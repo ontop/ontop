@@ -9,33 +9,24 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.Equivalences;
+import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.LANG_STRING;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.OBJECT;
 
 
 @Singleton
@@ -45,9 +36,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private static final String OBJECT_PROPERTY_STR = "an object property";
     private static final String ANNOTATION_PROPERTY_STR = "an annotation property";
     private static final String CLASS_STR = "a class";
+    private final TermFactory termFactory;
+    private final AtomFactory atomFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
-    private MappingOntologyComplianceValidatorImpl() {
+    private MappingOntologyComplianceValidatorImpl(TermFactory termFactory, AtomFactory atomFactory, TypeFactory typeFactory) {
+        this.termFactory = termFactory;
+        this.atomFactory = atomFactory;
+        this.typeFactory = typeFactory;
     }
 
 
@@ -80,13 +77,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         String predicateIRI = extractPredicateIRI(mappingAssertion);
 
-        Optional<TermType> tripleObjectType = extractTripleObjectType(mappingAssertion);
+        Optional<RDFTermType> tripleObjectType = extractTripleObjectType(mappingAssertion);
         checkTripleObject(predicateIRI, tripleObjectType, provenance, vocabulary, datatypeMap);
     }
 
     private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
         AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
-        if (projectionAtomPredicate.equals(PredicateImpl.QUEST_TRIPLE_PRED))
+        if (projectionAtomPredicate.equals(atomFactory.getTripleAtomPredicate()))
             throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
         else
             return projectionAtomPredicate.getName();
@@ -100,8 +97,10 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      * Return nothing if the property is rdf:type (class instance assertion)
      *
+     * TODO: refactor it!
+     *
      */
-    private Optional<TermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
+    private Optional<RDFTermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
             throws TripleObjectTypeInferenceException {
 
         Optional<Variable> optionalObjectVariable = extractTripleObjectVariable(mappingAssertion);
@@ -111,27 +110,21 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getRootNode())
                     .filter(n -> n instanceof ConstructionNode)
                     .map((n) -> (ConstructionNode) n)
-                    .map(ConstructionNode::getDirectBindingSubstitution)
+                    .map(ConstructionNode::getSubstitution)
                     .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
                     .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
                             "Not defined in the root node (expected for a mapping assertion)"));
 
             if (constructionTerm instanceof ImmutableFunctionalTerm) {
-                Predicate functionSymbol = ((ImmutableFunctionalTerm) constructionTerm).getFunctionSymbol();
+                ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
+                Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
                 if ((functionSymbol instanceof BNodePredicate)
                         || (functionSymbol instanceof URITemplatePredicate)) {
-                    return Optional.of(TYPE_FACTORY.getTermType(OBJECT));
+                    return Optional.of(typeFactory.getIRITermType());
                 }
                 else if (functionSymbol instanceof DatatypePredicate) {
                     DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
-
-                    COL_TYPE internalDatatype = TYPE_FACTORY.getInternalType(datatypeConstructionFunctionSymbol)
-                            .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionSymbol
-                                    + "\n TODO: throw a better exception"));
-
-                    return internalDatatype == LANG_STRING
-                            ? Optional.of(TYPE_FACTORY.getTermType(generateFreshVariable()))
-                            : Optional.of(TYPE_FACTORY.getTermType(internalDatatype));
+                    return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());
                 }
                 else {
                     throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
@@ -157,6 +150,18 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             return Optional.empty();
     }
 
+    private RDFDatatype extractLangTermType(ImmutableFunctionalTerm constructionFunctionalTerm) {
+        ImmutableList<? extends ImmutableTerm> arguments = constructionFunctionalTerm.getArguments();
+        ImmutableTerm langTerm = arguments.get(1);
+
+        if (!(langTerm instanceof Constant)) {
+            // TODO: throw a proper exception
+            throw new IllegalStateException("A langString must have a constant language tag: "
+                    + constructionFunctionalTerm);
+        }
+        return typeFactory.getLangTermType(((Constant) langTerm).getValue());
+    }
+
     private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)
             throws TripleObjectTypeInferenceException {
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
@@ -179,29 +184,32 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void checkTripleObject(String predicateIRI, Optional<TermType> optionalTripleObjectType,
+    private void checkTripleObject(String predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,
                                    ImmutableOntologyVocabulary declaredVocabulary,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         if (optionalTripleObjectType.isPresent()) {
-            TermType tripleObjectType = optionalTripleObjectType.get();
+            RDFTermType tripleObjectType = optionalTripleObjectType.get();
 
-            switch (tripleObjectType.getColType()) {
-                case UNSUPPORTED:
-                case NULL:
-                    // Should not occur (internal bug)
-                    throw new UndeterminedTripleObjectType(predicateIRI, tripleObjectType);
-                    // Object-like property
-                case OBJECT:
-                case BNODE:
-                    checkObjectOrAnnotationProperty(predicateIRI, provenance, declaredVocabulary);
-                    return;
-                // Data-like property
-                default:
-                    checkDataOrAnnotationProperty(tripleObjectType, predicateIRI, provenance, declaredVocabulary,
-                            datatypeMap);
+            if (tripleObjectType.isAbstract())
+                throw new AbstractTripleObjectType(predicateIRI, tripleObjectType);
+
+            /*
+             * TODO: avoid instanceof tests!
+             */
+            if (tripleObjectType instanceof ObjectRDFType) {
+                checkObjectOrAnnotationProperty(predicateIRI, provenance, declaredVocabulary);
+                return;
+            }
+            else if (tripleObjectType instanceof RDFDatatype) {
+                checkDataOrAnnotationProperty((RDFDatatype)tripleObjectType, predicateIRI, provenance, declaredVocabulary,
+                        datatypeMap);
+            }
+            else {
+                // E.g. Unbound
+                throw new UndeterminedTripleObjectType(predicateIRI, tripleObjectType);
             }
         }
         else {
@@ -226,7 +234,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     CLASS_STR, OBJECT_PROPERTY_STR));
     }
 
-    private void checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
+    private void checkDataOrAnnotationProperty(RDFDatatype tripleObjectType, String predicateIRI,
                                                PPMappingAssertionProvenance provenance,
                                                ImmutableOntologyVocabulary declaredVocabulary,
                                                ImmutableMultimap<String, Datatype> datatypeMap)
@@ -249,22 +257,22 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          */
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
-            if(declaredDatatype.getPredicate().getName().equals(DatatypeImpl.rdfsLiteral.getPredicate().getName())){
+            if(declaredDatatype.getIRI().equals(RDFS.LITERAL)){
                 break;
             }
             // TODO: throw a better exception
-            COL_TYPE internalType = TYPE_FACTORY.getInternalType((DatatypePredicate) declaredDatatype.getPredicate())
+            RDFDatatype declaredTermType = typeFactory.getOptionalDatatype(declaredDatatype.getIRI())
                     .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
-                            + declaredDatatype.getPredicate().getName() + ""));
+                            + declaredDatatype + " used for " + predicateIRI));
 
-            if (!tripleObjectType.isCompatibleWith(internalType)) {
+            if (!tripleObjectType.isA(declaredTermType)) {
 
                 throw new MappingOntologyMismatchException(
                         predicateIRI +
                                 " is declared with datatype " +
-                                declaredDatatype.getPredicate().getName() +
+                                declaredDatatype +
                                 " in the ontology, but has datatype " +
-                                TYPE_FACTORY.getTypePredicate(tripleObjectType.getColType()).getName() +
+                                termFactory.getRequiredTypePredicate(tripleObjectType).getName() +
                                 " according to the following triplesMap (either declared in the triplesMap, or " +
                                 "inferred from its source):\n[\n" +
                                 provenance.getProvenanceInfo() +
@@ -376,10 +384,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     // if the answer is no, drop the Optional and throw an exception instead
     private Optional<Predicate> getPredicate(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
-            return Optional.of(((Datatype) expression).getPredicate());
+            return typeFactory.getOptionalDatatype(((Datatype) expression).getIRI())
+                    .flatMap(termFactory::getOptionalTypePredicate)
+                    .map(p -> (Predicate) p);
         }
         if (expression instanceof DataPropertyRangeExpression) {
-            return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getPredicate());
+            return Optional.of(atomFactory.getDataPropertyPredicate(
+                    ((DataPropertyRangeExpression) expression).getProperty().getIRI()));
         }
         return Optional.empty();
     }
@@ -399,11 +410,18 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private static class UndeterminedTripleObjectType extends OntopInternalBugException {
         UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {
-            super("Internal bug: undetermined type (" + tripleObjectType.getColType() + ") for " + predicateName);
+            super("Internal bug: undetermined type (" + tripleObjectType + ") for " + predicateName);
         }
     }
 
-    private static Variable generateFreshVariable() {
-        return TERM_FACTORY.getVariable("fresh-" + UUID.randomUUID());
+    private static class AbstractTripleObjectType extends OntopInternalBugException {
+        AbstractTripleObjectType(String predicateName, TermType tripleObjectType) {
+            super("Internal bug: abstract type (" + tripleObjectType + ") for " + predicateName
+                    + ". Should have been detected earlier.");
+        }
+    }
+
+    private Variable generateFreshVariable() {
+        return termFactory.getVariable("fresh-" + UUID.randomUUID());
     }
 }

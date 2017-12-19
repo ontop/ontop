@@ -28,13 +28,9 @@ import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
-
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.utils.MappingTestingTools.MAPPING_FACTORY;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
 
 public class PrefixRendererTest extends TestCase {
@@ -53,7 +49,7 @@ public class PrefixRendererTest extends TestCase {
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
+		Function body = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
 
 		terms = new LinkedList<Term>();
 		terms.add(TERM_FACTORY.getVariable("id"));

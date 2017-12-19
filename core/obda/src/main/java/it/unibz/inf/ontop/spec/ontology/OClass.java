@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 /***
  * A named class.
@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
  */
 public interface OClass extends ClassExpression {
 	
-	public Predicate getPredicate();
-	
 	public String getName();
+
+    IRI getIRI();
 }

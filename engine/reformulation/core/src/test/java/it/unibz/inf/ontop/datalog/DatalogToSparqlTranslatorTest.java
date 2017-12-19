@@ -21,17 +21,13 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.datalog.DatalogToSparqlTranslator;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.atom.PredicateConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 
 import java.util.Arrays;
@@ -43,8 +39,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 
 @SuppressWarnings("deprecation")
 public class DatalogToSparqlTranslatorTest {
@@ -55,7 +50,7 @@ public class DatalogToSparqlTranslatorTest {
 	@Before
 	public void setup() {
 		prefixManager = new SimplePrefixManager(ImmutableMap.of(":", "http://example.org/"));
-		datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
+		datalogTranslator = new DatalogToSparqlTranslator(DATALOG_FACTORY, prefixManager, TERM_FACTORY);
 	}
 
 	@Test
@@ -682,6 +677,11 @@ public class DatalogToSparqlTranslatorTest {
 	}
 
 	// Reused static fields
+
+	private static RDFDatatype XSD_STRING_DT = TYPE_FACTORY.getXsdStringDatatype();
+	private static RDFDatatype XSD_DECIMAL_DT = TYPE_FACTORY.getXsdDecimalDatatype();
+	private static RDFDatatype XSD_INTEGER_DT = TYPE_FACTORY.getXsdIntegerDatatype();
+	private static RDFDatatype XSD_DATETIME_DT = TYPE_FACTORY.getXsdDatetimeDatatype();
 	
 	private static final String ANS2 = "ans2";
 	private static final String ANS3 = "ans3";
@@ -705,20 +705,20 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = TERM_FACTORY.getClassPredicate("http://example.org/Student");
-		predBachelorStudent = TERM_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
-		predMasterStudent = TERM_FACTORY.getClassPredicate("http://example.org/MasterStudent");
-		predDoctoralStudent = TERM_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
+		predStudent = ATOM_FACTORY.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = ATOM_FACTORY.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = ATOM_FACTORY.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = ATOM_FACTORY.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
-		predLastName = TERM_FACTORY.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
-		predAge = TERM_FACTORY.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
-		predGrade = TERM_FACTORY.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
-		predEnrollmentDate = TERM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
+		predFirstName = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/firstName", XSD_STRING_DT);
+		predLastName = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/lastName", XSD_STRING_DT);
+		predAge = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/age", XSD_INTEGER_DT);
+		predGrade = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/grade", XSD_DECIMAL_DT);
+		predEnrollmentDate = ATOM_FACTORY.getDataPropertyPredicate("http://example.org/enrollmentDate", XSD_DATETIME_DT);
 		
-		predHasCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
-		predHasElementaryCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
-		predHasAdvancedCourse = TERM_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
+		predHasCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = ATOM_FACTORY.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;
@@ -752,11 +752,11 @@ public class DatalogToSparqlTranslatorTest {
 	private static Constant c5;
 	
 	static {
-		c1 = TERM_FACTORY.getConstantLiteral("John", COL_TYPE.STRING);
-		c2 = TERM_FACTORY.getConstantLiteral("Smith", COL_TYPE.STRING);
-		c3 = TERM_FACTORY.getConstantLiteral("25", COL_TYPE.INTEGER);
-		c4 = TERM_FACTORY.getConstantLiteral("48.50", COL_TYPE.DECIMAL);
-		c5 = TERM_FACTORY.getConstantLiteral("2012-03-20 00:00:00", COL_TYPE.DATETIME);
+		c1 = TERM_FACTORY.getConstantLiteral("John", XSD_STRING_DT);
+		c2 = TERM_FACTORY.getConstantLiteral("Smith", XSD_STRING_DT);
+		c3 = TERM_FACTORY.getConstantLiteral("25", XSD_INTEGER_DT);
+		c4 = TERM_FACTORY.getConstantLiteral("48.50", XSD_DECIMAL_DT);
+		c5 = TERM_FACTORY.getConstantLiteral("2012-03-20 00:00:00", XSD_DATETIME_DT);
 	}
 	
 	private static Function student;

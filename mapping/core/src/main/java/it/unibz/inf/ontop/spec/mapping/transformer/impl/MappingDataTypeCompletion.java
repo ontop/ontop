@@ -29,15 +29,16 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.IntStream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class MappingDataTypeCompletion {
@@ -46,19 +47,36 @@ public class MappingDataTypeCompletion {
     private final boolean defaultDatatypeInferred;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
+    private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final TermTypeInferenceTools termTypeInferenceTools;
+    private final ImmutabilityTools immutabilityTools;
 
     /**
      * Constructs a new mapping data type resolution.
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
      * //TODO: rewrite in a Datalog-free fashion
-     *
      * @param metadata The database metadata.
+     * @param relation2Predicate
+     * @param termFactory
+     * @param typeFactory
+     * @param termTypeInferenceTools
+     * @param immutabilityTools
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
-                                     boolean defaultDatatypeInferred) {
+                                     boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
+                                     TermFactory termFactory, TypeFactory typeFactory,
+                                     TermTypeInferenceTools termTypeInferenceTools,
+                                     ImmutabilityTools immutabilityTools) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
+        this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.termTypeInferenceTools = termTypeInferenceTools;
+        this.immutabilityTools = immutabilityTools;
     }
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
@@ -101,40 +119,42 @@ public class MappingDataTypeCompletion {
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Term newTerm;
-            Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-            newTerm = TERM_FACTORY.getTypedTerm(variable, type);
+            RDFDatatype type = getDataType(termOccurenceIndex, variable);
+            newTerm = termFactory.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
-            Term newTerm = TERM_FACTORY.getTypedTerm(term, ((ValueConstant) term).getType());
+            Term newTerm = termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
         }
     }
 
-   /*
-   * Following r2rml standard we do not infer the datatype for operation but we return the default value string
+   /**
+    * Following r2rml standard we do not infer the datatype for operation but we return the default value string
     */
     private void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
 
-        if (term instanceof Function) {
-            Function castTerm = (Function) term;
+        ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
 
+        if (immutableTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
             if (castTerm.isOperation()) {
 
-                Optional<TermType> inferredType = TermTypeInferenceTools.inferType(castTerm);
+                Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
                 if(inferredType.isPresent()){
                     // delete explicit datatypes of the operands
                     deleteExplicitTypes(term, atom, position);
                     // insert the datatype of the evaluated operation
                     atom.setTerm(
                             position,
-                            TERM_FACTORY.getTypedTerm(
+                            termFactory.getTypedTerm(
                                     term,
-                                    inferredType.get().getColType()
+                                    // TODO: refactor this cast
+                                    (RDFDatatype) inferredType.get()
                             ));
                 }
                 else
@@ -143,7 +163,7 @@ public class MappingDataTypeCompletion {
 
                     if (defaultDatatypeInferred) {
 
-                        atom.setTerm(position, TERM_FACTORY.getTypedTerm(term, Predicate.COL_TYPE.STRING));
+                        atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
                     } else {
                         throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +
@@ -179,7 +199,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private Predicate.COL_TYPE getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
+    private RDFDatatype getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
 
 
         List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
@@ -190,26 +210,27 @@ public class MappingDataTypeCompletion {
         //                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
         IndexedPosition ip = list.get(0);
 
-        RelationID tableId = Relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
+        RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
                 .getFunctionSymbol());
         RelationDefinition td = metadata.getRelation(tableId);
         
         
         Attribute attribute = td.getAttribute(ip.pos);
-        Optional<Predicate.COL_TYPE>  colType;
+        Optional<RDFDatatype>  type;
         //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
         if (attribute.getType() == 0){
 
-            colType = Optional.empty();
+            type = Optional.empty();
         }
         else{
-            colType = metadata.getColType(attribute);
+            // TODO: refactor this (unsafe)!!!
+            type = Optional.of((RDFDatatype) attribute.getTermType());
         }
 
         if(defaultDatatypeInferred)
-            return colType.orElse(Predicate.COL_TYPE.STRING) ;
+            return type.orElseGet(typeFactory::getXsdStringDatatype) ;
         else {
-            return colType.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+            return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +
                     "- Add an explicit datatype in the mapping \n" +
                     "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +

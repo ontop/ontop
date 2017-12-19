@@ -2,34 +2,49 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.datalog.TargetAtom;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertIntoImmutableTerm;
 
+@Singleton
 public class DatalogConversionTools {
+
+    private final AtomFactory atomFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
+
+    @Inject
+    private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
+                                   ImmutabilityTools immutabilityTools, TermFactory termFactory) {
+        this.atomFactory = atomFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
+    }
 
     /**
      * TODO: explain
      */
-    public static DataNode createDataNode(IntermediateQueryFactory iqFactory, DataAtom dataAtom,
+    public DataNode createDataNode(IntermediateQueryFactory iqFactory, DataAtom dataAtom,
                                           Collection<Predicate> tablePredicates) {
 
         if (tablePredicates.contains(dataAtom.getPredicate())) {
@@ -43,14 +58,14 @@ public class DatalogConversionTools {
     /**
      * TODO: explain
      */
-    public static TargetAtom convertFromDatalogDataAtom(
+    public TargetAtom convertFromDatalogDataAtom(
             Function datalogDataAtom)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
         AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
                 ? (AtomPredicate) datalogAtomPredicate
-                : ATOM_FACTORY.getAtomPredicate(datalogAtomPredicate);
+                : atomFactory.getAtomPredicate(datalogAtomPredicate);
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();
@@ -61,7 +76,7 @@ public class DatalogConversionTools {
          *
          * Creates allBindings entries if needed (in case of constant of a functional term)
          */
-        VariableGenerator projectedVariableGenerator = new VariableGenerator(ImmutableSet.of());
+        VariableGenerator projectedVariableGenerator = new VariableGenerator(ImmutableSet.of(), termFactory);
         for (Term term : datalogDataAtom.getTerms()) {
             Variable newArgument;
 
@@ -90,7 +105,7 @@ public class DatalogConversionTools {
              * Non-ground functional term
              */
             else {
-                ImmutableTerm nonVariableTerm = convertIntoImmutableTerm(term);
+                ImmutableTerm nonVariableTerm = immutabilityTools.convertIntoImmutableTerm(term);
                 Variable newVariable = projectedVariableGenerator.generateNewVariable();
                 newArgument = newVariable;
                 bindingBuilder.put(newVariable, nonVariableTerm);
@@ -98,8 +113,8 @@ public class DatalogConversionTools {
             argListBuilder.add(newArgument);
         }
 
-        DistinctVariableOnlyDataAtom dataAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
-        ImmutableSubstitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(bindingBuilder.build());
+        DistinctVariableOnlyDataAtom dataAtom = atomFactory.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
 
 
         return new TargetAtomImpl(dataAtom, substitution);

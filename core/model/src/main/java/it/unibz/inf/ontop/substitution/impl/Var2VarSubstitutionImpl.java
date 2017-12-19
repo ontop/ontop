@@ -7,14 +7,11 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import fj.data.TreeMap;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.model.term.GroundTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,15 +34,10 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    protected Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected Var2VarSubstitutionImpl(Map<Variable, ? extends Variable> substitutionMap, AtomFactory atomFactory,
+                                      TermFactory termFactory) {
+        super(atomFactory, termFactory);
         this.map = ImmutableMap.copyOf(substitutionMap);
-    }
-
-    /**
-     * Functional Java constructor
-     */
-    public Var2VarSubstitutionImpl(TreeMap<Variable, Variable> substitutionMap) {
-        this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
     @Override
@@ -62,7 +54,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
     @Override
     public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), getAtomFactory(), getTermFactory());
     }
 
     @Override
@@ -84,7 +76,8 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
             ImmutableSubstitution<T> substitution) {
 
         if (isEmpty()) {
-            return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap()));
+            return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap(), getAtomFactory(),
+                    getTermFactory()));
         }
 
         try {
@@ -96,7 +89,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
                             (e1, e2) -> {
                                 throw new NotASubstitutionException();
                             })));
-            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+            return Optional.of(new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory()));
         } catch (NotASubstitutionException e) {
             return Optional.empty();
         }
@@ -139,13 +132,13 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
     @Override
     protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
-        return new Var2VarSubstitutionImpl(map);
+        return new Var2VarSubstitutionImpl(map, getAtomFactory(), getTermFactory());
     }
 
     @Override
     public Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g) {
         return new Var2VarSubstitutionImpl(composeRenaming(g)
-                .collect(ImmutableCollectors.toMap()));
+                .collect(ImmutableCollectors.toMap()), getAtomFactory(), getTermFactory());
     }
 
     @Override
@@ -164,5 +157,14 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
         return Stream.concat(gEntryStream, localEntryStream)
                 .filter(e -> !e.getKey().equals(e.getValue()));
+    }
+
+    @Override
+    public Var2VarSubstitution composeWith2(
+            ImmutableSubstitution<? extends Variable> g) {
+        ImmutableSubstitution<? extends Variable> composedSubstitution =
+                (ImmutableSubstitution<? extends Variable>) (ImmutableSubstitution<?>) composeWith(g);
+
+        return new Var2VarSubstitutionImpl(composedSubstitution.getImmutableMap(), getAtomFactory(), getTermFactory());
     }
 }

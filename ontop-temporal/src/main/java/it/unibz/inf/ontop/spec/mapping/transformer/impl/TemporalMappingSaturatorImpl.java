@@ -20,25 +20,25 @@ import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
-import it.unibz.inf.ontop.temporal.iq.node.impl.TemporalJoinNodeImpl;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.StaticAtomicExpressionImpl;
 import it.unibz.inf.ontop.temporal.model.impl.TemporalAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import java.util.*;
-import java.util.logging.Filter;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 
-    TemporalIntermediateQueryFactory TIQFactory;
+    private  final TemporalIntermediateQueryFactory TIQFactory;
+    private final TermFactory termFactory;
+    private final DatalogMTLConversionTools datalogMTLConversionTools;
 
     @Inject
-    private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory) {
+    private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory, TermFactory termFactory, DatalogMTLConversionTools datalogMTLConversionTools) {
         this.TIQFactory = TIQFactory;
+        this.termFactory = termFactory;
+        this.datalogMTLConversionTools = datalogMTLConversionTools;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                 atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
             }
 
-            TargetAtom targetAtom = DatalogMTLConversionTools.convertFromDatalogDataAtom(atomicExpression);
+            TargetAtom targetAtom = datalogMTLConversionTools.convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
             DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
             ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
                     targetAtom.getSubstitution(), Optional.empty());
@@ -193,17 +193,17 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         else if(operator == ExpressionOperation.NEQ.getName())
             expressionOperation = ExpressionOperation.NEQ;
 
-        return TERM_FACTORY.getImmutableExpression(expressionOperation,comparisonExpression.getLeftOperand(), comparisonExpression.getRightOperand());
+        return termFactory.getImmutableExpression(expressionOperation,comparisonExpression.getLeftOperand(), comparisonExpression.getRightOperand());
     }
 
     private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping, TemporalMapping temporalMapping){
         Map <Variable, Term> varMap = new HashMap<>();
         ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-        rule.getHead().getTerms().forEach(term ->{
+        rule.getHead().getImmutableTerms().forEach(term ->{
             if(term instanceof Variable){
                 for(AtomicExpression ae :atomicExpressionsList){
                     int varIdxInBody = 0;
-                    for(Term t : ae.getTerms()){
+                    for(Term t : ae.getImmutableTerms()){
                         if (t instanceof Variable) {
                             //TODO:Override compareTo for Variable
                             if(((Variable) t).equals(term)){

@@ -35,8 +35,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-
 
 public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
@@ -50,11 +48,16 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final TemporalSpecificationFactory temporalSpecificationFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final AtomFactory atomFactory;
+    private final MetaMappingExpander metaMappingExpander;
+
 
     @Inject
     private TemporalMappingExtractorImpl(TemporalMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                          TemporalPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings, TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger) {
+                                         NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
+                                         TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
+                                         AtomFactory atomFactory, MetaMappingExpander metaMappingExpander) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -64,9 +67,13 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         this.settings = settings;
         this.temporalSpecificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
+        this.atomFactory = atomFactory;
+        this.metaMappingExpander = metaMappingExpander;
     }
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
 
         SQLPPMapping ppMapping = extractPPMapping(specInput);
 
@@ -94,7 +101,9 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
         if(ontology.isPresent() != saturatedTBox.isPresent()){
             throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
         }
@@ -210,7 +219,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                 keys.add(mmk);
                             }
                     );
-                    quadrupleDefinitionMap.put(ATOM_FACTORY.getAtomPredicate(keyPred), toQuadrupleDefinition(keys, definitions));
+                    quadrupleDefinitionMap.put(atomFactory.getAtomPredicate(keyPred), toQuadrupleDefinition(keys, definitions));
                 });
 
         return temporalSpecificationFactory.createTemporalMapping(mappingWithProvenance.getMetadata(), ImmutableMap.copyOf(quadrupleDefinitionMap), mappingWithProvenance.getExecutorRegistry());
@@ -254,7 +263,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
     private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = metaMappingExpander.expand(
                 ppMapping.getTripleMaps(),
                 settings,
                 dbMetadata);

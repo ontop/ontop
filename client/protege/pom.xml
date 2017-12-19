@@ -291,11 +291,17 @@
 
         <dependency>
             <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-simple</artifactId>
+            <version>${commons-rdf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
             <artifactId>commons-rdf-jena</artifactId>
             <version>${commons-rdf.version}</version>
         </dependency>
 
-        <!-- transtiive closure of commons-rdf-jena starts -->
+        <!-- transitive closure of commons-rdf-jena starts -->
 
         <dependency>
             <groupId>org.apache.jena</groupId>

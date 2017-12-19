@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -13,12 +14,12 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
-public class IntensionalDataNodeImpl extends DataNodeImpl implements IntensionalDataNode {
+public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     @AssistedInject
-    private IntensionalDataNodeImpl(@Assisted DataAtom atom) {
+    private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom) {
         super(atom);
     }
 
@@ -64,6 +65,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     }
 
     @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof IntensionalDataNode)
                 && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
@@ -72,6 +78,12 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getLocallyRequiredVariables();
+    }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof IntensionalDataNode)
+                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
     }
 
     @Override
@@ -88,4 +100,5 @@ public class IntensionalDataNodeImpl extends DataNodeImpl implements Intensional
     public IntensionalDataNode newAtom(DataAtom newAtom) {
         return new IntensionalDataNodeImpl(newAtom);
     }
+
 }

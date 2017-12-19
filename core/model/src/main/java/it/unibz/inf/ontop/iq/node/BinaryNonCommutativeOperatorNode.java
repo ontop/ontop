@@ -6,5 +6,4 @@ package it.unibz.inf.ontop.iq.node;
  * For instance: Left Join.
  */
 public interface BinaryNonCommutativeOperatorNode extends BinaryOrderedOperatorNode {
-
 }

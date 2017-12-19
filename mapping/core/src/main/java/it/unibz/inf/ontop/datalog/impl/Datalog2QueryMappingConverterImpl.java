@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
-
 /**
  * Convert mapping assertions from Datalog to IntermediateQuery
  *
@@ -40,16 +38,19 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
+    private final DatalogRule2QueryConverter datalogRule2QueryConverter;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
                                               SpecificationFactory specificationFactory,
                                               IntermediateQueryFactory iqFactory,
-                                              ProvenanceMappingFactory provMappingFactory){
+                                              ProvenanceMappingFactory provMappingFactory,
+                                              DatalogRule2QueryConverter datalogRule2QueryConverter){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
+        this.datalogRule2QueryConverter = datalogRule2QueryConverter;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
+                        e -> datalogRule2QueryConverter.convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
                                 iqFactory, executorRegistry),
                         Map.Entry::getValue));
 

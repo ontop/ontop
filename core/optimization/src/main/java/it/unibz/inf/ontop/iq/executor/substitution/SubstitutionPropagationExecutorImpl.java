@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.executor.substitution;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.SubstitutionApplicationResults;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -17,9 +19,9 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 
-import javax.inject.Inject;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
@@ -29,14 +31,21 @@ import static it.unibz.inf.ontop.iq.executor.substitution.LocalPropagationTools.
 /**
  * TODO: explain
  */
+@Singleton
 public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
         implements SubstitutionPropagationExecutor<N> {
 
+    private final ImmutableSubstitutionTools substitutionTools;
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private SubstitutionPropagationExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private SubstitutionPropagationExecutorImpl(ImmutableSubstitutionTools substitutionTools,
+                                                IntermediateQueryFactory iqFactory,
+                                                SubstitutionFactory substitutionFactory) {
+        this.substitutionTools = substitutionTools;
         this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -85,7 +94,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
          */
         NodeCentricOptimizationResults<QueryNode> ascendingPropagationResults = propagateSubstitutionUp(
                 newFocusOrReplacingChildNode,
-                substitutionToPropagate, query, treeComponent, iqFactory, Optional.empty());
+                substitutionToPropagate, query, treeComponent, iqFactory, substitutionFactory, Optional.empty());
 
         /*
          * If some ancestors are removed, does not go further
@@ -142,7 +151,7 @@ public class SubstitutionPropagationExecutorImpl<N extends QueryNode>
                 .map(ExplicitVariableProjectionNode::getVariables)
                 .orElseGet(() -> query.getProjectionAtom().getVariables());
 
-        return ImmutableSubstitutionTools.prioritizeRenaming(substitution, priorityVariables);
+        return substitutionTools.prioritizeRenaming(substitution, priorityVariables);
     }
 
     /**

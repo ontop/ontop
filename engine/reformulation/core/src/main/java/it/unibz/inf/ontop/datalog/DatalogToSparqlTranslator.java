@@ -21,24 +21,15 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.List;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * This class provides the translation service from Datalog Program to SPARQL string.
@@ -47,30 +38,39 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  */
 public class DatalogToSparqlTranslator {
 	
-	private static final URIConstant RDF_TYPE = TERM_FACTORY.getConstantURI(IriConstants.RDF_TYPE);
+	private final URIConstant RDF_TYPE;
+	private final TermFactory termFactory;
 
 	private PrefixManager prefixManager;
 
 	private MutableQueryModifiers queryModifiers;
+	private final DatalogFactory datalogFactory;
 
 	/**
 	 * Creates the translator with a default prefix manager. The default prefix
 	 * manager contains the common prefixes (e.g., RDF, RDFS, OWL)
      *
      * TODO: use the factory to construct this translator
+	 * @param datalogFactory
+	 * @param termFactory
 	 */
-	public DatalogToSparqlTranslator() {
-		this(new SimplePrefixManager(ImmutableMap.of()));
+	public DatalogToSparqlTranslator(DatalogFactory datalogFactory, TermFactory termFactory) {
+		this(datalogFactory, new SimplePrefixManager(ImmutableMap.of()), termFactory);
 	}
 
 	/**
 	 * Creates the translator with a given prefix manager.
-	 * 
+	 *
+	 * @param datalogFactory
 	 * @param prefixManager
-	 *            the given prefix manager.
+ *            the given prefix manager.
+	 * @param termFactory
 	 */
-	public DatalogToSparqlTranslator(PrefixManager prefixManager) {
+	public DatalogToSparqlTranslator(DatalogFactory datalogFactory, PrefixManager prefixManager, TermFactory termFactory) {
+		this.termFactory = termFactory;
+		RDF_TYPE = this.termFactory.getConstantURI(IriConstants.RDF_TYPE);
 		this.prefixManager = prefixManager;
+		this.datalogFactory = datalogFactory;
 	}
 
 
@@ -260,7 +260,7 @@ public class DatalogToSparqlTranslator {
 
 	private Term getPredicate(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		return TERM_FACTORY.getConstantURI(predicate.getName());
+		return termFactory.getConstantURI(predicate.getName());
 	}
 
 	private Term getObject(Function function) {
@@ -322,11 +322,11 @@ public class DatalogToSparqlTranslator {
 
 	private void printJoinExpression(Function expression, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		Predicate joinPredicate = expression.getFunctionSymbol();
-		if (joinPredicate == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+		if (joinPredicate.equals(datalogFactory.getSparqlJoinPredicate())) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel);
 		} 
-		else if (joinPredicate == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+		else if (joinPredicate.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
 			sb.append(OPTIONAL + " {\n");

@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class S_TestTransitiveReduction extends TestCase {
 
 	ArrayList<String> input= new ArrayList<String>();
@@ -102,7 +104,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	
 	public void testR() throws Exception{
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile("src/test/resources/test/newDag/transitive.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
 		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
@@ -120,7 +122,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 	public void testR2() throws Exception{
-		Ontology onto = OWLAPITranslatorUtility.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
+		Ontology onto = OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile("src/test/resources/test/newDag/transitive2.owl");
 		TBoxReasoner dag = TBoxReasonerImpl.create(onto);
 		
 		ClassExpression A = onto.getVocabulary().getClass("http://www.kro.com/ontologies/A");
@@ -146,7 +148,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			TBoxReasonerImpl dag2 = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(fileInput));
 			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );

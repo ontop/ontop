@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
-import it.unibz.inf.ontop.model.OntopModelSingletons;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
@@ -10,8 +10,16 @@ import java.util.regex.Pattern;
 
 public class IntervalQueryParser {
 
-    public static TemporalMappingInterval parse(String input){
-        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
+    private final TermFactory termFactory;
+
+    @Inject
+    IntervalQueryParser(TermFactory termFactory, TermFactory termFactory1){
+
+        this.termFactory = termFactory1;
+    }
+
+    public TemporalMappingInterval parse(String input){
+
         boolean beginInclusive = false;
         boolean endInclusive = false;
         Variable begin;
@@ -31,8 +39,8 @@ public class IntervalQueryParser {
             strEnd = m.group();
             strEnd = strEnd.substring(1, strEnd.length()-1);
         }
-        begin = odf.getVariable(strBegin);
-        end = odf.getVariable(strEnd);
+        begin = termFactory.getVariable(strBegin);
+        end = termFactory.getVariable(strEnd);
 
         strBeginInclusive = input.substring(0,1);
         strEndInclusive = input.substring(input.length()-1, input.length());

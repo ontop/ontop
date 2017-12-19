@@ -1,27 +1,30 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 public class OWLAPITranslatorHelper {
 
 	private final ImmutableOntologyVocabulary voc;
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
-	
-	public OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc) {
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+
+
+	public OWLAPITranslatorHelper(ImmutableOntologyVocabulary voc, TermFactory termFactory, TypeFactory typeFactory) {
 		this.voc = voc;
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
 	}
 
 	
@@ -52,15 +55,15 @@ public class OWLAPITranslatorHelper {
 
 		ValueConstant c2;
 		if(!object.getLang().isEmpty()) {
-			c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), object.getLang());
+			c2 = termFactory.getConstantLiteral(object.getLiteral(), object.getLang());
 		}
 		else {
-			Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(object.getDatatype().toStringID());
+			Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(object.getDatatype().getIRI().toString());
 			if(type.isPresent()){
-				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral(), type.get());
+				c2 = termFactory.getConstantLiteral(object.getLiteral(), type.get());
 			}
 			else {
-				c2 = TERM_FACTORY.getConstantLiteral(object.getLiteral());
+				c2 = termFactory.getConstantLiteral(object.getLiteral());
 			}
 		}
 		URIConstant c1 = getIndividual(ax.getSubject());
@@ -146,7 +149,7 @@ public class OWLAPITranslatorHelper {
 		if (ind.isAnonymous()) 
 			throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + ind);
 
-		 return TERM_FACTORY.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
+		 return termFactory.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
 	}
 
 
@@ -158,7 +161,7 @@ public class OWLAPITranslatorHelper {
      */
 	private URIConstant getIndividual(OWLAnnotationSubject subject) throws OWLAPITranslatorOWL2QL.TranslationException {
 		if (subject instanceof IRI) {
-			return TERM_FACTORY.getConstantURI( ((IRI) subject).asIRI().get().toString());
+			return termFactory.getConstantURI( ((IRI) subject).asIRI().get().toString());
 		}
 		else{
 			throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
@@ -175,19 +178,19 @@ public class OWLAPITranslatorHelper {
 	private Constant getValue (OWLAnnotationValue value)  throws OWLAPITranslatorOWL2QL.TranslationException {
 		try {
 			if (value instanceof IRI) {
-				return TERM_FACTORY.getConstantURI(value.asIRI().get().toString());
+				return termFactory.getConstantURI(value.asIRI().get().toString());
 			}
 			if (value instanceof OWLLiteral) {
 				OWLLiteral owlLiteral = value.asLiteral().get();
 				if (!owlLiteral.getLang().isEmpty()) {
 
-					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
+					return termFactory.getConstantLiteral(owlLiteral.getLiteral(), owlLiteral.getLang());
 				} else {
-					Optional<Predicate.COL_TYPE> type = TYPE_FACTORY.getDatatype(owlLiteral.getDatatype().toStringID());
+					Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(owlLiteral.getDatatype().toStringID());
 					if(!type.isPresent()){
-						return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral());
+						return termFactory.getConstantLiteral(owlLiteral.getLiteral());
 					}
-					return TERM_FACTORY.getConstantLiteral(owlLiteral.getLiteral(), type.get());
+					return termFactory.getConstantLiteral(owlLiteral.getLiteral(), type.get());
 				}
 
 			} else {

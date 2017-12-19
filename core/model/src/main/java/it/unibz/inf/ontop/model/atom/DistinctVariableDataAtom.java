@@ -5,5 +5,5 @@ package it.unibz.inf.ontop.model.atom;
  * Still accepts ground terms.
  *
  */
-public interface DistinctVariableDataAtom extends DataAtom {
+public interface DistinctVariableDataAtom extends DataAtom<AtomPredicate> {
 }

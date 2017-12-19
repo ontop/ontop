@@ -24,6 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -34,7 +38,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -81,15 +84,20 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
-                                     SQLPPMappingFactory ppMappingFactory) {
+                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory,
+                                     TermFactory termFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -135,7 +143,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
+	private SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
             throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
@@ -208,7 +216,8 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         .flatMap(ax -> ax.getTargetAtoms().stream())
                         .flatMap(atom -> atom.getArguments().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t));
+                        .map(t -> (ImmutableFunctionalTerm) t),
+                termFactory);
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
@@ -390,10 +399,10 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         return line.contains(COMMENT_SYMBOL) && line.trim().indexOf(COMMENT_SYMBOL) == 0;
     }
 
-    private static List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
+    private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes));
+        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

@@ -20,14 +20,11 @@ package it.unibz.inf.ontop.datalog;
  * #L%
  */
 
-import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -40,10 +37,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class DatalogNormalizer {
+
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final DatalogFactory datalogFactory;
+	private final SubstitutionUtilities substitutionUtilities;
+
+	@Inject
+	private DatalogNormalizer(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
+							  SubstitutionUtilities substitutionUtilities) {
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
+		this.datalogFactory = datalogFactory;
+		this.substitutionUtilities = substitutionUtilities;
+	}
 
 	/***
 	 * This expands all Join that can be directly added as conjuncts to a
@@ -52,7 +60,7 @@ public class DatalogNormalizer {
 	 * @param query
 	 * @return
 	 */
-	public static void unfoldJoinTrees(CQIE query) {
+	public void unfoldJoinTrees(CQIE query) {
 		unfoldJoinTrees(query.getBody(), true);
 	}
 
@@ -70,12 +78,12 @@ public class DatalogNormalizer {
 	 * @param body
 	 * @return
 	 */
-	private static void unfoldJoinTrees(List body, boolean isJoin) {
+	private void unfoldJoinTrees(List body, boolean isJoin) {
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = (Function) body.get(i);
-			if (currentAtom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+			if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 				unfoldJoinTrees(currentAtom.getTerms(), false);
-			else if (currentAtom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+			else if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
 				unfoldJoinTrees(currentAtom.getTerms(), true);
 				int dataAtoms = countDataItems(currentAtom.getTerms());
 				if (isJoin || dataAtoms == 1) {
@@ -91,11 +99,11 @@ public class DatalogNormalizer {
 		}
 	}
 
-	public static void foldJoinTrees(CQIE query) {
+	public void foldJoinTrees(CQIE query) {
 		foldJoinTrees(query.getBody(), false);
 	}
 
-	private static void foldJoinTrees(List atoms, boolean isJoin) {
+	private void foldJoinTrees(List atoms, boolean isJoin) {
 		List<Function> dataAtoms = new LinkedList<>();
 		List<Function> booleanAtoms = new LinkedList<>();
 
@@ -109,9 +117,9 @@ public class DatalogNormalizer {
 				booleanAtoms.add(atom);
 			} else {
 				dataAtoms.add(atom);
-				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 					foldJoinTrees(atom.getTerms(), false);
-				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_JOIN)
+				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate()))
 					foldJoinTrees(atom.getTerms(), true);
 			}
 
@@ -127,7 +135,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = DATALOG_FACTORY.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = datalogFactory.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 
@@ -165,8 +173,8 @@ public class DatalogNormalizer {
 	 * 
 	 * @param query
 	 */
-	public static void pullOutEqualities(CQIE query) {
-		Substitution substitutions = new SubstitutionImpl();
+	public void pullOutEqualities(CQIE query) {
+		Substitution substitutions = new SubstitutionImpl(termFactory);
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<>();
@@ -181,7 +189,7 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		SubstitutionUtilities.applySubstitution(query, substitutions, false);
+		substitutionUtilities.applySubstitution(query, substitutions, false);
 
 	}
 
@@ -193,7 +201,7 @@ public class DatalogNormalizer {
 	 * 
 	 * @param leftJoin
 	 */
-	private static void addMinimalEqualityToLeftJoin(Function leftJoin) {
+	private void addMinimalEqualityToLeftJoin(Function leftJoin) {
 		int booleanAtoms = 0;
 		boolean isLeftJoin = leftJoin.isAlgebraFunction();
 		for (Term term : leftJoin.getTerms()) {
@@ -205,13 +213,14 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = TERM_FACTORY.getFunctionEQ(TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER),
-					TERM_FACTORY.getConstantLiteral("1", COL_TYPE.INTEGER));
+			Function trivialEquality = termFactory.getFunctionEQ(termFactory.getConstantLiteral("1",
+					typeFactory.getXsdIntegerDatatype()),
+					termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()));
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}
 
-	public static void addMinimalEqualityToLeftJoin(CQIE query) {
+	public void addMinimalEqualityToLeftJoin(CQIE query) {
 		for (Function f : query.getBody()) {
 			if (f.isAlgebraFunction()) {
 				addMinimalEqualityToLeftJoin(f);
@@ -229,7 +238,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
+	private void pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
 		for (int i = 0; i < currentTerms.size(); i++) {
@@ -248,7 +257,7 @@ public class DatalogNormalizer {
 			List<Term> subterms = atom.getTerms();
 
 			if (atom.isAlgebraFunction()) {
-				if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, true);
 				else
 					pullOutEqualities(subterms, substitutions, eqList, newVarCounter, false);
@@ -273,7 +282,7 @@ public class DatalogNormalizer {
 						 * a new variable and register in the substitutions, and
 						 * replace the current value with a fresh one.
 						 */
-						var2 = TERM_FACTORY.getVariable(var1.getName() + "f" + newVarCounter[0]);
+						var2 = termFactory.getVariable(var1.getName() + "f" + newVarCounter[0]);
 
 						substitutions.put(var1, var2);
 						subterms.set(j, var2);
@@ -287,10 +296,10 @@ public class DatalogNormalizer {
 						 */
 
 						if (atom.isDataFunction()) {
-							Variable newVariable = TERM_FACTORY.getVariable(var1.getName() + newVarCounter[0]);
+							Variable newVariable = termFactory.getVariable(var1.getName() + newVarCounter[0]);
 
 							subterms.set(j, newVariable);
-							Function equality = TERM_FACTORY.getFunctionEQ(var2, newVariable);
+							Function equality = termFactory.getFunctionEQ(var2, newVariable);
 							eqList.add(equality);
 
 						} else { // if its not data function, just replace
@@ -309,9 +318,9 @@ public class DatalogNormalizer {
 					 */
 					// only relevant if in data function?
 					if (atom.isDataFunction()) {
-						Variable var = TERM_FACTORY.getVariable("f" + newVarCounter[0]);
+						Variable var = termFactory.getVariable("f" + newVarCounter[0]);
 						newVarCounter[0] += 1;
-						Function equality = TERM_FACTORY.getFunctionEQ(var, subTerm);
+						Function equality = termFactory.getFunctionEQ(var, subTerm);
 						subterms.set(j, var);
 						eqList.add(equality);
 					}
@@ -329,7 +338,7 @@ public class DatalogNormalizer {
 	// therefore avoid having
 	// to rely on DBMS for nested JOIN optimisations (PostgreSQL case for BSBM
 	// Q3)
-	private static void saturateEqualities(Set<Function> boolSet) {
+	private void saturateEqualities(Set<Function> boolSet) {
 		List<Set<Term>> equalitySets = new ArrayList<>();
 		Iterator<Function> iter = boolSet.iterator();
 		while (iter.hasNext()) {
@@ -370,7 +379,7 @@ public class DatalogNormalizer {
 			List<Term> varList = new ArrayList<>(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = TERM_FACTORY.getFunctionEQ(varList.get(i), varList.get(j));
+					Function equality = termFactory.getFunctionEQ(varList.get(i), varList.get(j));
 					boolSet.add(equality);
 				}
 			}
@@ -438,7 +447,7 @@ public class DatalogNormalizer {
 	 * @param query
 	 * @return
 	 */
-	public static void pullUpNestedReferences(CQIE query) {
+	public void pullUpNestedReferences(CQIE query) {
 
 		List<Function> body = query.getBody();
 
@@ -466,7 +475,7 @@ public class DatalogNormalizer {
 			body.add(condition);
 	}
 
-	private static void pullUpNestedReferences(List currentLevelAtoms, Function head, Set<Variable> problemVariables,
+	private void pullUpNestedReferences(List currentLevelAtoms, Function head, Set<Variable> problemVariables,
 			Set<Function> booleanConditions, int[] freshVariableCount) {
 
 		/*
@@ -629,7 +638,7 @@ public class DatalogNormalizer {
 	 * the query (WHERE clauses)
 	 */
 
-	public static void pullOutLeftJoinConditions(CQIE query) {
+	public void pullOutLeftJoinConditions(CQIE query) {
 		Set<Function> booleanAtoms = new HashSet<>();
 		Set<Function> tempBooleans = new HashSet<>();
 		List<Function> body = query.getBody();
@@ -638,7 +647,7 @@ public class DatalogNormalizer {
 		body.addAll(booleanAtoms);
 	}
 
-	private static void pullOutLJCond(List currentTerms, Set<Function> leftConditionBooleans, boolean isLeftJoin,
+	private void pullOutLJCond(List currentTerms, Set<Function> leftConditionBooleans, boolean isLeftJoin,
 			Set<Function> currentBooleans, boolean isSecondJoin) {
 		boolean firstDataAtomFound = false;
 		boolean secondDataAtomFound = false;
@@ -671,7 +680,7 @@ public class DatalogNormalizer {
 				if (atom.isAlgebraFunction()) {
 					if (i != 0)
 						is2 = true;
-					if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN)
+					if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
 						pullOutLJCond(subterms, leftConditionBooleans, true, currentBooleans, is2);
 					else
 						pullOutLJCond(subterms, leftConditionBooleans, false, currentBooleans, is2);

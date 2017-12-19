@@ -24,16 +24,20 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 public class PredicateItem {
-	
-	private Predicate predicate;
-	private PrefixManager prefixManager;
-	
-	public PredicateItem(Predicate target) {
-		this(target, null);
+
+	public enum PredicateType {
+		DATA_PROPERTY,
+		OBJECT_PROPERTY,
+		CLASS
 	}
 	
-	public PredicateItem(Predicate target, PrefixManager pm) {
+	private Predicate predicate;
+	private final PredicateType predicateType;
+	private PrefixManager prefixManager;
+	
+	public PredicateItem(Predicate target, PredicateType predicateType, PrefixManager pm) {
 		predicate = target;
+		this.predicateType = predicateType;
 		prefixManager = pm;
 	}
 	
@@ -62,16 +66,12 @@ public class PredicateItem {
 		return predicate.getName().toString();
 	}
 	
-	public boolean isClassPredicate() {
-		return predicate.isClass();
-	}
-	
 	public boolean isDataPropertyPredicate() {
-		return predicate.isDataProperty();
+		return predicateType == PredicateType.DATA_PROPERTY;
 	}
 	
 	public boolean isObjectPropertyPredicate() {
-		return predicate.isObjectProperty();
+		return predicateType == PredicateType.OBJECT_PROPERTY;
 	}
 	
 	public PrefixManager getPrefixManager() {

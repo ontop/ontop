@@ -28,9 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.temporal.datalog.impl.TemporalDatalogRule2QueryConverter.convertDatalogRule;
-
-
 /**
  * Convert mapping assertions from Datalog to IntermediateQuery
  *
@@ -42,16 +39,18 @@ public class TemporalDatalog2QueryMappingConverterImpl implements TemporalDatalo
     private final SpecificationFactory specificationFactory;
     private final TemporalIntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
+    private final TemporalDatalogRule2QueryConverter datalogRule2QueryConverter;
 
     @Inject
     private TemporalDatalog2QueryMappingConverterImpl(TemporalDatalogProgram2QueryConverter converter,
-                                              SpecificationFactory specificationFactory,
+                                                      SpecificationFactory specificationFactory,
                                                       TemporalIntermediateQueryFactory iqFactory,
-                                              ProvenanceMappingFactory provMappingFactory){
+                                                      ProvenanceMappingFactory provMappingFactory, TemporalDatalogRule2QueryConverter datalogRule2QueryConverter){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
+        this.datalogRule2QueryConverter = datalogRule2QueryConverter;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class TemporalDatalog2QueryMappingConverterImpl implements TemporalDatalo
 
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
+                        e -> datalogRule2QueryConverter.convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
                                 iqFactory, executorRegistry),
                         Map.Entry::getValue));
 

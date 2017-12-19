@@ -20,8 +20,14 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -50,13 +56,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class TMappingProcessor {
 
-	private static final boolean noCQC = false;		
-
-	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
+	private class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final List<TMappingRule> rules = new LinkedList<>();
 	
 
@@ -175,7 +177,7 @@ public class TMappingProcessor {
 					// new map always has just one set of filters  !!
 					List<Function> newconditions = TMappingRule.cloneList(newRule.getConditions().get(0));
 					for (Function f : newconditions) 
-						SubstitutionUtilities.applySubstitution(f, fromNewRule);
+						substitutionUtilities.applySubstitution(f, fromNewRule);
 
 					List<List<Function>> existingconditions = currentRule.getConditions();
 					List<List<Function>> filterAtoms = new ArrayList<>(existingconditions.size() + 1);
@@ -209,7 +211,7 @@ public class TMappingProcessor {
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, filterAtoms);
+					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory, eqNormalizer);
 
 					break;
 				}				
@@ -226,7 +228,7 @@ public class TMappingProcessor {
 			List<Function> conjucntion1 = rule1.getConditions().get(0);
 			List<Function> conjunction2 = TMappingRule.cloneList(rule2.getConditions().get(0));
 			for (Function f : conjunction2)  {
-				SubstitutionUtilities.applySubstitution(f, toRule1);			
+				substitutionUtilities.applySubstitution(f, toRule1);
 				if (!conjucntion1.contains(f))
 					return false;
 			}
@@ -237,6 +239,23 @@ public class TMappingProcessor {
 	// end of the inner class
 
 
+	private static final boolean noCQC = false;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+	private final DatalogFactory datalogFactory;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final EQNormalizer eqNormalizer;
+
+	@Inject
+	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+							  SubstitutionUtilities substitutionUtilities, EQNormalizer eqNormalizer) {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+		this.datalogFactory = datalogFactory;
+		this.substitutionUtilities = substitutionUtilities;
+		this.eqNormalizer = eqNormalizer;
+	}
+
 	/**
 	 * constructs the TMappings for object properties using DAG
 	 * @param mappingIndex
@@ -244,7 +263,7 @@ public class TMappingProcessor {
 	 * @param dag
 	 * @param full
 	 */
-	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
+	private void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
 			boolean full, TMappingExclusionConfig excludeFromTMappings) {
@@ -261,7 +280,7 @@ public class TMappingProcessor {
 			}
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			AtomPredicate currentPredicate = atomFactory.getObjectPropertyPredicate(current.getIRI());
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
 			for (Equivalences<ObjectPropertyExpression> descendants : dag.getSub(propertySet)) {
@@ -275,7 +294,8 @@ public class TMappingProcessor {
 					 */
 					boolean requiresInverse = childproperty.isInverse();
 
-					List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
+					AtomPredicate childPredicate = atomFactory.getObjectPropertyPredicate(childproperty.getIRI());
+					List<TMappingRule> childmappings = originalMappings.get(childPredicate);
 					if (childmappings == null)
 						continue;
 					
@@ -287,12 +307,12 @@ public class TMappingProcessor {
 						if (!requiresInverse) {
 							if (!full)
 								continue;
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
+							newMappingHead = termFactory.getFunction(currentPredicate, terms);
 						} 
 						else {
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(1), terms.get(0));
+							newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -301,10 +321,10 @@ public class TMappingProcessor {
 			/* Setting up mappings for the equivalent classes */
 			for (ObjectPropertyExpression equivProperty : propertySet) {
 					 
-				Predicate p = equivProperty.getPredicate();
+				Predicate p = atomFactory.getObjectPropertyPredicate(equivProperty.getIRI());
 
 				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
+				if (p.equals(current.getIRI()))
 					continue;
 				
 				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
@@ -314,11 +334,11 @@ public class TMappingProcessor {
 					
 					Function newhead;
 					if (!equivProperty.isInverse()) 
-						newhead = TERM_FACTORY.getFunction(p, terms);
+						newhead = termFactory.getFunction(p, terms);
 					else 
-						newhead = TERM_FACTORY.getFunction(p, terms.get(1), terms.get(0));
+						newhead = termFactory.getFunction(p, terms.get(1), terms.get(0));
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -333,7 +353,7 @@ public class TMappingProcessor {
 	 * @param dag
 	 * @param full
 	 */
-	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
+	private void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex,
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
 			boolean full, TMappingExclusionConfig excludeFromTMappings) {
@@ -347,7 +367,7 @@ public class TMappingProcessor {
 				continue;
 			}
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = atomFactory.getDataPropertyPredicate(current.getIRI());
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
 			if (full) {
@@ -360,7 +380,8 @@ public class TMappingProcessor {
 						 * predicate and, if the child is inverse and the current is
 						 * positive, it will also invert the terms in the head
 						 */
-						List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
+						List<TMappingRule> childmappings = originalMappings.get(atomFactory.getDataPropertyPredicate(
+								childproperty.getIRI()));
 						if (childmappings == null)
 							continue;
 						
@@ -368,8 +389,8 @@ public class TMappingProcessor {
 							
 							List<Term> terms = childmapping.getHeadTerms();
 
-							Function newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
-							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+							Function newMappingHead = termFactory.getFunction(currentPredicate, terms);
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 							currentNodeMappings.mergeMappingsWithCQC(newmapping);
 						}
 					}
@@ -380,18 +401,18 @@ public class TMappingProcessor {
 			for (DataPropertyExpression equivProperty : propertySet) {
 			
 				 
-				Predicate p = equivProperty.getPredicate();
+				Predicate p = atomFactory.getDataPropertyPredicate(equivProperty.getIRI());
 
 				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
+				if (p.equals(currentPredicate))
 					continue;
 				
 				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
 					
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = TERM_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
+					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -407,7 +428,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+	public List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 		
 		final boolean printouts = false;
 		
@@ -447,7 +468,7 @@ public class TMappingProcessor {
 					CQContainmentCheckUnderLIDs.twoAtomQs++;
 			}	
 			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc, datalogFactory, termFactory, eqNormalizer);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {
@@ -495,7 +516,7 @@ public class TMappingProcessor {
 			}
 
 			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
+			Predicate currentPredicate = atomFactory.getClassPredicate(current.getIRI());
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
@@ -513,7 +534,7 @@ public class TMappingProcessor {
 					if (childDescription instanceof OClass) {
 						if (!full)
 							continue;
-						childPredicate = ((OClass) childDescription).getPredicate();
+						childPredicate = atomFactory.getClassPredicate(((OClass) childDescription).getIRI());
 						isClass = true;
 						isInverse = false;
 
@@ -527,14 +548,14 @@ public class TMappingProcessor {
 					} 
 					else if (childDescription instanceof ObjectSomeValuesFrom) {
 						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
-						childPredicate = some.getPredicate();
+						childPredicate = atomFactory.getObjectPropertyPredicate(some.getIRI());
 						isClass = false;
 						isInverse = some.isInverse();
 					} 
 					else {
 						assert (childDescription instanceof DataSomeValuesFrom);
 						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
-						childPredicate = some.getPredicate();
+						childPredicate = atomFactory.getDataPropertyPredicate(some.getIRI());
 						isClass = false;
 						isInverse = false;  // can never be an inverse
 					} 
@@ -549,15 +570,15 @@ public class TMappingProcessor {
 
 						Function newMappingHead;
 						if (isClass) {
-							newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms);
+							newMappingHead = termFactory.getFunction(currentPredicate, terms);
 						} 
 						else {
 							if (!isInverse) 
-								newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(0));
+								newMappingHead = termFactory.getFunction(currentPredicate, terms.get(0));
 							else 
-								newMappingHead = TERM_FACTORY.getFunction(currentPredicate, terms.get(1));
+								newMappingHead = termFactory.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory, eqNormalizer);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -569,13 +590,13 @@ public class TMappingProcessor {
 				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
 				
-				Predicate p = ((OClass) equiv).getPredicate();
+				Predicate p = atomFactory.getClassPredicate(((OClass) equiv).getIRI());
 				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);	
 				
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					Function newhead = TERM_FACTORY.getFunction(p, currentNodeMapping.getHeadTerms());
+					Function newhead = termFactory.getFunction(p, currentNodeMapping.getHeadTerms());
 
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, datalogFactory, termFactory, eqNormalizer);
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -624,7 +645,7 @@ public class TMappingProcessor {
 	}
 
 	
-	private static TMappingIndexEntry getMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate current) {
+	private TMappingIndexEntry getMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate current) {
 		
 		TMappingIndexEntry currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {

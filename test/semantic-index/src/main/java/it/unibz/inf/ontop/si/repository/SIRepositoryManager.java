@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 
 /**
- * Created by benjamin on 28/07/17.
+ * Stores ABox assertions (triples) in the DB
  */
 public interface SIRepositoryManager extends Serializable {
     void generateMetadata();
@@ -26,8 +26,6 @@ public interface SIRepositoryManager extends Serializable {
     void dropDBSchema(Connection conn) throws SQLException;
 
     int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException;
-
-    void loadMetadata(Connection conn) throws SQLException;
 
     ImmutableList<SQLPPTriplesMap> getMappings();
 

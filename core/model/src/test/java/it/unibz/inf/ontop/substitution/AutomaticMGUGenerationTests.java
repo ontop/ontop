@@ -36,6 +36,8 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
+
 /**
  * @author Mariano Rodriguez Muro
  * 
@@ -56,19 +58,11 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities();
+		unifier = new UnifierUtilities(TERM_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
 
 	}
 
-	/**
-	 * Test method for
-	 * {@link UnifierUtilities#getMGU(it.unibz.inf.ontop.model.Atom, it.unibz.inf.ontop.model.Atom)}
-	 * .
-	 * 
-	 * @throws Exception
-	 */
-	
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
 		File inputFile = new File("src/test/java/it/unibz/inf/ontop/substitution/mgu-computation-test-cases.txt");
@@ -92,7 +86,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<SingletonSubstitution> computedmgu = new ArrayList<>();
 			Exception expectedException = null;
 
-			Substitution mgu = UnifierUtilities.getMGU(atoms.get(0), atoms.get(1));
+			Substitution mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {

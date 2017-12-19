@@ -20,26 +20,28 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TermType;
 
-import static it.unibz.inf.ontop.model.IriConstants.CANONICAL_IRI;
-import static it.unibz.inf.ontop.model.IriConstants.SAME_AS;
+import javax.annotation.Nonnull;
+
 
 public class PredicateImpl implements Predicate {
 
-	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
-	public static final Predicate QUEST_QUADRUPLE_PRED = new PredicateImpl("quadruple", 4, new COL_TYPE[3]);
+	private final ImmutableList<TermType> expectedBaseTypes;
 
 	private int arity = -1;
 	private String name = null;
 	private int identifier = -1;
-	private COL_TYPE[] types = null;
 
-	protected PredicateImpl(String name, int arity, COL_TYPE[] types) {
+	protected PredicateImpl(@Nonnull String name, int arity, @Nonnull ImmutableList<TermType> expectedBaseTypes) {
+		if (expectedBaseTypes.size() != arity)
+			throw new IllegalArgumentException("expectedBaseTypes.size() must be equal to the arity");
 		this.name = name;
 		this.identifier = name.hashCode();
 		this.arity = arity;
-		this.types = types;
+		this.expectedBaseTypes = expectedBaseTypes;
 	}
 
 	@Override
@@ -52,6 +54,9 @@ public class PredicateImpl implements Predicate {
 		return name;
 	}
 
+	/**
+	 * TODO: also check arity?
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof PredicateImpl)) {
@@ -77,73 +82,18 @@ public class PredicateImpl implements Predicate {
 	}
 
 	@Override
-	public COL_TYPE getType(int column) {
-		if (types != null) {
-			return types[column];
-		}
-		return null;
+	public TermType getExpectedBaseType(int index) {
+		return expectedBaseTypes.get(index);
 	}
 
 	@Override
-	public COL_TYPE[] getTypes() {
-		if (types != null) {
-			return types;
-		}
-		return null;
-	}
-
-	@Override
-	public boolean isClass() {
-		return (arity == 1 && getType(0) == COL_TYPE.OBJECT);
-	}
-
-	@Override
-	public boolean isObjectProperty() {
-		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT); 
-	}
-
-	@Override
-	public boolean isAnnotationProperty() {
-		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.NULL);
-	}
-
-	@Override
-	@Deprecated
-	public boolean isDataProperty() {
-		return (arity == 2 && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.LITERAL); 
-	}
-
-	@Override
-	public boolean isSameAsProperty() {
-		return (arity == 2 && name.equals(SAME_AS) && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT);
-	}
-
-	@Override
-	public boolean isCanonicalIRIProperty() {
-		return (arity == 2 && name.equals(CANONICAL_IRI) && getType(0) == COL_TYPE.OBJECT && getType(1) == COL_TYPE.OBJECT);
+	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
+		return expectedBaseTypes;
 	}
 
 
 	@Override
 	public boolean isTriplePredicate() {
-		return (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName()));
+		return (arity == 3 && name.equals("triple"));
 	}
-
-//    @Override
-//    public boolean isAggregationPredicate() {
-//        // The arity is supposed to be one
-//        // but we prefer robustness to
-//        // ill-defined arities
-//
-//        switch(getName()) {
-//            case OBDAVocabulary.SPARQL_AVG_URI:
-//            case OBDAVocabulary.SPARQL_SUM_URI:
-//            case OBDAVocabulary.SPARQL_COUNT_URI:
-//            case OBDAVocabulary.SPARQL_MAX_URI:
-//            case OBDAVocabulary.SPARQL_MIN_URI:
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
 }

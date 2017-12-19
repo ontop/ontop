@@ -3,8 +3,11 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
@@ -19,13 +22,20 @@ public class LegacyMappingEquivalenceFreeRewriter implements MappingEquivalenceF
     private final boolean enabled;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
 
     @Inject
     private LegacyMappingEquivalenceFreeRewriter(OntopMappingSettings settings, Mapping2DatalogConverter
-            mapping2DatalogConverter, Datalog2QueryMappingConverter datalog2MappingConverter) {
+            mapping2DatalogConverter, Datalog2QueryMappingConverter datalog2MappingConverter, AtomFactory atomFactory,
+                                                 TermFactory termFactory, DatalogFactory datalogFactory) {
         this.enabled = settings.isEquivalenceOptimizationEnabled();
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
     }
 
     @Override
@@ -35,7 +45,8 @@ public class LegacyMappingEquivalenceFreeRewriter implements MappingEquivalenceF
             ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 //            Stream<CQIE> rules = mapping2DatalogConverter.convert(mapping);
 
-            ImmutableList<CQIE> updatedRules = new LegacyMappingVocabularyValidator(tBox, vocabulary)
+            ImmutableList<CQIE> updatedRules = new LegacyMappingVocabularyValidator(tBox, vocabulary, atomFactory,
+                    termFactory, datalogFactory)
                     .replaceEquivalences(rules);
             return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
                     mapping.getMetadata());

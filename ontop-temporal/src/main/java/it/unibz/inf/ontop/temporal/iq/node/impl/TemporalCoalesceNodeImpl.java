@@ -90,4 +90,9 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
         return null;
     }
 
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return false;
+    }
+
 }

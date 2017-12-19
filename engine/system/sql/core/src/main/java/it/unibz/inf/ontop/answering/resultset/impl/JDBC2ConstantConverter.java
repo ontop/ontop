@@ -6,7 +6,10 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.math.BigDecimal;
@@ -22,10 +25,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 public class JDBC2ConstantConverter {
+
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
@@ -88,8 +93,11 @@ public class JDBC2ConstantConverter {
     }
 
 
-    public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
+    public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary,
+                                  TermFactory termFactory, TypeFactory typeFactory) {
         this.iriDictionary = iriDictionary.orElse(null);
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
         String vendor = dbMetadata.getDriverName();
         systemDB = identifySystem(vendor);
         this.bnodeCounter = new AtomicInteger();
@@ -118,11 +126,13 @@ public class JDBC2ConstantConverter {
             stringValue = String.valueOf(value);
 
             int t = cell.getTypeValue();
-            Predicate.COL_TYPE type = Predicate.COL_TYPE.getQuestType(t);
+            COL_TYPE type = COL_TYPE.getQuestType(t);
             if (type == null)
                 throw new OntopResultConversionException("typeCode unknown: " + t);
 
             switch (type) {
+                case UNSUPPORTED:
+                    return termFactory.getConstantLiteral(stringValue, typeFactory.getUnsupportedDatatype());
                 case NULL:
                     return null;
 
@@ -136,7 +146,7 @@ public class JDBC2ConstantConverter {
                             // we leave realValue as it is.
                         }
                     }
-                    return TERM_FACTORY.getConstantURI(stringValue.trim());
+                    return termFactory.getConstantURI(stringValue.trim());
 
                 case BNODE:
                     String scopedLabel = this.bnodeMap.get(stringValue);
@@ -144,77 +154,70 @@ public class JDBC2ConstantConverter {
                         scopedLabel = "b" + bnodeCounter.getAndIncrement();
                         bnodeMap.put(stringValue, scopedLabel);
                     }
-                    return TERM_FACTORY.getConstantBNode(scopedLabel);
-
+                    return termFactory.getConstantBNode(scopedLabel);
                 case LANG_STRING:
                     // The constant is a literal, we need to find if its
                     // rdfs:Literal or a normal literal and construct it
                     // properly.
                     String language = cell.getLangValue();
                     if (language == null || language.trim().equals(""))
-                        return TERM_FACTORY.getConstantLiteral(stringValue);
+                        return termFactory.getConstantLiteral(stringValue);
                     else
-                        return TERM_FACTORY.getConstantLiteral(stringValue, language);
+                        return termFactory.getConstantLiteral(stringValue, language);
 
                 case BOOLEAN:
 
                     boolean bvalue = Boolean.parseBoolean(stringValue);
-                    return TERM_FACTORY.getBooleanConstant(bvalue);
-
-                case FLOAT:
-                case DOUBLE:
-
-//                    It allows to consider the canonical representation. nan and infinite are catched.
-                    BigDecimal bigDecimal;
-                    try {
-                        bigDecimal = new BigDecimal (stringValue);
-
-                    }
-                    catch (NumberFormatException e){
-                        return TERM_FACTORY.getConstantLiteral(stringValue,type);
-                    }
-                    DecimalFormat formatter = new DecimalFormat("0.0E0");
-                    formatter.setRoundingMode(RoundingMode.UNNECESSARY);
-                    formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
-                    return  TERM_FACTORY.getConstantLiteral(formatter.format(bigDecimal),type);
+                    return termFactory.getBooleanConstant(bvalue);
 
                 case DECIMAL:
+                    return termFactory.getConstantLiteral(stringValue, XSD.DECIMAL);
+                case FLOAT:
+                    return termFactory.getConstantLiteral(extractFloatingValue(stringValue), XSD.FLOAT);
+                case DOUBLE:
+                    return termFactory.getConstantLiteral(extractFloatingValue(stringValue), XSD.DOUBLE);
+
                 case INT:
+                    return termFactory.getConstantLiteral(stringValue, XSD.INT);
+
                 case LONG:
+                    return termFactory.getConstantLiteral(stringValue, XSD.LONG);
                 case UNSIGNED_INT:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
+                    return termFactory.getConstantLiteral(stringValue, XSD.UNSIGNED_INT);
 
                 case INTEGER:
+                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.INTEGER);
                 case NEGATIVE_INTEGER:
+                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NEGATIVE_INTEGER);
                 case NON_NEGATIVE_INTEGER:
+                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NON_NEGATIVE_INTEGER);
                 case POSITIVE_INTEGER:
+                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.POSITIVE_INTEGER);
                 case NON_POSITIVE_INTEGER:
+                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NON_POSITIVE_INTEGER);
 
-                    /**
-                     * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
-                     */
-                    String integerString = String.valueOf(Double.valueOf(stringValue).intValue());
-
-                    return TERM_FACTORY.getConstantLiteral(integerString, type);
-
+                case STRING:
+                    return termFactory.getConstantLiteral(stringValue, XSD.STRING);
                 case DATETIME:
 
-                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME
+                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)), XSD.DATETIME
                     );
 
                 case DATETIME_STAMP:
-                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME_STAMP
+                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)), XSD.DATETIMESTAMP
                 );
 
                 case DATE:
-                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATE);
+                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)), XSD.DATE);
 
                 case TIME:
 
-                    return TERM_FACTORY.getConstantLiteral(DateTimeFormatter.ISO_TIME.format(convertToTime(value)), Predicate.COL_TYPE.TIME);
+                    return termFactory.getConstantLiteral(DateTimeFormatter.ISO_TIME.format(convertToTime(value)), XSD.TIME);
 
+                case YEAR:
+                    return termFactory.getConstantLiteral(stringValue, XSD.GYEAR);
                 default:
-                    return TERM_FACTORY.getConstantLiteral(stringValue, type);
+                    throw new IllegalStateException("Unexpected colType: " + type);
 
             }
         } catch (IllegalArgumentException e) {
@@ -239,6 +242,28 @@ public class JDBC2ConstantConverter {
         } catch (Exception e) {
             throw new OntopResultConversionException(e);
         }
+    }
+
+    private String extractFloatingValue(String stringValue) {
+        BigDecimal bigDecimal;
+        try {
+            bigDecimal = new BigDecimal (stringValue);
+
+        }
+        catch (NumberFormatException e){
+            return stringValue;
+        }
+        DecimalFormat formatter = new DecimalFormat("0.0E0");
+        formatter.setRoundingMode(RoundingMode.UNNECESSARY);
+        formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
+        return  formatter.format(bigDecimal);
+    }
+
+    /**
+     * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
+     */
+    private String extractIntegerValue(String stringValue) {
+        return String.valueOf(Double.valueOf(stringValue).intValue());
     }
 
     private TemporalAccessor convertToJavaDate(Object value) throws OntopResultConversionException {

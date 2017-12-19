@@ -34,6 +34,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+
 
 /**
  * Test syntax of the parser.
@@ -303,16 +305,17 @@ public class TurtleSyntaxParserTest {
 
 	}
 
-	//Test for language tag from db
+	//Test for language tag from a variable (FORBIDDEN)
 	@Test
 	public void test_12_1(){
 		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
-		TestCase.assertTrue(result);
+		TestCase.assertFalse(result);
 
 	}
 
 	private boolean compareCQIE(String input, int countBody) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY,
+				TERM_FACTORY);
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -328,7 +331,8 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY,
+				TERM_FACTORY);
 
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {

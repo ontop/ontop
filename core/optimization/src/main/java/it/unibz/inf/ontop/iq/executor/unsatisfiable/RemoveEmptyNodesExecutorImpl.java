@@ -18,11 +18,12 @@ import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
 import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.AscendingPropagationTools.propagateSubstitutionUp;
-import static it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools.computeNullSubstitution;
 
 /**
  * TODO: explain
@@ -31,10 +32,15 @@ import static it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools.co
 public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutableSubstitutionTools substitutionTools;
 
     @Inject
-    private RemoveEmptyNodesExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private RemoveEmptyNodesExecutorImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                                         ImmutableSubstitutionTools substitutionTools) {
         this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.substitutionTools = substitutionTools;
     }
 
     /**
@@ -177,7 +183,7 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
      * Keeps track of the closest ancestor and the next sibling of the original focus (empty) node.
      *
      */
-    private static NodeTrackingResults<EmptyNode> propagateNullVariables(IntermediateQuery query,
+    private NodeTrackingResults<EmptyNode> propagateNullVariables(IntermediateQuery query,
                                                                          QueryNode ancestorNode,
                                                                          Optional<QueryNode> optionalNextSiblingOfFocusNode,
                                                                          QueryTreeComponent treeComponent,
@@ -192,11 +198,11 @@ public class RemoveEmptyNodesExecutorImpl implements RemoveEmptyNodesExecutor {
                     Optional.of(ancestorNode), optionalAncestorTracker);
         }
 
-        ImmutableSubstitution<Constant> ascendingSubstitution = computeNullSubstitution(nullVariables);
+        ImmutableSubstitution<Constant> ascendingSubstitution = substitutionTools.computeNullSubstitution(nullVariables);
 
         NodeTrackingResults<QueryNode> propagationResults =
                 propagateSubstitutionUp(propagatingNode, ascendingSubstitution, query, treeComponent, iqFactory,
-                        optionalAncestorTracker);
+                        substitutionFactory, optionalAncestorTracker);
 
         QueryNode closestRemainingAncestor = propagationResults.getOptionalNewNode()
                 /**

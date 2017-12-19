@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -15,8 +14,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -107,19 +105,19 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getOBDACanonicalIRI(), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getOBDACanonicalIRI(), list);
     }
 
     private Function getClassPropertyFunction(String name, Term term1) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate(name), term1);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate(name), term1);
 
     }
-    private Function getDataPropertyFunction(String name, Term term1, Term term2, Predicate.COL_TYPE type) {
+    private Function getDataPropertyFunction(String name, Term term1, Term term2) {
 
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getDataPropertyPredicate(name, type), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getDataPropertyPredicate(name, TYPE_FACTORY.getAbstractRDFSLiteral()), list);
 
     }
 
@@ -127,16 +125,16 @@ public class CanonicalIRIRewriterTest {
         List<Term> list = new ArrayList<>(2);
         list.add(term1);
         list.add(term2);
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate(name), list);
+        return TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate(name), list);
 
     }
 
     private void addDataPropertiesMappings(){
 
         //other mappings with data property
-        Function headM1 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(epdsURI,t0), t2, Predicate.COL_TYPE.LITERAL);
-        Function headM2 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(npdURI,t0), t2, Predicate.COL_TYPE.LITERAL);
-        Function headM3 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(owURI,t0), t2, Predicate.COL_TYPE.LITERAL);
+        Function headM1 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(epdsURI,t0), t2);
+        Function headM2 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(npdURI,t0), t2);
+        Function headM3 = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(owURI,t0), t2);
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms = new LinkedList<>();
@@ -171,9 +169,12 @@ public class CanonicalIRIRewriterTest {
     private void addClassPropertiesMappings(){
 
         //mappings with class
-        Function headM1 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", TERM_FACTORY.getUriTemplate(epdsURI,t0));
-        Function headM2 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", TERM_FACTORY.getUriTemplate(npdURI,t0));
-        Function headM3 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore", TERM_FACTORY.getUriTemplate(owURI,t0));
+        Function headM1 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore",
+                TERM_FACTORY.getUriTemplate(epdsURI,t0));
+        Function headM2 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore",
+                TERM_FACTORY.getUriTemplate(npdURI,t0));
+        Function headM3 = getClassPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#Wellbore",
+                TERM_FACTORY.getUriTemplate(owURI,t0));
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms = new LinkedList<>();
@@ -208,9 +209,12 @@ public class CanonicalIRIRewriterTest {
     private void addObjectPropertiesMappings() {
 
         //other mappings with object property
-        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", TERM_FACTORY.getUriTemplate(epdsURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1) );
-        Function headM2 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", TERM_FACTORY.getUriTemplate(npdURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1));
-        Function headM3 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", TERM_FACTORY.getUriTemplate(owURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1));
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy",
+                TERM_FACTORY.getUriTemplate(epdsURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1) );
+        Function headM2 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy",
+                TERM_FACTORY.getUriTemplate(npdURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1));
+        Function headM3 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy",
+                TERM_FACTORY.getUriTemplate(owURI,t0), TERM_FACTORY.getUriTemplate(unchangedURI, t1));
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms = new LinkedList<>();
@@ -244,7 +248,8 @@ public class CanonicalIRIRewriterTest {
     private void addObjectPropertiesDoubleURIMappings() {
 
         //other mappings with object property, having a wellbore as subject and object
-        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", TERM_FACTORY.getUriTemplate(epdsURI,t0), TERM_FACTORY.getUriTemplate(npdURI,t3) );
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo",
+                TERM_FACTORY.getUriTemplate(epdsURI,t0), TERM_FACTORY.getUriTemplate(npdURI,t3) );
 
 
         List<Function> bodyM1 = new LinkedList<>();
@@ -275,9 +280,12 @@ public class CanonicalIRIRewriterTest {
     private void addObjectPropertiesOnlyObjectURIMappings() {
 
         //other mappings with object property, having a wellbore as  object
-        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check", TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(epdsURI,t0));
-        Function headM2 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check", TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(npdURI,t0));
-        Function headM3 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check", TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(owURI,t0));
+        Function headM1 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check",
+                TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(epdsURI,t0));
+        Function headM2 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check",
+                TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(npdURI,t0));
+        Function headM3 = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check",
+                TERM_FACTORY.getUriTemplate(unchangedURI, t0) , TERM_FACTORY.getUriTemplate(owURI,t0));
 
         List<Function> bodyM1 = new LinkedList<>();
         List<Term> atomTerms = new LinkedList<>();
@@ -314,7 +322,8 @@ public class CanonicalIRIRewriterTest {
 
         addClassPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY, UNIFIER_UTILITIES)
+                .buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -352,12 +361,13 @@ public class CanonicalIRIRewriterTest {
         addClassPropertiesMappings();
         addDataPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
+                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
         assertEquals(6, canonicalSameAsMappings.size() );
-        Function head = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can), t2, Predicate.COL_TYPE.LITERAL);
+        Function head = getDataPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#name", TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can), t2);
         List<Function> body = new ArrayList<>();
         List<Term> atomTerms1 = new LinkedList<>();
         atomTerms1.add(t0_can);
@@ -391,12 +401,14 @@ public class CanonicalIRIRewriterTest {
         addDataPropertiesMappings();
         addObjectPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
+                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
         assertEquals(9, canonicalSameAsMappings.size() );
-        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy", TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can),  TERM_FACTORY.getUriTemplate(unchangedURI, t1));
+        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#checkedBy",
+                TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can),  TERM_FACTORY.getUriTemplate(unchangedURI, t1));
         List<Function> body = new ArrayList<>();
         List<Term> atomTerms1 = new LinkedList<>();
         atomTerms1.add(t0_can);
@@ -430,12 +442,14 @@ public class CanonicalIRIRewriterTest {
         addDataPropertiesMappings();
         addObjectPropertiesOnlyObjectURIMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
+                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
         assertEquals(9, canonicalSameAsMappings.size() );
-        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check",   TERM_FACTORY.getUriTemplate(unchangedURI, t2_can),  TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can));
+        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#check",
+                TERM_FACTORY.getUriTemplate(unchangedURI, t2_can),  TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can));
         List<Function> body = new ArrayList<>();
         List<Term> atomTerms1 = new LinkedList<>();
         atomTerms1.add(t0_can);
@@ -471,12 +485,14 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesMappings();
         addObjectPropertiesDoubleURIMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter().buildCanonicalIRIMappings(mappings);
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
+                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
 
         System.out.print( Joiner.on("\n").join(canonicalSameAsMappings));
 
         assertEquals(10, canonicalSameAsMappings.size() );
-        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo", TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can), TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can) );
+        Function head = getObjectPropertyFunction("http://ontop.inf.unibz.it/test/wellbore#linkedTo",
+                TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can), TERM_FACTORY.getUriTemplate(canonURI,t1_can,t0_can) );
         List<Function> body = new ArrayList<>();
         List<Term> atomTerms1 = new ArrayList<>();
         atomTerms1.add(t0_can);

@@ -1,48 +1,86 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN" ;
+    private static final int MAX_ITERATIONS = 100000;
+    private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final ConstructionNodeTools constructionNodeTools;
 
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
-                                TermNullabilityEvaluator nullabilityEvaluator) {
-        super(optionalFilterCondition, nullabilityEvaluator);
+                                TermNullabilityEvaluator nullabilityEvaluator,
+                                TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                                ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                                IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                                ConstructionNodeTools constructionNodeTools,
+                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+        super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+        this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @AssistedInject
     private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
-                              TermNullabilityEvaluator nullabilityEvaluator) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator);
+                              TermNullabilityEvaluator nullabilityEvaluator,
+                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                              ConstructionNodeTools constructionNodeTools,
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+        this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @AssistedInject
-    private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator) {
-        super(Optional.empty(), nullabilityEvaluator);
+    private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
+                              TypeFactory typeFactory, DatalogTools datalogTools,
+                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                              ConstructionNodeTools constructionNodeTools,
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+        this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @Override
@@ -52,17 +90,22 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode clone() {
-        return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator());
+        return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
     @Override
-    public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+    public InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
 
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator());
+        return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
     @Override
@@ -75,7 +118,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
 
         ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().equals(TermConstants.NULL))
+                .filter(e -> e.getValue().equals(termFactory.getNullConstant()))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toSet());
 
@@ -101,6 +144,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
+        return applyDescendingSubstitution(substitution);
+    }
+
+    private SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
         return getOptionalFilterCondition()
                 .map(cond -> transformBooleanExpression(substitution, cond))
@@ -167,22 +215,23 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
         switch (remainingChildren.size()) {
             case 0:
-                return new NodeTransformationProposalImpl(DECLARE_AS_TRUE,
-                        ImmutableSet.of());
+                return new NodeTransformationProposalImpl(DECLARE_AS_TRUE, ImmutableSet.of());
             case 1:
-                Optional<ImmutableExpression> condition = getOptionalFilterCondition();
-                if (condition.isPresent()) {
-                    return new NodeTransformationProposalImpl(
-                            REPLACE_BY_NEW_NODE,
-                            query.getFactory().createFilterNode(condition.get()),
-                            ImmutableSet.of()
-                    );
-                }
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                            remainingChildren.get(0),ImmutableSet.of());
+                return getOptionalFilterCondition()
+                        .map(immutableExpression -> new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
+                                query.getFactory().createFilterNode(immutableExpression),
+                                ImmutableSet.of()))
+                        .orElseGet(() -> new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
+                                remainingChildren.get(0), ImmutableSet.of()));
             default:
                 return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
         }
+    }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof InnerJoinNode)
+                && getOptionalFilterCondition().equals(((InnerJoinNode) queryNode).getOptionalFilterCondition());
     }
 
     @Override
@@ -194,4 +243,232 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public String toString() {
         return JOIN_NODE_STR + getOptionalFilterString();
     }
-}
+
+    /**
+     * TODO: explain
+     */
+    @Override
+    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator) {
+        final ImmutableSet<Variable> projectedVariables = initialChildren.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        // Non-final
+        ImmutableList<IQTree> currentChildren = initialChildren;
+        ImmutableSubstitution<ImmutableTerm> currentSubstitution = substitutionFactory.getSubstitution();
+        Optional<ImmutableExpression> currentJoiningCondition = getOptionalFilterCondition();
+        boolean hasConverged = false;
+
+        try {
+
+            int i = 0;
+            while ((!hasConverged) && (i++ < MAX_ITERATIONS)) {
+                LiftingStepResults results = liftChildBinding(currentChildren, currentJoiningCondition, variableGenerator);
+                hasConverged = results.hasConverged;
+                currentChildren = results.children;
+                currentSubstitution = results.substitution.composeWith(currentSubstitution);
+                currentJoiningCondition = results.joiningCondition;
+            }
+
+            if (i >= MAX_ITERATIONS)
+                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+
+            IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition);
+
+            ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory
+                    .getSubstitution(currentSubstitution.getImmutableMap().entrySet().stream()
+                            .filter(e -> projectedVariables.contains(e.getKey()))
+                            .collect(ImmutableCollectors.toMap()));
+
+            ImmutableSet<Variable> childrenVariables = currentChildren.stream()
+                    .flatMap(c -> c.getVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            /*
+             * NB: creates a construction if a substitution needs to be propagated and/or if some variables
+             * have to be projected away
+             */
+            return projectedVariables.equals(childrenVariables) && ascendingSubstitution.isEmpty()
+                    ? joinIQ
+                    : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ, true);
+
+        } catch (EmptyIQException e) {
+            return iqFactory.createEmptyNode(projectedVariables);
+        }
+    }
+
+    /**
+     * TODO: consider the constraint
+     */
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+        SubstitutionResults<InnerJoinNode> results = applyDescendingSubstitution(descendingSubstitution);
+
+        InnerJoinNode joinNode;
+        switch (results.getLocalAction()) {
+            case NO_CHANGE:
+                joinNode = this;
+                break;
+            case NEW_NODE:
+                joinNode = results.getOptionalNewNode().get();
+                break;
+            case DECLARE_AS_EMPTY:
+                return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+            default:
+                throw new MinorOntopInternalBugException("Unexpected local action " +
+                        "after applying a descending substitution to a inner join: " + results.getLocalAction());
+        }
+
+        ImmutableList<IQTree> updatedChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitution(descendingSubstitution, constraint))
+                .filter(c -> !(c instanceof TrueNode))
+                .collect(ImmutableCollectors.toList());
+
+        if (updatedChildren.stream()
+                .anyMatch(IQTree::isDeclaredAsEmpty)) {
+            return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+        }
+
+        switch (updatedChildren.size()) {
+            case 0:
+                return iqFactory.createTrueNode();
+            case 1:
+                return updatedChildren.get(0);
+            default:
+                return iqFactory.createNaryIQTree(joinNode, updatedChildren);
+        }
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
+        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
+                .flatMap(c -> c.getVariables().stream()
+                        .map(v -> Maps.immutableEntry(v, c)))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap();
+
+        return variableProvenanceMap.entrySet().stream()
+                .filter(e -> e.getValue().size() == 1)
+                .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
+                .map(Map.Entry::getKey)
+                .filter(this::isFilteringNullValue)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<Variable> computeNewlyProjectedVariables(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> formerProjectedVariables = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
+    }
+
+    /**
+     * Lifts the binding OF AT MOST ONE child
+     */
+    private LiftingStepResults liftChildBinding(ImmutableList<IQTree> initialChildren,
+                                                Optional<ImmutableExpression> initialJoiningCondition,
+                                                VariableGenerator variableGenerator) throws EmptyIQException {
+        ImmutableList<IQTree> liftedChildren = initialChildren.stream()
+                .map(c -> c.liftBinding(variableGenerator))
+                .filter(c -> !(c.getRootNode() instanceof TrueNode))
+                .collect(ImmutableCollectors.toList());
+
+        if (liftedChildren.stream()
+                .anyMatch(IQTree::isDeclaredAsEmpty))
+            throw new EmptyIQException();
+
+
+        Optional<IQTree> optionalSelectedLiftedChild = liftedChildren.stream()
+                .filter(iq -> iq.getRootNode() instanceof ConstructionNode)
+                .findFirst();
+
+        /*
+         * No substitution to lift -> converged
+         */
+        if (!optionalSelectedLiftedChild.isPresent())
+            return new InnerJoinNodeImpl.LiftingStepResults(substitutionFactory.getSubstitution(), liftedChildren,
+                    initialJoiningCondition, true);
+
+        UnaryIQTree selectedLiftedChild = (UnaryIQTree) optionalSelectedLiftedChild.get();
+
+        ImmutableList<IQTree> otherLiftedChildren = liftedChildren.stream()
+                .filter(c -> c != selectedLiftedChild)
+                .collect(ImmutableCollectors.toList());
+
+        ConstructionNode selectedChildConstructionNode = (ConstructionNode) selectedLiftedChild.getRootNode();
+        IQTree selectedGrandChild = selectedLiftedChild.getChild();
+
+        try {
+            return liftRegularChildBinding(selectedChildConstructionNode,
+                    selectedGrandChild,
+                    otherLiftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
+                    this::convertIntoLiftingStepResults);
+        } catch (UnsatisfiableJoiningConditionException e) {
+            throw new EmptyIQException();
+        }
+    }
+
+    /**
+     * TODO: should we try to preserve the children order?
+     */
+    private LiftingStepResults convertIntoLiftingStepResults(
+            ImmutableList<IQTree> otherLiftedChildren, IQTree selectedGrandChild,
+            Optional<ImmutableExpression> newCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        ImmutableList<IQTree> newChildren = Stream.concat(
+                otherLiftedChildren.stream()
+                        .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition)),
+                Stream.of(selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)))
+                .collect(ImmutableCollectors.toList());
+
+        return new LiftingStepResults(ascendingSubstitution, newChildren, newCondition, false);
+    }
+
+
+
+    private IQTree createJoinOrFilterOrTrue(ImmutableList<IQTree> currentChildren,
+                                            Optional<ImmutableExpression> currentJoiningCondition) {
+        switch (currentChildren.size()) {
+            case 0:
+                return iqFactory.createTrueNode();
+            case 1:
+                IQTree uniqueChild = currentChildren.get(0);
+                return currentJoiningCondition
+                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
+                        .orElse(uniqueChild);
+            default:
+                InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
+                        ? this
+                        : changeOptionalFilterCondition(currentJoiningCondition);
+                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
+        }
+    }
+
+
+
+    private static class LiftingStepResults {
+        public final ImmutableSubstitution<ImmutableTerm> substitution;
+        public final ImmutableList<IQTree> children;
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        public final Optional<ImmutableExpression> joiningCondition;
+        public final boolean hasConverged;
+
+        private LiftingStepResults(ImmutableSubstitution<ImmutableTerm> substitution, ImmutableList<IQTree> children,
+                                   Optional<ImmutableExpression> joiningCondition, boolean hasConverged) {
+            this.substitution = substitution;
+            this.children = children;
+            this.joiningCondition = joiningCondition;
+            this.hasConverged = hasConverged;
+        }
+    }
+
+
+    private static class EmptyIQException extends Exception {
+    }
+
+ }

@@ -23,9 +23,11 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -56,8 +58,6 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 /**
  * 
@@ -69,6 +69,14 @@ public class MetaMappingExpander {
 	private static final Logger log = LoggerFactory.getLogger(MetaMappingExpander.class);
 	
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+
+	@Inject
+	private MetaMappingExpander(AtomFactory atomFactory, TermFactory termFactory) {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+	}
 
 
 	/**
@@ -79,7 +87,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public static ImmutableList<SQLPPTriplesMap> expand(Collection<SQLPPTriplesMap> mappings,
+	public ImmutableList<SQLPPTriplesMap> expand(Collection<SQLPPTriplesMap> mappings,
 														OntopMappingSQLSettings settings, DBMetadata metadata)
 			throws MetaMappingExpansionException {
 
@@ -127,7 +135,7 @@ public class MetaMappingExpander {
 		return ImmutableList.copyOf(expandedMappings);
 	}
 
-	private static List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String id,
+	private List<SQLPPTriplesMap> instantiateMapping(Connection connection, DBMetadata metadata, String id,
 															ImmutableFunctionalTerm target, String sql)
 			throws SQLException, JSQLParserException, InvalidSelectQueryException, UnsupportedSelectQueryException {
 
@@ -175,9 +183,9 @@ public class MetaMappingExpander {
 
 			String predicateName = getPredicateName(templateAtom.getTerm(0), values);
 			ImmutableFunctionalTerm newTarget = (arity == 1)
-					? TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getClassPredicate(predicateName),
+					? termFactory.getImmutableFunctionalTerm(atomFactory.getClassPredicate(predicateName),
 					target.getTerm(0))
-					: TERM_FACTORY.getImmutableFunctionalTerm(TERM_FACTORY.getObjectPropertyPredicate(predicateName),
+					: termFactory.getImmutableFunctionalTerm(atomFactory.getObjectPropertyPredicate(predicateName),
 					target.getTerm(0), target.getTerm(2));
 
 			String newId = IDGenerator.getNextUniqueID(id + "#");
@@ -196,10 +204,10 @@ public class MetaMappingExpander {
 
 
 
-	private static ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
+	private ImmutableList<SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
-		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata);
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
 
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
 

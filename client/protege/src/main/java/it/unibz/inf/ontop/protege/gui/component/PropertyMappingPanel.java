@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
@@ -45,6 +46,9 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
+
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.DATA_PROPERTY;
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.OBJECT_PROPERTY;
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
@@ -145,11 +149,12 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
+		AtomFactory atomFactory = obdaModel.getAtomFactory();
         for (DataPropertyExpression dp : obdaModel.getCurrentVocabulary().getDataProperties()) {
-            v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
+            v.addElement(new PredicateItem(atomFactory.getDataPropertyPredicate(dp.getIRI()), DATA_PROPERTY, prefixManager));
         }
         for (ObjectPropertyExpression op : obdaModel.getCurrentVocabulary().getObjectProperties()) {
-            v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
+            v.addElement(new PredicateItem(atomFactory.getObjectPropertyPredicate(op.getIRI()), OBJECT_PROPERTY, prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
         cboPropertyAutoSuggest.setRenderer(new PropertyListCellRenderer());
@@ -383,7 +388,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox();
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			
@@ -489,7 +494,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox();
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			

@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.BindingExtractor;
@@ -16,13 +18,13 @@ import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.UnionLiftProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.UnionLiftProposalImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.iq.optimizer.impl.QueryNodeNavigationTools.getDepthFirstNextNode;
 import static it.unibz.inf.ontop.iq.optimizer.impl.QueryNodeNavigationTools.getNextNodeAndQuery;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -33,10 +35,20 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
  * Uses {@link UnionFriendlyBindingExtractor}, {@link SubstitutionPropagationProposal} and {@link UnionLiftProposal}
  *
  */
+@Singleton
 public class TopDownBindingLiftOptimizer implements BindingLiftOptimizer {
 
-    private final SimpleUnionNodeLifter lifter = new SimpleUnionNodeLifter();
-    private final UnionFriendlyBindingExtractor extractor = new UnionFriendlyBindingExtractor();
+    private final SimpleUnionNodeLifter lifter;
+    private final UnionFriendlyBindingExtractor extractor;
+    private final SubstitutionFactory substitutionFactory;
+
+    @Inject
+    public TopDownBindingLiftOptimizer(SubstitutionFactory substitutionFactory,
+                                       UnionFriendlyBindingExtractor extractor) {
+        this.substitutionFactory = substitutionFactory;
+        this.lifter = new SimpleUnionNodeLifter();
+        this.extractor = extractor;
+    }
 
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {

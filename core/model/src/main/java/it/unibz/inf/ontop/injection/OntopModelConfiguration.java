@@ -4,6 +4,9 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -23,6 +26,9 @@ public interface OntopModelConfiguration {
     void validate() throws InvalidOntopConfigurationException;
 
     IntermediateQueryFactory getIQFactory();
+    AtomFactory getAtomFactory();
+    TermFactory getTermFactory();
+    TypeFactory getTypeFactory();
 
     /**
      * Default builder

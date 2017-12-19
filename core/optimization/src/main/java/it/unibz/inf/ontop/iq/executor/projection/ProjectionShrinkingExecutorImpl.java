@@ -14,19 +14,21 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.ProjectionShrinkingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private ProjectionShrinkingExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private ProjectionShrinkingExecutorImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
 
                 ConstructionNode replacingNode = iqFactory.createConstructionNode(
                         retainedVariables,
-                        SUBSTITUTION_FACTORY.getSubstitution(shrinkedMap),
+                        substitutionFactory.getSubstitution(shrinkedMap),
                         ((ConstructionNode) focusNode).getOptionalModifiers()
                 );
                 treeComponent.replaceNode(focusNode, replacingNode);

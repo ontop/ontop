@@ -40,6 +40,8 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
+
 public class ParserFileTest extends TestCase {
 	private static final String ROOT = "src/test/resources/scenario/";
 
@@ -129,7 +131,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
-		RDBMetadata dbMetadata = RDBMetadataExtractionTools.createDummyMetadata();
+		RDBMetadata dbMetadata = createDummyMetadata();
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 
         /**

@@ -6,6 +6,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -14,7 +16,10 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
+import java.util.Optional;
+import java.util.stream.Stream;
+
+public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
@@ -107,6 +112,38 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     }
 
     @Override
+    public IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+
+        ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
+
+        ImmutableSet<Variable> newProjectedVariables = Stream.concat(
+                projectedVariables.stream(),
+                descendingSubstitution.getImmutableMap().values().stream()
+                        .filter(val -> val instanceof Variable)
+                        .map(v -> (Variable) v))
+                .filter(v -> !substitutionDomain.contains(v))
+                .collect(ImmutableCollectors.toSet());
+        return new EmptyNodeImpl(newProjectedVariables);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return projectedVariables;
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return true;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        return projectedVariables;
+    }
+
+    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }
@@ -119,5 +156,12 @@ public class EmptyNodeImpl extends QueryNodeImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
+    }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        if (!(queryNode instanceof EmptyNode))
+            return false;
+        return projectedVariables.equals(((EmptyNode) queryNode).getVariables());
     }
 }

@@ -59,9 +59,12 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
             throws ConversionException;
 
     /**
-     * Returns "f o g" where f is this substitution
+     * Returns "(g o f)" where g is this substitution.
+     * NB: (g o f)(x) = g(f(x))
      */
-    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
+    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);
+
+    ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> f);
 
     /**
      * Because of the optional cannot be overloaded.
@@ -93,6 +96,10 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 
     Var2VarSubstitution getVar2VarFragment();
+    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
+    ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
+    ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
+    ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
 
     ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
 
@@ -100,5 +107,4 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Reduces the substitution's domain to its intersection with the argument domain
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
-
 }

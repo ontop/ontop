@@ -37,18 +37,6 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
         }
     }
 
-    protected ImmutableFunctionalTermImpl(Function functionalTermToClone) {
-        this(functionalTermToClone.getFunctionSymbol(), convertTerms(functionalTermToClone));
-    }
-
-    private static ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
-        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-        for (Term term : functionalTermToClone.getTerms()) {
-            builder.add(ImmutabilityTools.convertIntoImmutableTerm(term));
-        }
-        return builder.build();
-    }
-
 
     @Override
     public ImmutableList<Term> getTerms() {

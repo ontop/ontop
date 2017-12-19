@@ -20,7 +20,13 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +70,18 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+
+			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+			AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
+			TermFactory termFactory = defaultConfiguration.getTermFactory();
+			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
+			Injector injector = defaultConfiguration.getInjector();
+			DatalogFactory datalogFactory = injector.getInstance(DatalogFactory.class);
+			JdbcTypeMapper jdbcTypeMapper = injector.getInstance(JdbcTypeMapper.class);
+
+
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+					atomFactory, jdbcTypeMapper);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

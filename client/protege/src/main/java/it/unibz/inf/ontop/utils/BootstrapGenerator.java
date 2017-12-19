@@ -1,13 +1,15 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -34,8 +36,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 public class BootstrapGenerator {
 
@@ -46,15 +46,26 @@ public class BootstrapGenerator {
     private final OWLModelManager owlManager;
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final MappingVocabularyExtractor vocabularyExtractor;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
+    private final JdbcTypeMapper jdbcTypeMapper;
     private int currentMappingIndex = 1;
 
-    public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri, OWLModelManager owlManager) throws DuplicateMappingException, InvalidMappingException, MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
-
+    public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
+                              OWLModelManager owlManager, JdbcTypeMapper jdbcTypeMapper) throws DuplicateMappingException, InvalidMappingException,
+            MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+        this.jdbcTypeMapper = jdbcTypeMapper;
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
         vocabularyExtractor = configuration.getInjector().getInstance(MappingVocabularyExtractor.class);
+        atomFactory = obdaModelManager.getAtomFactory();
+        termFactory = obdaModelManager.getTermFactory();
+        typeFactory = obdaModelManager.getTypeFactory();
+        datalogFactory = obdaModelManager.getDatalogFactory();
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
@@ -90,7 +101,8 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
+        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+                atomFactory, jdbcTypeMapper);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
@@ -164,7 +176,7 @@ public class BootstrapGenerator {
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, TERM_FACTORY);
+        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory);
 
         List<SQLPPTriplesMap> axioms = new ArrayList<>();
         axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));

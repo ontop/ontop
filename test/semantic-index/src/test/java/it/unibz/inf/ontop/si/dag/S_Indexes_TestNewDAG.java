@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class S_Indexes_TestNewDAG extends TestCase {
 	
 	ArrayList<String> input= new ArrayList<String>();
@@ -101,7 +103,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		TBoxReasoner dag = TBoxReasonerImpl.create(OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(fileInput));
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);

@@ -22,21 +22,21 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.URI;
@@ -60,7 +60,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 
@@ -77,22 +76,38 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final IRIDictionary uriRef;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     private final DatalogProgram program;
+    private final DatalogFactory datalogFactory;
     private int predicateIdx = 0;
+    private final org.apache.commons.rdf.api.RDF rdfFactory;
+    private final it.unibz.inf.ontop.model.term.ValueConstant valueNull;
 
     /**
-	 * 
-	 * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
-	 * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
+     * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
+     * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
+     * @param termFactory
+     * @param typeFactory
+     * @param datalogFactory
      *
 	 */
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
-                                     @Nullable IRIDictionary iriDictionary) {
+                                     @Nullable IRIDictionary iriDictionary,
+                                     AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+                                     DatalogFactory datalogFactory) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
 
-        this.program = DATALOG_FACTORY.getDatalogProgram();
+        this.program = this.datalogFactory.getDatalogProgram();
+        this.rdfFactory = new SimpleRDF();
+        this.valueNull = termFactory.getNullConstant();
     }
 
 	/**
@@ -126,8 +141,8 @@ public class SparqlAlgebraToDatalogTranslator {
             answerVariables = Collections.emptyList();
         }
 
-        Predicate pred = TERM_FACTORY.getPredicate(ONTOP_QUERY, answerVariables.size());
-        Function head = TERM_FACTORY.getFunction(pred, answerVariables);
+        Predicate pred = termFactory.getPredicate(ONTOP_QUERY, answerVariables.size());
+        Function head = termFactory.getFunction(pred, answerVariables);
         appendRule(head, body.atoms);
 
         List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
@@ -136,7 +151,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		return new InternalSparqlQuery(program, signature);
 	}
 
-    private static class TranslationResult {
+    private class TranslationResult {
 
         final ImmutableList<Function> atoms;
         final ImmutableSet<Variable> variables;
@@ -174,7 +189,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
 
-                eqAtoms.add(TERM_FACTORY.getFunctionEQ(v, expr));
+                eqAtoms.add(termFactory.getFunctionEQ(v, expr));
             }
 
             return new TranslationResult(getAtomsExtended(eqAtoms.stream()), ImmutableSet.copyOf(vars), false);
@@ -186,7 +201,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (nullVariables.isEmpty())
                 return atoms;
 
-            return getAtomsExtended(nullVariables.stream().map(v -> TERM_FACTORY.getFunctionEQ(v, TermConstants.NULL)));
+            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, valueNull)));
         }
 
         /**
@@ -199,7 +214,7 @@ public class SparqlAlgebraToDatalogTranslator {
             return ImmutableList.copyOf(Iterables.concat(atoms, extension.collect(Collectors.toList())));
 
 //            ImmutableList.Builder builder = ImmutableList.<Function>builder().addAll(atoms)
-//                    .addAll(nullVariables.stream().map(v -> TERM_FACTORY.getFunctionEQ(v, OBDAVocabulary.NULL)).iterator());
+//                    .addAll(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, OBDAVocabulary.NULL)).iterator());
 
 //            return builder.build();
         }
@@ -207,9 +222,9 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private Function getFreshHead(List<Term> terms) {
-        Predicate pred = TERM_FACTORY.getPredicate(ONTOP_QUERY + predicateIdx, terms.size());
+        Predicate pred = termFactory.getPredicate(ONTOP_QUERY + predicateIdx, terms.size());
         predicateIdx++;
-        return TERM_FACTORY.getFunction(pred, terms);
+        return termFactory.getFunction(pred, terms);
     }
 
     private TranslationResult createFreshNode(ImmutableSet<Variable> vars) {
@@ -227,7 +242,7 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private void appendRule(Function head, List<Function> body) {
-        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+        CQIE rule = datalogFactory.getCQIE(head, body);
         program.appendRule(rule);
     }
 
@@ -263,7 +278,7 @@ public class SparqlAlgebraToDatalogTranslator {
                             + "This query has a more complex expression '" + expression + "'");
 
                 Var v = (Var) expression;
-                Variable var = TERM_FACTORY.getVariable(v.getName());
+                Variable var = termFactory.getVariable(v.getName());
                 int direction = c.isAscending() ? OrderCondition.ORDER_ASCENDING
                         : OrderCondition.ORDER_DESCENDING;
                 modifiers.addOrderCondition(var, direction);
@@ -289,7 +304,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 return new TranslationResult(atoms, vars, true);
             }
             else {
-                Function body = DATALOG_FACTORY.getSPARQLJoin(wrapNonTriplePattern(a1),
+                Function body = datalogFactory.getSPARQLJoin(wrapNonTriplePattern(a1),
                         wrapNonTriplePattern(a2));
 
                 return new TranslationResult(ImmutableList.of(body), vars, false);
@@ -301,7 +316,7 @@ public class SparqlAlgebraToDatalogTranslator {
             TranslationResult a2 = translate(lj.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
-            Function body = DATALOG_FACTORY.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
+            Function body = datalogFactory.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
                     wrapNonTriplePattern(a2));
 
             ValueExpr expr = lj.getCondition();
@@ -343,13 +358,13 @@ public class SparqlAlgebraToDatalogTranslator {
             List<Term> tVars = new ArrayList<>(pes.size());
             boolean noRenaming = true;
             for (ProjectionElem pe : pes) {
-                Variable sVar = TERM_FACTORY.getVariable(pe.getSourceName());
+                Variable sVar = termFactory.getVariable(pe.getSourceName());
                 if (!sub.variables.contains(sVar))
                     throw new IllegalArgumentException("Projection source of " + pe
                             + " not found in " + projection.getArg());
                 sVars.add(sVar);
 
-                Variable tVar = TERM_FACTORY.getVariable(pe.getTargetName());
+                Variable tVar = termFactory.getVariable(pe.getTargetName());
                 tVars.add(tVar);
 
                 if (!sVar.equals(tVar))
@@ -367,7 +382,7 @@ public class SparqlAlgebraToDatalogTranslator {
             Function head = getFreshHead(sVars);
             appendRule(head, sub.atoms);
 
-            Function atom = TERM_FACTORY.getFunction(head.getFunctionSymbol(), tVars);
+            Function atom = termFactory.getFunction(head.getFunctionSymbol(), tVars);
             return new TranslationResult(ImmutableList.of(atom), vars, false);
         }
         else if (node instanceof Extension) {     // EXTEND algebra operation
@@ -378,7 +393,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())));
             return sub.extendWithBindings(
                     nontrivialBindings,
-                    ee -> TERM_FACTORY.getVariable(ee.getName()),
+                    ee -> termFactory.getVariable(ee.getName()),
                     (ee, vars) -> getExpression(ee.getExpr(), vars));
         }
         else if (node instanceof BindingSetAssignment) { // VALUES in SPARQL
@@ -389,7 +404,7 @@ public class SparqlAlgebraToDatalogTranslator {
             for (BindingSet bs :values.getBindingSets()) {
                 bindings.add(empty.extendWithBindings(
                         StreamSupport.stream(bs.spliterator(), false),
-                        be -> TERM_FACTORY.getVariable(be.getName()),
+                        be -> termFactory.getVariable(be.getName()),
                         (be, vars) -> getTermForLiteralOrIri(be.getValue())));
             }
 
@@ -425,7 +440,7 @@ public class SparqlAlgebraToDatalogTranslator {
             // TODO: check whether the return type is Boolean
             return f;
         }
-        return TERM_FACTORY.getFunctionIsTrue(term);
+        return termFactory.getFunctionIsTrue(term);
     }
 
 	private TranslationResult translateTriplePattern(StatementPattern triple) throws OntopUnsupportedInputQueryException {
@@ -447,23 +462,23 @@ public class SparqlAlgebraToDatalogTranslator {
 			//  term variable term .
             Term pTerm = getTermForVariable(triple.getPredicateVar(), variables);
             Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-			atom = ATOM_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
+			atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 		}
 		else if (p instanceof IRI) {
 			if (p.equals(RDF.TYPE)) {
 				if (o == null) {
 					// term rdf:type variable .
-					Term pTerm = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF_TYPE));
+					Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF_TYPE));
                     Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
-					atom = ATOM_FACTORY.getTripleAtom(sTerm, pTerm, oTerm);
+					atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 				}
-				else if (o instanceof URI) {
+				else if (o instanceof IRI) {
 					// term rdf:type uri .
-					Predicate.COL_TYPE type = TYPE_FACTORY.getDatatype((IRI)o);
-					if (type != null) // datatype
-						atom = TERM_FACTORY.getFunction(TYPE_FACTORY.getTypePredicate(type), sTerm);
-					else // class
-						atom = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate(o.stringValue()), sTerm);
+                    atom = typeFactory.getOptionalDatatype(rdfFactory.createIRI(o.stringValue()))
+                            // datatype
+                            .map(rdfDatatype -> termFactory.getFunction(termFactory.getRequiredTypePredicate(rdfDatatype), sTerm))
+                            // class
+                            .orElseGet(() -> termFactory.getFunction(atomFactory.getClassPredicate(o.stringValue()), sTerm));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
@@ -471,8 +486,10 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-				Predicate predicate = TERM_FACTORY.getPredicate(p.stringValue(), new COL_TYPE[] { null, null });
-				atom = TERM_FACTORY.getFunction(predicate, sTerm, oTerm);
+				Predicate predicate = termFactory.getPredicate(p.stringValue(), ImmutableList.of(
+				        typeFactory.getAbstractObjectRDFType(),
+				        typeFactory.getAbstractRDFTermType()));
+				atom = termFactory.getFunction(predicate, sTerm, oTerm);
 			}
 		}
 		else
@@ -482,8 +499,8 @@ public class SparqlAlgebraToDatalogTranslator {
         return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
 	}
 
-    private static Term getTermForVariable(Var v, ImmutableSet.Builder<Variable> variables) {
-        Variable var = TERM_FACTORY.getVariable(v.getName());
+    private Term getTermForVariable(Var v, ImmutableSet.Builder<Variable> variables) {
+        Variable var = termFactory.getVariable(v.getName());
         variables.add(var);
         return var;
     }
@@ -498,29 +515,32 @@ public class SparqlAlgebraToDatalogTranslator {
         throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
     }
 
-    private static Term getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
+    private Term getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
         Optional<String> lang = literal.getLanguage();
 
         if (lang.isPresent()) {
-            return TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral(value, COL_TYPE.STRING), lang.get());
+            // TODO: use a string lexical type instead
+            return termFactory.getTypedTerm(termFactory.getConstantLiteral(value, typeFactory.getXsdStringDatatype()), lang.get());
 
         } else {
-            COL_TYPE type;
+            RDFDatatype type;
              /*
               * default data type is xsd:string
               */
             if (typeURI == null) {
-                type = COL_TYPE.STRING;
+                type = typeFactory.getXsdStringDatatype();
             } else {
-                type = TYPE_FACTORY.getDatatype(typeURI);
+                // TODO: support arbitrary datatypes
+                type = typeFactory.getOptionalDatatype(rdfFactory.createIRI(typeURI.stringValue()))
+                        .orElse(null);
             }
 
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
-                return TERM_FACTORY.getUriTemplateForDatatype(typeURI.stringValue());
+                return termFactory.getUriTemplateForDatatype(typeURI.stringValue());
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
@@ -528,9 +548,9 @@ public class SparqlAlgebraToDatalogTranslator {
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
 
-            Term constant = TERM_FACTORY.getConstantLiteral(value, type);
+            Term constant = termFactory.getConstantLiteral(value, type);
 
-            return TERM_FACTORY.getTypedTerm(constant, type);
+            return termFactory.getTypedTerm(constant, type);
 
         }
     }
@@ -550,16 +570,18 @@ public class SparqlAlgebraToDatalogTranslator {
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
-                return TERM_FACTORY.getUriTemplateForDatatype(uri);
+                return termFactory.getUriTemplateForDatatype(uri);
             else
-                return TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
+                // TODO: use a lexical term type instead
+                return termFactory.getUriTemplate(termFactory.getConstantLiteral(String.valueOf(id),
+                        typeFactory.getXsdIntegerDatatype()));
         }
         else {
             Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
             if (constantFunction.getArity() == 1 && unknownUrisToTemplates) {
                 // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
                 // despite the name, this is NOT necessarily a datatype
-                constantFunction = TERM_FACTORY.getUriTemplateForDatatype(uri);
+                constantFunction = termFactory.getUriTemplateForDatatype(uri);
             }
             return constantFunction;
         }
@@ -581,8 +603,8 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		if (expr instanceof Var) {
             Var v = (Var) expr;
-            Variable var = TERM_FACTORY.getVariable(v.getName());
-            return variables.contains(var) ? var : TermConstants.NULL;
+            Variable var = termFactory.getVariable(v.getName());
+            return variables.contains(var) ? var : valueNull;
 		} 
 		else if (expr instanceof ValueConstant) {
 			Value v = ((ValueConstant) expr).getValue();
@@ -597,37 +619,37 @@ public class SparqlAlgebraToDatalogTranslator {
             // BOUND (Sec 17.4.1.1)
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
-            Variable var = TERM_FACTORY.getVariable(v.getName());
-            return variables.contains(var) ? TERM_FACTORY.getFunctionIsNotNull(var) : TERM_FACTORY.getBooleanConstant(false);
+            Variable var = termFactory.getVariable(v.getName());
+            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getBooleanConstant(false);
         }
         else if (expr instanceof UnaryValueOperator) {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
 
             if (expr instanceof Not) {
-                return TERM_FACTORY.getFunctionNOT(term);
+                return termFactory.getFunctionNOT(term);
             }
             else if (expr instanceof IsNumeric) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.IS_NUMERIC, term);
+                return termFactory.getFunction(ExpressionOperation.IS_NUMERIC, term);
             }
             else if (expr instanceof IsLiteral) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.IS_LITERAL, term);
+                return termFactory.getFunction(ExpressionOperation.IS_LITERAL, term);
             }
             else if (expr instanceof IsURI) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.IS_IRI, term);
+                return termFactory.getFunction(ExpressionOperation.IS_IRI, term);
             }
             else if (expr instanceof Str) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.SPARQL_STR, term);
+                return termFactory.getFunction(ExpressionOperation.SPARQL_STR, term);
             }
             else if (expr instanceof Datatype) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
+                return termFactory.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
             }
             else if (expr instanceof IsBNode) {
-                return TERM_FACTORY.getFunction(ExpressionOperation.IS_BLANK, term);
+                return termFactory.getFunction(ExpressionOperation.IS_BLANK, term);
             }
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
-                    return TERM_FACTORY.getFunction(ExpressionOperation.SPARQL_LANG, term);
+                    return termFactory.getFunction(ExpressionOperation.SPARQL_LANG, term);
                 else
                     throw new RuntimeException("A variable or a value is expected in " + expr);
             }
@@ -647,15 +669,15 @@ public class SparqlAlgebraToDatalogTranslator {
             Term term2 = getExpression(bexpr.getRightArg(), variables);
 
             if (expr instanceof And) {
-                return TERM_FACTORY.getFunctionAND(term1, term2);
+                return termFactory.getFunctionAND(term1, term2);
             }
             else if (expr instanceof Or) {
-                return TERM_FACTORY.getFunctionOR(term1, term2);
+                return termFactory.getFunctionOR(term1, term2);
             }
             else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)
                 // ROMAN (28 June 2016): strictly speaking it's not equality
-                return TERM_FACTORY.getFunctionEQ(term1, term2);
+                return termFactory.getFunctionEQ(term1, term2);
             }
             else if (expr instanceof Regex) {
                 // REGEX (Sec 17.4.3.14)
@@ -663,31 +685,31 @@ public class SparqlAlgebraToDatalogTranslator {
                 // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
                 Regex reg = (Regex) expr;
                 Term term3 = (reg.getFlagsArg() != null) ?
-                        getExpression(reg.getFlagsArg(), variables) : TermConstants.NULL;
-                return TERM_FACTORY.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
+                        getExpression(reg.getFlagsArg(), variables) : valueNull;
+                return termFactory.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
             }
             else if (expr instanceof Compare) {
                 ExpressionOperation p = RelationalOperations.get(((Compare) expr).getOperator());
-                return TERM_FACTORY.getFunction(p, term1, term2);
+                return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
                 ExpressionOperation p = NumericalOperations.get(((MathExpr)expr).getOperator());
-                return TERM_FACTORY.getFunction(p, term1, term2);
+                return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof LangMatches) {
                 if (term2 instanceof Function) {
                     Function f = (Function) term2;
                     if (f.isDataTypeFunction()) {
                         Term functionTerm = f.getTerm(0);
-                        if (functionTerm instanceof Constant) {
-                            Constant c = (Constant) functionTerm;
-                            term2 = TERM_FACTORY.getFunction(f.getFunctionSymbol(),
-                                    TERM_FACTORY.getConstantLiteral(c.getValue().toLowerCase(),
+                        if (functionTerm instanceof it.unibz.inf.ontop.model.term.ValueConstant) {
+                            it.unibz.inf.ontop.model.term.ValueConstant c = (it.unibz.inf.ontop.model.term.ValueConstant) functionTerm;
+                            term2 = termFactory.getFunction(f.getFunctionSymbol(),
+                                    termFactory.getConstantLiteral(c.getValue().toLowerCase(),
                                             c.getType()));
                         }
                     }
                 }
-                return TERM_FACTORY.getLANGMATCHESFunction(term1, term2);
+                return termFactory.getLANGMATCHESFunction(term1, term2);
             }
         }
 		else if (expr instanceof FunctionCall) {
@@ -705,7 +727,7 @@ public class SparqlAlgebraToDatalogTranslator {
                             "Wrong number of arguments (found " + terms.size() + ", only " +
                                     p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
 
-                return TERM_FACTORY.getFunction(p, terms);
+                return termFactory.getFunction(p, terms);
             }
 
             // these are all special cases with **variable** number of arguments
@@ -720,7 +742,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
                     Term concat = terms.get(0);
                     for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                        concat = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, concat, terms.get(i));
+                        concat = termFactory.getFunction(ExpressionOperation.CONCAT, concat, terms.get(i));
                     return concat;
 
                 // REPLACE (Sec 17.4.3.15)
@@ -730,14 +752,14 @@ public class SparqlAlgebraToDatalogTranslator {
                     // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
                     Term flags;
                     if (arity == 3)
-                        flags = TERM_FACTORY.getConstantLiteral("");
+                        flags = termFactory.getConstantLiteral("");
                     else if (arity == 4)
                         flags = terms.get(3);
                     else
                         throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                                 + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
 
-                    return TERM_FACTORY.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+                    return termFactory.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
 
 
                     // SUBSTR (Sec 17.4.3.3)
@@ -745,9 +767,9 @@ public class SparqlAlgebraToDatalogTranslator {
                     // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
                 case "http://www.w3.org/2005/xpath-functions#substring":
                     if (arity == 2)
-                        return TERM_FACTORY.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
+                        return termFactory.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
                     else if (arity == 3)
-                        return TERM_FACTORY.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
+                        return termFactory.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
 
                     throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                             + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");

@@ -1,14 +1,20 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -29,8 +35,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  *
@@ -67,6 +71,7 @@ public class OBDAModel {
     private final OBDADataSource source;
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
+    private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private OntologyVocabulary currentMutableVocabulary;
 
@@ -75,12 +80,29 @@ public class OBDAModel {
     private final List<OBDAMappingListener> mappingListeners;
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final Relation2Predicate relation2Predicate;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
+    private final JdbcTypeMapper jdbcTypeMapper;
 
     public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory, PrefixDocumentFormat owlPrefixManager) {
+                     SQLPPMappingFactory ppMappingFactory,
+                     PrefixDocumentFormat owlPrefixManager,
+                     AtomFactory atomFactory, TermFactory termFactory,
+                     TypeFactory typeFactory, DatalogFactory datalogFactory,
+                     Relation2Predicate relation2Predicate, JdbcTypeMapper jdbcTypeMapper) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
+        this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
+        this.owlPrefixManager = owlPrefixManager;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
+        this.relation2Predicate = relation2Predicate;
+        this.jdbcTypeMapper = jdbcTypeMapper;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -102,7 +124,8 @@ public class OBDAModel {
                             .flatMap(ax -> ax.getTargetAtoms().stream())
                             .flatMap(atom -> atom.getArguments().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t));
+                            .map(t -> (ImmutableFunctionalTerm) t),
+                    termFactory);
 
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
@@ -185,7 +208,7 @@ public class OBDAModel {
                 .map(a -> {
                     if (a.getFunctionSymbol().equals(removedPredicate)) {
                         counter.incrementAndGet();
-                        return  TERM_FACTORY.getImmutableFunctionalTerm(newPredicate,
+                        return  termFactory.getImmutableFunctionalTerm(newPredicate,
                                 ImmutableList.copyOf(a.getArguments()));
                     }
                     return a;
@@ -448,5 +471,29 @@ public class OBDAModel {
                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                 },
                 LinkedHashMap::new);
+    }
+
+    public AtomFactory getAtomFactory() {
+        return atomFactory;
+    }
+
+    public TermFactory getTermFactory() {
+        return termFactory;
+    }
+
+    public Relation2Predicate getRelation2Predicate() {
+        return relation2Predicate;
+    }
+
+    public TypeFactory getTypeFactory() {
+        return typeFactory;
+    }
+
+    public DatalogFactory getDatalogFactory() {
+        return datalogFactory;
+    }
+
+    public JdbcTypeMapper getJDBCTypeMapper() {
+        return jdbcTypeMapper;
     }
 }

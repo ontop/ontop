@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -16,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * Rewrite the mappings to use the canonical iri
+ *
+ * WARNING: MUTABLE!!!!
  *
  */
 public class CanonicalIRIRewriter {
@@ -53,6 +52,16 @@ public class CanonicalIRIRewriter {
 
     private static final Logger log = LoggerFactory.getLogger(CanonicalIRIRewriter.class);
 
+    private final SubstitutionUtilities substitutionUtilities;
+    private final TermFactory termFactory;
+    private final UnifierUtilities unifierUtilities;
+
+    public CanonicalIRIRewriter(SubstitutionUtilities substitutionUtilities, TermFactory termFactory, UnifierUtilities unifierUtilities) {
+        this.substitutionUtilities = substitutionUtilities;
+        this.termFactory = termFactory;
+        this.unifierUtilities = unifierUtilities;
+    }
+
 
     //rewrite all the URI of the mappings with canonical iri if defined
     public List<CQIE> buildCanonicalIRIMappings(List<CQIE> mappings) {
@@ -77,7 +86,7 @@ public class CanonicalIRIRewriter {
 
             Predicate predicate = head.getFunctionSymbol();
 
-            if (predicate.isCanonicalIRIProperty()) {
+            if (isCanonicalIRI(predicate)) {
                 // we throw away this mapping
                 continue;
             }
@@ -128,6 +137,10 @@ public class CanonicalIRIRewriter {
 
     }
 
+    private static boolean isCanonicalIRI(Predicate predicate) {
+        return predicate.getName().equals(IriConstants.CANONICAL_IRI);
+    }
+
 
     //get the canonicalIRIs from the original mappings
     private void analyzeCanonicalIRIMappings(List<CQIE> rules) {
@@ -138,7 +151,7 @@ public class CanonicalIRIRewriter {
 
             Predicate predicate = head.getFunctionSymbol();
 
-            if (predicate.isCanonicalIRIProperty()) { // we check for ontop:is_canonical_iri
+            if (isCanonicalIRI(predicate)) { // we check for ontop:is_canonical_iri
 
                 //rename all the variables to avoid conflicts while merging the mappings
                 Set<Variable> variables = rule.getReferencedVariables();
@@ -160,11 +173,11 @@ public class CanonicalIRIRewriter {
                 Map<Variable, Term> map = variables.stream()
                         .collect(Collectors.toMap(
                                 var -> var,
-                                var -> TERM_FACTORY.getVariable(var.getName() + finalRename)));
+                                var -> termFactory.getVariable(var.getName() + finalRename)));
 
                 //apply substitution for variables renaming
-                Substitution substitution = new SubstitutionImpl(map);
-                CQIE canonicalMapping = SubstitutionUtilities.applySubstitution(rule, substitution, true);
+                Substitution substitution = new SubstitutionImpl(map, termFactory);
+                CQIE canonicalMapping = substitutionUtilities.applySubstitution(rule, substitution, true);
 
                 //store the renamed mapping
                 uriMappingMap.put(objectURIName, canonicalMapping);
@@ -198,9 +211,9 @@ public class CanonicalIRIRewriter {
             Function target = (Function) canonHead.getTerm(1);
 
             //get substitution
-            Substitution subs = UnifierUtilities.getMGU(uriTerm, target);
+            Substitution subs = unifierUtilities.getMGU(uriTerm, target);
 
-            CQIE newMapping = SubstitutionUtilities.applySubstitution(mapping, subs, true);
+            CQIE newMapping = substitutionUtilities.applySubstitution(mapping, subs, true);
             Function currentHead = newMapping.getHead();
             currentHead.setTerm(termPosition.getPosition(), templateCanURI);
 

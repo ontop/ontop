@@ -21,13 +21,14 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.Collection;
 import java.util.Iterator;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.OWLAPI_TRANSLATOR_UTILITY;
 
 public class TranslatorTest extends TestCase {
 
@@ -45,7 +46,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPI_TRANSLATOR_UTILITY.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -70,7 +71,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPI_TRANSLATOR_UTILITY.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();
@@ -93,7 +94,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPI_TRANSLATOR_UTILITY.translate(onto);
 		
 		Collection<BinaryAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
 		Iterator<BinaryAxiom<ObjectPropertyExpression>> assit = ass.iterator();
@@ -130,7 +131,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create("http://example/testonto"));
 		manager.addAxiom(onto, ax);
 		
-		Ontology dlliteonto = OWLAPITranslatorUtility.translate(onto);
+		Ontology dlliteonto = OWLAPI_TRANSLATOR_UTILITY.translate(onto);
 		
 		Collection<BinaryAxiom<ClassExpression>> ass = dlliteonto.getSubClassAxioms();
 		Iterator<BinaryAxiom<ClassExpression>> assit = ass.iterator();

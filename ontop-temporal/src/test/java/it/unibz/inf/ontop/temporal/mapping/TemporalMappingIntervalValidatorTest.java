@@ -49,10 +49,10 @@ public class TemporalMappingIntervalValidatorTest extends TestCase {
         }
     }
 
-    @Test
-    public void test6(){
-        String s = "[{ts_begin}, {ts_end})";
-        IntervalQueryParser.parse(s);
-    }
+//    @Test
+//    public void test6(){
+//        String s = "[{ts_begin}, {ts_end})";
+//        IntervalQueryParser.parse(s);
+//    }
 
 }

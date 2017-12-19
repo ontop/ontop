@@ -1,10 +1,5 @@
 package it.unibz.inf.ontop.model.type;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
-
-import java.util.Optional;
-
 /**
  * TODO: explain
  *
@@ -12,16 +7,14 @@ import java.util.Optional;
  */
 public interface TermType {
 
-    Predicate.COL_TYPE getColType();
-
-    Optional<LanguageTag> getLanguageTagConstant();
-
     /**
-     * Non-constant term
+     * Returns true if the TermType INSTANCE cannot be attached to a constant
      */
-    Optional<Term> getLanguageTagTerm();
+    boolean isAbstract();
 
-    boolean isCompatibleWith(Predicate.COL_TYPE moreGeneralType);
+    boolean isA(TermType otherTermType);
 
-    Optional<TermType> getCommonDenominator(TermType otherTermType);
+    TermType getCommonDenominator(TermType otherTermType);
+
+    TermTypeAncestry getAncestry();
 }

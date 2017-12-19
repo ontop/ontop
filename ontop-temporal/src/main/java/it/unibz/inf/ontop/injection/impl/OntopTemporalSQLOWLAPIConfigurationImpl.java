@@ -44,8 +44,11 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
     }
 
     private Optional<Ontology> getOntology() throws OntologyException {
+        OWLAPITranslatorUtility owlapiTranslatorUtility = getInjector().getInstance(OWLAPITranslatorUtility.class);
+
         try {
-            return super.loadInputOntology().map(o -> OWLAPITranslatorUtility.translateImportsClosure(o));
+            return loadInputOntology()
+                    .map(owlapiTranslatorUtility::translateImportsClosure);
         } catch (OWLOntologyCreationException e) {
             throw new OntologyException(e.getMessage());
         }

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.atom.VariableOnlyDataAtom;
 
-public class VariableOnlyDataAtomImpl extends AbstractDataAtomImpl implements VariableOnlyDataAtom {
+public class VariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate> implements VariableOnlyDataAtom {
     protected VariableOnlyDataAtomImpl(AtomPredicate predicate, ImmutableList<Variable> variables) {
         super(predicate, variables);
     }

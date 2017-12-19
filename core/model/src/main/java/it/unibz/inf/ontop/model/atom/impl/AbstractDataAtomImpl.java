@@ -12,22 +12,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public abstract class AbstractDataAtomImpl extends ImmutableFunctionalTermImpl implements DataAtom {
+public abstract class AbstractDataAtomImpl<P extends AtomPredicate> extends ImmutableFunctionalTermImpl
+        implements DataAtom<P> {
 
-    private final AtomPredicate predicate;
+    private final P predicate;
 
-    protected AbstractDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> variableOrGroundTerms) {
+    protected AbstractDataAtomImpl(P predicate, ImmutableList<? extends VariableOrGroundTerm> variableOrGroundTerms) {
         super(predicate, variableOrGroundTerms);
         this.predicate = predicate;
     }
 
-    protected AbstractDataAtomImpl(AtomPredicate predicate, VariableOrGroundTerm... variableOrGroundTerms) {
+    protected AbstractDataAtomImpl(P predicate, VariableOrGroundTerm... variableOrGroundTerms) {
         super(predicate, variableOrGroundTerms);
         this.predicate = predicate;
     }
 
     @Override
-    public AtomPredicate getPredicate() {
+    public P getPredicate() {
         return predicate;
     }
 

@@ -38,10 +38,10 @@ import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 
+import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
@@ -91,7 +91,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Setting up the CQ parser
         prefixes = prefixManager.getPrefixMap();
-        parser = new TurtleOBDASyntaxParser(prefixes);
+        parser = new TurtleOBDASyntaxParser(prefixes, ATOM_FACTORY, TERM_FACTORY);
     }
 
     @Test
@@ -102,23 +102,23 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
-            throws DuplicateMappingException, InvalidMappingException, MappingIOException, InvalidPredicateDeclarationException {
+            throws DuplicateMappingException, InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, MappingIOException {
+    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, InvalidPredicateDeclarationException, MappingIOException {
+    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, MappingIOException {
+            MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
 
@@ -129,7 +129,7 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
-            InvalidPredicateDeclarationException, MappingIOException {
+            MappingIOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
     
@@ -140,7 +140,7 @@ public class SQLMappingParserUsingOwlTest {
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
                 specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
-                        UriTemplateMatcher.create(Stream.of())));
+                        UriTemplateMatcher.create(Stream.of(), TERM_FACTORY)));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
@@ -166,7 +166,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     private SQLPPMapping loadObdaFile(String fileLocation) throws MappingIOException,
-            InvalidPredicateDeclarationException, InvalidMappingException, DuplicateMappingException {
+            InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
     }

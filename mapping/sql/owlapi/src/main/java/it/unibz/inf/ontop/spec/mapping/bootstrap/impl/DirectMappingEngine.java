@@ -23,8 +23,13 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -33,9 +38,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -46,8 +48,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /***
@@ -60,6 +60,11 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class DirectMappingEngine {
 
 	private final MappingVocabularyExtractor vocabularyExtractor;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+	private final DatalogFactory datalogFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
+	private final TypeFactory typeFactory;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -102,8 +107,14 @@ public class DirectMappingEngine {
 
 	@Inject
 	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
-								SpecificationFactory specificationFactory,
-                                SQLPPMappingFactory ppMappingFactory) {
+								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+								JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory,
+								SpecificationFactory specificationFactory, SQLPPMappingFactory ppMappingFactory) {
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+		this.datalogFactory = datalogFactory;
+		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.typeFactory = typeFactory;
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -200,7 +211,8 @@ public class DirectMappingEngine {
 	 */
 	private SQLPPMapping extractPPMapping() throws MappingException, SQLException {
 		it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty(),
+				termFactory));
 		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
 		return extractPPMapping(emptyPPMapping);
 	}
@@ -224,7 +236,8 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
+					atomFactory, jdbcTypeMapper);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);
@@ -259,7 +272,7 @@ public class DirectMappingEngine {
 	 */
 	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, TERM_FACTORY);
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory);
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));

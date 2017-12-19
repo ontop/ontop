@@ -90,4 +90,9 @@ public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements Sinc
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return null;
     }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return false;
+    }
 }

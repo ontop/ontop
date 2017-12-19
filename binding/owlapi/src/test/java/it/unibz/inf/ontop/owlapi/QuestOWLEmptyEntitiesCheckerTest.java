@@ -21,13 +21,11 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.OWLAPI_TRANSLATOR_UTILITY;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -73,8 +72,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	// final String obdaFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 
-	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
-	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+	private List<IRI> emptyConcepts = new ArrayList<>();
+	private List<IRI> emptyRoles = new ArrayList<>();
 
 	private OntopOWLReasoner reasoner;
 
@@ -104,7 +103,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		onto =  OWLAPITranslatorUtility.translate(ontology);
+		onto =  OWLAPI_TRANSLATOR_UTILITY.translate(ontology);
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -156,7 +155,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	public void testEmptyConcepts() throws Exception {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<Predicate> iterator = empties.iEmptyConcepts();
+		Iterator<IRI> iterator = empties.iEmptyConcepts();
 		while (iterator.hasNext()){
 			emptyConcepts.add(iterator.next());
 		}
@@ -175,7 +174,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Test
 	public void testEmptyRoles() throws Exception {
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<Predicate> iterator = empties.iEmptyRoles();
+		Iterator<IRI> iterator = empties.iEmptyRoles();
 		while (iterator.hasNext()){
 			emptyRoles.add(iterator.next());
 		}

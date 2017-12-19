@@ -92,4 +92,9 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return null;
     }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return false;
+    }
 }

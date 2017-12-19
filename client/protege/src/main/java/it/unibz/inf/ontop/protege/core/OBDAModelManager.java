@@ -22,11 +22,17 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.base.Optional;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -61,8 +67,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class OBDAModelManager implements Disposable {
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
@@ -73,6 +77,9 @@ public class OBDAModelManager implements Disposable {
 	private final OWLEditorKit owlEditorKit;
 
 	private final OWLOntologyManager mmgr;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
 
 	private QueryController queryController;
 
@@ -105,6 +112,9 @@ public class OBDAModelManager implements Disposable {
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
+	private final AtomFactory atomFactory;
+	private final Relation2Predicate relation2Predicate;
+	private final DatalogFactory datalogFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -121,6 +131,12 @@ public class OBDAModelManager implements Disposable {
 
 		SpecificationFactory specificationFactory = defaultInjector.getInstance(SpecificationFactory.class);
 		SQLPPMappingFactory ppMappingFactory = defaultInjector.getInstance(SQLPPMappingFactory.class);
+		atomFactory = defaultInjector.getInstance(AtomFactory.class);
+		termFactory = defaultInjector.getInstance(TermFactory.class);
+		typeFactory = defaultInjector.getInstance(TypeFactory.class);
+		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
+		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
+		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -142,7 +158,8 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat);
+		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
+				typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -158,7 +175,31 @@ public class OBDAModelManager implements Disposable {
 		return configurationManager;
 	}
 
-	/***
+	public AtomFactory getAtomFactory() {
+		return atomFactory;
+	}
+
+	public Relation2Predicate getRelation2Predicate() {
+		return relation2Predicate;
+	}
+
+	public TermFactory getTermFactory() {
+		return termFactory;
+	}
+
+	public DatalogFactory getDatalogFactory() {
+		return datalogFactory;
+	}
+
+	public JdbcTypeMapper getJdbcTypeMapper() {
+		return jdbcTypeMapper;
+	}
+
+	public TypeFactory getTypeFactory() {
+		return typeFactory;
+	}
+
+    /***
 	 * This ontology change listener has some euristics that determine if the
 	 * user is refactoring his ontology. In particular, this listener will try
 	 * to determine if some add/remove axioms are in fact a "renaming"
@@ -361,7 +402,7 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private static Predicate getPredicate(OWLEntity entity) {
+	private Predicate getPredicate(OWLEntity entity) {
 		Predicate p = null;
 		if (entity instanceof OWLClass) {
 			/* We ignore TOP and BOTTOM (Thing and Nothing) */
@@ -370,20 +411,20 @@ public class OBDAModelManager implements Disposable {
 			}
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getClassPredicate(uri);
+			p = atomFactory.getClassPredicate(uri);
 		} else if (entity instanceof OWLObjectProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getObjectPropertyPredicate(uri);
+			p = atomFactory.getObjectPropertyPredicate(uri);
 		} else if (entity instanceof OWLDataProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getDataPropertyPredicate(uri);
+			p = atomFactory.getDataPropertyPredicate(uri);
 
 		} else if (entity instanceof OWLAnnotationProperty) {
 			String uri = entity.getIRI().toString();
 
-			p = TERM_FACTORY.getAnnotationPropertyPredicate(uri);
+			p = atomFactory.getAnnotationPropertyPredicate(uri);
 		}
 		return p;
 	}

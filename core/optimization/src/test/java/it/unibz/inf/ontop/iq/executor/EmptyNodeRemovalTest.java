@@ -6,8 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.NodeTracker;
 import it.unibz.inf.ontop.iq.proposal.NodeTrackingResults;
@@ -22,34 +20,30 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
 
     private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private static Variable X = DATA_FACTORY.getVariable("x");
-    private static Variable Y = DATA_FACTORY.getVariable("y");
-    private static Variable A = DATA_FACTORY.getVariable("a");
-    private static Variable B = DATA_FACTORY.getVariable("b");
-    private static Variable B1 = DATA_FACTORY.getVariable("b1");
-    private static Variable C = DATA_FACTORY.getVariable("c");
+    private static Variable X = TERM_FACTORY.getVariable("x");
+    private static Variable Y = TERM_FACTORY.getVariable("y");
+    private static Variable A = TERM_FACTORY.getVariable("a");
+    private static Variable B = TERM_FACTORY.getVariable("b");
+    private static Variable B1 = TERM_FACTORY.getVariable("b1");
+    private static Variable C = TERM_FACTORY.getVariable("c");
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
-    private static URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
-    private static Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static AtomPredicate TABLE_1 = ATOM_FACTORY.getAtomPredicate("table1", 2);
-    private static AtomPredicate TABLE_2 = ATOM_FACTORY.getAtomPredicate("table2", 1);
-    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B));
-    private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_2, A));
-    private static final EmptyNode EMPTY_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
+    private static URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
+    private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
+    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+    private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, A));
+    private static final EmptyNode DB_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
 
     /**
      * TODO: Put the UNION as the root instead of the construction node (when this will become legal)
@@ -65,7 +59,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         QueryNode rootNode = query.getRootNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         ConstructionNode secondConstructionNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
@@ -90,7 +84,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
         //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
@@ -119,7 +113,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         QueryNode rootNode = query.getRootNode();
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
@@ -134,7 +128,7 @@ public class EmptyNodeRemovalTest {
     public void testUnionNoNullPropagation() throws EmptyQueryException {
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables,
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
                 Optional.empty());
@@ -156,7 +150,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, unionNode);
@@ -177,7 +171,7 @@ public class EmptyNodeRemovalTest {
                                                             EmptyNode emptyNode) {
         ImmutableSet<Variable> subQueryProjectedVariables = emptyNode.getVariables();
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ImmutableSet<Variable> projectedVariables = PROJECTION_ATOM.getVariables();
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables, topBindings);
@@ -203,7 +197,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -222,7 +216,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
@@ -239,7 +233,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testLJ2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -263,7 +257,7 @@ public class EmptyNodeRemovalTest {
     @Ignore("TODO: support it")
     @Test
     public void testLJ3Optimal() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -287,7 +281,7 @@ public class EmptyNodeRemovalTest {
         /*
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, topLeftJoinNode);
@@ -312,7 +306,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -336,7 +330,7 @@ public class EmptyNodeRemovalTest {
         /*
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, topLeftJoinNode);
@@ -355,7 +349,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJ4() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -379,7 +373,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
@@ -396,7 +390,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoin1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -421,7 +415,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoin2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -449,7 +443,7 @@ public class EmptyNodeRemovalTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testJoin3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
@@ -476,38 +470,38 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ1() throws EmptyQueryException {
         IntermediateQuery query = generateJoinLJInitialQuery(
-                Optional.of(DATA_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);
+                Optional.of(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, B, C)), B);
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true));
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(DB_NODE_1, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ2() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C)), B);
 
         System.out.println("\n Unsatisfiable query: \n" +  query);
 
         // Should throw an exception
-        query.applyProposal(new RemoveEmptyNodeProposalImpl(EMPTY_NODE_1, true));
+        query.applyProposal(new RemoveEmptyNodeProposalImpl(DB_NODE_1, true));
         System.err.println("\n Failure: this query should have been declared as unsatisfiable: \n" +  query);
     }
 
     @Test
     public void testJoinLJ3() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(DATA_FACTORY.getImmutableExpression(
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NULL, C)), B);
 
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
@@ -522,7 +516,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, EMPTY_NODE_1);
+        optimizeAndCompare(query, expectedQuery, DB_NODE_1);
     }
 
     @Test
@@ -533,7 +527,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(
                 PROJECTION_ATOM.getVariables(),
@@ -548,13 +542,13 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, EMPTY_NODE_1);
+        optimizeAndCompare(query, expectedQuery, DB_NODE_1);
     }
 
 
     private static IntermediateQuery generateJoinLJInitialQuery(Optional<ImmutableExpression> joiningCondition,
                                                                 Variable variableForBuildingY) {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -569,7 +563,7 @@ public class EmptyNodeRemovalTest {
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(joinNode, leftJoinNode);
         queryBuilder.addChild(leftJoinNode, DATA_NODE_2, LEFT);
-        queryBuilder.addChild(leftJoinNode, EMPTY_NODE_1, RIGHT);
+        queryBuilder.addChild(leftJoinNode, DB_NODE_1, RIGHT);
 
         return queryBuilder.build();
     }
@@ -577,7 +571,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testFilter1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -585,7 +579,7 @@ public class EmptyNodeRemovalTest {
                 Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C));
         queryBuilder.addChild(rootNode, filterNode);
 
@@ -607,7 +601,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testFilter2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -615,7 +609,7 @@ public class EmptyNodeRemovalTest {
                 Optional.empty());
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(DATA_FACTORY.getImmutableExpression(
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NULL, C));
         queryBuilder.addChild(rootNode, filterNode);
 
@@ -628,7 +622,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
                         Y, NULL)),
@@ -642,7 +636,7 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testComplexTreeWithJoinCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -654,7 +648,7 @@ public class EmptyNodeRemovalTest {
 
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
 
-        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(
+        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.IS_NOT_NULL, C));
         queryBuilder.addChild(lj1, join, RIGHT);
 
@@ -669,7 +663,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
                         Y, NULL)));
@@ -684,17 +678,17 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testLJRemovalDueToNull1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
                         Y, generateURI1(B))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, A, B1)), RIGHT);
+        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B1)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
@@ -706,7 +700,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
                         Y, NULL)));
@@ -721,7 +715,7 @@ public class EmptyNodeRemovalTest {
      */
     @Test
     public void testLJRemovalDueToNull2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -742,7 +736,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
                         Y, NULL)));
@@ -754,17 +748,17 @@ public class EmptyNodeRemovalTest {
 
     @Test
     public void testLJRemovalDueToNull3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(C),
                         Y, generateURI1(B))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(DATA_FACTORY.getImmutableExpression(
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
                 ExpressionOperation.EQ, B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE_1, B1, C)), RIGHT);
+        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, B1, C)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
@@ -776,7 +770,7 @@ public class EmptyNodeRemovalTest {
         /**
          * Expected query
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, NULL,
                         Y, NULL)));
@@ -788,7 +782,7 @@ public class EmptyNodeRemovalTest {
 
 //    @Test
 //    public void testGroup1() throws EmptyQueryException {
-//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 //
 //        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -808,7 +802,7 @@ public class EmptyNodeRemovalTest {
 //        /**
 //         * Expected query
 //         */
-//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 //        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
 //                        Y, OBDAVocabulary.NULL)),
@@ -844,7 +838,7 @@ public class EmptyNodeRemovalTest {
 //        /**
 //         * Expected query
 //         */
-//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 //        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
 //                        Y, OBDAVocabulary.NULL)),
@@ -863,7 +857,7 @@ public class EmptyNodeRemovalTest {
 //     */
 //    @Test
 //    public void testGroup3() throws EmptyQueryException {
-//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 //
 //        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -884,7 +878,7 @@ public class EmptyNodeRemovalTest {
 //        /**
 //         * Expected query
 //         */
-//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 //        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
 //                        X, TERM_FACTORY.getImmutableExpression(ExpressionOperation.AVG, A),
@@ -920,7 +914,7 @@ public class EmptyNodeRemovalTest {
 
 //    @Test
 //    public void testGroupIsNotNullBinding() throws EmptyQueryException {
-//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+//        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 //
 //        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
@@ -956,7 +950,7 @@ public class EmptyNodeRemovalTest {
 
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
     }
 
 }

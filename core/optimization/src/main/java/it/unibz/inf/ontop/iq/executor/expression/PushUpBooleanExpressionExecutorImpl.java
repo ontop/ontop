@@ -20,10 +20,12 @@ import java.util.Optional;
 public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
     private ImmutableExpression getCombinedExpression(ImmutableExpression expressionToPropagate, JoinOrFilterNode recipientNode) {
         Optional<ImmutableExpression> recipientNodeFormerExpression = recipientNode.getOptionalFilterCondition();
         if (recipientNodeFormerExpression.isPresent()) {
-            return ImmutabilityTools.foldBooleanExpressions(recipientNodeFormerExpression.get(), expressionToPropagate)
+            return immutabilityTools.foldBooleanExpressions(recipientNodeFormerExpression.get(), expressionToPropagate)
                     .orElseThrow(() -> new IllegalStateException("Folding two existing expressions should produce an expression"));
         }
         return expressionToPropagate;

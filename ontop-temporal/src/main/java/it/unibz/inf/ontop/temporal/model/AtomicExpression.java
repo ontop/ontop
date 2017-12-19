@@ -9,5 +9,7 @@ import java.util.List;
 public interface AtomicExpression extends DatalogMTLExpression {
     AtomPredicate getPredicate();
 
-    ImmutableList<? extends Term> getTerms();
+    ImmutableList<? extends Term> getImmutableTerms();
+
+    List<? extends Term> getTerms();
 }

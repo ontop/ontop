@@ -109,11 +109,11 @@
 //					PropertySomeClassRestriction some = (PropertySomeClassRestriction)superConcept;
 //					// make \exists R.\top equivalent to \exists R
 //					if (some.getFiller().equals(owlThing))
-//						superConcept = ontFactory.createPropertySomeRestriction(some.getPredicate(), some.isInverse());
+//						superConcept = ontFactory.createPropertySomeRestriction(some.getIRI(), some.isInverse());
 //
 //					TreeWitnessGenerator twg = gens.get(superConcept);
 //					if (twg == null) {
-//						twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), some.getFiller());
+//						twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getIRI().getName(), some.isInverse()), some.getFiller());
 //						gens.put(superConcept, twg);
 //					}
 //					twg.addConcept(subConcept);
@@ -133,7 +133,7 @@
 //						PropertySomeRestriction some = (PropertySomeRestriction)basicSuperConcept;
 //						TreeWitnessGenerator twg = gens.get(some);
 //						if (twg == null) {
-//							twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), owlThing);
+//							twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getIRI().getName(), some.isInverse()), owlThing);
 //							gens.put(superConcept, twg);
 //						}
 //						twg.addConcept(subConcept);
@@ -146,8 +146,8 @@
 //				log.debug("RI AXIOM: {}", sax);
 //				Property superProperty = sax.getSuper();
 //				Property subProperty = sax.getSub();
-//				Property superPropertyInv = ontFactory.createProperty(superProperty.getPredicate(), !superProperty.isInverse());
-//				Property subPropertyInv = ontFactory.createProperty(subProperty.getPredicate(), !subProperty.isInverse());
+//				Property superPropertyInv = ontFactory.createProperty(superProperty.getIRI(), !superProperty.isInverse());
+//				Property subPropertyInv = ontFactory.createProperty(subProperty.getIRI(), !subProperty.isInverse());
 //				Set<Property> set = subproperties.get(superProperty);
 //				Set<Property> setInv = null;
 //				if (set == null) {
@@ -190,7 +190,7 @@
 //
 //			// ADD INCLUSIONS BETWEEN EXISTENTIALS OF SUB-PROPERTIES
 //			for (Map.Entry<Property, Set<Property>> prop : subproperties.entrySet()) {
-//				PropertySomeRestriction existsSuper =  ontFactory.createPropertySomeRestriction(prop.getKey().getPredicate(), prop.getKey().isInverse());
+//				PropertySomeRestriction existsSuper =  ontFactory.createPropertySomeRestriction(prop.getKey().getIRI(), prop.getKey().isInverse());
 //				Set<BasicClassDescription> setExistsSuper = subconcepts.get(existsSuper);
 //				if (setExistsSuper == null) {
 //					setExistsSuper = new HashSet<BasicClassDescription>();
@@ -198,7 +198,7 @@
 //					subconcepts.put(existsSuper, setExistsSuper);
 //				}
 //				for (Property subproperty : prop.getValue())
-//					setExistsSuper.add(ontFactory.createPropertySomeRestriction(subproperty.getPredicate(), subproperty.isInverse()));
+//					setExistsSuper.add(ontFactory.createPropertySomeRestriction(subproperty.getIRI(), subproperty.isInverse()));
 //			}
 //			graphTransitiveClosure(subconcepts);
 //
@@ -284,7 +284,7 @@
 //	}
 //
 //	public Property getProperty(PropertySomeRestriction some) {
-//		return ontFactory.createProperty(some.getPredicate(), some.isInverse());
+//		return ontFactory.createProperty(some.getIRI(), some.isInverse());
 //	}
 //
 //	public Set<Property> getSubProperties(Predicate pred, boolean inverse) {

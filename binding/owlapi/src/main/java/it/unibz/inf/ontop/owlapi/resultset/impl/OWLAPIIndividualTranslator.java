@@ -22,7 +22,8 @@ package it.unibz.inf.ontop.owlapi.resultset.impl;
 
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.AnnotationAssertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyAssertion;
@@ -30,8 +31,6 @@ import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.*;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLDatatypeImpl;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 
 /***
@@ -101,16 +100,23 @@ public class OWLAPIIndividualTranslator {
 		String value = v.getValue();
 		if (value == null) {
 			return null;
-		} 
-		else if (v.getType() == COL_TYPE.LANG_STRING) {
-			return dataFactory.getOWLLiteral(value, v.getLanguage());
+		}
+
+		TermType type = v.getType();
+		if (!(type instanceof RDFDatatype))
+			// TODO: throw a proper exception
+			throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
+		RDFDatatype datatype = (RDFDatatype) type;
+
+		if (datatype.getLanguageTag().isPresent()) {
+			return dataFactory.getOWLLiteral(value, datatype.getLanguageTag().get().getFullString());
 		} 
 		else {
-			OWLDatatype datatype = new OWLDatatypeImpl(IRI.create(TYPE_FACTORY.getDatatypeURI(v.getType()).stringValue()));
-			if (datatype != null)
-				return dataFactory.getOWLLiteral(value, datatype);
+			OWLDatatype owlDatatype = new OWLDatatypeImpl(IRI.create(datatype.getIRI().getIRIString()));
+			if (owlDatatype != null)
+				return dataFactory.getOWLLiteral(value, owlDatatype);
 			else 
-				throw new IllegalArgumentException(v.getType().toString());
+				throw new IllegalArgumentException(datatype.toString());
 		}
 	}
 

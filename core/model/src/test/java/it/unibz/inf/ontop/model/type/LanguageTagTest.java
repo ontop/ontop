@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.model.type;
 
 
-import it.unibz.inf.ontop.model.type.TermType;
 import org.junit.Test;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
-import static junit.framework.TestCase.assertFalse;
+import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -17,144 +14,120 @@ public class LanguageTagTest {
 
     @Test
     public void testDifferentLanguageRegions() {
-        TermType type1 = TYPE_FACTORY.getTermType("en-us");
-        TermType type2 = TYPE_FACTORY.getTermType("en-gb");
+        TermType type1 = TYPE_FACTORY.getLangTermType("en-us");
+        TermType type2 = TYPE_FACTORY.getLangTermType("en-gb");
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        assertEquals(optionalCommonDenominator.get(), TYPE_FACTORY.getTermType("en"));
-        assertNotEquals(optionalCommonDenominator.get(), type1);
-        assertNotEquals(optionalCommonDenominator.get(), TYPE_FACTORY.getTermType("it"));
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en"));
+        assertNotEquals(commonDenominator, type1);
+        assertNotEquals(commonDenominator, TYPE_FACTORY.getLangTermType("it"));
     }
 
     @Test
     public void testSameLanguageRegions() {
-        TermType type1 = TYPE_FACTORY.getTermType("en-gb");
-        TermType type2 = TYPE_FACTORY.getTermType("en-gb");
+        TermType type1 = TYPE_FACTORY.getLangTermType("en-gb");
+        TermType type2 = TYPE_FACTORY.getLangTermType("en-gb");
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
+        TermType commonDenominator = type1.getCommonDenominator(type2);
 
-        assertEquals(optionalCommonDenominator.get(), TYPE_FACTORY.getTermType("en-gb"));
-        assertNotEquals(optionalCommonDenominator.get(), TYPE_FACTORY.getTermType("en"));
+        assertEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en-gb"));
+        assertNotEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en"));
+    }
+
+    @Test
+    public void testRegularLanguageTag() {
+        RDFDatatype type = TYPE_FACTORY.getLangTermType("en-gb");
+
+        Optional<LanguageTag> optionalLanguageTag = type.getLanguageTag();
+        assertTrue(optionalLanguageTag.isPresent());
+
+        LanguageTag langTag = optionalLanguageTag.get();
+        assertEquals("en-gb", langTag.getFullString());
+        assertEquals("en", langTag.getPrefix());
+
+        Optional<String> optionalSuffix = langTag.getOptionalSuffix();
+        assertTrue(optionalSuffix.isPresent());
+        assertEquals("gb", optionalSuffix.get());
+    }
+
+    @Test
+    public void testUpperCaseLanguageTag() {
+        RDFDatatype type = TYPE_FACTORY.getLangTermType("EN-GB");
+
+        Optional<LanguageTag> optionalLanguageTag = type.getLanguageTag();
+        assertTrue(optionalLanguageTag.isPresent());
+
+        LanguageTag langTag = optionalLanguageTag.get();
+        assertEquals("en-gb", langTag.getFullString());
+        assertEquals("en", langTag.getPrefix());
+
+        Optional<String> optionalSuffix = langTag.getOptionalSuffix();
+        assertTrue(optionalSuffix.isPresent());
+        assertEquals("gb", optionalSuffix.get());
     }
 
     @Test
     public void testSameTag() {
-        TermType type1 = TYPE_FACTORY.getTermType("en-gb");
+        TermType type1 = TYPE_FACTORY.getLangTermType("en-gb");
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type1);
-        assertTrue(optionalCommonDenominator.isPresent());
+        TermType commonDenominator = type1.getCommonDenominator(type1);
 
-        assertEquals(optionalCommonDenominator.get(), TYPE_FACTORY.getTermType("en-gb"));
-        assertEquals(optionalCommonDenominator.get(), type1);
-    }
-
-    @Test
-    public void testDifferentLanguagesWithRegionalTag() {
-        TermType type1 = TYPE_FACTORY.getTermType("en-us");
-        TermType type2 = TYPE_FACTORY.getTermType("fr-be");
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
-    }
-
-    @Test
-    public void testDifferentLanguages() {
-        TermType type1 = TYPE_FACTORY.getTermType("en");
-        TermType type2 = TYPE_FACTORY.getTermType("fr");
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
-    }
-
-    @Test
-    public void testLanguageString() {
-        TermType type1 = TYPE_FACTORY.getTermType("en");
-        TermType type2 = TYPE_FACTORY.getTermType(STRING);
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
-    }
-
-    @Test
-    public void testLanguageAndLiteral() {
-        TermType type1 = TYPE_FACTORY.getTermType("en");
-        TermType type2 = TYPE_FACTORY.getTermType(LITERAL);
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
-    }
-
-    @Test
-    public void testLanguageAndURI() {
-        TermType type1 = TYPE_FACTORY.getTermType("en");
-        TermType type2 = TYPE_FACTORY.getTermType(OBJECT);
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertFalse(optionalCommonDenominator.isPresent());
-    }
-
-    @Test
-    public void testString() {
-        TermType type1 = TYPE_FACTORY.getTermType(STRING);
-        TermType type2 = TYPE_FACTORY.getTermType(STRING);
-
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), STRING);
+        assertEquals(commonDenominator, TYPE_FACTORY.getLangTermType("en-gb"));
         assertEquals(commonDenominator, type1);
     }
 
     @Test
-    public void testStringAndLiteral() {
-        TermType type1 = TYPE_FACTORY.getTermType(STRING);
-        TermType type2 = TYPE_FACTORY.getTermType(LITERAL);
+    public void testDifferentLanguagesWithRegionalTag() {
+        TermType type1 = TYPE_FACTORY.getLangTermType("en-us");
+        TermType type2 = TYPE_FACTORY.getLangTermType("fr-be");
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, TYPE_FACTORY.getXsdStringDatatype());
     }
 
     @Test
-    public void testLiterals() {
-        TermType type1 = TYPE_FACTORY.getTermType(LITERAL);
-        TermType type2 = TYPE_FACTORY.getTermType(LITERAL);
+    public void testDifferentLanguages() {
+        TermType type1 = TYPE_FACTORY.getLangTermType("en");
+        TermType type2 = TYPE_FACTORY.getLangTermType("fr");
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, TYPE_FACTORY.getXsdStringDatatype());
+    }
 
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
+    @Test
+    public void testLanguageString() {
+        TermType type1 = TYPE_FACTORY.getLangTermType("en");
+        TermType type2 = TYPE_FACTORY.getXsdStringDatatype();
+
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(type2, commonDenominator);
+    }
+
+    @Test
+    public void testLanguageAndURI() {
+        TermType type1 = TYPE_FACTORY.getLangTermType("en");
+        TermType type2 = TYPE_FACTORY.getIRITermType();
+
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, TYPE_FACTORY.getAbstractRDFTermType());
+    }
+
+    @Test
+    public void testString() {
+        TermType type1 = TYPE_FACTORY.getXsdStringDatatype();
+        TermType type2 = TYPE_FACTORY.getXsdStringDatatype();
+
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, type1);
     }
 
     @Test
     public void testLangNumber() {
-        TermType type1 = TYPE_FACTORY.getTermType("en");
-        TermType type2 = TYPE_FACTORY.getTermType(DECIMAL);
+        TermType type1 = TYPE_FACTORY.getLangTermType("en");
+        TermType type2 = TYPE_FACTORY.getXsdDecimalDatatype();
 
-        Optional<TermType> optionalCommonDenominator = type1.getCommonDenominator(type2);
-        assertTrue(optionalCommonDenominator.isPresent());
-
-        TermType commonDenominator = optionalCommonDenominator.get();
-        assertEquals(commonDenominator.getColType(), LITERAL);
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+        assertEquals(commonDenominator, TYPE_FACTORY.getAbstractRDFSLiteral());
     }
 
 }

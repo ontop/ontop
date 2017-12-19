@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
@@ -46,8 +46,8 @@ public class OntopTemporalModule extends OntopAbstractModule{
         bindFromSettings(SQLPPMappingConverter.class);
         bindFromSettings(PreProcessedImplicitRelationalDBConstraintExtractor.class);
         bindFromSettings(MappingExtractor.class);
-        bindFromSettings(TemporalMappingExtractor.class);
         bindFromSettings(TemporalMappingParser.class);
+        bindFromSettings(TemporalMappingExtractor.class);
         bindFromSettings(TemporalPPMappingConverter.class);
         bindFromSettings(TemporalDatalog2QueryMappingConverter.class);
         bindFromSettings(TemporalDatalogProgram2QueryConverter.class);
@@ -72,6 +72,10 @@ public class OntopTemporalModule extends OntopAbstractModule{
                 InnerJoinNode.class,
                 LeftJoinNode.class,
                 FilterNode.class,
+                BinaryNonCommutativeIQTree.class,
+                IQ.class,
+                NaryIQTree.class,
+                UnaryIQTree.class,
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
                 EmptyNode.class,

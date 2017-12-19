@@ -20,86 +20,84 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * This class maps SQL datatypes to XML datatypes.
  * Details look at this link: https://docs.google.com/spreadsheet/ccc?key=0AoDXwrYLJ2lvdFAtRXBPcUs2UjMtY08tZ3NYTEp5dVE&usp=sharing
  */
-public class JdbcTypeMapper {
+public class JdbcTypeMapper implements TypeMapper {
 
-	private static JdbcTypeMapper INSTANCE;
-	private final Map<Integer, COL_TYPE> sqlToQuest = new HashMap<Integer, COL_TYPE>();
-	private final Map<COL_TYPE, Integer> datatypeMap = new HashMap<COL_TYPE, Integer>();
+	private final ImmutableMap<Integer, TermType> sqlToTermTypeMap;
+	private final ImmutableMap<TermType, Integer> datatypeMap;
+	private final TypeFactory typeFactory;
 
 	@Inject
-	private JdbcTypeMapper() {
-		sqlToQuest.put(Types.VARCHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.CHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.LONGVARCHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.NVARCHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.NCHAR, COL_TYPE.STRING);
-		sqlToQuest.put(Types.INTEGER, COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.BIGINT, COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.SMALLINT, COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.TINYINT, COL_TYPE.INTEGER);
-		sqlToQuest.put(Types.NUMERIC, COL_TYPE.DECIMAL);
-		sqlToQuest.put(Types.DECIMAL, COL_TYPE.DECIMAL);
-		sqlToQuest.put(Types.FLOAT, COL_TYPE.DOUBLE); // conversion to float to follow r2rml Natural Mapping of SQL Values
-		sqlToQuest.put(Types.DOUBLE, COL_TYPE.DOUBLE);
-		sqlToQuest.put(Types.REAL, COL_TYPE.DOUBLE);
-		sqlToQuest.put(Types.DATE, COL_TYPE.DATE);
-		sqlToQuest.put(Types.TIME, COL_TYPE.TIME);
-		sqlToQuest.put(Types.TIMESTAMP, COL_TYPE.DATETIME); //GX: needs check
-		sqlToQuest.put(Types.TIMESTAMP_WITH_TIMEZONE, COL_TYPE.DATETIME); //BC: needs check
-		sqlToQuest.put(Types.BOOLEAN, COL_TYPE.BOOLEAN);
-		sqlToQuest.put(Types.BIT, COL_TYPE.BOOLEAN);
-//		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
-//		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
-//		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
-		sqlToQuest.put(Types.CLOB, COL_TYPE.STRING);
-		sqlToQuest.put(Types.OTHER, COL_TYPE.STRING);
+	private JdbcTypeMapper(TypeFactory typeFactory) {
+		this.typeFactory = typeFactory;
+		ImmutableMap.Builder<Integer, TermType> sqlToTermBuilder = ImmutableMap.builder();
+		sqlToTermBuilder.put(Types.VARCHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.CHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.LONGNVARCHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.LONGVARCHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.NVARCHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.NCHAR, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.INTEGER, typeFactory.getXsdIntegerDatatype());
+		sqlToTermBuilder.put(Types.BIGINT, typeFactory.getXsdIntegerDatatype());
+		sqlToTermBuilder.put(Types.SMALLINT, typeFactory.getXsdIntegerDatatype());
+		sqlToTermBuilder.put(Types.TINYINT, typeFactory.getXsdIntegerDatatype());
+		sqlToTermBuilder.put(Types.NUMERIC, typeFactory.getXsdDecimalDatatype());
+		sqlToTermBuilder.put(Types.DECIMAL, typeFactory.getXsdDecimalDatatype());
+		sqlToTermBuilder.put(Types.FLOAT, typeFactory.getXsdDoubleDatatype()); // conversion to float to follow r2rml Natural Mapping of SQL Values
+		sqlToTermBuilder.put(Types.DOUBLE, typeFactory.getXsdDoubleDatatype());
+		sqlToTermBuilder.put(Types.REAL, typeFactory.getXsdDoubleDatatype());
+		sqlToTermBuilder.put(Types.DATE, typeFactory.getDatatype(XSD.DATE));
+		sqlToTermBuilder.put(Types.TIME, typeFactory.getDatatype(XSD.TIME));
+		sqlToTermBuilder.put(Types.TIMESTAMP, typeFactory.getDatatype(XSD.DATETIME)); //GX: needs check
+		sqlToTermBuilder.put(Types.TIMESTAMP_WITH_TIMEZONE, typeFactory.getDatatype(XSD.DATETIME)); //BC: needs check
+		sqlToTermBuilder.put(Types.BOOLEAN, typeFactory.getXsdBooleanDatatype());
+		sqlToTermBuilder.put(Types.BIT, typeFactory.getXsdBooleanDatatype());
+//		sqlToTermBuilder.put(Types.BINARY, dfac.getDataTypePredicateBinary());
+//		sqlToTermBuilder.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
+//		sqlToTermBuilder.put(Types.BLOB, dfac.getDataTypePredicateBinary());
+		sqlToTermBuilder.put(Types.CLOB, typeFactory.getXsdStringDatatype());
+		sqlToTermBuilder.put(Types.OTHER, typeFactory.getXsdStringDatatype());
+		sqlToTermTypeMap = sqlToTermBuilder.build();
 
-		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
-		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
-		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.DECIMAL, Types.DECIMAL); //BC: needs to be checked
-		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.UNSIGNED_INT, Types.INTEGER);
-		datatypeMap.put(COL_TYPE.FLOAT, Types.FLOAT);
-		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
-		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
-		datatypeMap.put(COL_TYPE.DATETIME_STAMP, Types.TIMESTAMP);
-		datatypeMap.put(COL_TYPE.DATETIME, Types.TIMESTAMP);
-		// all other COL_TYPEs are mapped to Types.VARCHAR by default
+		ImmutableMap.Builder<TermType, Integer> datatypeBuilder = ImmutableMap.builder();
+		datatypeBuilder.put(typeFactory.getXsdBooleanDatatype(), Types.BOOLEAN);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.INT), Types.INTEGER);
+		datatypeBuilder.put(typeFactory.getXsdIntegerDatatype(), Types.BIGINT);
+		datatypeBuilder.put(typeFactory.getXsdDecimalDatatype(), Types.DECIMAL); //BC: needs to be checked
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.LONG), Types.BIGINT);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.NEGATIVE_INTEGER), Types.BIGINT);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.POSITIVE_INTEGER), Types.BIGINT);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.NON_POSITIVE_INTEGER), Types.BIGINT);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.UNSIGNED_INT), Types.INTEGER);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.FLOAT), Types.FLOAT);
+		datatypeBuilder.put(typeFactory.getXsdDoubleDatatype(), Types.DOUBLE);
+		datatypeBuilder.put(typeFactory.getXsdStringDatatype(), Types.VARCHAR);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.DATETIMESTAMP), Types.TIMESTAMP);
+		datatypeBuilder.put(typeFactory.getDatatype(XSD.DATETIME), Types.TIMESTAMP);
+		// all other types are mapped to Types.VARCHAR by default
+		datatypeMap = datatypeBuilder.build();
 	}
 
-	@Deprecated
-	public static JdbcTypeMapper getInstance() {
-		if (INSTANCE == null)
-			INSTANCE = new JdbcTypeMapper();
-		return INSTANCE;
+	@Override
+	public TermType getTermType(int sqlType, String typeName) {
+		return Optional.ofNullable(sqlToTermTypeMap.get(sqlType))
+				// TODO: use another default type
+				.orElse(typeFactory.getXsdStringDatatype());
 	}
 
-	public Predicate.COL_TYPE getPredicate(int sqlType) {
-		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
-		if (type == null)
-			type = COL_TYPE.STRING; //treat them as simple literal
-
-		return type;
-	}
-
-	public int getSQLType(Predicate.COL_TYPE type) {
+	public int getSQLType(TermType type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);
 			if (sqlType != null)

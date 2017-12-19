@@ -49,7 +49,12 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     }
 
     @Override
-    public ImmutableList<? extends Term> getTerms() {
+    public ImmutableList<? extends Term> getImmutableTerms() {
         return ImmutableList.copyOf(terms);
+    }
+
+    @Override
+    public List<? extends Term> getTerms() {
+        return terms;
     }
 }

@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
-import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.spec.impl.TestingTools;
 import it.unibz.inf.ontop.temporal.model.*;
 import org.junit.Test;
 
@@ -22,8 +22,8 @@ public class WeatherUseCaseTest {
 
         TemporalRange range = f.createTemporalRange(true, true, Duration.parse("PT0H"), Duration.parse("PT1H"));
 
-        TermFactory odf = OntopModelSingletons.TERM_FACTORY;
-        AtomFactory af = OntopModelSingletons.ATOM_FACTORY;
+        TermFactory odf = TestingTools.TERM_FACTORY;
+        AtomFactory af = TestingTools.ATOM_FACTORY;
 
         final AtomPredicate p1 = af.getAtomPredicate("Hurricane",1);
         final AtomPredicate p2 = af.getAtomPredicate("HurricaneForceWind",1);

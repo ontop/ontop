@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.datalog;
 
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -27,16 +28,16 @@ public class VariableDispatcher {
     /**
      * For a datalog rule
      */
-    public VariableDispatcher(CQIE rule) {
-        variableGenerator = new VariableGenerator(rule);
+    public VariableDispatcher(CQIE rule, TermFactory termFactory) {
+        variableGenerator = new VariableGenerator(rule, termFactory);
         allocatedVariables = new HashSet<>();
     }
 
     /**
      * Please make sure you cannot use the other constructors!
      */
-    public VariableDispatcher() {
-        variableGenerator = new VariableGenerator(new HashSet<Variable>());
+    public VariableDispatcher(TermFactory termFactory) {
+        variableGenerator = new VariableGenerator(new HashSet<Variable>(), termFactory);
         allocatedVariables = new HashSet<>();
     }
 

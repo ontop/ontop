@@ -21,147 +21,124 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.IriConstants;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.impl.TypeFactoryImpl;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
+
+@Singleton
 public class TermFactoryImpl implements TermFactory {
 
-	private static final long serialVersionUID = 1851116693137470887L;
-	private static final TermFactory INSTANCE = new TermFactoryImpl(TypeFactoryImpl.getInstance());
-
-	private static int counter = 0;
+	private final TermType rootTermType;
 	private final TypeFactory typeFactory;
+	private final ValueConstant valueTrue;
+	private final ValueConstant valueFalse;
+	private final ValueConstant valueNull;
+	private final ValueConstant provenanceConstant;
+	private final ImmutabilityTools immutabilityTools;
+	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 
-	public static TermFactory getInstance() {
-		return INSTANCE;
-	}
-
+	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
+		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
+		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
+		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
+		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
+		this.rootTermType = typeFactory.getAbstractAtomicTermType();
+		this.immutabilityTools = new ImmutabilityTools(this);
+		this.type2FunctionSymbolMap = new HashMap<>();
 	}
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
-//		if (arity == 1) {
-//			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
-//		} else {
-			return new PredicateImpl(name, arity, null);
-//		}
+		ImmutableList<TermType> expectedArgumentTypes = IntStream.range(0, arity)
+				.boxed()
+				.map(i -> rootTermType)
+				.collect(ImmutableCollectors.toList());
+
+			return new PredicateImpl(name, arity, expectedArgumentTypes);
 	}
 	
 	@Override
-	public Predicate getPredicate(String uri, COL_TYPE[] types) {
-		return new PredicateImpl(uri, types.length, types);
-	}
-
-	@Override
-	public Predicate getObjectPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-	}
-
-	@Override
-	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-	}
-
-	@Override
-	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
-	}
-
-	//defining annotation property we still don't know if the values that it will assume, will be an object or a data property
-	@Override
-	public Predicate getAnnotationPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[]{Predicate.COL_TYPE.OBJECT, Predicate.COL_TYPE.NULL});
-	}
-
-	@Override
-	public Predicate getClassPredicate(String name) {
-		return new PredicateImpl(name, 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-	}
-
-	@Override
-	public Predicate getOWLSameAsPredicate() {
-		return new PredicateImpl(IriConstants.SAME_AS, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-	}
-
-	@Override
-	public Predicate getOBDACanonicalIRI() {
-		return new PredicateImpl(IriConstants.CANONICAL_IRI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
+		return new PredicateImpl(uri, types.size(), types);
 	}
 
 	@Override
 	@Deprecated
 	public URIConstant getConstantURI(String uriString) {
-		return new URIConstantImpl(uriString);
+		return new URIConstantImpl(uriString, typeFactory);
 	}
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value) {
-		return new ValueConstantImpl(value, COL_TYPE.STRING);
+		return new ValueConstantImpl(value, typeFactory.getXsdStringDatatype());
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, COL_TYPE type) {
+	public ValueConstant getConstantLiteral(String value, RDFDatatype type) {
 		return new ValueConstantImpl(value, type);
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, COL_TYPE type) {
-		Predicate pred = typeFactory.getTypePredicate(type);
-		if (pred == null)
-			throw new RuntimeException("Unknown data type!");
-		
-		return getFunction(pred, value);
-	}
-	
-	@Override
-	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase());
+	public ValueConstant getConstantLiteral(String value, IRI type) {
+		return getConstantLiteral(value, typeFactory.getDatatype(type));
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, Term language) {
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
-		return getFunction(pred, value, language);
+	public Function getTypedTerm(Term value, RDFDatatype type) {
+		return getFunction(getRequiredTypePredicate(type), value);
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, IRI datatypeIRI) {
+		return getTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
+	}
+
+	@Override
+	public ValueConstant getConstantLiteral(String value, String language) {
+		return new ValueConstantImpl(value, language.toLowerCase(), typeFactory);
 	}
 
 	@Override
 	public Function getTypedTerm(Term value, String language) {
-		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
-		return getFunction(pred, value, lang);
+		DatatypePredicate functionSymbol = getRequiredTypePredicate(typeFactory.getLangTermType(language));
+		return getFunction(functionSymbol, value);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, COL_TYPE type) {
-		Predicate pred = typeFactory.getTypePredicate(type);
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type) {
+		Predicate pred = getRequiredTypePredicate(type);
 		if (pred == null)
-			throw new RuntimeException("Unknown data type!");
+			throw new RuntimeException("Unknown data type: " + type);
 
 		return getImmutableFunctionalTerm(pred, value);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language) {
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
-		return getImmutableFunctionalTerm(pred, value, language);
+	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI) {
+		return getImmutableTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
-		ValueConstant lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.STRING);
-		Predicate pred = typeFactory.getTypePredicate(COL_TYPE.LANG_STRING);
-		return getImmutableFunctionalTerm(pred, value, lang);
+		return getImmutableTypedTerm(value, typeFactory.getLangTermType(language));
 	}
 
 	@Override
@@ -208,10 +185,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression getImmutableExpression(Expression expression) {
 		if (GroundTermTools.isGroundTerm(expression)) {
-			return new GroundExpressionImpl(expression);
+			return new GroundExpressionImpl(expression.getFunctionSymbol(),
+					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression));
 		}
 		else {
-			return new NonGroundExpressionImpl(expression);
+			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression));
 		}
 	}
 
@@ -226,7 +204,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
 		if (functor instanceof OperationPredicate) {
 			return getImmutableExpression((OperationPredicate)functor, terms);
 		}
@@ -251,7 +229,7 @@ public class TermFactoryImpl implements TermFactory {
 			return new GroundFunctionalTermImpl(functionalTerm);
 		}
 		else {
-			return new NonGroundFunctionalTermImpl(functionalTerm);
+			return new NonGroundFunctionalTermImpl(functionalTerm.getFunctionSymbol(), convertTerms(functionalTerm));
 		}
 
 	}
@@ -272,54 +250,54 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
+		Predicate uriPred = getURITemplatePredicate(terms.length);
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm... terms) {
-		Predicate pred = new URITemplatePredicateImpl(terms.length);
+		Predicate pred = getURITemplatePredicate(terms.length);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = new URITemplatePredicateImpl(terms.size());
+		Predicate pred = getURITemplatePredicate(terms.size());
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
-		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
+		Predicate uriPred = getURITemplatePredicate(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public Function getUriTemplateForDatatype(String type) {
-		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type));
+		return getFunction(getURITemplatePredicate(1), getConstantLiteral(type));
 	}
 	
 	@Override
 	public Function getBNodeTemplate(Term... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length);
+		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getFunction(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length);
+		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size());
+		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getBNodeTemplate(List<Term> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size());
+		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getFunction(pred, terms);
 	}
 
@@ -363,51 +341,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getExpression(ExpressionOperation.AND, term1, term2);
 	}
 
-//	@Override
-//	public Function getANDFunction(List<Term> terms) {
-//		if (terms.size() < 2) {
-//			throw new IllegalArgumentException("AND requires at least 2 terms");
-//		}
-//		LinkedList<Term> auxTerms = new LinkedList<Term>();
-//
-//		if (terms.size() == 2) {
-//			return getFunctionalTerm(ExpressionOperation.AND, terms.get(0), terms.get(1));
-//		}
-//		Term nested = getFunctionalTerm(ExpressionOperation.AND, terms.get(0), terms.get(1));
-//		terms.remove(0);
-//		terms.remove(0);
-//		while (auxTerms.size() > 1) {
-//			nested = getFunctionalTerm(ExpressionOperation.AND, nested, terms.get(0));
-//			terms.remove(0);
-//		}
-//		return getFunctionalTerm(ExpressionOperation.AND, nested, terms.get(0));
-//	}
-
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
 		return getExpression(ExpressionOperation.OR,term1, term2);
 	}
 
-	
-//	@Override
-//	public Function getORFunction(List<Term> terms) {
-//		if (terms.size() < 2) {
-//			throw new IllegalArgumentException("OR requires at least 2 terms");
-//		}
-//		LinkedList<Term> auxTerms = new LinkedList<Term>();
-//
-//		if (terms.size() == 2) {
-//			return getFunctionalTerm(ExpressionOperation.OR, terms.get(0), terms.get(1));
-//		}
-//		Term nested = getFunctionalTerm(ExpressionOperation.OR, terms.get(0), terms.get(1));
-//		terms.remove(0);
-//		terms.remove(0);
-//		while (auxTerms.size() > 1) {
-//			nested = getFunctionalTerm(ExpressionOperation.OR, nested, terms.get(0));
-//			terms.remove(0);
-//		}
-//		return getFunctionalTerm(ExpressionOperation.OR, nested, terms.get(0));
-//	}
 
 	@Override
 	public Expression getFunctionIsNull(Term term) {
@@ -439,7 +377,7 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public BNode getConstantBNode(String name) {
-		return new BNodeConstantImpl(name);
+		return new BNodeConstantImpl(name, typeFactory);
 	}
 
 	@Override
@@ -450,7 +388,66 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ValueConstant getBooleanConstant(boolean value) {
-		return value ? TermConstants.TRUE : TermConstants.FALSE;
+		return value ? valueTrue : valueFalse;
+	}
+
+	@Override
+	public ValueConstant getNullConstant() {
+		return valueNull;
+	}
+
+	@Override
+	public ValueConstant getProvenanceSpecialConstant() {
+		return provenanceConstant;
+	}
+
+	private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
+		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+		for (Term term : functionalTermToClone.getTerms()) {
+			builder.add(immutabilityTools.convertIntoImmutableTerm(term));
+		}
+		return builder.build();
+	}
+
+
+	@Override
+	public DatatypePredicate getRequiredTypePredicate(RDFDatatype type) {
+		return getOptionalTypePredicate(type)
+				.orElseThrow(() -> new NoConstructionFunctionException(type));
+	}
+
+	@Override
+	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
+		if (datatypeIri.equals(LANGSTRING))
+			throw new IllegalArgumentException("Lang string predicates are not unique (they depend on the language tag)");
+		return getRequiredTypePredicate(typeFactory.getDatatype(datatypeIri));
+	}
+
+	@Override
+	public Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type) {
+		if (type.isAbstract())
+			throw new IllegalArgumentException("The datatype " + type + " is abstract and therefore cannot be constructed");
+
+		return Optional.of(type2FunctionSymbolMap
+				.computeIfAbsent(
+						type,
+						t -> t.getLanguageTag()
+							// Lang string
+							.map(tag -> new DatatypePredicateImpl(type, typeFactory.getDatatype(XSD.STRING)))
+							// Other datatypes
+							.orElseGet(() -> new DatatypePredicateImpl(type, type))));
+	}
+
+	@Override
+	public URITemplatePredicate getURITemplatePredicate(int arity) {
+		return new URITemplatePredicateImpl(arity, typeFactory);
+	}
+
+	private static class NoConstructionFunctionException extends OntopInternalBugException {
+
+		private NoConstructionFunctionException(TermType type) {
+			super("No construction function found for " + type);
+		}
 	}
 
 }

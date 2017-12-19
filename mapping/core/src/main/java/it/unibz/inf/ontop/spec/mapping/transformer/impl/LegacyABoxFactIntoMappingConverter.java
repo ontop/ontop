@@ -4,17 +4,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadataTestingTools;
+import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
@@ -35,22 +32,33 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final SpecificationFactory mappingFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
+    private final DummyBasicDBMetadata defaultDummyDBMetadata;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
-                                              SpecificationFactory mappingFactory) {
+                                              SpecificationFactory mappingFactory, AtomFactory atomFactory,
+                                              TermFactory termFactory, DatalogFactory datalogFactory,
+                                              DummyBasicDBMetadata defaultDummyDBMetadata) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
+        this.defaultDummyDBMetadata = defaultDummyDBMetadata;
     }
 
     @Override
-    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry,
+                           boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
                 Collections.emptyList();
 
-        DBMetadata dummyDBMetadata = DBMetadataTestingTools.createDummyMetadata();
+        DBMetadata dummyDBMetadata = defaultDummyDBMetadata.clone();
 
         // Mutable !!
 //        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
@@ -89,10 +97,10 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         for (ClassAssertion ca : cas) {
             // no blank nodes are supported here
             URIConstant c = (URIConstant) ca.getIndividual();
-            Predicate p = ca.getConcept().getPredicate();
-            Function head = TERM_FACTORY.getFunction(p,
+            Predicate p = atomFactory.getClassPredicate(ca.getConcept().getIRI());
+            Function head = termFactory.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -104,11 +112,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             URIConstant s = (URIConstant) pa.getSubject();
             URIConstant o = (URIConstant) pa.getObject();
-            Predicate p = pa.getProperty().getPredicate();
-            Function head = TERM_FACTORY.getFunction(p,
+            AtomPredicate p = atomFactory.getObjectPropertyPredicate(pa.getProperty().getIRI());
+            Function head = termFactory.getFunction(p,
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -121,19 +129,16 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             URIConstant s = (URIConstant) da.getSubject();
             ValueConstant o = da.getValue();
-            Predicate p = da.getProperty().getPredicate();
+            Predicate p = atomFactory.getDataPropertyPredicate(da.getProperty().getIRI());
 
-            Function head;
-            if (o.getLanguage() != null) {
-                head = TERM_FACTORY.getFunction(p, TERM_FACTORY.getUriTemplate(
-                        TERM_FACTORY.getConstantLiteral(s.getURI())),
-                        TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
-            } else {
 
-                head = TERM_FACTORY.getFunction(p, TERM_FACTORY.getUriTemplate(
-                        TERM_FACTORY.getConstantLiteral(s.getURI())), TERM_FACTORY.getTypedTerm(o, o.getType()));
-            }
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            Function head = o.getType().getLanguageTag()
+                    .map(lang -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                            termFactory.getConstantLiteral(s.getURI())),
+                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                    .orElseGet(() -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                            termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType())));
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;
@@ -147,32 +152,29 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
             URIConstant s = (URIConstant) aa.getSubject();
             Constant v = aa.getValue();
-            Predicate p = aa.getProperty().getPredicate();
+            Predicate p = atomFactory.getAnnotationPropertyPredicate(aa.getProperty().getIRI());
 
             Function head;
             if (v instanceof ValueConstant) {
 
                 ValueConstant o = (ValueConstant) v;
 
-                if (o.getLanguage() != null) {
-                    head = TERM_FACTORY.getFunction(p, TERM_FACTORY.getUriTemplate(
-                            TERM_FACTORY.getConstantLiteral(s.getURI())),
-                            TERM_FACTORY.getTypedTerm(TERM_FACTORY.getConstantLiteral(o.getValue()), o.getLanguage()));
-                } else {
-
-                    head = TERM_FACTORY.getFunction(p, TERM_FACTORY.getUriTemplate(
-                            TERM_FACTORY.getConstantLiteral(s.getURI())), TERM_FACTORY.getTypedTerm(o, o.getType()));
-                }
+                head = o.getType().getLanguageTag()
+                        .map(lang -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                                    termFactory.getConstantLiteral(s.getURI())),
+                                    termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                        .orElseGet(() -> termFactory.getFunction(p, termFactory.getUriTemplate(
+                                termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType())));
             } else {
 
                 URIConstant o = (URIConstant) v;
-                head = TERM_FACTORY.getFunction(p,
-                        TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(s.getURI())),
-                        TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(o.getURI())));
+                head = termFactory.getFunction(p,
+                        termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getURI())),
+                        termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getURI())));
 
 
             }
-            CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
+            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
             count++;

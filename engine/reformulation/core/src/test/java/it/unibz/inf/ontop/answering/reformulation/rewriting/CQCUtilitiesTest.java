@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
@@ -37,8 +36,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -146,9 +144,9 @@ public class CQCUtilitiesTest {
 
 		List<Function> body = new LinkedList<Function>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -158,7 +156,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<Function>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -167,7 +165,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -177,9 +175,9 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
 
 		CQIE q4 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -187,7 +185,7 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
 		CQIE q5 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -195,7 +193,7 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("w1"), TERM_FACTORY.getVariable("w2")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("w1"), TERM_FACTORY.getVariable("w2")));
 
 		CQIE q6 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -203,9 +201,9 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("P"),
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("P"),
 				TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("w1")));
 
 		CQIE q7 = DATALOG_FACTORY.getCQIE(head, body);
@@ -214,9 +212,9 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("P"),
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("P"),
 				TERM_FACTORY.getVariable("w1"), TERM_FACTORY.getVariable("w2")));
 
 		CQIE q8 = DATALOG_FACTORY.getCQIE(head, body);
@@ -225,12 +223,12 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("m")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("n"), TERM_FACTORY.getVariable("o")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("m")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("n"), TERM_FACTORY.getVariable("o")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q9 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -238,15 +236,16 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("i"), TERM_FACTORY.getVariable("j")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("j"), TERM_FACTORY.getVariable("k")));
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("k"), TERM_FACTORY.getVariable("i")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("i"), TERM_FACTORY.getVariable("j")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("j"), TERM_FACTORY.getVariable("k")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("k"), TERM_FACTORY.getVariable("i")));
 
 		CQIE q10 = DATALOG_FACTORY.getCQIE(head, body);
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs();
+		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs(DATALOG_FACTORY, UNIFIER_UTILITIES, 
+				SUBSTITUTION_UTILITIES, TERM_FACTORY);
 		
 		assertTrue(cqcu.isContainedIn(q6, q5));
 
@@ -294,11 +293,11 @@ public class CQCUtilitiesTest {
 
 		List<Function> body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -308,7 +307,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -318,17 +317,17 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
-		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q2));
+		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q2));
 
-		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q3));
+		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q3));
 
-		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, q1));
+		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q2, q1));
 
-		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q3, q1));
+		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q3, q1));
 
 	}
 
@@ -346,11 +345,11 @@ public class CQCUtilitiesTest {
 
 		List<Function> body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -359,7 +358,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("x"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -368,14 +367,14 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("x"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -383,7 +382,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -391,7 +390,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -401,7 +400,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -425,17 +424,18 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("y")));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -453,17 +453,18 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 					TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -481,17 +482,18 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 					TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 			
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -509,17 +511,18 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 					TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -538,17 +541,18 @@ public class CQCUtilitiesTest {
 			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
+			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
 					TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
 
-			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+					SUBSTITUTION_UTILITIES, TERM_FACTORY);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -572,7 +576,7 @@ public class CQCUtilitiesTest {
 
 	}
 
-    //Facts should not be removed by the CQCUtilities
+    //Facts should not be removed by the CQC_UTILITIES
     @Test
     public void testFacts() throws Exception {
 
@@ -594,9 +598,10 @@ public class CQCUtilitiesTest {
 
         List<Function> body = new LinkedList<Function>();
 
-        body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), 
+				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
 
-        body.add(TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
 
         CQIE query1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -606,15 +611,16 @@ public class CQCUtilitiesTest {
         body = new LinkedList<Function>();
         CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
-		LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
-		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+		LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(TBoxReasonerImpl.create(sigma), false);
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES, 
+				SUBSTITUTION_UTILITIES, TERM_FACTORY);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
 
         assertFalse(cqc.isContainedIn(query2, query1));
 
-        assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
+        assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
         
-        assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query2, query1));
+        assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query2, query1));
     }
 }

@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface GroundTemporalAtomicExpression extends TemporalAtomicExpression{
 
-    public ImmutableList<Constant> getTerms();
+    public ImmutableList<Constant> getImmutableTerms();
 
 }

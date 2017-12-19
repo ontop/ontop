@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SubstitutionTest {
@@ -20,7 +18,7 @@ public class SubstitutionTest {
     private static final Variable X = TERM_FACTORY.getVariable("x");
     private static final Variable Y = TERM_FACTORY.getVariable("y");
     private static final Variable Z = TERM_FACTORY.getVariable("z");
-    private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1", Predicate.COL_TYPE.INTEGER);
+    private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
     private static final Predicate F_ARITY_1 = ATOM_FACTORY.getAtomPredicate("f", 1);
 
     @Test

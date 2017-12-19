@@ -24,13 +24,11 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -38,14 +36,11 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
 
 /***
  * Translate a intermediate queries expression into a Datalog program that has the
@@ -59,6 +54,10 @@ import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMuta
 public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
 
 	private final IntermediateQueryFactory iqFactory;
+	private final AtomFactory atomFactory;
+	private final SubstitutionFactory substitutionFactory;
+	private final DatalogFactory datalogFactory;
+	private final ImmutabilityTools immutabilityTools;;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -73,15 +72,21 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
 
 	// Incremented
 	private int subQueryCounter;
 	private int dummyPredCounter;
 
 	@Inject
-	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory) {
+	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+													SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
+													ImmutabilityTools immutabilityTools) {
 		this.iqFactory = iqFactory;
+		this.atomFactory = atomFactory;
+		this.substitutionFactory = substitutionFactory;
+		this.datalogFactory = datalogFactory;
+		this.immutabilityTools = immutabilityTools;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -110,10 +115,10 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
 			// TODO: support GROUP BY (distinct QueryNode)
 
-            dProgram = DATALOG_FACTORY.getDatalogProgram(mutableModifiers);
+            dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
 		}
         else {
-            dProgram = DATALOG_FACTORY.getDatalogProgram();
+            dProgram = datalogFactory.getDatalogProgram();
         }
 
 		translate(query,  dProgram, root);
@@ -136,7 +141,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 				.filter(r -> r instanceof ConstructionNode)
 				.map(r -> (ConstructionNode) r)
 				.map(ConstructionNode::getSubstitution)
-				.orElseGet(SUBSTITUTION_FACTORY::getSubstitution);
+				.orElseGet(substitutionFactory::getSubstitution);
 
 		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(),query.getFirstChild(root)));
 
@@ -156,7 +161,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			List<Function> atoms = new LinkedList<>();
 
 			//Constructing the rule
-			CQIE newrule = DATALOG_FACTORY.getCQIE(convertToMutableFunction(substitutedHeadAtom), atoms);
+			CQIE newrule = datalogFactory.getCQIE(immutabilityTools.convertToMutableFunction(substitutedHeadAtom), atoms);
 
 			pr.appendRule(newrule);
 
@@ -194,7 +199,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 			heads.add(new RuleHead(constructionNode.getSubstitution(), projectionAtom,te.getFirstChild(constructionNode)));
 			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
-			Function mutAt = convertToMutableFunction(projectionAtom);
+			Function mutAt = immutabilityTools.convertToMutableFunction(projectionAtom);
 			body.add(mutAt);
 			return body;
 			
@@ -204,7 +209,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true));
 
 			filter.flattenAND().stream()
-					.map(ImmutabilityTools::convertToMutableBooleanExpression)
+					.map(immutabilityTools::convertToMutableBooleanExpression)
 					.forEach(body::add);
 
 			return body;
@@ -212,7 +217,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 					
 		} else if (node instanceof DataNode) {
 			DataAtom atom = ((DataNode)node).getProjectionAtom();
-			Function mutAt = convertToMutableFunction(atom);
+			Function mutAt = immutabilityTools.convertToMutableFunction(atom);
 			body.add(mutAt);
 			return body;
 				
@@ -233,12 +238,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 				
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
-				Expression mutFilter =  ImmutabilityTools.convertToMutableBooleanExpression(filter2);
-				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
+				Expression mutFilter =  immutabilityTools.convertToMutableBooleanExpression(filter2);
+				Function newLJAtom = datalogFactory.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.of(mutFilter));
 				body.add(newLJAtom);
 				return body;
 			}else{
-				Function newLJAtom = DATALOG_FACTORY.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
+				Function newLJAtom = datalogFactory.getSPARQLLeftJoin(atomsListLeft, atomsListRight, Optional.empty());
 				body.add(newLJAtom);
 				return body;
 			}
@@ -274,7 +279,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
             } //end for
 
-			Function bodyAtom = convertToMutableFunction(freshHeadAtom);
+			Function bodyAtom = immutabilityTools.convertToMutableFunction(freshHeadAtom);
 			body.add(bodyAtom);
 			return body;
 
@@ -290,8 +295,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
 			if (isNested) {
-				body.add(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-						ATOM_FACTORY.getAtomPredicate(
+				body.add(atomFactory.getDistinctVariableOnlyDataAtom(
+						atomFactory.getAtomPredicate(
 								"dummy" + (++dummyPredCounter),
 								0
 						),
@@ -326,7 +331,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		if (filter.isPresent()){
 			if (isNested) {
 				ImmutableExpression filter2 = filter.get();
-				Function mutFilter = ImmutabilityTools.convertToMutableBooleanExpression(filter2);
+				Function mutFilter = immutabilityTools.convertToMutableBooleanExpression(filter2);
 				Function newJ = getSPARQLJoin(atoms, Optional.of(mutFilter));
 				body.add(newJ);
 				return body;
@@ -334,7 +339,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			else {
 				body.addAll(atoms);
 				filter.get().flattenAND().stream()
-						.map(ImmutabilityTools::convertToMutableBooleanExpression)
+						.map(immutabilityTools::convertToMutableBooleanExpression)
 						.forEach(body::add);
 				return body;
 			}
@@ -346,12 +351,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = ATOM_FACTORY.getAtomPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+ ++subQueryCounter,
+		AtomPredicate newPredicate = atomFactory.getAtomPredicate(datalogFactory.getSubqueryPredicatePrefix()+ ++subQueryCounter,
 				projectedVariables.size());
-		return ATOM_FACTORY.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
+		return atomFactory.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 
-	private static Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
+	private Function getSPARQLJoin(List<Function> atoms, Optional<Function> optionalCondition) {
 		int atomCount = atoms.size();
 		Function rightTerm;
 
@@ -368,8 +373,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		}
 
 		return optionalCondition.isPresent()
-				? DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
-				: DATALOG_FACTORY.getSPARQLJoin(atoms.get(0), rightTerm);
+				? datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm, optionalCondition.get())
+				: datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
 }

@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQL
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.DatalogAlgebraOperatorPredicates;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -41,13 +40,14 @@ import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.Literal;
@@ -63,8 +63,7 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -97,6 +96,7 @@ public class OneShotSQLGeneratorEngine {
 	private final QuotedIDFactory idFactory;
 	private final SQLDialectAdapter sqladapter;
 	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
+	private final TypeExtractor typeExtractor;
 
 	private final boolean distinctResultSet;
 	private final boolean isIRISafeEncodingEnabled;
@@ -108,6 +108,12 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
+	private final PullOutVariableOptimizer pullOutVariableOptimizer;
+	private final Relation2Predicate relation2Predicate;
+	private final DatalogNormalizer datalogNormalizer;
+	private final DatalogFactory datalogFactory;
+	private final TypeFactory typeFactory;
+	private final TermFactory termFactory;
 
 
 	// the only two mutable (query-dependent) fields
@@ -119,7 +125,18 @@ public class OneShotSQLGeneratorEngine {
 							  IRIDictionary iriDictionary,
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
-							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
+							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+							  PullOutVariableOptimizer pullOutVariableOptimizer,
+							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
+							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
+							  TypeFactory typeFactory, TermFactory termFactory) {
+		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+		this.typeExtractor = typeExtractor;
+		this.relation2Predicate = relation2Predicate;
+		this.datalogNormalizer = datalogNormalizer;
+		this.datalogFactory = datalogFactory;
+		this.typeFactory = typeFactory;
+		this.termFactory = termFactory;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -152,9 +169,12 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
                                       boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
-                                      IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-                                      ImmutableMap<ExpressionOperation, String> operations,
-									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator) {
+									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
+									  ImmutableMap<ExpressionOperation, String> operations,
+									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+									  PullOutVariableOptimizer pullOutVariableOptimizer,
+									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
+									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory, TermFactory termFactory) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -164,6 +184,13 @@ public class OneShotSQLGeneratorEngine {
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
+		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+		this.typeExtractor = typeExtractor;
+		this.relation2Predicate = relation2Predicate;
+		this.datalogNormalizer = datalogNormalizer;
+		this.datalogFactory = datalogFactory;
+		this.typeFactory = typeFactory;
+		this.termFactory = termFactory;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -219,7 +246,9 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
-				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator);
+				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
+                pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                typeFactory, termFactory);
 	}
 
 	/**
@@ -239,8 +268,8 @@ public class OneShotSQLGeneratorEngine {
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		for (CQIE cq : queryProgram.getRules()) {
-			DatalogNormalizer.foldJoinTrees(cq);
-			DatalogNormalizer.addMinimalEqualityToLeftJoin(cq);
+			datalogNormalizer.foldJoinTrees(cq);
+			datalogNormalizer.addMinimalEqualityToLeftJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
@@ -295,7 +324,7 @@ public class OneShotSQLGeneratorEngine {
 				.optimize(intermediateQuery);
 		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
 
-		IntermediateQuery queryAfterPullOut = new PullOutVariableOptimizer().optimize(groundTermFreeQuery);
+		IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
 		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
 		return queryAfterPullOut;
@@ -320,15 +349,16 @@ public class OneShotSQLGeneratorEngine {
 
 		final TypeExtractor.TypeResults typeResults;
 		try {
-			// Currently, incompatible terms are treated as a reformulation error
-			typeResults = TypeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
-		}
-		catch (IncompatibleTermException e) {
+			typeResults = typeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
+			/*
+			 * Currently, incompatible terms are treated as a reformulation error
+			 */
+		} catch (IncompatibleTermException e) {
 			throw new OntopTypingException(e.getMessage());
 		}
 
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
-		ImmutableMap<Predicate, ImmutableList<COL_TYPE>> castTypeMap = typeResults.getCastTypeMap();
+		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
 
 		// non-top-level intensional predicates - need to create subqueries
 
@@ -479,7 +509,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private ImmutableList<Function> getHaving(List<Function> body) {
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_HAVING) {
+			if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlHavingPredicate())) {
 				return convert(atom.getTerms());
 			}
 		}
@@ -488,7 +518,7 @@ public class OneShotSQLGeneratorEngine {
 
 	private ImmutableList<QualifiedAttributeID> getGroupBy(List<Function> body, AliasIndex index) {
 		return body.stream()
-				.filter(a -> a.getFunctionSymbol() == DatalogAlgebraOperatorPredicates.SPARQL_GROUP)
+				.filter(a -> a.getFunctionSymbol().equals(datalogFactory.getSparqlGroupPredicate()))
 				.map(a -> a.getVariables())
 				.flatMap(l -> l.stream())
 				.map(v -> index.getColumns(v))
@@ -665,7 +695,7 @@ public class OneShotSQLGeneratorEngine {
 		if (atom.isAlgebraFunction()) {
 			Predicate functionSymbol = atom.getFunctionSymbol();
 			ImmutableList<Function> joinAtoms = convert(atom.getTerms());
-			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+			if (functionSymbol.equals(datalogFactory.getSparqlJoinPredicate())) {
 				// nested joins we need to add parenthesis later
 				boolean parenthesis = joinAtoms.get(0).isAlgebraFunction()
 						|| joinAtoms.get(1).isAlgebraFunction();
@@ -674,7 +704,7 @@ public class OneShotSQLGeneratorEngine {
 						"JOIN", parenthesis, indent + INDENT);
 				return join;
 			}
-			else if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+			else if (functionSymbol.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
 				// in case of left join we want to add the parenthesis only for the right tables
 				// we ignore nested joins from the left tables
 				boolean parenthesis = joinAtoms.get(1).isAlgebraFunction();
@@ -740,13 +770,13 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else if (atom.isAlgebraFunction()) {
 			Predicate functionSymbol = atom.getFunctionSymbol();
-			if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_JOIN) {
+			if (functionSymbol.equals(datalogFactory.getSparqlJoinPredicate())) {
 				// if it's a join, we need to collect all the variables of each nested atom
 				convert(atom.getTerms()).stream()
 						.filter(f -> !f.isOperation())
 						.forEach(f -> collectVariableReferencesWithLeftJoin(vars, f));
 			}
-			else if (functionSymbol == DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN) {
+			else if (functionSymbol.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
 				// if it's a left join, only of the first data/algebra atom (the left atom)
 				collectVariableReferencesWithLeftJoin(vars, (Function) atom.getTerm(0));
 			}
@@ -827,20 +857,28 @@ public class OneShotSQLGeneratorEngine {
 	// return the SQL data type
 	private int getDataType(Term term) {
 
-		if (term instanceof Function) {
+		/*
+		 * TODO: refactor!
+		 */
+		if (term instanceof Function){
 			Function f = (Function) term;
-			if (f.isDataTypeFunction()) {
-				Predicate p = f.getFunctionSymbol();
-				COL_TYPE type = TYPE_FACTORY.getDatatype(p.getName()).get();
+			Predicate p = f.getFunctionSymbol();
+			if (p instanceof DatatypePredicate) {
+
+				RDFDatatype type = ((DatatypePredicate) p).getReturnedType();
 				return jdbcTypeMapper.getSQLType(type);
 			}
 			// return varchar for unknown
 			return Types.VARCHAR;
 		}
-		else if (term instanceof Variable) {
-			throw new RuntimeException("Cannot return the SQL type for: " + term);
-		}
-		else if (term.equals(TermConstants.FALSE) || term.equals(TermConstants.TRUE)) {
+        else if (term instanceof Variable) {
+            throw new RuntimeException("Cannot return the SQL type for: " + term);
+        }
+		/*
+		 * Boolean constant
+		 */
+		else if (term.equals(termFactory.getBooleanConstant(false))
+				 || term.equals(termFactory.getBooleanConstant(true))) {
 			return Types.BOOLEAN;
 		}
 
@@ -850,8 +888,8 @@ public class OneShotSQLGeneratorEngine {
 	private static final class SignatureVariable {
 		private final String name;
 		private final ImmutableList<String> columnAliases;
-		private final COL_TYPE castType;
-		SignatureVariable(String name, ImmutableList<String> columnAliases, COL_TYPE castType) {
+		private final TermType castType;
+		SignatureVariable(String name, ImmutableList<String> columnAliases, TermType castType) {
 			this.name = name;
 			this.columnAliases = columnAliases;
 			this.castType = castType;
@@ -886,7 +924,7 @@ public class OneShotSQLGeneratorEngine {
 				.toString();
 	}
 
-	private ImmutableList<SignatureVariable> createSignature(List<String> names, ImmutableList<COL_TYPE> castTypes) {
+	private ImmutableList<SignatureVariable> createSignature(List<String> names, ImmutableList<TermType> castTypes) {
 		/**
 		 * Set that contains all the variable names created on the top query.
 		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
@@ -914,7 +952,7 @@ public class OneShotSQLGeneratorEngine {
 		return builder.build();
 	}
 
-	private String getMainColumnForSELECT(Term ht, AliasIndex index, COL_TYPE castDataType) {
+	private String getMainColumnForSELECT(Term ht, AliasIndex index, TermType castDataType) {
 
 		String column = getSQLString(ht, index, false);
 		if (column.charAt(0) != '\'' && column.charAt(0) != '(' && castDataType != null) {
@@ -933,13 +971,10 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			return optionalTermType
-					.filter(t -> t.getColType() == LANG_STRING)
-					.map(t -> t.getLanguageTagConstant()
-								.map(tag -> "'" + tag.getFullString() + "'")
-								.orElseGet(() -> t.getLanguageTagTerm()
-										.map(tag -> getSQLString(tag, index, false))
-										.orElseThrow(() -> new IllegalStateException(
-												"Inconsistent term type: the language tag must be defined for any LANG_STRING"))))
+					.filter(t -> t instanceof RDFDatatype)
+					.map(t -> (RDFDatatype)t)
+					.flatMap(RDFDatatype::getLanguageTag)
+					.map(tag -> sqladapter.getSQLLexicalFormString(tag.getFullString()))
 					.orElse("NULL");
 		}
     }
@@ -966,12 +1001,24 @@ public class OneShotSQLGeneratorEngine {
 		}
 		else {
 			COL_TYPE colType = optionalTermType
-					.map(TermType::getColType)
+					.flatMap(this::extractColType)
 					// By default, we apply the "most" general COL_TYPE
 					.orElse(STRING);
 
 			return String.valueOf(colType.getQuestCode());
 		}
+	}
+
+	private Optional<COL_TYPE> extractColType(TermType termType) {
+		if (termType instanceof ObjectRDFType) {
+			COL_TYPE colType = ((ObjectRDFType)termType).isBlankNode() ? BNODE : OBJECT;
+			return Optional.of(colType);
+		}
+		else if (termType instanceof RDFDatatype) {
+			return Optional.of(COL_TYPE.getColType(((RDFDatatype)termType).getIRI()));
+		}
+		else
+			return Optional.empty();
 	}
 
 
@@ -1119,10 +1166,13 @@ public class OneShotSQLGeneratorEngine {
 		}
 		if (term instanceof ValueConstant) {
 			ValueConstant ct = (ValueConstant) term;
-			if (hasIRIDictionary() && ((ct.getType() == OBJECT || ct.getType() == STRING))) {
-				int id = getUriid(ct.getValue());
-				if (id >= 0)
-					return String.valueOf(id); // return the INTEGER, not a string
+			if (hasIRIDictionary()) {
+				if (ct.getType().isA(XSD.STRING)) {
+					int id = getUriid(ct.getValue());
+					if (id >= 0)
+						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+						return String.valueOf(id);
+				}
 			}
 			return getSQLLexicalForm(ct);
 		}
@@ -1145,8 +1195,10 @@ public class OneShotSQLGeneratorEngine {
 		int size = function.getTerms().size();
 
 		if (function.isDataTypeFunction()) {
-			if (functionSymbol.getType(0) == UNSUPPORTED) {
-				throw new RuntimeException("Unsupported type in the query: " + function);
+			if (functionSymbol.getExpectedBaseType(0)
+					.isA(typeFactory.getUnsupportedDatatype())) {
+				throw new RuntimeException("Unsupported type in the query: "
+						+ function);
 			}
 			if (size == 1) {
 				// atoms of the form integer(x)
@@ -1353,12 +1405,12 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLLexicalForm(ValueConstant constant) {
 
-		if (constant == TermConstants.NULL) {
+		if (constant.equals(termFactory.getNullConstant())) {
 			// TODO: we should not have to treat NULL as a special case!
 			// It is because this constant is currently of type COL_TYPE.STRING!
 			return "NULL";
 		}
-		switch (constant.getType()) {
+		switch (COL_TYPE.getColType(constant.getType().getIRI())) {
 			case BNODE:
 			case OBJECT:
 			case STRING:
@@ -1484,7 +1536,7 @@ public class OneShotSQLGeneratorEngine {
 				subQueryFromItems.put(fromItem.alias, fromItem);
 			}
 			else {
-				RelationDefinition relation = metadata.getRelation(Relation2Predicate.createRelationFromPredicateName(
+				RelationDefinition relation = metadata.getRelation(relation2Predicate.createRelationFromPredicateName(
 						metadata.getQuotedIDFactory(), predicate));
 				if (relation == null)
 					return;   // because of dummyN - what exactly is that?

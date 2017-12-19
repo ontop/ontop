@@ -14,12 +14,15 @@ import org.slf4j.LoggerFactory;
 public class FixedPointBindingLiftOptimizer implements BindingLiftOptimizer {
 
     private final TrueNodesRemovalOptimizer trueNodesRemovalOptimizer;
+    private final TopDownBindingLiftOptimizer topDownBindingLiftOptimizer;
     private static final Logger log = LoggerFactory.getLogger(FixedPointBindingLiftOptimizer.class);
     private static final int LOOPS = 10;
 
     @Inject
-    private FixedPointBindingLiftOptimizer(TrueNodesRemovalOptimizer trueNodesRemovalOptimizer) {
+    private FixedPointBindingLiftOptimizer(TrueNodesRemovalOptimizer trueNodesRemovalOptimizer,
+                                           TopDownBindingLiftOptimizer topDownBindingLiftOptimizer) {
         this.trueNodesRemovalOptimizer = trueNodesRemovalOptimizer;
+        this.topDownBindingLiftOptimizer = topDownBindingLiftOptimizer;
     }
 
     @Override
@@ -31,8 +34,7 @@ public class FixedPointBindingLiftOptimizer implements BindingLiftOptimizer {
         do {
             oldVersionNumber = query.getVersionNumber();
 
-            TopDownBindingLiftOptimizer substLiftOptimizer = new TopDownBindingLiftOptimizer();
-            query = substLiftOptimizer.optimize(query);
+            query = topDownBindingLiftOptimizer.optimize(query);
             log.trace("New query after substitution lift optimization: \n" + query.toString());
             countVersion++;
 

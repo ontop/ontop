@@ -13,9 +13,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
-import static it.unibz.inf.ontop.datalog.impl.DatalogConversionTools.convertFromDatalogDataAtom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -25,20 +22,20 @@ import static org.junit.Assert.assertTrue;
  */
 public class Datalog2IQConversionTest {
 
-    private static final Variable X = DATA_FACTORY.getVariable("x");
-    private static final Variable Y = DATA_FACTORY.getVariable("y");
-    private static final Constant TWO = DATA_FACTORY.getConstantLiteral("2", INTEGER);
-    private static final Function URI_TEMPLATE = DATA_FACTORY.getUriTemplate(
-            DATA_FACTORY.getConstantLiteral("http://example.org/"),
-            DATA_FACTORY.getVariable("z"));
+    private static final Variable X = TERM_FACTORY.getVariable("x");
+    private static final Variable Y = TERM_FACTORY.getVariable("y");
+    private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final Function URI_TEMPLATE = TERM_FACTORY.getUriTemplate(
+            TERM_FACTORY.getConstantLiteral("http://example.org/"),
+            TERM_FACTORY.getVariable("z"));
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         AtomPredicate predicate = ATOM_FACTORY.getAtomPredicate("ans", 5);
 
-        Function datalogHead = DATA_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
+        Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 
-        TargetAtom targetAtom = convertFromDatalogDataAtom(datalogHead);
+        TargetAtom targetAtom = DATALOG_CONVERSION_TOOLS.convertFromDatalogDataAtom(datalogHead);
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
         ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();

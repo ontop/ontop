@@ -1,20 +1,24 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
@@ -29,6 +33,15 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     private Term currentSubject;
 
     protected String error = "";
+    private final TermFactory termFactory;
+    private final AtomFactory atomFactory;
+    private final RDF rdfFactory;
+
+    public TurtleOBDAVisitorImpl(TermFactory termFactory, AtomFactory atomFactory) {
+        this.rdfFactory = new SimpleRDF();
+        this.termFactory = termFactory;
+        this.atomFactory = atomFactory;
+    }
 
     public String getError() {
         return error;
@@ -38,9 +51,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         return text.substring(1, text.length() - 1);
     }
 
-    private Term typeTerm(String text, COL_TYPE col_type) {
-        ValueConstant integerConstant = TERM_FACTORY.getConstantLiteral(text, COL_TYPE.LITERAL);
-        return TERM_FACTORY.getTypedTerm(integerConstant, col_type);
+    private Term typeTerm(String text, IRI datatype) {
+        ValueConstant integerConstant = termFactory.getConstantLiteral(text, datatype);
+        return termFactory.getTypedTerm(integerConstant, datatype);
     }
 
     protected Term construct(String text) {
@@ -52,12 +65,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(token.toString()); // a single URI template
-                toReturn = TERM_FACTORY.getUriTemplate(uriTemplate);
+                ValueConstant uriTemplate = termFactory.getConstantLiteral(token.toString()); // a single URI template
+                toReturn = termFactory.getUriTemplate(uriTemplate);
             } else if (token instanceof ColumnString) {
                 // a single URI template
-                Variable column = TERM_FACTORY.getVariable(token.toString());
-                toReturn = TERM_FACTORY.getUriTemplate(column);
+                Variable column = termFactory.getVariable(token.toString());
+                toReturn = termFactory.getUriTemplate(column);
             }
         } else {
             StringBuilder sb = new StringBuilder();
@@ -66,13 +79,13 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
                     sb.append(token.toString());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
-                    Variable column = TERM_FACTORY.getVariable(token.toString());
+                    Variable column = termFactory.getVariable(token.toString());
                     terms.add(column);
                 }
             }
-            ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+            ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
             terms.add(0, uriTemplate);
-            toReturn = TERM_FACTORY.getUriTemplate(terms);
+            toReturn = termFactory.getUriTemplate(terms);
         }
         return toReturn;
     }
@@ -172,11 +185,11 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             if (i > 0) {
                 st = str.substring(0, i);
                 st = st.replace("\\\\", "");
-                terms.add(TERM_FACTORY.getConstantLiteral(st));
+                terms.add(termFactory.getConstantLiteral(st));
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 j = str.indexOf("}");
-                terms.add(TERM_FACTORY.getVariable(str.substring(1, j)));
+                terms.add(termFactory.getVariable(str.substring(1, j)));
                 str = str.substring(j + 1, str.length());
             } else {
                 break;
@@ -184,7 +197,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         }
         if (!str.equals("")) {
             str = str.replace("\\\\", "");
-            terms.add(TERM_FACTORY.getConstantLiteral(str));
+            terms.add(termFactory.getConstantLiteral(str));
         }
         return terms;
     }
@@ -198,9 +211,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             return terms.get(0);
         }
 
-        Function f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+        Function f = termFactory.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
         for (int j = 2; j < terms.size(); j++) {
-            f = TERM_FACTORY.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+            f = termFactory.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
         }
         return f;
     }
@@ -222,33 +235,33 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             if (object instanceof Function) {
                 if (QueryUtils.isGrounded(object)) {
                     ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-                    Predicate predicate = TERM_FACTORY.getClassPredicate(c.getValue());
-                    atom = TERM_FACTORY.getFunction(predicate, subject);
+                    Predicate predicate = atomFactory.getClassPredicate(c.getValue());
+                    atom = termFactory.getFunction(predicate, subject);
                 } else {
-                    atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
+                    atom = atomFactory.getTripleAtom(subject, pred, object);
                 }
             } else if (object instanceof Variable) {
-                Term uriOfPred = TERM_FACTORY.getUriTemplate(pred);
-                Term uriOfObject = TERM_FACTORY.getUriTemplate(object);
-                atom = ATOM_FACTORY.getTripleAtom(subject, uriOfPred, uriOfObject);
+                Term uriOfPred = termFactory.getUriTemplate(pred);
+                Term uriOfObject = termFactory.getUriTemplate(object);
+                atom = atomFactory.getTripleAtom(subject, uriOfPred, uriOfObject);
             } else {
                 throw new IllegalArgumentException("parser cannot handle object " + object);
             }
         } else if (!QueryUtils.isGrounded(pred)) {
-            atom = ATOM_FACTORY.getTripleAtom(subject, pred, object);
+            atom = atomFactory.getTripleAtom(subject, pred, object);
         } else {
             Predicate predicate;
             if (pred instanceof Function) {
                 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
                 if (object instanceof Variable) {
-                    predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+                    predicate = atomFactory.getDataPropertyPredicate(pr.getValue());
                 } else {
                     if (object instanceof Function) {
                         if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
 
-                            predicate = TERM_FACTORY.getObjectPropertyPredicate(pr.getValue());
+                            predicate = atomFactory.getObjectPropertyPredicate(pr.getValue());
                         } else {
-                            predicate = TERM_FACTORY.getDataPropertyPredicate(pr.getValue());
+                            predicate = atomFactory.getDataPropertyPredicate(pr.getValue());
                         }
                     } else {
                         throw new IllegalArgumentException("parser cannot handle object " + object);
@@ -257,7 +270,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             } else {
                 throw new IllegalArgumentException("predicate should be a URI Function");
             }
-            atom = TERM_FACTORY.getFunction(predicate, subject, object);
+            atom = termFactory.getFunction(predicate, subject, object);
         }
         return atom;
     }
@@ -343,7 +356,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         if (rc != null) {
             return visitResource(rc);
         }
-        return TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF_TYPE));
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF_TYPE));
     }
 
     @Override
@@ -376,7 +389,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         if (ctx.iriExt() != null) {
             return visitIriExt(ctx.iriExt());
         }
-        return construct(this.visitIri(ctx.iri()));
+        return construct(this.visitIri(ctx.iri()).getIRIString());
     }
 
     public Term visitIriExt(IriExtContext ctx) {
@@ -388,41 +401,33 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Function visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        return TERM_FACTORY.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
+        return termFactory.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
     public Function visitVariableLiteral_2(VariableLiteral_2Context ctx) {
         Variable var = visitVariable(ctx.variable());
-        String iri = visitIri(ctx.iri());
-        Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(iri);
-        if (type.isPresent()) {
-            return TERM_FACTORY.getTypedTerm(var, type.get());
-        }
-        throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + iri);
+        IRI iri = visitIri(ctx.iri());
+        return termFactory.getTypedTerm(var, iri);
     }
 
     @Override
-    public String visitIri(IriContext ctx) {
+    public IRI visitIri(IriContext ctx) {
         TerminalNode token = ctx.PREFIXED_NAME();
-        if (token != null) {
-            return concatPrefix(token.getText());
-        }
-        return removeBrackets(ctx.IRIREF().getText());
+        return rdfFactory.createIRI(
+                token != null
+                        ? concatPrefix(token.getText())
+                        : removeBrackets(ctx.IRIREF().getText()));
     }
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
-        return TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
+        return termFactory.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
     }
 
     @Override
-    public Term visitLanguageTag(LanguageTagContext ctx) {
-        VariableContext vc = ctx.variable();
-        if (vc != null) {
-            return visitVariable(vc);
-        }
-        return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
+    public String visitLanguageTag(LanguageTagContext ctx) {
+        return ctx.LANGTAG().getText().substring(1).toLowerCase();
     }
 
     @Override
@@ -433,12 +438,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
             LanguageTagContext lc = ctx.languageTag();
             //if variable we cannot assign a datatype yet
             if (literal instanceof Variable) {
-                return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+                return termFactory.getTypedTerm(literal, XSD.STRING);
             }
             if (lc != null) {
-                return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
+                return termFactory.getTypedTerm(literal, visitLanguageTag(lc));
             }
-            return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+            return termFactory.getTypedTerm(literal, XSD.STRING);
         }
         return (Term) visitChildren(ctx);
     }
@@ -449,18 +454,14 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         if (str.contains("{")) {
             return getNestedConcat(str);
         }
-        return TERM_FACTORY.getConstantLiteral(str.substring(1, str.length() - 1), COL_TYPE.STRING); // without the double quotes
+        return termFactory.getConstantLiteral(str.substring(1, str.length() - 1), XSD.STRING); // without the double quotes
     }
 
     @Override
     public Term visitTypedLiteral(TypedLiteralContext ctx) {
         Term stringValue = visitStringLiteral(ctx.stringLiteral());
-        String iriRef = visitIri(ctx.iri());
-        Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(iriRef);
-        if (type.isPresent()) {
-            return TERM_FACTORY.getTypedTerm(stringValue, type.get());
-        }
-        throw new RuntimeException("Unsupported datatype: " + iriRef);
+        IRI iriRef = visitIri(ctx.iri());
+        return termFactory.getTypedTerm(stringValue, iriRef);
     }
 
     @Override
@@ -470,7 +471,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
-        return typeTerm(ctx.BOOLEAN_LITERAL().getText(), COL_TYPE.BOOLEAN);
+        return typeTerm(ctx.BOOLEAN_LITERAL().getText(), XSD.BOOLEAN);
     }
 
     @Override
@@ -478,38 +479,38 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
         TerminalNode token = ctx.INTEGER();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+            return typeTerm(token.getText(), XSD.INTEGER);
         }
         token = ctx.DOUBLE();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+            return typeTerm(token.getText(), XSD.DOUBLE);
         }
-        return typeTerm(ctx.DECIMAL().getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL().getText(), XSD.DECIMAL);
     }
 
     @Override
     public Term visitNumericPositive(NumericPositiveContext ctx) {
         TerminalNode token = ctx.INTEGER_POSITIVE();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+            return typeTerm(token.getText(), XSD.INTEGER);
         }
         token = ctx.DOUBLE_POSITIVE();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+            return typeTerm(token.getText(), XSD.DOUBLE);
         }
-        return typeTerm(ctx.DECIMAL_POSITIVE().getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL_POSITIVE().getText(), XSD.DECIMAL);
     }
 
     @Override
     public Term visitNumericNegative(NumericNegativeContext ctx) {
         TerminalNode token = ctx.INTEGER_NEGATIVE();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.INTEGER);
+            return typeTerm(token.getText(), XSD.INTEGER);
         }
         token = ctx.DOUBLE_NEGATIVE();
         if (token != null) {
-            return typeTerm(token.getText(), COL_TYPE.DOUBLE);
+            return typeTerm(token.getText(), XSD.DOUBLE);
         }
-        return typeTerm(ctx.DECIMAL_NEGATIVE().getText(), COL_TYPE.DECIMAL);
+        return typeTerm(ctx.DECIMAL_NEGATIVE().getText(), XSD.DECIMAL);
     }
 }

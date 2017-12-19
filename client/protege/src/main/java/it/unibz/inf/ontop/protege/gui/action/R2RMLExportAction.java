@@ -136,7 +136,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 throws Exception {
 
             SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
-                    modelManager.getActiveOntology());
+                    modelManager.getActiveOntology(), obdaModel.getTermFactory());
             writer.write(file);
         }
 

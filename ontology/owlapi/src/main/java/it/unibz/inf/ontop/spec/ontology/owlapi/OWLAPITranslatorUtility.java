@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
  * #L%
  */
 
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -45,6 +48,14 @@ import java.util.Set;
 public class OWLAPITranslatorUtility {
 
 	private static final Logger log = LoggerFactory.getLogger(OWLAPITranslatorUtility.class);
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+
+	@Inject
+	private OWLAPITranslatorUtility(TermFactory termFactory, TypeFactory typeFactory) {
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
+	}
 
 	/***
 	 * Load all the imports of the ontology and merges into a single ontop internal representation
@@ -53,7 +64,7 @@ public class OWLAPITranslatorUtility {
 	 * @return
 	 */
 	
-	public static Ontology translateImportsClosure(OWLOntology ontology) {
+	public Ontology translateImportsClosure(OWLOntology ontology) {
 		Set<OWLOntology> closure = ontology.getOWLOntologyManager().getImportsClosure(ontology);
 		return mergeTranslateOntologies(closure);
 	}
@@ -66,10 +77,10 @@ public class OWLAPITranslatorUtility {
 	 */
 	
 	@Deprecated
-	public static Ontology mergeTranslateOntologies(Collection<OWLOntology> ontologies)   {
+	public Ontology mergeTranslateOntologies(Collection<OWLOntology> ontologies)   {
 		log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
 
-		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(ontologies);
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(ontologies, termFactory, typeFactory);
 		for (OWLOntology owl : ontologies) {
 			translator.setCurrentOWLOntology(owl);
 			for (OWLAxiom axiom : owl.getAxioms())  {
@@ -91,8 +102,8 @@ public class OWLAPITranslatorUtility {
 	 * @return
 	 */
 	
-	public static Ontology translate(OWLOntology owl) {
-		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
+	public Ontology translate(OWLOntology owl) {
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl), termFactory, typeFactory);
 		translator.setCurrentOWLOntology(owl);
 
 		for (OWLAxiom axiom : owl.getAxioms()) 
@@ -108,10 +119,10 @@ public class OWLAPITranslatorUtility {
 	 * @throws OWLOntologyCreationException
 	 */
 	
-	public static Ontology loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
+	public Ontology loadOntologyFromFile(String filename) throws OWLOntologyCreationException {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl));
+		OWLAPITranslatorOWL2QL translator = new OWLAPITranslatorOWL2QL(Collections.singleton(owl), termFactory, typeFactory);
 		translator.setCurrentOWLOntology(owl);
 
 		for (OWLAxiom axiom : owl.getAxioms()) 

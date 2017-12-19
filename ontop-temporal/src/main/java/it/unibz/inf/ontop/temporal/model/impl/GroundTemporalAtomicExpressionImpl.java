@@ -13,7 +13,12 @@ public class GroundTemporalAtomicExpressionImpl  extends TemporalAtomicExpressio
     }
 
     @Override
-    public ImmutableList<Constant> getTerms() {
-        return (ImmutableList<Constant>) super.getTerms();
+    public ImmutableList<Constant> getImmutableTerms() {
+        return (ImmutableList<Constant>) super.getImmutableTerms();
+    }
+
+    @Override
+    public List<? extends Term> getTerms() {
+        return super.getTerms();
     }
 }

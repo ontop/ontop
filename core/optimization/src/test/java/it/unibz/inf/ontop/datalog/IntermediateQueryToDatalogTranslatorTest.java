@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -18,15 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static org.junit.Assert.assertTrue;
 
 
 public class IntermediateQueryToDatalogTranslatorTest {
 
 
-    private static Variable X = DATA_FACTORY.getVariable("x");
+    private static Variable X = TERM_FACTORY.getVariable("x");
     private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
@@ -43,10 +42,10 @@ public class IntermediateQueryToDatalogTranslatorTest {
     private static Predicate P2_DATALOG_PREDICATE;
 
     static {
-        ANS1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("ans1");
-        SUBQUERY1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+"1");
-        P1_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p1");
-        P2_DATALOG_PREDICATE = DATA_FACTORY.getClassPredicate("p2");
+        ANS1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("ans1");
+        SUBQUERY1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate(DATALOG_FACTORY.getSubqueryPredicatePrefix()+"1");
+        P1_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p1");
+        P2_DATALOG_PREDICATE = ATOM_FACTORY.getClassPredicate("p2");
     }
 
     @Test
@@ -69,11 +68,11 @@ public class IntermediateQueryToDatalogTranslatorTest {
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
         queryBuilder.addChild(rootNode, unionNode);
 
-        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(P1_X_ATOM);
-        queryBuilder.addChild(unionNode, extensionalDataNode1);
+        IntensionalDataNode intensionalDataNode1 = IQ_FACTORY.createIntensionalDataNode(P1_X_ATOM);
+        queryBuilder.addChild(unionNode, intensionalDataNode1);
 
-        ExtensionalDataNode extensionalDataNode2 = IQ_FACTORY.createExtensionalDataNode(P2_X_ATOM);
-        queryBuilder.addChild(unionNode, extensionalDataNode2);
+        IntensionalDataNode intensionalDataNode2 = IQ_FACTORY.createIntensionalDataNode(P2_X_ATOM);
+        queryBuilder.addChild(unionNode, intensionalDataNode2);
 
 
         IntermediateQuery inputQuery = queryBuilder.build();
@@ -94,10 +93,10 @@ public class IntermediateQueryToDatalogTranslatorTest {
         /**
          Expected Datalog program
          */
-        Function ans1Atom = DATA_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
-        Function ansSQ1Atom = DATA_FACTORY.getFunction(SUBQUERY1_DATALOG_PREDICATE, X);
-        Function p1Atom = DATA_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
-        Function p2Atom = DATA_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
+        Function ans1Atom = TERM_FACTORY.getFunction(ANS1_DATALOG_PREDICATE, X);
+        Function ansSQ1Atom = TERM_FACTORY.getFunction(SUBQUERY1_DATALOG_PREDICATE, X);
+        Function p1Atom = TERM_FACTORY.getFunction(P1_DATALOG_PREDICATE, X);
+        Function p2Atom = TERM_FACTORY.getFunction(P2_DATALOG_PREDICATE, X);
 
         List<CQIE> cqies = new ArrayList<>();
 

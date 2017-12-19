@@ -10,10 +10,10 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
@@ -28,8 +28,6 @@ import java.sql.Types;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static junit.framework.TestCase.assertTrue;
 
@@ -42,24 +40,23 @@ public class SubqueryTripleMappingGenerationTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final Variable X = DATA_FACTORY.getVariable("x");
+    private static final Variable X = TERM_FACTORY.getVariable("x");
 
     private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static BasicDBMetadata METADATA;
 
-    public static BasicDBMetadata METADATA = DBMetadataTestingTools.createDummyMetadata();
-
-    private static final AtomPredicate P1_PREDICATE;
-    private static final AtomPredicate P2_PREDICATE;
+    private static final RelationPredicate P1_PREDICATE;
+    private static final RelationPredicate P2_PREDICATE;
 
     static {
-        METADATA = DBMetadataTestingTools.createDummyMetadata();
+        METADATA = createDummyMetadata();
         QuotedIDFactory idFactory = METADATA.getQuotedIDFactory();
         DatabaseRelationDefinition table1Def = METADATA.createDatabaseRelation(idFactory.createRelationID(null, "table1"));
         DatabaseRelationDefinition table2Def = METADATA.createDatabaseRelation(idFactory.createRelationID(null, "table2"));
         table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        P1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
-        P2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        P1_PREDICATE = table1Def.getAtomPredicate();
+        P2_PREDICATE = table2Def.getAtomPredicate();
     }
 
     @Test
@@ -101,7 +98,7 @@ public class SubqueryTripleMappingGenerationTest {
                 .collect(Collectors.joining(""));
         log.debug("Saturated mapping:\n" + debug);
 
-        IntermediateQuery iq = saturatedMapping.getDefinition(ATOM_FACTORY.getAtomPredicate(PredicateImpl.QUEST_TRIPLE_PRED)).get();
+        IntermediateQuery iq = saturatedMapping.getDefinition(ATOM_FACTORY.getTripleAtomPredicate()).get();
         Optional<Constant> predConstant = iq.getNodesInTopDownOrder().stream()
             .filter(n -> n instanceof ConstructionNode)
             .flatMap(n -> ((ConstructionNode)n).getSubstitution().getImmutableMap().values().stream())

@@ -19,6 +19,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
-public interface DatatypePredicate extends BuiltinPredicate {
-	// NO-OP
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+
+public interface DatatypePredicate extends RDFTermConstructionSymbol {
+
+	@Override
+	RDFDatatype getReturnedType();
 }

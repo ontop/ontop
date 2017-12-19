@@ -92,4 +92,9 @@ public class BoxPlusNodeImpl extends TemporalOperatorWithRangeImpl implements Bo
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return null;
     }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return false;
+    }
 }

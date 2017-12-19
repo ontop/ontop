@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SQLParserTest {
@@ -41,7 +42,7 @@ public class SQLParserTest {
 
 	@Before
 	public void beforeEachTest() {
-		metadata = RDBMetadataExtractionTools.createDummyMetadata();
+		metadata = createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 		DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
 		r.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);
@@ -173,7 +174,7 @@ public class SQLParserTest {
 		r20.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
 		r20.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
 
-		sqp = new SelectQueryParser(metadata);
+		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY);
 	}
 
 	@Test

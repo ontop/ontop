@@ -64,11 +64,6 @@ public class MapItem {
 	public Predicate getDataType() {
 		return dataType;
 	}
-	
-	public boolean isSubjectMap() {
-		// A null predicate is assumed to be a class predicate
-		return (predicateItem == null || predicateItem.isClassPredicate());
-	}
 
 	public boolean isObjectMap() {
 		return predicateItem.isDataPropertyPredicate();

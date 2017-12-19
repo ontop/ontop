@@ -20,12 +20,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.ArrayList;
@@ -42,30 +44,43 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class DatalogQueryServices {
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
+	private final TermFactory termFactory;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final EQNormalizer eqNormalizer;
+	private final CQCUtilities cqcUtilities;
+
+	@Inject
+	private DatalogQueryServices(TermFactory termFactory, UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+								 EQNormalizer eqNormalizer, CQCUtilities cqcUtilities) {
+		this.termFactory = termFactory;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.eqNormalizer = eqNormalizer;
+		this.cqcUtilities = cqcUtilities;
+	}
 
 	// to be taken from it.unibz.inf.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
-	private static Function getFreshAtom(Function a, String suffix) {
+	private Function getFreshAtom(Function a, String suffix) {
 		List<Term> termscopy = new ArrayList<>(a.getArity());
 		
 		for (Term t : a.getTerms()) {
 			if (t instanceof Variable) {
 				Variable v = (Variable)t;
-				termscopy.add(TERM_FACTORY.getVariable(v.getName() + suffix));
+				termscopy.add(termFactory.getVariable(v.getName() + suffix));
 			}
 			else
 				termscopy.add(t.clone());
 		}
-		return TERM_FACTORY.getFunction(a.getFunctionSymbol(), termscopy);
+		return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	
-	public static List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
+	public List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
 		
 		PriorityQueue<CQIE> queue = new PriorityQueue<CQIE>(rules.size(), new Comparator<CQIE> () {
 			@Override
@@ -110,7 +125,7 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Substitution mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
+					Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
                             query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
@@ -120,13 +135,13 @@ public class DatalogQueryServices {
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
-						SubstitutionUtilities.applySubstitution(newquery, mgu, false);
+						substitutionUtilities.applySubstitution(newquery, mgu, false);
 						
 						// REDUCE
-						EQNormalizer.enforceEqualities(newquery);
+						eqNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
-						CQCUtilities.removeRundantAtoms(newquery);
+						cqcUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);
 						replaced = true;

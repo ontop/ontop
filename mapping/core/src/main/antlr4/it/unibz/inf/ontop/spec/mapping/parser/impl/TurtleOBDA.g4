@@ -53,11 +53,6 @@ grammar TurtleOBDA;
  then the source files are generated in target/generated-sources/antlr4/<subPath>
  */
 
-//@header {
-//import it.unibz.inf.ontop.model.term.*;
-//import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-//}
-
 
 /*------------------------------------------------------------------
  * PARSER RULES

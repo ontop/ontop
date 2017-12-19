@@ -36,6 +36,10 @@ public interface DatalogFactory {
 
     Function getSPARQLLeftJoin(Term t1, Term t2);
 
-    String getSubqueryPredicatePrefix();
+    AlgebraOperatorPredicate getSparqlJoinPredicate();
+    AlgebraOperatorPredicate getSparqlLeftJoinPredicate();
+    AlgebraOperatorPredicate getSparqlGroupPredicate();
+    AlgebraOperatorPredicate getSparqlHavingPredicate();
 
+    String getSubqueryPredicatePrefix();
 }

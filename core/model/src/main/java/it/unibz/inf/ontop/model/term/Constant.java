@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TermType;
 
 /**
  * This class defines a type of {@link Term} in which it has a constant
@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
  */
 public interface Constant extends NonFunctionalTerm, GroundTerm {
 
-	public Predicate.COL_TYPE getType();
+	TermType getType();
 
 	// TODO: eliminate getValue from this interface
 	

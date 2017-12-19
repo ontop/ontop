@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 /**
  * Commutative: the children order does not matter
  */
-public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilterNode {
+public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilterNode, NaryOperatorNode {
 
     @Override
     CommutativeJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);

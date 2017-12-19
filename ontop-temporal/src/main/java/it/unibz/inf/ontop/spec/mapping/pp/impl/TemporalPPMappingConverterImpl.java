@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
@@ -15,6 +14,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemporalPPMappingConverter.class);
@@ -38,18 +36,30 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
     private final TemporalIntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
     private final TemporalDatalog2QueryMappingConverter mappingConverter;
+    private final TermFactory termFactory;
+    private final EQNormalizer eqNormalizer;
+    private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
+    private final TemporalSQLPPMapping2DatalogConverter temporalSQLPPMapping2DatalogConverter;
 
 
 
     @Inject
     private TemporalPPMappingConverterImpl(SpecificationFactory specificationFactory,
                                            TemporalIntermediateQueryFactory iqFactory,
-                                           ProvenanceMappingFactory provMappingFactory, TemporalDatalog2QueryMappingConverter mappingConverter) {
+                                           ProvenanceMappingFactory provMappingFactory,
+                                           TemporalDatalog2QueryMappingConverter mappingConverter,
+                                           TermFactory termFactory, EQNormalizer eqNormalizer,
+                                           LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
+                                           TemporalSQLPPMapping2DatalogConverter temporalSQLPPMapping2DatalogConverter) {
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
         this.mappingConverter = mappingConverter;
 
+        this.termFactory = termFactory;
+        this.eqNormalizer = eqNormalizer;
+        this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
+        this.temporalSQLPPMapping2DatalogConverter = temporalSQLPPMapping2DatalogConverter;
     }
     @Override
     public MappingWithProvenance convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
@@ -75,7 +85,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
         /*
          * May also add views in the DBMetadata!
          */
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = TemporalSQLPPMapping2DatalogConverter.convert(
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = temporalSQLPPMapping2DatalogConverter.convert(
                 ppMapping.getTripleMaps(), dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", datalogMap.size());
@@ -85,7 +95,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
 
         return datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> LegacyIsNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
+                        e -> isNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
                         Map.Entry::getValue));
     }
 
@@ -110,7 +120,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
                     Term originalLangTag = typedTerm.getTerm(1);
                     if (originalLangTag instanceof ValueConstant) {
                         ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = TERM_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+                        Term normalizedLangTag = termFactory.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
                                 originalLangConstant.getType());
                         typedTerm.setTerm(1, normalizedLangTag);
                     }
@@ -120,232 +130,7 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
 
         // Normalizing equalities
         for (CQIE cq: unfoldingProgram)
-            EQNormalizer.enforceEqualities(cq);
+            eqNormalizer.enforceEqualities(cq);
     }
 
-
-
-//    private MappingWithProvenance convertIntoMappingWithProvenance(SQLPPMapping ppMapping, DBMetadata dbMetadata) throws InvalidSelectQueryException {
-//        RDBMetadata metadata = (RDBMetadata)dbMetadata;
-//
-//        for(SQLPPTriplesMap triplesMap : ppMapping.getTripleMaps()){
-//
-//            SelectQueryParser sqp = new SelectQueryParser(metadata);
-//            OBDASQLQuery sourceQuery = triplesMap.getSourceQuery();
-//            List<Function> body = null ;
-//            ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
-//            try {
-//                RAExpression re = sqp.parse(sourceQuery.toString());
-//                lookupTable = re.getAttributes();
-//
-//                body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
-//                body.addAll(re.getDataAtoms());
-//                body.addAll(re.getFilterAtoms());
-//
-//            } catch (InvalidSelectQueryException e) {
-//                e.printStackTrace();
-//            } catch (UnsupportedSelectQueryException e) {
-//                // WRAP UP
-//                //ImmutableSet<QuotedID> variableNames = mappingAxiom.getTargetQuery().stream()
-//                //        .map(f -> collectVariableNames(idfac, f))
-//                //        .reduce((s1, s2) -> ImmutableSet.<QuotedID>builder().addAll(s1).addAll(s2).build())
-//                //        .get();
-//                ImmutableList<QuotedID> variableNames =
-//                        new SelectQueryAttributeExtractor(metadata).extract(sourceQuery.toString());
-//
-//                ParserViewDefinition view = metadata.createParserView(sourceQuery.toString());
-//                // TODO: clean up
-//                boolean needsCreating = view.getAttributes().isEmpty();
-//                ImmutableMap.Builder<QualifiedAttributeID, Variable> builder = ImmutableMap.builder();
-//                List<Term> arguments = new ArrayList<>(variableNames.size());
-//                variableNames.forEach(id -> {
-//                    QualifiedAttributeID qId = new QualifiedAttributeID(null, id);
-//                    if (needsCreating)
-//                        view.addAttribute(qId);
-//                    Variable var = TERM_FACTORY.getVariable(id.getName());
-//                    builder.put(qId, var);
-//                    arguments.add(var);
-//                });
-//
-//                lookupTable = builder.build();
-//
-//                body = new ArrayList<>(1);
-//                body.add(TERM_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
-//            }
-//
-//            for(ImmutableFunctionalTerm ta : triplesMap.getTargetAtoms()) {
-//
-//                TemporalMappingInterval intervalQuery = ((SQLPPTemporalTriplesMap) triplesMap).getTemporalMappingInterval();
-//                TargetAtom targetAtom = convertToQuadAtom(ta, intervalQuery);
-//                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
-//                ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-//                        targetAtom.getSubstitution());
-//                List<Function> bodyAtoms = body;
-////                if (bodyAtoms.isEmpty()) {
-////                    return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
-////                }
-////                else {
-////                    DatalogRule2QueryConverter.AtomClassification atomClassification = new DatalogRule2QueryConverter.AtomClassification(bodyAtoms);
-////
-////                    return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
-////                            atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
-////                            atomClassification.optionalGroupAtom, iqFactory, executorRegistry);
-////                }
-//            }
-//
-//                System.out.println();
-//            }
-//
-//        return null;
-//    }
-//
-//    private Term getGraphURITemplate(TemporalMappingInterval intervalQuery){
-//
-//        Term graphConstrantLiteral = TERM_FACTORY.getConstantLiteral("GRAPH");
-//        Term beginInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isBeginInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
-//        Term endInc = TERM_FACTORY.getConstantLiteral(intervalQuery.isEndInclusiveToString(), Predicate.COL_TYPE.BOOLEAN);
-//
-//        return TERM_FACTORY.getUriTemplate(graphConstrantLiteral, beginInc, intervalQuery.getBegin(),intervalQuery.getEnd(), endInc);
-//    }
-//
-//    private TargetAtom convertToQuadAtom(ImmutableFunctionalTerm targetAtom, TemporalMappingInterval intervalQuery){
-//        Predicate atomPred = targetAtom.getFunctionSymbol();
-//
-//        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
-//        ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
-//
-//        ArrayList <Term> argList = new ArrayList();
-//        Iterator it = targetAtom.getArguments().iterator();
-//        while(it.hasNext()){
-//            argList.add((Term) it.next());
-//        }
-//
-//        if(argList.size() == 1){
-//            Term rdfTypeTerm = TERM_FACTORY.getConstantURI(IriConstants.RDF_TYPE);
-//            argList.add(rdfTypeTerm);
-//            Term predTerm = TERM_FACTORY.getConstantURI(atomPred.getName());
-//            argList.add(predTerm);
-//        }else {
-//            Term predTerm = TERM_FACTORY.getConstantURI(atomPred.getName());
-//            argList.add(1, predTerm);
-//        }
-//
-//        Term graphURITemplate = getGraphURITemplate(intervalQuery);
-//        argList.add(graphURITemplate);
-//
-//        /**
-//         * Replaces all the terms by variables.
-//         * Makes sure these variables are unique.
-//         *
-//         * Creates allBindings entries if needed (in case of constant of a functional term)
-//         */
-//        VariableGenerator variableGenerator = new VariableGenerator(ImmutableSet.of());
-//        for (Term term : argList) {
-//            Variable newArgument;
-//
-//            /**
-//             * If a variable occurs multiple times, rename it and keep track of the equivalence.
-//             *
-//             */
-//            if (term instanceof Variable) {
-//                Variable originalVariable = (Variable) term;
-//                newArgument = variableGenerator.generateNewVariableIfConflicting(originalVariable);
-//                if (!newArgument.equals(originalVariable)) {
-//                    allBindingBuilder.put(newArgument, originalVariable);
-//                }
-//            }
-//            /**
-//             * Ground-term: replace by a variable and add a binding.
-//             * (easier to merge than putting the ground term in the data atom).
-//             */
-//            else if (isGroundTerm(term)) {
-//                Variable newVariable = variableGenerator.generateNewVariable();
-//                newArgument = newVariable;
-//                allBindingBuilder.put(newVariable, castIntoGroundTerm(term));
-//            }
-//            /**
-//             * Non-ground functional term
-//             */
-//            else {
-//                ImmutableTerm immutableTerm = convertIntoImmutableTerm(term);
-//                variableGenerator.registerAdditionalVariables(immutableTerm.getVariableStream()
-//                        .collect(ImmutableCollectors.toSet()));
-//                Variable newVariable = variableGenerator.generateNewVariable();
-//                newArgument = newVariable;
-//                allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));
-//            }
-//            argListBuilder.add(newArgument);
-//        }
-//
-//
-//        DistinctVariableOnlyDataAtom dataAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ATOM_FACTORY.getAtomPredicate(QUEST_QUADRUPLE_PRED), argListBuilder.build());
-//        ImmutableSubstitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(allBindingBuilder.build());
-//
-//
-//        return new TargetAtomImpl(dataAtom, substitution);
-//    }
-//
-//
-//
-//
-//
-//    private TargetAtom convertFromAtom(ImmutableFunctionalTerm targetAtom){
-//        Predicate atomPred = targetAtom.getFunctionSymbol();
-//        AtomPredicate atomPredicate = (atomPred instanceof AtomPredicate)
-//                ? (AtomPredicate) atomPred
-//                : ATOM_FACTORY.getAtomPredicate(atomPred);
-//
-//        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
-//        ImmutableMap.Builder<Variable, ImmutableTerm> allBindingBuilder = ImmutableMap.builder();
-//
-//        /**
-//         * Replaces all the terms by variables.
-//         * Makes sure these variables are unique.
-//         *
-//         * Creates allBindings entries if needed (in case of constant of a functional term)
-//         */
-//        VariableGenerator variableGenerator = new VariableGenerator(ImmutableSet.of());
-//        for (Term term : targetAtom.getArguments()) {
-//            Variable newArgument;
-//
-//            /**
-//             * If a variable occurs multiple times, rename it and keep track of the equivalence.
-//             *
-//             */
-//            if (term instanceof Variable) {
-//                Variable originalVariable = (Variable) term;
-//                newArgument = variableGenerator.generateNewVariableIfConflicting(originalVariable);
-//                if (!newArgument.equals(originalVariable)) {
-//                    allBindingBuilder.put(newArgument, originalVariable);
-//                }
-//            }
-//            /**
-//             * Ground-term: replace by a variable and add a binding.
-//             * (easier to merge than putting the ground term in the data atom).
-//             */
-//            else if (isGroundTerm(term)) {
-//                Variable newVariable = variableGenerator.generateNewVariable();
-//                newArgument = newVariable;
-//                allBindingBuilder.put(newVariable, castIntoGroundTerm(term));
-//            }
-//            /**
-//             * Non-ground functional term
-//             */
-//            else {
-//                ImmutableTerm immutableTerm = convertIntoImmutableTerm(term);
-//                variableGenerator.registerAdditionalVariables(immutableTerm.getVariableStream()
-//                        .collect(ImmutableCollectors.toSet()));
-//                Variable newVariable = variableGenerator.generateNewVariable();
-//                newArgument = newVariable;
-//                allBindingBuilder.put(newVariable, convertIntoImmutableTerm(term));
-//            }
-//            argListBuilder.add(newArgument);
-//        }
-//
-//        DistinctVariableOnlyDataAtom dataAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
-//        ImmutableSubstitution<ImmutableTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(allBindingBuilder.build());
-//
-//
-//        return new TargetAtomImpl(dataAtom, substitution);
-//    }
 }

@@ -8,12 +8,12 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -30,19 +30,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.fail;
 
 public class MappingTest {
 
-    private static final AtomPredicate P1_PREDICATE;
-    private static final AtomPredicate P3_PREDICATE;
-    private static final AtomPredicate P4_PREDICATE;
-    private static final AtomPredicate P5_PREDICATE;
-    private static final AtomPredicate BROKER_PREDICATE;
+    private static final RelationPredicate P1_PREDICATE;
+    private static final RelationPredicate P3_PREDICATE;
+    private static final RelationPredicate P4_PREDICATE;
+    private static final RelationPredicate P5_PREDICATE;
+    private static final RelationPredicate BROKER_PREDICATE;
 
     private static final DBMetadata DB_METADATA;
 
@@ -66,25 +63,25 @@ public class MappingTest {
     private static final Constant URI_TEMPLATE_STR_1;
 
     static {
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
         table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col12"), Types.INTEGER, null, false);
-        P1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        P1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
         table3Def.addAttribute(idFactory.createAttributeID("col31"), Types.INTEGER, null, false);
-        P3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        P3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
         table4Def.addAttribute(idFactory.createAttributeID("col41"), Types.INTEGER, null, false);
-        P4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        P4_PREDICATE = table4Def.getAtomPredicate();
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
         table5Def.addAttribute(idFactory.createAttributeID("col51"), Types.INTEGER, null, false);
-        P5_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table5Def);
+        P5_PREDICATE = table5Def.getAtomPredicate();
 
         P1_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
         P2_ST_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P1_PREDICATE, ImmutableList.of(S, T));
@@ -97,9 +94,9 @@ public class MappingTest {
         tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), Types.INTEGER, null, false);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), Types.INTEGER, null, true);
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
-        BROKER_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(tableBrokerDef);
+        BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
-        URI_PREDICATE =  new URITemplatePredicateImpl(2);
+        URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
         ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("http://example.org/Dealer", 1);
         URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/person/{}");
 
@@ -141,7 +138,7 @@ public class MappingTest {
          * Renaming
          */
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of()));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
         ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingAssertions.stream()
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
@@ -194,7 +191,7 @@ public class MappingTest {
         mappingAssertions.add(query);
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of()));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
         ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingAssertions.stream()
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),

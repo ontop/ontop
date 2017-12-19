@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.datalog;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -32,23 +35,27 @@ import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 //TODO: rename, and possibly split
 public class VocabularyValidator {
 
 	private final TBoxReasoner reasoner;
 	private final ImmutableOntologyVocabulary voc;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+	private final DatalogFactory datalogFactory;
 
-	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
+	public VocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, AtomFactory atomFactory,
+							   TermFactory termFactory, DatalogFactory datalogFactory) {
 		this.reasoner = reasoner;
 		this.voc = voc;
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+		this.datalogFactory = datalogFactory;
 	}
 
 
 	public CQIE replaceEquivalences(CQIE query) {
-		return DATALOG_FACTORY.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
+		return datalogFactory.getCQIE(query.getHead(), replaceEquivalences(query.getBody()));
 	}
 
 	protected <T extends Term> List<T> replaceEquivalences(List<T> body) {
@@ -65,7 +72,7 @@ public class VocabularyValidator {
 				}
 				else if (atom.isAlgebraFunction()) {
 					// Calling recursively for nested expressions
-					nt = TERM_FACTORY.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
+					nt = termFactory.getFunction(atom.getFunctionSymbol(), replaceEquivalences(atom.getTerms()));
 				}
 				else {
 					nt = getNormal(atom);
@@ -87,23 +94,24 @@ public class VocabularyValidator {
 			OClass c = voc.getClass(p.getName());
 			OClass equivalent = (OClass)reasoner.getClassDAG().getCanonicalForm(c);
 			if (equivalent != null && !equivalent.equals(c))
-				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+				return termFactory.getFunction(atomFactory.getClassPredicate(equivalent.getIRI()), atom.getTerms());
 		} 
-		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
+		else if (/*p.couldBeAnObjectProperty()*/ (p.getArity() == 2) && voc.containsObjectProperty(p.getName())) {
 			ObjectPropertyExpression ope = voc.getObjectProperty(p.getName());
 			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyDAG().getCanonicalForm(ope);
 			if (equivalent != null && !equivalent.equals(ope)) {
+				AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(equivalent.getIRI().getIRIString());
 				if (!equivalent.isInverse()) 
-					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+					return termFactory.getFunction(propertyPredicate, atom.getTerms());
 				else 
-					return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					return termFactory.getFunction(propertyPredicate, atom.getTerm(1), atom.getTerm(0));
 			}
 		}
-		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
+		else if (/*p.couldBeADataProperty()*/ (p.getArity() == 2)  && voc.containsDataProperty(p.getName())) {
 			DataPropertyExpression dpe = voc.getDataProperty(p.getName());
 			DataPropertyExpression equivalent = reasoner.getDataPropertyDAG().getCanonicalForm(dpe);
 			if (equivalent != null && !equivalent.equals(dpe))
-				return TERM_FACTORY.getFunction(equivalent.getPredicate(), atom.getTerms());
+				return termFactory.getFunction(atomFactory.getDataPropertyPredicate(equivalent.getIRI()), atom.getTerms());
 		}
 		return atom;
 	}

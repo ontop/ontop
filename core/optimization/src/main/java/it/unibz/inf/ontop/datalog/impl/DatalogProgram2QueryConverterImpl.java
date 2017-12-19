@@ -30,8 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
-
 /**
  * Converts a datalog program into an intermediate query
  */
@@ -39,12 +37,15 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final DatalogRule2QueryConverter datalogRuleConverter;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
-                                              UnionBasedQueryMerger queryMerger) {
+                                              UnionBasedQueryMerger queryMerger,
+                                              DatalogRule2QueryConverter datalogRuleConverter) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
+        this.datalogRuleConverter = datalogRuleConverter;
     }
 
 
@@ -152,13 +153,13 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
+                return Optional.of(datalogRuleConverter.convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
                         iqFactory, executorRegistry));
             default:
                 List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
                     convertedDefinitions.add(
-                            convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
+                            datalogRuleConverter.convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
                                     Optional.<ImmutableQueryModifiers>empty(), iqFactory, executorRegistry));
                 }
                 return optionalModifiers.isPresent()

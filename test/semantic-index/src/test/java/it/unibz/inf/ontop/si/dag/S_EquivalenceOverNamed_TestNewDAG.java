@@ -38,6 +38,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR_UTILITY;
+
 public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 	ArrayList<String> input= new ArrayList<String>();
@@ -102,7 +104,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPI_TRANSLATOR_UTILITY.loadOntologyFromFile(fileInput));
 			//transform in a named graph
 			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
 			log.debug("Input number {}", i+1 );

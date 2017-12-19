@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 
@@ -17,8 +17,9 @@ public class ExampleSiemensProgram {
 
     public static DatalogMTLProgram getSampleProgram(){
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
-        AtomFactory af = OntopModelSingletons.ATOM_FACTORY;
-        TermFactory tf = OntopModelSingletons.TERM_FACTORY;
+        AtomFactory af = TestingTools.ATOM_FACTORY;
+        TermFactory tf = TestingTools.TERM_FACTORY;
+        TypeFactory tyf = TestingTools.TYPE_FACTORY;
 
         Map<String, String> prefixes = new HashMap<>();
         prefixes.put("ss:", "http://siemens.com/ns#");
@@ -53,9 +54,9 @@ public class ExampleSiemensProgram {
 
         TemporalAtomicExpression lrs = f.createTemporalAtomicExpression(conceptLRS, varRs);
         TemporalAtomicExpression rs = f.createTemporalAtomicExpression(dataPropertyRs, varRs, varV);
-        ComparisonExpression comparisonLs = f.createComparisonExpression(af.getAtomPredicate("LT", 2), varV, tf.getConstantLiteral("1000", Predicate.COL_TYPE.DECIMAL));
+        ComparisonExpression comparisonLs = f.createComparisonExpression(af.getAtomPredicate("LT", 2), varV, tf.getConstantLiteral("1000", tyf.getXsdDecimalDatatype()));
         TemporalAtomicExpression hrs = f.createTemporalAtomicExpression(conceptHRS, varRs);
-        ComparisonExpression comparisonHs = f.createComparisonExpression(af.getAtomPredicate("GT",2), varV, tf.getConstantLiteral("1260", Predicate.COL_TYPE.DECIMAL));
+        ComparisonExpression comparisonHs = f.createComparisonExpression(af.getAtomPredicate("GT",2), varV, tf.getConstantLiteral("1260", tyf.getXsdDecimalDatatype()));
         TemporalAtomicExpression mfon = f.createTemporalAtomicExpression(conceptMFON, varTs);
         TemporalAtomicExpression pio = f.createTemporalAtomicExpression(conceptPIO, varTb);
 

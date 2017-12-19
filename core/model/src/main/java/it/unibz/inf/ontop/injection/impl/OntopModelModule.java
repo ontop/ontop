@@ -2,20 +2,24 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 public class OntopModelModule extends OntopAbstractModule {
 
@@ -28,13 +32,18 @@ public class OntopModelModule extends OntopAbstractModule {
         configureCoreConfiguration();
 
         // Core factories: Too central to be overloaded from the properties
-        bind(TypeFactory.class).toInstance(TYPE_FACTORY);
-        bind(TermFactory.class).toInstance(TERM_FACTORY);
+        bindFromSettings(TypeFactory.class);
+        bindFromSettings(TermFactory.class);
+        bindFromSettings(AtomFactory.class);
+        bindFromSettings(SubstitutionFactory.class);
+        bindFromSettings(DatalogFactory.class);
 
         bindFromSettings(IntermediateQueryValidator.class);
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(FilterNullableVariableQueryTransformer.class);
         bindFromSettings(VariableDefinitionExtractor.class);
+        bindFromSettings(ExpressionNormalizer.class);
+        bindFromSettings(IQConverter.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,
@@ -46,7 +55,11 @@ public class OntopModelModule extends OntopAbstractModule {
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
                 EmptyNode.class,
-                TrueNode.class
+                TrueNode.class,
+                UnaryIQTree.class,
+                BinaryNonCommutativeIQTree.class,
+                NaryIQTree.class,
+                IQ.class
                 ),
                 IntermediateQueryFactory.class);
         install(iqFactoryModule);

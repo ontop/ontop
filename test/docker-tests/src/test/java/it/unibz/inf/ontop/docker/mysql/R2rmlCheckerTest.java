@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR_UTILITY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -75,10 +77,10 @@ public class R2rmlCheckerTest {
 	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
-	private List<Predicate> emptyConceptsObda = new ArrayList<>();
-	private List<Predicate> emptyRolesObda = new ArrayList<>();
-	private List<Predicate> emptyConceptsR2rml = new ArrayList<>();
-	private List<Predicate> emptyRolesR2rml = new ArrayList<Predicate>();
+	private List<IRI> emptyConceptsObda = new ArrayList<>();
+	private List<IRI> emptyRolesObda = new ArrayList<>();
+	private List<IRI> emptyConceptsR2rml = new ArrayList<>();
+	private List<IRI> emptyRolesR2rml = new ArrayList<>();
 
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
@@ -93,7 +95,7 @@ public class R2rmlCheckerTest {
 		owlOntology = manager
 				.loadOntologyFromOntologyDocument(owlFileName);
 
-		onto = OWLAPITranslatorUtility.translate(owlOntology);
+		onto = OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
 
 		loadOBDA();
 		loadR2rml();
@@ -191,10 +193,9 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
-				ontology, conn);
-		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
+		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsObda.add(iteratorC.next());
 		}
@@ -202,7 +203,7 @@ public class R2rmlCheckerTest {
 		log.info("Empty concept/s: " + emptyConceptsObda);
 		assertEquals(162, emptyConceptsObda.size());
 
-		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		Iterator<IRI> iteratorR = empties.iEmptyRoles();
 		while (iteratorR.hasNext()){
 			emptyRolesObda.add(iteratorR.next());
 		}
@@ -221,10 +222,10 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-		Ontology ontology =  OWLAPITranslatorUtility.translate(owlOntology);
+		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
 				ontology, conn);
-		Iterator<Predicate> iteratorC = empties.iEmptyConcepts();
+		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsR2rml.add(iteratorC.next());
 		}
@@ -232,7 +233,7 @@ public class R2rmlCheckerTest {
 		log.info("Empty concept/s: " + emptyConceptsR2rml);
 		assertEquals(162, emptyConceptsR2rml.size());
 
-		Iterator<Predicate> iteratorR = empties.iEmptyRoles();
+		Iterator<IRI> iteratorR = empties.iEmptyRoles();
 		while (iteratorR.hasNext()){
 			emptyRolesR2rml.add(iteratorR.next());
 		}

@@ -1,11 +1,16 @@
 package it.unibz.inf.ontop.si.impl;
 
 
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.SILoadingTools.RepositoryInit;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -46,14 +51,22 @@ public class OntologyIndividualLoading {
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
-        RepositoryInit init = createRepository(owlOntology);
+        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+        AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
+        TermFactory termFactory = defaultConfiguration.getTermFactory();
+        TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
+        OWLAPITranslatorUtility owlapiTranslatorUtility = defaultConfiguration.getInjector()
+                .getInstance(OWLAPITranslatorUtility.class);
+
+        RepositoryInit init = createRepository(owlOntology, atomFactory, termFactory, owlapiTranslatorUtility, typeFactory);
 
         try {
             /*
             Loads the data
              */
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(init.ontologyClosure
-                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.vocabulary);
+                    .orElseThrow(() -> new IllegalStateException("An ontology closure was expected")), init.vocabulary,
+                    termFactory, typeFactory);
 
             int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);

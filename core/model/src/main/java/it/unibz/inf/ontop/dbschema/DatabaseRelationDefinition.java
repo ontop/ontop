@@ -40,6 +40,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
+	private final TypeMapper typeMapper;
 	private UniqueConstraint pk;	
 	
 	
@@ -48,8 +49,9 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @param name
 	 */
-	protected DatabaseRelationDefinition(RelationID name) {
+	protected DatabaseRelationDefinition(RelationID name, TypeMapper typeMapper) {
 		super(name);
+		this.typeMapper = typeMapper;
 	}
 	
 	/**
@@ -62,8 +64,9 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 	
 	public Attribute addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
-		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id), 
-										attributes.size() + 1, type, typeName, canNull);
+		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id),
+				attributes.size() + 1, type, typeName, canNull,
+				typeMapper.getTermType(type, typeName));
 		
 		//check for duplicate names (put returns the previous value)
 		Attribute prev = attributeMap.put(id, att);
@@ -133,7 +136,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @return
 	 */
-	
+	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
 		return ImmutableList.copyOf(ucs);
 	}
@@ -145,6 +148,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 			otherFunctionalDependencies.add(constraint);
 	}
 
+	@Override
 	public ImmutableList<FunctionalDependency> getOtherFunctionalDependencies() {
 		return ImmutableList.copyOf(otherFunctionalDependencies);
 	}
@@ -154,7 +158,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @return
 	 */
-	
+	@Override
 	public UniqueConstraint getPrimaryKey() {
 		return pk;
 	}
@@ -175,7 +179,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @return list of foreign keys
 	 */
-	
+	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
 		return ImmutableList.copyOf(fks);
 	}

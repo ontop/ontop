@@ -22,11 +22,6 @@ public class NonGroundFunctionalTermImpl extends ImmutableFunctionalTermImpl imp
         checkNonGroundTermConstraint(this);
     }
 
-    public NonGroundFunctionalTermImpl(Function functionalTermToClone) {
-        super(functionalTermToClone);
-        checkNonGroundTermConstraint(this);
-    }
-
     @Override
     public boolean isGround() {
         return false;

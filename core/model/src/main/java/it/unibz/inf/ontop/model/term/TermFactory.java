@@ -22,11 +22,16 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TermFactory {
 
@@ -42,27 +47,7 @@ public interface TermFactory {
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-	public Predicate getPredicate(String uri, COL_TYPE[] types);
-
-	public Predicate getObjectPropertyPredicate(String name);
-
-	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
-
-	public Predicate getAnnotationPropertyPredicate(String name);
-
-	/**
-	 * with default type COL_TYPE.LITERAL
-	 * @param name
-	 * @return
-	 */
-	
-	public Predicate getDataPropertyPredicate(String name);
-	
-	public Predicate getClassPredicate(String name);
-
-	public Predicate getOWLSameAsPredicate();
-
-	public Predicate getOBDACanonicalIRI();
+	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
 
 	/*
 	 * Built-in function predicates
@@ -110,7 +95,7 @@ public interface TermFactory {
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<? extends ImmutableTerm> terms);
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 
@@ -190,6 +175,13 @@ public interface TermFactory {
 	public BNode getConstantBNode(String name);
 
 	public ValueConstant getBooleanConstant(boolean value);
+
+	ValueConstant getNullConstant();
+
+	/**
+	 * TODO: explain
+	 */
+	ValueConstant getProvenanceSpecialConstant();
 	
 	/**
 	 * Construct a {@link ValueConstant} object.
@@ -216,7 +208,9 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
+	ValueConstant getConstantLiteral(String value, RDFDatatype type);
+
+	ValueConstant getConstantLiteral(String value, IRI type);
 
 
 	/**
@@ -237,12 +231,12 @@ public interface TermFactory {
 	public ValueConstant getConstantLiteral(String value, String language);
 
 	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, Term language);
-	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	public Function getTypedTerm(Term value, RDFDatatype type);
+	Function getTypedTerm(Term value, IRI datatype);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, Predicate.COL_TYPE type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -258,4 +252,13 @@ public interface TermFactory {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
+
+
+	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
+
+	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
+
+	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
+
+	URITemplatePredicate getURITemplatePredicate(int arity);
 }

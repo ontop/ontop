@@ -1,6 +1,10 @@
 package it.unibz.inf.ontop.owlapi.swrl;
 
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.SWRLRule;
 
@@ -11,12 +15,13 @@ import org.semanticweb.owlapi.model.SWRLRule;
  *  
  */
 public class SWRLAPITranslator {
-	
+
 	DatalogProgram program;
 			
-	public SWRLAPITranslator(OWLOntology ontology) {
-		
-		SWRLVisitor visitor = new SWRLVisitor();
+	public SWRLAPITranslator(OWLOntology ontology, AtomFactory atomFactory, TermFactory termFactory,
+							 TypeFactory typeFactory, DatalogFactory datalogFactory) {
+
+		SWRLVisitor visitor = new SWRLVisitor(atomFactory, termFactory, typeFactory, datalogFactory);
 		
 		//get the axioms from the ontology and consider only the rules	
 		program =visitor.createDatalog(ontology);
@@ -24,9 +29,10 @@ public class SWRLAPITranslator {
 		
 	}
 	
-	public SWRLAPITranslator(SWRLRule rule) {
+	public SWRLAPITranslator(SWRLRule rule, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+							 DatalogFactory datalogFactory) {
 		
-		SWRLVisitor visitor = new SWRLVisitor();
+		SWRLVisitor visitor = new SWRLVisitor(atomFactory, termFactory, typeFactory, datalogFactory);
 		
 		//transform the rule
 		program =visitor.createDatalog(rule);

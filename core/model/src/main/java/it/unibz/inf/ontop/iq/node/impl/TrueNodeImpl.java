@@ -5,6 +5,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -12,10 +14,12 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
-public class TrueNodeImpl implements TrueNode {
+import java.util.Optional;
 
+public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
+    private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
 
     @AssistedInject
     private TrueNodeImpl() {
@@ -101,5 +105,38 @@ public class TrueNodeImpl implements TrueNode {
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
+    }
+
+    @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        return (queryNode instanceof TrueNode);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return EMPTY_VARIABLE_SET;
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+
+        return this;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        return EMPTY_VARIABLE_SET;
     }
 }

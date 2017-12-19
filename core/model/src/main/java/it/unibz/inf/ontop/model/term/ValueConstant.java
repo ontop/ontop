@@ -20,23 +20,20 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+
 /**
  * Provides an interface for storing the value constant.
  */
-public interface ValueConstant extends Constant {
+public interface ValueConstant extends RDFConstant {
 	
-	/***
-	 * Returns the language of this Literal constant, or null if its not a
-	 * literal with language.
-	 * 
-	 * @return
-	 */
-	public String getLanguage();
-	
-	/***
+	/**
 	 * Returns the literal value of this constant.
 	 * 
 	 * @return
 	 */
 	public String getValue();
+
+	@Override
+	RDFDatatype getType();
 }

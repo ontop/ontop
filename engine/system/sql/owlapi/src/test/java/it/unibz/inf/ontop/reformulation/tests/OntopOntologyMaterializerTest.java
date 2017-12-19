@@ -158,7 +158,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.build();
 
 			// read onto
-			Ontology onto =  OWLAPITranslatorUtility.translateImportsClosure(
+		OWLAPITranslatorUtility owlapiTranslatorUtility = configuration.getInjector().getInstance(OWLAPITranslatorUtility.class);
+
+		Ontology onto =  owlapiTranslatorUtility.translateImportsClosure(
 					configuration.loadProvidedInputOntology());
 			System.out.println(onto.getSubClassAxioms());
 			System.out.println(onto.getSubObjectPropertyAxioms());

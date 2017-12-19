@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -23,6 +22,7 @@ import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackerImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeTrackingResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools.propagateSubstitutionDownToNodes;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
 
 /**
  * These methods are only accessible by InternalProposalExecutors (requires access to the QueryTreeComponent).
@@ -117,7 +116,8 @@ public class AscendingPropagationTools {
     public static <N extends QueryNode> NodeTrackingResults<N> propagateSubstitutionUp(
             N focusNode, ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate,
             IntermediateQuery query, QueryTreeComponent treeComponent,
-            IntermediateQueryFactory iqFactory, Optional<NodeTracker> optionalAncestryTracker)
+            IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+            Optional<NodeTracker> optionalAncestryTracker)
             throws QueryNodeSubstitutionException, EmptyQueryException {
 
         // Substitutions to be propagated down into branches after the ascendant one
@@ -132,7 +132,7 @@ public class AscendingPropagationTools {
          * Special case: the focus node is the root
          */
         if (!optionalCurrentAncestor.isPresent()) {
-            insertRootConstructionNode(query, treeComponent, substitutionToPropagate, iqFactory);
+            insertRootConstructionNode(query, treeComponent, substitutionToPropagate, iqFactory, substitutionFactory);
         }
 
         /*
@@ -158,7 +158,7 @@ public class AscendingPropagationTools {
             else {
                 results.optionalSubstitutionToPropagate
                         .filter(s -> !s.isEmpty())
-                        .ifPresent(s -> insertRootConstructionNode(query, treeComponent, s, iqFactory));
+                        .ifPresent(s -> insertRootConstructionNode(query, treeComponent, s, iqFactory, substitutionFactory));
             }
 
             results.optionalDescendingPropagParams
@@ -175,7 +175,7 @@ public class AscendingPropagationTools {
     private static void insertRootConstructionNode(IntermediateQuery query,
                                                    QueryTreeComponent treeComponent,
                                                    ImmutableSubstitution<? extends ImmutableTerm> propagatedSubstitution,
-                                                   IntermediateQueryFactory iqFactory) {
+                                                   IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         ImmutableSet<Variable> projectedVariables = query.getProjectionAtom().getVariables();
 
         ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = propagatedSubstitution.getImmutableMap().entrySet().stream()
@@ -185,7 +185,7 @@ public class AscendingPropagationTools {
                         e -> (ImmutableTerm) e.getValue()));
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
-                SUBSTITUTION_FACTORY.getSubstitution(newSubstitutionMap));
+                substitutionFactory.getSubstitution(newSubstitutionMap));
 
         treeComponent.insertParent(treeComponent.getRootNode(), newRootNode);
     }

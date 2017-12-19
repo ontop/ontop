@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Ignore;
@@ -20,11 +21,7 @@ import org.junit.Test;
 import java.sql.Types;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.DATA_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.IQ_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -35,50 +32,50 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class FunctionalDependencyTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE;
-    private final static AtomPredicate TABLE2_PREDICATE;
-    private final static AtomPredicate TABLE3_PREDICATE;
-    private final static AtomPredicate TABLE4_PREDICATE;
+    private final static RelationPredicate TABLE1_PREDICATE;
+    private final static RelationPredicate TABLE2_PREDICATE;
+    private final static RelationPredicate TABLE3_PREDICATE;
+    private final static RelationPredicate TABLE4_PREDICATE;
 
     private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
     private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static Variable A = DATA_FACTORY.getVariable("a");
-    private final static Variable B = DATA_FACTORY.getVariable("b");
-    private final static Variable C = DATA_FACTORY.getVariable("c");
-    private final static Variable D = DATA_FACTORY.getVariable("d");
-    private final static Variable E = DATA_FACTORY.getVariable("e");
-    private final static Variable F = DATA_FACTORY.getVariable("f");
-    private final static Variable G = DATA_FACTORY.getVariable("g");
-    private final static Variable H = DATA_FACTORY.getVariable("h");
-    private final static Variable I = DATA_FACTORY.getVariable("i");
-    private final static Variable J = DATA_FACTORY.getVariable("j");
-    private final static Variable K = DATA_FACTORY.getVariable("k");
-    private final static Variable L = DATA_FACTORY.getVariable("l");
-    private final static Variable M = DATA_FACTORY.getVariable("m");
-    private final static Variable N = DATA_FACTORY.getVariable("n");
-    private final static Variable O = DATA_FACTORY.getVariable("o");
-    private final static Variable P = DATA_FACTORY.getVariable("p");
-    private final static Variable Q = DATA_FACTORY.getVariable("q");
-    private final static Variable R = DATA_FACTORY.getVariable("r");
-    private final static Variable S = DATA_FACTORY.getVariable("s");
-    private final static Variable T = DATA_FACTORY.getVariable("t");
-    private final static Variable U = DATA_FACTORY.getVariable("u");
-    private final static Variable V = DATA_FACTORY.getVariable("v");
-    private final static Variable W = DATA_FACTORY.getVariable("w");
-    private final static Variable X = DATA_FACTORY.getVariable("x");
-    private final static Variable Y = DATA_FACTORY.getVariable("y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
-    private final static Constant THREE = DATA_FACTORY.getConstantLiteral("3");
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
+    private final static Variable D = TERM_FACTORY.getVariable("d");
+    private final static Variable E = TERM_FACTORY.getVariable("e");
+    private final static Variable F = TERM_FACTORY.getVariable("f");
+    private final static Variable G = TERM_FACTORY.getVariable("g");
+    private final static Variable H = TERM_FACTORY.getVariable("h");
+    private final static Variable I = TERM_FACTORY.getVariable("i");
+    private final static Variable J = TERM_FACTORY.getVariable("j");
+    private final static Variable K = TERM_FACTORY.getVariable("k");
+    private final static Variable L = TERM_FACTORY.getVariable("l");
+    private final static Variable M = TERM_FACTORY.getVariable("m");
+    private final static Variable N = TERM_FACTORY.getVariable("n");
+    private final static Variable O = TERM_FACTORY.getVariable("o");
+    private final static Variable P = TERM_FACTORY.getVariable("p");
+    private final static Variable Q = TERM_FACTORY.getVariable("q");
+    private final static Variable R = TERM_FACTORY.getVariable("r");
+    private final static Variable S = TERM_FACTORY.getVariable("s");
+    private final static Variable T = TERM_FACTORY.getVariable("t");
+    private final static Variable U = TERM_FACTORY.getVariable("u");
+    private final static Variable V = TERM_FACTORY.getVariable("v");
+    private final static Variable W = TERM_FACTORY.getVariable("w");
+    private final static Variable X = TERM_FACTORY.getVariable("x");
+    private final static Variable Y = TERM_FACTORY.getVariable("y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
+    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static Constant THREE = TERM_FACTORY.getConstantLiteral("3");
 
     private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 
     private static final DBMetadata METADATA;
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /*
@@ -97,7 +94,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T1)
                 .addDependent(col4T1)
                 .build());
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -107,7 +104,7 @@ public class FunctionalDependencyTest {
         Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
@@ -129,7 +126,7 @@ public class FunctionalDependencyTest {
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
@@ -151,7 +148,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T4)
                 .addDependent(col4T4)
                 .build());
-        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         dbMetadata.freeze();
         METADATA = dbMetadata;
@@ -748,7 +745,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, B, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, B, TWO));
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
@@ -775,7 +772,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, F, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, F, TWO));
         queryBuilder.addChild(rootNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(

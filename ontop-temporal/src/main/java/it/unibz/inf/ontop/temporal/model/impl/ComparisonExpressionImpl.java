@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class ComparisonExpressionImpl implements ComparisonExpression{
 
@@ -28,8 +29,13 @@ public class ComparisonExpressionImpl implements ComparisonExpression{
     }
 
     @Override
-    public ImmutableList<? extends Term> getTerms() {
+    public ImmutableList<? extends Term> getImmutableTerms() {
         return ImmutableList.copyOf(Arrays.asList(leftTerm, rightTerm));
+    }
+
+    @Override
+    public List<? extends Term> getTerms() {
+        return Arrays.asList(leftTerm, rightTerm);
     }
 
     @Override

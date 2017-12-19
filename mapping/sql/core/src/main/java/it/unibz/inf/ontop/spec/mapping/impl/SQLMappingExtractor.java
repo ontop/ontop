@@ -41,17 +41,20 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
+    private final MetaMappingExpander metaMappingExpander;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings) {
+                                RDBMetadataExtractor dbMetadataExtractor, MetaMappingExpander metaMappingExpander,
+                                OntopMappingSQLSettings settings) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
+        this.metaMappingExpander = metaMappingExpander;
     }
 
     /**
@@ -88,7 +91,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
+        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = metaMappingExpander.expand(
                 ppMapping.getTripleMaps(),
                 settings,
                 dbMetadata);

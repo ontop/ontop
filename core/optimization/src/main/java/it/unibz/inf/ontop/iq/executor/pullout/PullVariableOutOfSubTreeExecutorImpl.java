@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.executor.pullout;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -8,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -23,13 +25,21 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * TODO: explain
  */
 @Singleton
 public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implements PullVariableOutOfSubTreeExecutor<N> {
+
+    private final TermFactory termFactory;
+    private final ImmutabilityTools immutabilityTools;
+
+    @Inject
+    private PullVariableOutOfSubTreeExecutorImpl(TermFactory termFactory, ImmutabilityTools immutabilityTools) {
+        this.termFactory = termFactory;
+        this.immutabilityTools = immutabilityTools;
+    }
 
     @Override
     public PullVariableOutOfSubTreeResults<N> apply(PullVariableOutOfSubTreeProposal<N> proposal,
@@ -55,14 +65,14 @@ public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implem
         N focusNode = proposal.getFocusNode();
 
         Stream<ImmutableExpression> newConditions = proposal.getRenamingSubstitution().getImmutableMap().entrySet().stream()
-                .map(e -> TERM_FACTORY.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+                .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
 
         Stream<ImmutableExpression> otherConditions = focusNode.getOptionalFilterCondition()
                 .map(exp -> exp.flattenAND().stream())
                 .orElseGet(Stream::of);
 
         return (N) focusNode.changeOptionalFilterCondition(
-                ImmutabilityTools.foldBooleanExpressions(Stream.concat(otherConditions, newConditions)));
+                immutabilityTools.foldBooleanExpressions(Stream.concat(otherConditions, newConditions)));
     }
 
     /**

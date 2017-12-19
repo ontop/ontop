@@ -3,8 +3,11 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.VocabularyValidator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
@@ -14,12 +17,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-
 public class LegacyMappingVocabularyValidator extends VocabularyValidator {
 
-    public LegacyMappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
-        super(reasoner, voc);
+    private final DatalogFactory datalogFactory;
+
+    public LegacyMappingVocabularyValidator(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc,
+                                            AtomFactory atomFactory, TermFactory termFactory,
+                                            DatalogFactory datalogFactory) {
+        super(reasoner, voc, atomFactory, termFactory, datalogFactory);
+        this.datalogFactory = datalogFactory;
     }
 
     /***
@@ -56,7 +62,7 @@ public class LegacyMappingVocabularyValidator extends VocabularyValidator {
 
         switch (newHeads.size()) {
             case 1:
-                return DATALOG_FACTORY.getCQIE(newHeads.get(0), mappingAssertion.getBody());
+                return datalogFactory.getCQIE(newHeads.get(0), mappingAssertion.getBody());
             default:
                 throw new EquivalenceReplacingException("Only one head must be returned after replacing equivalences");
         }

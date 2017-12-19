@@ -1,8 +1,12 @@
 package it.unibz.inf.ontop.si.impl;
 
 
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
@@ -38,12 +42,18 @@ public class GraphLoading {
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         try {
             Ontology implicitTbox =  loadTBoxFromDataset(dataset);
-            RepositoryInit init = createRepository(implicitTbox);
+
+            OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+            AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
+            TermFactory termFactory = defaultConfiguration.getTermFactory();
+            TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
+
+            RepositoryInit init = createRepository(implicitTbox, atomFactory, termFactory, typeFactory);
 
             /*
             Loads the data
              */
-            insertDataset(init.dataRepository, init.localConnection, dataset);
+            insertDataset(init.dataRepository, init.localConnection, dataset, termFactory, typeFactory);
 
             /*
             Creates the configuration and the loader object
@@ -58,7 +68,8 @@ public class GraphLoading {
 
 
 
-    private static void insertDataset(SIRepositoryManager dataRepository, Connection localConnection, Dataset dataset)
+    private static void insertDataset(SIRepositoryManager dataRepository, Connection localConnection, Dataset dataset,
+                                      TermFactory termFactory, TypeFactory typeFactory)
             throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
         Set<IRI> graphIRIs = new HashSet<>();
@@ -66,12 +77,12 @@ public class GraphLoading {
         graphIRIs.addAll(dataset.getNamedGraphs());
 
         for (Resource graphIRI : graphIRIs) {
-            insertGraph(dataRepository, localConnection, ((IRI)graphIRI));
+            insertGraph(dataRepository, localConnection, ((IRI)graphIRI), termFactory, typeFactory);
         }
     }
 
     private static void insertGraph(SIRepositoryManager dataRepository, Connection localConnection,
-                                    IRI graphIRI) throws SemanticIndexException {
+                                    IRI graphIRI, TermFactory termFactory, TypeFactory typeFactory) throws SemanticIndexException {
 
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphIRI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat);
@@ -87,7 +98,8 @@ public class GraphLoading {
             URL graphURL = new URL(graphIRI.toString());
             InputStream in = graphURL.openStream();
 
-            SemanticIndexRDFHandler rdfHandler = new SemanticIndexRDFHandler(dataRepository, localConnection);
+            SemanticIndexRDFHandler rdfHandler = new SemanticIndexRDFHandler(dataRepository, localConnection,
+                    termFactory, typeFactory);
             rdfParser.setRDFHandler(rdfHandler);
 
             rdfParser.parse(in, graphIRI.toString());

@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -17,15 +17,18 @@ import java.util.Map;
 
 public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
-    private static final SubstitutionFactory INSTANCE = new SubstitutionFactoryImpl();
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
-    public static SubstitutionFactory getInstance() {
-        return INSTANCE;
+    @Inject
+    private SubstitutionFactoryImpl(AtomFactory atomFactory, TermFactory termFactory) {
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
-        return new ImmutableSubstitutionImpl<>(newSubstitutionMap);
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, atomFactory, termFactory);
     }
 
     @Override
@@ -51,17 +54,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory);
     }
 
     @Override
     public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new Var2VarSubstitutionImpl(substitutionMap);
+        return new Var2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory);
     }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
-        return new InjectiveVar2VarSubstitutionImpl(substitutionMap);
+        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory);
     }
 
     /**
@@ -80,7 +83,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
         return getInjectiveVar2VarSubstitution(newMap);
     }
 
-    private static Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
+    private Variable generateNonConflictingVariable(Variable v, VariableGenerator variableGenerator,
                                                            ImmutableSet<Variable> variables) {
 
         Variable proposedVariable = variableGenerator.generateNewVariableIfConflicting(v);
@@ -97,7 +100,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 variables)
                 .immutableCopy();
 
-        VariableGenerator newVariableGenerator = new VariableGenerator(knownVariables);
+        VariableGenerator newVariableGenerator = new VariableGenerator(knownVariables, termFactory);
         return newVariableGenerator.generateNewVariableFromVar(v);
 
 
