@@ -39,7 +39,6 @@ public class MappingTestingTools {
     public static final MappingMerger MAPPING_MERGER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
-    public static final MappingEquivalenceFreeRewriter EQUIVALENCE_FREE_REWRITER;
     public static final IntermediateQuery2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
 
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
@@ -70,7 +69,6 @@ public class MappingTestingTools {
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
-        EQUIVALENCE_FREE_REWRITER = injector.getInstance(MappingEquivalenceFreeRewriter.class);
         INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IntermediateQuery2DatalogTranslator.class);
     }
 

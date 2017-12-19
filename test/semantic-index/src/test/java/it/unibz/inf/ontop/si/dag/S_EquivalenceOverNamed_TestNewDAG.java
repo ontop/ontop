@@ -24,11 +24,11 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +40,7 @@ import java.util.Set;
 
 public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
-	ArrayList<String> input= new ArrayList<String>();
-	ArrayList<String> output= new ArrayList<String>();
+	ArrayList<String> input = new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
 
@@ -49,10 +48,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		super(name);
 	}
 
-	public void setUp(){
-		
-		
-		
+	public void setUp() {
+
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
@@ -91,47 +88,40 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-		
-
-
-
 	}
 	
-	public void testNamedAndEquivalences() throws Exception{
+	public void testNamedAndEquivalences() throws Exception {
 		//for each file in the input
-		for (int i=0; i<input.size(); i++){
-			String fileInput=input.get(i);
-
-			TBoxReasonerImpl reasoner = (TBoxReasonerImpl)TBoxReasonerImpl.create(OWLAPITranslatorUtility.loadOntologyFromFile(fileInput));
+		for (String fileInput : input){
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 			//transform in a named graph
-			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
-			log.debug("Input number {}", i+1 );
+			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
+			log.debug("Input {}", fileInput);
 			log.info("First graph {}", reasoner.getClassGraph());
 			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", namedDag2);
-			TestTBoxReasonerImpl_Named dag2 = new TestTBoxReasonerImpl_Named(reasoner);
+			TestClassifiedTBoxImpl_Named dag2 = new TestClassifiedTBoxImpl_Named(reasoner);
 
-			assertTrue(testDescendants(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testDescendants(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testDescendants(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testDescendants(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testChildren(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testChildren(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testChildren(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testChildren(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testAncestors(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testAncestors(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testAncestors(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testAncestors(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
-			assertTrue(testParents(dag2.getClassDAG(), namedDag2.getClassDAG()));
-			assertTrue(testParents(dag2.getObjectPropertyDAG(), namedDag2.getObjectPropertyDAG()));
-			assertTrue(testParents(namedDag2.getClassDAG(), dag2.getClassDAG()));
-			assertTrue(testParents(namedDag2.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
+			assertTrue(testDescendants(dag2.classesDAG(), namedDag2.classesDAG()));
+			assertTrue(testDescendants(dag2.objectPropertiesDAG(), namedDag2.objectPropertiesDAG()));
+			assertTrue(testDescendants(namedDag2.classesDAG(), dag2.classesDAG()));
+			assertTrue(testDescendants(namedDag2.objectPropertiesDAG(), dag2.objectPropertiesDAG()));
+			assertTrue(testChildren(dag2.classesDAG(), namedDag2.classesDAG()));
+			assertTrue(testChildren(dag2.objectPropertiesDAG(), namedDag2.objectPropertiesDAG()));
+			assertTrue(testChildren(namedDag2.classesDAG(), dag2.classesDAG()));
+			assertTrue(testChildren(namedDag2.objectPropertiesDAG(), dag2.objectPropertiesDAG()));
+			assertTrue(testAncestors(dag2.classesDAG(), namedDag2.classesDAG()));
+			assertTrue(testAncestors(dag2.objectPropertiesDAG(), namedDag2.objectPropertiesDAG()));
+			assertTrue(testAncestors(namedDag2.classesDAG(), dag2.classesDAG()));
+			assertTrue(testAncestors(namedDag2.objectPropertiesDAG(), dag2.objectPropertiesDAG()));
+			assertTrue(testParents(dag2.classesDAG(), namedDag2.classesDAG()));
+			assertTrue(testParents(dag2.objectPropertiesDAG(), namedDag2.objectPropertiesDAG()));
+			assertTrue(testParents(namedDag2.classesDAG(), dag2.classesDAG()));
+			assertTrue(testParents(namedDag2.objectPropertiesDAG(), dag2.objectPropertiesDAG()));
 //			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			//assertTrue(checkEdgeReduction(graph1, namedDag2, true)); COMMENTED OUT BY ROMAN
 			assertTrue(checkforNamedVertexesOnly(namedDag2, reasoner));
-	
 		}
 	}
 
@@ -429,7 +419,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 				//
 				//if(d2.isaNamedDAG()){
 				//	for (Description v: d1.vertexSet()){
-				//		if(d1.getRoles().contains(v)| d1.getClassDAG().contains(v)){
+				//		if(d1.getRoles().contains(v)| d1.classesDAG().contains(v)){
 				//			numberVertexesD1++;
 				//			System.out.println(v);
 				//		}
@@ -506,25 +496,24 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 
 			}
 */			
-	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
-		for (Equivalences<ObjectPropertyExpression> node: dag.getObjectPropertyDAG()) {
+	private boolean checkforNamedVertexesOnly(TestClassifiedTBoxImpl_OnNamedDAG dag, ClassifiedTBox reasoner){
+		for (Equivalences<ObjectPropertyExpression> node: dag.objectPropertiesDAG()) {
 			ObjectPropertyExpression vertex = node.getRepresentative();
-			if (!reasoner.getObjectPropertyDAG().getVertex(vertex).isIndexed())
+			if (!reasoner.objectPropertiesDAG().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for (Equivalences<DataPropertyExpression> node: dag.getDataPropertyDAG()) {
+		for (Equivalences<DataPropertyExpression> node: dag.dataPropertiesDAG()) {
 			DataPropertyExpression vertex = node.getRepresentative();
-			if(!reasoner.getDataPropertyDAG().getVertex(vertex).isIndexed())
+			if(!reasoner.dataPropertiesDAG().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for (Equivalences<ClassExpression> node: dag.getClassDAG()) {
+		for (Equivalences<ClassExpression> node: dag.classesDAG()) {
 			ClassExpression vertex = node.getRepresentative();
-			if (!reasoner.getClassDAG().getVertex(vertex).isIndexed())
+			if (!reasoner.classesDAG().getVertex(vertex).isIndexed())
 				return false;
 		}
 		return true;
 	}
-
 }
 
 

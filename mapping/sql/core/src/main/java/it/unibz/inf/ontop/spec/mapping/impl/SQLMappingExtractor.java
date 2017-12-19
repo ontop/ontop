@@ -20,8 +20,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,8 +60,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      * TODO: move this method to AbstractMappingExtractor
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput, Optional<Ontology> optionalOntology,
-                                                  Optional<TBoxReasoner> optionalSaturatedTBox,
+                                                  OBDASpecInput specInput,
+                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
@@ -81,17 +80,28 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
+        validateMapping(optionalSaturatedTBox, filledProvMapping);
 
         return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = MetaMappingExpander.expand(
-                ppMapping.getTripleMaps(),
-                settings,
-                dbMetadata);
+
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps());
+        final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
+        if (expander.hasMappingsToBeExpanded()) {
+            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+                expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
+            }
+            // Problem while creating the connection
+            catch (SQLException e) {
+                throw new MetaMappingExpansionException(e.getMessage());
+            }
+        }
+        else
+            expandedMappingAxioms = expander.getNonExpandableMappings();
+
         try {
             return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getMetadata());
         } catch (DuplicateMappingException e) {

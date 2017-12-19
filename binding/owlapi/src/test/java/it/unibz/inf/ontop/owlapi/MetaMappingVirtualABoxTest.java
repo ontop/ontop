@@ -45,7 +45,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -174,7 +173,7 @@ public class MetaMappingVirtualABoxTest {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
+		// p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}

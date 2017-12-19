@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.validation.SQLPPMappingValidator;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+//import it.unibz.inf.ontop.spec.ontology.MutableOntologyVocabulary;
+//import it.unibz.inf.ontop.spec.ontology.impl.MutableOntologyVocabularyImpl;
+//import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -42,6 +43,9 @@ import org.slf4j.LoggerFactory;
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
+
+// TODO: find proper location fot the test
+
 public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -65,18 +69,18 @@ public class MetaMappingTargetQueryValidatorTest extends TestCase {
 		/**
 		 * TODO: do we want to consider a non-empty vocabulary?
 		 */
-		OntologyVocabulary vocabulary = OntologyFactoryImpl.getInstance().createVocabulary();
+		//MutableOntologyVocabulary vocabulary = new MutableOntologyVocabularyImpl();
 
-		// run validator
+        // run validator
 		try {
-			SQLPPMappingValidator.validate(ppMapping, vocabulary);
+         //   for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
+         //       if (!TargetQueryValidator.validate(mapping.getTargetAtoms(), vocabulary).isEmpty()) {
+         //           throw new Exception("Found an invalid target query: " + mapping.getTargetAtoms());
+         //       }
+         //   }
 		}
 		catch (Exception e) {
 			fail("The target query has problem:" + e.getMessage());
 		}
-		
 	}
-
-
-
 }

@@ -19,12 +19,14 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
  */
+
 public class SelectQueryAttributeExtractor2 {
     private final DBMetadata metadata;
     private final QuotedIDFactory idfac;
@@ -78,7 +80,8 @@ public class SelectQueryAttributeExtractor2 {
                 for (Join join : plainSelect.getJoins())
                     try {
                         current = join(current, join);
-                    } catch (IllegalJoinException e) {
+                    }
+                    catch (IllegalJoinException e) {
                         throw new InvalidSelectQueryException(e.toString(), join);
                     }
             return current.getAttributes();
@@ -89,7 +92,33 @@ public class SelectQueryAttributeExtractor2 {
     }
 
 
+    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        return attributes.entrySet().stream()
+                .filter(e -> e.getKey().getRelation() == null)
+                .collect(ImmutableCollectors.toMap());
+    }
 
+    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes, Table table) {
+        RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
+
+        return attributes.entrySet().stream()
+                .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
+                .collect(ImmutableCollectors.toMap(
+                        e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
+                        Map.Entry::getValue));
+    }
+
+    public QuotedID getSelectItemAliasedId(SelectExpressionItem si) {
+
+        if (si.getAlias() != null && si.getAlias().getName() != null) {
+            return idfac.createAttributeID(si.getAlias().getName());
+        }
+        else if (si.getExpression() instanceof Column) {
+            return idfac.createAttributeID(((Column)si.getExpression()).getColumnName());
+        }
+        else
+            throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", si);
+    }
 
 
 
@@ -226,7 +255,6 @@ public class SelectQueryAttributeExtractor2 {
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
             relationIndex++;
 
-
             SelectBody selectBody = subSelect.getSelectBody();
             if (!(selectBody instanceof PlainSelect))
                 throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
@@ -288,56 +316,37 @@ public class SelectQueryAttributeExtractor2 {
 
         @Override
         public void visit(AllColumns allColumns) {
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .collect(ImmutableCollectors.toMap());
+            map = expandStar(attributes);
         }
 
         @Override
         public void visit(AllTableColumns allTableColumns) {
-            Table table = allTableColumns.getTable();
-            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
-
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
-                    .collect(ImmutableCollectors.toMap(
-                            e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
-                            Map.Entry::getValue));
+            map = expandStar(attributes, allTableColumns.getTable());
         }
 
         @Override
         public void visit(SelectExpressionItem selectExpressionItem) {
             Expression expr = selectExpressionItem.getExpression();
+            QuotedID name = getSelectItemAliasedId(selectExpressionItem);
+            final Variable var;
             if (expr instanceof Column) {
                 Column column = (Column) expr;
-                QuotedID id = idfac.createAttributeID(column.getColumnName());
+                QuotedID columnId = idfac.createAttributeID(column.getColumnName());
+
                 Table table = column.getTable();
-                QualifiedAttributeID attr = (table == null || table.getName() == null)
-                        ? new QualifiedAttributeID(null, id)
-                        : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
+                RelationID tableId =  (table == null || table.getName() == null)
+                        ? null : idfac.createRelationID(table.getSchemaName(), table.getName());
 
-                //System.out.println("" + attr + " in " + attributes);
-                Variable var = attributes.get(attr);
-                if (var != null) {
-                    Alias columnAlias = selectExpressionItem.getAlias();
-                    QuotedID name = (columnAlias == null || columnAlias.getName() == null)
-                            ? id
-                            : idfac.createAttributeID(columnAlias.getName());
-
-                    map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
-                }
-                else
+                QualifiedAttributeID attr = new QualifiedAttributeID(tableId, columnId);
+                var = attributes.get(attr);
+                if (var == null)
                     throw new InvalidSelectQueryRuntimeException("Column not found", selectExpressionItem);
             }
             else {
-                //throw new UnsupportedSelectQueryException("Complex expressions in SELECT", selectExpressionItem);
-                Alias columnAlias = selectExpressionItem.getAlias();
-                if (columnAlias == null || columnAlias.getName() == null)
-                    throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
-
-                QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                map = ImmutableMap.of(new QualifiedAttributeID(null, name), createVariable(name));
+                // whether the complex expression has an alias already been checked
+                var = createVariable(name);
             }
+            map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
         }
     }
 

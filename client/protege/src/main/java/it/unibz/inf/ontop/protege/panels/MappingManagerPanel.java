@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -57,10 +56,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private SQLSourceQueryValidator validator;
 
-	private TargetQueryVocabularyValidator validatortrg;
-
-	private OBDAModel mapc;
-
 	private OBDAModel apic;
 
 	private OBDADataSource selectedSource;
@@ -78,22 +73,16 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * 
 	 * @param apic
 	 *            The API controller object.
-         * @param validator
-         *            TargetQueryVocabularyValidator
 	 */
-	public MappingManagerPanel(OBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(OBDAModel apic) {
 
-		validatortrg = validator;
-		
 		mappingsTree = new JTree();
 
 		initComponents();
 		addMenu();
 
-
-
 		// Setting up the mappings tree
-		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic, validator));
+		mappingList.setCellRenderer(new OBDAMappingListRenderer(apic));
 		mappingList.setFixedCellWidth(-1);
 		mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		mappingList.addMouseListener(new PopupListener());
@@ -174,7 +163,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	public void setOBDAModel(OBDAModel omodel) {
 		
 		this.apic = omodel;
-		this.mapc = apic;
 		ListModel model = new SynchronizedMappingListModel(omodel);
 
 		model.addListDataListener(new ListDataListener() {
@@ -192,10 +180,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			}
 		});
 		mappingList.setModel(model);
-	}
-
-	public void setTargetQueryValidator(TargetQueryVocabularyValidator validator) {
-		this.validatortrg = validator;
 	}
 
 	private void addMenu() {
@@ -228,7 +212,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	}
 
 	public void editMapping() {
-		SQLPPTriplesMap mapping = (SQLPPTriplesMap) mappingList.getSelectedValue();
+		SQLPPTriplesMap mapping = mappingList.getSelectedValue();
 		if (mapping == null) {
 			return;
 		}
@@ -237,7 +221,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource);
 		panel.setMapping(mapping);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);
@@ -603,7 +587,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 		int confirm = JOptionPane.showConfirmDialog(
 				this,
-				"This will create copies of the selected mappings. \nNumber of mappings selected = " 
+				"This will create copies of the selected mappings. \nNumber of mappings selected = "
 				+ currentSelection.length + "\nContinue? ", 
 				"Copy confirmation", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -611,7 +595,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		OBDAModel controller = mapc;
+		OBDAModel controller = apic;
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
@@ -665,7 +649,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
-		OBDAModel controller = mapc;
+		OBDAModel controller = apic;
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {
@@ -691,7 +675,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("New Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource, validatortrg);
+		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource);
 		panel.setID(id);
 		dialog.setContentPane(panel);
 		dialog.setSize(600, 500);

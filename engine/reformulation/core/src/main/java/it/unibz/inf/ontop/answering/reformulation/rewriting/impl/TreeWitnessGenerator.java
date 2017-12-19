@@ -20,12 +20,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,12 +41,12 @@ public class TreeWitnessGenerator {
 	private Set<ClassExpression> subconcepts;
 	private ObjectSomeValuesFrom existsRinv;
 
-	private final TBoxReasoner reasoner;
+	private final ClassifiedTBox reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
 //	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	public TreeWitnessGenerator(TBoxReasoner reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
+	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
 		this.reasoner = reasoner;
 		this.property = property;
 //		this.filler = filler;
@@ -58,14 +54,14 @@ public class TreeWitnessGenerator {
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(TBoxReasoner reasoner) {
+	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
 		
 		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<ClassExpression, TreeWitnessGenerator>();				
 
 		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
 		// TODO: improve the algorithm
-		for (Equivalences<ClassExpression> set : reasoner.getClassDAG()) {
-			Set<Equivalences<ClassExpression>> subClasses = reasoner.getClassDAG().getSub(set);
+		for (Equivalences<ClassExpression> set : reasoner.classesDAG()) {
+			Set<Equivalences<ClassExpression>> subClasses = reasoner.classesDAG().getSub(set);
 			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
 			for (ClassExpression concept : set) {
 				if (concept instanceof ObjectSomeValuesFrom && couldBeGenerating) {
@@ -92,7 +88,7 @@ public class TreeWitnessGenerator {
 	}
 	
 	
-	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TBoxReasoner reasoner) {
+	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
 		Set<ClassExpression> concepts = new HashSet<ClassExpression>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
@@ -108,7 +104,7 @@ public class TreeWitnessGenerator {
 		Set<ClassExpression> extension = new HashSet<ClassExpression>();
 		for (ClassExpression b : concepts) 
 			if (b instanceof ObjectSomeValuesFrom)
-				extension.addAll(reasoner.getClassDAG().getSubRepresentatives(b));
+				extension.addAll(reasoner.classesDAG().getSubRepresentatives(b));
 		concepts.addAll(extension);
 		
 		// use all concept names to subsume their sub-concepts
@@ -118,7 +114,7 @@ public class TreeWitnessGenerator {
 				modified = false;
 				for (ClassExpression b : concepts) 
 					if (b instanceof OClass) {
-						Set<ClassExpression> bsubconcepts = reasoner.getClassDAG().getSubRepresentatives(b);
+						Set<ClassExpression> bsubconcepts = reasoner.classesDAG().getSubRepresentatives(b);
 						Iterator<ClassExpression> i = concepts.iterator();
 						while (i.hasNext()) {
 							ClassExpression bp = i.next();
@@ -141,8 +137,8 @@ public class TreeWitnessGenerator {
 				for (ClassExpression b : concepts) 
 					if (b instanceof ObjectSomeValuesFrom) {
 						ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)b;
-						ObjectPropertyExpression prop = (ObjectPropertyExpression) some.getProperty();
-						Set<ObjectPropertyExpression> bsubproperties = reasoner.getObjectPropertyDAG().getSubRepresentatives(prop);
+						ObjectPropertyExpression prop = some.getProperty();
+						Set<ObjectPropertyExpression> bsubproperties = reasoner.objectPropertiesDAG().getSubRepresentatives(prop);
 						Iterator<ClassExpression> i = concepts.iterator();
 						while (i.hasNext()) {
 							ClassExpression bp = i.next();
@@ -168,9 +164,9 @@ public class TreeWitnessGenerator {
 	
 	public Set<ClassExpression> getSubConcepts() {
 		if (subconcepts == null) {
-			subconcepts = new HashSet<ClassExpression>();
+			subconcepts = new HashSet<>();
 			for (ClassExpression con : concepts)
-				subconcepts.addAll(reasoner.getClassDAG().getSubRepresentatives(con));
+				subconcepts.addAll(reasoner.classesDAG().getSubRepresentatives(con));
 		}
 		return subconcepts;
 	}

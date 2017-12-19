@@ -41,8 +41,6 @@ import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 
 public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion {
 
-	private static final long serialVersionUID = -8834975903851540150L;
-	
 	private final ObjectPropertyExpression prop;
 	private final ObjectConstant o2;
 	private final ObjectConstant o1;

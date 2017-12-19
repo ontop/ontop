@@ -226,14 +226,14 @@ public class R2RMLManager {
 			//CQIE targetQuery = DATALOG_FACTORY.getCQIE(head, body);
 			
 			if (sourceQuery.isEmpty()) {
-				throw new Exception("Could not create source query for join in "+tm.toString());
+				throw new Exception("Could not create source query for join in " + tm);
 			}
 			//finally, create mapping and add it to the list
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
 			// TODO: use a R2RML-specific class	instead
 			SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("mapping-join-"+robm.hashCode(),
 					MAPPING_FACTORY.getSQLQuery(sourceQuery), bodyBuilder.build());
-			System.out.println("WARNING joinMapping introduced : "+mapping.toString());
+			System.out.println("WARNING joinMapping introduced : " + mapping);
 			joinMappings.add(mapping);
 		}
 			

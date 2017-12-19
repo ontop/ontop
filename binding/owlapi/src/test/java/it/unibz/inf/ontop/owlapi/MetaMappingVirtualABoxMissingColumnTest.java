@@ -162,7 +162,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	public void testViEqSig() throws Exception {
 
         expectedEx.expect(IllegalConfigurationException.class);
-        expectedEx.expectMessage("The placeholder 'code1' in the target does not occur in the body of the mapping");
+        expectedEx.expectMessage(" The placeholder(s) \"code1\" in the target do(es) not occur in the body of the mapping");
 
 		runTests();
 	}

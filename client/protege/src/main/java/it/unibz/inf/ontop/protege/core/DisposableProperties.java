@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.OntopMappingSettings.OPTIMIZE_EQUIVALENCES;
 import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.*;
 
 /**
@@ -57,7 +56,7 @@ public class DisposableProperties extends Properties implements Disposable {
 //		keys.add(DATA_LOCATION);
 		keys.add(OBTAIN_FROM_ONTOLOGY);
 		keys.add(OBTAIN_FROM_MAPPINGS);
-		keys.add(OPTIMIZE_EQUIVALENCES);
+//		keys.add(OPTIMIZE_EQUIVALENCES);
 //		keys.add(QUERY_ONTOLOGY_ANNOTATIONS);
 //		keys.add(OPTIMIZE_TBOX_SIGMA);
 //		keys.add(CREATE_TEST_MAPPINGS);
