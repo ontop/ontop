@@ -60,7 +60,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
                     Optional.empty(), executorRegistry);
 
-            Ontology ontology = vocabularyExtractor.extractVocabulary(mappingAndDBMetadata.getMapping());
+            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
 
             return mappingTransformer.transform(
                     specInput,
@@ -94,7 +94,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
                     Optional.empty(), executorRegistry);
 
-            Ontology ontology = vocabularyExtractor.extractVocabulary(mappingAndDBMetadata.getMapping());
+            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
 
             return mappingTransformer.transform(
                     specInput,

@@ -117,16 +117,16 @@ public class DirectMappingEngine {
 															 Optional<OWLOntology> inputOntology)
 			throws MappingBootstrappingException {
 
-		setBaseURI(baseIRI);
+		this.baseIRI = fixBaseURI(baseIRI);
 
 		try {
 			SQLPPMapping newPPMapping = inputPPMapping.isPresent()
 					? extractPPMapping(inputPPMapping.get())
 					: extractPPMapping();
 
-			OntologyTBox newVocabulary = vocabularyExtractor.extractVocabulary(
+			OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
 					newPPMapping.getTripleMaps().stream()
-							.flatMap(ax -> ax.getTargetAtoms().stream())).tbox();
+							.flatMap(ax -> ax.getTargetAtoms().stream()));
 
 			OWLOntology newOntology = inputOntology.isPresent()
 					? updateOntology(inputOntology.get(), newVocabulary)
@@ -145,33 +145,32 @@ public class DirectMappingEngine {
 	}
 
 
-	/*
-     * set the base URI used in the ontology
-     */
-    private void setBaseURI(String prefix) {
-        if (prefix.endsWith("#")) {
-            this.baseIRI = prefix.replace("#", "/");
-        } else if (prefix.endsWith("/")) {
-            this.baseIRI = prefix;
-        } else this.baseIRI = prefix + "/";
-    }
+
+	public static String fixBaseURI(String prefix) {
+		if (prefix.endsWith("#")) {
+			return prefix.replace("#", "/");
+		} else if (prefix.endsWith("/")) {
+			return prefix;
+		} else {
+			return prefix + "/";
+		}
+	}
 
 
-    /***
+	/***
 	 * enrich the ontology according to mappings used in the model
 	 * 
 	 * @return a new ontology storing all classes and properties used in the mappings
 	 *
 	 */
-	private OWLOntology updateOntology(OWLOntology ontology, OntologyTBox vocabulary) {
+	private OWLOntology updateOntology(OWLOntology ontology, OntologyVocabulary vocabulary) {
 		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-		Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(ontology, vocabulary);
+		Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(manager, vocabulary);
 		manager.addAxioms(ontology, declarationAxioms);
 		return ontology;		
 	}
 
-	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntology ontology, OntologyTBox vocabulary) {
-        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, OntologyVocabulary vocabulary) {
 
         OWLDataFactory dataFactory = manager.getOWLDataFactory();
         Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();

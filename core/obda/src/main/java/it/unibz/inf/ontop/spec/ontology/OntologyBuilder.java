@@ -124,4 +124,6 @@ public interface OntologyBuilder {
     // build
 
     Ontology build();
+
+    OntologyVocabulary buildVocabulary();
 }

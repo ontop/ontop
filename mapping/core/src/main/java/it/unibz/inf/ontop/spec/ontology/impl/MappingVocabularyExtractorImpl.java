@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 
 import java.util.stream.Stream;
 
@@ -25,7 +26,11 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
 
 
     @Override
-    public Ontology extractVocabulary(Stream<? extends Function> targetAtoms) {
+    public OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
+        return extractVocabularyInternal(targetAtoms).buildVocabulary();
+    }
+
+    private OntologyBuilder extractVocabularyInternal(Stream<? extends Function> targetAtoms) {
         OntologyBuilder ontologyBuilder = OntologyBuilderImpl.builder();
         targetAtoms
                 .forEach(f -> {
@@ -40,14 +45,14 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                             ontologyBuilder.declareDataProperty(name);
                     }
                 });
-        return ontologyBuilder.build();
+        return ontologyBuilder;
     }
 
     @Override
-    public Ontology extractVocabulary(Mapping mapping) {
-        return extractVocabulary(mapping2DatalogConverter.convert(mapping)
-                .map(CQIE::getHead)
-        );
+    public Ontology extractOntology(Mapping mapping) {
+        return (extractVocabularyInternal(mapping2DatalogConverter.convert(mapping)
+                .map(CQIE::getHead)))
+                .build();
     }
 
 }

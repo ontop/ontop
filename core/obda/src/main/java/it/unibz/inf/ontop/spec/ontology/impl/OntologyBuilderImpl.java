@@ -530,6 +530,11 @@ public class OntologyBuilderImpl implements OntologyBuilder {
                 classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build());
     }
 
+    @Override
+    public OntologyVocabulary buildVocabulary() {
+        return new OntologyVocabularyImpl(classes.getImmutableCopy(), objectProperties.getImmutableCopy(),
+                dataProperties.getImmutableCopy(), annotationProperties.getImmutableCopy());
+    }
 
     // auxiliary symbols (for normalization)
 

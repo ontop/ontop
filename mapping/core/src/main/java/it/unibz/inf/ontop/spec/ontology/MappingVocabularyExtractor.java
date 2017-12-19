@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public interface MappingVocabularyExtractor {
 
-    Ontology extractVocabulary(Stream<? extends Function> targetAtoms);
+    OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms);
 
-    Ontology extractVocabulary(Mapping mapping);
+    Ontology extractOntology(Mapping mapping);
 }

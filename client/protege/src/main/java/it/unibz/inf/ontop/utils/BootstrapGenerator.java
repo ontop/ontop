@@ -60,9 +60,9 @@ public class BootstrapGenerator {
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
-        OntologyTBox newVocabulary = vocabularyExtractor.extractVocabulary(
+        OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
                 sqlppTriplesMaps.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())).tbox();
+                        .flatMap(ax -> ax.getTargetAtoms().stream()));
 
         updateProtegeOntology(owlManager.getActiveOntology(), newVocabulary);
     }
@@ -74,7 +74,7 @@ public class BootstrapGenerator {
 
         currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
 
-        Connection conn = null;
+        final Connection conn;
         try {
             conn = connManager.getConnection(configuration.getSettings());
         } catch (SQLException e) {
@@ -89,7 +89,7 @@ public class BootstrapGenerator {
         if (baseURI == null || baseURI.isEmpty())
             baseURI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
         else{
-            baseURI = fixBaseURI(baseURI);
+            baseURI = DirectMappingEngine.fixBaseURI(baseURI);
         }
         Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 
@@ -102,23 +102,13 @@ public class BootstrapGenerator {
             activeOBDAModel.addTriplesMap(triplesMap, true);
         }
         return newTriplesMap;
-
     }
 
-    private String fixBaseURI(String prefix) {
-        if (prefix.endsWith("#")) {
-            return prefix.replace("#", "/");
-        } else if (prefix.endsWith("/")) {
-            return prefix;
-        } else {
-            return prefix + "/";
-        }
-    }
-
-    private void updateProtegeOntology(OWLOntology ontology, OntologyTBox vocabulary)
+    private void updateProtegeOntology(OWLOntology ontology, OntologyVocabulary vocabulary)
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 
-        Set<OWLDeclarationAxiom> declarationAxioms = DirectMappingEngine.extractDeclarationAxioms(ontology, vocabulary);
+        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+        Set<OWLDeclarationAxiom> declarationAxioms = DirectMappingEngine.extractDeclarationAxioms(manager, vocabulary);
         List<AddAxiom> addAxioms = declarationAxioms.stream()
                 .map(ax -> new AddAxiom(ontology, ax))
                 .collect(Collectors.toList());
