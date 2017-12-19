@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
-import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;

@@ -28,8 +28,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 public class DatatypeImpl implements Datatype {
 	
-	private static final long serialVersionUID = -6228610469212615956L;
-	
 	private final Predicate predicate;
 
 	public static final  Datatype rdfsLiteral; 

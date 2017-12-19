@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -34,11 +35,15 @@ import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -78,7 +83,7 @@ public class R2rmlCheckerTest {
 
     @Before
 	public void setUp() throws Exception {
-		onto = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
+		onto = loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
 
 		loadOBDA();
 		loadR2rml();
@@ -462,6 +467,21 @@ public class R2rmlCheckerTest {
 			// conn.close();
 			st.close();
 		}
+	}
+
+	/**
+	 * USE FOR TESTS ONLY
+	 *
+	 * @param filename
+	 * @return
+	 * @throws OWLOntologyCreationException
+	 */
+
+	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
+		Ontology onto = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(owl));
+		return onto.tbox();
 	}
 
 }

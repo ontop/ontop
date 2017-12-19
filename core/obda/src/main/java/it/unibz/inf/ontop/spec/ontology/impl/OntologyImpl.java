@@ -175,7 +175,7 @@ public class OntologyImpl implements Ontology {
         this.functionalObjectPropertyAxioms = functionalObjectPropertyAxioms;
 	    this.functionalDataPropertyAxioms = functionalDataPropertyAxioms;
 
-	    this.unclassifiedTBox = new OntologyTBoxImpl();
+	    this.unclassifiedTBox = new UnclassifiedOntologyTBox();
 	    this.tbox = ClassifiedTBoxImpl.classify(unclassifiedTBox);
     }
 
@@ -190,65 +190,54 @@ public class OntologyImpl implements Ontology {
         return dt;
 	}
 
-    final OntologyTBoxImpl unclassifiedTBox;
+    private final UnclassifiedOntologyTBox unclassifiedTBox;
 
-    final ClassifiedTBox tbox;
+    private final ClassifiedTBox tbox;
 
+    /*
+        used only in OWLAPI Translation tests
+     */
 
-    public final class OntologyTBoxImpl implements OntologyTBox {
-        @Override
+    public final class UnclassifiedOntologyTBox {
+
         public OntologyVocabularyCategory<OClass> classes() { return classes; }
 
-        @Override
         public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return objectProperties; }
 
-        @Override
         public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return dataProperties; }
 
-        @Override
+        public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
+
         public ImmutableList<BinaryAxiom<ClassExpression>> getSubClassAxioms() { return classInclusions; }
 
-        @Override
         public ImmutableList<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() { return subDataRangeAxioms; }
 
-        @Override
         public ImmutableList<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() { return objectPropertyInclusions; }
 
-        @Override
         public ImmutableList<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() { return dataPropertyInclusions; }
 
-        @Override
         public ImmutableSet<ObjectPropertyExpression> getFunctionalObjectProperties() { return functionalObjectPropertyAxioms; }
 
-        @Override
         public ImmutableSet<DataPropertyExpression> getFunctionalDataProperties() { return functionalDataPropertyAxioms; }
 
-        @Override
         public ImmutableList<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() { return classDisjointness; }
 
-        @Override
         public ImmutableList<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() { return objectPropertyDisjointness; }
 
-        @Override
         public ImmutableList<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() { return dataPropertyDisjointness; }
 
-        @Override
         public ImmutableSet<ObjectPropertyExpression> getReflexiveObjectPropertyAxioms() { return reflexiveObjectPropertyAxioms; }
 
-        @Override
         public ImmutableSet<ObjectPropertyExpression> getIrreflexiveObjectPropertyAxioms() { return irreflexiveObjectPropertyAxioms; }
 
-        @Override
         public ImmutableSet<ObjectPropertyExpression> getAuxiliaryObjectProperties() { return auxObjectProperties; }
-
-
-        OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
     }
 
-	OntologyTBox unclassifiedTBox() { return new OntologyTBoxImpl(); }
-
     @Override
-    public ClassifiedTBox tbox() { return ClassifiedTBoxImpl.classify(new OntologyTBoxImpl()); }
+    public ClassifiedTBox tbox() { return tbox; }
+
+    // used only in tests
+    public UnclassifiedOntologyTBox unclassifiedTBox() { return unclassifiedTBox; }
 
 	@Override
 	public OntologyABox abox() {

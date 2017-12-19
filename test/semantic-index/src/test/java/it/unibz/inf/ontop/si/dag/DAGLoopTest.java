@@ -37,6 +37,6 @@ public class DAGLoopTest {
 	@Test
 	public void testLoop() throws Exception {
 		// generate DAG
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
 	}
 }

@@ -96,7 +96,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		connection.commit();
 
 		// Loading the OWL file
-		onto = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(owlfile);
+		onto = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify(owlfile);
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

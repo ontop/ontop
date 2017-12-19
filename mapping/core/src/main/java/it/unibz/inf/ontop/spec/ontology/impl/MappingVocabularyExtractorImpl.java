@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.spec.mapping.Mapping;

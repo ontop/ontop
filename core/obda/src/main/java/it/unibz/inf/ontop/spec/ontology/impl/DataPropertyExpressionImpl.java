@@ -45,8 +45,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
-	private static final long serialVersionUID = 500873858691854474L;
-
 	private final Predicate predicate;
 	private final String name;
 	

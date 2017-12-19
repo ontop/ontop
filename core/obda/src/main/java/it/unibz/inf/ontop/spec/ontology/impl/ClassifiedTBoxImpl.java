@@ -72,9 +72,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @param onto: ontology
 	 */
 
-	public static ClassifiedTBox classify(OntologyTBox onto) {
-
-	    OntologyImpl.OntologyTBoxImpl impl = (OntologyImpl.OntologyTBoxImpl)onto;
+	static ClassifiedTBox classify(OntologyImpl.UnclassifiedOntologyTBox onto) {
 
 		DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> objectPropertyGraph =
 				getObjectPropertyGraph(onto);
@@ -98,21 +96,21 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 
 		ClassifiedTBoxImpl r = new ClassifiedTBoxImpl(
-                impl.classes(),
-                impl.objectProperties(),
-                impl.dataProperties(),
-                impl.annotationProperties(),
+                onto.classes(),
+                onto.objectProperties(),
+                onto.dataProperties(),
+                onto.annotationProperties(),
                 classDAG,
                 objectPropertyDAG,
                 dataPropertyDAG,
                 dataRangeDAG,
-                impl.getDisjointClassesAxioms(),
-                impl.getDisjointObjectPropertiesAxioms(),
-                impl.getDisjointDataPropertiesAxioms(),
-                impl.getReflexiveObjectPropertyAxioms(),
-                impl.getIrreflexiveObjectPropertyAxioms(),
-                impl.getFunctionalObjectProperties(),
-                impl.getFunctionalDataProperties());
+                onto.getDisjointClassesAxioms(),
+                onto.getDisjointObjectPropertiesAxioms(),
+                onto.getDisjointDataPropertiesAxioms(),
+                onto.getReflexiveObjectPropertyAxioms(),
+                onto.getIrreflexiveObjectPropertyAxioms(),
+                onto.getFunctionalObjectProperties(),
+                onto.getFunctionalDataProperties());
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -546,7 +544,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the property inclusions
 	 */
 
-	private static DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph(OntologyTBox ontology) {
+	private static DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> getObjectPropertyGraph(OntologyImpl.UnclassifiedOntologyTBox ontology) {
 
 		DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
@@ -582,7 +580,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the property inclusions
 	 */
 
-	private static DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph(OntologyTBox ontology) {
+	private static DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> getDataPropertyGraph(OntologyImpl.UnclassifiedOntologyTBox ontology) {
 
 		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
@@ -610,7 +608,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 	 * @return the graph of the concept inclusions
 	 */
 
-	private static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (OntologyTBox ontology,
+	private static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (OntologyImpl.UnclassifiedOntologyTBox ontology,
 																					DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph,
 																					DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
 
@@ -651,7 +649,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		return graph;
 	}
 
-	private static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (OntologyTBox ontology,
+	private static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (OntologyImpl.UnclassifiedOntologyTBox ontology,
 																							DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
 
 		DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph

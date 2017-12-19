@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology.owlapi;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.URIConstant;
@@ -8,13 +7,11 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.*;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
@@ -77,40 +74,6 @@ public class OWLAPITranslatorOWL2QL {
         log.debug("Ontology loaded: {}", onto);
         return onto;
     }
-
-
-    /**
-     * USE FOR TESTS ONLY
-     *
-     */
-
-    public static OntologyTBox translateTBox(OWLOntology ontology)   {
-
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
-        extractOntoloyVocabulary(ontology, builder);
-
-        OWLAxiomVisitorImpl visitor = new OWLAxiomVisitorImpl(ontology, builder);
-        for (OWLAxiom axiom : ontology.getAxioms())  {
-            axiom.accept(visitor);
-        }
-        return builder.buildUnclassifiedTBox();
-    }
-
-    /**
-     * USE FOR TESTS ONLY
-     *
-     * @param filename
-     * @return
-     * @throws OWLOntologyCreationException
-     */
-
-    public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
-        OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-        OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        Ontology onto = translateAndClassify(ImmutableList.of(owl));
-        return onto.tbox();
-    }
-
 
 
 

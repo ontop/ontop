@@ -94,7 +94,7 @@ public class S_Indexes_TestNewDAG extends TestCase {
 	public void testIndexes() throws Exception {
 		//for each file in the input
 		for (String fileInput : input) {
-			ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 
 			//add input named graph
 			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);

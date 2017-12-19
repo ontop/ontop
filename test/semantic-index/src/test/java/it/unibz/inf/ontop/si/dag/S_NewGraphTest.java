@@ -41,7 +41,7 @@ public class S_NewGraphTest  extends TestCase{
 
 		// Loading the OWL file
 		log.info("Translating");
-		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(roleowlfile);
+		ClassifiedTBoxImpl r = (ClassifiedTBoxImpl) DAGEquivalenceTest.loadOntologyFromFileAndClassify(roleowlfile);
 
 		log.info("See information");
 		log.debug("properties {}", r.getObjectPropertyGraph());

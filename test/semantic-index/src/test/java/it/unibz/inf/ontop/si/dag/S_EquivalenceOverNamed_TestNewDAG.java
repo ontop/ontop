@@ -93,7 +93,7 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 	public void testNamedAndEquivalences() throws Exception {
 		//for each file in the input
 		for (String fileInput : input){
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			log.debug("Input {}", fileInput);

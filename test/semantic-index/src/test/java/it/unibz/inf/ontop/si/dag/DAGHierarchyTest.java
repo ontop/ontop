@@ -57,7 +57,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -136,7 +136,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -217,7 +217,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
@@ -294,7 +294,7 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		

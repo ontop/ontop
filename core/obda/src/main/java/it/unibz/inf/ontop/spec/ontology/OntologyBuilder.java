@@ -127,5 +127,4 @@ public interface OntologyBuilder {
 
     OntologyVocabulary buildVocabulary();
 
-    OntologyTBox buildUnclassifiedTBox();
 }

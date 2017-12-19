@@ -42,8 +42,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
-	private static final long serialVersionUID = -2514037755762973974L;
-	
 	private final boolean isInverse;
 	private final Predicate predicate;
 	private final String string;

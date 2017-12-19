@@ -52,7 +52,7 @@ public class S_Indexes_Compare extends TestCase {
 
 	public void testIndexes() throws Exception {
 		for (String fileInput: input) {
-			ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 
 			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 

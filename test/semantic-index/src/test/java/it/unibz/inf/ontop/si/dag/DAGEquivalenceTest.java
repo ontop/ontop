@@ -21,13 +21,19 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -54,7 +60,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceClasses);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceClasses);
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classesDAG()
@@ -108,7 +114,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceRoles);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceRoles);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
@@ -163,7 +169,7 @@ public class DAGEquivalenceTest extends TestCase {
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
@@ -221,5 +227,21 @@ public class DAGEquivalenceTest extends TestCase {
 		interval = nodeInterval.get(0);
 		assertEquals(2, interval.getStart());
 		assertEquals(3, interval.getEnd());
+	}
+
+
+	/**
+	 * USE FOR TESTS ONLY
+	 *
+	 * @param filename
+	 * @return
+	 * @throws OWLOntologyCreationException
+	 */
+
+	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
+		Ontology onto = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(owl));
+		return onto.tbox();
 	}
 }

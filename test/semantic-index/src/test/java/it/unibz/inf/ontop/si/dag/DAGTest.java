@@ -149,7 +149,7 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
+		ClassifiedTBox reasoner = DAGEquivalenceTest.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
 		List<List<Description>> exp_idx = get_results(reasoner, testname);
 
 		List<Description> classes = new LinkedList<>();

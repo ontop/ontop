@@ -40,8 +40,6 @@ import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 
 public class ObjectSomeValuesFromImpl implements ObjectSomeValuesFrom {
 
-	private static final long serialVersionUID = 593821958539751283L;
-	
 	private final ObjectPropertyExpression property;
 	private final String string;
 

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class DAG {
 	 * @param ontology
 	 *            ontology that contain TBox assertions for the DAG
 	 */
-	public DAG(OntologyTBox ontology) {
+	public DAG(OntologyImpl.UnclassifiedOntologyTBox ontology) {
 
 		//int rolenodes = (ontology.objectProperties().all().size() + ontology.dataProperties().all().size()) * 2;
 

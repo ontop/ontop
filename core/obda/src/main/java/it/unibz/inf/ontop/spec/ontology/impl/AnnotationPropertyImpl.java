@@ -38,8 +38,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class AnnotationPropertyImpl implements AnnotationProperty {
 
-	private static final long serialVersionUID = 500873858691854474L;
-
 	private final Predicate predicate;
 	private final String name;
 

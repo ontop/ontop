@@ -67,7 +67,7 @@ public class S_HierarchyTestNewDAG extends TestCase {
 
 	public void testReachability() throws Exception {
 		for (String fileInput: input) {
-			ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox reasoner = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG dag2= new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);

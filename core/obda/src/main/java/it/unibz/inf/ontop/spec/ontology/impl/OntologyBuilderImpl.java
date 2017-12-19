@@ -531,18 +531,6 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     }
 
     @Override
-    public OntologyTBox buildUnclassifiedTBox() {
-        return new OntologyImpl(classes.getImmutableCopy(), objectProperties.getImmutableCopy(),
-                ImmutableSet.copyOf(auxObjectProperties), dataProperties.getImmutableCopy(), annotationProperties.getImmutableCopy(),
-                classAxioms.inclusions.build(), classAxioms.disjointness.build(),
-                objectPropertyAxioms.inclusions.build(), objectPropertyAxioms.disjointness.build(),
-                dataPropertyAxioms.inclusions.build(), dataPropertyAxioms.disjointness.build(),
-                subDataRangeAxioms.build(), reflexiveObjectPropertyAxioms.build(), irreflexiveObjectPropertyAxioms.build(),
-                functionalObjectPropertyAxioms.build(), functionalDataPropertyAxioms.build(),
-                classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build()).unclassifiedTBox();
-    }
-
-    @Override
     public OntologyVocabulary buildVocabulary() {
         return new OntologyVocabularyImpl(classes.getImmutableCopy(), objectProperties.getImmutableCopy(),
                 dataProperties.getImmutableCopy(), annotationProperties.getImmutableCopy());

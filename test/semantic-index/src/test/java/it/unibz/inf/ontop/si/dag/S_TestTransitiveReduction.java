@@ -95,7 +95,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	
 	public void testR() throws OWLOntologyCreationException {
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
 
 		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
@@ -112,7 +112,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 	public void testR2() throws Exception {
-		ClassifiedTBox dag = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
+		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
 
 		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
 		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
@@ -134,7 +134,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	
 	public void testSimplification() throws Exception{
 		for (String fileInput: input) {
-			ClassifiedTBox dag2 = OWLAPITranslatorOWL2QL.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag2 = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph((ClassifiedTBoxImpl)dag2);
 
 			log.debug("Input number {}", fileInput);
