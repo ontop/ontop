@@ -1,17 +1,16 @@
 package it.unibz.inf.ontop.spec.dbschema.impl;
 
 
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
-import net.sf.jsqlparser.JSQLParserException;
+import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -95,9 +94,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
                 }
-                catch (JSQLParserException e) {
-                    System.out.println("Error obtaining the tables" + e);
-                }
+
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);
                 }
