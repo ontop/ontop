@@ -43,7 +43,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            ClassifiedTBox saturatedTBox = ClassifiedTBoxImpl.classify(optionalOntology.get().tbox());
+            ClassifiedTBox saturatedTBox = optionalOntology.get().tbox();
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
                     Optional.of(saturatedTBox), executorRegistry);
@@ -67,7 +67,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
                     ontology.abox(), // EMPTY ABOX
-                    ClassifiedTBoxImpl.classify(ontology.tbox()));
+                    ontology.tbox());
         }
     }
 
@@ -77,7 +77,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            ClassifiedTBox optionalSaturatedTBox = ClassifiedTBoxImpl.classify(optionalOntology.get().tbox());
+            ClassifiedTBox optionalSaturatedTBox = optionalOntology.get().tbox();
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
                     Optional.of(optionalSaturatedTBox), executorRegistry);
@@ -101,7 +101,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
                     ontology.abox(), // EMPTY ABOX
-                    ClassifiedTBoxImpl.classify(ontology.tbox()));
+                    ontology.tbox());
         }
     }
 }

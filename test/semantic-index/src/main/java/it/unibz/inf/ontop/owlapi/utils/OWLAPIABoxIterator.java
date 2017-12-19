@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /***
- * A read only iterator that will translate OWLAPI data assertions into ABox
+ * A read only iterator that will translateAndClassify OWLAPI data assertions into ABox
  * assertions in ontop's API. This is used in our Statement classes (e.g.,
  * {@code QuestOWLStatement} and SemanticIndexManager to iterate over the input
  * and then insert it into the semantic index database.

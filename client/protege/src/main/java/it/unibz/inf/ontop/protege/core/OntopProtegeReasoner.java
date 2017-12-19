@@ -323,9 +323,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @throws Exception
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-        return new QuestOWLEmptyEntitiesChecker(
-                ClassifiedTBoxImpl.classify(loadOntologies(getRootOntology())),
-                owlConnection);
+        return new QuestOWLEmptyEntitiesChecker(loadOntologies(getRootOntology()), owlConnection);
     }
 
     /**

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
@@ -70,7 +71,30 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
     @Override
     public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
 
-    @Override
+
+    // DUMMIES
+	@Override
+	public ImmutableList<NaryAxiom<ClassExpression>> disjointClasses() { return null; }
+
+	@Override
+	public ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties() { return null; }
+
+	@Override
+	public ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> functionalObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<DataPropertyExpression> functionalDataProperties() { return null; }
+
+	@Override
     public EquivalencesDAG<ClassExpression> classesDAG() {
         return classDAG;
     }

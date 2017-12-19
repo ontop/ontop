@@ -20,6 +20,9 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 /**
  *  This is the interface for the class ClassifiedTBox where we are able
  *  to retrieve all the connection built in our DAG
@@ -72,4 +75,26 @@ public interface ClassifiedTBox {
      */
 
     OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
+
+    // DISJOINTNESS
+
+    ImmutableList<NaryAxiom<ClassExpression>> disjointClasses();
+
+    ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties();
+
+    ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties();
+
+
+    // REFLEXIVITY / IRREFLEXIVITY
+
+    ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties();
+
+    ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties();
+
+    // FUNCTIONALITY
+
+    ImmutableSet<ObjectPropertyExpression> functionalObjectProperties();
+
+    ImmutableSet<DataPropertyExpression> functionalDataProperties();
+
 }

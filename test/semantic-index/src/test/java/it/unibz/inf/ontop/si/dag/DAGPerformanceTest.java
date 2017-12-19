@@ -23,9 +23,7 @@ package it.unibz.inf.ontop.si.dag;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.OntologyTBox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -123,13 +121,11 @@ public class DAGPerformanceTest extends TestCase {
 			OWLAxiom subc = fac.getOWLSubClassOfAxiom(c2, c1);
 			man.addAxiom(ont, subc);
     	}
-		
 
-		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
+		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -213,13 +209,10 @@ public class DAGPerformanceTest extends TestCase {
 			man.addAxiom(ont, subc);
     		
     	}
-		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
 
-		log.debug("Creating a DAG out of it");
-
+		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -305,13 +298,9 @@ public class DAGPerformanceTest extends TestCase {
     	}
 		
 
-		log.debug("Translating into quest API");
-		OntologyTBox tbox = OWLAPITranslatorOWL2QL.translate(ImmutableList.of(ont)).tbox();
-
-		log.debug("Creating a DAG out of it");
-
+		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = ClassifiedTBoxImpl.classify(tbox);
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();

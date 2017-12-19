@@ -420,7 +420,7 @@ public class CQCUtilitiesTest {
             OClass right = builder.declareClass("C");
             builder.addSubClassOfAxiom(left, right);
 
-			OntologyTBox sigma = builder.build().tbox();
+			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", Collections.singletonList(TERM_FACTORY.getVariable("x")));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -431,7 +431,7 @@ public class CQCUtilitiesTest {
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -448,7 +448,7 @@ public class CQCUtilitiesTest {
 
 			ObjectSomeValuesFrom right = pright.getDomain();
 			builder.addSubClassOfAxiom(left, right);
-			OntologyTBox sigma = builder.build().tbox();
+			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -459,7 +459,7 @@ public class CQCUtilitiesTest {
 					TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -476,7 +476,7 @@ public class CQCUtilitiesTest {
 
 			ObjectSomeValuesFrom right = pright.getDomain();
 			builder.addSubClassOfAxiom(left, right);
-            OntologyTBox sigma = builder.build().tbox();
+			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
@@ -487,7 +487,7 @@ public class CQCUtilitiesTest {
 					TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -504,8 +504,7 @@ public class CQCUtilitiesTest {
 
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			builder.addSubClassOfAxiom(left, right);
-            OntologyTBox sigma = builder.build().tbox();
-
+			ClassifiedTBox sigma = builder.build().tbox();
 
             Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
@@ -516,7 +515,7 @@ public class CQCUtilitiesTest {
 			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -534,7 +533,7 @@ public class CQCUtilitiesTest {
 
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			builder.addSubClassOfAxiom(left, right);
-            OntologyTBox sigma = builder.build().tbox();
+			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("y"));
 			Function body1 = TERM_FACTORY.getFunction(TERM_FACTORY.getObjectPropertyPredicate("R"),
@@ -545,7 +544,7 @@ public class CQCUtilitiesTest {
 			Function body2 = TERM_FACTORY.getFunction(TERM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+			LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
@@ -583,7 +582,7 @@ public class CQCUtilitiesTest {
 
         ObjectSomeValuesFrom right = pleft.getDomain();
         builder.addSubClassOfAxiom(left, right);
-        OntologyTBox sigma = builder.build().tbox();
+		ClassifiedTBox sigma = builder.build().tbox();
 
         // Query 1 q(x) :- R(x,y), A(x)
         Function head = getFunction("q", x);
@@ -602,7 +601,7 @@ public class CQCUtilitiesTest {
         body = new LinkedList<>();
         CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
-		LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(ClassifiedTBoxImpl.classify(sigma), false);
+		LinearInclusionDependencies dep = LinearInclusionDependencyTools.getABoxDependencies(sigma, false);
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 				
         assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False

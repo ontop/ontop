@@ -38,9 +38,6 @@ public class OWLAPITranslatorOWL2QL {
 	private static final boolean minCardinalityClassExpressions = true; // TEMPORARY FIX
 	private static final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 	
-	public OWLAPITranslatorOWL2QL() {
-	}
-	
 	public static class TranslationException extends Exception {
 
 		private static final long serialVersionUID = 7917688953760608030L;
@@ -60,7 +57,7 @@ public class OWLAPITranslatorOWL2QL {
      * @return
      */
 
-    public static Ontology translate(Collection<OWLOntology> ontologies)   {
+    public static Ontology translateAndClassify(Collection<OWLOntology> ontologies)   {
         log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
 
         OntologyBuilder builder = OntologyBuilderImpl.builder();
@@ -81,6 +78,24 @@ public class OWLAPITranslatorOWL2QL {
         return onto;
     }
 
+
+    /**
+     * USE FOR TESTS ONLY
+     *
+     */
+
+    public static OntologyTBox translateTBox(OWLOntology ontology)   {
+
+        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        extractOntoloyVocabulary(ontology, builder);
+
+        OWLAxiomVisitorImpl visitor = new OWLAxiomVisitorImpl(ontology, builder);
+        for (OWLAxiom axiom : ontology.getAxioms())  {
+            axiom.accept(visitor);
+        }
+        return builder.buildUnclassifiedTBox();
+    }
+
     /**
      * USE FOR TESTS ONLY
      *
@@ -92,8 +107,8 @@ public class OWLAPITranslatorOWL2QL {
     public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        Ontology onto = translate(ImmutableList.of(owl));
-        return ClassifiedTBoxImpl.classify(onto.tbox());
+        Ontology onto = translateAndClassify(ImmutableList.of(owl));
+        return onto.tbox();
     }
 
 

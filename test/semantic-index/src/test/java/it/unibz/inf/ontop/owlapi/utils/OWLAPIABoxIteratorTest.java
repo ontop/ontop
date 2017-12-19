@@ -48,7 +48,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Man");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Person");
 		builder.declareClass("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#Woman");
-		tbox = ClassifiedTBoxImpl.classify(builder.build().tbox());
+		tbox = builder.build().tbox();
 	}
 
 	public void testAssertionIterator() throws Exception {

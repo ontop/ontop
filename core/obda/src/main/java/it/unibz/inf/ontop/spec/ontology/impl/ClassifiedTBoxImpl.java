@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 
@@ -54,6 +55,16 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
     private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
     private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
     private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
+
+    private final ImmutableList<NaryAxiom<ClassExpression>> classDisjointness;
+    private final ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness;
+    private final ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness;
+
+    private final ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties;
+    private final ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties;
+
+    private final ImmutableSet<ObjectPropertyExpression> functionalObjectProperties;
+    private final ImmutableSet<DataPropertyExpression> functionalDataProperties;
 
 
     /**
@@ -94,7 +105,14 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
                 classDAG,
                 objectPropertyDAG,
                 dataPropertyDAG,
-                dataRangeDAG);
+                dataRangeDAG,
+                impl.getDisjointClassesAxioms(),
+                impl.getDisjointObjectPropertiesAxioms(),
+                impl.getDisjointDataPropertiesAxioms(),
+                impl.getReflexiveObjectPropertyAxioms(),
+                impl.getIrreflexiveObjectPropertyAxioms(),
+                impl.getFunctionalObjectProperties(),
+                impl.getFunctionalDataProperties());
 //		if (equivalenceReduced) {
 //			r = getEquivalenceSimplifiedReasoner(r);
 //		}
@@ -115,7 +133,14 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
                                EquivalencesDAGImpl<ClassExpression> classDAG,
                                EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG,
                                EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG,
-							   EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG) {
+							   EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG,
+                               ImmutableList<NaryAxiom<ClassExpression>> classDisjointness,
+                               ImmutableList<NaryAxiom<ObjectPropertyExpression>> objectPropertyDisjointness,
+                               ImmutableList<NaryAxiom<DataPropertyExpression>> dataPropertyDisjointness,
+                               ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties,
+                               ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties,
+                               ImmutableSet<ObjectPropertyExpression> functionalObjectProperties,
+                               ImmutableSet<DataPropertyExpression> functionalDataProperties) {
         this.classes = classes;
 		this.objectProperties = objectProperties;
 		this.dataProperties = dataProperties;
@@ -124,6 +149,13 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		this.objectPropertyDAG = objectPropertyDAG;
 		this.dataPropertyDAG = dataPropertyDAG;
         this.dataRangeDAG = dataRangeDAG;
+        this.classDisjointness = classDisjointness;
+        this.objectPropertyDisjointness = objectPropertyDisjointness;
+        this.dataPropertyDisjointness = dataPropertyDisjointness;
+        this.reflexiveObjectProperties = reflexiveObjectProperties;
+        this.irreflexiveObjectProperties = irreflexiveObjectProperties;
+        this.functionalObjectProperties = functionalObjectProperties;
+        this.functionalDataProperties = functionalDataProperties;
 	}
 
 	@Override
@@ -157,7 +189,32 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
     public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
 
 
-	// INTERNAL DETAILS
+
+
+    @Override
+    public ImmutableSet<ObjectPropertyExpression> functionalObjectProperties() { return functionalObjectProperties; }
+
+    @Override
+    public ImmutableSet<DataPropertyExpression> functionalDataProperties() { return functionalDataProperties; }
+
+    @Override
+    public ImmutableList<NaryAxiom<ClassExpression>> disjointClasses() { return classDisjointness; }
+
+    @Override
+    public ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties() { return objectPropertyDisjointness; }
+
+    @Override
+    public ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties() { return dataPropertyDisjointness; }
+
+    @Override
+    public ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties() { return reflexiveObjectProperties; }
+
+    @Override
+    public ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties() { return irreflexiveObjectProperties; }
+
+
+
+    // INTERNAL DETAILS
 
 
 
@@ -470,7 +527,10 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
         ClassifiedTBoxImpl impl = (ClassifiedTBoxImpl)reasoner;
 		return new ClassifiedTBoxImpl(impl.classes, impl.objectProperties, impl.dataProperties, impl.annotationProperties,
-		        classDAG, objectPropertyDAG, dataPropertyDAG, impl.dataRangeDAG);
+		        classDAG, objectPropertyDAG, dataPropertyDAG, impl.dataRangeDAG,
+                impl.classDisjointness, impl.objectPropertyDisjointness, impl.dataPropertyDisjointness,
+                impl.reflexiveObjectProperties, impl.irreflexiveObjectProperties,
+                impl.functionalObjectProperties, impl.functionalDataProperties);
 	}
 
 

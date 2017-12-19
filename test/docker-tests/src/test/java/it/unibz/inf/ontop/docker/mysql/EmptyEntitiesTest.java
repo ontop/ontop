@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,8 +92,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = ClassifiedTBoxImpl.classify(
-				OWLAPITranslatorOWL2QL.translate(ImmutableList.of(config.loadProvidedInputOntology())).tbox());
+		onto = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
 	}
 
 	@After

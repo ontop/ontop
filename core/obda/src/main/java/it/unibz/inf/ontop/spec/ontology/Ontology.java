@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
+
 public interface Ontology  {
 
 
-    OntologyTBox tbox();
+    ClassifiedTBox tbox();
 
 
     Datatype getDatatype(String uri);

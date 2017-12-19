@@ -50,19 +50,19 @@ public class OntologyImpl implements Ontology {
 
 	private final ImmutableSet<ObjectPropertyExpression> reflexiveObjectPropertyAxioms;
 	private final ImmutableSet<ObjectPropertyExpression> irreflexiveObjectPropertyAxioms;
-	
+
 	private final ImmutableSet<ObjectPropertyExpression> functionalObjectPropertyAxioms;
 	private final ImmutableSet<DataPropertyExpression> functionalDataPropertyAxioms;
-	
+
 	// assertions
-	
+
 	private final ImmutableList<ClassAssertion> classAssertions;
 	private final ImmutableList<ObjectPropertyAssertion> objectPropertyAssertions;
 	private final ImmutableList<DataPropertyAssertion> dataPropertyAssertions;
 	private final ImmutableList<AnnotationAssertion> annotationAssertions;
 
 	// exception messages
-	
+
 	private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
 
 	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
@@ -174,6 +174,9 @@ public class OntologyImpl implements Ontology {
 	    this.irreflexiveObjectPropertyAxioms = irreflexiveObjectPropertyAxioms;
         this.functionalObjectPropertyAxioms = functionalObjectPropertyAxioms;
 	    this.functionalDataPropertyAxioms = functionalDataPropertyAxioms;
+
+	    this.unclassifiedTBox = new OntologyTBoxImpl();
+	    this.tbox = ClassifiedTBoxImpl.classify(unclassifiedTBox);
     }
 
     @Override
@@ -187,7 +190,12 @@ public class OntologyImpl implements Ontology {
         return dt;
 	}
 
-	public final class OntologyTBoxImpl implements OntologyTBox {
+    final OntologyTBoxImpl unclassifiedTBox;
+
+    final ClassifiedTBox tbox;
+
+
+    public final class OntologyTBoxImpl implements OntologyTBox {
         @Override
         public OntologyVocabularyCategory<OClass> classes() { return classes; }
 
@@ -237,8 +245,10 @@ public class OntologyImpl implements Ontology {
         OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
     }
 
+	OntologyTBox unclassifiedTBox() { return new OntologyTBoxImpl(); }
+
     @Override
-	public OntologyTBox tbox() { return new OntologyTBoxImpl(); }
+    public ClassifiedTBox tbox() { return ClassifiedTBoxImpl.classify(new OntologyTBoxImpl()); }
 
 	@Override
 	public OntologyABox abox() {

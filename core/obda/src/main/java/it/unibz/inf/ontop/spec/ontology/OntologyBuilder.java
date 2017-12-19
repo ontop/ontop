@@ -126,4 +126,6 @@ public interface OntologyBuilder {
     Ontology build();
 
     OntologyVocabulary buildVocabulary();
+
+    OntologyTBox buildUnclassifiedTBox();
 }
