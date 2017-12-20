@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -28,10 +29,9 @@ import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.spec.ontology.Assertion;
-import it.unibz.inf.ontop.spec.ontology.AssertionFactory;
-import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
-import it.unibz.inf.ontop.spec.ontology.impl.AssertionFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -40,43 +40,41 @@ import java.util.*;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
-	private List<Assertion> results = new ArrayList<>();
+	private final List<Assertion> results = new ArrayList<>();
 
-	private TupleResultSet tupleResultSet;
+	private final TupleResultSet tupleResultSet;
 
+	private final ConstructTemplate constructTemplate;
 
-	private ConstructTemplate constructTemplate;
+	private final ImmutableMap<String, ValueExpr> extMap;
 
-	List<ExtensionElem> extList = null;
-	
-	Map<String, ValueExpr> extMap = null;
-	
-	//store results in case of describe queries
-	private boolean storeResults = false;
-
-	private AssertionFactory ofac = AssertionFactoryImpl.getInstance();
+	// store results in case of describe queries
+	private final boolean storeResults;
     private final TermFactory termFactory;
 
-    public DefaultSimpleGraphResultSet(TupleResultSet results, ConstructTemplate template,
-                                       boolean storeResult, TermFactory termFactory)
-            throws OntopResultConversionException, OntopConnectionException {
-		this.tupleResultSet = results;
-		this.constructTemplate = template;
-		this.storeResults = storeResult;
+	public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
+                                       boolean storeResults, TermFactory termFactory) throws OntopResultConversionException, OntopConnectionException {
+		this.tupleResultSet = tupleResultSet;
+		this.constructTemplate = constructTemplate;
         this.termFactory = termFactory;
-        processResultSet(tupleResultSet, constructTemplate);
+        Extension ex = constructTemplate.getExtension();
+        if (ex != null) {
+            extMap = ex.getElements().stream()
+                    .collect(ImmutableCollectors.toMap(e -> e.getName(), e -> e.getExpr()));
+        }
+        else
+            extMap = null;
+
+        this.storeResults = storeResults;
+        if (storeResults) {
+            //process current result set into local buffer,
+            //since additional results will be collected
+            while (tupleResultSet.hasNext()) {
+                results.addAll(processResults());
+            }
+        }
 	}
 
-    private void processResultSet(TupleResultSet resSet, ConstructTemplate template)
-            throws OntopResultConversionException, OntopConnectionException {
-		if (storeResults) {
-			//process current result set into local buffer, 
-			//since additional results will be collected
-			while (resSet.hasNext()) {
-				this.results.addAll(processResults(resSet, template));
-			}
-		}
-	}
 
     @Override
     public int getFetchSize() throws OntopConnectionException {
@@ -97,52 +95,47 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-    private List<Assertion> processResults(TupleResultSet result,
-                                           ConstructTemplate template)
+    private List<Assertion> processResults()
             throws OntopResultConversionException, OntopConnectionException {
-        List<Assertion> tripleAssertions = new ArrayList<>();
-        List<ProjectionElemList> peLists = template.getProjectionElemList();
 
-        Extension ex = template.getExtension();
-        if (ex != null) {
-            extList = ex.getElements();
-            Map<String, ValueExpr> newExtMap = new HashMap<>();
-            for (ExtensionElem anExtList : extList) {
-                newExtMap.put(anExtList.getName(), anExtList.getExpr());
-            }
-            extMap = newExtMap;
-        }
-        for (ProjectionElemList peList : peLists) {
+        List<Assertion> tripleAssertions = new ArrayList<>();
+        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier();
+
+        for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
 
             for (int i = 0; i < size / 3; i++) {
 
-                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), result);
-                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), result);
-                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), result);
+                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), tupleResultSet);
+                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), tupleResultSet);
+                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), tupleResultSet);
 
                 // A triple can only be constructed when none of bindings is missing
-                if (subjectConstant == null || predicateConstant == null || objectConstant==null){
+                if (subjectConstant == null || predicateConstant == null || objectConstant==null) {
                     continue;
                 }
 
                 // Determines the type of assertion
                 String predicateName = predicateConstant.getValue();
-                Assertion assertion;
                 try {
+                    Assertion assertion;
                     if (predicateName.equals(IriConstants.RDF_TYPE)) {
-                        assertion = ofac.createClassAssertion(objectConstant.getValue(), subjectConstant);
-                    } else {
-                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode))
-                            assertion = ofac.createObjectPropertyAssertion(predicateName,
+                        assertion = builder.createClassAssertion(objectConstant.getValue(), subjectConstant);
+                    }
+                    else {
+                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
+                            assertion = builder.createObjectPropertyAssertion(predicateName,
                                     subjectConstant, (ObjectConstant) objectConstant);
-                        else
-                            assertion = ofac.createDataPropertyAssertion(predicateName,
+                        }
+                        else {
+                            assertion = builder.createDataPropertyAssertion(predicateName,
                                     subjectConstant, (ValueConstant) objectConstant);
+                        }
                     }
                     if (assertion != null)
                         tripleAssertions.add(assertion);
-                } catch (InconsistentOntologyException e) {
+                }
+                catch (InconsistentOntologyException e) {
                     throw new OntopResultConversionException("InconsistentOntologyException: " +
                             predicateName + " " + subjectConstant + " " + objectConstant);
                 }
@@ -159,8 +152,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 		if (storeResults)
 			return false;
 		// construct
-        while(tupleResultSet.hasNext()) {
-            List<Assertion> newTriples = processResults(tupleResultSet, constructTemplate);
+        while (tupleResultSet.hasNext()) {
+            List<Assertion> newTriples = processResults();
             if (!newTriples.isEmpty()) {
                 results.addAll(newTriples);
                 return true;
@@ -179,27 +172,30 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
     private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
             throws OntopResultConversionException, OntopConnectionException {
-        Constant constant = null;
         String node_name = node.getSourceName();
-        ValueExpr ve = null;
 
+        ValueExpr ve = null;
         if (extMap != null) {
             ve = extMap.get(node_name);
             if (ve != null && ve instanceof Var)
                 throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
+        final Constant constant;
 //		if (node_name.charAt(0) == '-') {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
                 constant = termFactory.getConstantURI(vc.getValue().stringValue());
-            } else if (vc.getValue() instanceof Literal) {
+            }
+            else if (vc.getValue() instanceof Literal) {
                 constant = termFactory.getConstantLiteral(vc.getValue().stringValue());
-            } else {
+            }
+            else {
                 constant = termFactory.getConstantBNode(vc.getValue().stringValue());
             }
-        } else {
+        }
+        else {
             // constant = resSet.getConstant(node_name);
             // TODO(xiao): this fix is suspecious
             constant = resSet.next().getConstant(node_name);
@@ -211,5 +207,4 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	public void close() throws OntopConnectionException {
 		tupleResultSet.close();
 	}
-
 }

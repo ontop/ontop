@@ -12,16 +12,13 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
@@ -31,10 +28,8 @@ import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class BootstrapGenerator {
@@ -70,20 +65,17 @@ public class BootstrapGenerator {
         bootstrapMappingAndOntologyProtege(baseUri);
     }
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MappingIOException,
-            InvalidMappingException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
+    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException,
+            SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
 
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
-
-        ImmutableOntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+        OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()));
 
-        updateProtegeOntology (owlManager.getActiveOntology(), newVocabulary);
-
-
+        updateProtegeOntology(owlManager.getActiveOntology(), newVocabulary);
     }
 
     private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI)
@@ -93,8 +85,7 @@ public class BootstrapGenerator {
 
         currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
 
-
-        Connection conn = null;
+        final Connection conn;
         try {
             conn = connManager.getConnection(configuration.getSettings());
         } catch (SQLException e) {
@@ -110,7 +101,7 @@ public class BootstrapGenerator {
         if (baseURI == null || baseURI.isEmpty())
             baseURI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
         else{
-            baseURI = fixBaseURI(baseURI);
+            baseURI = DirectMappingEngine.fixBaseURI(baseURI);
         }
         Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 
@@ -123,55 +114,18 @@ public class BootstrapGenerator {
             activeOBDAModel.addTriplesMap(triplesMap, true);
         }
         return newTriplesMap;
-
     }
 
-    private String fixBaseURI(String prefix) {
-        if (prefix.endsWith("#")) {
-            return prefix.replace("#", "/");
-        } else if (prefix.endsWith("/")) {
-            return prefix;
-        } else {
-            return prefix + "/";
-        }
-    }
-
-    private void updateProtegeOntology(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary)
+    private void updateProtegeOntology(OWLOntology ontology, OntologyVocabulary vocabulary)
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException {
 
+        OWLOntologyManager manager = ontology.getOWLOntologyManager();
+        Set<OWLDeclarationAxiom> declarationAxioms = DirectMappingEngine.extractDeclarationAxioms(manager, vocabulary);
+        List<AddAxiom> addAxioms = declarationAxioms.stream()
+                .map(ax -> new AddAxiom(ontology, ax))
+                .collect(Collectors.toList());
 
-        OWLDataFactory dataFactory = owlManager.getOWLDataFactory();
-
-        owlManager.applyChanges( extractDeclarationAxioms(ontology, vocabulary, dataFactory));
-
-
-    }
-
-    private List<AddAxiom> extractDeclarationAxioms(OWLOntology ontology, ImmutableOntologyVocabulary vocabulary, OWLDataFactory dataFactory) {
-        List<AddAxiom> declarationAxioms = new ArrayList<>();
-
-
-
-        //Add all the classes
-        for (OClass c :  vocabulary.getClasses()) {
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(owlClass)));
-        }
-
-        //Add all the object properties
-        for (ObjectPropertyExpression p : vocabulary.getObjectProperties()){
-            OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
-        }
-
-        //Add all the data properties
-        for (DataPropertyExpression p : vocabulary.getDataProperties()){
-            OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
-            declarationAxioms.add(new AddAxiom(ontology, dataFactory.getOWLDeclarationAxiom(property)));
-        }
-
-        return declarationAxioms;
-
+        owlManager.applyChanges(addAxioms);
     }
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {

@@ -21,9 +21,6 @@ package it.unibz.inf.ontop.si;
  */
 
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +38,6 @@ public class YAGOTest {
     private final static String dataFile = "yago2core_20110315.n3";
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
-    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-   
-
     public static void main(String[] args) throws IOException, URISyntaxException {
         Ontology onto = parse_tbox(dataFile);
  //       DAG dag = new DAG(onto);
@@ -56,8 +50,7 @@ public class YAGOTest {
 
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
  
-		OntologyVocabulary voc = descFactory.createVocabulary();
-		Ontology onto = descFactory.createOntology(voc);
+		Ontology onto = null;
 
         while ((line = triples.readLine()) != null) {
             if (line.startsWith("@")) {

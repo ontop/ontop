@@ -49,11 +49,6 @@ import org.slf4j.LoggerFactory;
 public class DAGOperations {
 	private static final Logger	log	= LoggerFactory.getLogger(DAGOperations.class);
 
-	public static void buildAncestors(DAG dag) {
-		buildAncestors(dag.roles);
-		buildAncestors(dag.classes);
-	}
-	
 	/**
 	 * Calculate the ancestors for all nodes in the given DAG
 	 * 
@@ -62,7 +57,7 @@ public class DAGOperations {
 	 * @return Map from uri to the Set of their ancestors
 	 */
 	public static void buildAncestors(Map<Description, DAGNode> dagnodes) {
-		Queue<DAGNode> stack = new LinkedList<DAGNode>();
+		Queue<DAGNode> stack = new LinkedList<>();
 		
 		for (DAGNode n : dagnodes.values()) {
 			n.getAncestors().clear();
@@ -100,11 +95,6 @@ public class DAGOperations {
 		}
 	}
 	
-	public static void buildDescendants(DAG dag) {
-		buildDescendants(dag.roles);
-		buildDescendants(dag.classes);
-	}
-	
 	/**
 	 * Calculate the descendants for all nodes in the given DAG
 	 * 
@@ -113,7 +103,7 @@ public class DAGOperations {
 	 * @return Map from uri to the Set of their descendants
 	 */
 	public static void buildDescendants(Map<Description, DAGNode> dagnodes) {
-		Queue<DAGNode> stack = new LinkedList<DAGNode>();
+		Queue<DAGNode> stack = new LinkedList<>();
 
 		// Start with bottom nodes, that don't have children
 		for (DAGNode n : dagnodes.values()) {
@@ -601,5 +591,4 @@ public class DAGOperations {
 			SCC.add(component);
 		}
 	}
-
 }

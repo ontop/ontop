@@ -46,9 +46,8 @@ public class MappingTestingTools {
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingMerger MAPPING_MERGER;
-    public static final IntermediateQuery2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
-    public static final MappingEquivalenceFreeRewriter EQUIVALENCE_FREE_REWRITER;
+    public static final IntermediateQuery2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSaturator MAPPING_SATURATOR;
 
     public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER ;
@@ -76,7 +75,6 @@ public class MappingTestingTools {
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
-        EQUIVALENCE_FREE_REWRITER = injector.getInstance(MappingEquivalenceFreeRewriter.class);
         INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IntermediateQuery2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
 

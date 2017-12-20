@@ -15,10 +15,9 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -91,9 +90,9 @@ public class SubqueryTripleMappingGenerationTest {
                 EXECUTOR_REGISTRY,
                 EMPTY_MAPPING_METADATA
         );
-        TBoxReasoner tBoxReasoner = TBoxReasonerImpl.create(OntologyFactoryImpl.getInstance().createOntology(new OntologyVocabularyImpl()));
+        ClassifiedTBox tBoxReasoner = OntologyBuilderImpl.builder().build().tbox();
         Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, METADATA, tBoxReasoner);
-        String debug =saturatedMapping.getPredicates().stream()
+        String debug = saturatedMapping.getPredicates().stream()
                 .map(p -> saturatedMapping.getDefinition(p).get().toString())
                 .collect(Collectors.joining(""));
         log.debug("Saturated mapping:\n" + debug);

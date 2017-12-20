@@ -37,7 +37,6 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 
 /**
  * The following tests take the Stock exchange scenario and execute the queries
@@ -136,31 +135,13 @@ public class JoinEliminationMappingTest extends TestCase {
 
 	public void testViEqSig() throws Exception {
 		Properties p  = new Properties();
-		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
+		//p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}
 
 	public void testViEqNoSig() throws Exception {
 		Properties p  = new Properties();
-		runTests(p);
-	}
-
-	/**
-	 * This is a very slow test, disable it if you are doing routine checks.
-	 */
-	public void testViNoEqSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(OPTIMIZE_EQUIVALENCES, "false");
-		runTests(p);
-	}
-
-	/**
-	 * This is a very slow test, disable it if you are doing routine checks.
-	 */
-	public void testViNoEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(OPTIMIZE_EQUIVALENCES, "false");
 		runTests(p);
 	}
 }

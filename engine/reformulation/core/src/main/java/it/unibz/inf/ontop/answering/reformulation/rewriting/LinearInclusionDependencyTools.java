@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 public class LinearInclusionDependencyTools {
 
@@ -26,12 +26,12 @@ public class LinearInclusionDependencyTools {
         this.datalogFactory = datalogFactory;
     }
 
-    public LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
+    public LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
         LinearInclusionDependencies dependencies = new LinearInclusionDependencies(datalogFactory);
 
-        for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectPropertyDAG()) {
+        for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectPropertiesDAG()) {
             // super might be more efficient
-            for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.getObjectPropertyDAG().getSub(propNode)) {
+            for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.objectPropertiesDAG().getSub(propNode)) {
                 for (ObjectPropertyExpression subprop : subpropNode) {
                     if (subprop.isInverse())
                         continue;
@@ -48,9 +48,9 @@ public class LinearInclusionDependencyTools {
                 }
             }
         }
-        for (Equivalences<DataPropertyExpression> propNode : reasoner.getDataPropertyDAG()) {
+        for (Equivalences<DataPropertyExpression> propNode : reasoner.dataPropertiesDAG()) {
             // super might be more efficient
-            for (Equivalences<DataPropertyExpression> subpropNode : reasoner.getDataPropertyDAG().getSub(propNode)) {
+            for (Equivalences<DataPropertyExpression> subpropNode : reasoner.dataPropertiesDAG().getSub(propNode)) {
                 for (DataPropertyExpression subprop : subpropNode) {
 
                     Function body = translate(subprop);
@@ -65,9 +65,9 @@ public class LinearInclusionDependencyTools {
                 }
             }
         }
-        for (Equivalences<ClassExpression> classNode : reasoner.getClassDAG()) {
+        for (Equivalences<ClassExpression> classNode : reasoner.classesDAG()) {
             // super might be more efficient
-            for (Equivalences<ClassExpression> subclassNode : reasoner.getClassDAG().getSub(classNode)) {
+            for (Equivalences<ClassExpression> subclassNode : reasoner.classesDAG().getSub(classNode)) {
                 for (ClassExpression subclass : subclassNode) {
 
                     Function body = translate(subclass, variableYname);

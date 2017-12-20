@@ -7,13 +7,13 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.OntologyABox;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 
-public class DefaultMappingTransformer implements MappingTransformer{
+public class DefaultMappingTransformer implements MappingTransformer {
 
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
@@ -23,7 +23,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
     private final MappingMerger mappingMerger;
     private final OntopMappingSettings settings;
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
-    private final MappingEquivalenceFreeRewriter eqFreeRewriter;
     private final SpecificationFactory specificationFactory;
 
     @Inject
@@ -34,7 +33,6 @@ public class DefaultMappingTransformer implements MappingTransformer{
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
-                                     MappingEquivalenceFreeRewriter eqFreeRewriter,
                                      SpecificationFactory specificationFactory) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
@@ -43,23 +41,21 @@ public class DefaultMappingTransformer implements MappingTransformer{
         this.mappingMerger = mappingMerger;
         this.settings = settings;
         this.sameAsInverseRewriter = sameAsInverseRewriter;
-        this.eqFreeRewriter = eqFreeRewriter;
         this.specificationFactory = specificationFactory;
     }
 
     @Override
-    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, Ontology ontology,
-                                       TBoxReasoner tBox)
+    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, OntologyABox abox,
+                                       ClassifiedTBox tBox)
             throws MappingException, DBMetadataExtractionException {
-        Mapping factsAsMapping = factConverter.convert(ontology, mapping.getExecutorRegistry(),
+        Mapping factsAsMapping = factConverter.convert(abox, mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-        Mapping eqFreeMapping = eqFreeRewriter.rewrite(mappingWithFacts, tBox, ontology.getVocabulary(), dbMetadata);
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(eqFreeMapping, dbMetadata);
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox);
     }
 }

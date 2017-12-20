@@ -1,83 +1,19 @@
 package it.unibz.inf.ontop.spec.ontology;
 
+/*
 
-public interface OntologyVocabulary extends ImmutableOntologyVocabulary {
+ used only with MappingVocabularyExtractor and probably should be removed
 
-	/**
-	 * declare class
-	 * 
-	 * @param uri
-	 * @return class object
-	 */
-	
-	public OClass createClass(String uri);
+ */
 
-	/**
-	 * declare object property
-	 * 
-	 * @param uri property name
-	 * @return property object
-	 */
-	
-	public ObjectPropertyExpression createObjectProperty(String uri);
+public interface OntologyVocabulary {
 
-	/**
-	 * declare data property
-	 * 
-	 * @param uri property name
-	 * @return property object
-	 */
-	
-	public DataPropertyExpression createDataProperty(String uri);
+    OntologyVocabularyCategory<OClass> classes();
 
-	/**
-	 * declare annotation property
-	 *
-	 * @param uri property name
-	 * @return property object
-	 */
+    OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties();
 
-	public AnnotationProperty createAnnotationProperty(String uri);
+    OntologyVocabularyCategory<DataPropertyExpression> dataProperties();
 
+    OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
 
-	/**
-	 * remove class from the vocabulary
-	 * 
-	 * @param classname uri name
-	 */
-	
-	public void removeClass(String classname);
-
-	/**
-	 * remove object property from the vocabulary
-	 * 
-	 * @param property uri name
-	 */
-	
-	public void removeObjectProperty(String property);
-
-	/**
-	 * remove data property from the vocabulary
-	 * 
-	 * @param property uri name
-	 */
-	
-	public void removeDataProperty(String property);
-
-	/**
-	 * remove annotation property from the vocabulary
-	 *
-	 * @param property uri name
-	 */
-
-	public void removeAnnotationProperty(String property);
-	
-	
-	/**
-	 * copy all classes and properties from a given vocabulary 
-	 * 
-	 * @param v vocabulary to be copied from
-	 */
-	
-	public void merge(ImmutableOntologyVocabulary v);
 }

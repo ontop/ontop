@@ -26,6 +26,6 @@ import java.io.Serializable;
  * An entity descriptor, either role or class.
  */
 
-public interface Description extends Serializable {
+public interface Description {
 	// NO-OP
 }

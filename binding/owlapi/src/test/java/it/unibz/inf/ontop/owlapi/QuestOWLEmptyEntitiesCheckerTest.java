@@ -23,20 +23,15 @@ package it.unibz.inf.ontop.owlapi;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -47,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static it.unibz.inf.ontop.utils.OWLAPITestingTools.OWLAPI_TRANSLATOR_UTILITY;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -62,7 +56,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private Ontology onto;
+	private ClassifiedTBox onto;
 
 	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
 	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
@@ -101,15 +95,13 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		connection.commit();
 
 		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		onto =  OWLAPI_TRANSLATOR_UTILITY.translate(ontology);
+		onto = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify(owlfile);
 
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
-				.ontology(ontology)
+				.ontologyFile(owlfile)
 				.jdbcUrl(url)
 				.jdbcUser(username)
 				.jdbcPassword(password)
@@ -118,7 +110,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
         reasoner = factory.createReasoner(config);
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
-
 	}
 
 	@After
@@ -148,11 +139,9 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	/**
 	 * Test numbers of empty concepts
-	 * 
-	 * @throws Exception
 	 */
 	@Test
-	public void testEmptyConcepts() throws Exception {
+	public void testEmptyConcepts() {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<IRI> iterator = empties.iEmptyConcepts();
@@ -163,16 +152,13 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		log.info("Empty concept/s: " + emptyConcepts);
 		assertEquals(1, emptyConcepts.size());
 		assertEquals(1, empties.getEConceptsSize());
-
 	}
 
 	/**
 	 * Test numbers of empty roles
-	 * 
-	 * @throws Exception
 	 */
 	@Test
-	public void testEmptyRoles() throws Exception {
+	public void testEmptyRoles() {
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<IRI> iterator = empties.iEmptyRoles();
 		while (iterator.hasNext()){
@@ -182,9 +168,5 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		log.info("Empty role/s: " + emptyRoles);
 		assertEquals(2, emptyRoles.size());
 		assertEquals(2, empties.getERolesSize());
-
 	}
-
-
-
 }

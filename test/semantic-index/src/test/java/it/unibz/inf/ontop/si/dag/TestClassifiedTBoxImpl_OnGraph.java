@@ -20,20 +20,11 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -49,51 +40,80 @@ import com.google.common.collect.ImmutableSet;
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
 @Deprecated
-public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
+public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 
-	private final EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
-	private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
-	private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
-	private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
+    private final EquivalencesDAGImplOnGraph<ClassExpression> classDAG;
+    private final EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
+    private final EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
+    private final EquivalencesDAGImplOnGraph<DataRangeExpression> dataRangeDAG;
 
-	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(reasoner.getObjectPropertyGraph());
-		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(reasoner.getDataPropertyGraph());
-		this.classDAG = new EquivalencesDAGImplOnGraph<ClassExpression>(reasoner.getClassGraph());
-		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<DataRangeExpression>(reasoner.getDataRangeGraph());
+	private final ClassifiedTBoxImpl reasoner;
+
+	public TestClassifiedTBoxImpl_OnGraph(ClassifiedTBoxImpl reasoner) {
+		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getObjectPropertyGraph());
+		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataPropertyGraph());
+		this.classDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getClassGraph());
+		this.dataRangeDAG = new EquivalencesDAGImplOnGraph<>(reasoner.getDataRangeGraph());
+		this.reasoner = reasoner;
 	}
-	
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
+
+    @Override
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return reasoner.objectProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return reasoner.dataProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<OClass> classes() {
+	    return reasoner.classes();
+    }
+
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
+
+
+    // DUMMIES
+	@Override
+	public ImmutableList<NaryAxiom<ClassExpression>> disjointClasses() { return null; }
 
 	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
-		return objectPropertyDAG;
-	}
-	
+	public ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties() { return null; }
+
 	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
-		return dataPropertyDAG;
-	}
-	
-	/**
-	 * Return the DAG of classes
-	 * 
-	 * @return DAG 
-	 */
-	
+	public ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties() { return null; }
+
 	@Override
-	public EquivalencesDAG<ClassExpression> getClassDAG() {
-		return classDAG;
-	}
-	
+	public ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties() { return null; }
+
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
-		return dataRangeDAG;
-	}
+	public ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> functionalObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<DataPropertyExpression> functionalDataProperties() { return null; }
+
+	@Override
+    public EquivalencesDAG<ClassExpression> classesDAG() {
+        return classDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() {
+        return objectPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() {
+        return dataPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() {
+        return dataRangeDAG;
+    }
+
 
 	/**
 	 * Reconstruction of the DAG from the ontology graph
@@ -111,12 +131,11 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			Set<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T vertex : graph.vertexSet()) {
-					result.add(getVertex(vertex));
-				}
-
+                result.add(getVertex(vertex));
+            }
 			return result.iterator();
 		}
 
@@ -314,16 +333,12 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 
 	public int edgeSetSize() {
-		return objectPropertyDAG.graph.edgeSet().size() + dataPropertyDAG.graph.edgeSet().size() +  classDAG.graph.edgeSet().size();
+		return objectPropertyDAG.graph.edgeSet().size() + dataPropertyDAG.graph.edgeSet().size() + classDAG.graph.edgeSet().size();
 	}
 
-	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() {
-		return objectPropertyDAG.graph;
-	}
-	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() {
-		return dataPropertyDAG.graph;
-	}
-	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() {
-		return classDAG.graph;
-	}
+	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() { return objectPropertyDAG.graph; }
+
+	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() { return dataPropertyDAG.graph; }
+
+	public DefaultDirectedGraph<ClassExpression, DefaultEdge> getClassGraph() { return classDAG.graph; }
 }

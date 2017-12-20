@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -29,11 +30,8 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
@@ -46,12 +44,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR_UTILITY;
+import static it.unibz.inf.ontop.docker.utils.DockerTestingTools.OWLAPI_TRANSLATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -63,16 +62,15 @@ import static org.junit.Assert.assertTrue;
 public class R2rmlCheckerTest {
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OWLOntology owlOntology;
-	private Ontology onto;
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private ClassifiedTBox onto;
 
 	final String owlFile = "/mysql/npd/npd-v2-ql_a.owl";
 	final String obdaFile = "/mysql/npd/npd-v2-ql_a.obda";
 	final String propertyFile = "/mysql/npd/npd-v2-ql_a.properties";
 	final String r2rmlFile = "/mysql/npd/npd-v2-ql_a.ttl";
 
-	final InputStream owlFileName =  this.getClass().getResourceAsStream(owlFile);
+    final String owlFileName =  this.getClass().getResource(owlFile).toString();
 	final String obdaFileName =  this.getClass().getResource(obdaFile).toString();
 	final String r2rmlFileName =  this.getClass().getResource(r2rmlFile).toString();
 	final String propertyFileName =  this.getClass().getResource(propertyFile).toString();
@@ -85,38 +83,28 @@ public class R2rmlCheckerTest {
 	private OntopOWLReasoner reasonerOBDA;
 	private OntopOWLReasoner reasonerR2rml;
 
-	@Before
+    @Before
 	public void setUp() throws Exception {
-		// Loading the OWL file
-
-
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		owlOntology = manager
-				.loadOntologyFromOntologyDocument(owlFileName);
-
-		onto = OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
+		onto = loadOntologyFromFileAndClassify(new URL(owlFileName).getPath());
 
 		loadOBDA();
 		loadR2rml();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		try {
-
-			if(reasonerOBDA!=null){
-			reasonerOBDA.dispose();
+			if (reasonerOBDA!=null) {
+				reasonerOBDA.dispose();
 			}
-			if(reasonerR2rml!=null){
-			reasonerR2rml.dispose();
+			if (reasonerR2rml!=null) {
+				reasonerR2rml.dispose();
 			}
-
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.debug(e.getMessage());
 			assertTrue(false);
 		}
-
 	}
 
 	//TODO:  extract the two OBDA specifications to compare the mapping objects
@@ -149,7 +137,7 @@ public class R2rmlCheckerTest {
 
 			// Now we are ready for querying
 			log.debug("Comparing concepts");
-			for (OClass cl : onto.getVocabulary().getClasses()) {
+			for (OClass cl : onto.classes()) {
 				String concept = cl.getName();
 
 				int conceptOBDA = runSPARQLConceptsQuery("<" + concept + ">", obdaConnection);
@@ -159,7 +147,7 @@ public class R2rmlCheckerTest {
 			}
 
 			log.debug("Comparing object properties");
-			for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+			for (ObjectPropertyExpression prop : onto.objectProperties()) {
 				String role = prop.getName();
 
 				log.debug("description " + role);
@@ -170,7 +158,7 @@ public class R2rmlCheckerTest {
 			}
 
 			log.debug("Comparing data properties");
-			for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+			for (DataPropertyExpression prop : onto.dataProperties()) {
 				String role = prop.getName();
 
 				log.debug("description " + role);
@@ -190,11 +178,9 @@ public class R2rmlCheckerTest {
 //	@Test
 	public void testOBDAEmpties() throws Exception {
 
-
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
-		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsObda.add(iteratorC.next());
@@ -222,9 +208,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
-		Ontology ontology =  OWLAPI_TRANSLATOR_UTILITY.translate(owlOntology);
-		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(
-				ontology, conn);
+		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
 		Iterator<IRI> iteratorC = empties.iEmptyConcepts();
 		while (iteratorC.hasNext()){
 			emptyConceptsR2rml.add(iteratorC.next());
@@ -357,7 +341,7 @@ public class R2rmlCheckerTest {
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlFileName)
-				.ontology(owlOntology)
+				.ontologyFile(owlFileName)
 				.propertyFile(propertyFileName)
 				.enableTestMode()
 				.build();
@@ -380,12 +364,10 @@ public class R2rmlCheckerTest {
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)
-				.ontology(owlOntology)
+				.ontologyFile(owlFileName)
 				.enableTestMode()
 				.build();
 		reasonerOBDA = factory.createReasoner(config);
-
-
 	}
 
 	private int runSPARQLConceptsQuery(String description,	OWLConnection conn) throws Exception {
@@ -486,8 +468,22 @@ public class R2rmlCheckerTest {
 			}
 			// conn.close();
 			st.close();
-
 		}
+	}
+
+	/**
+	 * USE FOR TESTS ONLY
+	 *
+	 * @param filename
+	 * @return
+	 * @throws OWLOntologyCreationException
+	 */
+
+	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
+		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
+		Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(owl));
+		return onto.tbox();
 	}
 
 }

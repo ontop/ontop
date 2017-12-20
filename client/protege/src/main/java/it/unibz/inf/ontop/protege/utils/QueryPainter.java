@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -31,6 +30,8 @@ import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
+import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -65,7 +66,6 @@ public class QueryPainter {
 	private Border errorBorder;
 	private Timer timer;
 	private TargetQueryParserException parsingException;
-	private TargetQueryVocabularyValidator validator;
 
 	private boolean invalid = false;
 
@@ -88,13 +88,11 @@ public class QueryPainter {
 
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 
-	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModel apic, JTextPane parent) {
 		this.apic = apic;
 		this.parent = parent;
-		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
-
 
 		prepareStyles();
 		prepareTextPane();
@@ -179,8 +177,8 @@ public class QueryPainter {
 			invalid = true;
 			throw parsingException;
 		}
-		if (!validator.validate(query)) {
-			List<String> invalidPredicates = validator.getInvalidPredicates();
+		List<String> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
+		if (!invalidPredicates.isEmpty()) {
 			String invalidList = "";
 			for (String predicate : invalidPredicates) {
 				invalidList += "- " + predicate + "\n";
@@ -397,19 +395,23 @@ public class QueryPainter {
 			doc.setCharacterAttributes(pos, 1, black, false);
 			pos = input.indexOf(":", pos + 1);
 		}
+		MutableOntologyVocabulary vocabulary = apic.getCurrentVocabulary();
 		for (Function atom : current_query) {
 			Predicate predicate = atom.getFunctionSymbol();
 			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
-			if (validator.isClass(predicate)) {
+			if (vocabulary.classes().contains(predicate.getName())) {
 				ColorTask task = new ColorTask(predicateName, clazz);
 				tasks.add(task);
-			} else if (validator.isObjectProperty(predicate)) {
+			}
+			else if (vocabulary.objectProperties().contains(predicate.getName())) {
 				ColorTask task = new ColorTask(predicateName, objectProp);
 				tasks.add(task);
-			} else if (validator.isDataProperty(predicate)) {
+			}
+			else if (vocabulary.dataProperties().contains(predicate.getName())) {
 				ColorTask task = new ColorTask(predicateName, dataProp);
 				tasks.add(task);
-			} else if (validator.isAnnotationProperty(predicate)) {
+			}
+			else if (vocabulary.annotationProperties().contains(predicate.getName())) {
 				ColorTask task = new ColorTask(predicateName, annotProp);
 				tasks.add(task);
 			}

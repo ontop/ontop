@@ -44,7 +44,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -64,13 +63,9 @@ public class ComplexWhereMappingTest {
 
 	@Before
 	public void setUp() throws Exception {
-
-
 		/*
 		 * Initializing and H2 database
 		 */
-		// String driver = "org.h2.Driver";
-
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
@@ -89,10 +84,8 @@ public class ComplexWhereMappingTest {
 
 	@After
 	public void tearDown() throws Exception {
-
-			dropTables();
-			conn.close();
-
+		dropTables();
+		conn.close();
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -146,7 +139,7 @@ public class ComplexWhereMappingTest {
 
 	private static OntopSQLOWLAPIConfiguration createConfiguration() {
 		Properties p = new Properties();
-		p.put(OPTIMIZE_EQUIVALENCES, "true");
+		// p.put(OPTIMIZE_EQUIVALENCES, "true");
 		return OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
@@ -167,7 +160,7 @@ public class ComplexWhereMappingTest {
     public void testClassicEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.put(OPTIMIZE_EQUIVALENCES, "true");
+		// p.put(OPTIMIZE_EQUIVALENCES, "true");
 		OntopSQLOWLAPIConfiguration obdaConfig = createConfiguration();
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadVirtualAbox(obdaConfig, p)) {

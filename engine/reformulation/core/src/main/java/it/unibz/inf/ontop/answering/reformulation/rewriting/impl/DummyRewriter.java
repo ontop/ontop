@@ -22,9 +22,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 /***
  * A query rewriter that does nothing on the given query.
@@ -41,7 +40,7 @@ public class DummyRewriter implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology, ImmutableOntologyVocabulary voc, LinearInclusionDependencies sigma) {
+	public void setTBox(ClassifiedTBox ontology, LinearInclusionDependencies sigma) {
 		// NO-OP		
 	}
 }

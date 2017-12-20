@@ -42,8 +42,6 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
-	private static final long serialVersionUID = -2514037755762973974L;
-	
 	private final boolean isInverse;
 	private final IRI iri;
 	private final String string;
@@ -65,7 +63,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 * 
 	 * @param name
 	 */
-	
+
 	ObjectPropertyExpressionImpl(String name) {
 		this.iri = RDF_FACTORY.createIRI(name);
 		this.isInverse = false;

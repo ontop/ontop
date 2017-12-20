@@ -51,8 +51,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry,
-                           boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(OntologyABox ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
@@ -88,7 +87,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
                                                   Iterable<ObjectPropertyAssertion> pas,
                                                   Iterable<DataPropertyAssertion> das,
-                                                  List<AnnotationAssertion> aas,
+                                                  Iterable<AnnotationAssertion> aas,
                                                   UriTemplateMatcher uriTemplateMatcher) {
 
         List<CQIE> mutableMapping = new ArrayList<>();
@@ -151,13 +150,12 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
 
             URIConstant s = (URIConstant) aa.getSubject();
-            Constant v = aa.getValue();
             Predicate p = atomFactory.getAnnotationPropertyPredicate(aa.getProperty().getIRI());
 
             Function head;
-            if (v instanceof ValueConstant) {
+            if (aa.getValue() instanceof ValueConstant) {
 
-                ValueConstant o = (ValueConstant) v;
+                ValueConstant o = (ValueConstant) aa.getValue();
 
                 head = o.getType().getLanguageTag()
                         .map(lang -> termFactory.getFunction(p, termFactory.getUriTemplate(
@@ -167,7 +165,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                                 termFactory.getConstantLiteral(s.getURI())), termFactory.getTypedTerm(o, o.getType())));
             } else {
 
-                URIConstant o = (URIConstant) v;
+                URIConstant o = (URIConstant) aa.getValue();
                 head = termFactory.getFunction(p,
                         termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getURI())),
                         termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getURI())));

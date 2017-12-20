@@ -38,9 +38,9 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 public interface AnnotationAssertion extends Assertion {
 
-	public AnnotationProperty getProperty();
+	AnnotationProperty getProperty();
 	
-	public ObjectConstant getSubject();
+	ObjectConstant getSubject();
 	
-	public Constant getValue();
+	Constant getValue();
 }
