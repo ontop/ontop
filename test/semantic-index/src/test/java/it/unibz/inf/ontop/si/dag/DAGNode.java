@@ -39,12 +39,7 @@ import java.util.Set;
  * @author Sergejs Pugacs
  */
 @Deprecated
-public class DAGNode implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3207267860221176982L;
+public class DAGNode {
 
 	private final Description description;
 

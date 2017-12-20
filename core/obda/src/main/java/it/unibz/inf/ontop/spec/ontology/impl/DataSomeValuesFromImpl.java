@@ -39,8 +39,6 @@ import it.unibz.inf.ontop.spec.ontology.Datatype;
 
 public class DataSomeValuesFromImpl implements DataSomeValuesFrom {
 
-	private static final long serialVersionUID = 593821958539751283L;
-	
 	private final DataPropertyExpression property;
 	private final Datatype filler;
 	private final String string;

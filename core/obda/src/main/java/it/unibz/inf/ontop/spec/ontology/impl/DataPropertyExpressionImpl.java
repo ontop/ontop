@@ -45,7 +45,6 @@ import java.util.Map;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
-	private static final long serialVersionUID = 500873858691854474L;
 	private static final RDF RDF_FACTORY = new SimpleRDF();
 
 	private final String name;
@@ -61,7 +60,6 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(owlTopDataPropertyIRI);
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
 	private final IRI iri;
-
 
 	DataPropertyExpressionImpl(String name) {
 		this.name = name;

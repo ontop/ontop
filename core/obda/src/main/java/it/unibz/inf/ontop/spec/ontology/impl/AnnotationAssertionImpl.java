@@ -36,8 +36,6 @@ import it.unibz.inf.ontop.spec.ontology.AnnotationProperty;
 
 public class AnnotationAssertionImpl implements AnnotationAssertion {
 
-	private static final long serialVersionUID = -8834975903851540150L;
-
 	private final AnnotationProperty prop;
 	private final ObjectConstant o1;
 	private final Constant o2;

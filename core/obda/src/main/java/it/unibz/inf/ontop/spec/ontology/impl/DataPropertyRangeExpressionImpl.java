@@ -5,8 +5,6 @@ import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
 
 public class DataPropertyRangeExpressionImpl implements DataPropertyRangeExpression {
 
-	private static final long serialVersionUID = 4159090478171795156L;
-
 	private final DataPropertyExpression property;
 	private final String string;
 

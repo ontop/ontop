@@ -36,29 +36,5 @@ public interface AnnotationProperty extends Description {
     IRI getIRI();
 
 
-    public String getName();
-
-
-    /**
-     * the domain iri for the annotation property
-     * <p>
-     *
-     *
-     * @return iri  for the domain
-     */
-
-//    public AnnotationPropertyDomain getDomain();
-
-    /**
-     * the range iri for the annotation property
-     * <p>
-     * (
-     * <p>
-     *
-     * @return iri for the range
-     */
-
-//    public AnnotationPropertyRange getRange();
-
-
+    String getName();
 }

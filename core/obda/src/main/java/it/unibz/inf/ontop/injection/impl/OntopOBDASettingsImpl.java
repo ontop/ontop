@@ -9,12 +9,10 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
 
     private static final String DEFAULT_FILE = "obda-default.properties";
     private final boolean isSameAs;
-    private final boolean optEquivalences;
 
     protected OntopOBDASettingsImpl(Properties userProperties) {
         super(loadProperties(userProperties));
         isSameAs = getRequiredBoolean(SAME_AS);
-        optEquivalences = getRequiredBoolean(OPTIMIZE_EQUIVALENCES);
     }
 
     private static Properties loadProperties(Properties userProperties) {
@@ -25,11 +23,6 @@ public class OntopOBDASettingsImpl extends OntopModelSettingsImpl implements Ont
 
     static Properties loadDefaultOBDAProperties() {
         return loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
-    }
-
-    @Override
-    public boolean isEquivalenceOptimizationEnabled() {
-        return optEquivalences;
     }
 
     @Override

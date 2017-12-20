@@ -53,7 +53,8 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc, DatalogFactory datalogFactory, TermFactory termFactory, EQNormalizer eqNormalizer) {
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc, DatalogFactory datalogFactory,
+						TermFactory termFactory, EQNormalizer eqNormalizer) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;

@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
 
 /**
- * This class shows how to create an instance of quest giving the metadata manually 
+ * This class shows how to create an instance of quest giving the metadata manually
  * 
  * @author mrezk, Christian 
  *

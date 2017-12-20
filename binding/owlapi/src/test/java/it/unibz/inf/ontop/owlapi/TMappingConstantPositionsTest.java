@@ -39,8 +39,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
-
 /***
  */
 
@@ -149,7 +147,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 	public void testViEqSig() throws Exception {
 
 		Properties p = new Properties();
-		p.put(OPTIMIZE_EQUIVALENCES, "true");
+		// p.put(OPTIMIZE_EQUIVALENCES, "true");
 
 		runTests(p);
 	}

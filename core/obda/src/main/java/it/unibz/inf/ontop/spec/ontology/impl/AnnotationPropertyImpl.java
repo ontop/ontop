@@ -41,15 +41,10 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	private final String name;
 	private IRI iri;
-//	private final AnnotationPropertyDomainImpl domain;
-//	private final AnnotationPropertyRangeImpl range;
-
 
 	AnnotationPropertyImpl(String name) {
 		this.name = name;
 		this.iri = new SimpleRDF().createIRI(name);
-//		this.domain =  new AnnotationPropertyDomainImpl(this);
-//		this.range = new AnnotationPropertyRangeImpl(this);
 	}
 
 	@Override
@@ -61,17 +56,6 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	public String getName() {
 		return name;
 	}
-
-//	@Override
-//	public AnnotationPropertyDomain getDomain() {
-//		return domain;
-//	}
-//
-//	@Override
-//	public AnnotationPropertyRange getRange() {
-//		return range;
-//	}
-
 
 	@Override
 	public boolean equals(Object obj) {

@@ -35,7 +35,6 @@ import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
@@ -95,7 +94,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
-	private final TermFactory termFactory;
+    private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
 	private final JdbcTypeMapper jdbcTypeMapper;
 
@@ -105,9 +104,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		this.configurationManager = configurationManager;
 		this.owlModelManager = owlModelManager;
 		prefixManager = obdaModel.getMutablePrefixManager();
-		termFactory = obdaModel.getTermFactory();
-		atomFactory = obdaModel.getAtomFactory();
-		jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
+        termFactory = obdaModel.getTermFactory();
+        atomFactory = obdaModel.getAtomFactory();
+        jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -307,10 +306,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		pnlClassMap.setLayout(new java.awt.BorderLayout());
 
 		pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
-		Vector<Object> v = new Vector<Object>();
-		for (OClass c : obdaModel.getCurrentVocabulary().getClasses()) {
-			Predicate pred = atomFactory.getClassPredicate(c.getIRI());
-			v.addElement(new PredicateItem(pred, CLASS, prefixManager));
+		Vector<Object> v = new Vector<>();
+		for (Predicate c : obdaModel.getCurrentVocabulary().classes()) {
+			v.addElement(new PredicateItem(c, CLASS, prefixManager));
 		}
 		cboClassAutoSuggest = new AutoSuggestComboBox(v);
 		cboClassAutoSuggest.setRenderer(new ClassListCellRenderer());

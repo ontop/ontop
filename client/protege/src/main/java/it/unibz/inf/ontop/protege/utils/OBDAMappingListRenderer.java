@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
@@ -74,13 +73,12 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(OBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
+	public OBDAMappingListRenderer(OBDAModel obdaModel) {
 
 		prefixManager = obdaModel.getMutablePrefixManager();
 
-
 		trgQueryTextPane = new JTextPane();
-		painter = new QueryPainter(obdaModel, trgQueryTextPane, validator);
+		painter = new QueryPainter(obdaModel, trgQueryTextPane);
 
 		trgQueryTextPane.setMargin(new Insets(4, 4, 4, 4));
 
