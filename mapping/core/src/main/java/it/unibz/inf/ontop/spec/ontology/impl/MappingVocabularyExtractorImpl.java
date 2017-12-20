@@ -6,19 +6,16 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
 
 import java.util.stream.Stream;
 
 
 public class MappingVocabularyExtractorImpl implements MappingVocabularyExtractor {
 
-    private static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final Mapping2DatalogConverter mapping2DatalogConverter;
 
     @Inject
@@ -28,32 +25,33 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
 
 
     @Override
-    public ImmutableOntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
-        OntologyVocabulary ontologyVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+    public OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
+        return extractVocabularyInternal(targetAtoms).buildVocabulary();
+    }
+
+    private OntologyBuilder extractVocabularyInternal(Stream<? extends Function> targetAtoms) {
+        OntologyBuilder ontologyBuilder = OntologyBuilderImpl.builder();
         targetAtoms
                 .forEach(f -> {
+                    String name = f.getFunctionSymbol().getName();
                     if (f.getArity() == 1)
-                        ontologyVocabulary.createClass(f.getFunctionSymbol().getName());
+                        ontologyBuilder.declareClass(name);
                     else {
                         Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
                         if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
-                            ontologyVocabulary.createObjectProperty(f.getFunctionSymbol().getName());
+                            ontologyBuilder.declareObjectProperty(name);
                         else
-                            ontologyVocabulary.createDataProperty(f.getFunctionSymbol().getName());
+                            ontologyBuilder.declareDataProperty(name);
                     }
                 });
-        return ontologyVocabulary;
+        return ontologyBuilder;
     }
 
     @Override
     public Ontology extractOntology(Mapping mapping) {
-
-        return extractOntology(mapping2DatalogConverter.convert(mapping)
-                .map(CQIE::getHead)
-        );
+        return (extractVocabularyInternal(mapping2DatalogConverter.convert(mapping)
+                .map(CQIE::getHead)))
+                .build();
     }
 
-    private Ontology extractOntology(Stream<? extends Function> mappingAxioms) {
-        return ONTOLOGY_FACTORY.createOntology(extractVocabulary(mappingAxioms));
-    }
 }

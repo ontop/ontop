@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.utils.VersionInfo;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -60,8 +60,6 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
     private final Version version;
 
-	private boolean interrupted = false;
-
 	private final ReasonerProgressMonitor pm;
 
 	private boolean prepared = false;
@@ -81,7 +79,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	/* The merge and translation of all loaded ontologies */
 	// TODO: see if still relevant
-	private Ontology translatedOntologyMerge;
+	private ClassifiedTBox translatedOntologyMerge;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
@@ -218,7 +216,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	/***
 	 * This method loads the given ontologies in the system. This will merge
 	 * these new ontologies with the existing ones in a set. Then it will
-	 * translate the assertions in all the ontologies into a single one, in our
+	 * translateAndClassify the assertions in all the ontologies into a single one, in our
 	 * internal representation.
 	 * 
 	 * The translation is done using our OWLAPITranslator that gets the TBox
@@ -229,15 +227,16 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	 * are used later when classify() is called.
 	 * 
 	 */
-	public static Ontology loadOntologies(OWLOntology ontology) throws Exception {
+	public static ClassifiedTBox loadOntologies(OWLOntology ontology) throws Exception {
 		/*
-		 * We will keep track of the loaded ontologies and translate the TBox
+		 * We will keep track of the loaded ontologies and translateAndClassify the TBox
 		 * part of them into our internal representation.
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-        Ontology mergeOntology = OWLAPITranslatorUtility.translateImportsClosure(ontology);
-        return mergeOntology;
+        Ontology mergeOntology = OWLAPITranslatorOWL2QL.translateAndClassify(
+				ontology.getOWLOntologyManager().getImportsClosure(ontology));
+        return mergeOntology.tbox();
 //		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
@@ -308,7 +307,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	@Override
     public void interrupt() {
-		interrupted = true;
+		/* interrupted = true; */
 	}
 
 	private void ensurePrepared() {
@@ -393,7 +392,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.disjointClasses()) {
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				Collection<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
@@ -414,7 +413,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<ObjectPropertyExpression> dda
-						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
+						: translatedOntologyMerge.disjointObjectProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
@@ -434,7 +433,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
 			for(NaryAxiom<DataPropertyExpression> dda
-						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
+						: translatedOntologyMerge.disjointDataProperties()) {
 				// TODO: handle role inverses and multiple arguments			
 				Collection<DataPropertyExpression> props = dda.getComponents();
 				Iterator<DataPropertyExpression> iterator = props.iterator();
@@ -459,7 +458,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		
-		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
+		for (ObjectPropertyExpression pfa : translatedOntologyMerge.functionalObjectProperties()) {
 			// TODO: handle inverses
 			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
@@ -471,7 +470,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 			}
 		}
 		
-		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
+		for (DataPropertyExpression pfa : translatedOntologyMerge.functionalDataProperties()) {
 			String propFunc = pfa.getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
@@ -723,7 +722,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	}
 
     @Override
-	public void close() throws Exception {
+	public void close() {
 		dispose();
 	}
 

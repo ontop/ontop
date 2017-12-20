@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,9 +14,9 @@ public class SemanticIndexCache {
 	private final Map<ObjectPropertyExpression, SemanticIndexRange> opeRanges = new HashMap<>();
 	private final Map<DataPropertyExpression, SemanticIndexRange> dpeRanges = new HashMap<>();
 
-	private final TBoxReasoner reasonerDag;
+	private final ClassifiedTBox reasonerDag;
 	
-	public SemanticIndexCache(TBoxReasoner reasonerDag) {
+	public SemanticIndexCache(ClassifiedTBox reasonerDag) {
 		this.reasonerDag = reasonerDag;
 	}
 	

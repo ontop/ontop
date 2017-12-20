@@ -70,7 +70,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary());
+		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getSaturatedTBox());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
@@ -81,7 +81,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
-		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary()).stream()
+		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedTBox()).stream()
 				.collect(ImmutableCollectors.toMap(
 						DefaultOntopRDFMaterializer::convertIntoURI,
 						p -> p));
@@ -105,35 +105,30 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ClassifiedTBox vocabulary) {
         Set<Predicate> predicates = new HashSet<>();
 
-        //add all class/data/object predicates to selectedVocabulary
-            //from ontology
-            for (OClass cl : vocabulary.getClasses()) {
-                Predicate p = cl.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-            for (ObjectPropertyExpression role : vocabulary.getObjectProperties()) {
-                Predicate p = role.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-            for (DataPropertyExpression role : vocabulary.getDataProperties()) {
-                Predicate p = role.getPredicate();
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-			for (AnnotationProperty role : vocabulary.getAnnotationProperties()) {
-				Predicate p = role.getPredicate();
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-							&& !predicates.contains(p))
-					predicates.add(p);
-			}
+        // collect all class/data/object predicates to selectedVocabulary
+        for (OClass cl : vocabulary.classes()) {
+            Predicate p = cl.getPredicate();
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (ObjectPropertyExpression role : vocabulary.objectProperties()) {
+            Predicate p = role.getPredicate();
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (DataPropertyExpression role : vocabulary.dataProperties()) {
+            Predicate p = role.getPredicate();
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (AnnotationProperty role : vocabulary.annotationProperties()) {
+            Predicate p = role.getPredicate();
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
 //        else {
 //            //from mapping undeclared predicates (can happen)
 //			for (OBDAMappingAxiom axiom : this.model.getMappings()) {
@@ -144,6 +139,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 //        }
 
         return ImmutableSet.copyOf(predicates);
+    }
+
+    private static boolean isBuiltin(Predicate p) {
+	    return p.toString().startsWith("http://www.w3.org/2002/07/owl#");
     }
 
 	private static URI convertIntoURI(Predicate vocabularyPredicate) {

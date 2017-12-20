@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -44,7 +43,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public Mapping convert(Ontology ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(OntologyABox ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
@@ -80,7 +79,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
                                                   Iterable<ObjectPropertyAssertion> pas,
                                                   Iterable<DataPropertyAssertion> das,
-                                                  List<AnnotationAssertion> aas,
+                                                  Iterable<AnnotationAssertion> aas,
                                                   UriTemplateMatcher uriTemplateMatcher) {
 
         List<CQIE> mutableMapping = new ArrayList<>();
@@ -89,8 +88,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         for (ClassAssertion ca : cas) {
             // no blank nodes are supported here
             URIConstant c = (URIConstant) ca.getIndividual();
-            Predicate p = ca.getConcept().getPredicate();
-            Function head = TERM_FACTORY.getFunction(p,
+            Function head = TERM_FACTORY.getFunction(ca.getConcept().getPredicate(),
                     uriTemplateMatcher.generateURIFunction(c.getURI()));
             CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
 
@@ -104,8 +102,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             URIConstant s = (URIConstant) pa.getSubject();
             URIConstant o = (URIConstant) pa.getObject();
-            Predicate p = pa.getProperty().getPredicate();
-            Function head = TERM_FACTORY.getFunction(p,
+            Function head = TERM_FACTORY.getFunction(pa.getProperty().getPredicate(),
                     uriTemplateMatcher.generateURIFunction(s.getURI()),
                     uriTemplateMatcher.generateURIFunction(o.getURI()));
             CQIE rule = DATALOG_FACTORY.getCQIE(head, Collections.emptyList());
@@ -146,13 +143,12 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
 
             URIConstant s = (URIConstant) aa.getSubject();
-            Constant v = aa.getValue();
             Predicate p = aa.getProperty().getPredicate();
 
             Function head;
-            if (v instanceof ValueConstant) {
+            if (aa.getValue() instanceof ValueConstant) {
 
-                ValueConstant o = (ValueConstant) v;
+                ValueConstant o = (ValueConstant) aa.getValue();
 
                 if (o.getLanguage() != null) {
                     head = TERM_FACTORY.getFunction(p, TERM_FACTORY.getUriTemplate(
@@ -165,7 +161,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 }
             } else {
 
-                URIConstant o = (URIConstant) v;
+                URIConstant o = (URIConstant) aa.getValue();
                 head = TERM_FACTORY.getFunction(p,
                         TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(s.getURI())),
                         TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(o.getURI())));

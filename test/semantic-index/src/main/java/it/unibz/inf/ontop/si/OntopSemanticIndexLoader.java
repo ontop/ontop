@@ -6,8 +6,12 @@ import it.unibz.inf.ontop.si.impl.GraphLoading;
 import it.unibz.inf.ontop.si.impl.OntologyIndividualLoading;
 import it.unibz.inf.ontop.si.impl.VirtualAboxLoading;
 import org.eclipse.rdf4j.query.Dataset;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 
+import java.io.File;
 import java.util.Properties;
 
 /**
@@ -51,7 +55,15 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadOntologyIndividuals(String ontologyFilePath, Properties properties)
             throws SemanticIndexException {
-        return OntologyIndividualLoading.loadOntologyIndividuals(ontologyFilePath, properties);
+
+        try {
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(ontologyFilePath));
+            return OntologyIndividualLoading.loadOntologyIndividuals(ontology, properties);
+        }
+        catch (OWLOntologyCreationException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
     }
 
     /**

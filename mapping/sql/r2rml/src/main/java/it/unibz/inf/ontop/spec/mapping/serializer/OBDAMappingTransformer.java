@@ -193,7 +193,7 @@ public class OBDAMappingTransformer {
 					tm.addPredicateObjectMap(pom);
 				} 
  				else if (object instanceof Function) { //we create a template
-					//check if uritemplate we create a template, in case of datatype with single varible we create a column
+					//check if uritemplate we create a template, in case of datatype with single variable we create a column
  					Function o = (Function) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {

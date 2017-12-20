@@ -21,14 +21,12 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -48,65 +46,94 @@ import java.util.Set;
  */
 
 @Deprecated
-public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
+public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 
-	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
-	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
-	private final EquivalencesDAG<ClassExpression> classDAG;
-	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
+	private final EquivalencesDAGImpl<ClassExpression> classDAG;
+	private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
+
+	private final ClassifiedTBox reasoner;
 
 	/**
 	 * Constructor using a DAG or a named DAG
-	 * @param dag DAG to be used for reasoning
+	 * @param reasoner DAG to be used for reasoning
 	 */
-	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
+	public TestClassifiedTBoxImpl_OnNamedDAG(ClassifiedTBox reasoner) {
+
 		this.objectPropertyDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG()), reasoner.getObjectPropertyDAG());
+				SemanticIndexBuilder.getNamedDAG(reasoner.objectPropertiesDAG()), reasoner.objectPropertiesDAG());
 		this.dataPropertyDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG()), reasoner.getDataPropertyDAG());
+				SemanticIndexBuilder.getNamedDAG(reasoner.dataPropertiesDAG()), reasoner.dataPropertiesDAG());
 		this.classDAG = new EquivalencesDAGImpl<>(
-				SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG()), reasoner.getClassDAG());
+				SemanticIndexBuilder.getNamedDAG(reasoner.classesDAG()), reasoner.classesDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<>(
-					SemanticIndexBuilder.getNamedDAG(reasoner.getDataRangeDAG()), reasoner.getDataRangeDAG());
-	}
-
-	
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
-
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
-		return objectPropertyDAG;
-	}
-	
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
-
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
-		return dataPropertyDAG;
+					SemanticIndexBuilder.getNamedDAG(reasoner.dataRangesDAG()), reasoner.dataRangesDAG());
+		this.reasoner = reasoner;
 	}
 
 
-	/**
-	 * Return the DAG of classes
-	 * 
-	 * @return DAG 
-	 */
+    @Override
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return reasoner.objectProperties(); }
 
-	public EquivalencesDAG<ClassExpression> getClassDAG() {
-		return classDAG;
-	}
+    @Override
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return reasoner.dataProperties(); }
 
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
-		return dataRangeDAG;
-	}
+    @Override
+    public OntologyVocabularyCategory<OClass> classes() {
+        return reasoner.classes();
+    }
 
-	/**
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
+
+    // DUMMIES
+
+	@Override
+	public ImmutableList<NaryAxiom<ClassExpression>> disjointClasses() { return null; }
+
+	@Override
+	public ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties() { return null; }
+
+	@Override
+	public ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> functionalObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<DataPropertyExpression> functionalDataProperties() { return null; }
+
+
+
+	@Override
+    public EquivalencesDAG<ClassExpression> classesDAG() {
+        return classDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() {
+        return objectPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() {
+        return dataPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() {
+        return dataRangeDAG;
+    }
+
+
+    /**
 	 * Reconstruction of the Named DAG (as EquivalencesDAG) from a NamedDAG
 	 *
 	 * @param <T> Property or BasicClassDescription

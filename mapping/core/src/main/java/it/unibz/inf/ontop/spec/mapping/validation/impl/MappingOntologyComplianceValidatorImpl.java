@@ -62,26 +62,25 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      */
     @Override
-    public void validate(MappingWithProvenance mapping, ImmutableOntologyVocabulary declaredVocabulary,
-                         TBoxReasoner saturatedTBox)
+    public void validate(MappingWithProvenance mapping, ClassifiedTBox saturatedTBox)
             throws MappingOntologyMismatchException {
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
 
         for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            validateAssertion(entry.getKey(), entry.getValue(), declaredVocabulary, datatypeMap);
+            validateAssertion(entry.getKey(), entry.getValue(), saturatedTBox, datatypeMap);
         }
     }
 
     private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
-                                   ImmutableOntologyVocabulary vocabulary,
+                                   ClassifiedTBox saturatedTBox,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         String predicateIRI = extractPredicateIRI(mappingAssertion);
 
         Optional<TermType> tripleObjectType = extractTripleObjectType(mappingAssertion);
-        checkTripleObject(predicateIRI, tripleObjectType, provenance, vocabulary, datatypeMap);
+        checkTripleObject(predicateIRI, tripleObjectType, provenance, saturatedTBox, datatypeMap);
     }
 
     private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
@@ -181,7 +180,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(String predicateIRI, Optional<TermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,
-                                   ImmutableOntologyVocabulary declaredVocabulary,
+                                   ClassifiedTBox saturatedTBox,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
@@ -196,51 +195,51 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     // Object-like property
                 case OBJECT:
                 case BNODE:
-                    checkObjectOrAnnotationProperty(predicateIRI, provenance, declaredVocabulary);
+                    checkObjectOrAnnotationProperty(predicateIRI, provenance, saturatedTBox);
                     return;
                 // Data-like property
                 default:
-                    checkDataOrAnnotationProperty(tripleObjectType, predicateIRI, provenance, declaredVocabulary,
+                    checkDataOrAnnotationProperty(tripleObjectType, predicateIRI, provenance, saturatedTBox,
                             datatypeMap);
             }
         }
         else {
-            checkClass(predicateIRI, provenance, declaredVocabulary);
+            checkClass(predicateIRI, provenance, saturatedTBox);
         }
     }
 
     private void checkObjectOrAnnotationProperty(String predicateIRI, PPMappingAssertionProvenance provenance,
-                                                 ImmutableOntologyVocabulary declaredVocabulary)
+                                                 ClassifiedTBox saturatedTBox)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be a data property (should be either an object or an annotation property)
          */
-        if (declaredVocabulary.containsDataProperty(predicateIRI))
+        if (saturatedTBox.dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, OBJECT_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (declaredVocabulary.containsClass(predicateIRI))
+        if (saturatedTBox.classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, OBJECT_PROPERTY_STR));
     }
 
     private void checkDataOrAnnotationProperty(TermType tripleObjectType, String predicateIRI,
                                                PPMappingAssertionProvenance provenance,
-                                               ImmutableOntologyVocabulary declaredVocabulary,
+                                               ClassifiedTBox saturatedTBox,
                                                ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
-        if (declaredVocabulary.containsObjectProperty(predicateIRI))
+        if (saturatedTBox.objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, DATA_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (declaredVocabulary.containsClass(predicateIRI))
+        if (saturatedTBox.classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, DATA_PROPERTY_STR));
 
@@ -275,24 +274,24 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void checkClass(String predicateIRI, PPMappingAssertionProvenance provenance,
-                            ImmutableOntologyVocabulary declaredVocabulary) throws MappingOntologyMismatchException {
+                            ClassifiedTBox saturatedTBox) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
-        if (declaredVocabulary.containsObjectProperty(predicateIRI))
+        if (saturatedTBox.objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, CLASS_STR));
         /*
          * Cannot be a data property
          */
-        else if (declaredVocabulary.containsDataProperty(predicateIRI))
+        else if (saturatedTBox.dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, CLASS_STR));
 
         /*
          * Cannot be an annotation property
          */
-        if (declaredVocabulary.containsAnnotationProperty(predicateIRI))
+        if (saturatedTBox.annotationProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
     }
@@ -317,9 +316,9 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
      * from Ontop v 1.18.1
      */
-    private ImmutableMultimap<String, Datatype> computeDataTypeMap(TBoxReasoner reasoner) {
+    private ImmutableMultimap<String, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
-        return StreamSupport.stream(reasoner.getDataRangeDAG().spliterator(), false)
+        return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap(
                         e -> e.getKey().getName(),
@@ -328,7 +327,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
     private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
-                                                                               TBoxReasoner reasoner) {
+                                                                               ClassifiedTBox reasoner) {
         DataRangeExpression node = nodeSet.getRepresentative();
 
         return ImmutableMap.<Predicate, Datatype>builder()
@@ -337,10 +336,10 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                 .build();
     }
 
-    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(TBoxReasoner reasoner, DataRangeExpression node,
+    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
-            return reasoner.getDataRangeDAG().getSub(nodeSet).stream()
+            return reasoner.dataRangesDAG().getSub(nodeSet).stream()
                     .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
                     .map(this::getPredicate)

@@ -163,7 +163,7 @@ public class RDF4JClassicABoxTest {
 		// String queryString =
 		// "SELECT ?x ?y WHERE { ?x a onto:Person. ?x onto:age ?y } ";
 		try (RepositoryConnection con = repo.getConnection()) {
-			GraphQuery graphQuery = (con).prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+			GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
 			GraphQueryResult result = graphQuery.evaluate();
 
 			int nresult = 0;

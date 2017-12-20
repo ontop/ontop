@@ -5,9 +5,8 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
+import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.rdf4j.rio.helpers.SemanticIndexRDFHandler;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -32,12 +31,11 @@ import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
 
 public class GraphLoading {
 
-    private static final OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(GraphLoading.class);
 
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         try {
-            Ontology implicitTbox =  loadTBoxFromDataset(dataset);
+            Ontology implicitTbox = loadTBoxFromDataset(dataset);
             RepositoryInit init = createRepository(implicitTbox);
 
             /*
@@ -50,8 +48,8 @@ public class GraphLoading {
              */
             OntopSQLOWLAPIConfiguration configuration = createConfiguration(init.dataRepository, init.jdbcUrl, properties);
             return new OntopSemanticIndexLoaderImpl(configuration, init.localConnection);
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -92,9 +90,8 @@ public class GraphLoading {
 
             rdfParser.parse(in, graphIRI.toString());
             LOG.debug("Inserted {} triples from the graph {}", rdfHandler.getCount(), graphIRI);
-
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -105,25 +102,14 @@ public class GraphLoading {
         graphURIs.addAll(dataset.getDefaultGraphs());
         graphURIs.addAll(dataset.getNamedGraphs());
 
-        OntologyVocabulary vb = ONTOLOGY_FACTORY.createVocabulary();
-
+        OntologyBuilder vb = OntologyBuilderImpl.builder();
         for (IRI graphURI : graphURIs) {
-            Ontology o = getOntology(graphURI);
-            vb.merge(o.getVocabulary());
-
-            // TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
-
-            //for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())
-            //	result.add(ax);
-            //for (SubClassOfAxiom ax : result.getSubClassAxioms())
-            //	result.add(ax);
+            collectOntologyVocabulary(graphURI, vb);
         }
-        Ontology result = ONTOLOGY_FACTORY.createOntology(vb);
-
-        return result;
+        return vb.build();
     }
 
-    private static Ontology getOntology(IRI graphURI) throws IOException {
+    private static void collectOntologyVocabulary(IRI graphURI, OntologyBuilder vb) throws IOException {
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURI.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat, ValueFactoryImpl.getInstance());
         ParserConfig config = rdfParser.getParserConfig();
@@ -136,49 +122,30 @@ public class GraphLoading {
 //		rdfParser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //		rdfParser.setPreserveBNodeIDs(true);
 
-        RDFTBoxReader reader = new RDFTBoxReader();
-        rdfParser.setRDFHandler(reader);
+        rdfParser.setRDFHandler(new RDFHandlerBase() {
+            @Override
+            public void handleStatement(Statement st) throws RDFHandlerException {
+                URI pred = st.getPredicate();
+                Value obj = st.getObject();
+                if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
+                    vb.declareClass(obj.stringValue());
+                }
+                else if (obj instanceof Literal) {
+                    vb.declareDataProperty(pred.stringValue());
+                }
+                else {
+                    vb.declareObjectProperty(pred.stringValue());
+                }
+            }
+        });
 
         URL graphURL = new URL(graphURI.toString());
         InputStream in = graphURL.openStream();
         try {
             rdfParser.parse(in, graphURI.toString());
-        } finally {
+        }
+        finally {
             in.close();
         }
-        return reader.getOntology();
-    }
-
-    public static class RDFTBoxReader extends RDFHandlerBase {
-        private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-        private OntologyVocabulary vb = ofac.createVocabulary();
-
-        public Ontology getOntology() {
-            return ofac.createOntology(vb);
-        }
-
-        @Override
-        public void handleStatement(Statement st) throws RDFHandlerException {
-            URI pred = st.getPredicate();
-            Value obj = st.getObject();
-            if (obj instanceof Literal) {
-                String dataProperty = pred.stringValue();
-                vb.createDataProperty(dataProperty);
-            }
-            else if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
-                String className = obj.stringValue();
-                vb.createClass(className);
-            }
-            else {
-                String objectProperty = pred.stringValue();
-                vb.createObjectProperty(objectProperty);
-            }
-
-		/* Roman 10/08/15: recover?
-			Axiom axiom = getTBoxAxiom(st);
-			ontology.addAssertionWithCheck(axiom);
-		*/
-        }
-
     }
 }

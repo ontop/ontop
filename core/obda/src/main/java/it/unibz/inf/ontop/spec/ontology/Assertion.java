@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.spec.ontology;
 */
 
 
-import java.io.Serializable;
-
 /**
  * Represents 
  * 		- ClassAssertion, 
@@ -35,6 +33,6 @@ import java.io.Serializable;
  */
 
 
-public interface Assertion extends Serializable {
+public interface Assertion {
 // NO-OP
 }

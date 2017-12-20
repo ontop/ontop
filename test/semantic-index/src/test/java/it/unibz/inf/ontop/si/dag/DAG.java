@@ -20,21 +20,11 @@ package it.unibz.inf.ontop.si.dag;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Description;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.BinaryAxiom;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexRange;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,12 +32,11 @@ import java.util.LinkedList;
 import java.util.Map;
 
 @Deprecated
-public class DAG implements Serializable {
+public class DAG {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -9208872698083322721L;
 
 	private int index_counter = 1;
 
@@ -55,7 +44,7 @@ public class DAG implements Serializable {
 
 	public final static int NULL_INDEX = -1;
 
-	public Map<Description, Description> equi_mappings = new HashMap<Description, Description>();
+	public Map<Description, Description> equi_mappings = new HashMap<>();
 
 	public final Map<Description, DAGNode> classes;
 
@@ -79,20 +68,20 @@ public class DAG implements Serializable {
 	 * @param ontology
 	 *            ontology that contain TBox assertions for the DAG
 	 */
-	public DAG(Ontology ontology) {
+	public DAG(OntologyImpl.UnclassifiedOntologyTBox ontology) {
 
-		int rolenodes = (ontology.getVocabulary().getObjectProperties().size() + ontology.getVocabulary().getDataProperties().size()) * 2;
+		//int rolenodes = (ontology.objectProperties().all().size() + ontology.dataProperties().all().size()) * 2;
 
-		int classnodes = ontology.getVocabulary().getClasses().size() + rolenodes * 2;
+		//int classnodes = ontology.classes().all().size() + rolenodes * 2;
 
-		classes = new LinkedHashMap<Description, DAGNode>(classnodes * 2);
-		roles = new LinkedHashMap<Description, DAGNode>(rolenodes * 2);
+		classes = new LinkedHashMap<>(); // classnodes * 2
+		roles = new LinkedHashMap<>(); // rolenodes * 2
 
-		allnodes = new HashMap<Description, DAGNode>((rolenodes + classnodes) * 2);
+		allnodes = new HashMap<>(); // (rolenodes + classnodes) * 2
 
 		// classes.put(thingConcept, thing);
 
-		for (OClass concept : ontology.getVocabulary().getClasses()) {
+		for (OClass concept : ontology.classes()) {
 			if (!concept.isBottom() && !concept.isTop()) {
 				DAGNode node = new DAGNode(concept);
 
@@ -108,7 +97,7 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		
-		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.objectProperties()) {
 			if (!role.isBottom() && !role.isTop()) {
 				DAGNode rolenode = new DAGNode(role);
 
@@ -131,7 +120,7 @@ public class DAG implements Serializable {
 				allnodes.put(roleInv, rolenodeinv);
 			}
 		}
-		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) {
+		for (DataPropertyExpression role : ontology.dataProperties()) {
 			if (!role.isBottom() && !role.isTop()) {
 				DAGNode rolenode = new DAGNode(role);
 
@@ -446,7 +435,7 @@ public class DAG implements Serializable {
 	 * equivalence, realize that it must get the node for S and it must be used
 	 * in an inverse way.
 	 * 
-	 * @param conceptDescription
+	 * @param roleDescription
 	 * @return
 	 */
 	public DAGNode getRoleNode(ObjectPropertyExpression roleDescription) {
