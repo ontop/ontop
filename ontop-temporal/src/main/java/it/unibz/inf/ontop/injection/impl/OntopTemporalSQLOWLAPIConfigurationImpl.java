@@ -35,7 +35,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
     @Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(super.buildGuiceModules(),
-                Stream.of(new OntopTemporalModule(this)));
+                Stream.of(new OntopTemporalModule(temporalConfiguration)));
     }
 
     @Override
