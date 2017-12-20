@@ -193,18 +193,19 @@ public class JDBC2ConstantConverter {
                     /**
                      * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
                      */
-                    String integerString = String.valueOf(Double.valueOf(stringValue).intValue());
+                    String integerString = String.valueOf(new BigDecimal(stringValue).toBigInteger());
 
                     return TERM_FACTORY.getConstantLiteral(integerString, type);
 
                 case DATETIME:
-
-                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME
-                    );
-
                 case DATETIME_STAMP:
-                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATETIME_STAMP
-                );
+
+                    TemporalAccessor temporal = convertToJavaDate(value);
+                    if(temporal instanceof LocalDate){
+                        temporal = LocalDateTime.of((LocalDate)temporal, LocalTime.MIDNIGHT);
+                    }
+
+                    return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(temporal),type);
 
                 case DATE:
                     return TERM_FACTORY.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)),Predicate.COL_TYPE.DATE);
@@ -265,6 +266,7 @@ public class JDBC2ConstantConverter {
             if (dateValue == null) {
                 throw new OntopResultConversionException("unparseable datetime: " + stringValue);
             }
+
         }
         return dateValue;
 
