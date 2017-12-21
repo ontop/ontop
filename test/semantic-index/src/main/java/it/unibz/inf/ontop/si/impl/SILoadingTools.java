@@ -43,43 +43,22 @@ class SILoadingTools {
 
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
-        final Optional<Set<OWLOntology>> abox;
         final String jdbcUrl;
-        final ClassifiedTBox reasoner;
         final Connection localConnection;
 
-        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
-                               ClassifiedTBox reasoner, Connection localConnection) {
+        private RepositoryInit(SIRepositoryManager dataRepository, String jdbcUrl,
+                               Connection localConnection) {
             this.dataRepository = dataRepository;
-            this.abox = abox;
             this.jdbcUrl = jdbcUrl;
-            this.reasoner = reasoner;
             this.localConnection = localConnection;
         }
     }
 
-    static RepositoryInit createRepository(OWLOntology owlOntology) throws SemanticIndexException {
+    static RepositoryInit createRepository(ClassifiedTBox tbox) throws SemanticIndexException {
 
-        Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(ontologyClosure);
-        return createRepository(ontology, Optional.of(ontologyClosure));
-    }
-
-    static RepositoryInit createRepository(Ontology ontology) throws SemanticIndexException {
-        return createRepository(ontology, Optional.empty());
-    }
-
-    private static RepositoryInit createRepository(Ontology ontology, Optional<Set<OWLOntology>> ontologyClosure)
-            throws SemanticIndexException {
-
-        ClassifiedTBox reformulationReasoner = ontology.tbox();
-
-        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
+        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(tbox);
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
-        // we work in memory (with H2), the database is clean and
-        // Quest will insert new Abox assertions into the database.
-        dataRepository.generateMetadata();
 
         String jdbcUrl = buildNewJdbcUrl();
 
@@ -88,46 +67,48 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, localConnection);
+            return new RepositoryInit(dataRepository, jdbcUrl, localConnection);
         }
         catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
 
+
     static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
                                                            OWLOntology ontology,
                                                            String jdbcUrl, Properties properties) throws SemanticIndexException {
-        return createConfiguration(dataRepository, Optional.of(ontology), jdbcUrl, properties);
-    }
-
-    static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
-                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
-        return createConfiguration(dataRepository, Optional.empty(), jdbcUrl, properties);
-    }
-
-    private static OntopSQLOWLAPIConfiguration createConfiguration(SIRepositoryManager dataRepository,
-                                                  Optional<OWLOntology> optionalOntology,
-                                                  String jdbcUrl, Properties properties) throws SemanticIndexException {
         SQLPPMapping ppMapping = createPPMapping(dataRepository);
 
-        /**
-         * Tbox: ontology without the ABox axioms (are in the DB now).
-         */
-        OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
-        Optional<OWLOntology> optionalTBox;
-        if (optionalOntology.isPresent()) {
-            try {
-                OWLOntology tbox = newManager.copyOntology(optionalOntology.get(), OntologyCopy.SHALLOW);
-                newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
-                optionalTBox = Optional.of(tbox);
-            }
-            catch (OWLOntologyCreationException e) {
-                throw new SemanticIndexException(e.getMessage());
-            }
+        //Tbox: ontology without the ABox axioms (are in the DB now).
+        OWLOntology tbox;
+        try {
+            OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
+            tbox = newManager.copyOntology(ontology, OntologyCopy.SHALLOW);
+            newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
         }
-        else
-            optionalTBox = Optional.empty();
+        catch (OWLOntologyCreationException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
+
+        OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .ppMapping(ppMapping)
+                .properties(properties)
+                .jdbcUrl(jdbcUrl)
+                .jdbcUser(DEFAULT_USER)
+                .jdbcPassword(DEFAULT_PASSWORD)
+                //TODO: remove it (required by Tomcat...)
+                .jdbcDriver("org.h2.Driver")
+                .keepPermanentDBConnection(true)
+                .iriDictionary(dataRepository.getUriMap())
+                .ontology(tbox);
+
+        return builder.build();
+    }
+
+    static OntopSQLOWLAPIConfiguration createConfigurationWithoutTBox(SIRepositoryManager dataRepository,
+                                                  String jdbcUrl, Properties properties) {
+        SQLPPMapping ppMapping = createPPMapping(dataRepository);
 
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ppMapping(ppMapping)
@@ -140,7 +121,6 @@ class SILoadingTools {
                 .keepPermanentDBConnection(true)
                 .iriDictionary(dataRepository.getUriMap());
 
-        optionalTBox.ifPresent(builder::ontology);
         return builder.build();
     }
 

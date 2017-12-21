@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexURIMap;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,9 +15,9 @@ import java.util.Iterator;
  */
 public interface SIRepositoryManager {
 
-    void generateMetadata();
-
     SemanticIndexURIMap getUriMap();
+
+    ClassifiedTBox getClassifiedTBox();
 
     void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException;
 

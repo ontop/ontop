@@ -230,20 +230,19 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private final ClassifiedTBox reasonerDag;
 
-	private SemanticIndexCache cacheSI;
+	private final SemanticIndexCache cacheSI;
 	
 	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
 	
 	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag) {
-		this.reasonerDag = reasonerDag;
-	}
+	    this.reasonerDag = reasonerDag;
+        cacheSI = new SemanticIndexCache(reasonerDag);
+        cacheSI.buildSemanticIndexFromReasoner();
+    }
+
 
 	@Override
-	public void generateMetadata() {
-		cacheSI = new SemanticIndexCache(reasonerDag);
-		cacheSI.buildSemanticIndexFromReasoner();		
-	}
-	
+    public ClassifiedTBox getClassifiedTBox() { return reasonerDag; }
 
 	@Override
 	public SemanticIndexURIMap getUriMap() {
@@ -748,7 +747,8 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		range.addRange(intervals);	
 	}
-	
+
+/*
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -824,7 +824,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 
 		views.load(conn);
 	}
-
+*/
 	
 	@Override
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
