@@ -8,9 +8,12 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -20,11 +23,16 @@ import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
+import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
+import it.unibz.inf.ontop.temporal.iq.node.TemporalJoinNode;
+import it.unibz.inf.ontop.temporal.mapping.IntervalQueryParser;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.StaticAtomicExpressionImpl;
 import it.unibz.inf.ontop.temporal.model.impl.TemporalAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
+import org.apache.jena.base.Sys;
+
 import java.util.*;
 
 @Singleton
@@ -33,12 +41,15 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
     private  final TemporalIntermediateQueryFactory TIQFactory;
     private final TermFactory termFactory;
     private final DatalogMTLConversionTools datalogMTLConversionTools;
+    private final IQConverter iqConverter;
 
     @Inject
-    private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory, TermFactory termFactory, DatalogMTLConversionTools datalogMTLConversionTools) {
+    private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory, TermFactory termFactory,
+                                         DatalogMTLConversionTools datalogMTLConversionTools, IQConverter iqConverter) {
         this.TIQFactory = TIQFactory;
         this.termFactory = termFactory;
         this.datalogMTLConversionTools = datalogMTLConversionTools;
+        this.iqConverter = iqConverter;
     }
 
     @Override
@@ -46,22 +57,24 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return null;
     }
 
-    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, DatalogMTLProgram datalogMTLProgram){
-
+    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata,
+                            TemporalMapping temporalMapping, DBMetadata temporalDBMetadata,
+                            DatalogMTLProgram datalogMTLProgram){
 
         //List<TargetQueryParser> parsers = OntopNativeTemporalMappingParser.createParsers(datalogMTLProgram.getPrefixes());
-
-        TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, temporalMapping.getExecutorRegistry());
 
         Queue<DatalogMTLRule> queue = new LinkedList<>();
 
         queue.addAll(datalogMTLProgram.getRules());
 
+        IQ iq;
         while(!queue.isEmpty()){
             DatalogMTLRule rule = queue.poll();
+
             ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
             if (areAllMappingsExist(mapping,temporalMapping,atomicExpressionsList)){
-                saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata, TIQBuilder);
+                iq = saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata);
+                System.out.println(iq.toString());
             }else if(!queue.isEmpty()){
                 //TODO:Override compareTo for rule.getHead()
                 if (queue.stream().anyMatch(qe-> qe.getHead().equals(rule.getHead()))){
@@ -84,12 +97,15 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return false;
     }
 
-    private void saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, TemporalIntermediateQueryBuilder TIQBuilder){
+    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
+                              TemporalMapping temporalMapping, DBMetadata temporalDBMetadata){
+
         TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
         Stack<DatalogMTLExpression> teStack = new Stack<>();
         it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
         Stack<QueryNode> qnStack = new Stack<>();
+        Stack<IQTree> iqTreeStack = new Stack<>();
 
         if(!teStack.empty()) {
             ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping, temporalMapping);
@@ -101,53 +117,54 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                 atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
             }
 
-            TargetAtom targetAtom = datalogMTLConversionTools.convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
+            TargetAtom targetAtom = datalogMTLConversionTools
+                    .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
             DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
             ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
                     targetAtom.getSubstitution(), Optional.empty());
-            TIQBuilder.init(projectionAtom, constructionNode);
 
+            IQTree newTree = null;
             while (!teStack.isEmpty()) {
                 DatalogMTLExpression currentExpression = teStack.pop();
-                QueryNode newNode;
 
                 //TODO: Coalesce Node is missing, implement it.
                 if(currentExpression instanceof AtomicExpression) {
 
+                    IntermediateQuery intermediateQuery;
+                    IQTree newATree;
                     if (currentExpression instanceof ComparisonExpression){
                         continue;
-                    } else if (currentExpression instanceof StaticAtomicExpression)
-                        newNode = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get().getRootNode();
-                    else //TemporalAtomicExpression
-                        newNode = temporalMapping.getDefinitions().get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery().getRootNode();
-
-                    QueryNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-                    TIQBuilder.addChild(coalesceNode, newNode);
-                    qnStack.push(coalesceNode);
+                    } else if (currentExpression instanceof StaticAtomicExpression) {
+                        intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
+                    } else {//TemporalAtomicExpression
+                        intermediateQuery = temporalMapping.getDefinitions()
+                                .get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery();
+                    }
+                    newATree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
+                    TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                    newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
 
                 }else if(currentExpression instanceof TemporalJoinExpression){
-                    QueryNode qn1 = qnStack.pop();
-                    QueryNode qn2 = qnStack.pop();
-                    newNode = TIQFactory.createTemporalJoinNode();
-                    TIQBuilder.addChild(newNode, qn1);
-                    TIQBuilder.addChild(newNode, qn2);
-                    qnStack.push(newNode);
+                    IQTree iqTree1 = iqTreeStack.pop();
+                    IQTree iqTree2 = iqTreeStack.pop();
+
+                    TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
+                    newTree = TIQFactory.createNaryIQTree(temporalJoinNode, ImmutableList.of(iqTree1, iqTree2));
 
                 }else if(currentExpression instanceof StaticJoinExpression){
-                    QueryNode qn1 = qnStack.pop();
-                    QueryNode qn2 = qnStack.pop();
-                    newNode = TIQFactory.createInnerJoinNode();
-                    TIQBuilder.addChild(newNode, qn1);
-                    TIQBuilder.addChild(newNode, qn2);
-                    qnStack.push(newNode);
+                    IQTree iqTree1 = iqTreeStack.pop();
+                    IQTree iqTree2 = iqTreeStack.pop();
+                    InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
+                    newTree = TIQFactory.createNaryIQTree(innerJoinNode, ImmutableList.of(iqTree1, iqTree2));
 
                 }else if (currentExpression instanceof FilterExpression){
-                    newNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
-                    QueryNode qn1 = qnStack.pop();
-                    TIQBuilder.addChild(newNode, qn1);
+                    FilterNode filterNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
+                    IQTree iqTree = iqTreeStack.pop();
+                    newTree = TIQFactory.createUnaryIQTree(filterNode,iqTree);
 
                 }else if(currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
 
+                    UnaryOperatorNode newNode;
                     if(currentExpression instanceof BoxMinusExpression)
                          newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
 
@@ -159,9 +176,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     else
                         newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
 
-                    QueryNode qn = qnStack.pop();
-                    TIQBuilder.addChild(newNode, qn);
-                    qnStack.push(newNode);
+                    IQTree iqTree = iqTreeStack.pop();
+                    newTree = TIQFactory.createUnaryIQTree(newNode, iqTree);
 
                     //TODO: fill here
                 }else if(currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
@@ -173,12 +189,17 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 
                     }
                 }
+                if (newTree != null)
+                    iqTreeStack.push(newTree);
             }
-            TIQBuilder.build();
+
+
+            return TIQFactory.createIQ(projectionAtom, TIQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
+
         }else{
             //TODO:????
         }
-
+        return null;
     }
 
     private ImmutableExpression comparisonExpToFilterCondition(ComparisonExpression comparisonExpression){
@@ -219,7 +240,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                                 } else if (temporalMapping.getPredicates().contains(ae.getPredicate())) {
                                     int varIdxInSub = 0;
                                     QuadrupleDefinition qd = temporalMapping.getDefinitions().get(ae.getPredicate());
-                                    for(ImmutableTerm subTerm : ((ConstructionNode)qd.getQuadruple().getIntermediateQuery().getRootNode()).getSubstitution().getImmutableMap().values()){
+                                    for(ImmutableTerm subTerm : ((ConstructionNode)qd.getQuadruple()
+                                            .getIntermediateQuery().getRootNode()).getSubstitution().getImmutableMap().values()){
                                         if(varIdxInBody == varIdxInSub){
                                             varMap.put((Variable) t,(NonGroundFunctionalTerm) subTerm);
                                         }

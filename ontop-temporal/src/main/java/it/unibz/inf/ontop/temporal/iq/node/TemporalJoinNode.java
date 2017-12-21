@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.temporal.iq.node;
 
 import it.unibz.inf.ontop.iq.node.CommutativeJoinNode;
+import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;

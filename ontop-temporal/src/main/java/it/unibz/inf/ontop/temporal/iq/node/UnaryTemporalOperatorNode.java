@@ -1,4 +1,7 @@
 package it.unibz.inf.ontop.temporal.iq.node;
 
-public interface UnaryTemporalOperatorNode extends TemporalOperatorWithRange {
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+
+public interface UnaryTemporalOperatorNode extends TemporalOperatorWithRange, UnaryOperatorNode {
 }

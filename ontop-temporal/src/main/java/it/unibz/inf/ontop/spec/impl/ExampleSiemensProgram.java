@@ -43,7 +43,7 @@ public class ExampleSiemensProgram {
         final AtomPredicate conceptRotSpeedSensor = af.getAtomPredicate(prefixes.get("ss:") + "RotationSpeedSensor",1);
         final AtomPredicate objectPropertyIMB = af.getAtomPredicate(prefixes.get("ss:") + "isMonitoredBy",2);
         final AtomPredicate objectPropertyIPO = af.getAtomPredicate(prefixes.get("ss:") + "isPartOf",2);
-        final AtomPredicate conceptCLTRS = af.getAtomPredicate(prefixes.get("ss:") + "ColocTempRotSensors",2);
+        final AtomPredicate conceptCLTRS = af.getAtomPredicate(prefixes.get("ss:") + "ColocTempRotSensors",3);
 
         final Variable varRs = tf.getVariable("rs");
         final Variable varTs = tf.getVariable("ts");
