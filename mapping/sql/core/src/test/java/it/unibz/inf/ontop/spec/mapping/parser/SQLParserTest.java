@@ -954,7 +954,7 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().size());
 	}
 
-	@Test
+	@Test(expected = UnsupportedSelectQueryException.class) //due to IN with subselect
 	public void test_IN() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)");
 		assertEquals(7, re.getFilterAtoms().size());
