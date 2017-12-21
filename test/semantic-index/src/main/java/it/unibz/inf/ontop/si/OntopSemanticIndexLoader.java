@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.si;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.si.impl.GraphLoading;
+import it.unibz.inf.ontop.si.impl.RDF4JGraphLoading;
 import it.unibz.inf.ontop.si.impl.OntologyIndividualLoading;
 import it.unibz.inf.ontop.si.impl.VirtualAboxLoading;
 import org.eclipse.rdf4j.query.Dataset;
@@ -70,7 +70,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      * Loads the graph in an in-memory Semantic Index.
      */
     static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
-        return GraphLoading.loadRDFGraph(dataset, properties);
+        return RDF4JGraphLoading.loadRDFGraph(dataset, properties);
     }
 
     /**

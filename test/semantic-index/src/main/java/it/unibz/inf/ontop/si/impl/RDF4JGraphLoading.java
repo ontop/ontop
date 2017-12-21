@@ -11,30 +11,26 @@ import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
 
-public class GraphLoading {
+public class RDF4JGraphLoading {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GraphLoading.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RDF4JGraphLoading.class);
 
     public static OntopSemanticIndexLoader loadRDFGraph(Dataset dataset, Properties properties) throws SemanticIndexException {
         // Merge default and named graphs to filter duplicates
@@ -60,7 +56,7 @@ public class GraphLoading {
     }
 
 
-    private static final class CollectRDFVocabulary extends RDFHandlerBase {
+    private static final class CollectRDFVocabulary extends AbstractRDFHandler {
         private final OntologyBuilder vb;
 
         CollectRDFVocabulary() {
@@ -69,21 +65,21 @@ public class GraphLoading {
 
         @Override
         public void handleStatement(Statement st) throws RDFHandlerException {
-            URI pred = st.getPredicate();
+            String pred = st.getPredicate().stringValue();
             Value obj = st.getObject();
-            if (pred.stringValue().equals(IriConstants.RDF_TYPE)) {
+            if (pred.equals(IriConstants.RDF_TYPE)) {
                 vb.declareClass(obj.stringValue());
             }
             else if (obj instanceof Literal) {
-                vb.declareDataProperty(pred.stringValue());
+                vb.declareDataProperty(pred);
             }
             else {
-                vb.declareObjectProperty(pred.stringValue());
+                vb.declareObjectProperty(pred);
             }
         }
     }
 
-    private static final class SemanticIndexRDFHandler extends RDFHandlerBase {
+    private static final class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
         private final SIRepositoryManager repositoryManager;
         private final Connection connection;
@@ -104,34 +100,29 @@ public class GraphLoading {
 
         @Override
         public void endRDF() throws RDFHandlerException {
-            try {
-                loadBuffer();
-            }
-            catch (SQLException e) {
-                throw new RDFHandlerException(e);
-            }
+            loadBuffer();
         }
 
         @Override
         public void handleStatement(Statement st) throws RDFHandlerException {
             // Add statement to buffer
+            buffer.add(st);
+            if (buffer.size() == MAX_BUFFER_SIZE) {
+                loadBuffer();
+            }
+        }
+
+        private void loadBuffer() throws RDFHandlerException {
             try {
-                buffer.add(st);
-                if (buffer.size() == MAX_BUFFER_SIZE) {
-                    loadBuffer();
-                }
+                Iterator<Assertion> assertionIterator = buffer.stream()
+                        .map(st -> constructAssertion(st, builder))
+                        .iterator();
+                count += repositoryManager.insertData(connection, assertionIterator, 5000, 500);
+                buffer.clear();
             }
             catch (Exception e) {
                 throw new RDFHandlerException(e);
             }
-        }
-
-        private void loadBuffer() throws SQLException {
-            Iterator<Assertion> assertionIterator = buffer.stream()
-                    .map(st -> constructAssertion(st, builder))
-                    .iterator();
-            count += repositoryManager.insertData(connection, assertionIterator, 5000, 500);
-            buffer.clear();
         }
     }
 
@@ -203,7 +194,7 @@ public class GraphLoading {
     }
 
 
-    private static void processRDF(RDFHandlerBase rdfHandler,  IRI graphURL) throws SemanticIndexException {
+    private static void processRDF(AbstractRDFHandler rdfHandler,  IRI graphURL) throws SemanticIndexException {
 
         RDFFormat rdfFormat = Rio.getParserFormatForFileName(graphURL.toString()).get();
         RDFParser rdfParser = Rio.createParser(rdfFormat);
