@@ -82,7 +82,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
         ImmutableMap<Variable, GroundTerm> newMap = map.entrySet().stream()
                 .filter(e -> e.getValue() instanceof GroundTerm)
                 .map(e -> (Map.Entry<Variable, GroundTerm>) new AbstractMap.SimpleEntry<>(

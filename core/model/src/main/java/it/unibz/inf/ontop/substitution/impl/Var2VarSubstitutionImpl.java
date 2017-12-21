@@ -53,7 +53,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
         return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), getAtomFactory(), getTermFactory());
     }
 

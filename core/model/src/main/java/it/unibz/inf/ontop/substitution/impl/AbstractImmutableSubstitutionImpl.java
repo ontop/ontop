@@ -443,6 +443,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
+    public ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment() {
+        ImmutableMap<Variable, GroundFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof GroundFunctionalTerm)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (GroundFunctionalTerm) e.getValue()));
+
+        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+    }
+
+    @Override
     public ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment() {
         ImmutableMap<Variable, NonFunctionalTerm> newMap = getImmutableMap().entrySet().stream()
                 .filter(e -> e.getValue() instanceof NonFunctionalTerm)

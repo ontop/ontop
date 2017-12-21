@@ -98,13 +98,15 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Var2VarSubstitution getVar2VarFragment();
     ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
     ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
+    ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment();
     ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
     ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
 
-    ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
+    ImmutableSubstitution<GroundTerm> getGroundTermFragment();
 
     /**
      * Reduces the substitution's domain to its intersection with the argument domain
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
+
 }
