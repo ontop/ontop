@@ -34,4 +34,9 @@ public class StaticJoinExpressionImpl implements StaticJoinExpression {
     public List<StaticExpression> getOperands() {
         return operands;
     }
+
+    @Override
+    public int getArity() {
+        return getOperands().size();
+    }
 }

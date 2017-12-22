@@ -15,17 +15,17 @@ mappingId	urn:Map-Burner
 target		:Burner/{turbine_id}/{component_id} a :Burner ; :isPartOf :Turbine/{turbine_id} .
 source		SELECT component_id, turbine_id FROM tb_components WHERE component_type =1
 
-mappingId	urn:Map-isMonitoredBy
-target		:TurbinePart/{mnted_part} :isMonitoredBy :Sensor/{sensor_id} . 
-source		SELECT mnted_part, sensor_id FROM tb_sensors
+mappingId	urn:Map-isMonitoredBy-1
+target		:Burner/{mnted_part} :isMonitoredBy :TemperatureSensor/{sensor_id} .
+source		SELECT mnted_part, sensor_id FROM tb_sensors, tb_components WHERE sensor_type = 1 AND mnted_part = component_id AND component_type = 1
+
+mappingId	urn:Map-isMonitoredBy-2
+target		:PowerTurbine/{mnted_part} :isMonitoredBy :RotationSpeedSensor/{sensor_id} .
+source		SELECT mnted_part, sensor_id FROM tb_sensors, tb_components WHERE sensor_type = 0 AND mnted_part = component_id AND component_type = 0
 
 mappingId	urn:Map-RotSpeedSensor
 target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor ;  :measures {sensor_id}^^xsd:integer .
 source		SELECT sensor_id FROM tb_sensors WHERE sensor_type = 0
-
-mappingId	urn:Map-RotSpeedSensor-1
-target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor ;  :measures {sensor_id}^^xsd:integer .
-source		SELECT sensor_id FROM tb_sensors WHERE sensor_type = 1
 
 mappingId	urn:Map-PowerTurbine
 target		:PowerTurbine/{turbine_id}/{component_id} a :PowerTurbine ; :isPartOf :Turbine/{turbine_id} .

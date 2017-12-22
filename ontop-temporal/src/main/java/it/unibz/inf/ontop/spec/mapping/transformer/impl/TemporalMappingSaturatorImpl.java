@@ -136,13 +136,14 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                         continue;
                     } else if (currentExpression instanceof StaticAtomicExpression) {
                         intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
+                        newTree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
                     } else {//TemporalAtomicExpression
                         intermediateQuery = temporalMapping.getDefinitions()
                                 .get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery();
+                        newATree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
+                        TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                        newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
                     }
-                    newATree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
-                    TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-                    newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
 
                 }else if(currentExpression instanceof TemporalJoinExpression){
                     IQTree iqTree1 = iqTreeStack.pop();
@@ -152,10 +153,12 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     newTree = TIQFactory.createNaryIQTree(temporalJoinNode, ImmutableList.of(iqTree1, iqTree2));
 
                 }else if(currentExpression instanceof StaticJoinExpression){
-                    IQTree iqTree1 = iqTreeStack.pop();
-                    IQTree iqTree2 = iqTreeStack.pop();
+                    List<IQTree> iqtList = new ArrayList<>();
+                    for(int i = 0; i <((StaticJoinExpression) currentExpression).getArity(); i++){
+                        iqtList.add(iqTreeStack.pop());
+                    }
                     InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
-                    newTree = TIQFactory.createNaryIQTree(innerJoinNode, ImmutableList.of(iqTree1, iqTree2));
+                    newTree = TIQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
 
                 }else if (currentExpression instanceof FilterExpression){
                     FilterNode filterNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
@@ -220,7 +223,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
     private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping, TemporalMapping temporalMapping){
         Map <Variable, Term> varMap = new HashMap<>();
         ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-        rule.getHead().getImmutableTerms().forEach(term ->{
+        for(Term term : rule.getHead().getImmutableTerms()){
             if(term instanceof Variable){
                 for(AtomicExpression ae :atomicExpressionsList){
                     int varIdxInBody = 0;
@@ -233,7 +236,14 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                                     Optional<IntermediateQuery> iq = mapping.getDefinition(ae.getPredicate());
                                         for(ImmutableTerm subTerm : ((ConstructionNode)iq.get().getRootNode()).getSubstitution().getImmutableMap().values()){
                                             if(varIdxInBody == varIdxInSub){
-                                                varMap.put((Variable) t,(NonGroundFunctionalTerm) subTerm);
+                                                if(varMap.containsKey((Variable) t)){
+                                                    if (!varMap.get(t).equals(subTerm)){
+                                                        //TODO:throw exception
+                                                    }
+                                                }
+                                                else {
+                                                    varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
+                                                }
                                             }
                                            varIdxInSub++;
                                     }
@@ -258,7 +268,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                     }
                 }
             }
-        });
+        }
         return ImmutableMap.copyOf(varMap);
     }
 
