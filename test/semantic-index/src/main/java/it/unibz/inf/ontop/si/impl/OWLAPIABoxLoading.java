@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.si.impl;
 
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
+import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -23,9 +23,9 @@ import java.util.Properties;
 import java.util.Set;
 
 
-public class OntologyIndividualLoading {
+public class OWLAPIABoxLoading {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OntologyIndividualLoading.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OWLAPIABoxLoading.class);
 
     /**
      * High-level method
@@ -42,8 +42,7 @@ public class OntologyIndividualLoading {
 
             // load the data
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox());
-
-            int count = repo.getDataRepository().insertData(connection, aBoxIter, 5000, 500);
+            int count = repo.insertData(connection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);
 
             return new OntopSemanticIndexLoaderImpl(repo, connection, properties,

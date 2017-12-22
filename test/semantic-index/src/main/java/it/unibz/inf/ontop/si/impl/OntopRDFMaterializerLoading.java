@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
@@ -21,11 +22,11 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.si.impl.OntologyIndividualLoading.extractTBox;
+import static it.unibz.inf.ontop.si.impl.OWLAPIABoxLoading.extractTBox;
 
-public class VirtualAboxLoading {
+public class OntopRDFMaterializerLoading {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VirtualAboxLoading.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OntopRDFMaterializerLoading.class);
 
     /**
      * TODO: do want to use a different ontology for the materialization and the output OBDA system?
@@ -49,7 +50,7 @@ public class VirtualAboxLoading {
                     obdaConfiguration, materializationParams)) {
 
                 Connection connection = repo.createConnection();
-                int count = repo.getDataRepository().insertData(connection,
+                int count = repo.insertData(connection,
                         new Iterator<Assertion>() {
                             @Override
                             public boolean hasNext() {

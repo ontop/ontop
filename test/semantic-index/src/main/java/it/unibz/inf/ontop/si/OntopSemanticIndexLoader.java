@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.si;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.si.impl.RDF4JGraphLoading;
-import it.unibz.inf.ontop.si.impl.OntologyIndividualLoading;
-import it.unibz.inf.ontop.si.impl.VirtualAboxLoading;
+import it.unibz.inf.ontop.si.impl.OWLAPIABoxLoading;
+import it.unibz.inf.ontop.si.impl.OntopRDFMaterializerLoading;
 import org.eclipse.rdf4j.query.Dataset;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -47,7 +47,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology ontology,
                                                             Properties properties) throws SemanticIndexException {
-        return OntologyIndividualLoading.loadOntologyIndividuals(ontology, properties);
+        return OWLAPIABoxLoading.loadOntologyIndividuals(ontology, properties);
     }
 
     /**
@@ -59,7 +59,7 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
         try {
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
             OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(ontologyFilePath));
-            return OntologyIndividualLoading.loadOntologyIndividuals(ontology, properties);
+            return OWLAPIABoxLoading.loadOntologyIndividuals(ontology, properties);
         }
         catch (OWLOntologyCreationException e) {
             throw new SemanticIndexException(e.getMessage());
@@ -78,6 +78,6 @@ public interface OntopSemanticIndexLoader extends AutoCloseable {
      */
     static OntopSemanticIndexLoader loadVirtualAbox(OntopSQLOWLAPIConfiguration obdaConfiguration, Properties properties)
             throws SemanticIndexException {
-        return VirtualAboxLoading.loadVirtualAbox(obdaConfiguration, properties);
+        return OntopRDFMaterializerLoading.loadVirtualAbox(obdaConfiguration, properties);
     }
 }

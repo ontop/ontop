@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.si.repository.SIRepositoryManager;
+import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -46,7 +46,7 @@ public class RDF4JGraphLoading {
         Connection connection = repo.createConnection();
 
         //  Load the data
-        SemanticIndexRDFHandler insertData = new SemanticIndexRDFHandler(repo.getDataRepository(), connection);
+        SemanticIndexRDFHandler insertData = new SemanticIndexRDFHandler(repo, connection);
         for (IRI graphURL : graphURLs) {
             processRDF(insertData, graphURL);
         }
@@ -81,7 +81,7 @@ public class RDF4JGraphLoading {
 
     private static final class SemanticIndexRDFHandler extends AbstractRDFHandler {
 
-        private final SIRepositoryManager repositoryManager;
+        private final SIRepository repository;
         private final Connection connection;
         private final ABoxAssertionSupplier builder;
 
@@ -90,8 +90,8 @@ public class RDF4JGraphLoading {
         private List<Statement> buffer;
         private int count;
 
-        public SemanticIndexRDFHandler(SIRepositoryManager repositoryManager, Connection connection) {
-            this.repositoryManager = repositoryManager;
+        public SemanticIndexRDFHandler(SIRepository repository, Connection connection) {
+            this.repository = repository;
             this.builder = OntologyBuilderImpl.assertionSupplier();
             this.connection = connection;
             this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
@@ -117,7 +117,7 @@ public class RDF4JGraphLoading {
                 Iterator<Assertion> assertionIterator = buffer.stream()
                         .map(st -> constructAssertion(st, builder))
                         .iterator();
-                count += repositoryManager.insertData(connection, assertionIterator, 5000, 500);
+                count += repository.insertData(connection, assertionIterator, 5000, 500);
                 buffer.clear();
             }
             catch (Exception e) {

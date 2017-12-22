@@ -47,7 +47,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  * 
  */
 
-public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repository.SIRepositoryManager {
+public class RDBMSSIRepositoryManager {
 
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
@@ -241,19 +241,11 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
     }
 
 
-	@Override
-    public ClassifiedTBox getClassifiedTBox() { return reasonerDag; }
-
-	@Override
 	public SemanticIndexURIMap getUriMap() {
 		return uriMap;
 	}
 	
 
-
-	
-	
-	@Override
 	public void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException {
 
 		if (isDBSchemaDefined(conn)) {
@@ -324,7 +316,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		}
 	}
 
-	@Override
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
@@ -826,7 +817,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	}
 */
 	
-	@Override
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
 		List<SQLPPTriplesMap> result = new LinkedList<>();
@@ -1100,7 +1090,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	 * repository.
 	 * @throws  
 	 */
-	@Override
 	public void insertMetadata(Connection conn) throws SQLException {
 
 		log.debug("Inserting semantic index metadata.");
