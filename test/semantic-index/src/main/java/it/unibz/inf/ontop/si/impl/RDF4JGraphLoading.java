@@ -26,7 +26,6 @@ import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
 
 public class RDF4JGraphLoading {
 
@@ -42,17 +41,18 @@ public class RDF4JGraphLoading {
         for (IRI graphURL : graphURLs) {
             processRDF(collectVocabulary, graphURL);
         }
-        Ontology implicitTbox = collectVocabulary.vb.build();
-        RepositoryInit init = createRepository(implicitTbox.tbox());
+        Ontology vocabulary = collectVocabulary.vb.build();
+        SIRepository repo = new SIRepository(vocabulary.tbox());
+        Connection connection = repo.createConnection();
 
         //  Load the data
-        SemanticIndexRDFHandler insertData = new SemanticIndexRDFHandler(init.dataRepository, init.localConnection);
+        SemanticIndexRDFHandler insertData = new SemanticIndexRDFHandler(repo.getDataRepository(), connection);
         for (IRI graphURL : graphURLs) {
             processRDF(insertData, graphURL);
         }
         LOG.info("Inserted {} triples", insertData.count);
 
-        return new OntopSemanticIndexLoaderImpl(init, properties);
+        return new OntopSemanticIndexLoaderImpl(repo, connection, properties, Optional.empty() /* no tbox */);
     }
 
 

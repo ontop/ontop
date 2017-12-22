@@ -15,11 +15,13 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
+import static it.unibz.inf.ontop.si.impl.OntologyIndividualLoading.extractTBox;
 
 public class VirtualAboxLoading {
 
@@ -37,8 +39,7 @@ public class VirtualAboxLoading {
 
             Set<OWLOntology> ontologyClosure = inputOntology.getOWLOntologyManager().getImportsClosure(inputOntology);
             Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(ontologyClosure);
-
-            RepositoryInit init = createRepository(ontology.tbox());
+            SIRepository repo = new SIRepository(ontology.tbox());
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
@@ -47,7 +48,8 @@ public class VirtualAboxLoading {
             try (MaterializedGraphResultSet graphResultSet = materializer.materialize(
                     obdaConfiguration, materializationParams)) {
 
-                int count = init.dataRepository.insertData(init.localConnection,
+                Connection connection = repo.createConnection();
+                int count = repo.getDataRepository().insertData(connection,
                         new Iterator<Assertion>() {
                             @Override
                             public boolean hasNext() {
@@ -69,9 +71,10 @@ public class VirtualAboxLoading {
                             }
                         }, 5000, 500);
                 LOG.debug("Inserted {} triples from the mappings.", count);
+                return new OntopSemanticIndexLoaderImpl(repo, connection, properties,
+                        // TODO: use ontologyClosure?
+                        Optional.of(extractTBox(inputOntology)));
             }
-
-            return new OntopSemanticIndexLoaderImpl(init, properties, inputOntology);
         }
         catch (Exception e) {
             throw new SemanticIndexException(e.getMessage());

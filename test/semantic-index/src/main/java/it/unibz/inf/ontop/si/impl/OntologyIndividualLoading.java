@@ -7,15 +7,20 @@ import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.model.parameters.OntologyCopy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.si.impl.SILoadingTools.*;
 
 
 public class OntologyIndividualLoading {
@@ -30,24 +35,35 @@ public class OntologyIndividualLoading {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
         Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(ontologyClosure);
-
-        RepositoryInit init = createRepository(ontology.tbox());
+        SIRepository repo = new SIRepository(ontology.tbox());
 
         try {
-            /*
-            Loads the data
-             */
-            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, init.dataRepository.getClassifiedTBox());
+            Connection connection = repo.createConnection();
 
-            int count = init.dataRepository.insertData(init.localConnection, aBoxIter, 5000, 500);
+            // load the data
+            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox());
+
+            int count = repo.getDataRepository().insertData(connection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);
 
-            /*
-            Creates the configuration and the loader object
-             */
-            return new OntopSemanticIndexLoaderImpl(init, properties, owlOntology);
+            return new OntopSemanticIndexLoaderImpl(repo, connection, properties,
+                    // TODO: use ontologyClosure?
+                    Optional.of(extractTBox(owlOntology)));
         }
         catch (SQLException e) {
+            throw new SemanticIndexException(e.getMessage());
+        }
+    }
+
+    public static OWLOntology extractTBox(OWLOntology ontology) throws SemanticIndexException {
+        //Tbox: ontology without the ABox axioms (are in the DB now).
+        try {
+            OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
+            OWLOntology tbox = newManager.copyOntology(ontology, OntologyCopy.SHALLOW);
+            newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
+            return  tbox;
+        }
+        catch (OWLOntologyCreationException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
