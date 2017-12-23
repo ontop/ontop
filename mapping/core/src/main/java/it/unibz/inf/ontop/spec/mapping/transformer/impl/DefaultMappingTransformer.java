@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 
+import java.util.Optional;
+
 public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
@@ -42,17 +44,17 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology) {
-        Mapping factsAsMapping = factConverter.convert(ontology.abox(), mapping.getExecutorRegistry(),
-                settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
-        Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-        return createSpecification(mappingWithFacts, dbMetadata, ontology.tbox());
-    }
-
-    @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata) {
-        ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder().build().tbox();
-        return createSpecification(mapping, dbMetadata, emptyTBox);
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
+        if (ontology.isPresent()) {
+            Mapping factsAsMapping = factConverter.convert(ontology.get().abox(), mapping.getExecutorRegistry(),
+                    settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
+            Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
+            return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
+        }
+        else {
+            ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder().build().tbox();
+            return createSpecification(mapping, dbMetadata, emptyTBox);
+        }
     }
 
     OBDASpecification createSpecification(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {

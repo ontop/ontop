@@ -35,25 +35,11 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
-                    Optional.of(ontology.tbox()), executorRegistry);
-
-            return mappingTransformer.transform(
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    ontology);
-        }
-        else {
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
-                    Optional.empty(), executorRegistry);
-
-            return mappingTransformer.transform(
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata());
-        }
+        return mappingTransformer.transform(
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
     }
 
     @Override
@@ -61,24 +47,10 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    Optional.of(ontology.tbox()), executorRegistry);
-
-            return mappingTransformer.transform(
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    ontology);
-        }
-        else {
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    Optional.empty(), executorRegistry);
-
-            return mappingTransformer.transform(
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata());
-        }
+        return mappingTransformer.transform(
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
     }
 }

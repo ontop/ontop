@@ -68,14 +68,6 @@ public interface ClassifiedTBox {
     EquivalencesDAG<DataRangeExpression> dataRangesDAG();
 
 
-    /**
-     * annotation properties
-     *
-     * @return annotation properties
-     */
-
-    OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
-
     // DISJOINTNESS
 
     ImmutableList<NaryAxiom<ClassExpression>> disjointClasses();

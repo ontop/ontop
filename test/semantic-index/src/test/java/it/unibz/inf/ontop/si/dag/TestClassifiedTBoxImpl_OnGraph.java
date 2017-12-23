@@ -68,8 +68,6 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 	    return reasoner.classes();
     }
 
-    @Override
-    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
 
 
     // DUMMIES
