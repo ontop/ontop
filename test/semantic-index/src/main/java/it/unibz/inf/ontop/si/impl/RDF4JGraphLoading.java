@@ -65,16 +65,16 @@ public class RDF4JGraphLoading {
 
         @Override
         public void handleStatement(Statement st) throws RDFHandlerException {
-            String pred = st.getPredicate().stringValue();
+            String predicateName = st.getPredicate().stringValue();
             Value obj = st.getObject();
-            if (pred.equals(IriConstants.RDF_TYPE)) {
+            if (predicateName.equals(IriConstants.RDF_TYPE)) {
                 vb.declareClass(obj.stringValue());
             }
             else if (obj instanceof Literal) {
-                vb.declareDataProperty(pred);
+                vb.declareDataProperty(predicateName);
             }
             else {
-                vb.declareObjectProperty(pred);
+                vb.declareObjectProperty(predicateName);
             }
         }
     }

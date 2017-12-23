@@ -33,20 +33,19 @@ public class OWLAPIABoxLoading {
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
-        Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(ontologyClosure);
+        Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(owlOntology);
         SIRepository repo = new SIRepository(ontology.tbox());
 
         try {
             Connection connection = repo.createConnection();
 
             // load the data
+            Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox());
             int count = repo.insertData(connection, aBoxIter, 5000, 500);
             LOG.debug("Inserted {} triples from the ontology.", count);
 
             return new OntopSemanticIndexLoaderImpl(repo, connection, properties,
-                    // TODO: use ontologyClosure?
                     Optional.of(extractTBox(owlOntology)));
         }
         catch (SQLException e) {
@@ -58,6 +57,9 @@ public class OWLAPIABoxLoading {
         //Tbox: ontology without the ABox axioms (are in the DB now).
         try {
             OWLOntologyManager newManager = OWLManager.createOWLOntologyManager();
+            // TODO: there is a problem here
+            // removing ABox from the current ontology does not remove it from the closure
+            // so, the ABox assertions of the closure will remain
             OWLOntology tbox = newManager.copyOntology(ontology, OntologyCopy.SHALLOW);
             newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
             return  tbox;

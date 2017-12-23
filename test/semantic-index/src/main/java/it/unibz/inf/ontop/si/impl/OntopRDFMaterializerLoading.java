@@ -38,8 +38,7 @@ public class OntopRDFMaterializerLoading {
             OWLOntology inputOntology = obdaConfiguration.loadInputOntology()
                     .orElseThrow(() -> new IllegalArgumentException("The configuration must provide an ontology"));
 
-            Set<OWLOntology> ontologyClosure = inputOntology.getOWLOntologyManager().getImportsClosure(inputOntology);
-            Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(ontologyClosure);
+            Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(inputOntology);
             SIRepository repo = new SIRepository(ontology.tbox());
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
@@ -73,7 +72,6 @@ public class OntopRDFMaterializerLoading {
                         }, 5000, 500);
                 LOG.debug("Inserted {} triples from the mappings.", count);
                 return new OntopSemanticIndexLoaderImpl(repo, connection, properties,
-                        // TODO: use ontologyClosure?
                         Optional.of(extractTBox(inputOntology)));
             }
         }

@@ -48,24 +48,25 @@ public class OWLAPITranslatorOWL2QL {
 	}
 
     /**
-     * Load all the ontologies into a single translated merge.
+     * Include all imports and load then into a single translated merge.
      *
-     * @param ontologies
+     * @param owl
      * @return
      */
 
-    public static Ontology translateAndClassify(Collection<OWLOntology> ontologies)   {
-        log.debug("Load ontologies called. Translating {} ontologies.", ontologies.size());
+    public static Ontology translateAndClassify(OWLOntology owl)   {
+
+        Set<OWLOntology> owls = owl.getOWLOntologyManager().getImportsClosure(owl);
+        log.debug("Load ontologies called. Translating {} ontologies.", owls.size());
 
         OntologyBuilder builder = OntologyBuilderImpl.builder();
-
-        for (OWLOntology owl : ontologies) {
-            extractOntoloyVocabulary(owl, builder);
+        for (OWLOntology o : owls) {
+            extractOntoloyVocabulary(o, builder);
         }
 
-        for (OWLOntology owl : ontologies) {
-            OWLAxiomVisitorImpl visitor = new OWLAxiomVisitorImpl(owl, builder);
-            for (OWLAxiom axiom : owl.getAxioms())  {
+        for (OWLOntology o : owls) {
+            OWLAxiomVisitorImpl visitor = new OWLAxiomVisitorImpl(o, builder);
+            for (OWLAxiom axiom : o.getAxioms())  {
                 axiom.accept(visitor);
             }
         }
