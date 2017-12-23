@@ -115,7 +115,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         Set<Predicate> predicates = new HashSet<>();
 
         for (AtomPredicate a : mapping.getPredicates()) {
-        	if (a.isClass())
+        	if (a.getArity() == 1)
         		predicates.add(TERM_FACTORY.getClassPredicate(a.getName()));
         	else if (a.isObjectProperty())
         		predicates.add(TERM_FACTORY.getObjectPropertyPredicate(a.getName()));
