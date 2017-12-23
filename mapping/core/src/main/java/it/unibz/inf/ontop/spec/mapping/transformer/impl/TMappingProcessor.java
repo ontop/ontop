@@ -366,7 +366,7 @@ public class TMappingProcessor {
 
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 
-		final boolean printouts = false;
+		final boolean printouts = true;
 		
 		if (printouts)
 			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
@@ -544,6 +544,7 @@ public class TMappingProcessor {
 				total += frequences.get(idx).size();
 			}
 			System.out.println("NUMBER OF PREDICATES: " + total);
+			System.out.println("TMAP " + tmappingsProgram);
 		}
 				
 		return tmappingsProgram;

@@ -34,8 +34,10 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.net.URI;
@@ -52,6 +54,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /***
@@ -72,7 +76,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getSaturatedTBox());
+		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getSaturatedMapping());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
@@ -83,7 +87,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
-		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedTBox()).stream()
+		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedMapping()).stream()
 				.collect(ImmutableCollectors.toMap(
 						DefaultOntopRDFMaterializer::convertIntoURI,
 						p -> p));
@@ -107,9 +111,20 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ClassifiedTBox vocabulary) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull Mapping mapping) {
         Set<Predicate> predicates = new HashSet<>();
 
+        for (AtomPredicate a : mapping.getPredicates()) {
+        	if (a.isClass())
+        		predicates.add(TERM_FACTORY.getClassPredicate(a.getName()));
+        	else if (a.isObjectProperty())
+        		predicates.add(TERM_FACTORY.getObjectPropertyPredicate(a.getName()));
+        	else //if (a.isDataProperty())
+        		predicates.add(TERM_FACTORY.getDataPropertyPredicate(a.getName()));
+        	//else if (a.isAnnotationProperty())
+        	//	predicates.add(TERM_FACTORY.getAnnotationPropertyPredicate(a.getName()));
+		}
+/*
         // collect all class/data/object predicates to selectedVocabulary
         for (OClass cl : vocabulary.classes()) {
             Predicate p = cl.getPredicate();
@@ -139,7 +154,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 //					selectedVocabulary.add(f.getFunctionSymbol());
 //			}
 //        }
-
+*/
         return ImmutableSet.copyOf(predicates);
     }
 
