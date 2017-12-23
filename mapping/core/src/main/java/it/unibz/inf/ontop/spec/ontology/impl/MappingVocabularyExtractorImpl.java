@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.stream.Stream;
 
@@ -48,10 +45,10 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
     }
 
     @Override
-    public Ontology extractOntology(Mapping mapping) {
+    public ClassifiedTBox extractOntology(Mapping mapping) {
         return (extractVocabularyInternal(mapping2DatalogConverter.convert(mapping)
                 .map(CQIE::getHead)))
-                .build();
+                .build().tbox();
     }
 
 }

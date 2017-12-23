@@ -51,8 +51,8 @@ public class SIRepository {
 
     public String getPassword(){ return DEFAULT_PASSWORD; }
 
-    public int insertData(Connection connection, Iterator<Assertion> iterator, int commitLimit, int batchLimit) throws SQLException {
-        return dataRepository.insertData(connection, iterator, commitLimit, batchLimit);
+    public int insertData(Connection connection, Iterator<Assertion> iterator) throws SQLException {
+        return dataRepository.insertData(connection, iterator, 5000, 500);
     }
 
     public SemanticIndexURIMap getUriMap() { return dataRepository.getUriMap(); }

@@ -9,5 +9,5 @@ public interface MappingVocabularyExtractor {
 
     OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms);
 
-    Ontology extractOntology(Mapping mapping);
+    ClassifiedTBox extractOntology(Mapping mapping);
 }

@@ -42,7 +42,7 @@ public class OWLAPIABoxLoading {
             // load the data
             Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
             OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox());
-            int count = repo.insertData(connection, aBoxIter, 5000, 500);
+            int count = repo.insertData(connection, aBoxIter);
             LOG.debug("Inserted {} triples from the ontology.", count);
 
             return new OntopSemanticIndexLoaderImpl(repo, connection, properties,

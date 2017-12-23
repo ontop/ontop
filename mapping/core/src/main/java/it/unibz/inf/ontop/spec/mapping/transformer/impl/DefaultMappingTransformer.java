@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -46,12 +44,18 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     @Override
     public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, OntologyABox abox,
-                                       ClassifiedTBox tBox)
-            throws MappingException, DBMetadataExtractionException {
+                                       ClassifiedTBox tBox) {
         Mapping factsAsMapping = factConverter.convert(abox, mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
+
+        return transform(specInput, mappingWithFacts, dbMetadata, tBox);
+    }
+
+    @Override
+    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
+                                       ClassifiedTBox tBox) {
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);

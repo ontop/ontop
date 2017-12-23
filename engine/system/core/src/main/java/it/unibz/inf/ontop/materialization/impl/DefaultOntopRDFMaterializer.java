@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.net.URI;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 
 /***
  * Allows you to materialize the virtual RDF graph of an OBDA specification.
@@ -141,9 +143,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         return ImmutableSet.copyOf(predicates);
     }
 
-    private static boolean isBuiltin(Predicate p) {
-	    return p.toString().startsWith("http://www.w3.org/2002/07/owl#");
-    }
+    private static boolean isBuiltin(Predicate p) { return p.toString().startsWith(IriConstants.NS_OWL); }
 
 	private static URI convertIntoURI(Predicate vocabularyPredicate) {
 		try {

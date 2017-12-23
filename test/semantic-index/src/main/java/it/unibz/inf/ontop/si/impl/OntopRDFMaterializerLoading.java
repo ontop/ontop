@@ -69,7 +69,7 @@ public class OntopRDFMaterializerLoading {
                                     throw new RuntimeException(e);
                                 }
                             }
-                        }, 5000, 500);
+                        });
                 LOG.debug("Inserted {} triples from the mappings.", count);
                 return new OntopSemanticIndexLoaderImpl(repo, connection, properties,
                         Optional.of(extractTBox(inputOntology)));

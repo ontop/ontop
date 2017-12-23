@@ -87,15 +87,13 @@ public class RDF4JGraphLoading {
 
         private static final int MAX_BUFFER_SIZE = 5000;
 
-        private List<Statement> buffer;
-        private int count;
+        private List<Statement> buffer = new ArrayList<>(MAX_BUFFER_SIZE);
+        private int count = 0;
 
         public SemanticIndexRDFHandler(SIRepository repository, Connection connection) {
             this.repository = repository;
             this.builder = OntologyBuilderImpl.assertionSupplier();
             this.connection = connection;
-            this.buffer = new ArrayList<>(MAX_BUFFER_SIZE);
-            this.count = 0;
         }
 
         @Override
@@ -117,7 +115,7 @@ public class RDF4JGraphLoading {
                 Iterator<Assertion> assertionIterator = buffer.stream()
                         .map(st -> constructAssertion(st, builder))
                         .iterator();
-                count += repository.insertData(connection, assertionIterator, 5000, 500);
+                count += repository.insertData(connection, assertionIterator);
                 buffer.clear();
             }
             catch (Exception e) {
