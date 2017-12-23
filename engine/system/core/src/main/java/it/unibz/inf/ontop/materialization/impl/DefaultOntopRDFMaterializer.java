@@ -119,7 +119,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         		predicates.add(TERM_FACTORY.getClassPredicate(a.getName()));
         	else if (a.isObjectProperty())
         		predicates.add(TERM_FACTORY.getObjectPropertyPredicate(a.getName()));
-        	else //if (a.isDataProperty())
+        	else if (!a.isTriplePredicate())
         		predicates.add(TERM_FACTORY.getDataPropertyPredicate(a.getName()));
         	//else if (a.isAnnotationProperty())
         	//	predicates.add(TERM_FACTORY.getAnnotationPropertyPredicate(a.getName()));
