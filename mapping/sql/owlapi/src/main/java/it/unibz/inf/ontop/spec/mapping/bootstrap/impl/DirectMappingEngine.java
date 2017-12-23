@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -32,11 +34,11 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -58,8 +60,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  *
  */
 public class DirectMappingEngine {
-
-	private final MappingVocabularyExtractor vocabularyExtractor;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -101,13 +101,12 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
+	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
                                 SQLPPMappingFactory ppMappingFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
-		this.vocabularyExtractor = vocabularyExtractor;
 	}
 
 	/**
@@ -124,7 +123,7 @@ public class DirectMappingEngine {
 					? extractPPMapping(inputPPMapping.get())
 					: extractPPMapping();
 
-			OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+			OntologyVocabulary newVocabulary = extractVocabulary(
 					newPPMapping.getTripleMaps().stream()
 							.flatMap(ax -> ax.getTargetAtoms().stream()));
 
@@ -169,6 +168,25 @@ public class DirectMappingEngine {
 		manager.addAxioms(ontology, declarationAxioms);
 		return ontology;		
 	}
+
+	public static OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
+		OntologyBuilder ontologyBuilder = OntologyBuilderImpl.builder();
+		targetAtoms
+				.forEach(f -> {
+					String name = f.getFunctionSymbol().getName();
+					if (f.getArity() == 1)
+						ontologyBuilder.declareClass(name);
+					else {
+						Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
+						if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT))
+							ontologyBuilder.declareObjectProperty(name);
+						else
+							ontologyBuilder.declareDataProperty(name);
+					}
+				});
+		return ontologyBuilder.buildVocabulary();
+	}
+
 
 	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, OntologyVocabulary vocabulary) {
 

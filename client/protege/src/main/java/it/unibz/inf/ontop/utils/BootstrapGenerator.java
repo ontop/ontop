@@ -40,7 +40,6 @@ public class BootstrapGenerator {
     private final OBDAModel activeOBDAModel;
     private final OWLModelManager owlManager;
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-    private final MappingVocabularyExtractor vocabularyExtractor;
     private int currentMappingIndex = 1;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri, OWLModelManager owlManager) throws DuplicateMappingException, InvalidMappingException, MappingIOException, SQLException, OWLOntologyCreationException, OWLOntologyStorageException {
@@ -49,7 +48,6 @@ public class BootstrapGenerator {
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
-        vocabularyExtractor = configuration.getInjector().getInstance(MappingVocabularyExtractor.class);
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
@@ -60,7 +58,7 @@ public class BootstrapGenerator {
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
-        OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
+        OntologyVocabulary newVocabulary = DirectMappingEngine.extractVocabulary(
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()));
 
