@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 
 public class DefaultMappingTransformer implements MappingTransformer {
-    
+
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;

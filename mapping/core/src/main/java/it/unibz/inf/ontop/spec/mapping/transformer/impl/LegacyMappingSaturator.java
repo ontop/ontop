@@ -49,17 +49,14 @@ public class LegacyMappingSaturator implements MappingSaturator {
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules());
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
-
         ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
                 .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
-                foreignKeyCQC, tMappingExclusionConfig).stream()
-                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
-                .collect(ImmutableCollectors.toSet());
+        LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules());
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
+        List<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
+                foreignKeyCQC, tMappingExclusionConfig);
 
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
         allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));
@@ -74,7 +71,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private static ImmutableList<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
+    private static ImmutableList<CQIE> generateTripleMappings(List<CQIE> saturatedRules) {
         return saturatedRules.stream()
                 .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
                 .map(r -> generateTripleMapping(r))
