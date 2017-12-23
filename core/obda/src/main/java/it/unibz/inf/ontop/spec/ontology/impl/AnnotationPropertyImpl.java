@@ -41,8 +41,7 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	private final Predicate predicate;
 	private final String name;
 
-	// TODO: remove public access
-	public AnnotationPropertyImpl(String name) {
+	AnnotationPropertyImpl(String name) {
 		this.predicate = TERM_FACTORY.getAnnotationPropertyPredicate(name);
 		this.name = name;
 	}
