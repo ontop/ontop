@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer;
 
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 /**
@@ -12,9 +10,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
  */
 public interface MappingTransformer {
 
-    OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
-                                OntologyABox abox, ClassifiedTBox tBox);
+    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology);
 
-    OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
-                                ClassifiedTBox tBox);
+    OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata);
 }

@@ -25,16 +25,12 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     private final MappingExtractor mappingExtractor;
     private final MappingTransformer mappingTransformer;
-    private final OntopMappingSettings settings;
-    private final MappingVocabularyExtractor vocabularyExtractor;
 
     @Inject
     private DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer,
-                                              OntopMappingSettings settings, MappingVocabularyExtractor vocabularyExtractor) {
+                                              OntopMappingSettings settings) {
         this.mappingExtractor = mappingExtractor;
         this.mappingTransformer = mappingTransformer;
-        this.settings = settings;
-        this.vocabularyExtractor = vocabularyExtractor;
     }
 
     @Override
@@ -43,30 +39,23 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            ClassifiedTBox classifiedTBox = optionalOntology.get().tbox();
+            Ontology ontology = optionalOntology.get();
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
-                    Optional.of(classifiedTBox), executorRegistry);
+                    Optional.of(ontology.tbox()), executorRegistry);
 
             return mappingTransformer.transform(
-                    specInput,
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
-                    optionalOntology.get().abox(),
-                    classifiedTBox);
+                    ontology);
         }
         else {
-            // no ontology given - extract the vocabulary from mappings and use it as an ontology
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
                     Optional.empty(), executorRegistry);
 
-            ClassifiedTBox tbox = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
-
             return mappingTransformer.transform(
-                    specInput,
                     mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    tbox);
+                    mappingAndDBMetadata.getDBMetadata());
         }
     }
 
@@ -76,30 +65,23 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         if (optionalOntology.isPresent()) {
-            ClassifiedTBox classifiedTBox = optionalOntology.get().tbox();
+            Ontology ontology = optionalOntology.get();
 
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    Optional.of(classifiedTBox), executorRegistry);
+                    Optional.of(ontology.tbox()), executorRegistry);
 
             return mappingTransformer.transform(
-                    specInput,
                     mappingAndDBMetadata.getMapping(),
                     mappingAndDBMetadata.getDBMetadata(),
-                    optionalOntology.get().abox(),
-                    classifiedTBox);
+                    ontology);
         }
         else {
-            // no ontology given - extract the vocabulary from mappings and use it as an ontology
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
                     Optional.empty(), executorRegistry);
 
-            ClassifiedTBox tbox = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
-
             return mappingTransformer.transform(
-                    specInput,
                     mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    tbox);
+                    mappingAndDBMetadata.getDBMetadata());
         }
     }
 }

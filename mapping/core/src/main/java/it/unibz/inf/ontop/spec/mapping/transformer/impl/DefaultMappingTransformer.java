@@ -6,14 +6,13 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 
 public class DefaultMappingTransformer implements MappingTransformer {
-
-
+    
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
@@ -22,6 +21,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final OntopMappingSettings settings;
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final SpecificationFactory specificationFactory;
+    private final MappingVocabularyExtractor vocabularyExtractor;
 
     @Inject
     private DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter,
@@ -31,7 +31,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
-                                     SpecificationFactory specificationFactory) {
+                                     SpecificationFactory specificationFactory,
+                                     MappingVocabularyExtractor vocabularyExtractor) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
@@ -40,23 +41,34 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.settings = settings;
         this.sameAsInverseRewriter = sameAsInverseRewriter;
         this.specificationFactory = specificationFactory;
+        this.vocabularyExtractor = vocabularyExtractor;
     }
 
     @Override
-    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, OntologyABox abox,
-                                       ClassifiedTBox tBox) {
-        Mapping factsAsMapping = factConverter.convert(abox, mapping.getExecutorRegistry(),
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Ontology ontology) {
+
+        Mapping factsAsMapping = factConverter.convert(ontology.abox(), mapping.getExecutorRegistry(),
                 settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
         Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
 
-        return transform(specInput, mappingWithFacts, dbMetadata, tBox);
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
+        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
+        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, ontology.tbox());
+        Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, ontology.tbox());
     }
 
     @Override
-    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata,
-                                       ClassifiedTBox tBox) {
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata) {
+
+        // extract empty TBox (just the list of classes / properties)
+        ClassifiedTBox tBox = vocabularyExtractor.extractOntology(mapping);
+
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
+        // ROMAN (23.12.17): I'm not sure what mappingSaturator does with the EMPTY TBox,
+        // but it cannot be eliminated
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
