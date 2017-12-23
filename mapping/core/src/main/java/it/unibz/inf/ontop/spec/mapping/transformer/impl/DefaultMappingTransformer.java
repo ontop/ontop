@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 
 public class DefaultMappingTransformer implements MappingTransformer {
 
@@ -62,14 +63,13 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Override
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata) {
 
+        ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder().build().tbox();
+
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
-        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata);
+        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, emptyTBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        // extract empty TBox (just the list of classes / properties)
-        ClassifiedTBox tBox = vocabularyExtractor.extractOntology(mapping);
-
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox);
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, emptyTBox);
     }
 }
