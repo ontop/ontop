@@ -34,9 +34,7 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.*;
 
@@ -55,13 +53,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
-
-/***
+/**
  * Allows you to materialize the virtual RDF graph of an OBDA specification.
  * 
- * @author Mariano Rodriguez Muro (initial version, was called QuestMaterializer)
+ * @author Mariano Rodriguez Muro (initial version was called QuestMaterializer)
  * 
  */
 public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
@@ -72,9 +68,14 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         private final URI name;
         private final int arity;
 
-        VocabularyEntry(URI name, int arity) {
-            this.name = name;
-            this.arity = arity;
+        VocabularyEntry(Predicate predicate) {
+            try {
+                this.name = new URI(predicate.getName());
+            }
+            catch (URISyntaxException e) {
+                throw new NonURIPredicateInVocabularyException(predicate.getName());
+            }
+            this.arity = predicate.getArity();
         }
 
         private static final String PROPERTY_QUERY = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
@@ -84,9 +85,6 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
             return String.format((arity == 1) ? CLASS_QUERY : PROPERTY_QUERY, name.toString(), name.toString());
         }
     }
-
-	public DefaultOntopRDFMaterializer() {
-	}
 
 	@Override
 	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
@@ -126,19 +124,9 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 	    return mapping.getPredicates().stream()
                 .filter(p -> p.getArity() <= 2)
-                .map(p -> new VocabularyEntry(convertIntoURI(p.getName()), p.getArity()))
-                .collect(ImmutableCollectors.toMap(p -> p.name, p -> p));
+                .map(p -> new VocabularyEntry(p))
+                .collect(ImmutableCollectors.toMap(e -> e.name, e -> e));
     }
-
-	private static URI convertIntoURI(String name) {
-		try {
-			return new URI(name);
-		}
-		catch (URISyntaxException e) {
-			throw new NonURIPredicateInVocabularyException(name);
-		}
-	}
-
 
 
 	private static class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
@@ -276,8 +264,6 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			throw new NoSuchElementException("Please call hasNext() before calling next()");
 		}
 
-
-
 		/**
 		 * Releases all the connection resources
 		 */
@@ -300,29 +286,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	}
 
 
-
 	private static class NonURIPredicateInVocabularyException extends OntopInternalBugException {
 
 		NonURIPredicateInVocabularyException(String vocabularyPredicate) {
 			super("A non-URI predicate has been found in the vocabulary: " + vocabularyPredicate);
-		}
-	}
-
-
-
-	private static class NonRDFPredicateException extends OntopInternalBugException {
-
-		NonRDFPredicateException(Predicate predicate) {
-			super("This predicate is not a RDF predicate: " + predicate);
-		}
-	}
-
-
-
-	private static class InvalidMaterializationConstructQueryException extends OntopInternalBugException {
-
-		InvalidMaterializationConstructQueryException(OntopInvalidInputQueryException e) {
-			super("Invalid materialization construct query: \n" + e);
 		}
 	}
 }

@@ -1,32 +1,15 @@
 package it.unibz.inf.ontop.spec.ontology.impl;
 
-import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.stream.Stream;
 
-
 public class MappingVocabularyExtractorImpl implements MappingVocabularyExtractor {
-
-    private final Mapping2DatalogConverter mapping2DatalogConverter;
-
-    @Inject
-    private MappingVocabularyExtractorImpl(Mapping2DatalogConverter mapping2DatalogConverter){
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
-    }
-
 
     @Override
     public OntologyVocabulary extractVocabulary(Stream<? extends Function> targetAtoms) {
-        return extractVocabularyInternal(targetAtoms).buildVocabulary();
-    }
-
-    private OntologyBuilder extractVocabularyInternal(Stream<? extends Function> targetAtoms) {
         OntologyBuilder ontologyBuilder = OntologyBuilderImpl.builder();
         targetAtoms
                 .forEach(f -> {
@@ -41,14 +24,6 @@ public class MappingVocabularyExtractorImpl implements MappingVocabularyExtracto
                             ontologyBuilder.declareDataProperty(name);
                     }
                 });
-        return ontologyBuilder;
+        return ontologyBuilder.buildVocabulary();
     }
-
-    @Override
-    public ClassifiedTBox extractOntology(Mapping mapping) {
-        return (extractVocabularyInternal(mapping2DatalogConverter.convert(mapping)
-                .map(CQIE::getHead)))
-                .build().tbox();
-    }
-
 }
