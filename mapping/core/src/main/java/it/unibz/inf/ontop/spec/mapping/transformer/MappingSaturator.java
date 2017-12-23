@@ -8,4 +8,6 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 public interface MappingSaturator {
 
     Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox);
+
+    Mapping saturate(Mapping mapping, DBMetadata dbMetadata);
 }

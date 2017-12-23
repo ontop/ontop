@@ -62,15 +62,13 @@ public class DefaultMappingTransformer implements MappingTransformer {
     @Override
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata) {
 
-        // extract empty TBox (just the list of classes / properties)
-        ClassifiedTBox tBox = vocabularyExtractor.extractOntology(mapping);
-
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
-        // ROMAN (23.12.17): I'm not sure what mappingSaturator does with the EMPTY TBox,
-        // but it cannot be eliminated
-        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
+        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
+        // extract empty TBox (just the list of classes / properties)
+        ClassifiedTBox tBox = vocabularyExtractor.extractOntology(mapping);
 
         return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox);
     }

@@ -55,11 +55,28 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules());
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
-        List<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
-                foreignKeyCQC, tMappingExclusionConfig);
+        ImmutableList<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
+                foreignKeyCQC, tMappingExclusionConfig).stream()
+                // NOT SURE WHY SECOND TIME IS NEEDED
+                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .collect(ImmutableCollectors.toList());
 
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
         allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));
+
+        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules),
+                dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
+    }
+
+    @Override
+    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata) {
+
+        ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
+                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
+                .collect(ImmutableCollectors.toList());
+
+        List<CQIE> allMappingRules = new ArrayList<>(initialMappingRules);
+        allMappingRules.addAll(generateTripleMappings(initialMappingRules));
 
         return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules),
                 dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
@@ -71,7 +88,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
      *
      * TODO: clean it
      */
-    private static ImmutableList<CQIE> generateTripleMappings(List<CQIE> saturatedRules) {
+    private static ImmutableList<CQIE> generateTripleMappings(ImmutableList<CQIE> saturatedRules) {
         return saturatedRules.stream()
                 .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
                 .map(r -> generateTripleMapping(r))
