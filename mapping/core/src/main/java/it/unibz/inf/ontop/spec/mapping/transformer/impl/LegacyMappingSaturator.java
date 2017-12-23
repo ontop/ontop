@@ -68,20 +68,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
     }
 
-    @Override
-    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata) {
-
-        ImmutableSet<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
-                .map(r -> LegacyIsNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
-                .collect(ImmutableCollectors.toSet());
-
-        List<CQIE> allMappingRules = new ArrayList<>(initialMappingRules);
-        allMappingRules.addAll(generateTripleMappings(initialMappingRules));
-
-        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules),
-                dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
-    }
-
     /***
      * Creates mappings with heads as "triple(x,y,z)" from mappings with binary
      * and unary atoms"
@@ -99,29 +85,23 @@ public class LegacyMappingSaturator implements MappingSaturator {
         Function newhead;
         Function currenthead = rule.getHead();
         if (currenthead.getArity() == 1) {
-                /*
-                 * head is Class(x) Forming head as triple(x,uri(rdf:type),
-				 * uri(Class))
-				 */
+             // head is Class(x) Forming head as triple(x,uri(rdf:type), uri(Class))
             Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
 
             String classname = currenthead.getFunctionSymbol().getName();
             Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
 
             newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
-        } else if (currenthead.getArity() == 2) {
-				/*
-				 * head is Property(x,y) Forming head as triple(x,uri(Property),
-				 * y)
-				 */
+        }
+        else if (currenthead.getArity() == 2) {
+            // head is Property(x,y) Forming head as triple(x,uri(Property), y)
             String propname = currenthead.getFunctionSymbol().getName();
             Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
 
             newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
-        } else {
-				/*
-				 * head is triple(x,uri(Property),y)
-				 */
+        }
+        else {
+            // head is triple(x,uri(Property),y)
             newhead = (Function) currenthead.clone();
         }
         return DATALOG_FACTORY.getCQIE(newhead, rule.getBody());
