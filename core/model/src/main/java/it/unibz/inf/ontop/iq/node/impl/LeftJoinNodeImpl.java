@@ -551,7 +551,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                             .map(ImmutableFunctionalTerm::getArguments)
                             .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
                             // Rename right-specific variables if possible
-                            .map(args -> rightSpecificVariables.contains(args.get(1)) ? args : args.reverse())
+                            .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
+                                    ? args.reverse() : args)
                             .collect(ImmutableCollectors.toMap(
                                     args -> (Variable) args.get(0),
                                     args -> (NonFunctionalTerm) args.get(1))));
