@@ -41,7 +41,8 @@ public class ExampleSiemensProgram {
         final AtomPredicate conceptTurbine = af.getAtomPredicate(prefixes.get("ss:") + "Turbine",1);
         final AtomPredicate conceptTempSensor = af.getAtomPredicate(prefixes.get("ss:") + "TemperatureSensor",1);
         final AtomPredicate conceptRotSpeedSensor = af.getAtomPredicate(prefixes.get("ss:") + "RotationSpeedSensor",1);
-        final AtomPredicate objectPropertyIMB = af.getAtomPredicate(prefixes.get("ss:") + "isMonitoredBy",2);
+        final AtomPredicate objectPropertyIMBTs = af.getAtomPredicate(prefixes.get("ss:") + "isMonitoredBy",2);
+        final AtomPredicate objectPropertyIMBRs = af.getAtomPredicate(prefixes.get("ss:") + "isMonitoredBy",2);
         final AtomPredicate objectPropertyIPO = af.getAtomPredicate(prefixes.get("ss:") + "isPartOf",2);
         final AtomPredicate conceptCLTRS = af.getAtomPredicate(prefixes.get("ss:") + "ColocTempRotSensors",3);
 
@@ -63,8 +64,8 @@ public class ExampleSiemensProgram {
         StaticAtomicExpression tb = f.createStaticAtomicExpression(conceptTurbine, varTb);
         StaticAtomicExpression ts = f.createStaticAtomicExpression(conceptTempSensor, varTs);
         StaticAtomicExpression rss = f.createStaticAtomicExpression(conceptRotSpeedSensor, varRs);
-        StaticAtomicExpression isMonitoredByTs = f.createStaticAtomicExpression(objectPropertyIMB, varBurner, varTs);
-        StaticAtomicExpression isMonitoredByRS = f.createStaticAtomicExpression(objectPropertyIMB, varPt, varRs);
+        StaticAtomicExpression isMonitoredByTs = f.createStaticAtomicExpression(objectPropertyIMBTs, varBurner, varTs);
+        StaticAtomicExpression isMonitoredByRS = f.createStaticAtomicExpression(objectPropertyIMBRs, varPt, varRs);
         StaticAtomicExpression isPartOfPt = f.createStaticAtomicExpression(objectPropertyIPO, varPt, varTb);
         StaticAtomicExpression isPartOfB = f.createStaticAtomicExpression(objectPropertyIPO, varBurner, varTb);
         StaticAtomicExpression CLTRS = f.createStaticAtomicExpression(conceptCLTRS, varTb, varTs, varRs);

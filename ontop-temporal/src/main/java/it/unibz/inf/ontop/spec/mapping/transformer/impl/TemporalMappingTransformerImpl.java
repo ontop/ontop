@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -27,19 +28,21 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final MappingEquivalenceFreeRewriter eqFreeRewriter;
     private final SpecificationFactory specificationFactory;
+    private final TemporalSpecificationFactory temporalSpecificationFactory;
     private final TemporalMappingSaturator temporalMappingSaturator;
+    private final StaticRuleMappingSaturator staticRuleMappingSaturator;
 
     @Inject
     private TemporalMappingTransformerImpl(MappingCanonicalRewriter mappingCanonicalRewriter,
-                                      MappingNormalizer mappingNormalizer,
-                                      MappingSaturator mappingSaturator,
-                                      ABoxFactIntoMappingConverter inserter,
-                                      MappingMerger mappingMerger,
-                                      OntopMappingSettings settings,
-                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
-                                      MappingEquivalenceFreeRewriter eqFreeRewriter,
-                                      SpecificationFactory specificationFactory,
-                                           TemporalMappingSaturator temporalMappingSaturator) {
+                                           MappingNormalizer mappingNormalizer,
+                                           MappingSaturator mappingSaturator,
+                                           ABoxFactIntoMappingConverter inserter,
+                                           MappingMerger mappingMerger,
+                                           OntopMappingSettings settings,
+                                           MappingSameAsInverseRewriter sameAsInverseRewriter,
+                                           MappingEquivalenceFreeRewriter eqFreeRewriter,
+                                           SpecificationFactory specificationFactory1, TemporalSpecificationFactory specificationFactory,
+                                           TemporalMappingSaturator temporalMappingSaturator, StaticRuleMappingSaturator staticRuleMappingSaturator) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
@@ -48,8 +51,10 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
         this.settings = settings;
         this.sameAsInverseRewriter = sameAsInverseRewriter;
         this.eqFreeRewriter = eqFreeRewriter;
-        this.specificationFactory = specificationFactory;
+        this.specificationFactory = specificationFactory1;
+        this.temporalSpecificationFactory = specificationFactory;
         this.temporalMappingSaturator = temporalMappingSaturator;
+        this.staticRuleMappingSaturator = staticRuleMappingSaturator;
     }
 
     @Override
@@ -80,9 +85,11 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+        Mapping saturatedRuleMapping = staticRuleMappingSaturator.saturate(normalizedMapping, dbMetadata, datalogMTLProgram);
 
-        Mapping temporalSaturatedMapping = temporalMappingSaturator.saturate(normalizedMapping, dbMetadata, temporalMapping, temporalDBMetadata, datalogMTLProgram);
+        TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, dbMetadata, temporalMapping, temporalDBMetadata, datalogMTLProgram);
 
-        return specificationFactory.createSpecification(temporalSaturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
+        return null;
+        //return temporalSpecificationFactory.createSpecification(temporalSaturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
 }

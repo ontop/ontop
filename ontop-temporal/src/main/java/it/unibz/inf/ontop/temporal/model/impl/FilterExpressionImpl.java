@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.temporal.model.ComparisonExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.FilterExpression;
 
 import java.util.Arrays;
@@ -36,5 +37,10 @@ public class FilterExpressionImpl implements FilterExpression {
     @Override
     public ComparisonExpression getComparisonExpression() {
         return this.comparisonExpression;
+    }
+
+    @Override
+    public DatalogMTLExpression getExpression() {
+        return datalogMTLExpression;
     }
 }

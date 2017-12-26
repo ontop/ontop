@@ -57,7 +57,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return null;
     }
 
-    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata,
+    public TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata,
                             TemporalMapping temporalMapping, DBMetadata temporalDBMetadata,
                             DatalogMTLProgram datalogMTLProgram){
 
@@ -70,18 +70,20 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         IQ iq;
         while(!queue.isEmpty()){
             DatalogMTLRule rule = queue.poll();
-
-            ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-            if (areAllMappingsExist(mapping,temporalMapping,atomicExpressionsList)){
-                iq = saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata);
-                System.out.println(iq.toString());
-            }else if(!queue.isEmpty()){
-                //TODO:Override compareTo for rule.getHead()
-                if (queue.stream().anyMatch(qe-> qe.getHead().equals(rule.getHead()))){
-                    queue.add(rule);
+            if (!(rule.getBody() instanceof StaticJoinExpression) ||
+                    ((rule.getBody() instanceof FilterExpression) &&
+                            !(((FilterExpression) rule.getBody()).getExpression() instanceof StaticJoinExpression))) {
+                ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
+                if (areAllMappingsExist(mapping, temporalMapping, atomicExpressionsList)) {
+                    iq = saturateRule(rule, mapping, dbMetadata, temporalMapping, temporalDBMetadata);
+                    System.out.println(iq.toString());
+                } else {
+                    if (!queue.isEmpty()){
+                        //TODO:Override compareTo for rule.getHead()
+                        if (queue.stream().anyMatch(qe -> qe.getHead().equals(rule.getHead())))
+                            queue.add(rule);
+                    }
                 }
-            }else{
-                //TODO: ignore "rule"
             }
         }
         return null;
@@ -97,6 +99,12 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         return false;
     }
 
+    //expands into temporal mapping in the shape of named graph
+    private TemporalMapping expandToTemporalMapping(IQ iq){
+
+        return null;
+    }
+
     private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
                               TemporalMapping temporalMapping, DBMetadata temporalDBMetadata){
 
@@ -104,7 +112,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
         Stack<DatalogMTLExpression> teStack = new Stack<>();
         it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
-        Stack<QueryNode> qnStack = new Stack<>();
         Stack<IQTree> iqTreeStack = new Stack<>();
 
         if(!teStack.empty()) {

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
@@ -54,6 +55,7 @@ public class OntopTemporalModule extends OntopAbstractModule{
         bindFromSettings(TemporalDatalogProgram2QueryConverter.class);
         bindFromSettings(TemporalMappingTransformer.class);
         bindFromSettings(TemporalMappingSaturator.class);
+        bindFromSettings(StaticRuleMappingSaturator.class);
         //bindFromSettings(TemporalMapping.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(
