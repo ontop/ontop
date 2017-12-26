@@ -429,7 +429,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
+                              IQProperties currentIQProperties) {
 
         ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)
                 .flatMap(c -> c.getVariables().stream())
@@ -456,7 +457,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (i >= MAX_ITERATIONS)
             throw new MinorOntopInternalBugException("LJ.liftBinding() did not converge after " + i);
 
-        return convertResults2IQTree(projectedVariables, liftingState);
+        return convertResults2IQTree(projectedVariables, liftingState, currentIQProperties);
     }
 
     @Override
@@ -879,7 +880,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .findFirst();
     }
 
-    private IQTree convertResults2IQTree(ImmutableSet<Variable> projectedVariables, ChildLiftingState liftingState) {
+    private IQTree convertResults2IQTree(ImmutableSet<Variable> projectedVariables, ChildLiftingState liftingState,
+                                         IQProperties currentIQProperties) {
         Optional<ConstructionNode> topConstructionNode = Optional.of(liftingState.getComposedAscendingSubstitution())
                 .filter(s -> !s.isEmpty())
                 // Filters out the non-projected variables
@@ -895,12 +897,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 // LJ
                 .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(liftingState.ljCondition),
-                        liftingState.leftChild, liftingState.rightChild, true))
+                        liftingState.leftChild, liftingState.rightChild, currentIQProperties.declareLifted()))
                 // Left child
                 .orElse(liftingState.leftChild);
 
         return topConstructionNode
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, true))
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, currentIQProperties.declareLifted()))
                 .orElse(subTree);
     }
 

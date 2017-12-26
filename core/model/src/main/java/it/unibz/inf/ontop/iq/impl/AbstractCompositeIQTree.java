@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.CompositeIQTree;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -17,6 +19,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
+    private final IQProperties iqProperties;
     private static final String TAB_STR = "   ";
 
     /**
@@ -25,11 +28,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Nullable
     private ImmutableSet<Variable> knownVariables;
 
-    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children) {
+    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
+                                      IQProperties iqProperties) {
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
         this.children = children;
+        this.iqProperties = iqProperties;
         // To be computed on-demand
         knownVariables = null;
     }
@@ -104,4 +109,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
                     .allMatch(i -> children.get(i).isEquivalentTo(otherChildren.get(i)));
     }
 
+    protected IQProperties getProperties() {
+        return iqProperties;
+    }
 }

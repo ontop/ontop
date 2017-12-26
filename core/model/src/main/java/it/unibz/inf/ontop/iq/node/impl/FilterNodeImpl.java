@@ -162,16 +162,16 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode childRoot = liftedChildIQTree.getRootNode();
         if (childRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree);
+            return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
         else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return liftedChildIQTree;
         }
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
     }
 
     /**
@@ -206,19 +206,23 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
      *
      * TODO: let the filter node simplify (interpret) expressions in the lifted substitution
      */
-    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree liftedChildIQ) {
+    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree liftedChildIQ,
+                               IQProperties currentIQProperties) {
         IQTree grandChildIQTree = liftedChildIQ.getChild();
+
+        IQProperties liftedProperties = currentIQProperties.declareLifted();
 
         SubstitutionResults<FilterNode> result = applySubstitution(childConstructionNode.getSubstitution());
         switch (result.getLocalAction()) {
 
             case NO_CHANGE:
-                UnaryIQTree filterIQ = iqFactory.createUnaryIQTree(this, grandChildIQTree, true);
-                return iqFactory.createUnaryIQTree(childConstructionNode, filterIQ, true);
+                UnaryIQTree filterIQ = iqFactory.createUnaryIQTree(this, grandChildIQTree);
+                return iqFactory.createUnaryIQTree(childConstructionNode, filterIQ, liftedProperties);
 
             case NEW_NODE:
-                UnaryIQTree newFilterIQ = iqFactory.createUnaryIQTree(result.getOptionalNewNode().get(), grandChildIQTree, true);
-                return iqFactory.createUnaryIQTree(childConstructionNode, newFilterIQ, true);
+                UnaryIQTree newFilterIQ = iqFactory.createUnaryIQTree(result.getOptionalNewNode().get(), grandChildIQTree,
+                        liftedProperties);
+                return iqFactory.createUnaryIQTree(childConstructionNode, newFilterIQ, liftedProperties);
 
             case REPLACE_BY_CHILD:
                 return liftedChildIQ;

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -22,7 +23,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     private final IQTree leftChild;
     private final IQTree rightChild;
-    private final boolean isLifted;
     // LAZY
     @Nullable
     private ImmutableSet<Variable> nullableVariables;
@@ -30,17 +30,17 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted boolean isLifted) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild));
+                                           @Assisted IQProperties iqProperties) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.isLifted = isLifted;
     }
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
-                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild) {
-        this(rootNode, leftChild, rightChild, false);
+                                           @Assisted("left") IQTree leftChild,
+                                           @Assisted("right") IQTree rightChild) {
+        this(rootNode, leftChild, rightChild, new IQPropertiesImpl());
     }
 
     @Override
@@ -55,9 +55,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree liftBinding(VariableGenerator variableGenerator) {
-        if (isLifted)
+        IQProperties properties = getProperties();
+        if (properties.isLifted())
             return this;
-        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator);
+        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator, properties);
     }
 
     @Override

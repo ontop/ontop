@@ -56,30 +56,19 @@ public interface IntermediateQueryFactory {
 
     TrueNode createTrueNode();
 
-    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, boolean declareAsLifted);
-
-    /**
-     * Not declared as lifted
-     */
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
+    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
 
-    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
-                                                                @Assisted("left") IQTree leftChild,
-                                                                @Assisted("right") IQTree rightChild,
-                                                                boolean declareAsLifted);
-    /**
-     * Not declared as lifted
-     */
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild);
+    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
+                                                                @Assisted("left") IQTree leftChild,
+                                                                @Assisted("right") IQTree rightChild,
+                                                                IQProperties properties);
 
-    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, boolean declareAsLifted);
-
-    /**
-     * Not declared as lifted
-     */
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
+    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 }

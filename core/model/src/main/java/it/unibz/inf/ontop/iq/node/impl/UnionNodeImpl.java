@@ -210,7 +210,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
 
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
@@ -223,7 +223,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator);
+                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator, currentIQProperties);
         }
     }
 
@@ -253,14 +253,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     /**
      * Has at least two children
      */
-    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator) {
+    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
+                                                 IQProperties currentIQProperties) {
 
         /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
-            return iqFactory.createNaryIQTree(this, liftedChildren, true);
+            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareLifted());
 
         ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
                     projectedVariables,
@@ -271,7 +272,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                     variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
-            return iqFactory.createNaryIQTree(this, liftedChildren, true);
+            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareLifted());
         }
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, mergedSubstitution);

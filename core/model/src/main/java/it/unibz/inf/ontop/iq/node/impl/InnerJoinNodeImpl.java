@@ -248,7 +248,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
      * TODO: explain
      */
     @Override
-    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         final ImmutableSet<Variable> projectedVariables = initialChildren.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
@@ -273,7 +273,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             if (i >= MAX_ITERATIONS)
                 throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
 
-            IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition);
+            IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition, currentIQProperties);
 
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory
                     .getSubstitution(currentSubstitution.getImmutableMap().entrySet().stream()
@@ -291,7 +291,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return projectedVariables.equals(childrenVariables) && ascendingSubstitution.isEmpty()
                     ? joinIQ
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ, true);
+                            iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ,
+                    currentIQProperties.declareLifted());
 
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);
@@ -432,7 +433,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
 
     private IQTree createJoinOrFilterOrTrue(ImmutableList<IQTree> currentChildren,
-                                            Optional<ImmutableExpression> currentJoiningCondition) {
+                                            Optional<ImmutableExpression> currentJoiningCondition,
+                                            IQProperties currentIQProperties) {
         switch (currentChildren.size()) {
             case 0:
                 return iqFactory.createTrueNode();
@@ -445,7 +447,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
                         ? this
                         : changeOptionalFilterCondition(currentJoiningCondition);
-                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, true);
+                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, currentIQProperties.declareLifted());
         }
     }
 

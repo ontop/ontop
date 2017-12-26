@@ -9,6 +9,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -552,16 +553,16 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree);
+            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
         else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
     }
 
     /**
@@ -769,7 +770,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return termFactory.getImmutableExpression(EQ, t1, t2);
     }
 
-    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ) {
+    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
         IQTree grandChildIQTree = childIQ.getChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(
@@ -788,7 +789,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
+                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
             }
             /*
              * Not mergeable query modifiers --> keeps two nodes
@@ -803,8 +804,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                         nullabilityEvaluator, unificationTools, constructionNodeTools,
                         substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree, true);
-                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ, true);
+                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree,
+                        currentIQProperties.declareLifted());
+                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ,
+                        currentIQProperties.declareLifted());
             }
         }
         /*
@@ -816,7 +819,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                     unificationTools, constructionNodeTools,
                     substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
+            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
         }
     }
 
