@@ -315,58 +315,61 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                 .map(s -> Optional.of(s.get(variable)))
                 .reduce((od1, od2) -> od1
                         .flatMap(d1 -> od2
-                                .flatMap(d2 -> combineDefinitions(d1, d2, variableGenerator))))
+                                .flatMap(d2 -> combineDefinitions(d1, d2, variableGenerator, true))))
                 .flatMap(t -> t);
     }
 
     /**
-     * Compare and combine the bindings, returning only the compatible values.
+     * Compare and combine the bindings, returning only the compatible (partial) values.
      * In case of variable, we generate and return a new variable to avoid inconsistency during propagation
      *
-     * TODO: revisit it?
      */
     private Optional<ImmutableTerm> combineDefinitions(ImmutableTerm d1, ImmutableTerm d2,
-                                                       VariableGenerator variableGenerator) {
+                                                       VariableGenerator variableGenerator,
+                                                       boolean topLevel) {
         if (d1.equals(d2)) {
             return Optional.of(d1);
         }
         else if (d1 instanceof Variable)  {
-            return Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d1));
+            return topLevel
+                    ? Optional.empty()
+                    : Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d1));
         }
         else if (d2 instanceof Variable)  {
-            return Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d2));
+            return topLevel
+                    ? Optional.empty()
+                    : Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d2));
         }
         else if ((d1 instanceof ImmutableFunctionalTerm) && (d2 instanceof ImmutableFunctionalTerm)) {
             ImmutableFunctionalTerm functionalTerm1 = (ImmutableFunctionalTerm) d1;
             ImmutableFunctionalTerm functionalTerm2 = (ImmutableFunctionalTerm) d2;
 
             /*
-             * NB: function symbols are in charge of enforcing the declared arities
+             * Different function symbols: stops the common part here
              */
             if (!functionalTerm1.getFunctionSymbol().equals(functionalTerm2.getFunctionSymbol())) {
-                return Optional.empty();
+                return topLevel
+                        ? Optional.empty()
+                        : Optional.of(variableGenerator.generateNewVariable());
             }
-
-            ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
-            ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
-            if(arguments1.size()!=arguments2.size()){
-                throw new IllegalStateException("Functions have different arities, they cannot be combined");
-            }
-
-            ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
-            for(int i=0; i <  arguments1.size(); i++) {
-                // Recursive
-                Optional<ImmutableTerm> optionalNewArgument = combineDefinitions(arguments1.get(i), arguments2.get(i),
-                        variableGenerator);
-                if (optionalNewArgument.isPresent()) {
-                    argumentBuilder.add(optionalNewArgument.get());
+            else {
+                ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
+                ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
+                if (arguments1.size() != arguments2.size()) {
+                    throw new IllegalStateException("Functions have different arities, they cannot be combined");
                 }
-                else {
-                    return Optional.empty();
+
+                ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+                for (int i = 0; i < arguments1.size(); i++) {
+                    // Recursive
+                    ImmutableTerm newArgument = combineDefinitions(arguments1.get(i), arguments2.get(i),
+                            variableGenerator, false)
+                            .orElseGet(variableGenerator::generateNewVariable);
+                    argumentBuilder.add(newArgument);
                 }
+                return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+                        argumentBuilder.build()));
             }
-            return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
-                    argumentBuilder.build()));
         }
         else {
             return Optional.empty();
