@@ -69,6 +69,12 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public boolean isConstructed(Variable variable) {
+        return getVariables().contains(variable)
+                && getRootNode().isConstructed(variable, leftChild, rightChild);
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }

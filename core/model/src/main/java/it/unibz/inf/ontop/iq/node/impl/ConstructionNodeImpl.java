@@ -448,6 +448,12 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         ).collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return substitution.isDefining(variable)
+                || (getChildVariables().contains(variable) && child.isConstructed(variable));
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */

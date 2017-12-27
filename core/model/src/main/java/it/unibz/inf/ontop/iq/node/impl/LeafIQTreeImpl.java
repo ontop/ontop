@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
@@ -23,6 +24,11 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     @Override
     public IQTree liftBinding(VariableGenerator variableGenerator) {
         return this;
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable) {
+        return false;
     }
 
     @Override

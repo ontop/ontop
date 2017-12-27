@@ -503,6 +503,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
     }
 
+    @Override
+    public boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild) {
+        return Stream.of(leftChild, rightChild)
+                .anyMatch(c -> c.isConstructed(variable));
+    }
+
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
             ImmutableExpression initialExpression,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,

@@ -34,4 +34,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
+    
+    boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 }

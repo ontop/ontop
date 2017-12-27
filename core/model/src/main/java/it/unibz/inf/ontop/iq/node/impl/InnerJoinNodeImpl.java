@@ -358,6 +358,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .anyMatch(c -> c.isConstructed(variable));
+    }
+
     private ImmutableSet<Variable> computeNewlyProjectedVariables(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableList<IQTree> children) {

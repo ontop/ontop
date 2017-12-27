@@ -130,6 +130,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return child.isConstructed(variable);
+    }
+
+    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof FilterNode)
                 && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());

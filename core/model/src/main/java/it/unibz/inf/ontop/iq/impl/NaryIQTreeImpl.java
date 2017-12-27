@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
 
@@ -56,6 +55,14 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         }
         else
             return this;
+    }
+
+    /**
+     * TODO: should we cache the boolean?
+     */
+    @Override
+    public boolean isConstructed(Variable variable) {
+        return getVariables().contains(variable) && getRootNode().isConstructed(variable, getChildren());
     }
 
     @Override

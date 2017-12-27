@@ -34,6 +34,12 @@ public interface IQTree {
     ImmutableSet<Variable> getKnownVariables();
 
     /**
+     * Returns true if the variable is (at least in one branch) constructed by a substitution
+     * (in a construction node)
+     */
+    boolean isConstructed(Variable variable);
+
+    /**
      * Returns true if corresponds to a EmptyNode
      */
     boolean isDeclaredAsEmpty();

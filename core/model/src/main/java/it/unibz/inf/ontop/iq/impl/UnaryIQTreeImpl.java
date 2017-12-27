@@ -47,6 +47,12 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public boolean isConstructed(Variable variable) {
+        return getVariables().contains(variable)
+                && getRootNode().isConstructed(variable, getChild());
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }

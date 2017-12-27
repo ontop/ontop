@@ -134,6 +134,12 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }

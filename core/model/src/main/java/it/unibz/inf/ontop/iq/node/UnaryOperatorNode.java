@@ -22,4 +22,6 @@ public interface UnaryOperatorNode extends QueryNode {
                                        Optional<ImmutableExpression> constraint, IQTree child);
 
     ImmutableSet<Variable> getNullableVariables(IQTree child);
+
+    boolean isConstructed(Variable variable, IQTree child);
 }
