@@ -114,100 +114,99 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
         it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
         Stack<IQTree> iqTreeStack = new Stack<>();
 
-        if(!teStack.empty()) {
-            ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping, temporalMapping);
-            AtomicExpression atomicExpression;
+        if (rule.getHead() instanceof TemporalAtomicExpression) {
+            if(!teStack.empty()) {
+                ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping, temporalMapping);
+                AtomicExpression atomicExpression;
 
-            if (rule.getHead() instanceof TemporalAtomicExpression) {
                 atomicExpression = new TemporalAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
-            } else {
-                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
-            }
+//            } else {
+//                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
+//            }
 
-            TargetAtom targetAtom = datalogMTLConversionTools
-                    .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
-            DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
-            ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
-                    targetAtom.getSubstitution(), Optional.empty());
+                TargetAtom targetAtom = datalogMTLConversionTools
+                        .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
+                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+                ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
+                        targetAtom.getSubstitution(), Optional.empty());
 
-            IQTree newTree = null;
-            while (!teStack.isEmpty()) {
-                DatalogMTLExpression currentExpression = teStack.pop();
+                IQTree newTree = null;
+                while (!teStack.isEmpty()) {
+                    DatalogMTLExpression currentExpression = teStack.pop();
 
-                //TODO: Coalesce Node is missing, implement it.
-                if(currentExpression instanceof AtomicExpression) {
+                    //TODO: Coalesce Node is missing, implement it.
+                    if (currentExpression instanceof AtomicExpression) {
 
-                    IntermediateQuery intermediateQuery;
-                    IQTree newATree;
-                    if (currentExpression instanceof ComparisonExpression){
-                        continue;
-                    } else if (currentExpression instanceof StaticAtomicExpression) {
-                        intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
-                        newTree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
-                    } else {//TemporalAtomicExpression
-                        intermediateQuery = temporalMapping.getDefinitions()
-                                .get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery();
-                        newATree = ((UnaryIQTree)iqConverter.convert(intermediateQuery).getTree()).getChild();
-                        TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-                        newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
+                        IntermediateQuery intermediateQuery;
+                        IQTree newATree;
+                        if (currentExpression instanceof ComparisonExpression) {
+                            continue;
+                        } else if (currentExpression instanceof StaticAtomicExpression) {
+                            intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
+                            newTree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree()).getChild();
+                        } else {//TemporalAtomicExpression
+                            intermediateQuery = temporalMapping.getDefinitions()
+                                    .get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery();
+                            newATree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree()).getChild();
+                            TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                            newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
+                        }
+
+                    } else if (currentExpression instanceof TemporalJoinExpression) {
+                        IQTree iqTree1 = iqTreeStack.pop();
+                        IQTree iqTree2 = iqTreeStack.pop();
+
+                        TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
+                        newTree = TIQFactory.createNaryIQTree(temporalJoinNode, ImmutableList.of(iqTree1, iqTree2));
+
+                    } else if (currentExpression instanceof StaticJoinExpression) {
+                        List<IQTree> iqtList = new ArrayList<>();
+                        for (int i = 0; i < ((StaticJoinExpression) currentExpression).getArity(); i++) {
+                            iqtList.add(iqTreeStack.pop());
+                        }
+                        InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
+                        newTree = TIQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
+
+                    } else if (currentExpression instanceof FilterExpression) {
+                        FilterNode filterNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
+                        IQTree iqTree = iqTreeStack.pop();
+                        newTree = TIQFactory.createUnaryIQTree(filterNode, iqTree);
+
+                    } else if (currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
+
+                        UnaryOperatorNode newNode;
+                        if (currentExpression instanceof BoxMinusExpression)
+                            newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
+
+                        else if (currentExpression instanceof BoxPlusExpression)
+                            newNode = TIQFactory.createBoxPlusNode(((BoxPlusExpression) currentExpression).getRange());
+
+                        else if (currentExpression instanceof DiamondMinusExpression)
+                            newNode = TIQFactory.createDiamondMinusNode(((DiamondMinusExpression) currentExpression).getRange());
+                        else
+                            newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
+
+                        IQTree iqTree = iqTreeStack.pop();
+                        newTree = TIQFactory.createUnaryIQTree(newNode, iqTree);
+
+                        //TODO: fill here
+                    } else if (currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
+
+                        if (currentExpression instanceof SinceExpression) {
+
+                        } else {
+
+                        }
                     }
-
-                }else if(currentExpression instanceof TemporalJoinExpression){
-                    IQTree iqTree1 = iqTreeStack.pop();
-                    IQTree iqTree2 = iqTreeStack.pop();
-
-                    TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
-                    newTree = TIQFactory.createNaryIQTree(temporalJoinNode, ImmutableList.of(iqTree1, iqTree2));
-
-                }else if(currentExpression instanceof StaticJoinExpression){
-                    List<IQTree> iqtList = new ArrayList<>();
-                    for(int i = 0; i <((StaticJoinExpression) currentExpression).getArity(); i++){
-                        iqtList.add(iqTreeStack.pop());
-                    }
-                    InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
-                    newTree = TIQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
-
-                }else if (currentExpression instanceof FilterExpression){
-                    FilterNode filterNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
-                    IQTree iqTree = iqTreeStack.pop();
-                    newTree = TIQFactory.createUnaryIQTree(filterNode,iqTree);
-
-                }else if(currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
-
-                    UnaryOperatorNode newNode;
-                    if(currentExpression instanceof BoxMinusExpression)
-                         newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
-
-                    else if(currentExpression instanceof BoxPlusExpression)
-                         newNode = TIQFactory.createBoxPlusNode(((BoxPlusExpression) currentExpression).getRange());
-
-                    else if(currentExpression instanceof DiamondMinusExpression)
-                         newNode = TIQFactory.createDiamondMinusNode(((DiamondMinusExpression)currentExpression).getRange());
-                    else
-                        newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
-
-                    IQTree iqTree = iqTreeStack.pop();
-                    newTree = TIQFactory.createUnaryIQTree(newNode, iqTree);
-
-                    //TODO: fill here
-                }else if(currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
-
-                    if (currentExpression instanceof SinceExpression){
-
-                    }
-                    else{
-
-                    }
+                    if (newTree != null)
+                        iqTreeStack.push(newTree);
                 }
-                if (newTree != null)
-                    iqTreeStack.push(newTree);
+
+                return TIQFactory.createIQ(projectionAtom, TIQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
+
+            }else{
+                //TODO:throw exception
             }
-
-
-            return TIQFactory.createIQ(projectionAtom, TIQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
-
-        }else{
-            //TODO:????
         }
         return null;
     }

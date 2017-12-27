@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.StaticAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
+import org.eclipse.rdf4j.query.algebra.Copy;
 
 import java.util.*;
 
@@ -60,9 +62,9 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
 
         while(!queue.isEmpty()){
             DatalogMTLRule rule = queue.poll();
-            if ((rule.getBody() instanceof StaticJoinExpression) ||
+            if ((rule.getBody() instanceof StaticExpression) ||
                     ((rule.getBody() instanceof FilterExpression) &&
-                            (((FilterExpression) rule.getBody()).getExpression() instanceof StaticJoinExpression))) {
+                            (((FilterExpression) rule.getBody()).getExpression() instanceof StaticExpression))) {
                 ImmutableList<StaticAtomicExpression> staticAtomicExpressionsList = getAtomicExpressions(rule);
                 if (areAllMappingsExist(mapping, staticAtomicExpressionsList)) {
                     iq = saturateRule(rule, mapping, dbMetadata);
@@ -129,6 +131,16 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
                                 IQTree iqTree = iqTreeStack.pop();
                                 if (!iqtList.contains(iqTree))
                                     iqtList.add(iqTree);
+//                                boolean flag = false;
+//                                for(IQTree tree : iqtList){
+//                                    if(!isContainedInTheTree(iqTree, tree))
+//                                        flag = false;
+//                                    else {flag = true; break;}
+//                                }
+//                                if (flag == true) {
+//                                    //clone it
+//                                }else iqtList.add(iqTree);
+
                             }
                             InnerJoinNode innerJoinNode = IQFactory.createInnerJoinNode();
                             newTree = IQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
@@ -154,6 +166,18 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
             //TODO:????
         }
         return null;
+    }
+
+    private boolean isContainedInTheTree(IQTree newTree, IQTree iqTree){
+
+        boolean flag = false;
+        if (!newTree.equals(iqTree)){
+            for (IQTree subTree : iqTree.getChildren()){
+                flag = flag || isContainedInTheTree(newTree, subTree);
+            }
+        }else return true;
+
+        return false || flag;
     }
 
     private ImmutableList<StaticAtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
