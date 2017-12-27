@@ -30,6 +30,10 @@ public interface TemporalIntermediateQueryFactory extends IntermediateQueryFacto
 
     DiamondPlusNode createDiamondPlusNode(TemporalRange temporalRange);
 
+    SinceNode createSinceNode(TemporalRange temporalRange);
+
+    UntilNode createUntilNode(TemporalRange temporalRange);
+
     TemporalCoalesceNode createTemporalCoalesceNode();
 
     //TemporalRange createTemporalRange(Boolean beginInclusive, Boolean endInclusive, Duration begin, Duration end);

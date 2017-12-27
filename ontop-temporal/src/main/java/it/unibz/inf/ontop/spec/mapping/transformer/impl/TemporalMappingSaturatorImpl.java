@@ -124,21 +124,22 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
 //                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
 //            }
 
+                //creating construction node for the head of the rule
                 TargetAtom targetAtom = datalogMTLConversionTools
                         .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
                 DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
                 ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables(),
                         targetAtom.getSubstitution(), Optional.empty());
 
+                //building the tree
                 IQTree newTree = null;
                 while (!teStack.isEmpty()) {
                     DatalogMTLExpression currentExpression = teStack.pop();
-
+                    IQTree newCoalTree;
                     //TODO: Coalesce Node is missing, implement it.
                     if (currentExpression instanceof AtomicExpression) {
 
                         IntermediateQuery intermediateQuery;
-                        IQTree newATree;
                         if (currentExpression instanceof ComparisonExpression) {
                             continue;
                         } else if (currentExpression instanceof StaticAtomicExpression) {
@@ -147,9 +148,9 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                         } else {//TemporalAtomicExpression
                             intermediateQuery = temporalMapping.getDefinitions()
                                     .get(((TemporalAtomicExpression) currentExpression).getPredicate()).getQuadruple().getIntermediateQuery();
-                            newATree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree()).getChild();
+                            newCoalTree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree()).getChild();
                             TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-                            newTree = TIQFactory.createUnaryIQTree(coalesceNode, newATree);
+                            newTree = TIQFactory.createUnaryIQTree(coalesceNode, newCoalTree);
                         }
 
                     } else if (currentExpression instanceof TemporalJoinExpression) {
@@ -187,16 +188,29 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator{
                             newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
 
                         IQTree iqTree = iqTreeStack.pop();
-                        newTree = TIQFactory.createUnaryIQTree(newNode, iqTree);
 
-                        //TODO: fill here
+                        TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                        newCoalTree = TIQFactory.createUnaryIQTree(coalesceNode, iqTree);
+
+                        newTree = TIQFactory.createUnaryIQTree(newNode, newCoalTree);
+
                     } else if (currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
 
+                        BinaryNonCommutativeOperatorNode newNode;
                         if (currentExpression instanceof SinceExpression) {
-
-                        } else {
-
+                            newNode = TIQFactory.createSinceNode(((SinceExpression) currentExpression).getRange());
+                        } else { //UntilExpression
+                            newNode = TIQFactory.createUntilNode(((TemporalExpressionWithRange) currentExpression).getRange());
                         }
+                        IQTree right = iqTreeStack.pop();
+                        TemporalCoalesceNode rightCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+                        IQTree newRightCoalTree = TIQFactory.createUnaryIQTree(rightCoalesceNode, right);
+
+                        IQTree left = iqTreeStack.pop();
+                        TemporalCoalesceNode leftCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+                        IQTree newLeftCoalTree = TIQFactory.createUnaryIQTree(leftCoalesceNode, right);
+
+                        newTree = TIQFactory.createBinaryNonCommutativeIQTree(newNode, newLeftCoalTree, newRightCoalTree);
                     }
                     if (newTree != null)
                         iqTreeStack.push(newTree);

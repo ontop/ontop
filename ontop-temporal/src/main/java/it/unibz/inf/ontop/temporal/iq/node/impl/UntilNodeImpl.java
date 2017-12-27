@@ -2,18 +2,24 @@ package it.unibz.inf.ontop.temporal.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalQueryNodeVisitor;
 import it.unibz.inf.ontop.temporal.iq.node.UntilNode;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements UntilNode{
 
@@ -95,5 +101,20 @@ public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements Unti
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return false;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild) {
+        return null;
+    }
+
+    @Override
+    public IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
+        return null;
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
+        return null;
     }
 }

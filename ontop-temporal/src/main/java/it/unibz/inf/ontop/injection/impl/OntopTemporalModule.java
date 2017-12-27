@@ -88,6 +88,8 @@ public class OntopTemporalModule extends OntopAbstractModule{
                 BoxPlusNode.class,
                 DiamondMinusNode.class,
                 DiamondPlusNode.class,
+                SinceNode.class,
+                UntilNode.class,
                 TemporalCoalesceNode.class
                 //TemporalRange.class
                 ),
