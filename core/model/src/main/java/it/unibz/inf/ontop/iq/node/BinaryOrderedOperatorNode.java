@@ -31,9 +31,11 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                        IQProperties currentIQProperties);
 
+    IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild);
+
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
-    
+
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 }

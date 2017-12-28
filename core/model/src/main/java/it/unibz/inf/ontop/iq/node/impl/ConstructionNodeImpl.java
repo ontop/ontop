@@ -454,6 +454,32 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 || (getChildVariables().contains(variable) && child.isConstructed(variable));
     }
 
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        if (!childVariables.contains(variable)) {
+            return iqFactory.createUnaryIQTree(this, child);
+        }
+
+        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        /*
+         * Lift the union above the construction node
+         */
+        if ((newChildRoot instanceof UnionNode)
+                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            UnionNode unionNode = (UnionNode) newChildRoot;
+            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+
+            ImmutableList<IQTree> newChildren = grandChildren.stream()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(unionNode, newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */

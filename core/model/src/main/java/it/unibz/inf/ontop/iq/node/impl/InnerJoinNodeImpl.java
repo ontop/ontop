@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
@@ -362,6 +363,45 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
                 .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+        return IntStream.range(0, children.size()).boxed()
+                .map(i -> Maps.immutableEntry(i, children.get(i)))
+                .filter(e -> e.getValue().isConstructed(variable))
+                // index -> new child
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable)))
+                .filter(e -> {
+                            QueryNode newRootNode = e.getValue().getRootNode();
+                            return (newRootNode instanceof UnionNode)
+                                    && ((UnionNode) newRootNode).hasAChildWithLiftableDefinition(variable,
+                                    e.getValue().getChildren());
+                })
+                .findFirst()
+                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children))
+                .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
+    }
+
+    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren) {
+        UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet()));
+
+        return iqFactory.createNaryIQTree(newUnionNode,
+                newUnionChild.getChildren().stream()
+                        .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
+                        .collect(ImmutableCollectors.toList()));
+    }
+
+    private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
+        return iqFactory.createNaryIQTree(this,
+                IntStream.range(0, initialChildren.size())
+                        .boxed()
+                        .map(i -> i == childIndex
+                                ? unionGrandChild
+                                : initialChildren.get(i))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     private ImmutableSet<Variable> computeNewlyProjectedVariables(

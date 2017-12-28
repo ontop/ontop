@@ -62,6 +62,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable) {
+        return getRootNode().liftIncompatibleDefinitions(variable, leftChild, rightChild);
+    }
+
+    @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {

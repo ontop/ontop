@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -127,6 +128,29 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         return child.getNullableVariables().stream()
                 .filter(v -> !isFilteringNullValue(v))
                 .collect(ImmutableCollectors.toSet());
+    }
+
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        /*
+         * Lift the union above the filter
+         */
+        if ((newChildRoot instanceof UnionNode)
+                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            UnionNode unionNode = (UnionNode) newChildRoot;
+            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+
+            ImmutableList<IQTree> newChildren = grandChildren.stream()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(unionNode, newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

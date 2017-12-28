@@ -43,6 +43,14 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
                 : getRootNode().liftBinding(getChildren(), variableGenerator, getProperties());
     }
 
+    /**
+     * TODO: use the properties for optimization purposes?
+     */
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable) {
+        return getRootNode().liftIncompatibleDefinitions(variable, getChildren());
+    }
+
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,

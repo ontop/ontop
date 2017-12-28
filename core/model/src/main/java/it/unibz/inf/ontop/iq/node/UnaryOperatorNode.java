@@ -24,4 +24,6 @@ public interface UnaryOperatorNode extends QueryNode {
     ImmutableSet<Variable> getNullableVariables(IQTree child);
 
     boolean isConstructed(Variable variable, IQTree child);
+
+    IQTree liftIncompatibleDefinitions(Variable variable, IQTree child);
 }

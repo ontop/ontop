@@ -117,6 +117,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)
+                        && ((ConstructionNode) c.getRootNode()).getSubstitution().isDefining(variable));
+    }
+
+    @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         for(QueryNode child : query.getChildren(this)) {
             if (child.isVariableNullable(query, variable))
@@ -137,6 +144,18 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
                 .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    /**
+     * TODO: make it compatible definitions together (requires a VariableGenerator so as to lift bindings)
+     */
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> liftedChildren = children.stream()
+                .map(c -> c.liftIncompatibleDefinitions(variable))
+                .collect(ImmutableCollectors.toList());
+        
+        return iqFactory.createNaryIQTree(this, liftedChildren);
     }
 
     @Override

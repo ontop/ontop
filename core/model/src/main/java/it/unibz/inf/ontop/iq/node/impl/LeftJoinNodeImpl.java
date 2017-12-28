@@ -461,6 +461,32 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild) {
+        if (leftChild.getVariables().contains(variable)) {
+            IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable);
+            QueryNode leftChildRoot = liftedLeftChild.getRootNode();
+
+            if (leftChildRoot instanceof UnionNode
+                    && ((UnionNode) leftChildRoot).hasAChildWithLiftableDefinition(variable, leftChild.getChildren())) {
+
+                UnionNode newUnionNode = iqFactory.createUnionNode(
+                        Stream.of(leftChild, rightChild)
+                                .flatMap(c -> c.getVariables().stream())
+                                .collect(ImmutableCollectors.toSet()));
+
+                return iqFactory.createNaryIQTree(newUnionNode,
+                        liftedLeftChild.getChildren().stream()
+                        .map(unionChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(this, unionChild, rightChild))
+                        .collect(ImmutableCollectors.toList()));
+            }
+        }
+
+        // By default, nothing lifted
+        return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+
+    }
+
+    @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {

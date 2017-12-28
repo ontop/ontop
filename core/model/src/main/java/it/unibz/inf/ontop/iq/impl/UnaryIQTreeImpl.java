@@ -38,6 +38,14 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
             return getRootNode().liftBinding(getChild(), variableGenerator, getProperties());
     }
 
+    /**
+     * TODO: use the properties for optimization purposes
+     */
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable) {
+        return getRootNode().liftIncompatibleDefinitions(variable, getChild());
+    }
+
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,

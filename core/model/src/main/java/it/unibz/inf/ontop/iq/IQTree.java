@@ -22,6 +22,18 @@ public interface IQTree {
 
     IQTree liftBinding(VariableGenerator variableGenerator);
 
+    /**
+     * Tries to lift unions when they have incompatible definitions
+     * for a variable.
+     *
+     * Union branches with compatible definitions are kept together
+     *
+     * Assumes that a "regular" binding lift has already been applied
+     *   --> the remaining "non-lifted" definitions are conflicting with
+     *       others.
+     */
+    IQTree liftIncompatibleDefinitions(Variable variable);
+
     default boolean isLeaf() {
         return getChildren().isEmpty();
     }
