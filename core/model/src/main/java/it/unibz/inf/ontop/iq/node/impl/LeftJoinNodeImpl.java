@@ -609,7 +609,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             IQTree leftGrandChild = ((UnaryIQTree) liftedLeftChild).getChild();
 
             try {
-                return liftRegularChildBinding(leftConstructionNode, leftGrandChild, ImmutableList.of(rightChild),
+                return liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
+                        ImmutableList.of(liftedLeftChild,rightChild),
                         leftGrandChild.getVariables(), ljCondition, variableGenerator, this::convertIntoChildLiftingResults);
             }
             /*
@@ -688,14 +689,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private ChildLiftingState convertIntoChildLiftingResults(
-            ImmutableList<IQTree> otherChildren, IQTree leftGrandChild,
+            ImmutableList<IQTree> children, IQTree leftGrandChild, int leftChildPosition,
             Optional<ImmutableExpression> ljCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
-        if (otherChildren.size() != 1)
-            throw new MinorOntopInternalBugException("One other child was expected, not " + otherChildren);
+        if (children.size() != 2)
+            throw new MinorOntopInternalBugException("Two children were expected, not " + children);
 
-        IQTree newRightChild = otherChildren.get(0)
+        IQTree newRightChild = children.get(1)
                 .applyDescendingSubstitution(descendingSubstitution, ljCondition);
 
         return new ChildLiftingState(leftGrandChild, newRightChild, ljCondition, ascendingSubstitution);

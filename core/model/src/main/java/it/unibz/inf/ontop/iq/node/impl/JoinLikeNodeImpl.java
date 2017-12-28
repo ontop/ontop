@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
@@ -101,8 +102,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
      * For children of a commutative join or for the left child of a LJ
      */
     protected <R> R liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
+                                            int selectedChildPosition,
                                             IQTree selectedGrandChild,
-                                            ImmutableList<IQTree> otherChildren,
+                                            ImmutableList<IQTree> children,
                                             ImmutableSet<Variable> nonLiftableVariables,
                                             Optional<ImmutableExpression> initialJoiningCondition,
                                             VariableGenerator variableGenerator,
@@ -120,7 +122,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagableFragment = selectedChildSubstitution.getFunctionalTermFragment();
 
 
-        ImmutableSet<Variable> otherChildrenVariables = otherChildren.stream()
+        ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
+                .filter(i -> i != selectedChildPosition)
+                .boxed()
+                .map(children::get)
                 .flatMap(iq -> iq.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
@@ -138,8 +143,8 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         expressionResults.substitution.composeWith2(freshRenaming)
                                 .composeWith2(downPropagableFragment);
 
-        return liftConverter.convert(otherChildren, selectedGrandChild, newCondition, ascendingSubstitution,
-                descendingSubstitution);
+        return liftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
+                ascendingSubstitution, descendingSubstitution);
     }
 
     private Optional<ImmutableExpression> computeNonOptimizedCondition(Optional<ImmutableExpression> initialJoiningCondition,
@@ -278,7 +283,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     @FunctionalInterface
     protected interface LiftConverter<R> {
 
-        R convert(ImmutableList<IQTree> otherLiftedChildren, IQTree selectedGrandChild,
+        R convert(ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
                   Optional<ImmutableExpression> newCondition,
                   ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
                   ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);

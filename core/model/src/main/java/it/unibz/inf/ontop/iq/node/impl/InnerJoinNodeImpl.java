@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -430,30 +431,28 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             throw new EmptyIQException();
 
 
-        Optional<IQTree> optionalSelectedLiftedChild = liftedChildren.stream()
-                .filter(iq -> iq.getRootNode() instanceof ConstructionNode)
+        OptionalInt optionalSelectedLiftedChildPosition = IntStream.range(0, liftedChildren.size())
+                .filter(i -> liftedChildren.get(i).getRootNode() instanceof ConstructionNode)
                 .findFirst();
 
         /*
          * No substitution to lift -> converged
          */
-        if (!optionalSelectedLiftedChild.isPresent())
+        if (!optionalSelectedLiftedChildPosition.isPresent())
             return new InnerJoinNodeImpl.LiftingStepResults(substitutionFactory.getSubstitution(), liftedChildren,
                     initialJoiningCondition, true);
 
-        UnaryIQTree selectedLiftedChild = (UnaryIQTree) optionalSelectedLiftedChild.get();
-
-        ImmutableList<IQTree> otherLiftedChildren = liftedChildren.stream()
-                .filter(c -> c != selectedLiftedChild)
-                .collect(ImmutableCollectors.toList());
+        int selectedChildPosition = optionalSelectedLiftedChildPosition.getAsInt();
+        UnaryIQTree selectedLiftedChild = (UnaryIQTree) liftedChildren.get(selectedChildPosition);
 
         ConstructionNode selectedChildConstructionNode = (ConstructionNode) selectedLiftedChild.getRootNode();
         IQTree selectedGrandChild = selectedLiftedChild.getChild();
 
         try {
             return liftRegularChildBinding(selectedChildConstructionNode,
+                    selectedChildPosition,
                     selectedGrandChild,
-                    otherLiftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
+                    liftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
                     this::convertIntoLiftingStepResults);
         } catch (UnsatisfiableJoiningConditionException e) {
             throw new EmptyIQException();
@@ -464,13 +463,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
      * TODO: should we try to preserve the children order?
      */
     private LiftingStepResults convertIntoLiftingStepResults(
-            ImmutableList<IQTree> otherLiftedChildren, IQTree selectedGrandChild,
+            ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
             Optional<ImmutableExpression> newCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        ImmutableList<IQTree> newChildren = Stream.concat(
-                otherLiftedChildren.stream()
-                        .map(c -> c.applyDescendingSubstitution(descendingSubstitution, newCondition)),
-                Stream.of(selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)))
+        ImmutableList<IQTree> newChildren = IntStream.range(0, liftedChildren.size())
+                .boxed()
+                .map(i -> i == selectedChildPosition
+                        ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
+                        : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
                 .collect(ImmutableCollectors.toList());
 
         return new LiftingStepResults(ascendingSubstitution, newChildren, newCondition, false);
