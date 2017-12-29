@@ -557,7 +557,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     /**
      * TODO: explain
      *
-     * TODO: refactor !!!!!!!!!!
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
                                                                            ImmutableSet<Variable> leftVariables,
@@ -574,7 +573,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
                     return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
-                            && arguments.stream().anyMatch(t -> t instanceof Variable);
+                            && arguments.stream().anyMatch(rightVariables::contains);
                 })
                 .collect(ImmutableCollectors.toSet());
 
@@ -594,7 +593,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 expressions.stream()
                         .filter(e -> (!downSubstitutionExpressions.contains(e))
                                 || e.getArguments().stream().anyMatch(rightSpecificVariables::contains)))
-                // TODO: do not apply this substitution!!!
                 .map(downSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitution(newExpression, downSubstitution);
