@@ -4,11 +4,11 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 
 public class SITestingTools {
 
-    public static final OWLAPITranslatorUtility OWLAPI_TRANSLATOR_UTILITY;
+    public static final OWLAPITranslatorOWL2QL OWLAPI_TRANSLATOR;
     public static final TermFactory TERM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
 
@@ -16,7 +16,7 @@ public class SITestingTools {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
         Injector injector = defaultConfiguration.getInjector();
 
-        OWLAPI_TRANSLATOR_UTILITY = injector.getInstance(OWLAPITranslatorUtility.class);
+        OWLAPI_TRANSLATOR = injector.getInstance(OWLAPITranslatorOWL2QL.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
     }

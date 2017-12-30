@@ -12,24 +12,19 @@ import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class NavigationAfterRemovingEmptyNodeTest {
-
-    private static final AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
-    private static final AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
-    private static final AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("table3", 2);
-    private static final AtomPredicate TABLE4_PREDICATE = ATOM_FACTORY.getAtomPredicate("table4", 2);
-    private static final AtomPredicate TABLE5_PREDICATE = ATOM_FACTORY.getAtomPredicate("table5", 2);
-    private static final AtomPredicate TABLE6_PREDICATE = ATOM_FACTORY.getAtomPredicate("table6", 2);
 
     private static final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
     private static final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
@@ -57,17 +52,17 @@ public class NavigationAfterRemovingEmptyNodeTest {
     private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
-    private static final ExtensionalDataNode DATA_NODE_1 = buildExtensionalDataNode(TABLE1_PREDICATE, A, B);
-    private static final ExtensionalDataNode DATA_NODE_2 = buildExtensionalDataNode(TABLE2_PREDICATE, A, E);
-    private static final ExtensionalDataNode DATA_NODE_3 = buildExtensionalDataNode(TABLE3_PREDICATE, C, D);
-    private static final ExtensionalDataNode DATA_NODE_4 = buildExtensionalDataNode(TABLE4_PREDICATE, A, B);
-    private static final ExtensionalDataNode DATA_NODE_5 = buildExtensionalDataNode(TABLE2_PREDICATE, C, E);
-    private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_PREDICATE, E, F);
-    private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_PREDICATE, G, H);
+    private static final ExtensionalDataNode DATA_NODE_1 = buildExtensionalDataNode(TABLE1_AR2, A, B);
+    private static final ExtensionalDataNode DATA_NODE_2 = buildExtensionalDataNode(TABLE2_AR2, A, E);
+    private static final ExtensionalDataNode DATA_NODE_3 = buildExtensionalDataNode(TABLE3_AR2, C, D);
+    private static final ExtensionalDataNode DATA_NODE_4 = buildExtensionalDataNode(TABLE4_AR2, A, B);
+    private static final ExtensionalDataNode DATA_NODE_5 = buildExtensionalDataNode(TABLE2_AR2, C, E);
+    private static final ExtensionalDataNode DATA_NODE_6 = buildExtensionalDataNode(TABLE3_AR2, E, F);
+    private static final ExtensionalDataNode DATA_NODE_7 = buildExtensionalDataNode(TABLE4_AR2, G, H);
 
     @Test
     public void testNextSiblingInitiallyFar() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -85,9 +80,9 @@ public class NavigationAfterRemovingEmptyNodeTest {
         initialQueryBuilder.addChild(joinNode, filterNode);
         EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A));
         initialQueryBuilder.addChild(filterNode, emptyNode);
-        initialQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE2_PREDICATE, A, C));
+        initialQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE2_AR2, A, C));
 
-        ExtensionalDataNode rightMostNode = buildExtensionalDataNode(TABLE3_PREDICATE, A, D);
+        ExtensionalDataNode rightMostNode = buildExtensionalDataNode(TABLE3_AR2, A, D);
         initialQueryBuilder.addChild(unionNode, rightMostNode);
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();
@@ -107,7 +102,7 @@ public class NavigationAfterRemovingEmptyNodeTest {
 
     @Test
     public void testInsatisfiedJoinCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -148,7 +143,7 @@ public class NavigationAfterRemovingEmptyNodeTest {
         return TERM_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
     }
 
-    private static ExtensionalDataNode buildExtensionalDataNode(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
+    private static ExtensionalDataNode buildExtensionalDataNode(RelationPredicate predicate, VariableOrGroundTerm... arguments) {
         return IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(predicate, arguments));
     }
 

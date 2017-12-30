@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -103,7 +104,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
 
-    private DataAtom renameDataAtom(DataAtom atom) {
+    private DataAtom renameDataAtom(DataAtom<? extends AtomPredicate> atom) {
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         for (VariableOrGroundTerm term : atom.getArguments()) {
             argListBuilder.add(renamingSubstitution.applyToTerm(term));

@@ -23,11 +23,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fj.P;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.*;
 
@@ -45,12 +41,12 @@ public class ParserViewDefinition extends RelationDefinition {
 	private final String statement;
 	
 	/**
-	 * 
-	 * @param name
+	 *  @param name
 	 * @param statement
+	 * @param defaultType
 	 */
 	
-	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement) {
+	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement, TermType defaultType) {
 		super(name);
 		this.statement = statement;
 
@@ -59,7 +55,9 @@ public class ParserViewDefinition extends RelationDefinition {
 		int c = 1;
 		for (QuotedID id : attrs) {
 			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, 0, null, true);
+					new QualifiedAttributeID(name, id), c, 0, null, true,
+					// TODO: make sure a type is assigned
+					defaultType);
 			c++;
 			attributeMapBuilder.put(id, att);
 			attributeBuilder.add(att);
@@ -86,8 +84,28 @@ public class ParserViewDefinition extends RelationDefinition {
 
 	@Override
 	public List<Attribute> getAttributes() { return attributes; }
-	
-	
+
+	@Override
+	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
+		return ImmutableList.of();
+	}
+
+	@Override
+	public ImmutableList<FunctionalDependency> getOtherFunctionalDependencies() {
+		return ImmutableList.of();
+	}
+
+	@Override
+	public UniqueConstraint getPrimaryKey() {
+		return null;
+	}
+
+	@Override
+	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
+		return ImmutableList.of();
+	}
+
+
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();

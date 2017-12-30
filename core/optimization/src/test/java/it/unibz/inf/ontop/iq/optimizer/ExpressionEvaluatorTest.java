@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.*;
@@ -28,9 +29,6 @@ import static org.junit.Assert.assertNotEquals;
  * Test {@link ExpressionEvaluator}
  */
 public class ExpressionEvaluatorTest {
-
-    private final AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
-    private final AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
 
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
@@ -47,11 +45,11 @@ public class ExpressionEvaluatorTest {
     private URITemplatePredicate URI_PREDICATE2 =  TERM_FACTORY.getURITemplatePredicate(3);
     private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
-    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D));
-    private ExtensionalDataNode EXP_DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B));
-    private ExtensionalDataNode EXP_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
+    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
+    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D));
+    private ExtensionalDataNode EXP_DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, C, B));
+    private ExtensionalDataNode EXP_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
 
     private final ImmutableExpression EXPR_LANG = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.SPARQL_LANG, W );
@@ -69,7 +67,7 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -84,10 +82,10 @@ public class ExpressionEvaluatorTest {
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B)));
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, C, B)));
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D)));
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D)));
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -98,7 +96,7 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery2() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);;
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -130,7 +128,7 @@ public class ExpressionEvaluatorTest {
     public void testLangLeftNodeFunction() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -181,7 +179,7 @@ public class ExpressionEvaluatorTest {
     public void testLangRightNode() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -229,7 +227,7 @@ public class ExpressionEvaluatorTest {
     public void testNonEqualOperatorDistribution() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom
                 (ANS1_ARITY_2_PREDICATE, X ,Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -268,7 +266,7 @@ public class ExpressionEvaluatorTest {
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
         expectedQueryBuilder.addChild(expectedRootNode, joinNode2);
         expectedQueryBuilder.addChild(joinNode2, DATA_NODE_1);

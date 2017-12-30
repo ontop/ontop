@@ -12,7 +12,8 @@ import java.util.*;
 
 @Singleton
 public class DatalogFactoryImpl implements DatalogFactory {
-    
+
+    private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
     private final AlgebraOperatorPredicate sparqlJoinPredicate;
     private final AlgebraOperatorPredicate sparqlLeftjoinPredicate;
     private final AlgebraOperatorPredicate sparqlGroupPredicate;
@@ -113,6 +114,11 @@ public class DatalogFactoryImpl implements DatalogFactory {
     @Override
     public AlgebraOperatorPredicate getSparqlHavingPredicate() {
         return sparqlHavingPredicate;
+    }
+
+    @Override
+    public String getSubqueryPredicatePrefix() {
+        return SUBQUERY_PRED_PREFIX;
     }
 
 

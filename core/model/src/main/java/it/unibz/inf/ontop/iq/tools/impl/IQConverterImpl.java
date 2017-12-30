@@ -8,13 +8,12 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
-import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
 
@@ -75,7 +74,7 @@ public class IQConverterImpl implements IQConverter {
         QueryNode rootNode = topTree.getRootNode();
         queryBuilder.init(query.getProjectionAtom(), rootNode);
 
-        insertChildren(topTree, queryBuilder);
+        insertChildren(rootNode, topTree.getChildren(), queryBuilder);
 
         return queryBuilder.build();
     }
@@ -83,20 +82,25 @@ public class IQConverterImpl implements IQConverter {
     /**
      * Recursive
      */
-    private void insertChildren(IQTree parentTree, IntermediateQueryBuilder queryBuilder) {
-        QueryNode parentNode = parentTree.getRootNode();
+    private void insertChildren(QueryNode parentNode, ImmutableList<IQTree> childrenTrees,
+                                IntermediateQueryBuilder queryBuilder) {
 
-        if (parentTree instanceof BinaryNonCommutativeIQTree) {
-            BinaryNonCommutativeIQTree binaryParentTree = (BinaryNonCommutativeIQTree) parentTree;
-            queryBuilder.addChild(parentNode, binaryParentTree.getLeftChild().getRootNode(), LEFT);
-            queryBuilder.addChild(parentNode, binaryParentTree.getRightChild().getRootNode(), RIGHT);
+        ImmutableList<QueryNode> newChildren = childrenTrees.stream()
+                .map(IQTree::getRootNode)
+                .map(n -> queryBuilder.contains(n) ? n.clone() : n)
+                .collect(ImmutableCollectors.toList());
+
+        if (parentNode instanceof BinaryOrderedOperatorNode) {
+
+            queryBuilder.addChild(parentNode, newChildren.get(0), LEFT);
+            queryBuilder.addChild(parentNode, newChildren.get(1), RIGHT);
         }
         else {
-            parentTree.getChildren()
-                    .forEach(c -> queryBuilder.addChild(parentNode, c.getRootNode()));
+            newChildren
+                    .forEach(c -> queryBuilder.addChild(parentNode, c));
         }
 
-        parentTree.getChildren()
-                .forEach(c -> insertChildren(c, queryBuilder));
+        IntStream.range(0, childrenTrees.size())
+                .forEach(i -> insertChildren(newChildren.get(i), childrenTrees.get(i).getChildren(), queryBuilder));
     }
 }

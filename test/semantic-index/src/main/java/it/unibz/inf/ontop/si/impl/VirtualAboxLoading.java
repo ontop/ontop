@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.impl.SILoadingTools.RepositoryInit;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class VirtualAboxLoading {
 
             RepositoryInit init = createRepository(inputOntology, obdaConfiguration.getAtomFactory(),
                     obdaConfiguration.getTermFactory(),
-                    obdaConfiguration.getInjector().getInstance(OWLAPITranslatorUtility.class),
+                    obdaConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class),
                     obdaConfiguration.getTypeFactory());
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();

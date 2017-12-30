@@ -6,32 +6,22 @@
   <results>
     <result>
       <binding name="z">
-        <uri>http://example/c</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="z">
-        <uri>http://example/z</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="z">
-        <uri>http://example/X</uri>
-      </binding>
-    </result>
-    <result>
-      <binding name="z">
         <uri>http://example/b</uri>
       </binding>
     </result>
     <result>
       <binding name="z">
-        <uri>http://example/z</uri>
+        <uri>http://example/c</uri>
       </binding>
     </result>
     <result>
       <binding name="z">
         <uri>http://example/X</uri>
+      </binding>
+    </result>
+    <result>
+      <binding name="z">
+        <uri>http://example/z</uri>
       </binding>
     </result>
   </results>

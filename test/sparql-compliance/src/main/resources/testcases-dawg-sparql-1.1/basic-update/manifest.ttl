@@ -19,6 +19,10 @@
       :insert-where-03
       :insert-where-04
       :insert-using-01
+      :insert-05a
+      :insert-data-same-bnode
+      :insert-where-same-bnode
+      :insert-where-same-bnode2
     ) .
 
 :insert-data-spo1 rdf:type mf:UpdateEvaluationTest ;
@@ -160,3 +164,83 @@
                                rdfs:label "http://example.org/g2" ] ;
             ] ;
     .
+
+# 2012-07-10: :insert-05 was removed from the manifest list (in favor of :insert-05a) as mf:result isn't able to properly capture the situation of a bnode being shared across graphs in the expected resulting graph store state.
+:insert-05 a mf:UpdateEvaluationTest ;
+   mf:name "INSERT same bnode twice" ; 
+   rdfs:comment "As per http://lists.w3.org/Archives/Public/public-rdf-dawg/2012AprJun/0165.html. Tests whether inserting the same triples from the same source graph into the same target graph twice is idempotent, even in the presence of blank nodes. Note that this doesn't imply that blank nodes are actually shared across graphs, but only that the two graphs remain equivalent, cf. http://lists.w3.org/Archives/Public/public-rdf-dawg/2012JulSep/0009.html" ; 
+   dawgt:approval dawgt:NotClassified ;
+   mf:action [
+                ut:request <insert-05.ru> ;
+                ut:graphData [ ut:graph <insert-05-g1-pre.ttl> ;
+                               rdfs:label "http://example.org/g1" ] ;
+             ] ;
+   mf:result [
+                ut:graphData [ ut:graph <insert-05-g1-pre.ttl> ;
+                               rdfs:label "http://example.org/g1" ] ;
+                ut:graphData [ ut:graph <insert-05-g1-pre.ttl> ;
+                               rdfs:label "http://example.org/g2" ] ;
+             ] ;
+ .   
+
+:insert-05a a mf:UpdateEvaluationTest ;
+   mf:name "INSERT same bnode twice" ; 
+   rdfs:comment "As per http://lists.w3.org/Archives/Public/public-rdf-dawg/2012AprJun/0165.html" ; 
+    dawgt:approval dawgt:Approved ;
+    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-08-07#resolution_3> ;
+   mf:action [
+                ut:request <insert-05a.ru> ;
+                ut:graphData [ ut:graph <insert-05a-g1-pre.ttl> ;
+                               rdfs:label "http://example.org/g1" ] ;
+             ] ;
+   mf:result [
+                ut:graphData [ ut:graph <insert-05a-g3-post.ttl> ;
+                               rdfs:label "http://example.org/g3" ] ;
+             ] ;
+ .   
+
+:insert-data-same-bnode  a mf:UpdateEvaluationTest ;
+   mf:name "INSERTing the same bnode with INSERT DATA into two different Graphs is the same bnode" ; 
+   rdfs:comment "http://lists.w3.org/Archives/Public/public-rdf-dawg/2012JulSep/0196.html, this can be viewed as a variation of :insert-05a" ; 
+    dawgt:approval dawgt:NotClassified ;
+   mf:action [
+                ut:request <insert-data-same-bnode.ru> ;
+             ] ;
+   mf:result [
+                ut:graphData [ ut:graph <insert-05a-g3-post.ttl> ;
+                               rdfs:label "http://example.org/g3" ] ;
+             ] ;
+ .   
+
+:insert-where-same-bnode  a mf:UpdateEvaluationTest ;
+   mf:name "INSERTing the same bnode with two INSERT WHERE statement within one request is NOT the same bnode" ;
+   rdfs:comment "http://lists.w3.org/Archives/Public/public-rdf-dawg/2012OctDec/0001.html, this can be viewed as a further variation of :insert-05a" ;
+    dawgt:approval dawgt:NotClassified ;
+   mf:action [
+                ut:request <insert-where-same-bnode.ru> ;
+                ut:data <insert-where-same-bnode-pre.ttl> ;
+
+             ] ;
+   mf:result [
+                ut:data <insert-where-same-bnode-pre.ttl> ;
+                ut:graphData [ ut:graph <insert-where-same-bnode-g3-post.ttl> ;
+                               rdfs:label "http://example.org/g3" ] ;
+             ] ;
+ .
+
+:insert-where-same-bnode2  a mf:UpdateEvaluationTest ;
+   mf:name "INSERTing the same bnode with two INSERT WHERE statement within one request is NOT the same bnode even if both WHERE clauses have the empty solution mapping as the only solution." ;
+   rdfs:comment "http://lists.w3.org/Archives/Public/public-rdf-dawg/2012OctDec/0001.html, this can be viewed as a further variation of :insert-05a" ;
+    dawgt:approval dawgt:NotClassified ;
+   mf:action [
+                ut:request <insert-where-same-bnode2.ru> ;
+                ut:data <insert-where-same-bnode-pre.ttl> ;
+
+             ] ;
+   mf:result [
+                ut:data <insert-where-same-bnode-pre.ttl> ;
+                ut:graphData [ ut:graph <insert-where-same-bnode-g3-post.ttl> ;
+                               rdfs:label "http://example.org/g3" ] ;
+             ] ;
+ .
+

@@ -67,5 +67,4 @@ public class Edge implements Serializable  {
     	bf.append(right.toString());
     	return bf.toString();
     }
-
 }

@@ -24,11 +24,8 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 
@@ -60,11 +57,10 @@ public class TreeWitnessSet {
 	private Map<TreeWitness.TermCover, TreeWitness> twsCache;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
-	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	
-	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> allTWgenerators) {
+
+	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner, voc);
+		this.cache = new QueryConnectedComponentCache(reasoner);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -76,8 +72,8 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TBoxReasoner reasoner, ImmutableOntologyVocabulary voc, Collection<TreeWitnessGenerator> generators) {		
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, voc, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> generators) {
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -367,24 +363,22 @@ public class TreeWitnessSet {
 		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
-		private final TBoxReasoner reasoner;
-		private final ImmutableOntologyVocabulary voc;
-		
-		private QueryConnectedComponentCache(TBoxReasoner reasoner, ImmutableOntologyVocabulary voc) {
+		private final ClassifiedTBox reasoner;
+
+		private QueryConnectedComponentCache(ClassifiedTBox reasoner) {
 			this.reasoner = reasoner;
-			this.voc = voc;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
-			return new Intersection<ClassExpression>(reasoner.getClassDAG());
+			return new Intersection<>(reasoner.classesDAG());
 		}
 
 		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+			return new Intersection<>(reasoner.objectPropertiesDAG());
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.getClassDAG());
+			Intersection<ClassExpression> subc = new Intersection<>(reasoner.classesDAG());
 			for (Function a : atoms) {
 				 if (a.getArity() != 1) {
 					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -392,8 +386,8 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 if (voc.containsClass(pred.getName())) 
-					 subc.intersectWith(voc.getClass(pred.getName()));
+				 if (reasoner.classes().contains(pred.getName()))
+					 subc.intersectWith(reasoner.classes().get(pred.getName()));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -418,7 +412,7 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+				properties = new Intersection<>(reasoner.objectPropertiesDAG());
 				for (Function a : edge.getBAtoms()) {
 					if (a.isOperation()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
@@ -427,8 +421,8 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						if (voc.containsObjectProperty(a.getFunctionSymbol().getName())) {
-							ObjectPropertyExpression prop = voc.getObjectProperty(a.getFunctionSymbol().getName());
+						if (reasoner.objectProperties().contains(a.getFunctionSymbol().getName())) {
+							ObjectPropertyExpression prop = reasoner.objectProperties().get(a.getFunctionSymbol().getName());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(prop);

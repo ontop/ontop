@@ -223,9 +223,8 @@ public class MappingDataTypeCompletion {
             type = Optional.empty();
         }
         else{
-            type = metadata.getTermType(attribute)
-                    // TODO: refactor this (unsafe)!!!
-                    .map(t -> (RDFDatatype) t);
+            // TODO: refactor this (unsafe)!!!
+            type = Optional.of((RDFDatatype) attribute.getTermType());
         }
 
         if(defaultDatatypeInferred)

@@ -95,7 +95,7 @@ public interface TermFactory {
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<? extends ImmutableTerm> terms);
 
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
 

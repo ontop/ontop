@@ -5,14 +5,12 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.MappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -24,8 +22,6 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
         T3 extends MappingParser, T4 extends OntopMappingSettings> implements MappingExtractor{
 
 
-    private static final String ONTOLOGY_SATURATED_TBOX_ERROR_MSG = "the Ontology and TBoxReasoner must be both present, or none";
-
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     protected final T3 mappingParser;
 
@@ -35,15 +31,15 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
         T1 ppMapping = extractPPMapping(specInput);
 
-        return extract(ppMapping, specInput, dbMetadata, ontology, saturatedTBox, executorRegistry);
+        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry);
     }
 
     protected T1 extractPPMapping(OBDASpecInput specInput)
@@ -68,15 +64,11 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull Optional<TBoxReasoner> saturatedTBox,
+                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
-        if (ontology.isPresent() != saturatedTBox.isPresent()) {
-            throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
-        }
-        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
+        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
                 executorRegistry);
     }
 
@@ -84,18 +76,15 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
      * Validation:
      * - Mismatch between the ontology and the mapping
      */
-    protected void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
+    protected void validateMapping(Optional<ClassifiedTBox> optionalSaturatedTBox,
                                  MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
-            TBoxReasoner saturatedTBox = optionalSaturatedTBox
-                    .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
-
-            ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
+        if (optionalSaturatedTBox.isPresent()) {
+            ClassifiedTBox saturatedTBox = optionalSaturatedTBox.get();
+            ontologyComplianceValidator.validate(filledProvMapping, saturatedTBox);
         }
     }
 
-    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, Optional<TBoxReasoner> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
+    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<ClassifiedTBox> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
 
     protected abstract Optional<T2> castDBMetadata(Optional<DBMetadata> dbMetadata);
 

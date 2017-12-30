@@ -151,6 +151,18 @@ public class ImmutableUnificationTools {
         return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution));
     }
 
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
+                                                                                   ImmutableList<T> args2) {
+        if (args1.size() != args2.size())
+            throw new IllegalArgumentException("The two argument lists must have the same size");
+
+        Predicate functionSymbol = atomFactory.getAtomPredicate(PREDICATE_STR, args1.size());
+
+        return computeMGU(termFactory.getImmutableFunctionalTerm(functionSymbol, args1),
+                termFactory.getImmutableFunctionalTerm(functionSymbol, args2))
+                .map(u -> (ImmutableSubstitution<T>) u);
+    }
+
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
         Substitution mutableSubstitution = unifierUtilities.getMGU(
                 immutabilityTools.convertToMutableFunction(atom1),
@@ -171,6 +183,15 @@ public class ImmutableUnificationTools {
                 substitutionMapBuilder.build());
         return Optional.of(immutableSubstitution);
 
+    }
+
+    /**
+     * TODO: make it replace computeMGUS()
+     */
+    public Optional<ImmutableSubstitution<NonFunctionalTerm>> computeMGUS2(ImmutableSubstitution<NonFunctionalTerm> s1,
+                                                                           ImmutableSubstitution<NonFunctionalTerm> s2) {
+        return computeMGUS(s1,s2)
+                .map(u -> (ImmutableSubstitution<NonFunctionalTerm>)(ImmutableSubstitution<?>)u);
     }
 
     /**

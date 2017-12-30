@@ -21,11 +21,6 @@ public interface SubstitutionFactory {
                                                                        Variable k3, T v3, Variable k4, T v4);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 
-    <T extends VariableOrGroundTerm> VariableOrGroundTermSubstitution<T> getVariableOrGroundTermSubstitution();
-
-    <T extends VariableOrGroundTerm> VariableOrGroundTermSubstitution<T> getVariableOrGroundTermSubstitution(
-            ImmutableMap<Variable, T> substitutionMap);
-
     Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
     InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap);
 

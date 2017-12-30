@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -154,7 +155,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
         return optionalFoldExpression.get();
     }
 
-    private PairExtraction extractPairs(DataNode dataNode, IntermediateQuery query)
+    private PairExtraction extractPairs(DataNode<? extends AtomPredicate> dataNode, IntermediateQuery query)
             throws InvalidQueryOptimizationProposalException {
         ImmutableList.Builder<VariableGroundTermPair> pairBuilder = ImmutableList.builder();
         ImmutableList.Builder<VariableOrGroundTerm> newArgumentBuilder = ImmutableList.builder();

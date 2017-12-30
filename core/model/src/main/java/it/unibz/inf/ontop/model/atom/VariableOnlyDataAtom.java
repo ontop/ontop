@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 /**
  * Data atom that only has variables as arguments
  */
-public interface VariableOnlyDataAtom extends DataAtom {
+public interface VariableOnlyDataAtom extends DataAtom<AtomPredicate> {
 
     @Override
     ImmutableList<Variable> getArguments();

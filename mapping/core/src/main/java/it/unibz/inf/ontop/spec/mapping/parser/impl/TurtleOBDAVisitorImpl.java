@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
@@ -37,11 +35,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     protected String error = "";
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
 
-    public TurtleOBDAVisitorImpl(TermFactory termFactory, AtomFactory atomFactory, TypeFactory typeFactory) {
-        this.typeFactory = typeFactory;
+    public TurtleOBDAVisitorImpl(TermFactory termFactory, AtomFactory atomFactory) {
         this.rdfFactory = new SimpleRDF();
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
@@ -123,6 +119,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     private interface FormatString {
         int index();
+
         String toString();
     }
 
@@ -287,6 +284,12 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         return false;
     }
 
+    private String concatPrefix(String prefixedName) {
+        String[] tokens = prefixedName.split(":", 2);
+        String uri = directives.get(tokens[0]);  // the first token is the prefix
+        return uri + tokens[1];  // the second token is the local name
+    }
+
     @Override
     public List<Function> visitParse(ParseContext ctx) {
         ctx.directiveStatement().forEach(this::visit);
@@ -314,9 +317,16 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Void visitPrefixID(PrefixIDContext ctx) {
-        String uriref = visitIriref(ctx.iriref());
+        String iriref = removeBrackets(ctx.IRIREF().getText());
         String ns = ctx.PNAME_NS().getText();
-        directives.put(ns.substring(0, ns.length() - 1), uriref); // remove the end colon
+        directives.put(ns.substring(0, ns.length() - 1), iriref); // remove the end colon
+        return null;
+    }
+
+    @Override
+    public Object visitBase(BaseContext ctx) {
+        String iriRef = removeBrackets(ctx.IRIREF().getText());
+        directives.put("", iriRef);
         return null;
     }
 
@@ -376,39 +386,38 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Term visitResource(ResourceContext ctx) {
-        if (ctx.iriref() != null) {
-            return construct(this.visitIriref(ctx.iriref()));
+        if (ctx.iriExt() != null) {
+            return visitIriExt(ctx.iriExt());
         }
-        return construct(this.visitPrefixedName(ctx.prefixedName()));
+        return construct(this.visitIri(ctx.iri()).getIRIString());
     }
 
-    public String visitIriref(IrirefContext ctx) {
-        return removeBrackets(ctx.IRIREF().getText());
-    }
-
-    public String visitPrefixedName(PrefixedNameContext ctx) {
-        String[] tokens = ctx.PREFIXEDNAME().getText().split(":", 2);
-        String uri = directives.get(tokens[0]);  // the first token is the prefix
-        return uri + tokens[1];  // the second token is the local name
+    public Term visitIriExt(IriExtContext ctx) {
+        if (ctx.IRIREF_EXT() != null) {
+            return construct(removeBrackets(ctx.IRIREF_EXT().getText()));
+        }
+        return construct(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
     }
 
     @Override
-    public Function visitTypedLiteral_1(TypedLiteral_1Context ctx) {
-        return termFactory.getTypedTerm(visitVariable(ctx.variable()), ctx.LANGTAG().getText().substring(1));
+    public Function visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+        return termFactory.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public Function visitTypedLiteral_2(TypedLiteral_2Context ctx) {
+    public Function visitVariableLiteral_2(VariableLiteral_2Context ctx) {
         Variable var = visitVariable(ctx.variable());
-        Term resource = visitResource(ctx.resource());
-        if (resource instanceof Function) {
-            String functionName = ((ValueConstant) ((Function) resource).getTerm(0)).getValue();
+        IRI iri = visitIri(ctx.iri());
+        return termFactory.getTypedTerm(var, iri);
+    }
 
-            return typeFactory.getOptionalDatatype(functionName)
-                    .map(t -> termFactory.getTypedTerm(var, t))
-                    .orElseThrow(() -> new RuntimeException("Unsupported datatype: " + functionName));
-        }
-        throw new IllegalArgumentException("$resource.value should be an URI");
+    @Override
+    public IRI visitIri(IriContext ctx) {
+        TerminalNode token = ctx.PREFIXED_NAME();
+        return rdfFactory.createIRI(
+                token != null
+                        ? concatPrefix(token.getText())
+                        : removeBrackets(ctx.IRIREF().getText()));
     }
 
     @Override
@@ -417,23 +426,8 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     @Override
-    public Function visitFunction(FunctionContext ctx) {
-        String functionName = visitResource(ctx.resource()).toString();
-        ImmutableList<Term> terms = visitTerms(ctx.terms());
-        Predicate functionSymbol = termFactory.getPredicate(functionName, terms.size());
-        return termFactory.getFunction(functionSymbol, terms);
-    }
-
-    @Override
-    public ImmutableList<Term> visitTerms(TermsContext ctx) {
-        return ctx.term().stream()
-                .map(this::visitTerm)
-                .collect(ImmutableCollectors.toList());
-    }
-
-    @Override
-    public Term visitTerm(TermContext ctx) {
-        return (Term) visitChildren(ctx);
+    public String visitLanguageTag(LanguageTagContext ctx) {
+        return ctx.LANGTAG().getText().substring(1).toLowerCase();
     }
 
     @Override
@@ -441,13 +435,13 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
         StringLiteralContext slc = ctx.stringLiteral();
         if (slc != null) {
             Term literal = visitStringLiteral(slc);
-            TerminalNode token = ctx.LANGTAG();
+            LanguageTagContext lc = ctx.languageTag();
             //if variable we cannot assign a datatype yet
             if (literal instanceof Variable) {
                 return termFactory.getTypedTerm(literal, XSD.STRING);
             }
-            if (token != null) {
-                return termFactory.getTypedTerm(literal, token.getText().substring(1));
+            if (lc != null) {
+                return termFactory.getTypedTerm(literal, visitLanguageTag(lc));
             }
             return termFactory.getTypedTerm(literal, XSD.STRING);
         }
@@ -464,19 +458,10 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     }
 
     @Override
-    public Term visitDataTypeString(DataTypeStringContext ctx) {
+    public Term visitTypedLiteral(TypedLiteralContext ctx) {
         Term stringValue = visitStringLiteral(ctx.stringLiteral());
-        Term resource = visitResource(ctx.resource());
-        if (resource instanceof Function) {
-            String functionName = ((ValueConstant) ((Function) resource).getTerm(0)).getValue();
-
-            Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(functionName);
-            if (!type.isPresent()) {
-                throw new RuntimeException("Unsupported datatype: " + functionName);
-            }
-            return termFactory.getTypedTerm(stringValue, type.get());
-        }
-        return termFactory.getTypedTerm(stringValue, XSD.STRING);
+        IRI iriRef = visitIri(ctx.iri());
+        return termFactory.getTypedTerm(stringValue, iriRef);
     }
 
     @Override

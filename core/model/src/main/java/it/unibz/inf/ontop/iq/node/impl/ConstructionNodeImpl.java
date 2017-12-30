@@ -6,9 +6,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -21,8 +22,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools.NewSubstitutionPair;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
@@ -37,9 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
@@ -52,6 +56,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
+    private final ImmutableSet<Variable> childVariables;
 
     private final ImmutableUnificationTools unificationTools;
     private final ConstructionNodeTools constructionNodeTools;
@@ -62,6 +67,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final TermFactory termFactory;
     private final ValueConstant nullValue;
+    private final ImmutabilityTools immutabilityTools;
+    private final ExpressionEvaluator expressionEvaluator;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -70,7 +77,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -82,15 +89,27 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.termFactory = termFactory;
         this.nullValue = termFactory.getNullConstant();
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.expressionEvaluator = expressionEvaluator;
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
     }
 
     private void validate() {
+        ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
+
         // The substitution domain must be a subset of the projectedVariables
-        if (!projectedVariables.containsAll(substitution.getDomain())) {
+        if (!projectedVariables.containsAll(substitutionDomain)) {
             throw new InvalidQueryNodeException("ConstructionNode: all the domain variables " +
                     "of the substitution must be projected.\n" + toString());
+        }
+
+        // The variables contained in the domain and in the range of the substitution must be disjoint
+        if (substitutionDomain.stream()
+                .anyMatch(childVariables::contains)) {
+            throw new InvalidQueryNodeException("ConstructionNode: variables defined by the substitution cannot " +
+                    "be used for defining other variables.\n" + toString());
         }
 
         // Substitution to non-projected variables is incorrect
@@ -114,7 +133,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  ImmutableUnificationTools unificationTools,
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
@@ -122,10 +142,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitution = substitutionFactory.getSubstitution();
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.expressionEvaluator = expressionEvaluator;
         this.optionalModifiers = Optional.empty();
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
         this.nullValue = termFactory.getNullConstant();
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
     }
@@ -136,7 +159,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory) {
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
+                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -146,10 +171,26 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.expressionEvaluator = expressionEvaluator;
         this.optionalModifiers = Optional.empty();
         this.nullValue = termFactory.getNullConstant();
+        this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         validate();
+    }
+
+    private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
+                                                          ImmutableSubstitution<ImmutableTerm> substitution) {
+        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
+
+        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
+                .flatMap(ImmutableTerm::getVariableStream);
+
+        //return only the variables that are also used in the bindings for the child of the construction node
+        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
+                .filter(v -> !variableDefinedByBindings.contains(v))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -174,7 +215,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     public ConstructionNode clone() {
         return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator,
                 unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory,
-                iqFactory);
+                iqFactory, immutabilityTools, expressionEvaluator);
     }
 
     @Override
@@ -185,15 +226,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
     @Override
     public ImmutableSet<Variable> getChildVariables() {
-        ImmutableSet<Variable> variableDefinedByBindings = substitution.getDomain();
-
-        Stream<Variable> variablesRequiredByBindings = substitution.getImmutableMap().values().stream()
-                .flatMap(ImmutableTerm::getVariableStream);
-
-        //return only the variables that are also used in the bindings for the child of the construction node
-        return Stream.concat(projectedVariables.stream(), variablesRequiredByBindings)
-                .filter(v -> !variableDefinedByBindings.contains(v))
-                .collect(ImmutableCollectors.toSet());
+        return childVariables;
     }
 
     @Override
@@ -222,31 +255,6 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return collectedVariableBuilder.build();
     }
 
-    @Override
-    public ImmutableSubstitution<ImmutableTerm> getDirectBindingSubstitution() {
-        if (substitution.isEmpty())
-            return substitution;
-
-        // Non-final
-        ImmutableSubstitution<ImmutableTerm> previousSubstitution;
-        // Non-final
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution;
-
-        int i = 0;
-        do {
-            previousSubstitution = newSubstitution;
-            newSubstitution = newSubstitution.composeWith(substitution);
-            i++;
-        } while ((i < CONVERGENCE_BOUND) && (!previousSubstitution.equals(newSubstitution)));
-
-        if (i == CONVERGENCE_BOUND) {
-            LOGGER.warn(substitution + " has not converged after " + CONVERGENCE_BOUND + " recursions over itself");
-        }
-
-        return newSubstitution;
-
-    }
-
     /**
      * Creates a new ConstructionNode with a new substitution.
      *
@@ -262,7 +270,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                 newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools,
-                substitutionTools, substitutionFactory, termFactory, iqFactory);
+                substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
         /*
          * Stops to propagate the substitution
@@ -411,7 +419,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         else {
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
                     newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory, termFactory, iqFactory);
+                    substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
             return DefaultSubstitutionResults.newNode(newConstructionNode, substitutionToPropagate);
         }
@@ -425,6 +433,79 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return Optional.ofNullable(substitution.get(variable))
                 .map(t -> isTermNullable(query, t))
                 .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
+        ImmutableSet<Variable> nullableChildVariables = child.getNullableVariables();
+
+
+        return Stream.concat(
+                getSubstitution().getImmutableMap().entrySet().stream()
+                    .filter(e -> isNullable(e.getValue(), nullableChildVariables))
+                    .map(Map.Entry::getKey),
+                nullableChildVariables.stream()
+        ).collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return substitution.isDefining(variable)
+                || (getChildVariables().contains(variable) && child.isConstructed(variable));
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        if (!childVariables.contains(variable)) {
+            return iqFactory.createUnaryIQTree(this, child);
+        }
+
+        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        /*
+         * Lift the union above the construction node
+         */
+        if ((newChildRoot instanceof UnionNode)
+                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            UnionNode unionNode = (UnionNode) newChildRoot;
+            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+
+            ImmutableList<IQTree> newChildren = grandChildren.stream()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(unionNode, newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+        try {
+            Optional<ImmutableExpression> childConstraint = computeChildConstraint(substitution, Optional.of(constraint));
+            IQTree newChild = childConstraint
+                    .map(child::propagateDownConstraint)
+                    .orElse(child);
+            return iqFactory.createUnaryIQTree(this, newChild);
+
+        } catch (EmptyTreeException e) {
+            return iqFactory.createEmptyNode(projectedVariables);
+        }
+    }
+
+    /**
+     * TODO: involve the function to reduce the number of false positive
+     */
+    private boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableChildVariables) {
+        if (term instanceof Constant)
+            return term.equals(termFactory.getNullConstant());
+        // TODO: improve this
+        else if (term.isGround())
+            return true;
+        // TODO: improve this
+        return term.getVariableStream()
+                .anyMatch(nullableChildVariables::contains);
     }
 
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
@@ -496,6 +577,17 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
+    public boolean isEquivalentTo(QueryNode queryNode) {
+        if (!(queryNode instanceof ConstructionNode))
+            return false;
+        ConstructionNode node = (ConstructionNode) queryNode;
+
+        return projectedVariables.equals(node.getVariables())
+                && substitution.equals(node.getSubstitution())
+                && optionalModifiers.equals(node.getOptionalModifiers());
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }
@@ -507,16 +599,16 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree);
+            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
         else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, true);
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
     }
 
     /**
@@ -527,45 +619,212 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
             Optional<ImmutableExpression> constraint, IQTree child) {
-        SubstitutionResults<ConstructionNode> results = applyDescendingSubstitution(descendingSubstitution);
 
-        IQTree updatedChild = results.getSubstitutionToPropagate()
-                .map(s -> (ImmutableSubstitution<? extends VariableOrGroundTerm>) (ImmutableSubstitution<?>) s)
-                .map(this::convertVariableOrGroundTermSubstitution)
-                .map(s -> child.applyDescendingSubstitution(s, constraint))
-                .orElse(child);
+        if (optionalModifiers.isPresent()) {
+            throw new RuntimeException("TODO: support query modifiers");
+        }
 
-        switch (results.getLocalAction()) {
-            case NO_CHANGE:
-                return iqFactory.createUnaryIQTree(this, updatedChild);
-            case NEW_NODE:
-                return iqFactory.createUnaryIQTree(results.getOptionalNewNode().get(), updatedChild);
-            case REPLACE_BY_CHILD:
-                return updatedChild;
-            case DECLARE_AS_TRUE:
-                return iqFactory.createTrueNode();
-            case DECLARE_AS_EMPTY:
-                return iqFactory.createEmptyNode(
-                        projectedVariables.stream()
-                                .flatMap(v -> descendingSubstitution.apply(v).getVariableStream())
-                                .collect(ImmutableCollectors.toSet()));
-            default:
-                throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
+        ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
+        ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
+
+        try {
+            PropagationResults<NonFunctionalTerm> tauCPropagationResults = propagateTauC(tauC, child);
+            PropagationResults<VariableOrGroundTerm> tauFPropagationResults = propagateTauF(tauF, tauCPropagationResults);
+
+            Optional<FilterNode> filterNode = tauFPropagationResults.filter
+                    .map(iqFactory::createFilterNode);
+
+            Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
+                    constraint);
+
+            IQTree newChild = Optional.of(tauFPropagationResults.delta)
+                    .filter(delta -> !delta.isEmpty())
+                    .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
+                    .orElse(child);
+
+            Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
+                    .filter(theta -> !theta.isEmpty())
+                    .map(theta -> iqFactory.createConstructionNode(
+                            constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables),
+                            theta));
+
+            IQTree filterTree = filterNode
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
+                    .orElse(newChild);
+
+            return constructionNode
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, filterTree))
+                    .orElse(filterTree);
+
+        } catch (EmptyTreeException e) {
+            return iqFactory.createEmptyNode(projectedVariables);
         }
     }
 
-    private <T extends VariableOrGroundTerm>
-    VariableOrGroundTermSubstitution<T> convertVariableOrGroundTermSubstitution(
-            ImmutableSubstitution<T> substitution) {
-        if (substitution instanceof VariableOrGroundTermSubstitution)
-            return (VariableOrGroundTermSubstitution<T>) substitution;
+    private PropagationResults<NonFunctionalTerm> propagateTauC(ImmutableSubstitution<NonFunctionalTerm> tauC, IQTree child)
+            throws EmptyTreeException {
 
-        return substitutionFactory.getVariableOrGroundTermSubstitution(substitution.getImmutableMap());
+        /* ---------------
+         * tauC to thetaC
+         * ---------------
+         */
+
+        ImmutableSubstitution<NonFunctionalTerm> thetaC = substitution.getNonFunctionalTermFragment();
+
+        // Projected variables after propagating tauC
+        ImmutableSet<Variable> vC = constructionNodeTools.computeNewProjectedVariables(tauC, projectedVariables);
+
+        ImmutableSubstitution<NonFunctionalTerm> newEta = unificationTools.computeMGUS2(thetaC, tauC)
+                .map(eta -> substitutionTools.prioritizeRenaming(eta, vC))
+                .orElseThrow(EmptyTreeException::new);
+
+        ImmutableSubstitution<NonFunctionalTerm> thetaCBar = substitutionFactory.getSubstitution(
+                newEta.getImmutableMap().entrySet().stream()
+                        .filter(e -> vC.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        ImmutableSubstitution<NonFunctionalTerm> deltaC = extractDescendingSubstitution(newEta,
+                v -> v, thetaC, thetaCBar, projectedVariables);
+
+        /* ---------------
+         * deltaC to thetaF
+         * ---------------
+         */
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFunctionalTermFragment();
+
+        ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m = thetaF.getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> deltaC.apply(e.getKey()),
+                        e -> deltaC.applyToFunctionalTerm(e.getValue())
+                )).asMap();
+
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(m.entrySet().stream()
+                .filter(e -> e.getKey() instanceof Variable)
+                .filter(e -> !child.getVariables().contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap(
+                        e -> (Variable) e.getKey(),
+                        e -> e.getValue().iterator().next()
+                )));
+
+
+        ImmutableSubstitution<ImmutableTerm> gamma = extractDescendingSubstitution(deltaC,
+                thetaFBar::apply,
+                thetaF, thetaFBar,
+                projectedVariables);
+        ImmutableSubstitution<NonFunctionalTerm> newDeltaC = gamma.getNonFunctionalTermFragment();
+
+        Optional<ImmutableExpression> f = computeF(m, thetaFBar, gamma, newDeltaC);
+
+        return new PropagationResults<>(thetaCBar, thetaFBar, newDeltaC, f);
+
     }
 
-    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ) {
+    private Optional<ImmutableExpression> computeF(ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m,
+                                                   ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
+                                                   ImmutableSubstitution<ImmutableTerm> gamma,
+                                                   ImmutableSubstitution<NonFunctionalTerm> newDeltaC) {
+        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entrySet().stream()
+                .filter(e -> (!(e.getKey() instanceof Variable))
+                        || (!thetaFBar.isDefining((Variable)e.getKey())))
+                .flatMap(e -> e.getValue().stream()
+                        .map(v -> createEquality(thetaFBar.apply(e.getKey()), v)));
+
+        Stream<ImmutableExpression> blockedExpressions = gamma.getImmutableMap().entrySet().stream()
+                .filter(e -> !newDeltaC.isDefining(e.getKey()))
+                .map(e -> createEquality(e.getKey(), e.getValue()));
+
+        return immutabilityTools.foldBooleanExpressions(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+    }
+
+    private PropagationResults<VariableOrGroundTerm> propagateTauF(ImmutableSubstitution<GroundFunctionalTerm> tauF,
+                                                 PropagationResults<NonFunctionalTerm> tauCPropagationResults) {
+
+        ImmutableSubstitution<ImmutableTerm> thetaBar = tauCPropagationResults.theta;
+
+        ImmutableSubstitution<VariableOrGroundTerm> delta = substitutionFactory.getSubstitution(
+                tauF.getImmutableMap().entrySet().stream()
+                        .filter(e -> !thetaBar.isDefining(e.getKey()))
+                        .filter(e -> !tauCPropagationResults.delta.isDefining(e.getKey()))
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                e -> (VariableOrGroundTerm)e.getValue()
+                        )))
+                .composeWith2(tauCPropagationResults.delta);
+
+        ImmutableSubstitution<ImmutableTerm> newTheta = substitutionFactory.getSubstitution(
+                thetaBar.getImmutableMap().entrySet().stream()
+                        .filter(e -> !tauF.isDefining(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        Stream<ImmutableExpression> newConditionStream =
+                Stream.concat(
+                        // tauF vs thetaBar
+                        tauF.getImmutableMap().entrySet().stream()
+                            .filter(e -> thetaBar.isDefining(e.getKey()))
+                            .map(e -> createEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
+                        // tauF vs newDelta
+                        tauF.getImmutableMap().entrySet().stream()
+                                .filter(e -> tauCPropagationResults.delta.isDefining(e.getKey()))
+                                .map(e -> createEquality(tauCPropagationResults.delta.apply(e.getKey()),
+                                        tauF.apply(e.getValue()))));
+
+        Optional<ImmutableExpression> newF = immutabilityTools.foldBooleanExpressions(Stream.concat(
+                tauCPropagationResults.filter
+                        .map(e -> e.flattenAND().stream())
+                        .orElseGet(Stream::empty),
+                newConditionStream));
+
+        return new PropagationResults<>(newTheta, delta, newF);
+    }
+
+    private Optional<ImmutableExpression> computeChildConstraint(ImmutableSubstitution<ImmutableTerm> theta,
+                                                                 Optional<ImmutableExpression> initialConstraint)
+            throws EmptyTreeException {
+
+        Optional<ExpressionEvaluator.EvaluationResult> descendingConstraintResults = initialConstraint
+                .map(theta::applyToBooleanExpression)
+                .map(exp -> expressionEvaluator.clone().evaluateExpression(exp));
+
+        if (descendingConstraintResults
+                .filter(ExpressionEvaluator.EvaluationResult::isEffectiveFalse)
+                .isPresent())
+            throw new EmptyTreeException();
+
+        return descendingConstraintResults
+                .flatMap(ExpressionEvaluator.EvaluationResult::getOptionalExpression);
+    }
+
+    /**
+     * TODO: find a better name
+     *
+     */
+    private <T extends ImmutableTerm> ImmutableSubstitution<T> extractDescendingSubstitution(
+            ImmutableSubstitution<? extends NonFunctionalTerm> substitution,
+            java.util.function.Function<NonFunctionalTerm, T> valueTransformationFct,
+            ImmutableSubstitution<? extends ImmutableTerm> partialTheta,
+            ImmutableSubstitution<? extends ImmutableTerm> newPartialTheta,
+            ImmutableSet<Variable> originalProjectedVariables) {
+
+        return substitutionFactory.getSubstitution(
+                substitution.getImmutableMap().entrySet().stream()
+                        .filter(e -> {
+                            Variable v = e.getKey();
+                            return (!partialTheta.isDefining(v))
+                                    && ((!newPartialTheta.isDefining(v)) || originalProjectedVariables.contains(v));
+                        })
+                        .collect(ImmutableCollectors.toMap(
+                               e -> e.getKey(),
+                               e -> valueTransformationFct.apply(e.getValue())
+                        )));
+    }
+
+    private ImmutableExpression createEquality(ImmutableTerm t1, ImmutableTerm t2) {
+        return termFactory.getImmutableExpression(EQ, t1, t2);
+    }
+
+    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
         IQTree grandChildIQTree = childIQ.getChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(
@@ -582,9 +841,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             if (topModifiers.isPresent()) {
                 ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                         newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
+                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
             }
             /*
              * Not mergeable query modifiers --> keeps two nodes
@@ -592,15 +851,17 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             else {
                 ConstructionNode newTopConstructionNode = new ConstructionNodeImpl(projectedVariables,
                         newSubstitution, formerModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
                 ConstructionNode newChildConstructionNode = new ConstructionNodeImpl(grandChildIQTree.getVariables(),
                         substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers(),
                         nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory);
+                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree, true);
-                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ, true);
+                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree,
+                        currentIQProperties.declareLifted());
+                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ,
+                        currentIQProperties.declareLifted());
             }
         }
         /*
@@ -610,9 +871,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
                     newSubstitution, childConstructionNode.getOptionalModifiers(), nullabilityEvaluator,
                     unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory, termFactory, iqFactory);
+                    substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
 
-            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, true);
+            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
         }
     }
 
@@ -644,4 +905,36 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return previousModifiers.newSortConditions(conditionBuilder.build());
     }
 
+    private class EmptyTreeException extends Exception {
+    }
+
+    public static class PropagationResults<T extends VariableOrGroundTerm> {
+
+        public final ImmutableSubstitution<T> delta;
+        public final Optional<ImmutableExpression> filter;
+        public final ImmutableSubstitution<ImmutableTerm> theta;
+
+        /**
+         * After tauC propagation
+         */
+        PropagationResults(ImmutableSubstitution<NonFunctionalTerm> thetaCBar,
+                           ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
+                           ImmutableSubstitution<T> newDeltaC,
+                           Optional<ImmutableExpression> f) {
+            this.theta = thetaFBar.composeWith(thetaCBar);
+            this.delta = newDeltaC;
+            this.filter = f;
+        }
+
+        /**
+         * After tauF propagation
+         */
+        PropagationResults(ImmutableSubstitution<ImmutableTerm> theta,
+                           ImmutableSubstitution<T> delta,
+                           Optional<ImmutableExpression> newF) {
+            this.theta = theta;
+            this.delta = delta;
+            this.filter = newF;
+        }
+    }
 }

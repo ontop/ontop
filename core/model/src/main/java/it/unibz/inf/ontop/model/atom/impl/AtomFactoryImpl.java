@@ -121,23 +121,12 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        /**
-         * NB: A GroundDataAtom is a DistinctVariableDataAtom
-         */
-        if(areVariablesDistinct(arguments)) {
-            return getDistinctVariableDataAtom(predicate, arguments);
-        }
-        else if (isVariableOnly(arguments)) {
-            return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-        }
-        else {
-            return new DataAtomImpl(predicate, arguments);
-        }
+    public <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        return new DataAtomImpl<>(predicate, arguments);
     }
 
     @Override
-    public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
+    public <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, VariableOrGroundTerm... terms) {
         return getDataAtom(predicate, ImmutableList.copyOf(terms));
     }
 

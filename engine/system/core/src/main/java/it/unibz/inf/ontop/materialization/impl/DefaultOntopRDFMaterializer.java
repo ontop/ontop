@@ -71,7 +71,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getVocabulary(),
+		ImmutableSet<Predicate> vocabulary = extractVocabulary(obdaSpecification.getSaturatedTBox(),
 				configuration.getAtomFactory());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
@@ -82,12 +82,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		AtomFactory atomFactory = configuration.getAtomFactory();
 
-		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getVocabulary(), atomFactory).stream()
-				.collect(ImmutableCollectors.toMap(
-						DefaultOntopRDFMaterializer::convertIntoURI,
-						p -> p));
+		ImmutableMap<URI, Predicate> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedTBox(),
+				configuration.getAtomFactory()).stream()
+					.collect(ImmutableCollectors.toMap(
+							DefaultOntopRDFMaterializer::convertIntoURI,
+							p -> p));
 
 		ImmutableSet<Predicate> internalVocabulary = selectedVocabulary.stream()
 				.filter(vocabularyMap::containsKey)
@@ -108,36 +108,30 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ImmutableOntologyVocabulary vocabulary,
-															 AtomFactory atomFactory) {
+	private static ImmutableSet<Predicate> extractVocabulary(@Nonnull ClassifiedTBox vocabulary, AtomFactory atomFactory) {
         Set<Predicate> predicates = new HashSet<>();
 
-        //add all class/data/object predicates to selectedVocabulary
-            //from ontology
-            for (OClass cl : vocabulary.getClasses()) {
-                Predicate p = atomFactory.getClassPredicate(cl.getIRI());
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-            for (ObjectPropertyExpression role : vocabulary.getObjectProperties()) {
-                Predicate p = atomFactory.getObjectPropertyPredicate(role.getIRI());
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-            for (DataPropertyExpression role : vocabulary.getDataProperties()) {
-                Predicate p = atomFactory.getDataPropertyPredicate(role.getIRI());
-                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-                        && !predicates.contains(p))
-                    predicates.add(p);
-            }
-			for (AnnotationProperty role : vocabulary.getAnnotationProperties()) {
-				Predicate p = atomFactory.getAnnotationPropertyPredicate(role.getIRI());
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-							&& !predicates.contains(p))
-					predicates.add(p);
-			}
+        // collect all class/data/object predicates to selectedVocabulary
+        for (OClass cl : vocabulary.classes()) {
+            Predicate p = atomFactory.getClassPredicate(cl.getIRI());
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (ObjectPropertyExpression role : vocabulary.objectProperties()) {
+            Predicate p = atomFactory.getObjectPropertyPredicate(role.getIRI());
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (DataPropertyExpression role : vocabulary.dataProperties()) {
+            Predicate p = atomFactory.getDataPropertyPredicate(role.getIRI());
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
+        for (AnnotationProperty role : vocabulary.annotationProperties()) {
+            Predicate p = atomFactory.getAnnotationPropertyPredicate(role.getIRI());
+            if (!isBuiltin(p))
+                predicates.add(p);
+        }
 //        else {
 //            //from mapping undeclared predicates (can happen)
 //			for (OBDAMappingAxiom axiom : this.model.getMappings()) {
@@ -148,6 +142,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 //        }
 
         return ImmutableSet.copyOf(predicates);
+    }
+
+    private static boolean isBuiltin(Predicate p) {
+	    return p.toString().startsWith("http://www.w3.org/2002/07/owl#");
     }
 
 	private static URI convertIntoURI(Predicate vocabularyPredicate) {

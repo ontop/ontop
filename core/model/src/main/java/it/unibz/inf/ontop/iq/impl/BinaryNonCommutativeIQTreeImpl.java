@@ -1,17 +1,20 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.VariableOrGroundTermSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 
@@ -20,22 +23,24 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     private final IQTree leftChild;
     private final IQTree rightChild;
-    private final boolean isLifted;
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> nullableVariables;
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted boolean isLifted) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild));
+                                           @Assisted IQProperties iqProperties) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.isLifted = isLifted;
     }
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
-                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild) {
-        this(rootNode, leftChild, rightChild, false);
+                                           @Assisted("left") IQTree leftChild,
+                                           @Assisted("right") IQTree rightChild) {
+        this(rootNode, leftChild, rightChild, new IQPropertiesImpl());
     }
 
     @Override
@@ -50,20 +55,44 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree liftBinding(VariableGenerator variableGenerator) {
-        if (isLifted)
+        IQProperties properties = getProperties();
+        if (properties.isLifted())
             return this;
-        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator);
+        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator, properties);
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable) {
+        return getRootNode().liftIncompatibleDefinitions(variable, leftChild, rightChild);
     }
 
     @Override
     public IQTree applyDescendingSubstitution(
-            VariableOrGroundTermSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
         return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, leftChild, rightChild);
     }
 
     @Override
+    public boolean isConstructed(Variable variable) {
+        return getVariables().contains(variable)
+                && getRootNode().isConstructed(variable, leftChild, rightChild);
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getNullableVariables() {
+        if (nullableVariables == null)
+            nullableVariables = getRootNode().getNullableVariables(leftChild, rightChild);
+        return nullableVariables;
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+        return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
     }
 }

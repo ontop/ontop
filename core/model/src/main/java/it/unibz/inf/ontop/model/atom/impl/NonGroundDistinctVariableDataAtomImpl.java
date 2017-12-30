@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 
-public class NonGroundDistinctVariableDataAtomImpl extends AbstractDataAtomImpl implements DistinctVariableDataAtom {
+public class NonGroundDistinctVariableDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate> implements DistinctVariableDataAtom {
 
     protected NonGroundDistinctVariableDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
         super(predicate, arguments);

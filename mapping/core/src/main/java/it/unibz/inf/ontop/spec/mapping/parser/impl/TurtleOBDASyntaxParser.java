@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.*;
@@ -39,18 +38,15 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	private final Map<String, String> prefixes;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
 
 	/**
 	 * Default constructor;
 	 * @param atomFactory
 	 * @param termFactory
-	 * @param typeFactory
 	 */
-	public TurtleOBDASyntaxParser(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory) {
+	public TurtleOBDASyntaxParser(AtomFactory atomFactory, TermFactory termFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
-		this.typeFactory = typeFactory;
 		this.prefixes = ImmutableMap.of();
 	}
 
@@ -60,12 +56,10 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public TurtleOBDASyntaxParser(Map<String, String> prefixes, AtomFactory atomFactory, TermFactory termFactory,
-								  TypeFactory typeFactory) {
+	public TurtleOBDASyntaxParser(Map<String, String> prefixes, AtomFactory atomFactory, TermFactory termFactory) {
 		this.prefixes = prefixes;
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
-		this.typeFactory = typeFactory;
 	}
 
 	/**
@@ -91,7 +85,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
-			return new TurtleOBDAVisitorImpl(termFactory, atomFactory, typeFactory).visitParse(parser.parse()).stream()
+			return new TurtleOBDAVisitorImpl(termFactory, atomFactory).visitParse(parser.parse()).stream()
 					.map(termFactory::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
 		} catch (RuntimeException e) {

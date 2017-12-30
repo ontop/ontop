@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,29 +31,31 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
     private boolean isStillMutable;
+    private final TypeMapper typeMapper;
     @Nullable
-    private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> uniqueConstraints;
+    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
     private final AtomFactory atomFactory;
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              QuotedIDFactory idfac, AtomFactory atomFactory, Relation2Predicate relation2Predicate,
-                              TermFactory termFactory, DatalogFactory datalogFactory) {
-        this(driverName, driverVersion, databaseProductName, databaseVersion, idfac, new HashMap<>(), new HashMap<>(),
-                new LinkedList<>(), relation2Predicate, atomFactory, termFactory, datalogFactory);
+                              TypeMapper typeMapper, AtomFactory atomFactory, TermFactory termFactory,
+                              DatalogFactory datalogFactory, QuotedIDFactory idfac) {
+        this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
+                new HashMap<>(), new LinkedList<>(), atomFactory, termFactory, datalogFactory, idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
-                              Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                              Relation2Predicate relation2Predicate, AtomFactory atomFactory,
-                              TermFactory termFactory, DatalogFactory datalogFactory) {
-        super(relation2Predicate, termFactory, datalogFactory);
+                              TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
+            RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
+                              AtomFactory atomFactory, TermFactory termFactory,
+                              DatalogFactory datalogFactory, QuotedIDFactory idfac) {
+        super(termFactory, datalogFactory);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
         this.databaseVersion = databaseVersion;
+        this.typeMapper = typeMapper;
         this.idfac = idfac;
         this.tables = tables;
         this.relations = relations;
@@ -77,7 +79,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id, typeMapper);
         add(table, tables);
         add(table, relations);
         listOfTables.add(table);
@@ -133,11 +135,6 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
-    public Optional<TermType> getTermType(Attribute attribute) {
-        throw new RuntimeException("This method should not be called");
-    }
-
-    @Override
     public void freeze() {
         isStillMutable = false;
     }
@@ -174,9 +171,9 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
-    public ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> getUniqueConstraints() {
+    public ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> getUniqueConstraints() {
         if (uniqueConstraints == null) {
-            ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> constraints = extractUniqueConstraints();
+            ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> constraints = extractUniqueConstraints();
             if (!isStillMutable)
                 uniqueConstraints = constraints;
             return constraints;
@@ -186,43 +183,22 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
     }
 
-    private ImmutableMultimap<AtomPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
+    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
         Map<Predicate, AtomPredicate> predicateCache = new HashMap<>();
 
         return getDatabaseRelations().stream()
-                .flatMap(relation -> extractUniqueConstraintsFromRelation(relation, predicateCache))
+                .flatMap(this::extractUniqueConstraintsFromRelation)
                 .collect(ImmutableCollectors.toMultimap());
     }
 
-    private Stream<Map.Entry<AtomPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
-            DatabaseRelationDefinition relation, Map<Predicate, AtomPredicate> predicateCache) {
-
-        Predicate originalPredicate = getRelation2Predicate().createPredicateFromRelation(relation);
-        AtomPredicate atomPredicate = convertToAtomPredicate(originalPredicate, predicateCache);
+    private Stream<Map.Entry<RelationPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
+            DatabaseRelationDefinition relation) {
 
         return relation.getUniqueConstraints().stream()
                 .map(uc -> uc.getAttributes().stream()
                         .map(Attribute::getIndex)
                         .collect(ImmutableCollectors.toList()))
-                .map(positions -> new AbstractMap.SimpleEntry<>(atomPredicate, positions));
-    }
-
-
-    @Override
-    protected AtomPredicate convertToAtomPredicate(Predicate originalPredicate,
-                                                   Map<Predicate, AtomPredicate> predicateCache) {
-        if (originalPredicate instanceof AtomPredicate) {
-            return (AtomPredicate) originalPredicate;
-        }
-        else if (predicateCache.containsKey(originalPredicate)) {
-            return predicateCache.get(originalPredicate);
-        }
-        else {
-            AtomPredicate atomPredicate = atomFactory.getAtomPredicate(originalPredicate);
-            // Cache it
-            predicateCache.put(originalPredicate, atomPredicate);
-            return atomPredicate;
-        }
+                .map(positions -> new AbstractMap.SimpleEntry<>(relation.getAtomPredicate(), positions));
     }
 
     @Override
@@ -258,9 +234,10 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     @Deprecated
     @Override
     public BasicDBMetadata clone() {
-        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, idfac,
-                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), getRelation2Predicate(),
-                atomFactory, getTermFactory(), getDatalogFactory());
+        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
+                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables),
+                atomFactory, getTermFactory(), getDatalogFactory(), idfac
+        );
     }
 
     protected boolean isStillMutable() {

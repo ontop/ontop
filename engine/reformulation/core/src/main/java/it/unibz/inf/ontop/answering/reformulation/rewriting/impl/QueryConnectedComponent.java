@@ -20,12 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +85,6 @@ public class QueryConnectedComponent {
 	 * constructor is private as instances created only by the static method getConnectedComponents
 	 * 
 	 * @param edges: a list of edges in the connected component
-	 * @param loop: a loop if the component is degenerate
 	 * @param nonDLAtoms: a list of non-DL atoms in the connected component
 	 * @param terms: terms that are covered by the edges
 	 */
@@ -199,11 +201,14 @@ public class QueryConnectedComponent {
 	/**
 	 * getConnectedComponents creates a list of connected components of a given CQ
 	 * 
-	 * @param cqie: CQ to be split into connected components 
+	 * @param cqie : CQ to be split into connected components
+	 * @param termFactory
+	 * @param atomFactory
 	 * @return list of connected components
 	 */
 	
-	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
+	public static List<QueryConnectedComponent> getConnectedComponents(ClassifiedTBox reasoner, CQIE cqie,
+																	   TermFactory termFactory, AtomFactory atomFactory) {
 
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
@@ -215,11 +220,11 @@ public class QueryConnectedComponent {
 		Map<Term, Loop> allLoops = new HashMap<Term, Loop>();
 		List<Function> nonDLAtoms = new LinkedList<Function>();
 		
-		for (Function a: cqie.getBody()) {
-			Predicate p = a.getFunctionSymbol();
-			if (a.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates 
-			//if (p.isClass() || p.couldBeAnObjectProperty() || p.couldBeADataProperty()) { // if DL predicate (throws NullPointerException)
-				Term t0 = a.getTerm(0);				
+		for (Function atom : cqie.getBody()) {
+			Predicate p = atom.getFunctionSymbol();
+			if (atom.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates
+				Function a = getCanonicalForm(reasoner, atom, termFactory, atomFactory);
+				Term t0 = a.getTerm(0);
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
 					// proper DL edge between two distinct terms
 					Term t1 = a.getTerm(1);
@@ -240,7 +245,7 @@ public class QueryConnectedComponent {
 			}
 			else { // non-DL precicate
 				//log.debug("NON-DL ATOM {}",  a);
-				nonDLAtoms.add(a);
+				nonDLAtoms.add(atom);
 			}
 		}	
 
@@ -481,5 +486,40 @@ public class QueryConnectedComponent {
 		public int hashCode() {
 			return t0.hashCode() ^ t1.hashCode();
 		}
-	}	
+	}
+
+	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function atom, TermFactory termFactory,
+											 AtomFactory atomFactory) {
+		Predicate p = atom.getFunctionSymbol();
+
+		// the contains tests are inefficient, but tests fails without them
+		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+		if (/*p.isClass()*/ (p.getArity() == 1) && reasoner.classes().contains(p.getName())) {
+			OClass c = reasoner.classes().get(p.getName());
+			OClass equivalent = (OClass)reasoner.classesDAG().getCanonicalForm(c);
+			if (equivalent != null && !equivalent.equals(c)) {
+				return termFactory.getFunction(atomFactory.getClassPredicate(equivalent.getIRI()), atom.getTerms());
+			}
+		}
+		else if (/*p.isObjectProperty()*/ (p.getArity() == 2) && reasoner.objectProperties().contains(p.getName())) {
+			ObjectPropertyExpression ope = reasoner.objectProperties().get(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
+			if (equivalent != null && !equivalent.equals(ope)) {
+				if (!equivalent.isInverse())
+					return termFactory.getFunction(atomFactory.getObjectPropertyPredicate(equivalent.getIRI()), atom.getTerms());
+				else
+					return termFactory.getFunction(atomFactory.getObjectPropertyPredicate(equivalent.getIRI()),
+							atom.getTerm(1), atom.getTerm(0));
+			}
+		}
+		else if (/*p.isDataProperty()*/ (p.getArity() == 2)  && reasoner.dataProperties().contains(p.getName())) {
+			DataPropertyExpression dpe = reasoner.dataProperties().get(p.getName());
+			DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
+			if (equivalent != null && !equivalent.equals(dpe)) {
+				return termFactory.getFunction(atomFactory.getDataPropertyPredicate(equivalent.getIRI()), atom.getTerms());
+			}
+		}
+		return atom;
+	}
+
 }

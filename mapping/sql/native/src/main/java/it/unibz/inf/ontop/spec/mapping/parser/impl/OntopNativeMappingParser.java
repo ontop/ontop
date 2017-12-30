@@ -86,20 +86,18 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final SpecificationFactory specificationFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
-                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory, TermFactory termFactory,
-                                     TypeFactory typeFactory) {
+                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory,
+                                     TermFactory termFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
     }
 
     /**
@@ -404,7 +402,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory, typeFactory));
+        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

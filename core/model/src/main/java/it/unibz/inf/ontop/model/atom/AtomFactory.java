@@ -45,22 +45,22 @@ public interface AtomFactory {
     /**
      * Beware: a DataAtom is immutable
      */
-    DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> terms);
+    <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, ImmutableList<? extends VariableOrGroundTerm> terms);
 
     /**
      * Beware: a DataAtom is immutable
      */
-    DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms);
+    <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, VariableOrGroundTerm... terms);
 
     DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-                                                                ImmutableList<? extends VariableOrGroundTerm> arguments);
+                                                         ImmutableList<? extends VariableOrGroundTerm> arguments);
     DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm ... arguments);
 
     DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
-                                                                        ImmutableList<Variable> arguments);
+                                                                 ImmutableList<Variable> arguments);
 
     DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
-                                                                        Variable ... arguments);
+                                                                 Variable ... arguments);
 
     VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... terms);
 

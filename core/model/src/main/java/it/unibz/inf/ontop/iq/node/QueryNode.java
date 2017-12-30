@@ -120,4 +120,9 @@ public interface QueryNode extends Cloneable {
      * Locally defined variables must not appear in the sub-tree
      */
     ImmutableSet<Variable> getLocallyDefinedVariables();
+
+    /**
+     * Is syntactically equivalent
+     */
+    boolean isEquivalentTo(QueryNode queryNode);
 }

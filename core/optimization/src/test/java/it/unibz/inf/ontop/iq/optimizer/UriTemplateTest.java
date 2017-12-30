@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.CONCAT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
@@ -31,10 +32,6 @@ public class UriTemplateTest {
     private static Constant URI_TEMPLATE_STR_2_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/");
     private static Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
     private static Constant URI_TEMPLATE_STR_3 =  TERM_FACTORY.getConstantLiteral("{}");
-
-    private final static AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("T1", 2);
-    private final static AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("T2", 2);
-    private final static AtomPredicate TABLE3_PREDICATE = ATOM_FACTORY.getAtomPredicate("T3", 1);
 
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
@@ -54,7 +51,7 @@ public class UriTemplateTest {
     @Ignore
     @Test
     public void testCompatibleUriTemplates1() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -70,21 +67,21 @@ public class UriTemplateTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
+        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
         ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
-        ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
+        ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, E));
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR1, E));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();

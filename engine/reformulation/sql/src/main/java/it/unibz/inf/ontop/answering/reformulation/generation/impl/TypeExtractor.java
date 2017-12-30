@@ -31,7 +31,6 @@ public class TypeExtractor {
     private final Relation2Predicate relation2Predicate;
     private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
-    private final JdbcTypeMapper jdbcTypeMapper;
 
     @Inject
     private TypeExtractor(Relation2Predicate relation2Predicate, TermTypeInferenceTools termTypeInferenceTools,
@@ -40,7 +39,6 @@ public class TypeExtractor {
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.literalType = typeFactory.getAbstractRDFSLiteral();
         this.immutabilityTools = immutabilityTools;
-        this.jdbcTypeMapper = jdbcTypeMapper;
     }
 
 
@@ -134,8 +132,7 @@ public class TypeExtractor {
                             Attribute attribute = td.get().getAttribute(i+1);
 
                             //get type from metadata
-                            TermType type = jdbcTypeMapper.getTermType(attribute.getType());
-                            defaultTypeBuilder.add(type);
+                            defaultTypeBuilder.add(attribute.getTermType());
                         }
                         else{
                             defaultTypeBuilder.add(literalType);

@@ -1,16 +1,13 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBMetadata;
@@ -44,47 +41,67 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
-        Optional<TBoxReasoner> optionalSaturatedTBox = saturateTBox(optionalOntology);
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology,
-                optionalSaturatedTBox, executorRegistry);
+        if (optionalOntology.isPresent()) {
+            ClassifiedTBox saturatedTBox = optionalOntology.get().tbox();
 
-        return transform(specInput, optionalOntology, optionalSaturatedTBox, mappingAndDBMetadata);
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
+                    Optional.of(saturatedTBox), executorRegistry);
+
+            return mappingTransformer.transform(
+                    specInput,
+                    mappingAndDBMetadata.getMapping(),
+                    mappingAndDBMetadata.getDBMetadata(),
+                    optionalOntology.get().abox(),
+                    saturatedTBox);
+        }
+        else {
+            // no ontology given - extract the vocabulary from mappings and use it as an ontology
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
+                    Optional.empty(), executorRegistry);
+
+            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
+
+            return mappingTransformer.transform(
+                    specInput,
+                    mappingAndDBMetadata.getMapping(),
+                    mappingAndDBMetadata.getDBMetadata(),
+                    ontology.abox(), // EMPTY ABOX
+                    ontology.tbox());
+        }
     }
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
                                      @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
-        Optional<TBoxReasoner> optionalSaturatedTBox = saturateTBox(optionalOntology);
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                optionalOntology, optionalSaturatedTBox, executorRegistry);
+        if (optionalOntology.isPresent()) {
+            ClassifiedTBox optionalSaturatedTBox = optionalOntology.get().tbox();
 
-        return transform(specInput, optionalOntology, optionalSaturatedTBox, mappingAndDBMetadata);
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
+                    Optional.of(optionalSaturatedTBox), executorRegistry);
+
+            return mappingTransformer.transform(
+                    specInput,
+                    mappingAndDBMetadata.getMapping(),
+                    mappingAndDBMetadata.getDBMetadata(),
+                    optionalOntology.get().abox(),
+                    optionalSaturatedTBox);
+        }
+        else {
+            // no ontology given - extract the vocabulary from mappings and use it as an ontology
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
+                    Optional.empty(), executorRegistry);
+
+            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
+
+            return mappingTransformer.transform(
+                    specInput,
+                    mappingAndDBMetadata.getMapping(),
+                    mappingAndDBMetadata.getDBMetadata(),
+                    ontology.abox(), // EMPTY ABOX
+                    ontology.tbox());
+        }
     }
-
-    private OBDASpecification transform(@Nonnull OBDASpecInput specInput, @Nonnull Optional<Ontology> optionalOntology,
-                                        Optional<TBoxReasoner> optionalInputTBox, MappingAndDBMetadata mappingAndDBMetadata)
-            throws MappingException, OntologyException, DBMetadataExtractionException {
-        //Bootstrap the ontology from the mapping if it does not already exist
-        Ontology ontology = optionalOntology
-                .orElseGet(() -> vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping()));
-        TBoxReasoner tBox = optionalInputTBox
-                .orElseGet(() -> TBoxReasonerImpl.create(ontology, settings.isEquivalenceOptimizationEnabled()));
-
-        return mappingTransformer.transform(
-                specInput,
-                mappingAndDBMetadata.getMapping(),
-                mappingAndDBMetadata.getDBMetadata(),
-                ontology,
-                tBox);
-    }
-
-    private Optional<TBoxReasoner> saturateTBox(Optional<Ontology> ontology) {
-        return ontology
-                .map(o -> TBoxReasonerImpl.create(o, settings.isEquivalenceOptimizationEnabled()));
-    }
-
-
 }

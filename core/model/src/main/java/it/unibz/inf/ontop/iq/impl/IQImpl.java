@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQ;
@@ -64,5 +65,16 @@ public class IQImpl implements IQ {
     @Override
     public String toString() {
         return projectionAtom + "\n" + tree.toString();
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        return (otherObject instanceof IQ)
+                && tree.isEquivalentTo(((IQ) otherObject).getTree());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }

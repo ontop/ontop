@@ -39,7 +39,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.validation.TargetQueryVocabularyValidator;
+import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
-	private TargetQueryVocabularyValidator validator;
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
@@ -80,14 +79,12 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource,
-								 TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
-		this.validator = validator;
 
 		prefixManager = obdaModel.getMutablePrefixManager();
 
@@ -105,7 +102,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		txtMappingID.setFont(new Font("Dialog", Font.BOLD, 12));
 
 		cmdInsertMapping.setEnabled(false);
-		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery, validator);
+		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
 		painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
 		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
@@ -184,8 +181,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private void insertMapping(String target, String source) {
 		ImmutableList<ImmutableFunctionalTerm> targetQuery = parse(target);
 		if (targetQuery != null) {
-			final boolean isValid = validator.validate(targetQuery);
-			if (isValid) {
+			// List of invalid predicates that are found by the validator.
+			List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
+			if (invalidPredicates.isEmpty()) {
 				try {
 					OBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
@@ -211,10 +209,8 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				}
 				parent.setVisible(false);
 				parent.dispose();
-
-			} else {
-				// List of invalid predicates that are found by the validator.
-				List<String> invalidPredicates = validator.getInvalidPredicates();
+			}
+			else {
 				String invalidList = "";
 				for (String predicate : invalidPredicates) {
 					invalidList += "- " + predicate + "\n";
@@ -593,7 +589,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
 		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getAtomFactory(), obdaModel.getTermFactory(), obdaModel.getTypeFactory());
+				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

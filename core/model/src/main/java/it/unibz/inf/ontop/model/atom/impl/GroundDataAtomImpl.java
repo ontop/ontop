@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.term.GroundTerm;
 
-public class GroundDataAtomImpl extends AbstractDataAtomImpl implements DistinctVariableDataAtom {
+public class GroundDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate> implements DistinctVariableDataAtom {
 
     protected GroundDataAtomImpl(AtomPredicate predicate, ImmutableList<? extends GroundTerm> groundTerms) {
         super(predicate, groundTerms);

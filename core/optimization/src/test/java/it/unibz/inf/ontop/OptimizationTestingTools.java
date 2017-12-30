@@ -35,7 +35,6 @@ public class OptimizationTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
@@ -62,7 +61,6 @@ public class OptimizationTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        RELATION_2_PREDICATE = injector.getInstance(Relation2Predicate.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);

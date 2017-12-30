@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.iq.executor.leftjoin;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.DataNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -15,8 +17,10 @@ import java.util.Optional;
  */
 public interface LeftJoinRightChildNormalizationAnalyzer {
 
-    LeftJoinRightChildNormalizationAnalysis analyze(ImmutableList<DataNode> leftDataNodes, DataNode rightDataNode,
-                                                    DBMetadata dbMetadata, VariableGenerator variableGenerator);
+    LeftJoinRightChildNormalizationAnalysis analyze(ImmutableSet<Variable> leftVariables,
+                                                    ImmutableList<ExtensionalDataNode> leftDataNodes,
+                                                    ExtensionalDataNode rightDataNode,
+                                                    VariableGenerator variableGenerator);
 
     interface LeftJoinRightChildNormalizationAnalysis {
         /**
