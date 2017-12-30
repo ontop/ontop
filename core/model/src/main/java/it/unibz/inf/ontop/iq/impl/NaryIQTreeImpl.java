@@ -86,6 +86,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+        return getRootNode().propagateDownConstraint(constraint, getChildren());
+    }
+
+    @Override
     public boolean containsNullableVariable(Variable variable) {
         return getNullableVariables().contains(variable);
     }

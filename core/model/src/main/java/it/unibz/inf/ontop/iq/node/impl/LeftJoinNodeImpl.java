@@ -516,7 +516,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         : iqFactory.createBinaryNonCommutativeIQTree(
                                 iqFactory.createLeftJoinNode(expressionAndCondition.optionalExpression),
                                 updatedLeftChild, updatedRightChild);
-            } catch (UnsatisfiableJoiningConditionException e) {
+            } catch (UnsatisfiableConditionException e) {
                 return updatedLeftChild;
             }
         }
@@ -535,18 +535,26 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .anyMatch(c -> c.isConstructed(variable));
     }
 
+    /**
+     * TODO: implement it seriously!!!
+     */
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
+        return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+    }
+
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
             ImmutableExpression initialExpression,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
-            throws UnsatisfiableJoiningConditionException {
+            throws UnsatisfiableConditionException {
 
         ExpressionEvaluator.EvaluationResult results =
                 createExpressionEvaluator().evaluateExpression(
                         descendingSubstitution.applyToBooleanExpression(initialExpression));
 
         if (results.isEffectiveFalse())
-            throw new UnsatisfiableJoiningConditionException();
+            throw new UnsatisfiableConditionException();
 
         return results.getOptionalExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
@@ -614,7 +622,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             /*
              * Replaces the LJ by the left child
              */
-            catch (UnsatisfiableJoiningConditionException e) {
+            catch (UnsatisfiableConditionException e) {
                 EmptyNode newRightChild = iqFactory.createEmptyNode(rightChild.getVariables());
 
                 return new ChildLiftingState(liftedLeftChild, newRightChild, Optional.empty(),
@@ -665,7 +673,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return new ChildLiftingState(state.leftChild, newRightChild, simplificationResults.optionalExpression,
                     newAscendingSubstitution);
 
-        } catch (UnsatisfiableJoiningConditionException e) {
+        } catch (UnsatisfiableConditionException e) {
             return new ChildLiftingState(state.leftChild,
                     iqFactory.createEmptyNode(rightChild.getVariables()),
                     Optional.empty(),

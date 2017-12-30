@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
@@ -250,7 +249,30 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
      * TODO: explain
      */
     @Override
-    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator,
+                              IQProperties currentIQProperties) {
+        IQTree newParentTree = propagateDownCondition(Optional.empty(), initialChildren);
+
+        /*
+         * If after propagating down the condition the root is still a join node, goes to the next step
+         */
+        if (newParentTree.getRootNode() instanceof InnerJoinNodeImpl) {
+            return ((InnerJoinNodeImpl)newParentTree.getRootNode()).liftBindingAfterPropagatingCondition(
+                    newParentTree.getChildren(), variableGenerator, currentIQProperties);
+        }
+        else
+            /*
+             * Otherwise, goes back to the general method
+             */
+            return newParentTree.liftBinding(variableGenerator);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private IQTree liftBindingAfterPropagatingCondition(ImmutableList<IQTree> initialChildren,
+                                                        VariableGenerator variableGenerator,
+                                                        IQProperties currentIQProperties) {
         final ImmutableSet<Variable> projectedVariables = initialChildren.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
@@ -303,6 +325,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     /**
      * TODO: consider the constraint
+     * TODO: adopt the new style
      */
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -384,6 +407,48 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
     }
 
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+        return propagateDownCondition(Optional.of(constraint), children);
+    }
+
+    private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
+        try {
+            ExpressionAndSubstitution conditionSimplificationResults =
+                    simplifyCondition(getOptionalFilterCondition(), ImmutableSet.of());
+
+            Optional<ImmutableExpression> downConstraint = computeDownConstraint(initialConstraint,
+                    conditionSimplificationResults);
+
+            //TODO: propagate different constraints to different children
+
+            ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.substitution)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> children.stream()
+                            .map(child -> child.applyDescendingSubstitution(s, downConstraint))
+                            .collect(ImmutableCollectors.toList())
+                    )
+                    .orElseGet(() -> downConstraint
+                            .map(s -> children.stream()
+                                    .map(child -> child.propagateDownConstraint(s))
+                                    .collect(ImmutableCollectors.toList()))
+                            .orElse(children));
+
+            InnerJoinNode newJoin = conditionSimplificationResults.optionalExpression.equals(getOptionalFilterCondition())
+                    ? this
+                    : conditionSimplificationResults.optionalExpression
+                    .map(iqFactory::createInnerJoinNode)
+                    .orElseGet(iqFactory::createInnerJoinNode);
+
+            return iqFactory.createNaryIQTree(newJoin, newChildren);
+
+        } catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(children.stream()
+                    .flatMap(c -> c.getVariables().stream())
+                    .collect(ImmutableCollectors.toSet()));
+        }
+    }
+
     private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren) {
         UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
                 .flatMap(c -> c.getVariables().stream())
@@ -454,7 +519,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     selectedGrandChild,
                     liftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
                     this::convertIntoLiftingStepResults);
-        } catch (UnsatisfiableJoiningConditionException e) {
+        } catch (UnsatisfiableConditionException e) {
             throw new EmptyIQException();
         }
     }

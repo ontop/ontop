@@ -71,6 +71,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+        return getRootNode().propagateDownConstraint(constraint, getChild());
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)

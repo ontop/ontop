@@ -38,4 +38,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
+
+    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild);
 }

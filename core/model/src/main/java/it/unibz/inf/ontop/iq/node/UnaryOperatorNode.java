@@ -26,4 +26,6 @@ public interface UnaryOperatorNode extends QueryNode {
     boolean isConstructed(Variable variable, IQTree child);
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child);
+
+    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
 }

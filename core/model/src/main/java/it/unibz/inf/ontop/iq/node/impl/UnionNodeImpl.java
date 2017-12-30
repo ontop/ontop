@@ -159,6 +159,14 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(this,
+                children.stream()
+                        .map(c -> c.propagateDownConstraint(constraint))
+                        .collect(ImmutableCollectors.toList()));
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }

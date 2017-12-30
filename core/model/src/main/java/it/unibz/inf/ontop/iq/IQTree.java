@@ -63,4 +63,13 @@ public interface IQTree {
     ImmutableSet<Variable> getNullableVariables();
 
     boolean isEquivalentTo(IQTree tree);
+
+    /**
+     * TODO: explain
+     *
+     * The constraint is used for pruning. It remains enforced by
+     * a parent tree.
+     *
+     */
+    IQTree propagateDownConstraint(ImmutableExpression constraint);
 }

@@ -90,4 +90,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
             nullableVariables = getRootNode().getNullableVariables(leftChild, rightChild);
         return nullableVariables;
     }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+        return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+    }
 }

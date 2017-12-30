@@ -480,6 +480,20 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         return iqFactory.createUnaryIQTree(this, newChild);
     }
 
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+        try {
+            Optional<ImmutableExpression> childConstraint = computeChildConstraint(substitution, Optional.of(constraint));
+            IQTree newChild = childConstraint
+                    .map(child::propagateDownConstraint)
+                    .orElse(child);
+            return iqFactory.createUnaryIQTree(this, newChild);
+
+        } catch (EmptyTreeException e) {
+            return iqFactory.createEmptyNode(projectedVariables);
+        }
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */
@@ -622,17 +636,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
             Optional<FilterNode> filterNode = tauFPropagationResults.filter
                     .map(iqFactory::createFilterNode);
 
-            Optional<ExpressionEvaluator.EvaluationResult> descendingConstraintResults = constraint
-                    .map(tauFPropagationResults.theta::applyToBooleanExpression)
-                    .map(exp -> expressionEvaluator.clone().evaluateExpression(exp));
-
-            if (descendingConstraintResults
-                    .filter(ExpressionEvaluator.EvaluationResult::isEffectiveFalse)
-                    .isPresent())
-                return iqFactory.createEmptyNode(projectedVariables);
-
-            Optional<ImmutableExpression> descendingConstraint = descendingConstraintResults
-                    .flatMap(ExpressionEvaluator.EvaluationResult::getOptionalExpression);
+            Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
+                    constraint);
 
             IQTree newChild = Optional.of(tauFPropagationResults.delta)
                     .filter(delta -> !delta.isEmpty())
@@ -772,6 +777,23 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                 newConditionStream));
 
         return new PropagationResults<>(newTheta, delta, newF);
+    }
+
+    private Optional<ImmutableExpression> computeChildConstraint(ImmutableSubstitution<ImmutableTerm> theta,
+                                                                 Optional<ImmutableExpression> initialConstraint)
+            throws EmptyTreeException {
+
+        Optional<ExpressionEvaluator.EvaluationResult> descendingConstraintResults = initialConstraint
+                .map(theta::applyToBooleanExpression)
+                .map(exp -> expressionEvaluator.clone().evaluateExpression(exp));
+
+        if (descendingConstraintResults
+                .filter(ExpressionEvaluator.EvaluationResult::isEffectiveFalse)
+                .isPresent())
+            throw new EmptyTreeException();
+
+        return descendingConstraintResults
+                .flatMap(ExpressionEvaluator.EvaluationResult::getOptionalExpression);
     }
 
     /**
