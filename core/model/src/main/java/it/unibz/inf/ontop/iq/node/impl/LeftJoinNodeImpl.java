@@ -525,7 +525,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             if (updatedRightChild.isDeclaredAsEmpty())
                 return updatedLeftChild;
             // TODO: lift it again!
-            return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+            return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
     }
 
