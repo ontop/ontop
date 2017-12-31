@@ -535,12 +535,44 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .anyMatch(c -> c.isConstructed(variable));
     }
 
-    /**
-     * TODO: implement it seriously!!!
-     */
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
-        return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+        return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
+    }
+
+    private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {
+
+        IQTree newLeftChild = initialConstraint
+                .map(leftChild::propagateDownConstraint)
+                .orElse(leftChild);
+
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+
+        try {
+            ExpressionAndSubstitution conditionSimplificationResults =
+                    simplifyCondition(getOptionalFilterCondition(), leftVariables);
+
+            Optional<ImmutableExpression> rightConstraint = computeDownConstraint(initialConstraint,
+                    conditionSimplificationResults);
+
+            IQTree newRightChild = Optional.of(conditionSimplificationResults.substitution)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> rightChild.applyDescendingSubstitution(s, rightConstraint))
+                    .orElseGet(() -> rightConstraint
+                            .map(rightChild::propagateDownConstraint)
+                            .orElse(rightChild));
+
+            LeftJoinNode newLeftJoin = conditionSimplificationResults.optionalExpression.equals(getOptionalFilterCondition())
+                    ? this
+                    : conditionSimplificationResults.optionalExpression
+                    .map(iqFactory::createLeftJoinNode)
+                    .orElseGet(iqFactory::createLeftJoinNode);
+
+            return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoin, newLeftChild, newRightChild);
+
+        } catch (UnsatisfiableConditionException e) {
+            return newLeftChild;
+        }
     }
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
