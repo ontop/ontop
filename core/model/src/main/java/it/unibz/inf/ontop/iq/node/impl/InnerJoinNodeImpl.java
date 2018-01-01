@@ -291,10 +291,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition, currentIQProperties);
 
-            AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(substitutionFactory
-                            .getSubstitution(currentSubstitution.getImmutableMap().entrySet().stream()
-                                    .filter(e -> projectedVariables.contains(e.getKey()))
-                                    .collect(ImmutableCollectors.toMap())),
+            AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
+                    currentSubstitution.reduceDomainToIntersectionWith(projectedVariables),
                     projectedVariables);
 
             IQTree newJoinIQ = ascendingNormalization.normalizeChild(joinIQ);

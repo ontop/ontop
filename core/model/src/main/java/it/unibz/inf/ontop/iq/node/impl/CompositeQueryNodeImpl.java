@@ -47,11 +47,9 @@ public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
                                 Map.Entry::getKey,
                                 (v1, v2) -> v1)));
 
-        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = substitutionFactory.getSubstitution(
-                downRenamingSubstitution.composeWith(ascendingSubstitution)
-                        .getImmutableMap().entrySet().stream()
-                            .filter(e -> projectedVariables.contains(e.getKey()))
-                            .collect(ImmutableCollectors.toMap()));
+        ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
+                .composeWith(ascendingSubstitution)
+                .reduceDomainToIntersectionWith(projectedVariables);
 
         return new AscendingSubstitutionNormalization(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);
