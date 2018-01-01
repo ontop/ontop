@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -21,8 +22,9 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     private final ImmutableMap<Variable, T> map;
 
     protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
-                                        AtomFactory atomFactory, TermFactory termFactory) {
-        super(atomFactory, termFactory);
+                                        AtomFactory atomFactory, TermFactory termFactory,
+                                        SubstitutionFactory substitutionFactory) {
+        super(atomFactory, termFactory, substitutionFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (substitutionMap.entrySet().stream()
@@ -78,7 +80,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
                         e.getKey(), (Variable) e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new Var2VarSubstitutionImpl(newMap, getAtomFactory(), getTermFactory());
+        return substitutionFactory.getVar2VarSubstitution(newMap);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
                         e.getKey(), (GroundTerm) e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap, getAtomFactory(), getTermFactory());
+        return substitutionFactory.getSubstitution(newMap);
     }
 
     @Override
@@ -99,7 +101,7 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     @Override
     protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
-        return new ImmutableSubstitutionImpl<>(map, getAtomFactory(), getTermFactory());
+        return substitutionFactory.getSubstitution(map);
     }
 
 

@@ -108,4 +108,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      * Reduces the substitution's domain to its intersection with the argument domain
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
+
+    ImmutableSubstitution<ImmutableTerm> normalizeValues();
 }
