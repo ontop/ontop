@@ -310,7 +310,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return ascendingNormalization.generateTopConstructionNode()
                     .map(Optional::of)
                     .orElseGet(() -> Optional.of(projectedVariables)
-                            .filter(childrenVariables::equals)
+                            .filter(vars -> !vars.equals(childrenVariables))
                             .map(iqFactory::createConstructionNode))
                     .map(constructionNode -> (IQTree) iqFactory.createUnaryIQTree(constructionNode, newJoinIQ,
                             currentIQProperties.declareLifted()))
