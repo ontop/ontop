@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
-public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements JoinOrFilterNode {
+public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implements JoinOrFilterNode {
 
     private Optional<ImmutableExpression> optionalFilterCondition;
     private final TermNullabilityEvaluator nullabilityEvaluator;
@@ -38,10 +39,11 @@ public abstract class JoinOrFilterNodeImpl extends QueryNodeImpl implements Join
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
-                                   TypeFactory typeFactory, DatalogTools datalogTools,
+                                   IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                                    ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
                                    ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                                    ExpressionEvaluator defaultExpressionEvaluator) {
+        super(substitutionFactory, iqFactory);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.termFactory = termFactory;

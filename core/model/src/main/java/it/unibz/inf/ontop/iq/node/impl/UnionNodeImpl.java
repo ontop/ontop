@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
-public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
+public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
@@ -39,6 +39,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
         this.iqFactory = iqFactory;

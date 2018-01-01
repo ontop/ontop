@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
-public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
+public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements ConstructionNode {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
@@ -77,7 +77,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
+                                 ExpressionEvaluator expressionEvaluator) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -135,6 +137,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
@@ -162,6 +165,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
 
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
