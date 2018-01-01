@@ -18,6 +18,11 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
+            <groupId>${parent.groupId}</groupId>
+            <artifactId>ontop-owlapi</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.temporal.model;
 
 
+import com.google.common.collect.ImmutableList;
 
 public interface DatalogMTLRule {
 
@@ -9,4 +10,6 @@ public interface DatalogMTLRule {
     <T extends DatalogMTLExpression> T getBody();
 
     String render();
+
+    ImmutableList<AtomicExpression> getLeaves();
 }

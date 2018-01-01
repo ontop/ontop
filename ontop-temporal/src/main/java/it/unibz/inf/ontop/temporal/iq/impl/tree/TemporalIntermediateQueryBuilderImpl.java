@@ -14,10 +14,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 
 public class TemporalIntermediateQueryBuilderImpl extends DefaultIntermediateQueryBuilder implements TemporalIntermediateQueryBuilder {
-
-    private DistinctVariableOnlyDataAtom projectionAtom;
-    private QueryTree tree;
-    private boolean canEdit;
     private TemporalIntermediateQueryFactory tiqFactory;
 
     @AssistedInject

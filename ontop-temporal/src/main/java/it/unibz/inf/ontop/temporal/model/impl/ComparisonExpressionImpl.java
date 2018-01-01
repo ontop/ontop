@@ -34,8 +34,13 @@ public class ComparisonExpressionImpl implements ComparisonExpression{
     }
 
     @Override
-    public List<? extends Term> getTerms() {
+    public List<Term> getTerms() {
         return Arrays.asList(leftTerm, rightTerm);
+    }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getVariableOrGroundTerms() {
+        return ImmutableList.copyOf(Arrays.asList(leftTerm, rightTerm));
     }
 
     @Override

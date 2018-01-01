@@ -3,12 +3,14 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.StaticAtomicExpression;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -16,19 +18,19 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
 
     private final AtomPredicate predicate;
 
-    private final List<Term> terms;
+    private final List<VariableOrGroundTerm> terms;
 
-    StaticAtomicExpressionImpl(AtomPredicate predicate, List<Term> terms) {
+    StaticAtomicExpressionImpl(AtomPredicate predicate, List<VariableOrGroundTerm> terms) {
         this.predicate = predicate;
         this.terms = terms;
     }
 
-    public StaticAtomicExpressionImpl(AtomPredicate predicate, ImmutableList<Term> terms) {
+    public StaticAtomicExpressionImpl(AtomPredicate predicate, ImmutableList<VariableOrGroundTerm> terms) {
         this.predicate = predicate;
         this.terms = terms;
     }
 
-    StaticAtomicExpressionImpl(AtomPredicate predicate, Term... terms) {
+    StaticAtomicExpressionImpl(AtomPredicate predicate, VariableOrGroundTerm... terms) {
         this.predicate = predicate;
         this.terms = Arrays.asList(terms);;
     }
@@ -44,8 +46,13 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
     }
 
     @Override
-    public List<? extends Term> getTerms() {
-        return terms;
+    public List<Term> getTerms() {
+        return terms.stream().map(t -> (Term)t).collect(Collectors.toList());
+    }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getVariableOrGroundTerms() {
+        return ImmutableList.copyOf(terms);
     }
 
     @Override

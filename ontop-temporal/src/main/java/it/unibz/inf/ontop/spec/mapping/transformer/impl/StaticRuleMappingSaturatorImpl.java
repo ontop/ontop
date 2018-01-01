@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.TargetAtom;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -18,6 +17,10 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
+import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
+import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -28,145 +31,222 @@ import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.StaticAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import org.eclipse.rdf4j.query.algebra.Copy;
 
 import java.util.*;
 
-@Singleton
 public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturator {
 
-    private  final IntermediateQueryFactory IQFactory;
+    private final IntermediateQueryFactory IQFactory;
     private final TermFactory termFactory;
     private final DatalogConversionTools datalogConversionTools;
+    private final DatalogFactory datalogFactory;
+    private final DatalogProgram2QueryConverter datalogConverter;
     private final IQConverter iqConverter;
     private final SpecificationFactory specificationFactory;
 
+
     @Inject
-    private StaticRuleMappingSaturatorImpl(IntermediateQueryFactory IQFactory, TermFactory termFactory,
-                                           DatalogConversionTools datalogConversionTools, IQConverter iqConverter, SpecificationFactory specificationFactory) {
+    private StaticRuleMappingSaturatorImpl(IntermediateQueryFactory IQFactory,
+                                           TermFactory termFactory, DatalogConversionTools datalogConversionTools,
+                                           DatalogFactory datalogFactory, DatalogProgram2QueryConverter datalogConverter,
+                                           IQConverter iqConverter, SpecificationFactory specificationFactory) {
         this.IQFactory = IQFactory;
         this.termFactory = termFactory;
         this.datalogConversionTools = datalogConversionTools;
+        this.datalogFactory = datalogFactory;
+        this.datalogConverter = datalogConverter;
         this.iqConverter = iqConverter;
         this.specificationFactory = specificationFactory;
     }
 
+    private DatalogProgram convertStaticMTLRulesToDatalogProgram(DatalogMTLProgram datalogMTLProgram){
+        ImmutableList<DatalogMTLRule> staticRuleList = datalogMTLProgram.getRules().stream()
+                .filter(rule -> rule.getHead() instanceof StaticExpression)
+                .collect(ImmutableCollectors.toList());
+
+        DatalogProgram datalogProgram = datalogFactory.getDatalogProgram();
+        datalogProgram.appendRule(staticRuleList.stream()
+                .map(rule -> datalogFactory.getCQIE(termFactory.getFunction(rule.getHead().getPredicate(), rule.getHead().getTerms()),
+                        getAtomicExpressions(rule).stream()
+                                .map(sae -> termFactory.getFunction(sae.getPredicate(), sae.getTerms())).collect(ImmutableCollectors.toList())))
+        .collect(ImmutableCollectors.toList()));
+
+        return datalogProgram;
+    }
+
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, DatalogMTLProgram datalogMTLProgram) {
-        Queue<DatalogMTLRule> queue = new LinkedList<>();
-        queue.addAll(datalogMTLProgram.getRules());
-        IQ iq;
+
+        DatalogProgram datalogProgram = convertStaticMTLRulesToDatalogProgram(datalogMTLProgram);
+        Queue<CQIE> queue = new LinkedList<>();
+        queue.addAll(datalogProgram.getRules());
         Map<AtomPredicate, IntermediateQuery> mappingMap = new HashMap<>();
         mapping.getPredicates().forEach(atomPredicate -> mappingMap.put(atomPredicate, mapping.getDefinition(atomPredicate).get()));
 
-        while(!queue.isEmpty()){
-            DatalogMTLRule rule = queue.poll();
-            if ((rule.getBody() instanceof StaticExpression) ||
-                    ((rule.getBody() instanceof FilterExpression) &&
-                            (((FilterExpression) rule.getBody()).getExpression() instanceof StaticExpression))) {
-                ImmutableList<StaticAtomicExpression> staticAtomicExpressionsList = getAtomicExpressions(rule);
-                if (areAllMappingsExist(mapping, staticAtomicExpressionsList)) {
-                    iq = saturateRule(rule, mapping, dbMetadata);
+        while(!queue.isEmpty()) {
+            CQIE rule = queue.poll();
+                if (areAllMappingsExist(ImmutableMap.copyOf(mappingMap), ImmutableList.copyOf(rule.getBody()))) {
                     try {
-                        IntermediateQuery intermediateQuery = iqConverter.convert(iq, dbMetadata, mapping.getExecutorRegistry());
-                        mappingMap.put(iq.getProjectionAtom().getPredicate(), intermediateQuery);
-                        System.out.println(iq.toString());
+                        DatalogProgram dProg = datalogFactory.getDatalogProgram();
+                        dProg.appendRule(rule);
+                        IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
+                                dbMetadata, dProg, ImmutableList.of(), mapping.getExecutorRegistry());
+
+                        intermediateQuery = unfold(intermediateQuery, ImmutableMap.copyOf(mappingMap));
+                        mappingMap.put(intermediateQuery.getProjectionAtom().getPredicate(), intermediateQuery);
+                        System.out.println(intermediateQuery.toString());
+
                     } catch (EmptyQueryException e) {
                         e.printStackTrace();
                     }
-
-                } else {
+                }else {
                     if (!queue.isEmpty()){
                         //TODO:Override compareTo for rule.getHead()
                         if (queue.stream().anyMatch(qe -> qe.getHead().equals(rule.getHead())))
                             queue.add(rule);
                     }
                 }
-            }
         }
+
+
         return specificationFactory.createMapping(mapping.getMetadata(), ImmutableMap.copyOf(mappingMap), mapping.getExecutorRegistry());
     }
 
-    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata){
+    //BasicQueryUnfolder.optimize
+    // TODO: follow the steps in QuestqueryProcessor by injecting TranslationFactory
+    private IntermediateQuery unfold(IntermediateQuery query, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) throws EmptyQueryException {
 
-        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
-        Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
-        Stack<DatalogMTLExpression> teStack = new Stack<>();
-        it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
-        Stack<IQTree> iqTreeStack = new Stack<>();
-
-        if(!teStack.empty()) {
-            ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping);
-            AtomicExpression atomicExpression;
-
-            if (rule.getHead() instanceof StaticAtomicExpression) {
-                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
+        // Non-final
+        Optional<IntensionalDataNode> optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
 
 
-                TargetAtom targetAtom = datalogConversionTools
-                        .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(), ((List<Term>) atomicExpression.getTerms())));
-                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
-                ConstructionNode constructionNode = IQFactory.createConstructionNode(projectionAtom.getVariables(),
-                        targetAtom.getSubstitution(), Optional.empty());
+        while (optionalCurrentIntensionalNode.isPresent()) {
 
-                IQTree newTree;
-                while (!teStack.isEmpty()) {
-                    DatalogMTLExpression currentExpression = teStack.pop();
+            IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
 
-                    if (currentExpression instanceof StaticExpression || currentExpression instanceof ComparisonExpression) {
-                        //TODO: Coalesce Node is missing, implement it.
-                        if (currentExpression instanceof AtomicExpression) {
+            Optional<IntermediateQuery> optionalMappingAssertion = Optional.ofNullable(mappingMap.get(
+                    intensionalNode.getProjectionAtom().getPredicate()));
 
-                            IntermediateQuery intermediateQuery;
-                            if (currentExpression instanceof ComparisonExpression) {
-                                continue;
-                            } else { //StaticAtomicExpression
-                                intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
-                                newTree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree()).getChild();
-                            }
-                        } else if (currentExpression instanceof StaticJoinExpression) {
-                            List<IQTree> iqtList = new ArrayList<>();
-                            for (int i = 0; i < ((StaticJoinExpression) currentExpression).getArity(); i++) {
-                                IQTree iqTree = iqTreeStack.pop();
-                                if (!iqtList.contains(iqTree))
-                                    iqtList.add(iqTree);
-//                                boolean flag = false;
-//                                for(IQTree tree : iqtList){
-//                                    if(!isContainedInTheTree(iqTree, tree))
-//                                        flag = false;
-//                                    else {flag = true; break;}
-//                                }
-//                                if (flag == true) {
-//                                    //clone it
-//                                }else iqtList.add(iqTree);
+            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
+            query.applyProposal(queryMerging);
 
-                            }
-                            InnerJoinNode innerJoinNode = IQFactory.createInnerJoinNode();
-                            newTree = IQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
-
-                        } else { //FilterExpression)
-                            FilterNode filterNode = IQFactory
-                                    .createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
-                            IQTree iqTree = iqTreeStack.pop();
-                            newTree = IQFactory.createUnaryIQTree(filterNode, iqTree);
-                        }
-
-                        if (newTree != null)
-                            iqTreeStack.push(newTree);
-                    } else {
-                        iqTreeStack.empty();
-                        break;
-                    }
-                }
-                if (!iqTreeStack.isEmpty())
-                    return IQFactory.createIQ(projectionAtom, IQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
-            }
-        }else{
-            //TODO:????
+            /**
+             * Next intensional node
+             *
+             * NB: some intensional nodes may have dropped during the last merge
+             */
+            optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
         }
-        return null;
+
+        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
+        return new TrueNodesRemovalOptimizer().optimize(query);
     }
+
+//    @Override
+//    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, DatalogMTLProgram datalogMTLProgram) {
+//        Queue<DatalogMTLRule> queue = new LinkedList<>();
+//        queue.addAll(datalogMTLProgram.getRules());
+//        IQ iq;
+//        Map<AtomPredicate, IntermediateQuery> mappingMap = new HashMap<>();
+//        mapping.getPredicates().forEach(atomPredicate -> mappingMap.put(atomPredicate, mapping.getDefinition(atomPredicate).get()));
+//
+//        while(!queue.isEmpty()){
+//            DatalogMTLRule rule = queue.poll();
+//            if ((rule.getBody() instanceof StaticExpression) ||
+//                    ((rule.getBody() instanceof FilterExpression) &&
+//                            (((FilterExpression) rule.getBody()).getExpression() instanceof StaticExpression))) {
+//                ImmutableList<StaticAtomicExpression> staticAtomicExpressionsList = getAtomicExpressions(rule);
+//                if (areAllMappingsExist(mapping, staticAtomicExpressionsList)) {
+//                    iq = saturateRule(rule, mapping, dbMetadata);
+//                    try {
+//                        IntermediateQuery intermediateQuery = iqConverter.convert(iq, dbMetadata, mapping.getExecutorRegistry());
+//                        mappingMap.put(iq.getProjectionAtom().getPredicate(), intermediateQuery);
+//                        System.out.println(iq.toString());
+//                    } catch (EmptyQueryException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                } else {
+//                    if (!queue.isEmpty()){
+//                        //TODO:Override compareTo for rule.getHead()
+//                        if (queue.stream().anyMatch(qe -> qe.getHead().equals(rule.getHead())))
+//                            queue.add(rule);
+//                    }
+//                }
+//            }
+//        }
+//        return specificationFactory.createMapping(mapping.getMetadata(), ImmutableMap.copyOf(mappingMap), mapping.getExecutorRegistry());
+//    }
+
+//    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata){
+//
+//        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
+//        Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
+//        Stack<DatalogMTLExpression> teStack = new Stack<>();
+//        it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
+//        Stack<IQTree> iqTreeStack = new Stack<>();
+//
+//        if(!teStack.empty()) {
+//            ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping);
+//            AtomicExpression atomicExpression;
+//
+//            if (rule.getHead() instanceof StaticAtomicExpression) {
+//                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
+//
+//
+//                TargetAtom targetAtom = datalogConversionTools
+//                        .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(),  atomicExpression.getTerms()));
+//                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+//                ConstructionNode constructionNode = IQFactory.createConstructionNode(projectionAtom.getVariables(),
+//                        targetAtom.getSubstitution(), Optional.empty());
+//
+//                IQTree newTree;
+//                while (!teStack.isEmpty()) {
+//                    DatalogMTLExpression currentExpression = teStack.pop();
+//
+//                    if (currentExpression instanceof StaticExpression || currentExpression instanceof ComparisonExpression) {
+//                        //TODO: Coalesce Node is missing, implement it.
+//                        if (currentExpression instanceof AtomicExpression) {
+//
+//                            IntermediateQuery intermediateQuery;
+//                            if (currentExpression instanceof ComparisonExpression) {
+//                                continue;
+//                            } else { //StaticAtomicExpression
+//                                intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
+//                                newTree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree());
+//                            }
+//                        } else if (currentExpression instanceof StaticJoinExpression) {
+//                            List<IQTree> iqtList = new ArrayList<>();
+//                            for (int i = 0; i < ((StaticJoinExpression) currentExpression).getArity(); i++) {
+//                                IQTree iqTree = iqTreeStack.pop();
+//                                //if (!iqtList.contains(iqTree))
+//                                    iqtList.add(iqTree);
+//                            }
+//                            InnerJoinNode innerJoinNode = IQFactory.createInnerJoinNode();
+//                            newTree = IQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
+//
+//                        } else { //FilterExpression)
+//                            FilterNode filterNode = IQFactory
+//                                    .createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
+//                            IQTree iqTree = iqTreeStack.pop();
+//                            newTree = IQFactory.createUnaryIQTree(filterNode, iqTree);
+//                        }
+//
+//                        if (newTree != null)
+//                            iqTreeStack.push(newTree);
+//                    } else {
+//                        iqTreeStack.empty();
+//                        break;
+//                    }
+//                }
+//                if (!iqTreeStack.isEmpty())
+//                    return IQFactory.createIQ(projectionAtom, IQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
+//            }
+//        }else{
+//            //TODO:????
+//        }
+//        return null;
+//    }
 
     private boolean isContainedInTheTree(IQTree newTree, IQTree iqTree){
 
@@ -192,15 +272,23 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
         return null;
     }
 
+    private boolean areAllMappingsExist(ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ImmutableList<Function> bodyList){
 
-    private boolean areAllMappingsExist(Mapping mapping, ImmutableList<StaticAtomicExpression> atomicExpressionsList){
-
-        if (atomicExpressionsList.stream().filter(ae-> !(ae instanceof ComparisonExpression))
-                .allMatch(ae -> mapping.getDefinition(ae.getPredicate()).isPresent()))
+        if (bodyList.stream().filter(ae-> !(ae instanceof ComparisonExpression))
+                .allMatch(ae -> mappingMap.containsKey(ae.getFunctionSymbol())))
             return true;
 
         return false;
     }
+
+//    private boolean areAllMappingsExist(ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ImmutableList<StaticAtomicExpression> atomicExpressionsList){
+//
+//        if (atomicExpressionsList.stream().filter(ae-> !(ae instanceof ComparisonExpression))
+//                .allMatch(ae -> mappingMap.containsKey(ae.getPredicate())))
+//            return true;
+//
+//        return false;
+//    }
 
     private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping){
         Map<Variable, Term> varMap = new HashMap<>();

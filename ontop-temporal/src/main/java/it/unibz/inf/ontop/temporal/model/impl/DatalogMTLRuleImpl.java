@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.temporal.model.AtomicExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
@@ -26,6 +27,11 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
     @Override
     public String render() {
         return String.format("%s :- %s .", head.render(), body.render());
+    }
+
+    @Override
+    public ImmutableList<AtomicExpression> getLeaves() {
+        return null;
     }
 
     @Override

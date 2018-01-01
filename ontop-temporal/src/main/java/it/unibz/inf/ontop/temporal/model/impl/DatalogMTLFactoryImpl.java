@@ -18,12 +18,12 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<Term> terms) {
+    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<VariableOrGroundTerm> terms) {
         return new TemporalAtomicExpressionImpl(predicate, terms);
     }
 
     @Override
-    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, Term... terms) {
+    public TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, VariableOrGroundTerm... terms) {
         return new TemporalAtomicExpressionImpl(predicate, terms);
     }
 
@@ -94,12 +94,12 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<Term> terms) {
+    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<VariableOrGroundTerm> terms) {
         return new StaticAtomicExpressionImpl(predicate, terms);
     }
 
     @Override
-    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, Term... terms) {
+    public StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, VariableOrGroundTerm... terms) {
         return new StaticAtomicExpressionImpl(predicate, terms);
     }
 

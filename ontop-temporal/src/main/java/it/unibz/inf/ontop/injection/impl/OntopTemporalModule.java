@@ -2,6 +2,10 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
@@ -100,5 +104,15 @@ public class OntopTemporalModule extends OntopAbstractModule{
                 ImmutableList.of(RDBMetadataExtractor.class),
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
+
+//        Module translationFactoryModule = buildFactory(
+//                ImmutableList.of(
+//                        QueryUnfolder.class,
+//                        NativeQueryGenerator.class,
+//                        SameAsRewriter.class,
+//                        InputQueryTranslator.class),
+//                TranslationFactory.class);
+//        install(translationFactoryModule);
+
     }
 }

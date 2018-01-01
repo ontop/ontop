@@ -12,9 +12,9 @@ import java.util.Map;
 
 public interface DatalogMTLFactory {
 
-    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<Term> terms);
+    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, List<VariableOrGroundTerm> terms);
 
-    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, Term... terms);
+    TemporalAtomicExpression createTemporalAtomicExpression(AtomPredicate predicate, VariableOrGroundTerm... terms);
 
     TemporalJoinExpression createTemporalJoinExpression(DatalogMTLExpression... expressions);
 
@@ -42,9 +42,9 @@ public interface DatalogMTLFactory {
 
     TemporalInterval createTemporalInterval(boolean beginInclusive, boolean endInclusive, Instant begin, Instant end);
 
-    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<Term> terms);
+    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, List<VariableOrGroundTerm> terms);
 
-    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, Term... terms);
+    StaticAtomicExpression createStaticAtomicExpression(AtomPredicate predicate, VariableOrGroundTerm... terms);
 
     StaticJoinExpression createStaticJoinExpression(StaticExpression... expressions);
 

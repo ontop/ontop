@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.temporal.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -22,8 +24,8 @@ import java.util.Optional;
 
 public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements SinceNode{
 
-    @Inject
-    protected SinceNodeImpl(TemporalRange temporalRange) {
+    @AssistedInject
+    protected SinceNodeImpl(@Assisted TemporalRange temporalRange) {
         super(temporalRange);
     }
 

@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.temporal.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -23,8 +25,8 @@ import java.util.Optional;
 
 public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements UntilNode{
 
-    @Inject
-    protected UntilNodeImpl(TemporalRange temporalRange) {
+    @AssistedInject
+    protected UntilNodeImpl(@Assisted TemporalRange temporalRange) {
         super(temporalRange);
     }
 
