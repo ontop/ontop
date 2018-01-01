@@ -305,70 +305,10 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         /*
          * Cleans the composite substitution by removing non-projected variables
          */
+        return compositeSubstitution
+                .reduceDomainToIntersectionWith(projectedVariables)
+                .normalizeValues();
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
-        compositeSubstitution.getImmutableMap().entrySet().stream()
-                .map(this::applyNullNormalization)
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .forEach(newSubstitutionMapBuilder::put);
-
-         return substitutionFactory.getSubstitution(newSubstitutionMapBuilder.build());
-
-    }
-
-    /**
-     * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
-     */
-    private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
-        ImmutableTerm value = substitutionEntry.getValue();
-        if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
-            return newValue.equals(value)
-                    ? substitutionEntry
-                    : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
-        }
-        return substitutionEntry;
-    }
-
-    private ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isSupportingNullArguments(functionalTerm)) {
-            return functionalTerm;
-        }
-
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getArguments().stream()
-                .map(arg -> (arg instanceof ImmutableFunctionalTerm)
-                        ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
-                        : arg)
-                .collect(ImmutableCollectors.toList());
-        if (newArguments.stream()
-                .anyMatch(arg -> arg.equals(nullValue))) {
-            return nullValue;
-        }
-
-        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
-    }
-
-    /**
-     * TODO: move it elsewhere
-     */
-    private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    // TODO: add COALESCE, EXISTS, NOT EXISTS
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        else if ((functionSymbol instanceof URITemplatePredicate)
-                || (functionSymbol instanceof BNodePredicate)) {
-            return false;
-        }
-        return true;
     }
 
 
@@ -829,7 +769,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
 
         AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
-                mergeWithAscendingSubstitution(childConstructionNode.getSubstitution()), projectedVariables);
+                childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 

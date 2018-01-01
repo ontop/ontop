@@ -33,10 +33,6 @@ public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
     protected AscendingSubstitutionNormalization normalizeAscendingSubstitution(
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
-        if (!ascendingSubstitution.getDomain().stream().allMatch(projectedVariables::contains))
-            throw new IllegalArgumentException("Invalid ascending substitution: " +
-                    "its domain is not a subset of the projected variables");
-
         Var2VarSubstitution downRenamingSubstitution = substitutionFactory.getVar2VarSubstitution(
                 ascendingSubstitution.getImmutableMap().entrySet().stream()
                         .filter(e -> e.getValue() instanceof Variable)
@@ -49,7 +45,8 @@ public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
 
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
                 .composeWith(ascendingSubstitution)
-                .reduceDomainToIntersectionWith(projectedVariables);
+                .reduceDomainToIntersectionWith(projectedVariables)
+                .normalizeValues();
 
         return new AscendingSubstitutionNormalization(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);

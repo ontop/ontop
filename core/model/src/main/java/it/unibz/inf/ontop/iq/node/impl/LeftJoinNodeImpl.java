@@ -946,11 +946,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private IQTree convertResults2IQTree(ImmutableSet<Variable> projectedVariables, ChildLiftingState liftingState,
                                          IQProperties currentIQProperties) {
 
-
-
         AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
-                liftingState.getComposedAscendingSubstitution().reduceDomainToIntersectionWith(projectedVariables),
-                projectedVariables);
+                liftingState.getComposedAscendingSubstitution(), projectedVariables);
 
         Optional<ConstructionNode> topConstructionNode = ascendingNormalization.generateTopConstructionNode();
 
