@@ -7,6 +7,10 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
+mappingId	urn:Map-Turbine
+target		:Turbine/{turbine_id} a :Turbine .
+source		SELECT turbine_id FROM tb_components
+
 mappingId	urn:Map-TempSensor
 target		:TemperatureSensor/{sensor_id} a :TemperatureSensor ;  :measures {m_type}^^xsd:string .
 source		SELECT sensor_id, 'Temperature' AS m_type FROM tb_sensors WHERE sensor_type =1

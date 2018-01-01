@@ -66,7 +66,8 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping, @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
+                                     @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
         Optional<TBoxReasoner> optionalSaturatedTBox = saturateTBox(ontology);
 
         MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,

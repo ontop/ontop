@@ -25,17 +25,19 @@ import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 
+import java.util.Properties;
+
 /**
  * Created by elem on 08/08/2017.
  */
-public class OntopTemporalModule extends OntopAbstractModule{
+public class OntopTemporalModule extends OntopAbstractModule {
 
     private final OntopMappingSQLAllSettings settings;
 
+    //TODO this method can be removed
     protected OntopTemporalModule(OntopTemporalSQLOWLAPIConfiguration configuration) {
-        //TODO this method can be removed
         super(configuration.getSettings());
-        settings = configuration.getSettings();
+        settings = ((OntopTemporalMappingSQLAllConfiguration)configuration).getSettings();
     }
 
     OntopTemporalModule(OntopTemporalMappingSQLAllConfigurationImpl configuration) {
@@ -105,14 +107,14 @@ public class OntopTemporalModule extends OntopAbstractModule{
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 
-//        Module translationFactoryModule = buildFactory(
-//                ImmutableList.of(
-//                        QueryUnfolder.class,
-//                        NativeQueryGenerator.class,
-//                        SameAsRewriter.class,
-//                        InputQueryTranslator.class),
-//                TranslationFactory.class);
-//        install(translationFactoryModule);
+        /*Module translationFactoryModule = buildFactory(
+                ImmutableList.of(
+                        QueryUnfolder.class,
+                        NativeQueryGenerator.class,
+                        SameAsRewriter.class,
+                        InputQueryTranslator.class),
+                TranslationFactory.class);
+        install(translationFactoryModule);*/
 
     }
 }

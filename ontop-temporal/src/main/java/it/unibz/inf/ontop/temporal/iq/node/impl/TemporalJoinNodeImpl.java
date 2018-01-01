@@ -27,8 +27,10 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalJoinNode;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalQueryNodeVisitor;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -93,13 +95,60 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     }
 
     @Override
-    public SubstitutionResults<? extends CommutativeJoinNode> applyAscendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+    public SubstitutionResults<? extends CommutativeJoinNode> applyAscendingSubstitution
+            (ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
+        if (substitution.isEmpty()) {
+            return DefaultSubstitutionResults.noChange();
+        }
+
+        ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue().equals(termFactory.getNullConstant()))
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
+
+
+        ImmutableSet<Variable > otherNodesProjectedVariables = query.getOtherChildrenStream(this, childNode)
+                .flatMap(c -> query.getVariables(c).stream())
+                .collect(ImmutableCollectors.toSet());
+
+        /*
+         * If there is an implicit equality involving one null variables, the join is empty.
+         */
+        if (otherNodesProjectedVariables.stream()
+                .anyMatch(nullVariables::contains)) {
+            // Reject
+            return DefaultSubstitutionResults.declareAsEmpty();
+        }
+
+        return computeAndEvaluateNewCondition(substitution, Optional.empty())
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
     }
 
     @Override
-    public SubstitutionResults<? extends CommutativeJoinNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+    public SubstitutionResults<? extends CommutativeJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
+        return applyDescendingSubstitution(substitution);
+    }
+
+    private SubstitutionResults<TemporalJoinNode> applyDescendingSubstitution(
+            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+
+        return getOptionalFilterCondition()
+                .map(cond -> transformBooleanExpression(substitution, cond))
+                .map(ev -> applyEvaluation(ev, substitution))
+                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
+    }
+
+    private SubstitutionResults<TemporalJoinNode> applyEvaluation(ExpressionEvaluator.EvaluationResult evaluationResult,
+                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        if (evaluationResult.isEffectiveFalse()) {
+            return DefaultSubstitutionResults.declareAsEmpty();
+        }
+        else {
+            TemporalJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
+            return DefaultSubstitutionResults.newNode(newNode, substitution);
+        }
     }
 
     @Override

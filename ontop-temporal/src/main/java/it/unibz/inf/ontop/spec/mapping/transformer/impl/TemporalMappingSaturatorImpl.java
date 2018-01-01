@@ -5,22 +5,30 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
+import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
+import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalJoinNode;
@@ -29,6 +37,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
@@ -38,25 +47,30 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final DatalogMTLConversionTools datalogMTLConversionTools;
     private final IQConverter iqConverter;
     private final AtomFactory atomFactory;
+    //private final QueryUnfolder queryUnfolder;
+    //private final TranslationFactory translationFactory;
 
     @Inject
     private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory, TermFactory termFactory,
-                                         DatalogMTLConversionTools datalogMTLConversionTools, IQConverter iqConverter, AtomFactory atomFactory) {
+                                         DatalogMTLConversionTools datalogMTLConversionTools, IQConverter iqConverter,
+                                         AtomFactory atomFactory/*, TranslationFactory translationFactory*/) {
         this.TIQFactory = TIQFactory;
         this.termFactory = termFactory;
         this.datalogMTLConversionTools = datalogMTLConversionTools;
         this.iqConverter = iqConverter;
         this.atomFactory = atomFactory;
+       // this.translationFactory = translationFactory;
     }
 
-    @Override
+    /*@Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, TBoxReasoner saturatedTBox) {
         return null;
-    }
+    }*/
 
     public TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata,
                                     TemporalMapping temporalMapping, DBMetadata temporalDBMetadata,
                                     DatalogMTLProgram datalogMTLProgram) {
+        //QueryUnfolder queryUnfolder = translationFactory.create(mapping);
 
         Queue<DatalogMTLRule> queue = new LinkedList<>();
 
@@ -117,6 +131,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         if (rule.getHead() instanceof TemporalAtomicExpression) {
             if (!teStack.empty()) {
                 IntermediateQuery iq = dMTLToIntermediateQuery(rule,mapping,dbMetadata, temporalMapping, temporalDBMetadata);
+
             } else {
                 //TODO:throw exception
             }
@@ -292,6 +307,36 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
             getBuilder(((BinaryTemporalExpression)currentExpression).getLeftOperand(), leftCoalesceNode, TIQBuilder);
         }
        return TIQBuilder;
+    }
+
+    //BasicQueryUnfolder.optimize
+    // TODO: follow the steps in QuestqueryProcessor by injecting TranslationFactory
+    private IntermediateQuery unfold(IntermediateQuery query, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) throws EmptyQueryException {
+
+        // Non-final
+        Optional<IntensionalDataNode> optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
+
+
+        while (optionalCurrentIntensionalNode.isPresent()) {
+
+            IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
+
+            Optional<IntermediateQuery> optionalMappingAssertion = Optional.ofNullable(mappingMap.get(
+                    intensionalNode.getProjectionAtom().getPredicate()));
+
+            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
+            query.applyProposal(queryMerging);
+
+            /**
+             * Next intensional node
+             *
+             * NB: some intensional nodes may have dropped during the last merge
+             */
+            optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
+        }
+
+        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
+        return new TrueNodesRemovalOptimizer().optimize(query);
     }
 
 //    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,

@@ -274,11 +274,12 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
 
     private boolean areAllMappingsExist(ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ImmutableList<Function> bodyList){
 
-        if (bodyList.stream().filter(ae-> !(ae instanceof ComparisonExpression))
-                .allMatch(ae -> mappingMap.containsKey(ae.getFunctionSymbol())))
-            return true;
+        for (Function f : bodyList){
+            if (!mappingMap.containsKey(f.getFunctionSymbol()))
+                return false;
+        }
 
-        return false;
+        return true;
     }
 
 //    private boolean areAllMappingsExist(ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ImmutableList<StaticAtomicExpression> atomicExpressionsList){

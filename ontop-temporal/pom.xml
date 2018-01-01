@@ -19,6 +19,11 @@
         </dependency>
         <dependency>
             <groupId>${parent.groupId}</groupId>
+            <artifactId>ontop-engine</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>ontop-owlapi</artifactId>
             <version>${parent.version}</version>
         </dependency>

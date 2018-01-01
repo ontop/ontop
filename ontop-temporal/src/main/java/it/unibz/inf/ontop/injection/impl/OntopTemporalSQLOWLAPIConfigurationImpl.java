@@ -4,6 +4,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntologyException;
+import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
@@ -22,25 +23,31 @@ import java.util.stream.Stream;
 
 public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfigurationImpl implements OntopTemporalSQLOWLAPIConfiguration {
 
-    private final OntopTemporalMappingSQLAllConfigurationImpl temporalConfiguration;
+    public final OntopTemporalMappingSQLAllConfigurationImpl temporalConfiguration;
+    private final OntopTemporalSQLOWLAPIOptions options;
 
 
     OntopTemporalSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings,
                                             OntopTemporalMappingSQLAllSettings temporalSettings,
                                             OntopTemporalSQLOWLAPIOptions options) {
         super(settings, options.owlOptions);
+        this.options = options;
         temporalConfiguration = new OntopTemporalMappingSQLAllConfigurationImpl(temporalSettings, options.temporalOptions);
     }
 
     @Override
     protected Stream<Module> buildGuiceModules() {
-        return Stream.concat(super.buildGuiceModules(),
-                Stream.of(new OntopTemporalModule(temporalConfiguration)));
+        return Stream.concat(super.buildGuiceModules(), Stream.concat(
+                new OntopReformulationConfigurationImpl(getSettings(),
+                        options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules(),
+                Stream.of(new OntopTemporalModule(this)))
+        );
     }
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return temporalConfiguration.loadSpecification(this::getOntology);
+        //super.loadOBDASpecification();
+        return temporalConfiguration.loadSpecification();
     }
 
     private Optional<Ontology> getOntology() throws OntologyException {

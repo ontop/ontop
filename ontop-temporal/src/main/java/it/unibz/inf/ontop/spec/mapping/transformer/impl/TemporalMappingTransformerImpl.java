@@ -41,8 +41,10 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
                                            OntopMappingSettings settings,
                                            MappingSameAsInverseRewriter sameAsInverseRewriter,
                                            MappingEquivalenceFreeRewriter eqFreeRewriter,
-                                           SpecificationFactory specificationFactory1, TemporalSpecificationFactory specificationFactory,
-                                           TemporalMappingSaturator temporalMappingSaturator, StaticRuleMappingSaturator staticRuleMappingSaturator) {
+                                           SpecificationFactory specificationFactory1,
+                                           TemporalSpecificationFactory specificationFactory,
+                                           TemporalMappingSaturator temporalMappingSaturator,
+                                           StaticRuleMappingSaturator staticRuleMappingSaturator) {
         this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
