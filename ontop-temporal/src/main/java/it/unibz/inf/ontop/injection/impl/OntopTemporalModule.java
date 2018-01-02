@@ -2,10 +2,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
@@ -17,6 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
@@ -24,8 +21,6 @@ import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
-
-import java.util.Properties;
 
 /**
  * Created by elem on 08/08/2017.
@@ -62,7 +57,8 @@ public class OntopTemporalModule extends OntopAbstractModule {
         bindFromSettings(TemporalMappingTransformer.class);
         bindFromSettings(TemporalMappingSaturator.class);
         bindFromSettings(StaticRuleMappingSaturator.class);
-        //bindFromSettings(TemporalMapping.class);
+        bindFromSettings(DatalogMTLToIntermediateQueryConverter.class);
+        //bindFromSettings(TemporalQuadrupleMapping.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(
                 PrefixManager.class,

@@ -56,7 +56,7 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return null;
+         return ImmutableSet.of();
     }
 
     @Override

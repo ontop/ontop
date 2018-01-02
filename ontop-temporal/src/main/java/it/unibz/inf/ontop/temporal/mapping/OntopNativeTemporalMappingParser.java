@@ -179,10 +179,10 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         }
 
         //TODO: expand into NAMED GRAPHS here!
-        List<SQLPPTemporalTriplesMap> expandedMappings =  expandTemporalTriplesMapsIntoNamedGraphs(mappings);
+        //List<SQLPPTemporalTriplesMap> expandedMappings =  expandTemporalTriplesMapsIntoNamedGraphs(mappings);
 
         it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
-        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(expandedMappings);
+        ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
 
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()

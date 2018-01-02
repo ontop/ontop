@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLTemporalMappingAssertionProvenance;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -138,11 +139,37 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         //TODO: write a mapping validator for temporal mappings
         //validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
 
-        return new TemporalMappingAndDBMetadataImpl(toRegularMapping(provMapping), dbMetadata);
+        return new TemporalMappingAndDBMetadataImpl(toTemporalMapping(provMapping), dbMetadata);
+    }
+
+    public TemporalMapping toTemporalMapping(MappingWithProvenance mappingWithProvenance){
+
+        ImmutableMultimap<AtomPredicate, IntermediateQuery> assertionMultimap =
+                mappingWithProvenance.getMappingAssertions().stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q));
+
+        ImmutableMap<AtomPredicate, IntermediateQuery> definitionMap = assertionMultimap.asMap().values().stream()
+                .map(queryMerger::mergeDefinitions)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toMap(
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q));
+
+        ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> intervalDefinitionMap =
+                definitionMap.entrySet().stream().collect(ImmutableCollectors.toMap(
+                        ae -> ae.getKey(),
+                        ae -> new IntervalAndIntermediateQuery(((SQLTemporalMappingAssertionProvenance)mappingWithProvenance
+                                .getProvenance(ae.getValue())).getTriplesMap().getTemporalMappingInterval(), ae.getValue())));
+
+        return temporalSpecificationFactory
+                .createTemporalMapping(mappingWithProvenance.getMetadata(), intervalDefinitionMap, mappingWithProvenance.getExecutorRegistry());
     }
 
     //TODO: move it to a proper place
-    public TemporalMapping toRegularMapping( MappingWithProvenance mappingWithProvenance) {
+    public TemporalQuadrupleMapping toRegularMapping(MappingWithProvenance mappingWithProvenance) {
         class MapItem{
             Predicate pred;
             Predicate projPred;
@@ -222,7 +249,8 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                     quadrupleDefinitionMap.put(atomFactory.getAtomPredicate(keyPred), toQuadrupleDefinition(keys, definitions));
                 });
 
-        return temporalSpecificationFactory.createTemporalMapping(mappingWithProvenance.getMetadata(), ImmutableMap.copyOf(quadrupleDefinitionMap), mappingWithProvenance.getExecutorRegistry());
+        return null;
+        //return temporalSpecificationFactory.createTemporalMapping(mappingWithProvenance.getMetadata(), ImmutableMap.copyOf(quadrupleDefinitionMap), mappingWithProvenance.getExecutorRegistry());
     }
 
     private QuadrupleDefinition toQuadrupleDefinition(List <String> keyList, List<IntermediateQuery> iqList){

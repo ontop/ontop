@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.impl;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
+import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
 import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
@@ -24,7 +24,7 @@ public class TemporalOBDASpecificationImpl implements TemporalOBDASpecification 
     }
 
     @Override
-    public TemporalMapping getTemporalSaturatedMapping() {
+    public TemporalQuadrupleMapping getTemporalSaturatedMapping() {
         return null;
     }
 

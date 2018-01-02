@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
+import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;

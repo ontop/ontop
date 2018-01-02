@@ -4,12 +4,14 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
+import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
 
-public class TemporalMappingAndDBMetadataImpl implements TemporalMappingExtractor.MappingAndDBMetadata {
+public class TemporalMappingAndDBMetadataImpl  implements TemporalMappingExtractor.MappingAndDBMetadata {
+
     private final TemporalMapping temporalMapping;
     private final DBMetadata dbMetadata;
 
-    public TemporalMappingAndDBMetadataImpl(TemporalMapping mapping,  DBMetadata dbMetadata) {
+    public TemporalMappingAndDBMetadataImpl(TemporalMapping mapping, DBMetadata dbMetadata) {
         this.temporalMapping = mapping;
         this.dbMetadata = dbMetadata;
     }

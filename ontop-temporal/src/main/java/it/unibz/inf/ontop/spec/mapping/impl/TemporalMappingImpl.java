@@ -1,23 +1,26 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
-import it.unibz.inf.ontop.spec.mapping.QuadrupleDefinition;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class TemporalMappingImpl implements TemporalMapping{
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public class TemporalMappingImpl implements TemporalMapping {
 
     private final MappingMetadata metadata;
-    private final ImmutableMap<AtomPredicate, QuadrupleDefinition> definitions;
+    private final ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> definitions;
     /**
      * TODO: remove it when the conversion to Datalog will not be needed anymore
      */
@@ -25,53 +28,58 @@ public class TemporalMappingImpl implements TemporalMapping{
 
     @AssistedInject
     private TemporalMappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted ImmutableMap<AtomPredicate, QuadrupleDefinition> temporalMappingMap,
+                        @Assisted ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> mappingMap,
                         @Assisted ExecutorRegistry executorRegistry,
                         OntopModelSettings settings) {
         this.metadata = metadata;
-        this.definitions = temporalMappingMap;
+        this.definitions = mappingMap;
         this.executorRegistry = executorRegistry;
 
         if (settings.isTestModeEnabled()) {
-
-            temporalMappingMap.values().forEach(qd -> {
-                        for (IntermediateQuery query : qd.getAll()) {
-                            if (projectNullableVariable(query))
-                                throw new IllegalArgumentException(
-                                        "A mapping assertion must not return a nullable variable. \n" + query);
-                        }
-                    }
-            );
+            for (IntervalAndIntermediateQuery query : mappingMap.values()) {
+                if (projectNullableVariable(query.getIntermediateQuery()))
+                    throw new IllegalArgumentException(
+                            "A mapping assertion must not return a nullable variable. \n" + query);
+            }
         }
     }
 
     private static boolean projectNullableVariable(IntermediateQuery query) {
         QueryNode rootNode = query.getRootNode();
-        return rootNode.getLocalVariables().stream()
+        return query.getProjectionAtom().getVariableStream()
                 .anyMatch(v -> rootNode.isVariableNullable(query, v));
     }
 
-
+    @Override
     public MappingMetadata getMetadata() {
         return metadata;
     }
 
+    @Override
+    public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate) {
+        IntermediateQuery query = definitions.get(predicate).getIntermediateQuery();
+        return query != null && query.getProjectionAtom().getPredicate().getArity() == predicate.getArity()?
+                Optional.of(query):
+                Optional.empty();
+    }
 
-//    public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate1, AtomPredicate predicate2) {
-//        return Optional.ofNullable(definitions.get(predicate1));
-//    }
-
-
+    @Override
     public ImmutableSet<AtomPredicate> getPredicates() {
         return definitions.keySet();
     }
 
-    public ImmutableMap<AtomPredicate, QuadrupleDefinition> getDefinitions() {
-        return definitions;
-
+    @Override
+    public ImmutableCollection<IntermediateQuery> getQueries() {
+        return definitions.values().stream().map(i-> i.getIntermediateQuery()).collect(ImmutableCollectors.toList());
     }
 
+    @Override
     public ExecutorRegistry getExecutorRegistry() {
         return executorRegistry;
+    }
+
+    @Override
+    public IntervalAndIntermediateQuery getIntervalAndIntermediateQuery(AtomPredicate predicate) {
+        return definitions.get(predicate);
     }
 }
