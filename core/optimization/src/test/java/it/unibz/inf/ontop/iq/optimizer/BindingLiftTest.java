@@ -1825,7 +1825,6 @@ public class BindingLiftTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, generateURI1(A), Y, generateURI2(B), Z, generateURI1(C))));
-        ConstructionNode constructionNode2 = emptyConstructionNode;
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
 
