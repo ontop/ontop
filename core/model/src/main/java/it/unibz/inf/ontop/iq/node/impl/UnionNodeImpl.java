@@ -249,6 +249,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
+                .map(c -> projectAwayUnnecessaryVariables(c, currentIQProperties))
                 .collect(ImmutableCollectors.toList());
 
         switch (liftedChildren.size()) {
@@ -445,6 +446,35 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return substitutionPair.bindings.isEmpty()
                 ? newChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+    }
+
+    /**
+     * Projects away variables only for child construction nodes
+     */
+    private IQTree projectAwayUnnecessaryVariables(IQTree child, IQProperties currentIQProperties) {
+        if (child.getRootNode() instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
+
+            if (constructionNode.getOptionalModifiers().isPresent())
+                return child;
+
+            AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
+                    constructionNode.getSubstitution(), projectedVariables);
+            Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
+
+            if (proposedConstructionNode
+                    .filter(c -> c.isSyntacticallyEquivalentTo(constructionNode))
+                    .isPresent())
+                return child;
+
+            IQTree grandChild = normalization.normalizeChild(((UnaryIQTree) child).getChild());
+
+            return proposedConstructionNode
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareLifted()))
+                    .orElse(grandChild);
+        }
+        else
+            return child;
     }
 
 }
