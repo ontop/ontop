@@ -24,7 +24,7 @@ public class DefaultTree implements QueryTree {
     private final Set<EmptyNode> emptyNodes;
     private final Set<TrueNode> trueNodes;
     private final Set<IntensionalDataNode> intensionalNodes;
-    private int versionNumber;
+    private UUID versionNumber;
 
 
     protected DefaultTree(QueryNode rootQueryNode) {
@@ -41,7 +41,7 @@ public class DefaultTree implements QueryTree {
         childrenIndex.put(rootNode, createChildrenRelation(rootNode));
         // No parent
 
-        versionNumber = 1;
+        versionNumber = UUID.randomUUID();
     }
 
     private DefaultTree(TreeNode rootNode,
@@ -51,7 +51,7 @@ public class DefaultTree implements QueryTree {
                         Set<EmptyNode> emptyNodes,
                         Set<TrueNode> trueNodes,
                         Set<IntensionalDataNode> intensionalNodes,
-                        int versionNumber) {
+                        UUID versionNumber) {
         this.rootNode = rootNode;
         this.nodeIndex = nodeIndex;
         this.childrenIndex = childrenIndex;
@@ -448,12 +448,12 @@ public class DefaultTree implements QueryTree {
     }
 
     @Override
-    public int getVersionNumber() {
+    public UUID getVersionNumber() {
         return versionNumber;
     }
 
     private void updateVersionNumber() {
-        versionNumber++;
+        versionNumber = UUID.randomUUID();
     }
 
     /**

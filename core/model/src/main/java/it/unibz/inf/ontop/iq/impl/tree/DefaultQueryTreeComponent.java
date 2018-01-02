@@ -275,7 +275,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public int getVersionNumber() {
+    public UUID getVersionNumber() {
         return tree.getVersionNumber();
     }
 

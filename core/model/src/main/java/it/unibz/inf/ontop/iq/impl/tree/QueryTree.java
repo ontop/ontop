@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -68,5 +69,5 @@ public interface QueryTree {
 
 
 
-    int getVersionNumber();
+    UUID getVersionNumber();
 }

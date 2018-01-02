@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.sql.Types;
 import java.util.Optional;
+import java.util.UUID;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
@@ -924,7 +925,7 @@ public class RedundantSelfJoinTest {
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
-        int initialVersion = query.getVersionNumber();
+        java.util.UUID initialVersion = query.getVersionNumber();
 
         IntermediateQuery expectedQuery = query.createSnapshot();
 
@@ -955,7 +956,7 @@ public class RedundantSelfJoinTest {
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
-        int initialVersion = query.getVersionNumber();
+        UUID initialVersion = query.getVersionNumber();
 
         IntermediateQuery expectedQuery = query.createSnapshot();
 
