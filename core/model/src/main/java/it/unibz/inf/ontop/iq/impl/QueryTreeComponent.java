@@ -142,4 +142,6 @@ public interface QueryTreeComponent {
      * Used in fixed-point optimization.
      */
     int getVersionNumber();
+
+    void replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree);
 }
