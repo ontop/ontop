@@ -46,11 +46,10 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
-public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionNode {
+public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements ConstructionNode {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
-    private static int CONVERGENCE_BOUND = 5;
 
     private final Optional<ImmutableQueryModifiers> optionalModifiers;
     private final TermNullabilityEvaluator nullabilityEvaluator;
@@ -77,7 +76,9 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
+                                 ExpressionEvaluator expressionEvaluator) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.optionalModifiers = optionalQueryModifiers;
@@ -135,6 +136,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
@@ -162,6 +164,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
 
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -213,9 +216,7 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      */
     @Override
     public ConstructionNode clone() {
-        return new ConstructionNodeImpl(projectedVariables, substitution, optionalModifiers, nullabilityEvaluator,
-                unificationTools, constructionNodeTools, substitutionTools, substitutionFactory, termFactory,
-                iqFactory, immutabilityTools, expressionEvaluator);
+        return iqFactory.createConstructionNode(projectedVariables, substitution, optionalModifiers);
     }
 
     @Override
@@ -268,9 +269,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(substitutionToApply);
 
-        ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                newSubstitution, getOptionalModifiers(), nullabilityEvaluator, unificationTools, constructionNodeTools,
-                substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                newSubstitution, getOptionalModifiers());
 
         /*
          * Stops to propagate the substitution
@@ -287,6 +287,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
      * into a non-projected one (this would produce an invalid construction node).
      * That is the responsibility of the SubstitutionPropagationExecutor
      * to prevent such bindings from appearing.
+     *
+     * TODO: simplify after getting rid of applyAscendingSubstitution()
      */
     private ImmutableSubstitution<ImmutableTerm> mergeWithAscendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply) {
@@ -303,70 +305,10 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
         /*
          * Cleans the composite substitution by removing non-projected variables
          */
+        return compositeSubstitution
+                .reduceDomainToIntersectionWith(projectedVariables)
+                .normalizeValues();
 
-        ImmutableMap.Builder<Variable, ImmutableTerm> newSubstitutionMapBuilder = ImmutableMap.builder();
-        compositeSubstitution.getImmutableMap().entrySet().stream()
-                .map(this::applyNullNormalization)
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .forEach(newSubstitutionMapBuilder::put);
-
-         return substitutionFactory.getSubstitution(newSubstitutionMapBuilder.build());
-
-    }
-
-    /**
-     * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
-     */
-    private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
-        ImmutableTerm value = substitutionEntry.getValue();
-        if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
-            return newValue.equals(value)
-                    ? substitutionEntry
-                    : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
-        }
-        return substitutionEntry;
-    }
-
-    private ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isSupportingNullArguments(functionalTerm)) {
-            return functionalTerm;
-        }
-
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getArguments().stream()
-                .map(arg -> (arg instanceof ImmutableFunctionalTerm)
-                        ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
-                        : arg)
-                .collect(ImmutableCollectors.toList());
-        if (newArguments.stream()
-                .anyMatch(arg -> arg.equals(nullValue))) {
-            return nullValue;
-        }
-
-        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
-    }
-
-    /**
-     * TODO: move it elsewhere
-     */
-    private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    // TODO: add COALESCE, EXISTS, NOT EXISTS
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        else if ((functionSymbol instanceof URITemplatePredicate)
-                || (functionSymbol instanceof BNodePredicate)) {
-            return false;
-        }
-        return true;
     }
 
 
@@ -825,10 +767,13 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
     }
 
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
-        IQTree grandChildIQTree = childIQ.getChild();
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(
-                childConstructionNode.getSubstitution());
+        AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
+                childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
+
+        IQTree grandChildIQTree = ascendingNormalization.normalizeChild(childIQ.getChild());
 
         /*
          * TODO: what about updating the query modifiers? Clarify
@@ -839,9 +784,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
                     .flatMap(m1 -> childConstructionNode.getOptionalModifiers()
                             .flatMap(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2)));
             if (topModifiers.isPresent()) {
-                ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                        newSubstitution, topModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
+                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                        newSubstitution, topModifiers);
 
                 return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
             }
@@ -849,14 +793,11 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
              * Not mergeable query modifiers --> keeps two nodes
              */
             else {
-                ConstructionNode newTopConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                        newSubstitution, formerModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
+                ConstructionNode newTopConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                        newSubstitution, formerModifiers);
 
-                ConstructionNode newChildConstructionNode = new ConstructionNodeImpl(grandChildIQTree.getVariables(),
-                        substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers(),
-                        nullabilityEvaluator, unificationTools, constructionNodeTools,
-                        substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
+                ConstructionNode newChildConstructionNode = iqFactory.createConstructionNode(grandChildIQTree.getVariables(),
+                        substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers());
 
                 UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree,
                         currentIQProperties.declareLifted());
@@ -868,10 +809,8 @@ public class ConstructionNodeImpl extends QueryNodeImpl implements ConstructionN
          * No top query modifier
          */
         else {
-            ConstructionNode newConstructionNode = new ConstructionNodeImpl(projectedVariables,
-                    newSubstitution, childConstructionNode.getOptionalModifiers(), nullabilityEvaluator,
-                    unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
+            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                    newSubstitution, childConstructionNode.getOptionalModifiers());
 
             return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
         }

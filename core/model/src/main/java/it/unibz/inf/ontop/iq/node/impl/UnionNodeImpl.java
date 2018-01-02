@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
-public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
+public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
@@ -39,6 +39,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
         this.iqFactory = iqFactory;
@@ -248,6 +249,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
+                .map(c -> projectAwayUnnecessaryVariables(c, currentIQProperties))
                 .collect(ImmutableCollectors.toList());
 
         switch (liftedChildren.size()) {
@@ -444,6 +446,35 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         return substitutionPair.bindings.isEmpty()
                 ? newChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+    }
+
+    /**
+     * Projects away variables only for child construction nodes
+     */
+    private IQTree projectAwayUnnecessaryVariables(IQTree child, IQProperties currentIQProperties) {
+        if (child.getRootNode() instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
+
+            if (constructionNode.getOptionalModifiers().isPresent())
+                return child;
+
+            AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
+                    constructionNode.getSubstitution(), projectedVariables);
+            Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
+
+            if (proposedConstructionNode
+                    .filter(c -> c.isSyntacticallyEquivalentTo(constructionNode))
+                    .isPresent())
+                return child;
+
+            IQTree grandChild = normalization.normalizeChild(((UnaryIQTree) child).getChild());
+
+            return proposedConstructionNode
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareLifted()))
+                    .orElse(grandChild);
+        }
+        else
+            return child;
     }
 
 }

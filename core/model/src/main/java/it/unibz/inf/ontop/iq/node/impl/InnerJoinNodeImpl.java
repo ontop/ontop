@@ -36,8 +36,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static final String JOIN_NODE_STR = "JOIN" ;
     private static final int MAX_ITERATIONS = 100000;
-    private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final ConstructionNodeTools constructionNodeTools;
 
     @AssistedInject
@@ -48,10 +46,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
     }
 
@@ -63,10 +59,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
     }
 
@@ -77,10 +71,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
         this.constructionNodeTools = constructionNodeTools;
     }
 
@@ -299,10 +291,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition, currentIQProperties);
 
-            ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = substitutionFactory
-                    .getSubstitution(currentSubstitution.getImmutableMap().entrySet().stream()
-                            .filter(e -> projectedVariables.contains(e.getKey()))
-                            .collect(ImmutableCollectors.toMap()));
+            AscendingSubstitutionNormalization ascendingNormalization =
+                    normalizeAscendingSubstitution(currentSubstitution, projectedVariables);
+
+            IQTree newJoinIQ = ascendingNormalization.normalizeChild(joinIQ);
 
             ImmutableSet<Variable> childrenVariables = currentChildren.stream()
                     .flatMap(c -> c.getVariables().stream())
@@ -312,11 +304,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
              * NB: creates a construction if a substitution needs to be propagated and/or if some variables
              * have to be projected away
              */
-            return projectedVariables.equals(childrenVariables) && ascendingSubstitution.isEmpty()
-                    ? joinIQ
-                    : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectedVariables, ascendingSubstitution), joinIQ,
-                    currentIQProperties.declareLifted());
+            return ascendingNormalization.generateTopConstructionNode()
+                    .map(Optional::of)
+                    .orElseGet(() -> Optional.of(projectedVariables)
+                            .filter(vars -> !vars.equals(childrenVariables))
+                            .map(iqFactory::createConstructionNode))
+                    .map(constructionNode -> (IQTree) iqFactory.createUnaryIQTree(constructionNode, newJoinIQ,
+                            currentIQProperties.declareLifted()))
+                    .orElse(newJoinIQ);
 
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);

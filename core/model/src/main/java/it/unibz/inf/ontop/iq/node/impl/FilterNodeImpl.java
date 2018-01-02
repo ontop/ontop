@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
-    private final IntermediateQueryFactory iqFactory;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
@@ -42,9 +41,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory) {
-        super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
-        this.iqFactory = iqFactory;
     }
 
     @Override
