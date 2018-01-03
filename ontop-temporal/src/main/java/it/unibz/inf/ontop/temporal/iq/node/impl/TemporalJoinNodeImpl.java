@@ -36,7 +36,7 @@ import java.util.Optional;
 
 public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJoinNode {
 
-    private static final String JOIN_NODE_STR = "TEMPORALJOIN" ;
+    private static final String JOIN_NODE_STR = "TEMPORAL JOIN" ;
 
     private static final int MAX_ITERATIONS = 100000;
     private final IntermediateQueryFactory iqFactory;
@@ -157,8 +157,8 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return null;
+    public TemporalJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return this;
     }
 
     @Override

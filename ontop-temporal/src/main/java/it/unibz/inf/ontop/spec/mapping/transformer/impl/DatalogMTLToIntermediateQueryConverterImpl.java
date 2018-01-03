@@ -96,7 +96,81 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
         return termFactory.getImmutableExpression(expressionOperation, comparisonExpression.getLeftOperand(), comparisonExpression.getRightOperand());
     }
 
-//    private ImmutableMap<Variable, Variable> retrieveMapForVariablesOccuringInTheHead(
+    private TemporalIntermediateQueryBuilder getBuilder(DatalogMTLExpression currentExpression,
+                                                        QueryNode parentNode, TemporalIntermediateQueryBuilder TIQBuilder){
+        if (currentExpression instanceof AtomicExpression) {
+            IntensionalDataNode intensionalDataNode =
+                    TIQFactory.createIntensionalDataNode(atomFactory
+                            .getDataAtom(((AtomicExpression) currentExpression).getPredicate(),
+                            ((AtomicExpression)currentExpression).getVariableOrGroundTerms()));
+            if(currentExpression instanceof TemporalAtomicExpression) {
+                TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                TIQBuilder.addChild(parentNode, coalesceNode);
+                TIQBuilder.addChild(coalesceNode, intensionalDataNode);
+            }else{
+                TIQBuilder.addChild(parentNode, intensionalDataNode);
+            }
+        }else if(currentExpression instanceof TemporalJoinExpression){
+            TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
+            TIQBuilder.addChild(parentNode, temporalJoinNode);
+            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(0), temporalJoinNode, TIQBuilder);
+            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(1), temporalJoinNode, TIQBuilder);
+        }else if(currentExpression instanceof StaticJoinExpression){
+            InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
+            TIQBuilder.addChild(parentNode,innerJoinNode);
+            ((StaticJoinExpression)currentExpression).getChildNodes().forEach(exp ->{
+                getBuilder(exp, innerJoinNode, TIQBuilder);
+            });
+        }else if (currentExpression instanceof FilterExpression){
+            FilterNode filterNode = TIQFactory
+                    .createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression)
+                            .getComparisonExpression()));
+            TIQBuilder.addChild(parentNode, filterNode);
+            getBuilder(((FilterExpression) currentExpression).getExpression(), filterNode,TIQBuilder);
+
+        }else if(currentExpression instanceof UnaryTemporalExpression
+                && currentExpression instanceof TemporalExpressionWithRange){
+
+            UnaryOperatorNode newNode;
+            if (currentExpression instanceof BoxMinusExpression)
+                newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
+
+            else if (currentExpression instanceof BoxPlusExpression)
+                newNode = TIQFactory.createBoxPlusNode(((BoxPlusExpression) currentExpression).getRange());
+
+            else if (currentExpression instanceof DiamondMinusExpression)
+                newNode = TIQFactory.createDiamondMinusNode(((DiamondMinusExpression) currentExpression).getRange());
+            else
+                newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
+
+            TIQBuilder.addChild(parentNode, newNode);
+            TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+            TIQBuilder.addChild(newNode, coalesceNode);
+            getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),coalesceNode,TIQBuilder);
+
+        }else if (currentExpression instanceof BinaryTemporalExpression
+                && currentExpression instanceof TemporalExpressionWithRange) {
+
+            BinaryNonCommutativeOperatorNode newNode;
+            if (currentExpression instanceof SinceExpression) {
+                newNode = TIQFactory.createSinceNode(((SinceExpression) currentExpression).getRange());
+            } else { //UntilExpression
+                newNode = TIQFactory.createUntilNode(((TemporalExpressionWithRange) currentExpression).getRange());
+            }
+            TIQBuilder.addChild(parentNode, newNode);
+
+            TemporalCoalesceNode rightCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+            TIQBuilder.addChild(newNode, rightCoalesceNode);
+            getBuilder(((BinaryTemporalExpression)currentExpression).getRightOperand(), rightCoalesceNode, TIQBuilder);
+
+            TemporalCoalesceNode leftCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+            TIQBuilder.addChild(newNode, leftCoalesceNode);
+            getBuilder(((BinaryTemporalExpression)currentExpression).getLeftOperand(), leftCoalesceNode, TIQBuilder);
+        }
+        return TIQBuilder;
+    }
+
+    //    private ImmutableMap<Variable, Variable> retrieveMapForVariablesOccuringInTheHead(
 //            DatalogMTLRule rule, Mapping mapping, Map<AtomPredicate,
 //            IntervalAndIntermediateQuery> temporalMappingMap) {
 //        Map<Variable, Variable> varMap = new HashMap<>();
@@ -154,71 +228,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
 //                .map(dMTLexp -> (AtomicExpression) dMTLexp)
 //                .collect(ImmutableCollectors.toList());
 //    }
-
-    private TemporalIntermediateQueryBuilder getBuilder(DatalogMTLExpression currentExpression, QueryNode parentNode, TemporalIntermediateQueryBuilder TIQBuilder){
-        if (currentExpression instanceof AtomicExpression) {
-            IntensionalDataNode intensionalDataNode =
-                    TIQFactory.createIntensionalDataNode(atomFactory.getDataAtom(((AtomicExpression) currentExpression).getPredicate(),
-                            ((AtomicExpression)currentExpression).getVariableOrGroundTerms()));
-            TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-            TIQBuilder.addChild(parentNode, coalesceNode);
-            TIQBuilder.addChild(coalesceNode,intensionalDataNode);
-        }else if(currentExpression instanceof TemporalJoinExpression){
-            TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
-            TIQBuilder.addChild(parentNode, temporalJoinNode);
-            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(0), ((QueryNode) temporalJoinNode), TIQBuilder);
-            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(1), ((QueryNode) temporalJoinNode), TIQBuilder);
-        }else if(currentExpression instanceof StaticJoinExpression){
-            InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
-            TIQBuilder.addChild(parentNode,innerJoinNode);
-            ((StaticJoinExpression)currentExpression).getChildNodes().forEach(exp ->{
-                getBuilder(exp, ((QueryNode) innerJoinNode), TIQBuilder);
-            });
-        }else if (currentExpression instanceof FilterExpression){
-            FilterNode filterNode = TIQFactory.createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
-            TIQBuilder.addChild(parentNode, filterNode);
-            getBuilder(((FilterExpression) currentExpression).getExpression(), filterNode,TIQBuilder);
-
-        }else if(currentExpression instanceof UnaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange){
-
-            UnaryOperatorNode newNode;
-            if (currentExpression instanceof BoxMinusExpression)
-                newNode = TIQFactory.createBoxMinusNode(((BoxMinusExpression) currentExpression).getRange());
-
-            else if (currentExpression instanceof BoxPlusExpression)
-                newNode = TIQFactory.createBoxPlusNode(((BoxPlusExpression) currentExpression).getRange());
-
-            else if (currentExpression instanceof DiamondMinusExpression)
-                newNode = TIQFactory.createDiamondMinusNode(((DiamondMinusExpression) currentExpression).getRange());
-            else
-                newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
-
-            TIQBuilder.addChild(parentNode, newNode);
-            TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-            TIQBuilder.addChild(newNode, coalesceNode);
-            getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),coalesceNode,TIQBuilder);
-
-        }else if (currentExpression instanceof BinaryTemporalExpression && currentExpression instanceof TemporalExpressionWithRange) {
-
-            BinaryNonCommutativeOperatorNode newNode;
-            if (currentExpression instanceof SinceExpression) {
-                newNode = TIQFactory.createSinceNode(((SinceExpression) currentExpression).getRange());
-            } else { //UntilExpression
-                newNode = TIQFactory.createUntilNode(((TemporalExpressionWithRange) currentExpression).getRange());
-            }
-            TIQBuilder.addChild(parentNode, newNode);
-
-            TemporalCoalesceNode rightCoalesceNode = TIQFactory.createTemporalCoalesceNode();
-            TIQBuilder.addChild(newNode, rightCoalesceNode);
-            getBuilder(((BinaryTemporalExpression)currentExpression).getRightOperand(), rightCoalesceNode, TIQBuilder);
-
-            TemporalCoalesceNode leftCoalesceNode = TIQFactory.createTemporalCoalesceNode();
-            TIQBuilder.addChild(newNode, leftCoalesceNode);
-            getBuilder(((BinaryTemporalExpression)currentExpression).getLeftOperand(), leftCoalesceNode, TIQBuilder);
-        }
-        return TIQBuilder;
-    }
-
+//
 //    private IntermediateQuery dMTLToIntermediateQuery(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
 //                                                      TemporalQuadrupleMapping temporalQuadrupleMapping, DBMetadata temporalDBMetadata) {
 //

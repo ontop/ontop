@@ -28,9 +28,10 @@ public class TemporalJoinExpressionImpl implements TemporalJoinExpression {
 
     @Override
     public String toString() {
-        return "TemporalJoinExpressionImpl{" +
-                "operands=" + operands +
-                '}';
+        String s="";
+        for (DatalogMTLExpression expression : operands)
+            s += expression.render()+",";
+        return s;
     }
 
     @Override

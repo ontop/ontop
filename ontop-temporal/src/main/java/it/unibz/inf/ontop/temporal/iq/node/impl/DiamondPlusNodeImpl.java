@@ -25,10 +25,18 @@ import java.util.Optional;
 
 public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implements DiamondPlusNode {
 
+    private static final String DIAMONDPLUS_NODE_STR = "DIAMOND PLUS" ;
+
     @AssistedInject
     protected DiamondPlusNodeImpl(@Assisted TemporalRange temporalRange) {
         super(temporalRange);
     }
+
+    @Override
+    public String toString() {
+        return DIAMONDPLUS_NODE_STR + getRange();
+    }
+
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
@@ -41,8 +49,8 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return null;
+    public DiamondPlusNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return this;
     }
 
     @Override
@@ -52,7 +60,7 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return null;
+        return ImmutableSet.of();
     }
 
     @Override

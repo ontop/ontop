@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -45,8 +46,8 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return null;
+    public TemporalCoalesceNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return this;
     }
 
     @Override
@@ -60,13 +61,13 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
     }
 
     @Override
-    public SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+    public SubstitutionResults<TemporalCoalesceNode> applyAscendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override
-    public SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+    public SubstitutionResults<TemporalCoalesceNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override

@@ -52,7 +52,7 @@ public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements Unti
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return null;
+        return ImmutableSet.of();
     }
 
     @Override

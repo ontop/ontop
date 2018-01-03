@@ -19,6 +19,8 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.reformulation.RuleUnfolder;
+import it.unibz.inf.ontop.reformulation.impl.RuleUnfolderImpl;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
@@ -33,32 +35,14 @@ import java.util.stream.Collectors;
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 
-    private final TemporalIntermediateQueryFactory TIQFactory;
-    private final TermFactory termFactory;
-    private final DatalogMTLConversionTools datalogMTLConversionTools;
-    private final IQConverter iqConverter;
-    private final AtomFactory atomFactory;
     private final DatalogMTLToIntermediateQueryConverter dMTLConverter;
-    //private final QueryUnfolder queryUnfolder;
-    //private final TranslationFactory translationFactory;
+    private RuleUnfolder ruleUnfolder;
 
     @Inject
-    private TemporalMappingSaturatorImpl(TemporalIntermediateQueryFactory TIQFactory, TermFactory termFactory,
-                                         DatalogMTLConversionTools datalogMTLConversionTools, IQConverter iqConverter,
-                                         AtomFactory atomFactory,/*, TranslationFactory translationFactory*/DatalogMTLToIntermediateQueryConverter dMTLConverter) {
-        this.TIQFactory = TIQFactory;
-        this.termFactory = termFactory;
-        this.datalogMTLConversionTools = datalogMTLConversionTools;
-        this.iqConverter = iqConverter;
-        this.atomFactory = atomFactory;
-       // this.translationFactory = translationFactory;
+    private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter) {
         this.dMTLConverter = dMTLConverter;
+        this.ruleUnfolder = new RuleUnfolderImpl();
     }
-
-    /*@Override
-    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, TBoxReasoner saturatedTBox) {
-        return null;
-    }*/
 
     @Override
     public TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata,
@@ -70,7 +54,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         queue.addAll(datalogMTLProgram.getRules());
         Map <AtomPredicate, IntermediateQuery> mergedMap = mergeMappings(mapping,temporalMapping);
 
-        SaturateRuleReturnType sType;
         while (!queue.isEmpty()) {
             DatalogMTLRule rule = queue.poll();
             if (!(rule.getBody() instanceof StaticJoinExpression) ||
@@ -82,7 +65,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
                 if (areAllMappingsExist(mergedMap, atomicExpressionsList)) {
                     try {
-                        IntermediateQuery iq = unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
+                        IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                         System.out.println(iq.toString());
                     } catch (EmptyQueryException e) {
@@ -107,6 +90,23 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         mergedMap.putAll(temporalMapping.getPredicates().stream()
                 .collect(Collectors.toMap(p-> p, p -> temporalMapping.getDefinition(p).get())));
         return mergedMap;
+    }
+
+    private boolean areAllMappingsExist(Map<AtomPredicate, IntermediateQuery> mergedMap,
+                                        ImmutableList<AtomicExpression> atomicExpressionsList) {
+
+        if (atomicExpressionsList.stream().filter(ae -> !(ae instanceof ComparisonExpression))
+                .allMatch(ae -> mergedMap.containsKey(ae.getPredicate())))
+            return true;
+
+        return false;
+    }
+
+    private ImmutableList<AtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
+        return TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
+                .filter(dMTLexp -> dMTLexp instanceof AtomicExpression)
+                .map(dMTLexp -> (AtomicExpression) dMTLexp)
+                .collect(ImmutableCollectors.toList());
     }
 
 //    @Override
@@ -153,38 +153,17 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 //        }
 //        return null;
 //    }
-
-    private boolean areAllMappingsExist(Mapping mapping, Map<AtomPredicate, IntervalAndIntermediateQuery> temporalMappingMap,
-                                        ImmutableList<AtomicExpression> atomicExpressionsList) {
-
-        if (atomicExpressionsList.stream().filter(ae -> !(ae instanceof ComparisonExpression))
-                .allMatch(ae -> mapping.getDefinition(ae.getPredicate()).isPresent() || temporalMappingMap.containsKey(ae.getPredicate())))
-            return true;
-
-        return false;
-    }
-
-    private boolean areAllMappingsExist(Map<AtomPredicate, IntermediateQuery> mergedMap,
-                                        ImmutableList<AtomicExpression> atomicExpressionsList) {
-
-        if (atomicExpressionsList.stream().filter(ae -> !(ae instanceof ComparisonExpression))
-                .allMatch(ae -> mergedMap.containsKey(ae.getPredicate())))
-            return true;
-
-        return false;
-    }
-
-    //expands into temporal mapping in the shape of named graph
-    private QuadrupleDefinition iqToQuadrupleDefinition(IQ iq) {
-        return null;
-    }
-
-    private QuadrupleItem getQuadPredItem(IQ iq) {
-
-        return null;
-    }
-
-
+//
+//    private boolean areAllMappingsExist(Mapping mapping, Map<AtomPredicate, IntervalAndIntermediateQuery> temporalMappingMap,
+//                                        ImmutableList<AtomicExpression> atomicExpressionsList) {
+//
+//        if (atomicExpressionsList.stream().filter(ae -> !(ae instanceof ComparisonExpression))
+//                .allMatch(ae -> mapping.getDefinition(ae.getPredicate()).isPresent() || temporalMappingMap.containsKey(ae.getPredicate())))
+//            return true;
+//
+//        return false;
+//    }
+//
 //    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
 //                            TemporalQuadrupleMapping temporalMapping, DBMetadata temporalDBMetadata) {
 //
@@ -204,117 +183,76 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 //        }
 //        return null;
 //    }
-
-
-
-    private ImmutableList<AtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
-        return TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
-                .filter(dMTLexp -> dMTLexp instanceof AtomicExpression)
-                .map(dMTLexp -> (AtomicExpression) dMTLexp)
-                .collect(ImmutableCollectors.toList());
-    }
-    private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping, TemporalQuadrupleMapping temporalQuadrupleMapping) {
-        Map<Variable, Term> varMap = new HashMap<>();
-        ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
-        for (Term term : rule.getHead().getImmutableTerms()) {
-            if (term instanceof Variable) {
-                for (AtomicExpression ae : atomicExpressionsList) {
-                    int varIdxInBody = 0;
-                    for (Term t : ae.getImmutableTerms()) {
-                        if (t instanceof Variable) {
-                            //TODO:Override compareTo for Variable
-                            if (((Variable) t).equals(term)) {
-                                if (mapping.getPredicates().contains(ae.getPredicate())) {
-                                    int varIdxInSub = 0;
-                                    Optional<IntermediateQuery> iq = mapping.getDefinition(ae.getPredicate());
-                                    for (ImmutableTerm subTerm :
-                                            ((ConstructionNode) iq.get().getRootNode()).getSubstitution().getImmutableMap().values()) {
-                                        if (varIdxInBody == varIdxInSub) {
-                                            if (varMap.containsKey((Variable) t)) {
-                                                if (!varMap.get(t).equals(subTerm)) {
-                                                    //TODO:throw exception
-                                                }
-                                            } else {
-                                                varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
-                                            }
-                                        }
-                                        varIdxInSub++;
-                                    }
-                                } else if (temporalQuadrupleMapping.getPredicates().contains(ae.getPredicate())) {
-                                    int varIdxInSub = 0;
-                                    QuadrupleDefinition qd = temporalQuadrupleMapping.getDefinitions().get(ae.getPredicate());
-                                    for (ImmutableTerm subTerm : ((ConstructionNode) qd.getQuadruple()
-                                            .getIntermediateQuery().getRootNode()).getSubstitution().getImmutableMap().values()) {
-                                        if (varIdxInBody == varIdxInSub) {
-                                            varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
-                                        }
-                                        varIdxInSub++;
-                                    }
-
-                                } else {
-                                    //TODO:throw exception;
-                                }
-                            }
-
-                        }
-                        varIdxInBody++;
-                    }
-                }
-            }
-        }
-        return ImmutableMap.copyOf(varMap);
-    }
-
-
-
-
-
-    //BasicQueryUnfolder.optimize
-    // TODO: follow the steps in QuestQueryProcessor by injecting TranslationFactory
-    private IntermediateQuery unfold(IntermediateQuery query, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) throws EmptyQueryException {
-
-        // Non-final
-        Optional<IntensionalDataNode> optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
-
-
-        while (optionalCurrentIntensionalNode.isPresent()) {
-
-            IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
-
-            Optional<IntermediateQuery> optionalMappingAssertion = Optional.ofNullable(mappingMap.get(
-                    intensionalNode.getProjectionAtom().getPredicate()));
-
-            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
-            query.applyProposal(queryMerging);
-
-            /**
-             * Next intensional node
-             *
-             * NB: some intensional nodes may have dropped during the last merge
-             */
-            optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
-        }
-
-        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
-        return new TrueNodesRemovalOptimizer().optimize(query);
-    }
-    private class SaturateRuleReturnType{
-        AtomPredicate atomPredicate;
-        IntervalAndIntermediateQuery intervalAndIntermediateQuery;
-
-        public SaturateRuleReturnType(AtomPredicate atomPredicate,
-                                      IntervalAndIntermediateQuery intervalAndIntermediateQuery) {
-            this.atomPredicate = atomPredicate;
-            this.intervalAndIntermediateQuery = intervalAndIntermediateQuery;
-        }
-    }
-
-    private SaturateRuleReturnType saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
-                                                ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> temporalMappingMap, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException {
-
-        return null;
-    }
-
+//
+//    private ImmutableMap<Variable, Term> retrieveMapForVariablesOccuringInTheHead(DatalogMTLRule rule, Mapping mapping, TemporalQuadrupleMapping temporalQuadrupleMapping) {
+//        Map<Variable, Term> varMap = new HashMap<>();
+//        ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
+//        for (Term term : rule.getHead().getImmutableTerms()) {
+//            if (term instanceof Variable) {
+//                for (AtomicExpression ae : atomicExpressionsList) {
+//                    int varIdxInBody = 0;
+//                    for (Term t : ae.getImmutableTerms()) {
+//                        if (t instanceof Variable) {
+//                            //TODO:Override compareTo for Variable
+//                            if (((Variable) t).equals(term)) {
+//                                if (mapping.getPredicates().contains(ae.getPredicate())) {
+//                                    int varIdxInSub = 0;
+//                                    Optional<IntermediateQuery> iq = mapping.getDefinition(ae.getPredicate());
+//                                    for (ImmutableTerm subTerm :
+//                                            ((ConstructionNode) iq.get().getRootNode()).getSubstitution().getImmutableMap().values()) {
+//                                        if (varIdxInBody == varIdxInSub) {
+//                                            if (varMap.containsKey((Variable) t)) {
+//                                                if (!varMap.get(t).equals(subTerm)) {
+//                                                    //TODO:throw exception
+//                                                }
+//                                            } else {
+//                                                varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
+//                                            }
+//                                        }
+//                                        varIdxInSub++;
+//                                    }
+//                                } else if (temporalQuadrupleMapping.getPredicates().contains(ae.getPredicate())) {
+//                                    int varIdxInSub = 0;
+//                                    QuadrupleDefinition qd = temporalQuadrupleMapping.getDefinitions().get(ae.getPredicate());
+//                                    for (ImmutableTerm subTerm : ((ConstructionNode) qd.getQuadruple()
+//                                            .getIntermediateQuery().getRootNode()).getSubstitution().getImmutableMap().values()) {
+//                                        if (varIdxInBody == varIdxInSub) {
+//                                            varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
+//                                        }
+//                                        varIdxInSub++;
+//                                    }
+//
+//                                } else {
+//                                    //TODO:throw exception;
+//                                }
+//                            }
+//
+//                        }
+//                        varIdxInBody++;
+//                    }
+//                }
+//            }
+//        }
+//        return ImmutableMap.copyOf(varMap);
+//    }
+//
+//    private class SaturateRuleReturnType{
+//        AtomPredicate atomPredicate;
+//        IntervalAndIntermediateQuery intervalAndIntermediateQuery;
+//
+//        public SaturateRuleReturnType(AtomPredicate atomPredicate,
+//                                      IntervalAndIntermediateQuery intervalAndIntermediateQuery) {
+//            this.atomPredicate = atomPredicate;
+//            this.intervalAndIntermediateQuery = intervalAndIntermediateQuery;
+//        }
+//    }
+//
+//    private SaturateRuleReturnType saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
+//                                                ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> temporalMappingMap, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException {
+//
+//        return null;
+//    }
+//
 //    private SaturateRuleReturnType saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata,
 //                            ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> temporalMappingMap, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException {
 //

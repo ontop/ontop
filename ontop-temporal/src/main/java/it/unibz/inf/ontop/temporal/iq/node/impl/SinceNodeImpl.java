@@ -51,7 +51,7 @@ public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements Sinc
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return null;
+        return ImmutableSet.of();
     }
 
     @Override

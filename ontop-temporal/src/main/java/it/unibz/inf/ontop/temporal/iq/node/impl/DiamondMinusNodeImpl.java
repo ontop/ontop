@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -25,10 +26,18 @@ import java.util.Optional;
 
 public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implements DiamondMinusNode{
 
+    private static final String DIAMONDMINUS_NODE_STR = "DIAMOND MINUS" ;
+
     @AssistedInject
     protected DiamondMinusNodeImpl(@Assisted TemporalRange temporalRange) {
         super(temporalRange);
     }
+
+    @Override
+    public String toString() {
+        return DIAMONDMINUS_NODE_STR + getRange();
+    }
+
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
@@ -41,8 +50,8 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
     }
 
     @Override
-    public QueryNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return null;
+    public DiamondMinusNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
+        return this;
     }
 
     @Override
@@ -52,17 +61,17 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return null;
+        return ImmutableSet.of();
     }
 
     @Override
     public SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override
     public SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
+        return DefaultSubstitutionResults.noChange();
     }
 
     @Override
