@@ -125,7 +125,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -212,7 +212,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -300,7 +300,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(ont)).tbox();
+		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();

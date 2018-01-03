@@ -216,28 +216,22 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	/***
 	 * This method loads the given ontologies in the system. This will merge
 	 * these new ontologies with the existing ones in a set. Then it will
-	 * translateAndClassify the assertions in all the ontologies into a single one, in our
+	 * translate the assertions in all the ontologies into a single one, in our
 	 * internal representation.
 	 * 
 	 * The translation is done using our OWLAPITranslator that gets the TBox
 	 * part of the ontologies and filters all the DL-Lite axioms (RDFS/OWL2QL
 	 * and DL-Lite).
 	 * 
-	 * The original ontologies and the merged/translated ontology are kept and
-	 * are used later when classify() is called.
-	 * 
 	 */
-	public static ClassifiedTBox loadOntologies(OWLOntology ontology) throws Exception {
+	public static ClassifiedTBox loadOntologies(OWLOntology ontology) {
 		/*
-		 * We will keep track of the loaded ontologies and translateAndClassify the TBox
+		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation.
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
-
-        Ontology mergeOntology = OWLAPITranslatorOWL2QL.translateAndClassify(
-				ontology.getOWLOntologyManager().getImportsClosure(ontology));
+        Ontology mergeOntology = OWLAPITranslatorOWL2QL.translateAndClassify(ontology);
         return mergeOntology.tbox();
-//		log.debug("Ontology loaded: {}", mergeOntology);
 	}
 
 	/**

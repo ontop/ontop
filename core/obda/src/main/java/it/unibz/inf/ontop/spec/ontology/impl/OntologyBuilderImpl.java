@@ -359,10 +359,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         if (ope.isBottom())
             throw new InconsistentOntologyException();
 
-        if (ope.isInverse())
-            reflexiveObjectPropertyAxioms.add(ope.getInverse());
-        else
-            reflexiveObjectPropertyAxioms.add(ope);
+        reflexiveObjectPropertyAxioms.add(ope.isInverse() ? ope.getInverse() : ope);
     }
 
     /**
@@ -385,10 +382,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         if (ope.isBottom())
             return;
 
-        if (ope.isInverse())
-            irreflexiveObjectPropertyAxioms.add(ope.getInverse());
-        else
-            irreflexiveObjectPropertyAxioms.add(ope);
+        irreflexiveObjectPropertyAxioms.add(ope.isInverse() ? ope.getInverse() : ope);
     }
 
 
@@ -530,11 +524,6 @@ public class OntologyBuilderImpl implements OntologyBuilder {
                 classAssertions.build(), objectPropertyAssertions.build(), dataPropertyAssertions.build(), annotationAssertions.build());
     }
 
-    @Override
-    public OntologyVocabulary buildVocabulary() {
-        return new OntologyVocabularyImpl(classes.getImmutableCopy(), objectProperties.getImmutableCopy(),
-                dataProperties.getImmutableCopy(), annotationProperties.getImmutableCopy());
-    }
 
     // auxiliary symbols (for normalization)
 

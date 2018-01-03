@@ -3,11 +3,8 @@ package it.unibz.inf.ontop.spec.impl;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBMetadata;
@@ -25,16 +22,12 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     private final MappingExtractor mappingExtractor;
     private final MappingTransformer mappingTransformer;
-    private final OntopMappingSettings settings;
-    private final MappingVocabularyExtractor vocabularyExtractor;
 
     @Inject
     private DefaultOBDASpecificationExtractor(MappingExtractor mappingExtractor, MappingTransformer mappingTransformer,
-                                              OntopMappingSettings settings, MappingVocabularyExtractor vocabularyExtractor) {
+                                              OntopMappingSettings settings) {
         this.mappingExtractor = mappingExtractor;
         this.mappingTransformer = mappingTransformer;
-        this.settings = settings;
-        this.vocabularyExtractor = vocabularyExtractor;
     }
 
     @Override
@@ -42,33 +35,11 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
-        if (optionalOntology.isPresent()) {
-            ClassifiedTBox saturatedTBox = optionalOntology.get().tbox();
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
-                    Optional.of(saturatedTBox), executorRegistry);
-
-            return mappingTransformer.transform(
-                    specInput,
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    optionalOntology.get().abox(),
-                    saturatedTBox);
-        }
-        else {
-            // no ontology given - extract the vocabulary from mappings and use it as an ontology
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata,
-                    Optional.empty(), executorRegistry);
-
-            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
-
-            return mappingTransformer.transform(
-                    specInput,
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    ontology.abox(), // EMPTY ABOX
-                    ontology.tbox());
-        }
+        return mappingTransformer.transform(
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
     }
 
     @Override
@@ -76,32 +47,10 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
-        if (optionalOntology.isPresent()) {
-            ClassifiedTBox optionalSaturatedTBox = optionalOntology.get().tbox();
+        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    Optional.of(optionalSaturatedTBox), executorRegistry);
-
-            return mappingTransformer.transform(
-                    specInput,
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    optionalOntology.get().abox(),
-                    optionalSaturatedTBox);
-        }
-        else {
-            // no ontology given - extract the vocabulary from mappings and use it as an ontology
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    Optional.empty(), executorRegistry);
-
-            Ontology ontology = vocabularyExtractor.extractOntology(mappingAndDBMetadata.getMapping());
-
-            return mappingTransformer.transform(
-                    specInput,
-                    mappingAndDBMetadata.getMapping(),
-                    mappingAndDBMetadata.getDBMetadata(),
-                    ontology.abox(), // EMPTY ABOX
-                    ontology.tbox());
-        }
+        return mappingTransformer.transform(
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
     }
 }

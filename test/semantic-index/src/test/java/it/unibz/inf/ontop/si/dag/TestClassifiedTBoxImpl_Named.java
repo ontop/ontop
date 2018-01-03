@@ -69,9 +69,6 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
     }
 
     @Override
-    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
-
-    @Override
     public EquivalencesDAG<ClassExpression> classesDAG() {
         return classDAG;
     }

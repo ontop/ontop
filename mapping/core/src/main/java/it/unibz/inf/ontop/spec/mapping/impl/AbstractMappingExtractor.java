@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.MappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -33,13 +34,13 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
         T1 ppMapping = extractPPMapping(specInput);
 
-        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry);
+        return extract(ppMapping, specInput, dbMetadata, ontology, executorRegistry);
     }
 
     protected T1 extractPPMapping(OBDASpecInput specInput)
@@ -64,11 +65,11 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
 
-        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
+        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology,
                 executorRegistry);
     }
 
@@ -76,15 +77,14 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
      * Validation:
      * - Mismatch between the ontology and the mapping
      */
-    protected void validateMapping(Optional<ClassifiedTBox> optionalSaturatedTBox,
+    protected void validateMapping(Optional<Ontology> ontology,
                                  MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
-        if (optionalSaturatedTBox.isPresent()) {
-            ClassifiedTBox saturatedTBox = optionalSaturatedTBox.get();
-            ontologyComplianceValidator.validate(filledProvMapping, saturatedTBox);
+        if (ontology.isPresent()) {
+            ontologyComplianceValidator.validate(filledProvMapping, ontology.get());
         }
     }
 
-    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<ClassifiedTBox> saturatedTBox, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
+    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
 
     protected abstract Optional<T2> castDBMetadata(Optional<DBMetadata> dbMetadata);
 

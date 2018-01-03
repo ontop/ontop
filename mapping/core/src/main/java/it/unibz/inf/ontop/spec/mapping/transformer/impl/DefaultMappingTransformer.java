@@ -2,19 +2,18 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.OntologyABox;
-import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+
+import java.util.Optional;
 
 public class DefaultMappingTransformer implements MappingTransformer {
-
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingNormalizer mappingNormalizer;
@@ -45,17 +44,25 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(OBDASpecInput specInput, Mapping mapping, DBMetadata dbMetadata, OntologyABox abox,
-                                       ClassifiedTBox tBox)
-            throws MappingException, DBMetadataExtractionException {
-        Mapping factsAsMapping = factConverter.convert(abox, mapping.getExecutorRegistry(),
-                settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
-        Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
+    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
+        if (ontology.isPresent()) {
+            Mapping factsAsMapping = factConverter.convert(ontology.get().abox(), mapping.getExecutorRegistry(),
+                    settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
+            Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
+            return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
+        }
+        else {
+            ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder().build().tbox();
+            return createSpecification(mapping, dbMetadata, emptyTBox);
+        }
+    }
+
+    OBDASpecification createSpecification(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
         Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
-        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tBox);
+        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tbox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tBox);
+        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tbox);
     }
 }
