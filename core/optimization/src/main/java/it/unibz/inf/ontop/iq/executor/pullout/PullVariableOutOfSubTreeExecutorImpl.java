@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.iq.executor.pullout;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.SubstitutionResults;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -23,7 +21,6 @@ import it.unibz.inf.ontop.iq.proposal.impl.PullVariableOutOfSubTreeResultsImpl;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools.propagateSubstitutionDown;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 /**
@@ -34,11 +31,14 @@ public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implem
 
     private final TermFactory termFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final IQConverter iqConverter;
 
     @Inject
-    private PullVariableOutOfSubTreeExecutorImpl(TermFactory termFactory, ImmutabilityTools immutabilityTools) {
+    private PullVariableOutOfSubTreeExecutorImpl(TermFactory termFactory, ImmutabilityTools immutabilityTools,
+                                                 IQConverter iqConverter) {
         this.termFactory = termFactory;
         this.immutabilityTools = immutabilityTools;
+        this.iqConverter = iqConverter;
     }
 
     @Override
@@ -88,57 +88,14 @@ public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implem
 
     }
 
-    /**
-     * UGLY!
-     *
-     * Because DescendingPropagationTools.propagateSubstitutionDown() does not apply the substitution to
-     * the root, this method contains the logic to apply it to the root
-     */
     private QueryNode propagateDownSubstitution(QueryNode originalSubTreeNode,
-                                                ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                                ImmutableSubstitution<? extends Variable> substitution,
                                                 IntermediateQuery query, QueryTreeComponent treeComponent) {
 
-        SubstitutionResults<? extends QueryNode> rootRenamingResults = originalSubTreeNode
-                .applyDescendingSubstitution(substitution, query);
+        IQTree propagatedSubTree = iqConverter.convertTree(query, originalSubTreeNode)
+                .applyDescendingSubstitution(substitution, Optional.empty());
 
-        Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> newSubstitution =
-                rootRenamingResults.getSubstitutionToPropagate();
-
-        QueryNode newSubTreeRootNode;
-        switch (rootRenamingResults.getLocalAction()) {
-            case NO_CHANGE:
-                newSubTreeRootNode = originalSubTreeNode;
-                break;
-            case NEW_NODE:
-                newSubTreeRootNode = rootRenamingResults.getOptionalNewNode().get();
-                treeComponent.replaceNode(originalSubTreeNode, newSubTreeRootNode);
-                break;
-            case REPLACE_BY_CHILD:
-                newSubTreeRootNode = treeComponent.replaceNodeByChild(originalSubTreeNode,
-                        rootRenamingResults.getOptionalReplacingChildPosition());
-                // Recursive
-                return newSubstitution
-                        // Recursive
-                        .map(s -> propagateDownSubstitution(newSubTreeRootNode, s, query, treeComponent))
-                        .orElse(newSubTreeRootNode);
-            default:
-                throw new MinorOntopInternalBugException("Unexpected local action for propagating renamings down to a " +
-                        "subtree " + rootRenamingResults.getLocalAction());
-        }
-
-        if (newSubstitution.isPresent()) {
-        /*
-         * Updates the tree component
-         */
-            try {
-                propagateSubstitutionDown(newSubTreeRootNode, newSubstitution.get(), query, treeComponent);
-            } catch (EmptyQueryException e) {
-                throw new IllegalStateException("PullVariableOutOfSubTree should not generate a QueryEmptyNodeException");
-            }
-        }
-
-        // TODO: make sure the root node has not been modified (would be a bug)
-        return newSubTreeRootNode;
+        return treeComponent.replaceSubTreeByIQ(originalSubTreeNode, propagatedSubTree);
     }
 
 }

@@ -275,12 +275,13 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public void replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree) {
+    public QueryNode replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree) {
         QueryNode iqRoot = replacingSubTree.getRootNode();
         QueryNode newSubTreeRoot = contains(iqRoot) ? iqRoot.clone() : iqRoot;
         replaceSubTree(subTreeRoot, newSubTreeRoot);
 
         insertIQChildren(newSubTreeRoot, replacingSubTree.getChildren());
+        return newSubTreeRoot;
     }
 
     /**

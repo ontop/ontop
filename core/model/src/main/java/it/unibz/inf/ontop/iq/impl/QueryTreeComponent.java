@@ -142,5 +142,5 @@ public interface QueryTreeComponent {
      */
     UUID getVersionNumber();
 
-    void replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree);
+    QueryNode replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree);
 }
