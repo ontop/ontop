@@ -65,6 +65,7 @@ public class LeftJoinOptimizationTest {
     private final static Variable N2 = TERM_FACTORY.getVariable("n2");
     private final static Variable O = TERM_FACTORY.getVariable("o");
     private final static Variable OF0 = TERM_FACTORY.getVariable("of0");
+    private final static Variable OF1 = TERM_FACTORY.getVariable("of1");
     private final static Variable O1 = TERM_FACTORY.getVariable("o1");
     private final static Variable O2 = TERM_FACTORY.getVariable("o2");
     private final static Variable O1F1 = TERM_FACTORY.getVariable("o1f1");
@@ -790,11 +791,11 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(O,
                         TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
                             TERM_FACTORY.getImmutableExpression(EQ, N, N1),
-                            O1)));
+                            OF1)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         expectedQueryBuilder.addChild(constructionNode1, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, OF1)));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
