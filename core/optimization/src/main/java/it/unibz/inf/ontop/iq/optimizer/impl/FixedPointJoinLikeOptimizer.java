@@ -56,7 +56,7 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
                 conversionVersion = query.getVersionNumber();
             }
 
-        } while (converged);
+        } while (!converged);
         return query;
     }
 
