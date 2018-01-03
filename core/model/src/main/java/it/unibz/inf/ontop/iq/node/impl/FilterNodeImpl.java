@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -236,10 +237,18 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                             .map(child::propagateDownConstraint)
                             .orElse(child));
 
-            return conditionSimplificationResults.optionalExpression
+            IQTree filterLevelTree = conditionSimplificationResults.optionalExpression
                     .map(e -> e.equals(getFilterCondition()) ? this : iqFactory.createFilterNode(e))
                     .map(filterNode -> (IQTree) iqFactory.createUnaryIQTree(filterNode, newChild))
                     .orElse(newChild);
+
+            return Optional.of(conditionSimplificationResults.substitution)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
+                    .map(s -> iqFactory.createConstructionNode(child.getVariables(), s))
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, filterLevelTree))
+                    .orElse(filterLevelTree);
+
 
         } catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(child.getVariables());
