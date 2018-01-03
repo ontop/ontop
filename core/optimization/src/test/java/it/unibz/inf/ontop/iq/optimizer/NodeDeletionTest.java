@@ -49,10 +49,10 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 
@@ -89,10 +89,10 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
@@ -155,20 +155,16 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
-        assertTrue(viceRootNode instanceof ConstructionNode);
-        assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 1);
-
-        QueryNode viceViceRootNode = optimizedQuery.getFirstChild(viceRootNode).get();
-        assertTrue(viceViceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceViceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
-        assertTrue(optimizedQuery.getChildren(viceViceRootNode).isEmpty());
+        assertTrue(viceRootNode instanceof ExtensionalDataNode);
+        assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
+        assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
     }
 
     @Test
@@ -226,10 +222,10 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
@@ -274,7 +270,7 @@ public class NodeDeletionTest {
         /**
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = INNER_JOIN_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 }

@@ -48,8 +48,6 @@ public interface QueryTree {
 
     void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes();
-
     ImmutableSet<TrueNode> getTrueNodes();
 
     QueryNode replaceNodeByChild(QueryNode parentNode,

@@ -21,7 +21,6 @@ public class DefaultTree implements QueryTree {
     private final Map<QueryNode, TreeNode> nodeIndex;
     private final Map<TreeNode, ChildrenRelation> childrenIndex;
     private final Map<TreeNode, TreeNode> parentIndex;
-    private final Set<EmptyNode> emptyNodes;
     private final Set<TrueNode> trueNodes;
     private final Set<IntensionalDataNode> intensionalNodes;
     private UUID versionNumber;
@@ -31,7 +30,6 @@ public class DefaultTree implements QueryTree {
         nodeIndex = new HashMap<>();
         childrenIndex = new HashMap<>();
         parentIndex = new HashMap<>();
-        emptyNodes = new HashSet<>();
         trueNodes = new HashSet<>();
         intensionalNodes = new HashSet<>();
 
@@ -48,7 +46,6 @@ public class DefaultTree implements QueryTree {
                         Map<QueryNode, TreeNode> nodeIndex,
                         Map<TreeNode, ChildrenRelation> childrenIndex,
                         Map<TreeNode, TreeNode> parentIndex,
-                        Set<EmptyNode> emptyNodes,
                         Set<TrueNode> trueNodes,
                         Set<IntensionalDataNode> intensionalNodes,
                         UUID versionNumber) {
@@ -56,7 +53,6 @@ public class DefaultTree implements QueryTree {
         this.nodeIndex = nodeIndex;
         this.childrenIndex = childrenIndex;
         this.parentIndex = parentIndex;
-        this.emptyNodes = emptyNodes;
         this.trueNodes = trueNodes;
         this.intensionalNodes = intensionalNodes;
         this.versionNumber = versionNumber;
@@ -343,23 +339,6 @@ public class DefaultTree implements QueryTree {
         addChild(newParentNode, childNode, optionalPosition, false, false);
     }
 
-    public ImmutableSet<EmptyNode> getEmptyNodes() {
-//        if (subTreeRoot == rootNode) {
-        return ImmutableSet.copyOf(emptyNodes);
-//        }
-//        /**
-//         * TODO: find a more efficient implementation
-//         */
-//        else {
-//            return Stream.concat(
-//                    Stream.of(subTreeRoot),
-//                    getSubTreeNodesInTopDownOrder(subTreeRoot).stream())
-//                    .filter(n -> n instanceof EmptyNode)
-//                    .map(n -> (EmptyNode) n)
-//                    .collect(ImmutableCollectors.toSet());
-//        }
-    }
-
     public ImmutableSet<TrueNode> getTrueNodes() {
         return ImmutableSet.copyOf(trueNodes);
     }
@@ -432,7 +411,7 @@ public class DefaultTree implements QueryTree {
                         Map.Entry::getValue
                 ));
         return new DefaultTree(newNodeIndex.get(rootNode.getQueryNode()), newNodeIndex, newChildrenIndex,
-                newParentIndex, new HashSet<>(emptyNodes), new HashSet<>(trueNodes), new HashSet<>(intensionalNodes), versionNumber);
+                newParentIndex, new HashSet<>(trueNodes), new HashSet<>(intensionalNodes), versionNumber);
     }
 
     @Override
@@ -543,10 +522,7 @@ public class DefaultTree implements QueryTree {
      */
     private void insertNodeIntoIndex(QueryNode queryNode, TreeNode treeNode) {
         nodeIndex.put(queryNode, treeNode);
-        if (queryNode instanceof EmptyNode) {
-            emptyNodes.add((EmptyNode)queryNode);
-
-        }else if (queryNode instanceof TrueNode){
+        if (queryNode instanceof TrueNode){
            trueNodes.add((TrueNode) queryNode);
         }
         else if (queryNode instanceof IntensionalDataNode){
@@ -561,9 +537,7 @@ public class DefaultTree implements QueryTree {
     private void removeNodeFromIndex(QueryNode queryNode) {
         nodeIndex.remove(queryNode);
 
-        if (queryNode instanceof EmptyNode) {
-            emptyNodes.remove(queryNode);
-        } else if (queryNode instanceof TrueNode) {
+        if (queryNode instanceof TrueNode) {
             trueNodes.remove(queryNode);
         } else if (queryNode instanceof IntensionalDataNode){
             intensionalNodes.remove(queryNode);
