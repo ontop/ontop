@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -104,15 +102,6 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
         QueryNode newNode = propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode,
                 focusNodeUpdate.newEqualities);
-
-        if (focusNodeUpdate.optionalSubstitution.isPresent()) {
-            try {
-                DescendingPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
-                        focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
-            } catch (EmptyQueryException e) {
-                throw new IllegalStateException("EmptyQueryExceptions are not expected when pulling the variables out of data nodes");
-            }
-        }
 
         // return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
         return new NodeCentricOptimizationResultsImpl<>(query, query.getNextSibling(newNode),
