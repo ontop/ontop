@@ -6,43 +6,55 @@ import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
-import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
-import it.unibz.inf.ontop.reformulation.impl.RuleUnfolderImpl;
 import it.unibz.inf.ontop.spec.mapping.*;
-import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
+import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
+import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 
     private final DatalogMTLToIntermediateQueryConverter dMTLConverter;
     private final RuleUnfolder ruleUnfolder;
+    private final ImmutabilityTools immutabilityTools;
+    private final JoinLikeOptimizer joinLikeOptimizer;
+    private final TemporalIntermediateQueryFactory TIQFactory;
+    private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
+    private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
+
 
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
-                                         RuleUnfolder ruleUnfolder) {
+                                         RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools,
+                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory) {
         this.dMTLConverter = dMTLConverter;
         this.ruleUnfolder = ruleUnfolder;
+        this.immutabilityTools = immutabilityTools;
+        TIQFactory = tiqFactory;
+        this.pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
+        projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
+        this.joinLikeOptimizer = joinLikeOptimizer;
     }
 
     @Override
@@ -67,6 +79,11 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 if (areAllMappingsExist(mergedMap, atomicExpressionsList)) {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
+                        iq = ruleUnfolder.optimize(iq);
+                        //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
+                        iq = projectionShrinkingOptimizer.optimize(iq);
+                        iq = joinLikeOptimizer.optimize(iq);
+                        iq = removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                         System.out.println(iq.toString());
                     } catch (EmptyQueryException e) {
@@ -108,6 +125,54 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 .filter(dMTLexp -> dMTLexp instanceof AtomicExpression)
                 .map(dMTLexp -> (AtomicExpression) dMTLexp)
                 .collect(ImmutableCollectors.toList());
+    }
+
+    private IntermediateQuery removeRedundantTemporalCoalesces(IntermediateQuery intermediateQuery, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry){
+
+        TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
+        TIQBuilder.init(intermediateQuery.getProjectionAtom(), intermediateQuery.getRootNode());
+        TIQBuilder = func(TIQBuilder, intermediateQuery, intermediateQuery.getRootNode());
+
+        return TIQBuilder.build();
+    }
+
+    private TemporalIntermediateQueryBuilder func(TemporalIntermediateQueryBuilder TIQBuilder, IntermediateQuery query,
+                                                  QueryNode currentNode){
+        if(currentNode instanceof TemporalCoalesceNode){
+            QueryNode child = query.getFirstChild(currentNode).get();
+            if(child instanceof FilterNode){
+                QueryNode childOfChild = query.getFirstChild(child).get();
+                if(childOfChild instanceof TemporalCoalesceNode){
+                    QueryNode childOfChildOfChild = query.getFirstChild(childOfChild).get();
+                    TIQBuilder.addChild(currentNode, child);
+                    TIQBuilder.addChild(child, childOfChildOfChild);
+                    func(TIQBuilder, query, childOfChildOfChild);
+                }else{
+                    TIQBuilder.addChild(currentNode, child);
+                    TIQBuilder.addChild(child, childOfChild);
+                    func(TIQBuilder, query, childOfChild);
+                }
+            }else{
+                TIQBuilder.addChild(currentNode, child);
+                func(TIQBuilder, query, child);
+            }
+        }else if (currentNode instanceof UnaryOperatorNode){
+            QueryNode child = query.getFirstChild(currentNode).get();
+            TIQBuilder.addChild(currentNode, child);
+            func(TIQBuilder, query,child);
+
+        }else if(currentNode instanceof BinaryNonCommutativeOperatorNode){
+            QueryNode leftChild = query.getChild(currentNode, LEFT).get();
+            QueryNode rightChild = query.getChild(currentNode, RIGHT).get();
+            TIQBuilder.addChild(currentNode,leftChild,LEFT);
+            TIQBuilder.addChild(currentNode,rightChild, RIGHT);
+            func(TIQBuilder, query, leftChild);
+            func(TIQBuilder, query, rightChild);
+        }else if(currentNode instanceof NaryOperatorNode){
+            query.getChildren(currentNode).forEach(c -> TIQBuilder.addChild(currentNode, c));
+            query.getChildren(currentNode).forEach(c -> func(TIQBuilder,query,c));
+        }
+        return TIQBuilder;
     }
 
 //    @Override

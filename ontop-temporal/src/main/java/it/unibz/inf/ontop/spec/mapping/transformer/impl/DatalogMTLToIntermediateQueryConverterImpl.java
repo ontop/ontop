@@ -145,9 +145,15 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                 newNode = TIQFactory.createDiamondPlusNode(((DiamondPlusExpression) currentExpression).getRange());
 
             TIQBuilder.addChild(parentNode, newNode);
-            TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-            TIQBuilder.addChild(newNode, coalesceNode);
-            getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),coalesceNode,TIQBuilder);
+
+            // to avoid redundant coalesce nodes
+            if(((UnaryTemporalExpression)currentExpression).getOperand() instanceof UnaryTemporalExpression){
+                getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),newNode,TIQBuilder);
+            }else {
+                TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                TIQBuilder.addChild(newNode, coalesceNode);
+                getBuilder(((UnaryTemporalExpression) currentExpression).getOperand(), coalesceNode, TIQBuilder);
+            }
 
         }else if (currentExpression instanceof BinaryTemporalExpression
                 && currentExpression instanceof TemporalExpressionWithRange) {
