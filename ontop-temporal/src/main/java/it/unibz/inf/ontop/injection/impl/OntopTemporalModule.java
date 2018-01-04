@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
@@ -58,6 +59,7 @@ public class OntopTemporalModule extends OntopAbstractModule {
         bindFromSettings(TemporalMappingSaturator.class);
         bindFromSettings(StaticRuleMappingSaturator.class);
         bindFromSettings(DatalogMTLToIntermediateQueryConverter.class);
+        bindFromSettings(RuleUnfolder.class);
         //bindFromSettings(TemporalQuadrupleMapping.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(

@@ -5,58 +5,55 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
-import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.temporal.model.*;
-import it.unibz.inf.ontop.temporal.model.impl.StaticAtomicExpressionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
 public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturator {
 
-    private final IntermediateQueryFactory IQFactory;
     private final TermFactory termFactory;
-    private final DatalogConversionTools datalogConversionTools;
     private final DatalogFactory datalogFactory;
     private final DatalogProgram2QueryConverter datalogConverter;
-    private final IQConverter iqConverter;
     private final SpecificationFactory specificationFactory;
+    private final RuleUnfolder ruleUnfolder;
+    private final ImmutabilityTools immutabilityTools;
+    private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
+    private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
+    private final JoinLikeOptimizer joinLikeOptimizer;
 
 
     @Inject
-    private StaticRuleMappingSaturatorImpl(IntermediateQueryFactory IQFactory,
-                                           TermFactory termFactory, DatalogConversionTools datalogConversionTools,
-                                           DatalogFactory datalogFactory, DatalogProgram2QueryConverter datalogConverter,
-                                           IQConverter iqConverter, SpecificationFactory specificationFactory) {
-        this.IQFactory = IQFactory;
+    private StaticRuleMappingSaturatorImpl(TermFactory termFactory, DatalogFactory datalogFactory,
+                                           DatalogProgram2QueryConverter datalogConverter,
+                                           SpecificationFactory specificationFactory,
+                                           RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools, JoinLikeOptimizer joinLikeOptimizer) {
         this.termFactory = termFactory;
-        this.datalogConversionTools = datalogConversionTools;
         this.datalogFactory = datalogFactory;
         this.datalogConverter = datalogConverter;
-        this.iqConverter = iqConverter;
         this.specificationFactory = specificationFactory;
+        this.ruleUnfolder = ruleUnfolder;
+        this.immutabilityTools = immutabilityTools;
+        this.joinLikeOptimizer = joinLikeOptimizer;
+        pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
+        projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
     }
 
     private DatalogProgram convertStaticMTLRulesToDatalogProgram(DatalogMTLProgram datalogMTLProgram){
@@ -92,7 +89,11 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
                         IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
                                 dbMetadata, dProg, ImmutableList.of(), mapping.getExecutorRegistry());
 
-                        intermediateQuery = unfold(intermediateQuery, ImmutableMap.copyOf(mappingMap));
+                        intermediateQuery = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mappingMap));
+                        intermediateQuery = ruleUnfolder.optimize(intermediateQuery);
+                        intermediateQuery = pushUpBooleanExpressionOptimizer.optimize(intermediateQuery);
+                        intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
+                        intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
                         mappingMap.put(intermediateQuery.getProjectionAtom().getPredicate(), intermediateQuery);
                         System.out.println(intermediateQuery.toString());
 
@@ -110,36 +111,6 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
 
 
         return specificationFactory.createMapping(mapping.getMetadata(), ImmutableMap.copyOf(mappingMap), mapping.getExecutorRegistry());
-    }
-
-    //BasicQueryUnfolder.optimize
-    // TODO: follow the steps in QuestqueryProcessor by injecting TranslationFactory
-    private IntermediateQuery unfold(IntermediateQuery query, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap) throws EmptyQueryException {
-
-        // Non-final
-        Optional<IntensionalDataNode> optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
-
-
-        while (optionalCurrentIntensionalNode.isPresent()) {
-
-            IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
-
-            Optional<IntermediateQuery> optionalMappingAssertion = Optional.ofNullable(mappingMap.get(
-                    intensionalNode.getProjectionAtom().getPredicate()));
-
-            QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
-            query.applyProposal(queryMerging);
-
-            /**
-             * Next intensional node
-             *
-             * NB: some intensional nodes may have dropped during the last merge
-             */
-            optionalCurrentIntensionalNode = query.getIntensionalNodes().findFirst();
-        }
-
-        // remove unnecessary TrueNodes, which may have been introduced during substitution lift
-        return new TrueNodesRemovalOptimizer().optimize(query);
     }
 
 //    @Override

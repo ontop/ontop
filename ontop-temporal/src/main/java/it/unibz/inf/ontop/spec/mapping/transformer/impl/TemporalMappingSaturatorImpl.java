@@ -36,12 +36,13 @@ import java.util.stream.Collectors;
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 
     private final DatalogMTLToIntermediateQueryConverter dMTLConverter;
-    private RuleUnfolder ruleUnfolder;
+    private final RuleUnfolder ruleUnfolder;
 
     @Inject
-    private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter) {
+    private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
+                                         RuleUnfolder ruleUnfolder) {
         this.dMTLConverter = dMTLConverter;
-        this.ruleUnfolder = new RuleUnfolderImpl();
+        this.ruleUnfolder = ruleUnfolder;
     }
 
     @Override

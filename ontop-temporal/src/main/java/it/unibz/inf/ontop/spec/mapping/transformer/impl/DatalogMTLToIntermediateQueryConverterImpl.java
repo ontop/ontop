@@ -103,7 +103,8 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                     TIQFactory.createIntensionalDataNode(atomFactory
                             .getDataAtom(((AtomicExpression) currentExpression).getPredicate(),
                             ((AtomicExpression)currentExpression).getVariableOrGroundTerms()));
-            if(currentExpression instanceof TemporalAtomicExpression) {
+            if(currentExpression instanceof TemporalAtomicExpression
+                    && !(parentNode instanceof TemporalCoalesceNode)) {
                 TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
                 TIQBuilder.addChild(parentNode, coalesceNode);
                 TIQBuilder.addChild(coalesceNode, intensionalDataNode);
