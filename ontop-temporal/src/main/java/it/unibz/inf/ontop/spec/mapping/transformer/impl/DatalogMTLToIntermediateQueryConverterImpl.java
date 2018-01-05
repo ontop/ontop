@@ -73,7 +73,6 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                 TIQBuilder.init(projectionAtom, constructionNode);
                 TIQBuilder = getBuilder(rule.getBody(), constructionNode, TIQBuilder);
                 IntermediateQuery intermediateQuery = TIQBuilder.build();
-                System.out.println(intermediateQuery.toString());
                 return intermediateQuery;
             }
         }

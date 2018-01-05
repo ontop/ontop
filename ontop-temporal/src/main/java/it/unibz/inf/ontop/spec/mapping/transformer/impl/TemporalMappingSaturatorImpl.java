@@ -74,6 +74,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                             !(((FilterExpression) rule.getBody()).getExpression() instanceof StaticJoinExpression))) {
                 IntermediateQuery intermediateQuery = dMTLConverter.dMTLToIntermediateQuery(rule,
                         temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                System.out.println(intermediateQuery.toString());
 
                 ImmutableList<AtomicExpression> atomicExpressionsList = getAtomicExpressions(rule);
                 if (areAllMappingsExist(mergedMap, atomicExpressionsList)) {
