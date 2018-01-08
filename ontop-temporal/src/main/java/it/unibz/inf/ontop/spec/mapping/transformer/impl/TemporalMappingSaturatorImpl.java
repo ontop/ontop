@@ -80,7 +80,9 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 if (areAllMappingsExist(mergedMap, atomicExpressionsList)) {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
+                        System.out.println(iq.toString());
                         iq = ruleUnfolder.optimize(iq);
+                        System.out.println(iq.toString());
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
                         iq = projectionShrinkingOptimizer.optimize(iq);
                         iq = joinLikeOptimizer.optimize(iq);

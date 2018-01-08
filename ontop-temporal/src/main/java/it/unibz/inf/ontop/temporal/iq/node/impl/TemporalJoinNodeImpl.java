@@ -95,7 +95,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     }
 
     @Override
-    public SubstitutionResults<? extends CommutativeJoinNode> applyAscendingSubstitution
+    public SubstitutionResults<TemporalJoinNode> applyAscendingSubstitution
             (ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
         if (substitution.isEmpty()) {
             return DefaultSubstitutionResults.noChange();
@@ -126,7 +126,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     }
 
     @Override
-    public SubstitutionResults<? extends CommutativeJoinNode> applyDescendingSubstitution(
+    public SubstitutionResults<TemporalJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
         return applyDescendingSubstitution(substitution);
     }

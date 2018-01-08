@@ -22,6 +22,7 @@ public class TemporalMappingParserTest extends TestCase {
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)
+                .enableTestMode()
                 .build();
 
         //Injector injector = configuration.getInjector();
