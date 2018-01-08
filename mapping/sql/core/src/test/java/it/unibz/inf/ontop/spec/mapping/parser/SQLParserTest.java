@@ -24,12 +24,11 @@ import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -955,12 +954,12 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().size());
 	}
 
-	@Ignore
-	public void test_recursive() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = sqp.parse("WITH RECURSIVE fibonacci(indice, site_id) AS ( VALUES (1, 1) UNION ALL SELECT site_id, indice+site_id FROM fibonacci WHERE site_id < 1000000 ) SELECT site_id FROM fibonacci");
-		assertEquals(2, re.getDataAtoms().size());
+	@Test(expected = UnsupportedSelectQueryException.class) //due to IN with subselect
+	public void test_IN() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		RAExpression re = sqp.parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)");
 		assertEquals(7, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
+
 
 }
