@@ -92,7 +92,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		onto = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(config.loadProvidedInputOntology())).tbox();
+		onto = OWLAPITranslatorOWL2QL.translateAndClassify(config.loadProvidedInputOntology()).tbox();
 	}
 
 	@After

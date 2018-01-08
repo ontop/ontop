@@ -25,14 +25,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.MappingVocabularyExtractor;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -58,8 +58,6 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
  *
  */
 public class DirectMappingEngine {
-
-	private final MappingVocabularyExtractor vocabularyExtractor;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -101,13 +99,12 @@ public class DirectMappingEngine {
 	}
 
 	@Inject
-	private DirectMappingEngine(OntopSQLCredentialSettings settings, MappingVocabularyExtractor vocabularyExtractor,
+	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
                                 SQLPPMappingFactory ppMappingFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
-		this.vocabularyExtractor = vocabularyExtractor;
 	}
 
 	/**
@@ -120,31 +117,25 @@ public class DirectMappingEngine {
 		this.baseIRI = fixBaseURI(baseIRI);
 
 		try {
-			SQLPPMapping newPPMapping = inputPPMapping.isPresent()
-					? extractPPMapping(inputPPMapping.get())
-					: extractPPMapping();
+			SQLPPMapping newPPMapping = extractPPMapping(inputPPMapping);
 
-			OntologyVocabulary newVocabulary = vocabularyExtractor.extractVocabulary(
-					newPPMapping.getTripleMaps().stream()
-							.flatMap(ax -> ax.getTargetAtoms().stream()));
+			OWLOntology ontology = inputOntology.isPresent()
+                    ? inputOntology.get()
+                    : OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI));
 
-			OWLOntology newOntology = inputOntology.isPresent()
-					? updateOntology(inputOntology.get(), newVocabulary)
-					: updateOntology(createEmptyOntology(baseIRI), newVocabulary);
+            // update ontology
+            OWLOntologyManager manager = ontology.getOWLOntologyManager();
+            Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(manager,
+                    newPPMapping.getTripleMaps().stream()
+                            .flatMap(ax -> ax.getTargetAtoms().stream()));
+            manager.addAxioms(ontology, declarationAxioms);
 
-			return new DefaultBootstrappingResults(newPPMapping, newOntology);
+            return new DefaultBootstrappingResults(newPPMapping, ontology);
 		}
 		catch (SQLException | MappingException | OWLOntologyCreationException e) {
 			throw new MappingBootstrappingException(e);
 		}
 	}
-
-	private static OWLOntology createEmptyOntology(String baseIRI) throws OWLOntologyCreationException {
-		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
-		return mng.createOntology(IRI.create(baseIRI));
-	}
-
-
 
 	public static String fixBaseURI(String prefix) {
 		if (prefix.endsWith("#")) {
@@ -157,41 +148,28 @@ public class DirectMappingEngine {
 	}
 
 
-	/***
-	 * enrich the ontology according to mappings used in the model
-	 * 
-	 * @return a new ontology storing all classes and properties used in the mappings
-	 *
-	 */
-	private OWLOntology updateOntology(OWLOntology ontology, OntologyVocabulary vocabulary) {
-		OWLOntologyManager manager = ontology.getOWLOntologyManager();
-		Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(manager, vocabulary);
-		manager.addAxioms(ontology, declarationAxioms);
-		return ontology;		
-	}
-
-	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, OntologyVocabulary vocabulary) {
+	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, Stream<? extends Function> targetAtoms) {
 
         OWLDataFactory dataFactory = manager.getOWLDataFactory();
         Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
 
-        //Add all the classes
-        for (OClass c :  vocabulary.classes()) {
-            OWLClass owlClass = dataFactory.getOWLClass(IRI.create(c.getName()));
-            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(owlClass));
-        }
-
-        //Add all the object properties
-        for (ObjectPropertyExpression p : vocabulary.objectProperties()) {
-            OWLObjectProperty property = dataFactory.getOWLObjectProperty(IRI.create(p.getName()));
-            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
-        }
-
-        //Add all the data properties
-        for (DataPropertyExpression p : vocabulary.dataProperties()) {
-            OWLDataProperty property = dataFactory.getOWLDataProperty(IRI.create(p.getName()));
-            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(property));
-        }
+        targetAtoms.forEach(f -> {
+            IRI iri = IRI.create(f.getFunctionSymbol().getName());
+            final OWLEntity entity;
+            if (f.getArity() == 1) {
+                entity = dataFactory.getOWLClass(iri);
+            }
+            else {
+                Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
+                if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT)) {
+                    entity = dataFactory.getOWLObjectProperty(iri);
+                }
+                else {
+                    entity = dataFactory.getOWLDataProperty(iri);
+                }
+            }
+            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(entity));
+        });
 
         return declarationAxioms;
     }
@@ -201,17 +179,19 @@ public class DirectMappingEngine {
 	 *
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
-	private SQLPPMapping extractPPMapping() throws MappingException, SQLException {
-		it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
-		SQLPPMapping emptyPPMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
-		return extractPPMapping(emptyPPMapping);
-	}
+	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping) throws MappingException, SQLException {
 
-	private SQLPPMapping extractPPMapping(SQLPPMapping ppMapping)
-			throws MappingException, SQLException {
-		currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
-		return bootstrapMappings(ppMapping);
+        SQLPPMapping mapping;
+	    if (!ppMapping.isPresent()) {
+            it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
+            mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
+        }
+        else
+            mapping = ppMapping.get();
+
+		currentMappingIndex = mapping.getTripleMaps().size() + 1;
+		return bootstrapMappings(mapping);
 	}
 
 

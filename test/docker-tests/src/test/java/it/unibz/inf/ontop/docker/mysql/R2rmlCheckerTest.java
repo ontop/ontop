@@ -480,7 +480,7 @@ public class R2rmlCheckerTest {
 	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		Ontology onto = OWLAPITranslatorOWL2QL.translateAndClassify(ImmutableList.of(owl));
+		Ontology onto = OWLAPITranslatorOWL2QL.translateAndClassify(owl);
 		return onto.tbox();
 	}
 

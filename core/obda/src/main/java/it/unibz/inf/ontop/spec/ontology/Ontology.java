@@ -23,15 +23,18 @@ package it.unibz.inf.ontop.spec.ontology;
 
 public interface Ontology  {
 
-
     ClassifiedTBox tbox();
-
 
     Datatype getDatatype(String uri);
 
 
     OntologyABox abox();
 
+    /**
+     * annotation properties
+     *
+     * @return annotation properties
+     */
 
     OntologyVocabularyCategory<AnnotationProperty> annotationProperties();
 }

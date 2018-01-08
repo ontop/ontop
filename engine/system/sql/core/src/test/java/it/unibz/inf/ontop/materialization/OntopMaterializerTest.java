@@ -127,7 +127,6 @@ public class OntopMaterializerTest {
 				.map(p -> URI.create(p.getName()))
 				.collect(ImmutableCollectors.toSet());
 
-		//Ontology tbox = MappingVocabularyExtractor.extractOntology(ppMapping);
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
 
 		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
