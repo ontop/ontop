@@ -435,7 +435,16 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                     .map(iqFactory::createInnerJoinNode)
                     .orElseGet(iqFactory::createInnerJoinNode);
 
-            return iqFactory.createNaryIQTree(newJoin, newChildren);
+            NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
+
+            return Optional.of(conditionSimplificationResults.substitution)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> iqFactory.createConstructionNode(children.stream()
+                            .flatMap(c -> c.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet()),
+                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s))
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, joinTree))
+                    .orElse(joinTree);
 
         } catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(children.stream()
