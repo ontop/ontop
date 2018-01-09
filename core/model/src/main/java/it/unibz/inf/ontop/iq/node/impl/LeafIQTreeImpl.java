@@ -64,7 +64,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
                     .map(this::applyDescendingSubstitution)
                     .orElse(this);
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(getVariables());
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }
     }
 

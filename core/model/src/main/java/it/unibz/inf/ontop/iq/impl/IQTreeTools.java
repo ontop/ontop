@@ -1,9 +1,13 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -13,10 +17,12 @@ import java.util.Optional;
 public class IQTreeTools {
 
     private final TermFactory termFactory;
+    private final ConstructionNodeTools constructionNodeTools;
 
     @Inject
-    private IQTreeTools(TermFactory termFactory) {
+    private IQTreeTools(TermFactory termFactory, ConstructionNodeTools constructionNodeTools) {
         this.termFactory = termFactory;
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     /**
@@ -41,6 +47,12 @@ public class IQTreeTools {
         }
 
         return Optional.of(reducedSubstitution);
+    }
+
+    public ImmutableSet<Variable> computeNewProjectedVariables(
+            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
+            ImmutableSet<Variable> projectedVariables) {
+        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables);
     }
 
 
