@@ -158,13 +158,4 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
         return Stream.concat(gEntryStream, localEntryStream)
                 .filter(e -> !e.getKey().equals(e.getValue()));
     }
-
-    @Override
-    public Var2VarSubstitution composeWith2(
-            ImmutableSubstitution<? extends Variable> g) {
-        ImmutableSubstitution<Variable> composedSubstitution =
-                (ImmutableSubstitution<Variable>) (ImmutableSubstitution<?>) composeWith(g);
-
-        return substitutionFactory.getVar2VarSubstitution(composedSubstitution.getImmutableMap());
-    }
 }
