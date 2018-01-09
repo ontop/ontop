@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -25,15 +26,17 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           @Assisted IQProperties iqProperties) {
-        super(rootNode, children, iqProperties);
+                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                           IntermediateQueryFactory iqFactory) {
+        super(rootNode, children, iqProperties, iqTreeTools, iqFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
     }
 
     @AssistedInject
-    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children) {
-        this(rootNode, children, new IQPropertiesImpl());
+    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory);
     }
 
     @Override
@@ -56,13 +59,16 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
 
-        ImmutableSet<Variable> projectedVariables = getVariables();
-        if (descendingSubstitution.getDomain().stream()
-                .anyMatch(projectedVariables::contains)) {
-            return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChildren()))
+                    .orElseGet(() -> constraint
+                            .map(this::propagateDownConstraint)
+                            .orElse(this));
+
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(getVariables());
         }
-        else
-            return this;
     }
 
     /**

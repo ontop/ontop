@@ -2,10 +2,11 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -14,7 +15,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
-import java.util.Optional;
 
 public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
@@ -22,7 +22,8 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
 
     @AssistedInject
-    private TrueNodeImpl() {
+    private TrueNodeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(iqTreeTools, iqFactory);
     }
 
     @Override
@@ -73,8 +74,8 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public TrueNodeImpl clone() {
-        return new TrueNodeImpl();
+    public TrueNode clone() {
+        return iqFactory.createTrueNode();
     }
 
     @Override
@@ -118,10 +119,8 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
-
+    protected IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         return this;
     }
 
