@@ -915,6 +915,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree subTree = ascendingNormalization.normalizeChild(
                 Optional.of(liftingState.rightChild)
                     .filter(rightChild -> !rightChild.isDeclaredAsEmpty())
+                    .filter(rightChild -> !(rightChild.getRootNode() instanceof TrueNode))
                     // LJ
                     .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(liftingState.ljCondition),
