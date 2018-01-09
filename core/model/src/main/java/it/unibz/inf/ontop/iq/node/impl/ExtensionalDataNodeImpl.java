@@ -64,13 +64,6 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return applySubstitution(this, substitution);
-    }
-
-    @Override
     public SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         return applySubstitution(this, substitution);

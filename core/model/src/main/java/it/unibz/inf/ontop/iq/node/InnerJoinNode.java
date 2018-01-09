@@ -22,11 +22,6 @@ public interface InnerJoinNode extends CommutativeJoinNode {
     InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query);
-
-    @Override
     SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

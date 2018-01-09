@@ -48,13 +48,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public SubstitutionResults<TrueNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return DefaultSubstitutionResults.noChange();
-    }
-
-    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         if (node instanceof TrueNode) {
             return true;
@@ -81,11 +74,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public String toString() {
         return PREFIX;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("A TrueNode is not expected to have a child");
     }
 
     @Override

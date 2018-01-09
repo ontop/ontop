@@ -22,11 +22,6 @@ public interface EmptyNode extends LeafIQTree {
             throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<EmptyNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) ;
-
-    @Override
     SubstitutionResults<EmptyNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 }

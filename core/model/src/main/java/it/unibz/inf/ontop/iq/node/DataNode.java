@@ -23,11 +23,6 @@ public interface DataNode<P extends AtomPredicate> extends LeafIQTree {
     DataNode<P> newAtom(DataAtom<P> newAtom);
 
     @Override
-    SubstitutionResults<? extends DataNode<P>> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query);
-
-    @Override
     SubstitutionResults<? extends DataNode<P>> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 }

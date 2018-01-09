@@ -16,11 +16,6 @@ public interface TrueNode extends LeafIQTree {
             throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<TrueNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) ;
-
-    @Override
     SubstitutionResults<TrueNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) ;
 

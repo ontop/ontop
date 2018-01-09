@@ -42,11 +42,6 @@ public interface ConstructionNode extends ExplicitVariableProjectionNode, UnaryO
     ImmutableSet<Variable> getChildVariables();
 
     @Override
-    SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query);
-
-    @Override
     SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException;

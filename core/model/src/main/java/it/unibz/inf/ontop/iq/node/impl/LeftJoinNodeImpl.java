@@ -315,34 +315,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        ArgumentPosition emptyNodePosition = query.getOptionalPosition(this, emptyChild)
-                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
-
-        QueryNode otherChild = query.getChild(this, (emptyNodePosition == LEFT) ? RIGHT : LEFT)
-                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
-
-        ImmutableSet<Variable> variablesProjectedByOtherChild = query.getVariables(otherChild);
-
-        ImmutableSet<Variable> nullVariables;
-
-        switch(emptyNodePosition) {
-            case LEFT:
-                nullVariables = union(variablesProjectedByOtherChild, emptyChild.getVariables());
-                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, nullVariables);
-
-            case RIGHT:
-                nullVariables = emptyChild.getVariables().stream()
-                        .filter(v -> !(variablesProjectedByOtherChild.contains(v)))
-                        .collect(ImmutableCollectors.toSet());
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                        otherChild, nullVariables);
-            default:
-                throw new IllegalStateException("Unknown position: " + emptyNodePosition);
-        }
-    }
-
-    @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
         ArgumentPosition trueNodePosition = query.getOptionalPosition(this, trueChild)
                 .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));

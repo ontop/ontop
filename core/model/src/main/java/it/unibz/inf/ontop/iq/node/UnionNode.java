@@ -21,11 +21,6 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
     UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<UnionNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) ;
-
-    @Override
     SubstitutionResults<UnionNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 

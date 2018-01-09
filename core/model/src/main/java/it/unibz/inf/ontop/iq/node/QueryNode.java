@@ -68,14 +68,6 @@ public interface QueryNode extends Cloneable {
     ImmutableSet<Variable> getLocalVariables();
 
     /**
-     * Applies a substitution coming from below
-     */
-    SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query)
-            throws QueryNodeSubstitutionException;
-
-    /**
      * Applies a substitution coming from above
      */
     SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(
@@ -94,8 +86,6 @@ public interface QueryNode extends Cloneable {
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
-
-    NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
 
     NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
 

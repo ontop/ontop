@@ -21,11 +21,6 @@ public interface IntensionalDataNode extends DataNode<AtomPredicate> {
     IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<IntensionalDataNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query);
-
-    @Override
     SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 

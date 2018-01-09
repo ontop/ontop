@@ -17,11 +17,6 @@ public interface CommutativeJoinNode extends JoinLikeNode, CommutativeJoinOrFilt
     CommutativeJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    SubstitutionResults<? extends CommutativeJoinNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
-
-    @Override
     SubstitutionResults<? extends CommutativeJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException;

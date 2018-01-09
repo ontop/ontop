@@ -68,11 +68,6 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     }
 
     @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
-    }
-
-    @Override
     public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
         throw new UnsupportedOperationException("A DataNode is not expected to have a child");
     }

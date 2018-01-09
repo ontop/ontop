@@ -19,11 +19,6 @@ public interface JoinLikeNode extends JoinOrFilterNode {
     JoinLikeNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
 
     @Override
-    SubstitutionResults<? extends JoinLikeNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
-
-    @Override
     SubstitutionResults<? extends JoinLikeNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException;

@@ -257,28 +257,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     /**
-     * Creates a new ConstructionNode with a new substitution.
-     *
-     * Stops the propagation.
-     *
-     */
-    @Override
-    public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
-            QueryNode childNode, IntermediateQuery query) {
-
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(substitutionToApply);
-
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                newSubstitution, getOptionalModifiers());
-
-        /*
-         * Stops to propagate the substitution
-         */
-        return DefaultSubstitutionResults.newNode(newConstructionNode);
-    }
-
-    /**
      * Merges the current substitution with the ascending one
      *
      * This substitution is obtained by composition and then cleaned (only defines the projected variables)
@@ -485,14 +463,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .filter(n -> n.getSubstitution().equals(substitution))
                 .filter(n -> n.getOptionalModifiers().equals(optionalModifiers))
                 .isPresent();
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        /*
-         * A construction node has only one child
-         */
-        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
     }
 
     @Override

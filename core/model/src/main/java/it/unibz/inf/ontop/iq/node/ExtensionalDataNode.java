@@ -22,11 +22,6 @@ public interface ExtensionalDataNode extends DataNode<RelationPredicate> {
             throws QueryNodeTransformationException;
 
     @Override
-    SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query);
-
-    @Override
     SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query);
 

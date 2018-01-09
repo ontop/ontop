@@ -53,13 +53,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public SubstitutionResults<EmptyNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return DefaultSubstitutionResults.noChange();
-    }
-
-    @Override
     public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
         ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
@@ -86,11 +79,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
             return projectedVariables.equals(((EmptyNode) node).getVariables());
         }
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
     }
 
     @Override

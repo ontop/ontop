@@ -11,11 +11,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 public interface CommutativeJoinOrFilterNode extends JoinOrFilterNode {
 
     @Override
-    SubstitutionResults<? extends CommutativeJoinOrFilterNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException;
-
-    @Override
     SubstitutionResults<? extends CommutativeJoinOrFilterNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
             throws QueryNodeSubstitutionException;
