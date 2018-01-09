@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
-                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
+                                                  Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
@@ -88,7 +89,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalSaturatedTBox, filledProvMapping);
+        validateMapping(optionalOntology, filledProvMapping);
 
         return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
@@ -112,7 +113,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         try {
             return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getMetadata());
-        } catch (DuplicateMappingException e) {
+        }
+        catch (DuplicateMappingException e) {
             // Internal bug
             throw new IllegalStateException(e);
         }
@@ -141,7 +143,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         }
         /*
          * Problem while creating the connection
-         */ catch (SQLException e) {
+         */
+        catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
         }
     }

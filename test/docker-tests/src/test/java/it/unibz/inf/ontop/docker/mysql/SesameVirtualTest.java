@@ -38,79 +38,64 @@ public class SesameVirtualTest extends TestCase {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	
-	public void test() throws Exception
-	{
+	public void test() {
 		//create a sesame repository
 		RepositoryConnection con = null;
 		Repository repo = null;
-		
-		try {
-			String owlFile = "/mysql/example/exampleBooks.owl";
-			String obdaFile = "/mysql/example/exampleBooks.obda";
-			String propertyFile = "/mysql/example/exampleBooks.properties";
-			String owlFileName =  this.getClass().getResource(owlFile).toString();
-			String obdaFileName =  this.getClass().getResource(obdaFile).toString();
-			String propertyFileName =  this.getClass().getResource(propertyFile).toString();
 
-			OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.ontologyFile(owlFileName)
-					.nativeOntopMappingFile(obdaFileName)
-					.propertyFile(propertyFileName)
-					.enableTestMode()
-					.build();
+		String owlFile = "/mysql/example/exampleBooks.owl";
+		String obdaFile = "/mysql/example/exampleBooks.obda";
+		String propertyFile = "/mysql/example/exampleBooks.properties";
+		String owlFileName = this.getClass().getResource(owlFile).toString();
+		String obdaFileName = this.getClass().getResource(obdaFile).toString();
+		String propertyFileName = this.getClass().getResource(propertyFile).toString();
 
-			repo = OntopRepository.defaultRepository(configuration);
-	
-			repo.initialize();
-			
-			con = repo.getConnection();
-			
-			///query repo
-			 try {
-			      String queryString = "select * where {?x ?z ?y }";
-			      		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
-			      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-			      TupleQueryResult result = tupleQuery.evaluate();
-			      try {
-			    	  List<String> bindings = result.getBindingNames();
-			    	  while (result.hasNext()) {
-			    		   BindingSet bindingSet = result.next();
-			    		   for (String b : bindings)
-			    			   log.debug("Binding: "+bindingSet.getBinding(b));
-			    	  }
-			      }
-			      finally {
-			         result.close();
-			      }
-			      
-			      queryString =  "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
-			      GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
-			      GraphQueryResult gresult = graphQuery.evaluate();
-			      while(gresult.hasNext())
-			      {
-			    	  Statement s = gresult.next();
-			    	  System.out.println(s.toString());
-			      }
-			      
-				  System.out.println("Closing...");
-				 
-			     con.close();
-			    	  
-			   }
-			 catch(Exception e)
-			 {
-				 e.printStackTrace();
-			 }
-			
-			
-			
-		} catch (Exception e1) {
-			e1.printStackTrace();
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.ontologyFile(owlFileName)
+				.nativeOntopMappingFile(obdaFileName)
+				.propertyFile(propertyFileName)
+				.enableTestMode()
+				.build();
+
+		repo = OntopRepository.defaultRepository(configuration);
+
+		repo.initialize();
+
+		con = repo.getConnection();
+
+		///query repo
+
+		String queryString = "select * where {?x ?z ?y }";
+		//"<http://www.semanticweb.org/tibagosi/ontologies/2012/11/Ontology1355819752067.owl#Book>}";
+		TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+		TupleQueryResult result = tupleQuery.evaluate();
+
+		List<String> bindings = result.getBindingNames();
+		while (result.hasNext()) {
+			BindingSet bindingSet = result.next();
+			for (String b : bindings)
+				log.debug("Binding: " + bindingSet.getBinding(b));
 		}
-		
-	
-	System.out.println("Done.");	
+
+		result.close();
+
+
+		queryString = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o FILTER(?s = <http://meraka/moss/exampleBooks.owl#book/23/>)}";
+		GraphQuery graphQuery = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString);
+		GraphQueryResult gresult = graphQuery.evaluate();
+		while (gresult.hasNext()) {
+			Statement s = gresult.next();
+			System.out.println(s.toString());
+		}
+
+		System.out.println("Closing...");
+
+		con.close();
+
+
+		System.out.println("Done.");
 	}
+
 
 }
 

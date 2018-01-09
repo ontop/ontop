@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlapi;
 
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -447,7 +446,7 @@ public class OWL2QLTranslatorTest {
 		OWLDataRange dr4 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.XSD_BOOLEAN.getDatatype(factory));
 		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt4, dr4));
 	
-		Ontology dlliteonto = OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(onto));
+		Ontology dlliteonto = OWLAPI_TRANSLATOR.translateAndClassify(onto);
 	}
 	
 	@Test
@@ -789,7 +788,7 @@ public class OWL2QLTranslatorTest {
 			boolean flag = false;
 			try {
 				manager.addAxiom(onto, factory.getOWLReflexiveObjectPropertyAxiom(owlBottom));
-				OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(onto));
+				OWLAPI_TRANSLATOR.translateAndClassify(onto);
 			}
 			catch (RuntimeException e) {
 				if (e.getMessage().startsWith("Incon"))
@@ -802,7 +801,7 @@ public class OWL2QLTranslatorTest {
 			try {
 				OWLOntology onto2 = manager.createOntology(IRI.create("http://example/testonto2"));
 				manager.addAxiom(onto2, factory.getOWLIrreflexiveObjectPropertyAxiom(owlTop));
-				OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(onto));
+				OWLAPI_TRANSLATOR.translateAndClassify(onto);
 			}
 			catch (RuntimeException e) {
 				if (e.getMessage().startsWith("Incon"))
@@ -1195,7 +1194,7 @@ public class OWL2QLTranslatorTest {
 
 
 	public static OntologyImpl.UnclassifiedOntologyTBox translateTBox(OWLOntology owl) {
-		return ((OntologyImpl)OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(owl))).unclassifiedTBox();
+		return ((OntologyImpl)OWLAPI_TRANSLATOR.translateAndClassify(owl)).unclassifiedTBox();
 	}
 
     /**
@@ -1209,7 +1208,7 @@ public class OWL2QLTranslatorTest {
     public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(owl));
+        Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
         return onto.tbox();
     }
 }

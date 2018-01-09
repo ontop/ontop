@@ -58,25 +58,25 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      */
     @Override
-    public void validate(MappingWithProvenance mapping, ClassifiedTBox saturatedTBox)
+    public void validate(MappingWithProvenance mapping, Ontology ontology)
             throws MappingOntologyMismatchException {
 
-        ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(saturatedTBox);
+        ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
         for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            validateAssertion(entry.getKey(), entry.getValue(), saturatedTBox, datatypeMap);
+            validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
         }
     }
 
     private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
-                                   ClassifiedTBox saturatedTBox,
+                                   Ontology ontology,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         String predicateIRI = extractPredicateIRI(mappingAssertion);
 
         Optional<RDFTermType> tripleObjectType = extractTripleObjectType(mappingAssertion);
-        checkTripleObject(predicateIRI, tripleObjectType, provenance, saturatedTBox, datatypeMap);
+        checkTripleObject(predicateIRI, tripleObjectType, provenance, ontology, datatypeMap);
     }
 
     private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
@@ -184,7 +184,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(String predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,
-                                   ClassifiedTBox saturatedTBox,
+                                   Ontology ontology,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
@@ -198,11 +198,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
              * TODO: avoid instanceof tests!
              */
             if (tripleObjectType instanceof ObjectRDFType) {
-                checkObjectOrAnnotationProperty(predicateIRI, provenance, saturatedTBox);
+                checkObjectOrAnnotationProperty(predicateIRI, provenance, ontology);
                 return;
             }
             else if (tripleObjectType instanceof RDFDatatype) {
-                checkDataOrAnnotationProperty((RDFDatatype)tripleObjectType, predicateIRI, provenance, saturatedTBox,
+                checkDataOrAnnotationProperty((RDFDatatype)tripleObjectType, predicateIRI, provenance, ontology,
                         datatypeMap);
             }
             else {
@@ -211,42 +211,42 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             }
         }
         else {
-            checkClass(predicateIRI, provenance, saturatedTBox);
+            checkClass(predicateIRI, provenance, ontology);
         }
     }
 
     private void checkObjectOrAnnotationProperty(String predicateIRI, PPMappingAssertionProvenance provenance,
-                                                 ClassifiedTBox saturatedTBox)
+                                                 Ontology ontology)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be a data property (should be either an object or an annotation property)
          */
-        if (saturatedTBox.dataProperties().contains(predicateIRI))
+        if (ontology.tbox().dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, OBJECT_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (saturatedTBox.classes().contains(predicateIRI))
+        if (ontology.tbox().classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, OBJECT_PROPERTY_STR));
     }
 
     private void checkDataOrAnnotationProperty(RDFDatatype tripleObjectType, String predicateIRI,
                                                PPMappingAssertionProvenance provenance,
-                                               ClassifiedTBox saturatedTBox,
+                                               Ontology ontology,
                                                ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
-        if (saturatedTBox.objectProperties().contains(predicateIRI))
+        if (ontology.tbox().objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, DATA_PROPERTY_STR));
         /*
          * Cannot be a class
          */
-        if (saturatedTBox.classes().contains(predicateIRI))
+        if (ontology.tbox().classes().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     CLASS_STR, DATA_PROPERTY_STR));
 
@@ -281,24 +281,24 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private void checkClass(String predicateIRI, PPMappingAssertionProvenance provenance,
-                            ClassifiedTBox saturatedTBox) throws MappingOntologyMismatchException {
+                            Ontology ontology) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
-        if (saturatedTBox.objectProperties().contains(predicateIRI))
+        if (ontology.tbox().objectProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     OBJECT_PROPERTY_STR, CLASS_STR));
         /*
          * Cannot be a data property
          */
-        else if (saturatedTBox.dataProperties().contains(predicateIRI))
+        else if (ontology.tbox().dataProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     DATA_PROPERTY_STR, CLASS_STR));
 
         /*
          * Cannot be an annotation property
          */
-        if (saturatedTBox.annotationProperties().contains(predicateIRI))
+        if (ontology.annotationProperties().contains(predicateIRI))
             throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
                     ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
     }

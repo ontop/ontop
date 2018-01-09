@@ -183,9 +183,6 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
     @Override
     public EquivalencesDAG<DataRangeExpression> dataRangesDAG() { return dataRangeDAG; }
 
-    @Override
-    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return annotationProperties; }
-
 
 
 
