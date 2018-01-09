@@ -663,8 +663,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             catch (UnsatisfiableConditionException e) {
                 EmptyNode newRightChild = iqFactory.createEmptyNode(rightChild.getVariables());
 
-                return new ChildLiftingState(liftedLeftChild, newRightChild, Optional.empty(),
-                        substitutionFactory.getSubstitution());
+                return new ChildLiftingState(leftGrandChild, newRightChild, Optional.empty(),
+                        leftConstructionNode.getSubstitution());
             }
         }
         else if (liftedLeftChild.isDeclaredAsEmpty())
