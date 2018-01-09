@@ -39,9 +39,9 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 public interface ObjectPropertyAssertion extends Assertion {
 
-	public ObjectPropertyExpression getProperty();
+	ObjectPropertyExpression getProperty();
 	
-	public ObjectConstant getSubject();
+	ObjectConstant getSubject();
 	
-	public ObjectConstant getObject();	
+	ObjectConstant getObject();
 }

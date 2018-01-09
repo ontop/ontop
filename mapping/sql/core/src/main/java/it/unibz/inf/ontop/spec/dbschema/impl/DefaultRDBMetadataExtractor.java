@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
-import net.sf.jsqlparser.JSQLParserException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -110,9 +109,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
                 }
-                catch (JSQLParserException e) {
-                    System.out.println("Error obtaining the tables" + e);
-                }
+
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);
                 }

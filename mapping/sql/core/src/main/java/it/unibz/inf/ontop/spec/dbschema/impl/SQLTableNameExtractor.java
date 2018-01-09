@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
  */
 
 
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
@@ -48,8 +48,7 @@ import java.util.*;
 public class SQLTableNameExtractor {
 
 
-	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPTriplesMap> mappings)
-			throws JSQLParserException {
+	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPTriplesMap> mappings){
 		List<String> errorMessage = new LinkedList<>();
 		Set<RelationID> tables = new HashSet<>();
 		for (SQLPPTriplesMap axiom : mappings) {
@@ -274,7 +273,14 @@ public class SQLTableNameExtractor {
 
 			@Override
 			public void visit(InExpression inExpression) {
-				inExpression.getLeftExpression().accept(this);
+
+				if (inExpression.getLeftItemsList() != null) {
+					ItemsList leftItemsList = inExpression.getLeftItemsList();
+					leftItemsList.accept(itemsListVisitor);
+				}
+				else {
+					inExpression.getLeftExpression().accept(this);
+				}
 				inExpression.getRightItemsList().accept(itemsListVisitor);
 			}
 

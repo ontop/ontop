@@ -327,8 +327,7 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
         OWLOntology rootOntology = getRootOntology();
-        Ontology mergeOntology = owlapiTranslator.translateAndClassify(
-                rootOntology.getOWLOntologyManager().getImportsClosure(rootOntology));
+        Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
         ClassifiedTBox tBox = mergeOntology.tbox();
 
         return new QuestOWLEmptyEntitiesChecker(tBox, owlConnection);

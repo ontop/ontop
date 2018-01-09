@@ -37,8 +37,6 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class AnnotationPropertyImpl implements AnnotationProperty {
 
-	private static final long serialVersionUID = 500873858691854474L;
-
 	private final String name;
 	private IRI iri;
 

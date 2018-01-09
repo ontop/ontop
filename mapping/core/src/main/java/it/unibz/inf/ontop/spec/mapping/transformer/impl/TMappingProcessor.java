@@ -568,6 +568,7 @@ public class TMappingProcessor {
 				total += frequences.get(idx).size();
 			}
 			System.out.println("NUMBER OF PREDICATES: " + total);
+			System.out.println("TMAP " + tmappingsProgram);
 		}
 				
 		return tmappingsProgram;

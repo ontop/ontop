@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[MappingDeclaration] @collection [[
+mappingId	MapWithIn
+target		:route-{route_id} a :Route ; :hasPosition "{position_in_route}" .
+source		SELECT * FROM l_ship_route  WHERE (route_id,position_in_route) IN( SELECT route_id, MAX(position_in_route) FROM l_ship_route GROUP BY route_id )
+
+mappingId	MapWithIntersection
+target		:vertex-{vertex_id} a :Vertex ; :hasVertex "{vertex_id}" .
+source		SELECT vertex_id FROM l_ship_route  WHERE (route_id,position_in_route) IN
+            ( SELECT route_id, MAX(position_in_route)
+              FROM l_ship_route
+              GROUP BY route_id
+            )
+            INTERSECT
+            SELECT berth_id
+            FROM l_ship_initial_position
+
+]]
+
