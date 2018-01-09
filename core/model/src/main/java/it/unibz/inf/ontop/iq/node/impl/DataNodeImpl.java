@@ -68,11 +68,6 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     }
 
     @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }

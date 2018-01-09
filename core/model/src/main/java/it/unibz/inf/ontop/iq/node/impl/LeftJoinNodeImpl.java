@@ -315,31 +315,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        ArgumentPosition trueNodePosition = query.getOptionalPosition(this, trueChild)
-                .orElseThrow(() -> new IllegalStateException("The deleted child of a LJ must have a position"));
-        QueryNode otherChild = query.getChild(this, (trueNodePosition == LEFT) ? RIGHT : LEFT)
-                .orElseThrow(() -> new IllegalStateException("The other child of a LJ is missing"));
-        switch(trueNodePosition) {
-            case LEFT:
-                throw new UnsupportedOperationException("A TrueNode in the left position of a LeftJoin should not be removed");
-            case RIGHT:
-                Optional<ImmutableExpression> condition = getOptionalFilterCondition();
-                if (condition.isPresent()) {
-                    return new NodeTransformationProposalImpl(
-                            REPLACE_BY_NEW_NODE,
-                            query.getFactory().createFilterNode(condition.get()),
-                            ImmutableSet.of()
-                    );
-                }
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                        otherChild, ImmutableSet.of());
-            default:
-                throw new IllegalStateException("Unknown position: " + trueNodePosition);
-        }
-    }
-
-    @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return queryNode instanceof LeftJoinNode
                 && getOptionalFilterCondition().equals(((LeftJoinNode) queryNode).getOptionalFilterCondition());
@@ -940,6 +915,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree subTree = ascendingNormalization.normalizeChild(
                 Optional.of(liftingState.rightChild)
                     .filter(rightChild -> !rightChild.isDeclaredAsEmpty())
+                    .filter(rightChild -> !(rightChild.getRootNode() instanceof TrueNode))
                     // LJ
                     .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(liftingState.ljCondition),

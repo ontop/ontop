@@ -82,11 +82,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
-    }
-
-    @Override
     public EmptyNode clone() {
         return iqFactory.createEmptyNode(projectedVariables);
     }
