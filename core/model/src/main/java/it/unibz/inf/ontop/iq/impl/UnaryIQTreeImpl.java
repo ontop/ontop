@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -18,26 +19,31 @@ import java.util.Optional;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
-    private final boolean isLifted;
-
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
-                            @Assisted boolean isLifted) {
-        super(rootNode, ImmutableList.of(child));
-        this.isLifted = isLifted;
+                            @Assisted IQProperties iqProperties) {
+        super(rootNode, ImmutableList.of(child), iqProperties);
     }
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child) {
-        this(rootNode, child, false);
+        this(rootNode, child, new IQPropertiesImpl());
     }
 
     @Override
     public IQTree liftBinding(VariableGenerator variableGenerator) {
-        if (isLifted)
+        if (getProperties().isLifted())
             return this;
         else
-            return getRootNode().liftBinding(getChild(), variableGenerator);
+            return getRootNode().liftBinding(getChild(), variableGenerator, getProperties());
+    }
+
+    /**
+     * TODO: use the properties for optimization purposes
+     */
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable) {
+        return getRootNode().liftIncompatibleDefinitions(variable, getChild());
     }
 
     @Override
@@ -49,6 +55,12 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public boolean isConstructed(Variable variable) {
+        return getVariables().contains(variable)
+                && getRootNode().isConstructed(variable, getChild());
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
@@ -56,6 +68,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public ImmutableSet<Variable> getNullableVariables() {
         return getRootNode().getNullableVariables(getChild());
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint) {
+        return getRootNode().propagateDownConstraint(constraint, getChild());
     }
 
     @Override

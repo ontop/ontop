@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
@@ -88,9 +86,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 	@Override
 	public void tearDown() throws Exception {
 
-			dropTables();
-//			 conn.close();
-			jdbcconn.close();
+		dropTables();
+//		conn.close();
+		jdbcconn.close();
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -115,13 +113,10 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.build();
 		
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-				.build();
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
 
 		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
-			int classAss = 0;
-			int propAss = 0;
-			int objAss = 0;
+			int classAss = 0, propAss = 0, objAss = 0;
 
 			LOGGER.debug("Assertions:");
 			while (resultSet.hasNext()) {
@@ -145,8 +140,8 @@ public class OntopOntologyMaterializerTest extends TestCase {
 	
 	public void testDataWithModelAndOnto() throws Exception {
 
-			// read model
-			File f = new File("src/test/resources/materializer/MaterializeTest.obda");
+		// read model
+		File f = new File("src/test/resources/materializer/MaterializeTest.obda");
 
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile("src/test/resources/materializer/MaterializeTest.owl")
@@ -157,23 +152,19 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.enableTestMode()
 				.build();
 
-			// read onto
-		OWLAPITranslatorUtility owlapiTranslatorUtility = configuration.getInjector().getInstance(OWLAPITranslatorUtility.class);
-
-		Ontology onto =  owlapiTranslatorUtility.translateImportsClosure(
-					configuration.loadProvidedInputOntology());
-			System.out.println(onto.getSubClassAxioms());
-			System.out.println(onto.getSubObjectPropertyAxioms());
-			System.out.println(onto.getSubDataPropertyAxioms());
+		// read onto
+		// OWLOntology ontology = configuration.loadProvidedInputOntology();
+		// Ontology onto = OWLAPITranslatorOWL2QL.translate(
+		//		ontology.getOWLOntologyManager().getImportsClosure(ontology));
+		// System.out.println(onto.tbox().getSubClassAxioms());
+		// System.out.println(onto.tbox().getSubObjectPropertyAxioms());
+		// System.out.println(onto.tbox().getSubDataPropertyAxioms());
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-				.build();
-		try(MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
+		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
+		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
 
-			int classAss = 0;
-			int propAss = 0;
-			int objAss = 0;
+			int classAss = 0, propAss = 0, objAss = 0;
 			while (resultSet.hasNext()) {
 				Assertion assertion = resultSet.next();
 				LOGGER.debug(assertion + "\n");
@@ -191,6 +182,4 @@ public class OntopOntologyMaterializerTest extends TestCase {
 			assertEquals(3, objAss); //3 since no subprop for obj prop
 		}
 	}
-
-
 }

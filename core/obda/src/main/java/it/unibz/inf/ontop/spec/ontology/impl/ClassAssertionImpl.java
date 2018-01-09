@@ -35,8 +35,6 @@ import it.unibz.inf.ontop.spec.ontology.OClass;
 
 public class ClassAssertionImpl implements ClassAssertion {
 
-	private static final long serialVersionUID = 5689712345023046811L;
-
 	private final ObjectConstant object;
 	private final OClass concept;
 

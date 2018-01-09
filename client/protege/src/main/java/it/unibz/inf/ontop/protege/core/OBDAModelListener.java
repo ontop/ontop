@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import java.io.Serializable;
+public interface OBDAModelListener {
 
-public interface OBDAModelListener extends Serializable {
+	void datasourceAdded(OBDADataSource source);
 
-	public void datasourceAdded(OBDADataSource source);
+	void datasourceDeleted(OBDADataSource source);
 
-	public void datasourceDeleted(OBDADataSource source);
+	void datasourceUpdated(String oldname, OBDADataSource currendata);
 
-	public void datasourceUpdated(String oldname, OBDADataSource currendata);
+	void alldatasourcesDeleted();
 
-	public void alldatasourcesDeleted();
-
-	public void datasourceParametersUpdated();
+	void datasourceParametersUpdated();
 }

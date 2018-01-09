@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
@@ -20,8 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,20 +42,22 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
-    private final MetaMappingExpander metaMappingExpander;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                RDBMetadataExtractor dbMetadataExtractor, MetaMappingExpander metaMappingExpander,
-                                OntopMappingSQLSettings settings) {
+                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
+                                AtomFactory atomFactory, TermFactory termFactory) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
-        this.metaMappingExpander = metaMappingExpander;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -64,10 +67,11 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      * TODO: move this method to AbstractMappingExtractor
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput, Optional<Ontology> optionalOntology,
-                                                  Optional<TBoxReasoner> optionalSaturatedTBox,
+                                                  OBDASpecInput specInput,
+                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException,
+            InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -84,17 +88,28 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, optionalSaturatedTBox, filledProvMapping);
+        validateMapping(optionalSaturatedTBox, filledProvMapping);
 
         return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = metaMappingExpander.expand(
-                ppMapping.getTripleMaps(),
-                settings,
-                dbMetadata);
+
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory);
+        final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
+        if (expander.hasMappingsToBeExpanded()) {
+            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+                expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
+            }
+            // Problem while creating the connection
+            catch (SQLException e) {
+                throw new MetaMappingExpansionException(e.getMessage());
+            }
+        }
+        else
+            expandedMappingAxioms = expander.getNonExpandableMappings();
+
         try {
             return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getMetadata());
         } catch (DuplicateMappingException e) {

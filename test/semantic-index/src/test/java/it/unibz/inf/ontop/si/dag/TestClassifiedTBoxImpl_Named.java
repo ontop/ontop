@@ -21,13 +21,11 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataRangeExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -35,65 +33,90 @@ import java.util.Set;
 
 /**
  * Representation of the named part of the property and class DAGs  
- *     based on the DAGs provided by a TBoxReasonerImpl
+ *     based on the DAGs provided by a ClassifiedTBoxImpl
  * 
  * WARNING: THIS CLASS IS FOR TESTING ONLY 
  */
 @Deprecated
-public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
+public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 
-	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
-	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
-	private final EquivalencesDAG<ClassExpression> classDAG;
-	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
+	private final EquivalencesDAGImpl<ClassExpression> classDAG;
+	private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAGImpl<DataRangeExpression> dataRangeDAG;
 
-	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
-		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataPropertyDAG());
-		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClassDAG());
-		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRangeDAG());
+	private final ClassifiedTBox reasoner;
+
+	public TestClassifiedTBoxImpl_Named(ClassifiedTBox reasoner) {
+		this.objectPropertyDAG = new EquivalencesDAGImpl<>(reasoner.objectPropertiesDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<>(reasoner.dataPropertiesDAG());
+		this.classDAG = new EquivalencesDAGImpl<>(reasoner.classesDAG());
+		this.dataRangeDAG = new EquivalencesDAGImpl<>(reasoner.dataRangesDAG());
+
+		this.reasoner = reasoner;
 	}
 
 
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
+    @Override
+    public OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties() { return reasoner.objectProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<DataPropertyExpression> dataProperties() { return reasoner.dataProperties(); }
+
+    @Override
+    public OntologyVocabularyCategory<OClass> classes() {
+        return reasoner.classes();
+    }
+
+    @Override
+    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
+
+    @Override
+    public EquivalencesDAG<ClassExpression> classesDAG() {
+        return classDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<ObjectPropertyExpression> objectPropertiesDAG() {
+        return objectPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataPropertyExpression> dataPropertiesDAG() {
+        return dataPropertyDAG;
+    }
+
+    @Override
+    public EquivalencesDAG<DataRangeExpression> dataRangesDAG() {
+        return dataRangeDAG;
+    }
+
+	// DUMMIES
 
 	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
-		return objectPropertyDAG;
-	}
-	/**
-	 * Return the DAG of properties
-	 * 
-	 * @return DAG 
-	 */
+	public ImmutableList<NaryAxiom<ClassExpression>> disjointClasses() { return null; }
 
 	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
-		return dataPropertyDAG;
-	}
-	
-	/**
-	 * Return the DAG of classes
-	 * 
-	 * @return DAG 
-	 */
+	public ImmutableList<NaryAxiom<ObjectPropertyExpression>> disjointObjectProperties() { return null; }
 
 	@Override
-	public EquivalencesDAG<ClassExpression> getClassDAG() {
-		return classDAG;
-	}
-	
-	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
-		return dataRangeDAG;
-	}
+	public ImmutableList<NaryAxiom<DataPropertyExpression>> disjointDataProperties() { return null; }
 
-	/**
-	 * Reconstruction of the Named DAG (as EquivalncesDAG) from a DAG
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> reflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> irreflexiveObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<ObjectPropertyExpression> functionalObjectProperties() { return null; }
+
+	@Override
+	public ImmutableSet<DataPropertyExpression> functionalDataProperties() { return null; }
+
+
+    /**
+	 * Reconstruction of the Named DAG (as EquivalencesDAG) from a DAG
 	 *
 	 * @param <T> Property or BasicClassDescription
 	 */
@@ -108,7 +131,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Iterator<Equivalences<T>> iterator() {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -132,7 +155,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getDirectSub(v)) {
 				T child = e.getRepresentative();
@@ -149,7 +172,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 		@Override
 		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -162,7 +185,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		@Override
 		public Set<T> getSubRepresentatives(T v) {
 			Equivalences<T> eq = reasonerDAG.getVertex(v);
-			LinkedHashSet<T> result = new LinkedHashSet<T>();
+			LinkedHashSet<T> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(eq)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());
@@ -174,7 +197,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 		@Override
 		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getDirectSuper(v)) {
 				T parent = e.getRepresentative();
@@ -191,7 +214,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		
 		@Override
 		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getSuper(v)) {
 				Equivalences<T> nodes = getVertex(e.getRepresentative());

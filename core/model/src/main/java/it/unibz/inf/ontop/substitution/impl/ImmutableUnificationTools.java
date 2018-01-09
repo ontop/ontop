@@ -186,6 +186,15 @@ public class ImmutableUnificationTools {
     }
 
     /**
+     * TODO: make it replace computeMGUS()
+     */
+    public Optional<ImmutableSubstitution<NonFunctionalTerm>> computeMGUS2(ImmutableSubstitution<NonFunctionalTerm> s1,
+                                                                           ImmutableSubstitution<NonFunctionalTerm> s2) {
+        return computeMGUS(s1,s2)
+                .map(u -> (ImmutableSubstitution<NonFunctionalTerm>)(ImmutableSubstitution<?>)u);
+    }
+
+    /**
      * Computes one Most General Unifier (MGU) of (two) substitutions.
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,

@@ -57,8 +57,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
-    private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
     private final ValueConstant valueNull;
 
@@ -69,11 +67,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                              IntermediateQueryFactory iqFactory,
                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
-        this.iqFactory = iqFactory;
         this.immutabilityTools = immutabilityTools;
     }
 
@@ -84,12 +80,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                              IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                              ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
-        this.iqFactory = iqFactory;
     }
 
     @AssistedInject
@@ -98,12 +92,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                              IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                              ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
-        this.substitutionFactory = substitutionFactory;
         this.valueNull = termFactory.getNullConstant();
         this.immutabilityTools = immutabilityTools;
-        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -429,7 +421,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
+                              IQProperties currentIQProperties) {
 
         ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)
                 .flatMap(c -> c.getVariables().stream())
@@ -456,7 +449,33 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (i >= MAX_ITERATIONS)
             throw new MinorOntopInternalBugException("LJ.liftBinding() did not converge after " + i);
 
-        return convertResults2IQTree(projectedVariables, liftingState);
+        return convertResults2IQTree(projectedVariables, liftingState, currentIQProperties);
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild) {
+        if (leftChild.getVariables().contains(variable)) {
+            IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable);
+            QueryNode leftChildRoot = liftedLeftChild.getRootNode();
+
+            if (leftChildRoot instanceof UnionNode
+                    && ((UnionNode) leftChildRoot).hasAChildWithLiftableDefinition(variable, leftChild.getChildren())) {
+
+                UnionNode newUnionNode = iqFactory.createUnionNode(
+                        Stream.of(leftChild, rightChild)
+                                .flatMap(c -> c.getVariables().stream())
+                                .collect(ImmutableCollectors.toSet()));
+
+                return iqFactory.createNaryIQTree(newUnionNode,
+                        liftedLeftChild.getChildren().stream()
+                        .map(unionChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(this, unionChild, rightChild))
+                        .collect(ImmutableCollectors.toList()));
+            }
+        }
+
+        // By default, nothing lifted
+        return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+
     }
 
     @Override
@@ -489,7 +508,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         : iqFactory.createBinaryNonCommutativeIQTree(
                                 iqFactory.createLeftJoinNode(expressionAndCondition.optionalExpression),
                                 updatedLeftChild, updatedRightChild);
-            } catch (UnsatisfiableJoiningConditionException e) {
+            } catch (UnsatisfiableConditionException e) {
                 return updatedLeftChild;
             }
         }
@@ -498,7 +517,53 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             if (updatedRightChild.isDeclaredAsEmpty())
                 return updatedLeftChild;
             // TODO: lift it again!
-            return iqFactory.createBinaryNonCommutativeIQTree(this, leftChild, rightChild);
+            return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
+        }
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild) {
+        return Stream.of(leftChild, rightChild)
+                .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
+        return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
+    }
+
+    private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {
+
+        IQTree newLeftChild = initialConstraint
+                .map(leftChild::propagateDownConstraint)
+                .orElse(leftChild);
+
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+
+        try {
+            ExpressionAndSubstitution conditionSimplificationResults =
+                    simplifyCondition(getOptionalFilterCondition(), leftVariables);
+
+            Optional<ImmutableExpression> rightConstraint = computeDownConstraint(initialConstraint,
+                    conditionSimplificationResults);
+
+            IQTree newRightChild = Optional.of(conditionSimplificationResults.substitution)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> rightChild.applyDescendingSubstitution(s, rightConstraint))
+                    .orElseGet(() -> rightConstraint
+                            .map(rightChild::propagateDownConstraint)
+                            .orElse(rightChild));
+
+            LeftJoinNode newLeftJoin = conditionSimplificationResults.optionalExpression.equals(getOptionalFilterCondition())
+                    ? this
+                    : conditionSimplificationResults.optionalExpression
+                    .map(iqFactory::createLeftJoinNode)
+                    .orElseGet(iqFactory::createLeftJoinNode);
+
+            return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoin, newLeftChild, newRightChild);
+
+        } catch (UnsatisfiableConditionException e) {
+            return newLeftChild;
         }
     }
 
@@ -506,14 +571,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableExpression initialExpression,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
-            throws UnsatisfiableJoiningConditionException {
+            throws UnsatisfiableConditionException {
 
         ExpressionEvaluator.EvaluationResult results =
                 createExpressionEvaluator().evaluateExpression(
                         descendingSubstitution.applyToBooleanExpression(initialExpression));
 
         if (results.isEffectiveFalse())
-            throw new UnsatisfiableJoiningConditionException();
+            throw new UnsatisfiableConditionException();
 
         return results.getOptionalExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
@@ -524,7 +589,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     /**
      * TODO: explain
      *
-     * TODO: refactor !!!!!!!!!!
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
                                                                            ImmutableSet<Variable> leftVariables,
@@ -541,7 +605,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
                     return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
-                            && arguments.stream().anyMatch(t -> t instanceof Variable);
+                            && arguments.stream().anyMatch(rightVariables::contains);
                 })
                 .collect(ImmutableCollectors.toSet());
 
@@ -551,7 +615,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                             .map(ImmutableFunctionalTerm::getArguments)
                             .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
                             // Rename right-specific variables if possible
-                            .map(args -> rightSpecificVariables.contains(args.get(1)) ? args : args.reverse())
+                            .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
+                                    ? args.reverse() : args)
                             .collect(ImmutableCollectors.toMap(
                                     args -> (Variable) args.get(0),
                                     args -> (NonFunctionalTerm) args.get(1))));
@@ -560,7 +625,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 expressions.stream()
                         .filter(e -> (!downSubstitutionExpressions.contains(e))
                                 || e.getArguments().stream().anyMatch(rightSpecificVariables::contains)))
-                // TODO: do not apply this substitution!!!
                 .map(downSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitution(newExpression, downSubstitution);
@@ -575,13 +639,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             IQTree leftGrandChild = ((UnaryIQTree) liftedLeftChild).getChild();
 
             try {
-                return liftRegularChildBinding(leftConstructionNode, leftGrandChild, ImmutableList.of(rightChild),
+                return liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
+                        ImmutableList.of(liftedLeftChild,rightChild),
                         leftGrandChild.getVariables(), ljCondition, variableGenerator, this::convertIntoChildLiftingResults);
             }
             /*
              * Replaces the LJ by the left child
              */
-            catch (UnsatisfiableJoiningConditionException e) {
+            catch (UnsatisfiableConditionException e) {
                 EmptyNode newRightChild = iqFactory.createEmptyNode(rightChild.getVariables());
 
                 return new ChildLiftingState(liftedLeftChild, newRightChild, Optional.empty(),
@@ -632,7 +697,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return new ChildLiftingState(state.leftChild, newRightChild, simplificationResults.optionalExpression,
                     newAscendingSubstitution);
 
-        } catch (UnsatisfiableJoiningConditionException e) {
+        } catch (UnsatisfiableConditionException e) {
             return new ChildLiftingState(state.leftChild,
                     iqFactory.createEmptyNode(rightChild.getVariables()),
                     Optional.empty(),
@@ -654,14 +719,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     private ChildLiftingState convertIntoChildLiftingResults(
-            ImmutableList<IQTree> otherChildren, IQTree leftGrandChild,
+            ImmutableList<IQTree> children, IQTree leftGrandChild, int leftChildPosition,
             Optional<ImmutableExpression> ljCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
-        if (otherChildren.size() != 1)
-            throw new MinorOntopInternalBugException("One other child was expected, not " + otherChildren);
+        if (children.size() != 2)
+            throw new MinorOntopInternalBugException("Two children were expected, not " + children);
 
-        IQTree newRightChild = otherChildren.get(0)
+        IQTree newRightChild = children.get(1)
                 .applyDescendingSubstitution(descendingSubstitution, ljCondition);
 
         return new ChildLiftingState(leftGrandChild, newRightChild, ljCondition, ascendingSubstitution);
@@ -878,28 +943,26 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .findFirst();
     }
 
-    private IQTree convertResults2IQTree(ImmutableSet<Variable> projectedVariables, ChildLiftingState liftingState) {
-        Optional<ConstructionNode> topConstructionNode = Optional.of(liftingState.getComposedAscendingSubstitution())
-                .filter(s -> !s.isEmpty())
-                // Filters out the non-projected variables
-                .map(s -> substitutionFactory.getSubstitution(
-                        s.getImmutableMap().entrySet().stream()
-                                .filter(e -> projectedVariables.contains(e.getKey()))
-                                .collect(ImmutableCollectors.toMap())))
-                .filter(s -> !s.isEmpty())
-                .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
+    private IQTree convertResults2IQTree(ImmutableSet<Variable> projectedVariables, ChildLiftingState liftingState,
+                                         IQProperties currentIQProperties) {
 
-        IQTree subTree = Optional.of(liftingState.rightChild)
-                .filter(rightChild -> !rightChild.isDeclaredAsEmpty())
-                // LJ
-                .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
+        AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
+                liftingState.getComposedAscendingSubstitution(), projectedVariables);
+
+        Optional<ConstructionNode> topConstructionNode = ascendingNormalization.generateTopConstructionNode();
+
+        IQTree subTree = ascendingNormalization.normalizeChild(
+                Optional.of(liftingState.rightChild)
+                    .filter(rightChild -> !rightChild.isDeclaredAsEmpty())
+                    // LJ
+                    .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(liftingState.ljCondition),
-                        liftingState.leftChild, liftingState.rightChild, true))
-                // Left child
-                .orElse(liftingState.leftChild);
+                        liftingState.leftChild, liftingState.rightChild, currentIQProperties.declareLifted()))
+                    // Left child
+                    .orElse(liftingState.leftChild));
 
         return topConstructionNode
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, true))
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, currentIQProperties.declareLifted()))
                 .orElse(subTree);
     }
 

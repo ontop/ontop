@@ -7,14 +7,13 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 
 /**
- * To be build by Guice (Assisted inject pattern)
+ * To be built by Guice (Assisted inject pattern)
  */
 public interface SpecificationFactory {
 
@@ -24,6 +23,5 @@ public interface SpecificationFactory {
 
     Mapping createMapping(MappingMetadata metadata, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap, ExecutorRegistry executorRegistry);
 
-    OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, TBoxReasoner tBox,
-                                          ImmutableOntologyVocabulary vocabulary);
+    OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }

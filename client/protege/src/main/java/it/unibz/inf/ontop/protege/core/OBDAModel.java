@@ -21,9 +21,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.ontology.OntologyFactory;
-import it.unibz.inf.ontop.spec.ontology.OntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyFactoryImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -63,7 +60,6 @@ import java.util.stream.Collectors;
  */
 public class OBDAModel {
 
-    private final static OntologyFactory ONTOLOGY_FACTORY = OntologyFactoryImpl.getInstance();
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private Map<String, SQLPPTriplesMap> triplesMapMap;
@@ -73,7 +69,7 @@ public class OBDAModel {
     private MutablePrefixManager prefixManager;
     private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
-    private OntologyVocabulary currentMutableVocabulary;
+    private MutableOntologyVocabulary currentMutableVocabulary;
 
 
     private final List<OBDAModelListener> sourceListeners;
@@ -108,7 +104,7 @@ public class OBDAModel {
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
         source = initDataSource();
-        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        currentMutableVocabulary = new MutableOntologyVocabularyImpl(atomFactory);
     }
 
     private static OBDADataSource initDataSource() {
@@ -320,18 +316,6 @@ public class OBDAModel {
         mappingListeners.add(mlistener);
     }
 
-    private void fireSourceAdded(OBDADataSource source) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceAdded(source);
-        }
-    }
-
-    private void fireSourceRemoved(OBDADataSource source) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceDeleted(source);
-        }
-    }
-
     /**
      * TODO: make it private
      */
@@ -341,19 +325,13 @@ public class OBDAModel {
         }
     }
 
-    private void fireSourceNameUpdated(URI old, OBDADataSource newDataSource) {
-        for (OBDAModelListener listener : sourceListeners) {
-            listener.datasourceUpdated(old.toString(), newDataSource);
-        }
-    }
-
     /**
      *
      */
     public void reset(PrefixDocumentFormat owlPrefixMapper) {
         triplesMapMap.clear();
         prefixManager = new MutablePrefixManager(owlPrefixMapper);
-        currentMutableVocabulary = ONTOLOGY_FACTORY.createVocabulary();
+        currentMutableVocabulary = new MutableOntologyVocabularyImpl(atomFactory);
     }
 
 
@@ -456,10 +434,7 @@ public class OBDAModel {
         return source;
     }
 
-    public OntologyVocabulary getCurrentVocabulary() {
-        return currentMutableVocabulary;
-
-    }
+    public MutableOntologyVocabulary getCurrentVocabulary() { return currentMutableVocabulary; }
 
     private static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
             java.util.function.Function<I, String> keyFunction,

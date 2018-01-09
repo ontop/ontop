@@ -27,9 +27,7 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 
 public class DatatypeImpl implements Datatype {
-	
-	private static final long serialVersionUID = -6228610469212615956L;
-	
+
 	private final IRI iri;
 
 	public static final  Datatype rdfsLiteral; 

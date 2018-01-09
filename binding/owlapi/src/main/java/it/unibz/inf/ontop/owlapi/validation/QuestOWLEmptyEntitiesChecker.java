@@ -23,10 +23,7 @@ package it.unibz.inf.ontop.owlapi.validation;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
@@ -42,31 +39,29 @@ import java.util.Iterator;
  */
 public class QuestOWLEmptyEntitiesChecker {
 
-	private Ontology onto;
-	private OWLConnection conn;
+	private final ClassifiedTBox onto;
+	private final OWLConnection conn;
 
 	private int nEmptyConcepts = 0;
 	private int nEmptyRoles = 0;
 
-
 	/**
 	 * Generate SPARQL queries to check if there are instances for each concept and role in the ontology
 	 *
-	 * @param translatedOntologyMerge the OWLAPI ontology, conn QuestOWL connection
+	 * @param tbox the ontology, conn QuestOWL connection
 	 * @throws Exception
 	 */
-	public QuestOWLEmptyEntitiesChecker(Ontology translatedOntologyMerge, OWLConnection conn) throws Exception {
-		this.onto = translatedOntologyMerge;
+	public QuestOWLEmptyEntitiesChecker(ClassifiedTBox tbox, OWLConnection conn)	 {
+		this.onto = tbox;
 		this.conn = conn;
 	}
 
 	public Iterator<IRI> iEmptyConcepts() {
-		return new EmptyEntitiesIterator( onto.getVocabulary().getClasses().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.classes().iterator(), conn);
 	}
 
-
 	public Iterator<IRI> iEmptyRoles() {
-		return new EmptyEntitiesIterator(onto.getVocabulary().getObjectProperties().iterator(), onto.getVocabulary().getDataProperties().iterator(), conn);
+		return new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
 	}
 
 	public int getEConceptsSize() {
@@ -98,16 +93,17 @@ public class QuestOWLEmptyEntitiesChecker {
 	private class EmptyEntitiesIterator implements Iterator<IRI> {
 
 
-		private String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
-		private String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
+		private static final String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
+		private static final String queryRoles = "SELECT * WHERE {?x <%s> ?y.} LIMIT 1";
 
-		private OWLConnection questConn;
+		private final OWLConnection questConn;
+
 		private boolean hasNext = false;
 		private IRI nextConcept;
 
-		Iterator<OClass> classIterator;
-		Iterator<ObjectPropertyExpression> objectRoleIterator;
-		Iterator<DataPropertyExpression> dataRoleIterator;
+		private final Iterator<OClass> classIterator;
+		private final Iterator<ObjectPropertyExpression> objectRoleIterator;
+		private final Iterator<DataPropertyExpression> dataRoleIterator;
 
 		private Logger log = LoggerFactory.getLogger(EmptyEntitiesIterator.class);
 
@@ -161,9 +157,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			};
 
 			this.objectRoleIterator = objectRoleIterator;
-
 			this.dataRoleIterator = dataRoleIterator;
-
 		}
 
 		private String getPredicateQuery(IRI p) {
@@ -194,7 +188,6 @@ public class QuestOWLEmptyEntitiesChecker {
 						return hasNext;
 					}
 				}
-
 			}
 			log.debug( "No more empty concepts" );
 
@@ -217,7 +210,6 @@ public class QuestOWLEmptyEntitiesChecker {
 						return hasNext;
 					}
 				}
-
 			}
 			log.debug( "No more empty data roles" );
 			hasNext = false;
@@ -231,47 +223,36 @@ public class QuestOWLEmptyEntitiesChecker {
 
 			//execute next query
 			try (OWLStatement stm = questConn.createStatement()){
-
 				try (TupleOWLResultSet rs = stm.executeSelectQuery(query)) {
-
 					if (!rs.hasNext()) {
-
 						nextConcept = entity;
 						log.debug( "Empty " + entity );
 
 						hasNext = true;
 						return true;
-
 					}
 
 					return false;
-
 				}
-			} catch (OWLException e) {
+			}
+			catch (OWLException e) {
 				e.printStackTrace();
 			}
-
 			return false;
 		}
 
 		@Override
 		public IRI next() {
-
-			if(hasNext) {
+			if (hasNext) {
 				return nextConcept;
 			}
-
 			return null;
-
-
 		}
-
 
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }
 

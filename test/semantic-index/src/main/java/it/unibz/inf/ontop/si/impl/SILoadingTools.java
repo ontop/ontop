@@ -16,12 +16,9 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.si.repository.impl.RDBMSSIRepositoryManager;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
-import it.unibz.inf.ontop.spec.ontology.impl.TBoxReasonerImpl;
 import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -46,31 +43,30 @@ class SILoadingTools {
     private static final Logger LOG = LoggerFactory.getLogger(OntopSemanticIndexLoaderImpl.class);
     private static final String DEFAULT_USER = "sa";
     private static final String DEFAULT_PASSWORD = "";
-    private static final boolean OPTIMIZE_EQUIVALENCES = true;;
 
     static class RepositoryInit {
         final SIRepositoryManager dataRepository;
-        final Optional<Set<OWLOntology>> ontologyClosure;
+        final Optional<Set<OWLOntology>> abox;
         final String jdbcUrl;
-        final ImmutableOntologyVocabulary vocabulary;
+        final ClassifiedTBox reasoner;
         final Connection localConnection;
 
-        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> ontologyClosure, String jdbcUrl,
-                               ImmutableOntologyVocabulary vocabulary, Connection localConnection) {
+        private RepositoryInit(SIRepositoryManager dataRepository, Optional<Set<OWLOntology>> abox, String jdbcUrl,
+                               ClassifiedTBox reasoner, Connection localConnection) {
             this.dataRepository = dataRepository;
-            this.ontologyClosure = ontologyClosure;
+            this.abox = abox;
             this.jdbcUrl = jdbcUrl;
-            this.vocabulary = vocabulary;
+            this.reasoner = reasoner;
             this.localConnection = localConnection;
         }
     }
 
     static RepositoryInit createRepository(OWLOntology owlOntology, AtomFactory atomFactory, TermFactory termFactory,
-                                           OWLAPITranslatorUtility owlapiTranslatorUtility,
+                                           OWLAPITranslatorOWL2QL owlapiTranslator,
                                            TypeFactory typeFactory) throws SemanticIndexException {
 
         Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-        Ontology ontology = owlapiTranslatorUtility.mergeTranslateOntologies(ontologyClosure);
+        Ontology ontology = owlapiTranslator.translateAndClassify(ontologyClosure);
         return createRepository(ontology, Optional.of(ontologyClosure), atomFactory, termFactory, typeFactory);
     }
 
@@ -83,11 +79,10 @@ class SILoadingTools {
                                                    AtomFactory atomFactory, TermFactory termFactory,
                                                    TypeFactory typeFactory)
             throws SemanticIndexException {
-        ImmutableOntologyVocabulary vocabulary = ontology.getVocabulary();
 
-        final TBoxReasoner reformulationReasoner = TBoxReasonerImpl.create(ontology, OPTIMIZE_EQUIVALENCES);
+        ClassifiedTBox reformulationReasoner = ontology.tbox();
 
-        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(vocabulary, reformulationReasoner, atomFactory,
+        SIRepositoryManager dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner, atomFactory,
                 termFactory, typeFactory);
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
@@ -102,9 +97,9 @@ class SILoadingTools {
 
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
-            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, vocabulary, localConnection);
-
-        } catch (SQLException e) {
+            return new RepositoryInit(dataRepository, ontologyClosure, jdbcUrl, reformulationReasoner, localConnection);
+        }
+        catch (SQLException e) {
             throw new SemanticIndexException(e.getMessage());
         }
     }
@@ -135,7 +130,8 @@ class SILoadingTools {
                 OWLOntology tbox = newManager.copyOntology(optionalOntology.get(), OntologyCopy.SHALLOW);
                 newManager.removeAxioms(tbox, tbox.getABoxAxioms(Imports.EXCLUDED));
                 optionalTBox = Optional.of(tbox);
-            } catch (OWLOntologyCreationException e) {
+            }
+            catch (OWLOntologyCreationException e) {
                 throw new SemanticIndexException(e.getMessage());
             }
         }
@@ -176,8 +172,8 @@ class SILoadingTools {
         try {
             return new SQLPPMappingImpl(mappingAxioms,
                     specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
-
-        } catch (DuplicateMappingException e) {
+        }
+        catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());
         }
     }

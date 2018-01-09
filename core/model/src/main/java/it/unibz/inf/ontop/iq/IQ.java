@@ -16,5 +16,4 @@ public interface IQ {
     VariableGenerator getVariableGenerator();
 
     IQ liftBinding();
-
 }

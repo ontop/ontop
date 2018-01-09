@@ -22,6 +22,18 @@ public interface IQTree {
 
     IQTree liftBinding(VariableGenerator variableGenerator);
 
+    /**
+     * Tries to lift unions when they have incompatible definitions
+     * for a variable.
+     *
+     * Union branches with compatible definitions are kept together
+     *
+     * Assumes that a "regular" binding lift has already been applied
+     *   --> the remaining "non-lifted" definitions are conflicting with
+     *       others.
+     */
+    IQTree liftIncompatibleDefinitions(Variable variable);
+
     default boolean isLeaf() {
         return getChildren().isEmpty();
     }
@@ -32,6 +44,12 @@ public interface IQTree {
             Optional<ImmutableExpression> constraint);
 
     ImmutableSet<Variable> getKnownVariables();
+
+    /**
+     * Returns true if the variable is (at least in one branch) constructed by a substitution
+     * (in a construction node)
+     */
+    boolean isConstructed(Variable variable);
 
     /**
      * Returns true if corresponds to a EmptyNode
@@ -45,4 +63,13 @@ public interface IQTree {
     ImmutableSet<Variable> getNullableVariables();
 
     boolean isEquivalentTo(IQTree tree);
+
+    /**
+     * TODO: explain
+     *
+     * The constraint is used for pruning. It remains enforced by
+     * a parent tree.
+     *
+     */
+    IQTree propagateDownConstraint(ImmutableExpression constraint);
 }

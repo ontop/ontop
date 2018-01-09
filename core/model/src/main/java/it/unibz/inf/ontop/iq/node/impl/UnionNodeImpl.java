@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
-public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
+public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private static final String UNION_NODE_STR = "UNION";
     private final ImmutableSet<Variable> projectedVariables;
@@ -39,6 +39,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
         this.iqFactory = iqFactory;
@@ -117,6 +118,13 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)
+                        && ((ConstructionNode) c.getRootNode()).getSubstitution().isDefining(variable));
+    }
+
+    @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         for(QueryNode child : query.getChildren(this)) {
             if (child.isVariableNullable(query, variable))
@@ -131,6 +139,32 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         return children.stream()
                 .flatMap(c -> c.getNullableVariables().stream())
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    /**
+     * TODO: make it compatible definitions together (requires a VariableGenerator so as to lift bindings)
+     */
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> liftedChildren = children.stream()
+                .map(c -> c.liftIncompatibleDefinitions(variable))
+                .collect(ImmutableCollectors.toList());
+        
+        return iqFactory.createNaryIQTree(this, liftedChildren);
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
+        return iqFactory.createNaryIQTree(this,
+                children.stream()
+                        .map(c -> c.propagateDownConstraint(constraint))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     @Override
@@ -210,11 +244,12 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
 
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.liftBinding(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
+                .map(c -> projectAwayUnnecessaryVariables(c, currentIQProperties))
                 .collect(ImmutableCollectors.toList());
 
         switch (liftedChildren.size()) {
@@ -223,7 +258,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator);
+                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator, currentIQProperties);
         }
     }
 
@@ -253,14 +288,15 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
     /**
      * Has at least two children
      */
-    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator) {
+    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
+                                                 IQProperties currentIQProperties) {
 
         /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
-            return iqFactory.createNaryIQTree(this, liftedChildren, true);
+            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareLifted());
 
         ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
                     projectedVariables,
@@ -271,7 +307,7 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                     variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
-            return iqFactory.createNaryIQTree(this, liftedChildren, true);
+            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareLifted());
         }
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, mergedSubstitution);
@@ -315,58 +351,61 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
                 .map(s -> Optional.of(s.get(variable)))
                 .reduce((od1, od2) -> od1
                         .flatMap(d1 -> od2
-                                .flatMap(d2 -> combineDefinitions(d1, d2, variableGenerator))))
+                                .flatMap(d2 -> combineDefinitions(d1, d2, variableGenerator, true))))
                 .flatMap(t -> t);
     }
 
     /**
-     * Compare and combine the bindings, returning only the compatible values.
+     * Compare and combine the bindings, returning only the compatible (partial) values.
      * In case of variable, we generate and return a new variable to avoid inconsistency during propagation
      *
-     * TODO: revisit it?
      */
     private Optional<ImmutableTerm> combineDefinitions(ImmutableTerm d1, ImmutableTerm d2,
-                                                       VariableGenerator variableGenerator) {
+                                                       VariableGenerator variableGenerator,
+                                                       boolean topLevel) {
         if (d1.equals(d2)) {
             return Optional.of(d1);
         }
         else if (d1 instanceof Variable)  {
-            return Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d1));
+            return topLevel
+                    ? Optional.empty()
+                    : Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d1));
         }
         else if (d2 instanceof Variable)  {
-            return Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d2));
+            return topLevel
+                    ? Optional.empty()
+                    : Optional.of(variableGenerator.generateNewVariableFromVar((Variable) d2));
         }
         else if ((d1 instanceof ImmutableFunctionalTerm) && (d2 instanceof ImmutableFunctionalTerm)) {
             ImmutableFunctionalTerm functionalTerm1 = (ImmutableFunctionalTerm) d1;
             ImmutableFunctionalTerm functionalTerm2 = (ImmutableFunctionalTerm) d2;
 
             /*
-             * NB: function symbols are in charge of enforcing the declared arities
+             * Different function symbols: stops the common part here
              */
             if (!functionalTerm1.getFunctionSymbol().equals(functionalTerm2.getFunctionSymbol())) {
-                return Optional.empty();
+                return topLevel
+                        ? Optional.empty()
+                        : Optional.of(variableGenerator.generateNewVariable());
             }
-
-            ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
-            ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
-            if(arguments1.size()!=arguments2.size()){
-                throw new IllegalStateException("Functions have different arities, they cannot be combined");
-            }
-
-            ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
-            for(int i=0; i <  arguments1.size(); i++) {
-                // Recursive
-                Optional<ImmutableTerm> optionalNewArgument = combineDefinitions(arguments1.get(i), arguments2.get(i),
-                        variableGenerator);
-                if (optionalNewArgument.isPresent()) {
-                    argumentBuilder.add(optionalNewArgument.get());
+            else {
+                ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
+                ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
+                if (arguments1.size() != arguments2.size()) {
+                    throw new IllegalStateException("Functions have different arities, they cannot be combined");
                 }
-                else {
-                    return Optional.empty();
+
+                ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+                for (int i = 0; i < arguments1.size(); i++) {
+                    // Recursive
+                    ImmutableTerm newArgument = combineDefinitions(arguments1.get(i), arguments2.get(i),
+                            variableGenerator, false)
+                            .orElseGet(variableGenerator::generateNewVariable);
+                    argumentBuilder.add(newArgument);
                 }
+                return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
+                        argumentBuilder.build()));
             }
-            return Optional.of(termFactory.getImmutableFunctionalTerm(functionalTerm1.getFunctionSymbol(),
-                    argumentBuilder.build()));
         }
         else {
             return Optional.empty();
@@ -407,6 +446,35 @@ public class UnionNodeImpl extends QueryNodeImpl implements UnionNode {
         return substitutionPair.bindings.isEmpty()
                 ? newChild
                 : iqFactory.createUnaryIQTree(newConstructionNode, newChild);
+    }
+
+    /**
+     * Projects away variables only for child construction nodes
+     */
+    private IQTree projectAwayUnnecessaryVariables(IQTree child, IQProperties currentIQProperties) {
+        if (child.getRootNode() instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
+
+            if (constructionNode.getOptionalModifiers().isPresent())
+                return child;
+
+            AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
+                    constructionNode.getSubstitution(), projectedVariables);
+            Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
+
+            if (proposedConstructionNode
+                    .filter(c -> c.isSyntacticallyEquivalentTo(constructionNode))
+                    .isPresent())
+                return child;
+
+            IQTree grandChild = normalization.normalizeChild(((UnaryIQTree) child).getChild());
+
+            return proposedConstructionNode
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareLifted()))
+                    .orElse(grandChild);
+        }
+        else
+            return child;
     }
 
 }

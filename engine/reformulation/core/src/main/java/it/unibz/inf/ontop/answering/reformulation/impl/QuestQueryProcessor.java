@@ -36,7 +36,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
@@ -53,7 +53,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryRewriter rewriter;
 	private final LinearInclusionDependencies sigma;
-	private final VocabularyValidator vocabularyValidator;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -103,24 +102,20 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
-		TBoxReasoner saturatedTBox = obdaSpecification.getSaturatedTBox();
+		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox, obdaSpecification.getVocabulary(), sigma);
+		this.rewriter.setTBox(saturatedTBox, sigma);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
 		if(log.isDebugEnabled()){
-
-			String saturatedMappings = Joiner.on("\n").join(saturatedMapping.getQueries());
-			log.debug("Mapping: \n{}",saturatedMappings);
+			log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
 		}
 
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
 
-		this.vocabularyValidator = new VocabularyValidator(obdaSpecification.getSaturatedTBox(),
-				obdaSpecification.getVocabulary(), atomFactory, termFactory, datalogFactory);
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
@@ -157,10 +152,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 			// TODO: get rid of EQNormalizer
 			eqNormalizer.enforceEqualities(rule);
 
-			CQIE newquery = vocabularyValidator.replaceEquivalences(rule);
-			if (newquery.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
-				topLevelPredicate = newquery.getHead().getFunctionSymbol();
-			newprogramEq.appendRule(newquery);
+			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
+				topLevelPredicate = rule.getHead().getFunctionSymbol();
+			newprogramEq.appendRule(rule);
 		}
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,

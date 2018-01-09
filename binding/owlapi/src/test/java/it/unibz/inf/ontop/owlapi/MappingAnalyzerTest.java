@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.exception.InvalidMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.injection.OntopOBDASettings.OPTIMIZE_EQUIVALENCES;
 
 /***
  * A simple test that check if the system is able to handle mapping variants
@@ -103,7 +102,7 @@ public class MappingAnalyzerTest extends TestCase {
 
 	private void runTests(String obdaFileName) throws Exception {
 		Properties p = new Properties();
-		p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
+		// p.setProperty(OPTIMIZE_EQUIVALENCES, "true");
 		
 		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

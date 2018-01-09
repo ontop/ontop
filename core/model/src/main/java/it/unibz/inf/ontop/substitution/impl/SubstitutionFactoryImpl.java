@@ -28,7 +28,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap) {
-        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, atomFactory, termFactory);
+        return new ImmutableSubstitutionImpl<>(newSubstitutionMap, atomFactory, termFactory, this);
     }
 
     @Override
@@ -54,17 +54,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     @Override
     public <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory);
+        return new ImmutableSubstitutionImpl<>(ImmutableMap.of(), atomFactory, termFactory, this);
     }
 
     @Override
     public Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap) {
-        return new Var2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory);
+        return new Var2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory, this);
     }
 
     @Override
     public InjectiveVar2VarSubstitution getInjectiveVar2VarSubstitution(Map<Variable, Variable> substitutionMap) {
-        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory);
+        return new InjectiveVar2VarSubstitutionImpl(substitutionMap, atomFactory, termFactory, this);
     }
 
     /**

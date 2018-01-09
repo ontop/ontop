@@ -151,6 +151,11 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
+    public boolean contains(QueryNode node) {
+        return tree.contains(node);
+    }
+
+    @Override
     public IntermediateQueryFactory getFactory() {
         return iqFactory;
     }
