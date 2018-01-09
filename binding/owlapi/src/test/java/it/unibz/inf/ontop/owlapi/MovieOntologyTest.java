@@ -1,17 +1,19 @@
 package it.unibz.inf.ontop.owlapi;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
-public class MovieOntologyTest extends TestCase {
+import static junit.framework.TestCase.assertTrue;
+
+public class MovieOntologyTest {
 
 	private Connection conn;
 
@@ -22,7 +24,7 @@ public class MovieOntologyTest extends TestCase {
 	final String qfile = "src/test/resources/test/treewitness/" + testCase + ".q";
 
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// String driver = "org.h2.Driver";
@@ -31,12 +33,12 @@ public class MovieOntologyTest extends TestCase {
 	}
 
 	
-	@Override
+	@After
 	public void tearDown() throws Exception {
 		executeUpdate("src/test/resources/test/treewitness/imdb-schema-drop-h2.sql");		
 	}
 
-
+	@Test
 	public void testOntologyLoad() throws Exception {
 
 		/*
@@ -58,19 +60,15 @@ public class MovieOntologyTest extends TestCase {
 		//		System.out.println(mm);
 		//	}
 		//}
-			
-		
-		boolean fail = false;
 
 		reasoner.dispose();
 
-		assertFalse(fail);
+		assertTrue(true);
 	}
-	
-	private void executeUpdate(String filename) {
-		Statement st;
-		try {
-			st = conn.createStatement();
+
+	private void executeUpdate(String filename) throws Exception {
+
+		try (Statement st = conn.createStatement()){
 			FileReader reader = new FileReader(filename);
 			BufferedReader in = new BufferedReader(reader);
 			StringBuilder bf = new StringBuilder();
@@ -81,20 +79,14 @@ public class MovieOntologyTest extends TestCase {
 				line = in.readLine();
 				if (line !=null && line.isEmpty()) {
 					st.execute(bf.toString());
-					conn.commit();		
+					conn.commit();
 					bf = new StringBuilder();
 				}
 			}
 			in.close();
 			st.execute(bf.toString());
-			conn.commit();		
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			conn.commit();
+
 		}
 	}
 

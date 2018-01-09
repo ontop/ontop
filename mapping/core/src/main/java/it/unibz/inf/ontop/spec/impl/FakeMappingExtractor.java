@@ -4,10 +4,10 @@ import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class FakeMappingExtractor implements MappingExtractor {
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
     }
@@ -29,7 +29,7 @@ public class FakeMappingExtractor implements MappingExtractor {
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                         @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, DBMetadataExtractionException {
         throw new UnsupportedOperationException(MESSAGE);
