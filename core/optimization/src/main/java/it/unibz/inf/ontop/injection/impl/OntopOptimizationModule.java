@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecut
 import it.unibz.inf.ontop.iq.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
-import it.unibz.inf.ontop.iq.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.optimizer.*;
@@ -48,7 +47,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(GroundTermRemovalFromDataNodeExecutor.class);
         bindFromSettings(PullVariableOutOfDataNodeExecutor.class);
         bindFromSettings(PullVariableOutOfSubTreeExecutor.class);
-        bindFromSettings(RemoveEmptyNodesExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
         bindFromSettings(QueryMergingExecutor.class);
         bindFromSettings(UnionLiftExecutor.class);
