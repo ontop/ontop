@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
-import it.unibz.inf.ontop.iq.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
@@ -52,7 +51,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(UnionLiftExecutor.class);
         bindFromSettings(LeftJoinExecutor.class);
         bindFromSettings(ProjectionShrinkingExecutor.class);
-        bindFromSettings(TrueNodeRemovalExecutor.class);
         bindFromSettings(FlattenUnionExecutor.class);
         bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(DatalogProgram2QueryConverter.class);

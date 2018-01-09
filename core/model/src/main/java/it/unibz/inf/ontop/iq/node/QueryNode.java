@@ -87,8 +87,6 @@ public interface QueryNode extends Cloneable {
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
 
-    NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
-
     /**
      * Set of variables that this node, INDEPENDENTLY OF THE REQUIREMENTS OF ITS ANCESTORS,
      * requires to be defined in the sub-tree.

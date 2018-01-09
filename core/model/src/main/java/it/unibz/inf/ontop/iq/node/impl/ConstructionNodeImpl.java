@@ -466,14 +466,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        if (this.getVariables().isEmpty() && !this.equals(query.getRootNode())){
-           return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
-        }
-       return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
     }
