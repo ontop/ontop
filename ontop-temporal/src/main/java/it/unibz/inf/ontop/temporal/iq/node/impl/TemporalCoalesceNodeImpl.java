@@ -67,6 +67,7 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public SubstitutionResults<TemporalCoalesceNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
+        //throw new RuntimeException("TODO: implement it");
         return DefaultSubstitutionResults.noChange();
     }
 
