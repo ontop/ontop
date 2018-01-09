@@ -247,45 +247,6 @@ public class EmptyNodeRemovalTest {
         optimizeUnsatisfiableQuery(query);
     }
 
-    @Ignore("TODO: support it")
-    @Test
-    public void testLJ3Optimal() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
-
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateURI1(B))),
-                Optional.empty());
-        queryBuilder.init(PROJECTION_ATOM, rootNode);
-
-        LeftJoinNode topLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(rootNode, topLeftJoinNode);
-
-        queryBuilder.addChild(topLeftJoinNode, DATA_NODE_2, LEFT);
-
-        LeftJoinNode rightLeftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(topLeftJoinNode, rightLeftJoinNode, RIGHT);
-
-        queryBuilder.addChild(rightLeftJoinNode, DATA_NODE_1, LEFT);
-        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, B, C));
-        queryBuilder.addChild(rightLeftJoinNode, emptyNode, RIGHT);
-
-        IntermediateQuery query = queryBuilder.build();
-
-        /*
-         * Expected query
-         */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
-
-        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
-        expectedQueryBuilder.addChild(rootNode, topLeftJoinNode);
-        expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_2, LEFT);
-        expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_1, RIGHT);
-
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-
-        optimizeAndCompare(query, expectedQuery);
-    }
-
     @Test
     public void testLJ3() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -317,12 +278,7 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
         expectedQueryBuilder.addChild(rootNode, topLeftJoinNode);
         expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_2, LEFT);
-
-        ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(A, B, C),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(C, NULL)));
-        expectedQueryBuilder.addChild(topLeftJoinNode, rightConstructionNode, RIGHT);
-        expectedQueryBuilder.addChild(rightConstructionNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(topLeftJoinNode, DATA_NODE_1, RIGHT);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
