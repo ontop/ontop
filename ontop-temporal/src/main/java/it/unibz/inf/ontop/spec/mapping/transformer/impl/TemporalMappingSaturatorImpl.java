@@ -81,11 +81,11 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
                         System.out.println(iq.toString());
-                        iq = ruleUnfolder.optimize(iq);
-                        System.out.println(iq.toString());
+                        //iq = ruleUnfolder.optimize(iq);
+                        //System.out.println(iq.toString());
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
-                        iq = projectionShrinkingOptimizer.optimize(iq);
-                        iq = joinLikeOptimizer.optimize(iq);
+                        //iq = projectionShrinkingOptimizer.optimize(iq);
+                        //iq = joinLikeOptimizer.optimize(iq);
                         iq = removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                         System.out.println(iq.toString());

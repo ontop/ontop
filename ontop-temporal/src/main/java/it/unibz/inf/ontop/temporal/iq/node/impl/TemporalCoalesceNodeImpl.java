@@ -112,16 +112,16 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
-        return null;
+        throw new RuntimeException("TODO: implement it");
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
-        return null;
+        throw new RuntimeException("TODO: implement it");
     }
 
     @Override
     public ImmutableSet<Variable> getNullableVariables(IQTree child) {
-        return null;
+        return child.getNullableVariables();
     }
 }
