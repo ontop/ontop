@@ -56,12 +56,11 @@ public class EmptyNodeRemovalTest {
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
-        QueryNode rootNode = query.getRootNode();
-        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
-        ConstructionNode secondConstructionNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(
+                PROJECTION_ATOM.getVariables(),
                 leftBindings);
-        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
-        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
+        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
+        expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -85,12 +84,12 @@ public class EmptyNodeRemovalTest {
         //ImmutableSubstitution<ImmutableTerm> expectedTopBindings = topBindings.union(leftBindings)
         //        .orElseThrow(() -> new IllegalStateException("Wrong bindings (union cannot be computed)"));
 
-        QueryNode rootNode = query.getRootNode();
-        expectedQueryBuilder.init(PROJECTION_ATOM, rootNode);
-        ConstructionNode secondConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y, A), leftBindings,
-                Optional.empty());
-        expectedQueryBuilder.addChild(rootNode, secondConstructionNode);
-        expectedQueryBuilder.addChild(secondConstructionNode, DATA_NODE_1);
+        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, generateURI1(A),
+                        Y, generateURI1(B)));
+        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
