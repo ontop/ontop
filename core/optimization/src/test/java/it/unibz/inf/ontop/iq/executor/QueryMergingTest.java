@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -120,14 +121,8 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(remainingConstructionNode.getChildVariables());
-        expectedBuilder.addChild(remainingConstructionNode, newUnionNode);
-
-        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(newUnionNode.getVariables());
-        expectedBuilder.addChild(newUnionNode, emptyNode);
-
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE));
-        expectedBuilder.addChild(newUnionNode, expectedDataNode);
+        expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), mainQuery.getIntensionalNodes().findFirst().get());
@@ -384,8 +379,10 @@ public class QueryMergingTest {
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(ANS1_X_ATOM, expectedRootNode);
+        ConstructionNode expectedIntermediateConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
+        expectedBuilder.addChild(expectedRootNode, expectedIntermediateConstructionNode);
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, THREE));
-        expectedBuilder.addChild(expectedRootNode, expectedDataNode);
+        expectedBuilder.addChild(expectedIntermediateConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
@@ -697,6 +694,7 @@ public class QueryMergingTest {
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
+    @Ignore("TODO: decide what to do with ground functional terms")
     @Test
     public void testEx12() throws EmptyQueryException {
 
@@ -742,6 +740,7 @@ public class QueryMergingTest {
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
 
+    @Ignore("TODO: decide what to do with ground functional terms")
     @Test
     public void testEx13() throws EmptyQueryException {
 
