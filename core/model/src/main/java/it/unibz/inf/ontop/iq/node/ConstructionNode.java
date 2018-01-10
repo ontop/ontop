@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -40,9 +38,4 @@ public interface ConstructionNode extends ExplicitVariableProjectionNode, UnaryO
      * Variables that have to be provided by the child
      */
     ImmutableSet<Variable> getChildVariables();
-
-    @Override
-    SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
-            throws QueryNodeSubstitutionException;
 }

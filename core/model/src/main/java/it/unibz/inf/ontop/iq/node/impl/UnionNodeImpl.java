@@ -9,7 +9,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -24,7 +23,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
 public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
@@ -62,27 +60,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
-    }
-
-    @Override
-    public SubstitutionResults<UnionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        ImmutableSet<Variable> newProjectedVariables = constructionTools.computeNewProjectedVariables(substitution,
-                projectedVariables);
-
-        /*
-         * Stops the substitution if does not affect the projected variables
-         */
-        if (newProjectedVariables.equals(projectedVariables)) {
-            return DefaultSubstitutionResults.noChange();
-        }
-        /*
-         * Otherwise, updates the projected variables and propagates the substitution down.
-         */
-        else {
-            UnionNode newNode = new UnionNodeImpl(newProjectedVariables, constructionTools, iqFactory, substitutionFactory, termFactory);
-            return DefaultSubstitutionResults.newNode(newNode, substitution);
-        }
     }
 
     @Override

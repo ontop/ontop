@@ -5,12 +5,10 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
@@ -50,19 +48,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
         return projectedVariables;
-    }
-
-    @Override
-    public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
-                .map(substitution::apply)
-                .filter(v -> v instanceof Variable)
-                .map(v -> (Variable) v)
-                .collect(ImmutableCollectors.toSet());
-
-        EmptyNode newNode = iqFactory.createEmptyNode(newProjectedVariables);
-        return DefaultSubstitutionResults.newNode(newNode);
     }
 
     @Override

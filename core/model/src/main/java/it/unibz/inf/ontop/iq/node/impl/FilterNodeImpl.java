@@ -27,10 +27,9 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Optional;
-import java.util.stream.Stream;
+
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
@@ -80,13 +79,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 createExpressionEvaluator(), iqFactory);
     }
 
-    @Override
-    public SubstitutionResults<FilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            IntermediateQuery query) {
-        return applySubstitution(substitution);
-    }
-
+    /**
+     * TODO: remove
+     */
+    @Deprecated
     private SubstitutionResults<FilterNode> applySubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 

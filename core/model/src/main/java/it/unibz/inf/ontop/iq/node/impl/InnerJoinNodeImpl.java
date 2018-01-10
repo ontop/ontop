@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
@@ -101,12 +100,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
-    @Override
-    public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
-    }
-
+    /**
+     * TODO: remove
+     */
+    @Deprecated
     private SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
