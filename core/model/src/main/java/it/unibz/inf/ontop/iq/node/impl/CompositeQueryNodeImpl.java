@@ -67,20 +67,20 @@ public abstract class CompositeQueryNodeImpl extends QueryNodeImpl {
             this.projectedVariables = projectedVariables;
         }
 
-        Optional<ConstructionNode> generateTopConstructionNode() {
+        public Optional<ConstructionNode> generateTopConstructionNode() {
             return Optional.of(ascendingSubstitution)
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
         }
 
-        IQTree normalizeChild(IQTree child) {
+        public IQTree normalizeChild(IQTree child) {
             return downRenamingSubstitution.isEmpty()
                     ? child
                     : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty());
         }
 
-        ImmutableSubstitution<ImmutableTerm> getAscendingSubstitution() {
+        public ImmutableSubstitution<ImmutableTerm> getAscendingSubstitution() {
             return ascendingSubstitution;
         }
     }
