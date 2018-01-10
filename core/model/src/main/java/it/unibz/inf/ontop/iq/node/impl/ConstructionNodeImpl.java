@@ -534,11 +534,11 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
                     .orElse(child);
 
+            ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
+
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
-                    .filter(theta -> !theta.isEmpty())
-                    .map(theta -> iqFactory.createConstructionNode(
-                            constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables),
-                            theta));
+                    .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
+                    .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
 
             IQTree filterTree = filterNode
                     .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
