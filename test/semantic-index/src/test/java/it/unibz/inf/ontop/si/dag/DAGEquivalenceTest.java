@@ -21,12 +21,10 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -243,7 +241,7 @@ public class DAGEquivalenceTest extends TestCase {
 	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(ImmutableList.of(owl));
+		Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
 		return onto.tbox();
 	}
 }

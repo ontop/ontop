@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
@@ -514,8 +511,25 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         }
         else {
             IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, constraint);
-            if (updatedRightChild.isDeclaredAsEmpty())
-                return updatedLeftChild;
+            if (updatedRightChild.isDeclaredAsEmpty()) {
+                ImmutableSet<Variable> leftVariables = updatedLeftChild.getVariables();
+                ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
+                        updatedRightChild.getVariables()).immutableCopy();
+
+                Optional<ConstructionNode> constructionNode = Optional.of(projectedVariables)
+                        .filter(vars -> !leftVariables.containsAll(vars))
+                        .map(vars -> substitutionFactory.getSubstitution(
+                                projectedVariables.stream()
+                                        .filter(v -> !leftVariables.contains(v))
+                                        .collect(ImmutableCollectors
+                                                .toMap(v -> v,
+                                                        v -> (ImmutableTerm) termFactory.getNullConstant()))))
+                        .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
+
+                return constructionNode
+                        .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedLeftChild))
+                        .orElse(updatedLeftChild);
+            }
             // TODO: lift it again!
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
@@ -649,8 +663,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             catch (UnsatisfiableConditionException e) {
                 EmptyNode newRightChild = iqFactory.createEmptyNode(rightChild.getVariables());
 
-                return new ChildLiftingState(liftedLeftChild, newRightChild, Optional.empty(),
-                        substitutionFactory.getSubstitution());
+                return new ChildLiftingState(leftGrandChild, newRightChild, Optional.empty(),
+                        leftConstructionNode.getSubstitution());
             }
         }
         else if (liftedLeftChild.isDeclaredAsEmpty())

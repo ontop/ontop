@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -13,7 +12,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.proposal.*;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -103,7 +101,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
                  * No unification --> empty result
                  */
             } catch (AtomUnificationException e) {
-                return removeSubTree(query, treeComponent, topJoinNode);
+                return declareSubTreeAsEmpty(query, treeComponent, topJoinNode);
             }
         }
 
@@ -164,9 +162,9 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         return updateJoinNodeAndPropagateSubstitution(query, treeComponent, topJoinNode, proposal);
     }
     
-    private NodeCentricOptimizationResults<InnerJoinNode> removeSubTree(IntermediateQuery query,
-                                                                        QueryTreeComponent treeComponent,
-                                                                        InnerJoinNode topJoinNode) throws EmptyQueryException {
+    private NodeCentricOptimizationResults<InnerJoinNode> declareSubTreeAsEmpty(IntermediateQuery query,
+                                                                                QueryTreeComponent treeComponent,
+                                                                                InnerJoinNode topJoinNode) {
         /*
          * Replaces by an EmptyNode
          */
@@ -174,18 +172,9 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         treeComponent.replaceSubTree(topJoinNode, emptyNode);
 
         /*
-         * Removes the empty node
-         * (may throw an EmptyQuery)
-         */
-        RemoveEmptyNodeProposal removalProposal = new RemoveEmptyNodeProposalImpl(emptyNode, false);
-        NodeTrackingResults<EmptyNode> removalResults = query.applyProposal(removalProposal);
-
-        /*
          * If the query is not empty, changes the type of the results
          */
-        return new NodeCentricOptimizationResultsImpl<>(query,
-                removalResults.getOptionalNextSibling(),
-                removalResults.getOptionalClosestAncestor());
+        return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(emptyNode));
     }
 
 }

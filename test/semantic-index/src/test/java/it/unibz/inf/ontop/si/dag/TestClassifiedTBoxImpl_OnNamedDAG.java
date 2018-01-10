@@ -84,8 +84,6 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
         return reasoner.classes();
     }
 
-    @Override
-    public OntologyVocabularyCategory<AnnotationProperty> annotationProperties() { return reasoner.annotationProperties(); }
 
     // DUMMIES
 

@@ -52,7 +52,7 @@ import com.google.common.collect.ImmutableMap;
  * 
  */
 
-public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repository.SIRepositoryManager {
+public class RDBMSSIRepositoryManager {
 
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
@@ -245,7 +245,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	
 	private final ClassifiedTBox reasonerDag;
 
-	private SemanticIndexCache cacheSI;
+	private final SemanticIndexCache cacheSI;
 
 	private final SemanticIndexViewsManager views;
 	private final AtomFactory atomFactory;
@@ -257,25 +257,16 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		views = new SemanticIndexViewsManager(typeFactory);
-	}
-
-	@Override
-	public void generateMetadata() {
-		cacheSI = new SemanticIndexCache(reasonerDag);
-		cacheSI.buildSemanticIndexFromReasoner();		
+        cacheSI = new SemanticIndexCache(reasonerDag);
+        cacheSI.buildSemanticIndexFromReasoner();
 	}
 
 
-	@Override
 	public SemanticIndexURIMap getUriMap() {
 		return uriMap;
 	}
 	
 
-
-	
-	
-	@Override
 	public void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException {
 
 		if (isDBSchemaDefined(conn)) {
@@ -346,7 +337,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		}
 	}
 
-	@Override
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
@@ -740,8 +730,7 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 		range.addRange(intervals);	
 	}
 
-	
-	@Override
+
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
 		List<SQLPPTriplesMap> result = new LinkedList<>();
@@ -1007,7 +996,6 @@ public class RDBMSSIRepositoryManager implements it.unibz.inf.ontop.si.repositor
 	 * repository.
 	 * @throws  
 	 */
-	@Override
 	public void insertMetadata(Connection conn) throws SQLException {
 
 		log.debug("Inserting semantic index metadata.");

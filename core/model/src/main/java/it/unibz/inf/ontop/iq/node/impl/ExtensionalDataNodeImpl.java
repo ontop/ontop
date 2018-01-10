@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
@@ -36,8 +38,9 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     private ImmutableSet<Variable> nullableVariables;
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom) {
-        super(atom);
+    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
+                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(atom, iqTreeTools, iqFactory);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public ExtensionalDataNode clone() {
-        return new ExtensionalDataNodeImpl(getProjectionAtom());
+        return iqFactory.createExtensionalDataNode(getProjectionAtom());
     }
 
     @Override
@@ -75,7 +78,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public ExtensionalDataNode newAtom(DataAtom<RelationPredicate> newAtom) {
-        return new ExtensionalDataNodeImpl(newAtom);
+        return iqFactory.createExtensionalDataNode(newAtom);
     }
 
     @Override

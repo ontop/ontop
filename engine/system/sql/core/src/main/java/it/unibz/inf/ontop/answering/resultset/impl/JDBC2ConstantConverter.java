@@ -199,13 +199,9 @@ public class JDBC2ConstantConverter {
                 case STRING:
                     return termFactory.getConstantLiteral(stringValue, XSD.STRING);
                 case DATETIME:
-
-                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)), XSD.DATETIME
-                    );
-
+                    return termFactory.getConstantLiteral(extractDatetimeValue(value), XSD.DATETIME);
                 case DATETIME_STAMP:
-                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE_TIME.format(convertToJavaDate(value)), XSD.DATETIMESTAMP
-                );
+                    return termFactory.getConstantLiteral(extractDatetimeValue(value), XSD.DATETIMESTAMP);
 
                 case DATE:
                     return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)), XSD.DATE);
@@ -259,11 +255,19 @@ public class JDBC2ConstantConverter {
         return  formatter.format(bigDecimal);
     }
 
+    private String extractDatetimeValue(Object value) throws OntopResultConversionException {
+        TemporalAccessor temporal = convertToJavaDate(value);
+        if(temporal instanceof LocalDate){
+            temporal = LocalDateTime.of((LocalDate)temporal, LocalTime.MIDNIGHT);
+        }
+        return DateTimeFormatter.ISO_DATE_TIME.format(temporal);
+    }
+
     /**
      * Sometimes the integer may have been converted as DECIMAL, FLOAT or DOUBLE
      */
     private String extractIntegerValue(String stringValue) {
-        return String.valueOf(Double.valueOf(stringValue).intValue());
+        return String.valueOf(new BigDecimal(stringValue).toBigInteger());
     }
 
     private TemporalAccessor convertToJavaDate(Object value) throws OntopResultConversionException {
@@ -290,6 +294,7 @@ public class JDBC2ConstantConverter {
             if (dateValue == null) {
                 throw new OntopResultConversionException("unparseable datetime: " + stringValue);
             }
+
         }
         return dateValue;
 

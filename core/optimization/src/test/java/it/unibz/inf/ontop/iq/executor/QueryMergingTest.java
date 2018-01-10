@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -119,8 +120,14 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(remainingConstructionNode.getChildVariables());
+        expectedBuilder.addChild(remainingConstructionNode, newUnionNode);
+
+        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(newUnionNode.getVariables());
+        expectedBuilder.addChild(newUnionNode, emptyNode);
+
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE));
-        expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
+        expectedBuilder.addChild(newUnionNode, expectedDataNode);
 
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), mainQuery.getIntensionalNodes().findFirst().get());
@@ -1145,7 +1152,6 @@ public class QueryMergingTest {
 
         // Updates the query (in-place optimization)
         mainQuery.applyProposal(new QueryMergingProposalImpl(intensionalNode, Optional.of(subQuery)));
-
         System.out.println("\n Optimized query: \n" + mainQuery);
 
         assertTrue(areEquivalent(mainQuery, expectedQuery));

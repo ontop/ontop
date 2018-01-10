@@ -67,7 +67,7 @@ public class AnnotationAssertionImpl implements AnnotationAssertion {
 	public boolean equals(Object obj) {
 		if (obj instanceof AnnotationAssertionImpl) {
 			AnnotationAssertionImpl other = (AnnotationAssertionImpl)obj;
-			return prop.equals(other.prop);
+			return prop.equals(other.prop) && o1.equals(other.o1) && o2.equals(other.o2);
 		}
 		return false;
 	}

@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 /**
  *
  */
@@ -28,7 +30,7 @@ public class FixedPointBindingLiftOptimizer implements BindingLiftOptimizer {
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
 
-        int oldVersionNumber;
+        UUID oldVersionNumber;
         int countVersion = 0;
 
         do {

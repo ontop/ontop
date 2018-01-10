@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -26,6 +27,8 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 
 public class SelfJoinLikeExecutor {
+
+
 
     /**
      * TODO: explain
@@ -374,7 +377,7 @@ public class SelfJoinLikeExecutor {
         return listBuilder.build();
     }
 
-    protected static <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> updateJoinNodeAndPropagateSubstitution(
+    protected <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> updateJoinNodeAndPropagateSubstitution(
             IntermediateQuery query,
             QueryTreeComponent treeComponent,
             N joinNode,
@@ -392,18 +395,16 @@ public class SelfJoinLikeExecutor {
                 QueryNode uniqueChild = treeComponent.getFirstChild(joinNode).get();
                 Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition();
 
-                QueryNode newTopNode;
                 if (optionalFilter.isPresent()) {
-                    newTopNode = query.getFactory().createFilterNode(optionalFilter.get());
-                    treeComponent.replaceNode(joinNode, newTopNode);
+                    QueryNode filterNode = query.getFactory().createFilterNode(optionalFilter.get());
+                    treeComponent.replaceNode(joinNode, filterNode);
                 }
                 else {
                     treeComponent.removeOrReplaceNodeByUniqueChild(joinNode);
-                    newTopNode = uniqueChild;
                 }
 
                 NodeCentricOptimizationResults<QueryNode> propagationResults = propagateSubstitution(query,
-                        proposal.getOptionalSubstitution(), newTopNode);
+                        proposal.getOptionalSubstitution(), uniqueChild);
                 /*
                  * Converts it into NodeCentricOptimizationResults over the focus node
                  */
@@ -415,10 +416,21 @@ public class SelfJoinLikeExecutor {
                                 propagationResults.getOptionalNextSibling(),
                                 propagationResults.getOptionalClosestAncestor()));
             /*
-             * Multiple children, keep the top join node
+             * Multiple children, keep a join node BUT MOVES ITS CONDITION ABOVE (in a filter)
              */
             default:
-                return propagateSubstitution(query, proposal.getOptionalSubstitution(), joinNode);
+                N newJoinNode = joinNode.getOptionalFilterCondition()
+                        .map(cond -> {
+                            FilterNode parentFilter = query.getFactory().createFilterNode(cond);
+                            treeComponent.insertParent(joinNode, parentFilter);
+
+                            N conditionLessJoinNode = (N) ((JoinLikeNode) joinNode)
+                                    .changeOptionalFilterCondition(Optional.empty());
+                            treeComponent.replaceNode(joinNode, conditionLessJoinNode);
+                            return conditionLessJoinNode;
+                        })
+                        .orElse(joinNode);
+                return propagateSubstitution(query, proposal.getOptionalSubstitution(), newJoinNode);
         }
     }
 

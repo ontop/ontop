@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -21,9 +20,7 @@ import it.unibz.inf.ontop.iq.impl.*;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.proposal.ProposalResults;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
-import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -186,7 +183,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
     @Override
     public ProposalResults apply(QueryMergingProposal proposal, IntermediateQuery mainQuery,
                                  QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
 
         Optional<IntermediateQuery> optionalSubQuery = proposal.getSubQuery();
         if (optionalSubQuery.isPresent()) {
@@ -195,18 +192,6 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         else {
             removeUnsatisfiedNode(treeComponent, proposal.getIntensionalNode());
         }
-
-        // Non-final
-        Optional<EmptyNode> nextEmptyNode = treeComponent.getEmptyNodes().stream()
-                .findFirst();
-        while (nextEmptyNode.isPresent()) {
-            // Removes the empty nodes (in-place operation)
-            RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(nextEmptyNode.get(), false);
-            mainQuery.applyProposal(cleaningProposal);
-
-            nextEmptyNode = treeComponent.getEmptyNodes().stream().findFirst();
-        }
-
         return new ProposalResultsImpl();
     }
 

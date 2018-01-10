@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -16,7 +17,6 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
@@ -25,7 +25,9 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     private final ImmutableSet<Variable> projectedVariables;
 
     @AssistedInject
-    private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
+    private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                          IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
     }
 
@@ -66,7 +68,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
                 .map(v -> (Variable) v)
                 .collect(ImmutableCollectors.toSet());
 
-        EmptyNode newNode = new EmptyNodeImpl(newProjectedVariables);
+        EmptyNode newNode = iqFactory.createEmptyNode(newProjectedVariables);
         return DefaultSubstitutionResults.newNode(newNode);
     }
 
@@ -98,7 +100,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public EmptyNode clone() {
-        return new EmptyNodeImpl(projectedVariables);
+        return iqFactory.createEmptyNode(projectedVariables);
     }
 
     @Override
@@ -112,9 +114,8 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+    protected IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
         ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
 
@@ -125,7 +126,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
                         .map(v -> (Variable) v))
                 .filter(v -> !substitutionDomain.contains(v))
                 .collect(ImmutableCollectors.toSet());
-        return new EmptyNodeImpl(newProjectedVariables);
+        return iqFactory.createEmptyNode(newProjectedVariables);
     }
 
     @Override

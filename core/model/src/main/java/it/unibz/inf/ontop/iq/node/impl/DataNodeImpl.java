@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -18,8 +19,6 @@ import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
-
 /**
  *
  */
@@ -27,7 +26,8 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
 
     private DataAtom<P> atom;
 
-    protected DataNodeImpl(DataAtom<P> atom) {
+    protected DataNodeImpl(DataAtom<P> atom, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(iqTreeTools, iqFactory);
         this.atom = atom;
     }
 
@@ -61,9 +61,8 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+    protected IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
         return newAtom(newAtom);
     }

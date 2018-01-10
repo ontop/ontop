@@ -75,6 +75,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         ImmutableSet<CQIE> saturatedMappingRules = tMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
                 foreignKeyCQC, tMappingExclusionConfig).stream()
+                // NOT SURE WHY SECOND TIME IS NEEDED
                 .map(r -> isNotNullDatalogMappingFiller.addNotNull(r, dbMetadata))
                 .collect(ImmutableCollectors.toSet());
 
@@ -94,7 +95,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private ImmutableList<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
         return saturatedRules.stream()
                 .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(datalogFactory.getSubqueryPredicatePrefix()))
-                .map(r -> generateTripleMapping(r))
+                .map(this::generateTripleMapping)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -102,31 +103,23 @@ public class LegacyMappingSaturator implements MappingSaturator {
         Function newhead;
         Function currenthead = rule.getHead();
         if (currenthead.getArity() == 1) {
-                /*
-                 * head is Class(x) Forming head as triple(x,uri(rdf:type),
-				 * uri(Class))
-				 */
-                Function rdfTypeConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
+            // head is Class(x) Forming head as triple(x,uri(rdf:type), uri(Class))
+            Function rdfTypeConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
 
-                String classname = currenthead.getFunctionSymbol().getName();
-                Term classConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(classname));
+            String classname = currenthead.getFunctionSymbol().getName();
+            Term classConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(classname));
 
-                newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
-            }
-            else if (currenthead.getArity() == 2) {
-				/*
-				 * head is Property(x,y) Forming head as triple(x,uri(Property),
-				 * y)
-				 */
-                String propname = currenthead.getFunctionSymbol().getName();
-                Function propConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(propname));
+            newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
+        }
+        else if (currenthead.getArity() == 2) {
+            // head is Property(x,y) Forming head as triple(x,uri(Property), y)
+            String propname = currenthead.getFunctionSymbol().getName();
+            Function propConstant = termFactory.getUriTemplate(termFactory.getConstantLiteral(propname));
 
-                newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
-            }
-            else {
-				/*
-				 * head is triple(x,uri(Property),y)
-				 */
+            newhead = atomFactory.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
+        }
+        else {
+            // head is triple(x,uri(Property),y)
             newhead = (Function) currenthead.clone();
         }
         return datalogFactory.getCQIE(newhead, rule.getBody());

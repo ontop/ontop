@@ -782,7 +782,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         if (formerModifiers.isPresent()) {
             Optional<ImmutableQueryModifiers> topModifiers = formerModifiers
                     .flatMap(m1 -> childConstructionNode.getOptionalModifiers()
-                            .flatMap(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2)));
+                            .map(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2))
+                            .orElse(Optional.of(m1)));
             if (topModifiers.isPresent()) {
                 ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                         newSubstitution, topModifiers);

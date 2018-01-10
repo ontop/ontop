@@ -302,8 +302,13 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         try {
             return query.applyProposal(proposal, true)
-                    .getOptionalNewNode()
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Was not expected to modify the LJ node"));
+                    .getNewNodeOrReplacingChild()
+                    // Is expecting to be a ConstructionNode
+                    .flatMap(query::getFirstChild)
+                    .filter(n -> n instanceof LeftJoinNode)
+                    .map(n -> (LeftJoinNode) n)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to keep the LJ node " +
+                            "under a fresh construction node"));
         } catch (EmptyQueryException e) {
             throw new MinorOntopInternalBugException("This substitution propagation was not expected " +
                     "to make the query be empty");
@@ -320,9 +325,15 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                 normalizedLeftJoin, remainingRightSubstitution);
 
         try {
-            return query.applyProposal(proposal, true)
-                    .getOptionalNewNode()
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Was not expected to modify the LJ node"));
+            NodeCentricOptimizationResults<LeftJoinNode> results = query.applyProposal(proposal, true);
+            return results
+                    .getNewNodeOrReplacingChild()
+                    // The LJ is expected to be the child of a construction node
+                    .flatMap(query::getFirstChild)
+                    .filter(n -> n instanceof LeftJoinNode)
+                    .map(n -> (LeftJoinNode) n)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to insert a construction node " +
+                            "followed by a LJ"));
         } catch (EmptyQueryException e) {
             throw new MinorOntopInternalBugException("This substitution propagation was not expected " +
                     "to make the query be empty");
