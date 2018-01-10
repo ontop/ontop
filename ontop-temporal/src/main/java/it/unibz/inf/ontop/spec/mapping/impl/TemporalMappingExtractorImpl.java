@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
@@ -24,10 +25,11 @@ import it.unibz.inf.ontop.spec.mapping.pp.*;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLTemporalMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -50,7 +52,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final TemporalSpecificationFactory temporalSpecificationFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final AtomFactory atomFactory;
-    private final MetaMappingExpander metaMappingExpander;
+    private final TermFactory termFactory;
 
 
     @Inject
@@ -58,7 +60,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                          TemporalPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                          NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
                                          TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                                         AtomFactory atomFactory, MetaMappingExpander metaMappingExpander) {
+                                         AtomFactory atomFactory, TermFactory termFactory) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -69,16 +71,17 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         this.temporalSpecificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
         this.atomFactory = atomFactory;
-        this.metaMappingExpander = metaMappingExpander;
+        this.termFactory = termFactory;
     }
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<Ontology> ontology, @Nonnull Optional<TBoxReasoner> saturatedTBox,
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
 
         SQLPPMapping ppMapping = extractPPMapping(specInput);
 
-        return extract(ppMapping, specInput, dbMetadata, ontology, saturatedTBox, executorRegistry);
+        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry);
     }
 
     private SQLPPMapping extractPPMapping(OBDASpecInput specInput)
@@ -102,13 +105,13 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping, @Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull Optional<TBoxReasoner> saturatedTBox, @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
-        if(ontology.isPresent() != saturatedTBox.isPresent()){
-            throw new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG);
-        }
-        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology, saturatedTBox,
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
+                                        @Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+
+        return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
                 executorRegistry);
     }
 
@@ -119,8 +122,8 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
      *
      */
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput, Optional<Ontology> optionalOntology,
-                                                  Optional<TBoxReasoner> optionalSaturatedTBox,
+                                                  OBDASpecInput specInput,
+                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
@@ -289,12 +292,23 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         return qd;
     }
 
-    private SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
+    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
-        ImmutableList<SQLPPTriplesMap> expandedMappingAxioms = metaMappingExpander.expand(
-                ppMapping.getTripleMaps(),
-                settings,
-                dbMetadata);
+
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory);
+        final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
+        if (expander.hasMappingsToBeExpanded()) {
+            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+                expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
+            }
+            // Problem while creating the connection
+            catch (SQLException e) {
+                throw new MetaMappingExpansionException(e.getMessage());
+            }
+        }
+        else
+            expandedMappingAxioms = expander.getNonExpandableMappings();
+
         try {
             return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getMetadata());
         } catch (DuplicateMappingException e) {
@@ -336,14 +350,14 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
      * Validation:
      *    - Mismatch between the ontology and the mapping
      */
-    private void validateMapping(Optional<Ontology> optionalOntology, Optional<TBoxReasoner> optionalSaturatedTBox,
+    private void validateMapping(Optional<Ontology> optionalOntology, Optional<ClassifiedTBox> optionalSaturatedTBox,
                                  MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
         if (optionalOntology.isPresent()) {
             Ontology ontology = optionalOntology.get();
-            TBoxReasoner saturatedTBox = optionalSaturatedTBox
+            ClassifiedTBox saturatedTBox = optionalSaturatedTBox
                     .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
 
-            ontologyComplianceValidator.validate(filledProvMapping, ontology.getVocabulary(), saturatedTBox);
+            ontologyComplianceValidator.validate(filledProvMapping, saturatedTBox);
         }
     }
 

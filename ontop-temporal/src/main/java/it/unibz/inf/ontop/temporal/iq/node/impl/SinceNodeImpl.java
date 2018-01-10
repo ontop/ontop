@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -110,12 +111,27 @@ public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements Sinc
     }
 
     @Override
-    public IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return null;
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild) {
         return null;
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
+        return null;
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild) {
+        return false;
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
         return null;
     }
 }

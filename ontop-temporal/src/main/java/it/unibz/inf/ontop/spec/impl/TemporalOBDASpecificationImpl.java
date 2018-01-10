@@ -4,8 +4,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
-import it.unibz.inf.ontop.spec.ontology.ImmutableOntologyVocabulary;
-import it.unibz.inf.ontop.spec.ontology.TBoxReasoner;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.spec.ImmutableTemporalVocabulary;
 
@@ -47,12 +46,8 @@ public class TemporalOBDASpecificationImpl implements TemporalOBDASpecification 
     }
 
     @Override
-    public TBoxReasoner getSaturatedTBox() {
+    public ClassifiedTBox getSaturatedTBox() {
         return null;
     }
 
-    @Override
-    public ImmutableOntologyVocabulary getVocabulary() {
-        return null;
-    }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -113,8 +114,9 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
         return false;
     }
 
+
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return null;
     }
 
@@ -125,6 +127,21 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
 
     @Override
     public ImmutableSet<Variable> getNullableVariables(IQTree child) {
+        return null;
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return false;
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        return null;
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         return null;
     }
 }

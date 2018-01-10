@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
@@ -51,7 +52,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(optionalFilterCondition, nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
@@ -66,7 +67,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, typeFactory, datalogTools,
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
@@ -80,7 +81,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
@@ -197,8 +198,9 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
+
     @Override
-    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
+    public IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return null;
     }
 
@@ -209,6 +211,21 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
     @Override
     public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
+        return null;
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
+        return false;
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+        return null;
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
         return null;
     }
 }

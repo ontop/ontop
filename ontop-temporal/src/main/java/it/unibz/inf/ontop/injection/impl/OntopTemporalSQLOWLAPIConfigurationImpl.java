@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorUtility;
 import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -48,17 +47,6 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
         //super.loadOBDASpecification();
         return temporalConfiguration.loadSpecification();
-    }
-
-    private Optional<Ontology> getOntology() throws OntologyException {
-        OWLAPITranslatorUtility owlapiTranslatorUtility = getInjector().getInstance(OWLAPITranslatorUtility.class);
-
-        try {
-            return loadInputOntology()
-                    .map(owlapiTranslatorUtility::translateImportsClosure);
-        } catch (OWLOntologyCreationException e) {
-            throw new OntologyException(e.getMessage());
-        }
     }
 
     static class OntopTemporalSQLOWLAPIOptions {
