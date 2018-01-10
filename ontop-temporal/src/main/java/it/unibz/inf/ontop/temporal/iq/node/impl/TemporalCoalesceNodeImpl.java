@@ -71,7 +71,7 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+        return isEquivalentTo(node);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return false;
+        return queryNode instanceof TemporalCoalesceNode;
     }
 
 

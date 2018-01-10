@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
@@ -92,12 +93,19 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return false;
+        return queryNode instanceof BoxMinusNode;
     }
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+        if(newChildRoot instanceof ConstructionNode ){
+            IQTree boxLevelTree =  iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree((ConstructionNode)newChildRoot, boxLevelTree);
+        }else if(newChildRoot instanceof EmptyNode){
+            return newChild;
+        }
         return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 

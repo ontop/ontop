@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
@@ -42,16 +43,18 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final TemporalIntermediateQueryFactory TIQFactory;
     private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
+    private final BindingLiftOptimizer bindingLiftOptimizer;
 
 
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
                                          RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools,
-                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory) {
+                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory, BindingLiftOptimizer bindingLiftOptimizer) {
         this.dMTLConverter = dMTLConverter;
         this.ruleUnfolder = ruleUnfolder;
         this.immutabilityTools = immutabilityTools;
         TIQFactory = tiqFactory;
+        this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
         projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -81,7 +84,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
                         System.out.println(iq.toString());
-                        //iq = ruleUnfolder.optimize(iq);
+                        //bindingLiftOptimizer.optimize(iq);
+                        //System.out.println(iq.toString());
                         //System.out.println(iq.toString());
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
                         //iq = projectionShrinkingOptimizer.optimize(iq);
