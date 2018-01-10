@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -583,13 +584,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
          */
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFunctionalTermFragment();
 
-        ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m = thetaF.getImmutableMap().entrySet().stream()
+        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         e -> deltaC.apply(e.getKey()),
-                        e -> deltaC.applyToFunctionalTerm(e.getValue())
-                )).asMap();
+                        e -> deltaC.applyToFunctionalTerm(e.getValue())));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(m.entrySet().stream()
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(
+                m.asMap().entrySet().stream()
                 .filter(e -> e.getKey() instanceof Variable)
                 .filter(e -> !child.getVariables().contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap(
@@ -610,15 +611,16 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     }
 
-    private Optional<ImmutableExpression> computeF(ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m,
+    private Optional<ImmutableExpression> computeF(ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m,
                                                    ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
                                                    ImmutableSubstitution<ImmutableTerm> gamma,
                                                    ImmutableSubstitution<NonFunctionalTerm> newDeltaC) {
-        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entrySet().stream()
-                .filter(e -> (!(e.getKey() instanceof Variable))
-                        || (!thetaFBar.isDefining((Variable)e.getKey())))
-                .flatMap(e -> e.getValue().stream()
-                        .map(v -> createEquality(thetaFBar.apply(e.getKey()), v)));
+
+        ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.getImmutableMap().entrySet();
+
+        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
+                .filter(e -> !thetaFBarEntries.contains(e))
+                .map(e -> createEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.getImmutableMap().entrySet().stream()
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
