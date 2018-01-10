@@ -76,7 +76,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
 
         SQLPPMapping ppMapping = extractPPMapping(specInput);
@@ -108,7 +108,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                         @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
-                                        @Nonnull Optional<ClassifiedTBox> saturatedTBox,
+                                        @Nonnull Optional<Ontology> saturatedTBox,
                                         @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
 
         return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
@@ -123,7 +123,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
      */
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
-                                                  Optional<ClassifiedTBox> optionalSaturatedTBox,
+                                                  Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, DBMetadataExtractionException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
@@ -348,16 +348,12 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
     /**
      * Validation:
-     *    - Mismatch between the ontology and the mapping
+     * - Mismatch between the ontology and the mapping
      */
-    private void validateMapping(Optional<Ontology> optionalOntology, Optional<ClassifiedTBox> optionalSaturatedTBox,
-                                 MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
-        if (optionalOntology.isPresent()) {
-            Ontology ontology = optionalOntology.get();
-            ClassifiedTBox saturatedTBox = optionalSaturatedTBox
-                    .orElseThrow(() -> new IllegalArgumentException(ONTOLOGY_SATURATED_TBOX_ERROR_MSG));
-
-            ontologyComplianceValidator.validate(filledProvMapping, saturatedTBox);
+    protected void validateMapping(Optional<Ontology> ontology,
+                                   MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
+        if (ontology.isPresent()) {
+            ontologyComplianceValidator.validate(filledProvMapping, ontology.get());
         }
     }
 

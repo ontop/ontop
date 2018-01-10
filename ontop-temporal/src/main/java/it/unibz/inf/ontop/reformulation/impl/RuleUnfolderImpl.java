@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class RuleUnfolderImpl implements RuleUnfolder {
 
@@ -63,7 +64,7 @@ public class RuleUnfolderImpl implements RuleUnfolder {
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
 
-        int oldVersionNumber;
+        UUID oldVersionNumber;
         int countVersion = 0;
 
         do {
