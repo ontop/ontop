@@ -57,16 +57,6 @@ public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements Unti
     }
 
     @Override
-    public SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
-    }
-
-    @Override
-    public SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return null;
-    }
-
-    @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         return false;
     }
@@ -74,16 +64,6 @@ public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements Unti
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        return null;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        return null;
     }
 
     @Override

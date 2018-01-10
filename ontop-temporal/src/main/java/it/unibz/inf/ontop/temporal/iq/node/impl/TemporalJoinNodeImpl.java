@@ -95,51 +95,6 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                 substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
-    @Override
-    public SubstitutionResults<TemporalJoinNode> applyAscendingSubstitution
-            (ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        if (substitution.isEmpty()) {
-            return DefaultSubstitutionResults.noChange();
-        }
-
-        ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().equals(termFactory.getNullConstant()))
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-
-        ImmutableSet<Variable > otherNodesProjectedVariables = query.getOtherChildrenStream(this, childNode)
-                .flatMap(c -> query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toSet());
-
-        /*
-         * If there is an implicit equality involving one null variables, the join is empty.
-         */
-        if (otherNodesProjectedVariables.stream()
-                .anyMatch(nullVariables::contains)) {
-            // Reject
-            return DefaultSubstitutionResults.declareAsEmpty();
-        }
-
-        return computeAndEvaluateNewCondition(substitution, Optional.empty())
-                .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
-    }
-
-    @Override
-    public SubstitutionResults<TemporalJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) throws QueryNodeSubstitutionException {
-        return applyDescendingSubstitution(substitution);
-    }
-
-    private SubstitutionResults<TemporalJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        return getOptionalFilterCondition()
-                .map(cond -> transformBooleanExpression(substitution, cond))
-                .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
-    }
 
     private SubstitutionResults<TemporalJoinNode> applyEvaluation(ExpressionEvaluator.EvaluationResult evaluationResult,
                                                                ImmutableSubstitution<? extends ImmutableTerm> substitution) {
@@ -176,16 +131,6 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        return null;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        return null;
     }
 
     @Override

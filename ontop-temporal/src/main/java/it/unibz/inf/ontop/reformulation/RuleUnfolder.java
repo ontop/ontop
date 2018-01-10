@@ -10,5 +10,5 @@ public interface RuleUnfolder {
     IntermediateQuery unfold(IntermediateQuery query, ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap)
             throws EmptyQueryException;
 
-    IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException;
+    //IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException;
 }

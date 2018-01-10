@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
@@ -34,6 +35,7 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
     private final DatalogProgram2QueryConverter datalogConverter;
     private final SpecificationFactory specificationFactory;
     private final RuleUnfolder ruleUnfolder;
+    private final BindingLiftOptimizer bindingLiftOptimizer;
     private final ImmutabilityTools immutabilityTools;
     private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
@@ -44,12 +46,13 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
     private StaticRuleMappingSaturatorImpl(TermFactory termFactory, DatalogFactory datalogFactory,
                                            DatalogProgram2QueryConverter datalogConverter,
                                            SpecificationFactory specificationFactory,
-                                           RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools, JoinLikeOptimizer joinLikeOptimizer) {
+                                           RuleUnfolder ruleUnfolder, BindingLiftOptimizer bindingLiftOptimizer, ImmutabilityTools immutabilityTools, JoinLikeOptimizer joinLikeOptimizer) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         this.datalogConverter = datalogConverter;
         this.specificationFactory = specificationFactory;
         this.ruleUnfolder = ruleUnfolder;
+        this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.immutabilityTools = immutabilityTools;
         this.joinLikeOptimizer = joinLikeOptimizer;
         pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
@@ -91,7 +94,7 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
 
                         intermediateQuery = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mappingMap));
                         System.out.println(intermediateQuery.toString());
-                        intermediateQuery = ruleUnfolder.optimize(intermediateQuery);
+                        intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
                         intermediateQuery = pushUpBooleanExpressionOptimizer.optimize(intermediateQuery);
                         intermediateQuery = projectionShrinkingOptimizer.optimize(intermediateQuery);
                         intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
