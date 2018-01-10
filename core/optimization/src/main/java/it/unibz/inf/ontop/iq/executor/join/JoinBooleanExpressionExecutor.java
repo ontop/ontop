@@ -16,9 +16,7 @@ import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.iq.proposal.RemoveEmptyNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.iq.proposal.impl.RemoveEmptyNodeProposalImpl;
 
 import java.util.Optional;
 
@@ -66,13 +64,8 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
             EmptyNode replacingEmptyNode = iqFactory.createEmptyNode(query.getVariables(originalTopJoinNode));
             treeComponent.replaceSubTree(originalTopJoinNode, replacingEmptyNode);
 
-            RemoveEmptyNodeProposal cleaningProposal = new RemoveEmptyNodeProposalImpl(replacingEmptyNode, false);
-
-            NodeCentricOptimizationResults<EmptyNode> cleaningResults = query.applyProposal(cleaningProposal);
-
             // Converts it into a NodeCentricOptimizationResults<InnerJoinNode>
-            return new NodeCentricOptimizationResultsImpl<>(query, cleaningResults.getOptionalNextSibling(),
-                    cleaningResults.getOptionalClosestAncestor());
+            return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingEmptyNode));
         }
 
         /*

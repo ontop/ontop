@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.proposal.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -120,7 +121,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public int getVersionNumber() {
+    public UUID getVersionNumber() {
         return treeComponent.getVersionNumber();
     }
 

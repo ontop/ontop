@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
@@ -12,12 +14,9 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.stream.IntStream;
@@ -36,8 +35,9 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     private ImmutableSet<Variable> nullableVariables;
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom) {
-        super(atom);
+    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
+                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(atom, iqTreeTools, iqFactory);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public ExtensionalDataNode clone() {
-        return new ExtensionalDataNodeImpl(getProjectionAtom());
+        return iqFactory.createExtensionalDataNode(getProjectionAtom());
     }
 
     @Override
@@ -61,21 +61,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public SubstitutionResults<ExtensionalDataNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return applySubstitution(this, substitution);
-    }
-
-    @Override
-    public SubstitutionResults<ExtensionalDataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return applySubstitution(this, substitution);
-    }
-
-    @Override
     public ExtensionalDataNode newAtom(DataAtom<RelationPredicate> newAtom) {
-        return new ExtensionalDataNodeImpl(newAtom);
+        return iqFactory.createExtensionalDataNode(newAtom);
     }
 
     @Override

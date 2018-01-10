@@ -2,16 +2,19 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.CompositeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,8 +31,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Nullable
     private ImmutableSet<Variable> knownVariables;
 
+    protected final IQTreeTools iqTreeTools;
+    protected final IntermediateQueryFactory iqFactory;
+
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
-                                      IQProperties iqProperties) {
+                                      IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                      IntermediateQueryFactory iqFactory) {
+        this.iqTreeTools = iqTreeTools;
+        this.iqFactory = iqFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -111,5 +120,11 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     protected IQProperties getProperties() {
         return iqProperties;
+    }
+
+    protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution)
+            throws IQTreeTools.UnsatisfiableDescendingSubstitutionException {
+        return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
     }
 }

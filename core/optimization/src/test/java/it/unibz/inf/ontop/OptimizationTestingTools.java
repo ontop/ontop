@@ -10,10 +10,10 @@ import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -28,7 +28,6 @@ public class OptimizationTestingTools {
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
-    public static final InnerJoinOptimizer INNER_JOIN_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
@@ -40,6 +39,7 @@ public class OptimizationTestingTools {
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
+    public static final IQConverter IQ_CONVERTER;
     public static final ValueConstant NULL, TRUE, FALSE;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -53,7 +53,6 @@ public class OptimizationTestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
-        INNER_JOIN_OPTIMIZER = injector.getInstance(InnerJoinOptimizer.class);
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
@@ -61,6 +60,7 @@ public class OptimizationTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);

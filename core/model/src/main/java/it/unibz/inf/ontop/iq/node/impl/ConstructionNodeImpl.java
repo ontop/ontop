@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -26,10 +27,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,7 +34,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -257,28 +253,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     /**
-     * Creates a new ConstructionNode with a new substitution.
-     *
-     * Stops the propagation.
-     *
-     */
-    @Override
-    public SubstitutionResults<ConstructionNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply,
-            QueryNode childNode, IntermediateQuery query) {
-
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = mergeWithAscendingSubstitution(substitutionToApply);
-
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                newSubstitution, getOptionalModifiers());
-
-        /*
-         * Stops to propagate the substitution
-         */
-        return DefaultSubstitutionResults.newNode(newConstructionNode);
-    }
-
-    /**
      * Merges the current substitution with the ascending one
      *
      * This substitution is obtained by composition and then cleaned (only defines the projected variables)
@@ -309,16 +283,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .reduceDomainToIntersectionWith(projectedVariables)
                 .normalizeValues();
 
-    }
-
-
-    /**
-     * TODO: explain
-     */
-    @Override
-    public SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution, IntermediateQuery query) {
-        return applyDescendingSubstitution(descendingSubstitution);
     }
 
     private SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
@@ -488,22 +452,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        /*
-         * A construction node has only one child
-         */
-        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, projectedVariables);
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        if (this.getVariables().isEmpty() && !this.equals(query.getRootNode())){
-           return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_TRUE, ImmutableSet.of());
-        }
-       return new NodeTransformationProposalImpl(NodeTransformationProposedState.NO_LOCAL_CHANGE, ImmutableSet.of());
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return getChildVariables();
     }
@@ -586,11 +534,11 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
                     .orElse(child);
 
+            ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
+
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
-                    .filter(theta -> !theta.isEmpty())
-                    .map(theta -> iqFactory.createConstructionNode(
-                            constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables),
-                            theta));
+                    .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
+                    .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
 
             IQTree filterTree = filterNode
                     .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
@@ -636,13 +584,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
          */
         ImmutableSubstitution<ImmutableFunctionalTerm> thetaF = substitution.getFunctionalTermFragment();
 
-        ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m = thetaF.getImmutableMap().entrySet().stream()
+        ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m = thetaF.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         e -> deltaC.apply(e.getKey()),
-                        e -> deltaC.applyToFunctionalTerm(e.getValue())
-                )).asMap();
+                        e -> deltaC.applyToFunctionalTerm(e.getValue())));
 
-        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(m.entrySet().stream()
+        ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.getSubstitution(
+                m.asMap().entrySet().stream()
                 .filter(e -> e.getKey() instanceof Variable)
                 .filter(e -> !child.getVariables().contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap(
@@ -663,15 +611,16 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     }
 
-    private Optional<ImmutableExpression> computeF(ImmutableMap<ImmutableTerm, Collection<ImmutableFunctionalTerm>> m,
+    private Optional<ImmutableExpression> computeF(ImmutableMultimap<ImmutableTerm, ImmutableFunctionalTerm> m,
                                                    ImmutableSubstitution<ImmutableFunctionalTerm> thetaFBar,
                                                    ImmutableSubstitution<ImmutableTerm> gamma,
                                                    ImmutableSubstitution<NonFunctionalTerm> newDeltaC) {
-        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entrySet().stream()
-                .filter(e -> (!(e.getKey() instanceof Variable))
-                        || (!thetaFBar.isDefining((Variable)e.getKey())))
-                .flatMap(e -> e.getValue().stream()
-                        .map(v -> createEquality(thetaFBar.apply(e.getKey()), v)));
+
+        ImmutableSet<Map.Entry<Variable, ImmutableFunctionalTerm>> thetaFBarEntries = thetaFBar.getImmutableMap().entrySet();
+
+        Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
+                .filter(e -> !thetaFBarEntries.contains(e))
+                .map(e -> createEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.getImmutableMap().entrySet().stream()
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
@@ -782,7 +731,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         if (formerModifiers.isPresent()) {
             Optional<ImmutableQueryModifiers> topModifiers = formerModifiers
                     .flatMap(m1 -> childConstructionNode.getOptionalModifiers()
-                            .flatMap(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2)));
+                            .map(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2))
+                            .orElse(Optional.of(m1)));
             if (topModifiers.isPresent()) {
                 ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                         newSubstitution, topModifiers);

@@ -3,24 +3,26 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+
 
 public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     @AssistedInject
-    private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom) {
-        super(atom);
+    private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
+                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(atom, iqTreeTools, iqFactory);
     }
 
     @Override
@@ -30,26 +32,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IntensionalDataNode clone() {
-        return new IntensionalDataNodeImpl(getProjectionAtom());
+        return iqFactory.createIntensionalDataNode(getProjectionAtom());
     }
 
     @Override
     public IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
-    }
-
-    @Override
-    public SubstitutionResults<IntensionalDataNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return applySubstitution((IntensionalDataNode)this, substitution);
-    }
-
-    @Override
-    public SubstitutionResults<IntensionalDataNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return applySubstitution((IntensionalDataNode)this, substitution);
     }
 
     /**
@@ -98,7 +87,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IntensionalDataNode newAtom(DataAtom newAtom) {
-        return new IntensionalDataNodeImpl(newAtom);
+        return iqFactory.createIntensionalDataNode(newAtom);
     }
 
 }

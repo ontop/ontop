@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 /**
  * Object returned after applying a substitution to a QueryNode
  */
+@Deprecated
 public interface SubstitutionResults<T extends QueryNode> {
 
     /**

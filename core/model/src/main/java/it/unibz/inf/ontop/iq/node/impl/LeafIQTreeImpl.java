@@ -1,19 +1,29 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.Optional;
 
 public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree {
 
     private static final ImmutableList<IQTree> EMPTY_LIST = ImmutableList.of();
+    private final IQTreeTools iqTreeTools;
+    protected final IntermediateQueryFactory iqFactory;
 
-    public LeafIQTreeImpl() {
+    protected LeafIQTreeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         super();
+        this.iqTreeTools = iqTreeTools;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -41,6 +51,25 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
         return (tree instanceof LeafIQTree)
                 && isEquivalentTo((QueryNode) tree);
     }
+
+    /**
+     * NB: the constraint is irrelevant here
+     */
+    @Override
+    public final IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            Optional<ImmutableExpression> constraint) {
+        try {
+            return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution)
+                    .map(this::applyDescendingSubstitution)
+                    .orElse(this);
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    protected abstract IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {

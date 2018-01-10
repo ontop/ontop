@@ -62,7 +62,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, DATA_NODE_1);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -71,14 +70,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -100,7 +93,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, DATA_NODE_3);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -111,14 +103,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(filterNode, DATA_NODE_3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -139,7 +125,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn, DATA_NODE_2);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -149,14 +134,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(jn, DATA_NODE_1);
         expectedQueryBuilder.addChild(jn, DATA_NODE_2);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -176,7 +155,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), RIGHT);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -184,14 +162,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
 
@@ -204,25 +176,13 @@ public class TrueNodesRemovalOptimizerTest {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
-        InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, jn);
-        ConstructionNode cn = IQ_FACTORY.createConstructionNode(ImmutableSet.of());
-        queryBuilder.addChild(jn,cn);
-        queryBuilder.addChild(jn, DATA_NODE_1);
-        queryBuilder.addChild(cn, IQ_FACTORY.createTrueNode());
+        queryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode optimization: \n" + unOptimizedQuery);
 
         IntermediateQuery expectedQuery = unOptimizedQuery.createSnapshot();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
 
@@ -243,7 +203,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -254,14 +213,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -280,7 +233,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -291,14 +243,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -321,7 +267,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(jn2, DATA_NODE_1);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNode removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -330,14 +275,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -359,7 +298,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), RIGHT);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNodes removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -367,14 +305,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNodes removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
 
@@ -398,7 +330,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore TrueNodes removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -408,14 +339,8 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(ljn, IQ_FACTORY.createTrueNode(), LEFT);
         expectedQueryBuilder.addChild(ljn, DATA_NODE_1, RIGHT);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\nExpected query: \n" + expectedQuery);
 
-        // Optimize and compare
-        IntermediateQueryOptimizer optimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = optimizer.optimize(unOptimizedQuery);
-
-        System.out.println("\nQuery after TrueNodes removal: \n" + optimizedQuery);
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
     }
 
     @Test
@@ -437,7 +362,6 @@ public class TrueNodesRemovalOptimizerTest {
         queryBuilder.addChild(un, DATA_NODE_1);
 
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore true Node removal: \n" + unOptimizedQuery);
 
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -448,13 +372,20 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.addChild(un, DATA_NODE_1);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(unOptimizedQuery, expectedQuery);
+    }
+
+    private static void optimizeAndCompare(IntermediateQuery unOptimizedQuery, IntermediateQuery expectedQuery)
+            throws EmptyQueryException {
+
+        System.out.println("\nInitial query: \n" + unOptimizedQuery);
         System.out.println("\nExpected query: \n" + expectedQuery);
 
         // Optimize and compare
-        IntermediateQueryOptimizer substitutionOptimizer = new TrueNodesRemovalOptimizer();
-        IntermediateQuery optimizedQuery = substitutionOptimizer.optimize(unOptimizedQuery);
+        IntermediateQuery optimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
-        System.out.println("\nQuery after TrueNode Removal: \n" + optimizedQuery);
+        System.out.println("\nOptimized query: \n" + optimizedQuery);
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 

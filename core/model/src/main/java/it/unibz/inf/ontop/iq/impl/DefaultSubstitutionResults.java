@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.SubstitutionResults;
 
 import static it.unibz.inf.ontop.iq.node.SubstitutionResults.LocalAction.*;
 
+@Deprecated
 public class DefaultSubstitutionResults<T extends QueryNode> implements SubstitutionResults<T> {
     private final LocalAction localAction;
     private final Optional<T> optionalNewNode;

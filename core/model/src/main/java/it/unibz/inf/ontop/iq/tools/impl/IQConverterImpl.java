@@ -36,7 +36,8 @@ public class IQConverterImpl implements IQConverter {
     /**
      * Recursive
      */
-    private IQTree convertTree(IntermediateQuery query, QueryNode rootNode) {
+    @Override
+    public IQTree convertTree(IntermediateQuery query, QueryNode rootNode) {
         if (rootNode instanceof LeafIQTree) {
             return (LeafIQTree) rootNode;
         }

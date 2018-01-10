@@ -3,20 +3,18 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
@@ -25,7 +23,9 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     private final ImmutableSet<Variable> projectedVariables;
 
     @AssistedInject
-    private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables) {
+    private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
+                          IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
     }
 
@@ -51,26 +51,6 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public SubstitutionResults<EmptyNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return DefaultSubstitutionResults.noChange();
-    }
-
-    @Override
-    public SubstitutionResults<EmptyNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        ImmutableSet<Variable> newProjectedVariables = projectedVariables.stream()
-                .map(substitution::apply)
-                .filter(v -> v instanceof Variable)
-                .map(v -> (Variable) v)
-                .collect(ImmutableCollectors.toSet());
-
-        EmptyNode newNode = new EmptyNodeImpl(newProjectedVariables);
-        return DefaultSubstitutionResults.newNode(newNode);
-    }
-
-    @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         if (getVariables().contains(variable))
             return true;
@@ -87,18 +67,8 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        throw new UnsupportedOperationException("An EmptyNode is not expected to have a child");
-    }
-
-    @Override
     public EmptyNode clone() {
-        return new EmptyNodeImpl(projectedVariables);
+        return iqFactory.createEmptyNode(projectedVariables);
     }
 
     @Override
@@ -112,9 +82,8 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+    protected IQTree applyDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
         ImmutableSet<Variable> substitutionDomain = descendingSubstitution.getDomain();
 
@@ -125,7 +94,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
                         .map(v -> (Variable) v))
                 .filter(v -> !substitutionDomain.contains(v))
                 .collect(ImmutableCollectors.toSet());
-        return new EmptyNodeImpl(newProjectedVariables);
+        return iqFactory.createEmptyNode(newProjectedVariables);
     }
 
     @Override

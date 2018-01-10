@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -21,13 +22,15 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
-                            @Assisted IQProperties iqProperties) {
-        super(rootNode, ImmutableList.of(child), iqProperties);
+                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                            IntermediateQueryFactory iqFactory) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
     }
 
     @AssistedInject
-    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child) {
-        this(rootNode, child, new IQPropertiesImpl());
+    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
+                            IntermediateQueryFactory iqFactory) {
+        this(rootNode, child, new IQPropertiesImpl(), iqTreeTools, iqFactory);
     }
 
     @Override
@@ -50,8 +53,16 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChild()))
+                    .orElseGet(() -> constraint
+                            .map(this::propagateDownConstraint)
+                            .orElse(this));
 
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
     }
 
     @Override

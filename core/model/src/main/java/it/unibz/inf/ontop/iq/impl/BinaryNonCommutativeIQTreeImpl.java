@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -30,8 +31,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted IQProperties iqProperties) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties);
+                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                           IntermediateQueryFactory iqFactory) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
     }
@@ -39,8 +41,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild,
-                                           @Assisted("right") IQTree rightChild) {
-        this(rootNode, leftChild, rightChild, new IQPropertiesImpl());
+                                           @Assisted("right") IQTree rightChild,
+                                           IQTreeTools iqTreeTools,
+                                           IntermediateQueryFactory iqFactory) {
+        this(rootNode, leftChild, rightChild, new IQPropertiesImpl(), iqTreeTools, iqFactory);
     }
 
     @Override
@@ -70,7 +74,17 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, leftChild, rightChild);
+
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, leftChild, rightChild))
+                    .orElseGet(() -> constraint
+                            .map(this::propagateDownConstraint)
+                            .orElse(this));
+
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
     }
 
     @Override
