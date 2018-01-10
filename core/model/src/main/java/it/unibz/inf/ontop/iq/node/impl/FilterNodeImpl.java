@@ -8,16 +8,13 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -34,15 +31,18 @@ import java.util.Optional;
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private static final String FILTER_NODE_STR = "FILTER";
+    private final ConstructionNodeTools constructionNodeTools;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
                            TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                            ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                           ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory) {
+                           ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory,
+                           ConstructionNodeTools constructionNodeTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
+        this.constructionNodeTools = constructionNodeTools;
     }
 
     @Override
@@ -52,9 +52,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode clone() {
-        return new FilterNodeImpl(getOptionalFilterCondition().get(), getNullabilityEvaluator(), termFactory,
-                typeFactory, datalogTools, immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
-                createExpressionEvaluator(), iqFactory);
+        return iqFactory.createFilterNode(getFilterCondition());
     }
 
     @Override
@@ -74,40 +72,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public FilterNode changeFilterCondition(ImmutableExpression newFilterCondition) {
-        return new FilterNodeImpl(newFilterCondition, getNullabilityEvaluator(), termFactory, typeFactory, datalogTools,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
-                createExpressionEvaluator(), iqFactory);
-    }
-
-    /**
-     * TODO: remove
-     */
-    @Deprecated
-    private SubstitutionResults<FilterNode> applySubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        EvaluationResult evaluationResult = transformBooleanExpression(substitution, getFilterCondition());
-
-        /*
-         * The condition cannot be satisfied --> the sub-tree is empty.
-         */
-        if (evaluationResult.isEffectiveFalse()) {
-            return DefaultSubstitutionResults.declareAsEmpty();
-        }
-        else {
-            /*
-             * Propagates the substitution and ...
-             */
-            return evaluationResult.getOptionalExpression()
-                    /*
-                     * Still a condition: returns a filter node with the new condition
-                     */
-                    .map(exp -> DefaultSubstitutionResults.newNode(changeFilterCondition(exp), substitution))
-                    /*
-                     * No condition: the filter node is not needed anymore
-                     */
-                    .orElseGet(() -> DefaultSubstitutionResults.replaceByUniqueChild(substitution));
-        }
+        return iqFactory.createFilterNode(newFilterCondition);
     }
 
     @Override
@@ -240,7 +205,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode childRoot = liftedChildIQTree.getRootNode();
         if (childRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
+            return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties, variableGenerator);
         else if (liftedChildIQTree.isDeclaredAsEmpty()) {
             return liftedChildIQTree;
         }
@@ -248,65 +213,90 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
     }
 
-    /**
-     * TODO: consider the constraint
-     */
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child) {
 
-        SubstitutionResults<FilterNode> results = applySubstitution(descendingSubstitution);
+        ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
 
-        switch (results.getLocalAction()) {
-            case NO_CHANGE:
-                return iqFactory.createUnaryIQTree(this,
-                        child.applyDescendingSubstitution(descendingSubstitution, constraint));
-            case NEW_NODE:
-                return iqFactory.createUnaryIQTree(results.getOptionalNewNode().get(),
-                        child.applyDescendingSubstitution(descendingSubstitution, constraint));
-            case REPLACE_BY_CHILD:
-                return child.applyDescendingSubstitution(descendingSubstitution, constraint);
-            case DECLARE_AS_EMPTY:
-                return iqFactory.createEmptyNode(child.getVariables());
-            default:
-                throw new MinorOntopInternalBugException("Unexpected local action: " + results.getLocalAction());
+        try {
+            ExpressionAndSubstitution expressionAndSubstitution = simplifyCondition(Optional.of(unoptimizedExpression),
+                    ImmutableSet.of());
+
+            Optional<ImmutableExpression> downConstraint = computeDownConstraint(constraint,
+                    expressionAndSubstitution);
+
+            ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
+                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
+                            .composeWith2(expressionAndSubstitution.substitution);
+
+            IQTree newChild = child.applyDescendingSubstitution(downSubstitution, downConstraint);
+            IQTree filterLevelTree = expressionAndSubstitution.optionalExpression
+                    .map(iqFactory::createFilterNode)
+                    .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
+                    .orElse(newChild);
+            return expressionAndSubstitution.substitution.isEmpty()
+                    ? filterLevelTree
+                    : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(child.getVariables(),
+                                    (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
+                                            expressionAndSubstitution.substitution),
+                            filterLevelTree);
+        } catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(constructionNodeTools.computeNewProjectedVariables(descendingSubstitution,
+                    child.getVariables()));
         }
+
     }
 
 
     /**
-     * TODO: simplify after getting rid of the former mechanism
-     *
      * TODO: let the filter node simplify (interpret) expressions in the lifted substitution
      */
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree liftedChildIQ,
-                               IQProperties currentIQProperties) {
+                               IQProperties currentIQProperties, VariableGenerator variableGenerator) {
         IQTree grandChildIQTree = liftedChildIQ.getChild();
 
         IQProperties liftedProperties = currentIQProperties.declareLifted();
 
-        SubstitutionResults<FilterNode> result = applySubstitution(childConstructionNode.getSubstitution());
-        switch (result.getLocalAction()) {
+        ImmutableExpression unoptimizedExpression = childConstructionNode.getSubstitution()
+                .applyToBooleanExpression(getFilterCondition());
 
-            case NO_CHANGE:
-                UnaryIQTree filterIQ = iqFactory.createUnaryIQTree(this, grandChildIQTree);
-                return iqFactory.createUnaryIQTree(childConstructionNode, filterIQ, liftedProperties);
+        try {
+            ExpressionAndSubstitution expressionAndSubstitution = simplifyCondition(Optional.of(unoptimizedExpression),
+                    ImmutableSet.of());
 
-            case NEW_NODE:
-                UnaryIQTree newFilterIQ = iqFactory.createUnaryIQTree(result.getOptionalNewNode().get(), grandChildIQTree,
-                        liftedProperties);
-                return iqFactory.createUnaryIQTree(childConstructionNode, newFilterIQ, liftedProperties);
+            Optional<FilterNode> newFilterNode = expressionAndSubstitution.optionalExpression
+                    .map(iqFactory::createFilterNode);
 
-            case REPLACE_BY_CHILD:
-                return liftedChildIQ;
+            if (expressionAndSubstitution.substitution.isEmpty()) {
+                IQTree filterLevelTree = newFilterNode
+                        .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, grandChildIQTree, liftedProperties))
+                        .orElse(grandChildIQTree);
+                return iqFactory.createUnaryIQTree(childConstructionNode, filterLevelTree, liftedProperties);
+            }
+            else {
+                IQTree newGrandChild = grandChildIQTree.applyDescendingSubstitution(
+                        expressionAndSubstitution.substitution, expressionAndSubstitution.optionalExpression);
 
-            case DECLARE_AS_EMPTY:
-                return iqFactory.createEmptyNode(liftedChildIQ.getVariables());
+                IQTree filterLevelTree = newFilterNode
+                        .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newGrandChild, currentIQProperties))
+                        .orElse(newGrandChild);
 
-            default:
-                throw new MinorOntopInternalBugException("Unexpected action for propagating a substitution in a FilterNode: "
-                        + result.getLocalAction());
+                IQTree filterParentTree = iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(grandChildIQTree.getVariables(),
+                                (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
+                                        expressionAndSubstitution.substitution),
+                        filterLevelTree);
+
+                // Recursive
+                return iqFactory.createUnaryIQTree(childConstructionNode, filterParentTree, currentIQProperties)
+                        .liftBinding(variableGenerator);
+            }
+
+        } catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(childConstructionNode.getVariables());
         }
     }
 }

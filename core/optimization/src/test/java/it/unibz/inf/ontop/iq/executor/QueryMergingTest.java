@@ -120,14 +120,8 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(remainingConstructionNode.getChildVariables());
-        expectedBuilder.addChild(remainingConstructionNode, newUnionNode);
-
-        EmptyNode emptyNode = IQ_FACTORY.createEmptyNode(newUnionNode.getVariables());
-        expectedBuilder.addChild(newUnionNode, emptyNode);
-
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE));
-        expectedBuilder.addChild(newUnionNode, expectedDataNode);
+        expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), mainQuery.getIntensionalNodes().findFirst().get());
