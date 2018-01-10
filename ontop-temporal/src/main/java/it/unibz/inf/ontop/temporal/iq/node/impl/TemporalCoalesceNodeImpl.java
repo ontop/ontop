@@ -1,25 +1,24 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalQueryNodeVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.eclipse.rdf4j.query.algebra.Coalesce;
 
 import java.util.Optional;
 
@@ -27,8 +26,12 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     private static final String COALESCE_NODE_STR = "TEMPORAL COALESCE";
 
+
+    private final IntermediateQueryFactory iqFactory;
+
     @AssistedInject
-    protected TemporalCoalesceNodeImpl() {
+    protected TemporalCoalesceNodeImpl(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -94,12 +97,22 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        throw new RuntimeException("TODO: implement it");
+        IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+        if(newChildRoot instanceof ConstructionNode ){
+            IQTree coalesceLevelTree =  iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree((ConstructionNode)newChildRoot, coalesceLevelTree);
+        }else if(newChildRoot instanceof EmptyNode){
+            return newChild;
+        }
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, IQTree child) {
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

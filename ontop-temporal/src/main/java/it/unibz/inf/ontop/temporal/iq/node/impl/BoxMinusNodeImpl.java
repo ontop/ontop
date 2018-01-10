@@ -1,20 +1,17 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -28,10 +25,12 @@ import java.util.Optional;
 public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements BoxMinusNode{
 
     private static final String BOXMINUS_NODE_STR = "BOX MINUS" ;
+    private final IntermediateQueryFactory iqFactory;
 
     @AssistedInject
-    protected BoxMinusNodeImpl(@Assisted TemporalRange temporalRange) {
+    protected BoxMinusNodeImpl(@Assisted TemporalRange temporalRange, IntermediateQueryFactory iqFactory) {
         super(temporalRange);
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -98,12 +97,14 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return null;
+        IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
-        return null;
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override
