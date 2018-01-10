@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
@@ -101,45 +100,10 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
-    @Override
-    public SubstitutionResults<InnerJoinNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-
-        if (substitution.isEmpty()) {
-            return DefaultSubstitutionResults.noChange();
-        }
-
-        ImmutableSet<Variable> nullVariables = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue().equals(termFactory.getNullConstant()))
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-
-        ImmutableSet<Variable > otherNodesProjectedVariables = query.getOtherChildrenStream(this, childNode)
-                .flatMap(c -> query.getVariables(c).stream())
-                .collect(ImmutableCollectors.toSet());
-
-        /*
-         * If there is an implicit equality involving one null variables, the join is empty.
-         */
-        if (otherNodesProjectedVariables.stream()
-                .anyMatch(nullVariables::contains)) {
-            // Reject
-            return DefaultSubstitutionResults.declareAsEmpty();
-        }
-
-        return computeAndEvaluateNewCondition(substitution, Optional.empty())
-                .map(ev -> applyEvaluation(ev, substitution))
-                .orElseGet(() -> DefaultSubstitutionResults.noChange(substitution));
-    }
-
-    @Override
-    public SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        return applyDescendingSubstitution(substitution);
-    }
-
+    /**
+     * TODO: remove
+     */
+    @Deprecated
     private SubstitutionResults<InnerJoinNode> applyDescendingSubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
@@ -192,33 +156,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof InnerJoinNode) &&
             this.getOptionalFilterCondition().equals(((InnerJoinNode) node).getOptionalFilterCondition());
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-
-        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY,
-                query.getVariables(this));
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        ImmutableList<QueryNode> remainingChildren = query.getChildrenStream(this)
-                .filter(c -> c != trueChild)
-                .collect(ImmutableCollectors.toList());
-        switch (remainingChildren.size()) {
-            case 0:
-                return new NodeTransformationProposalImpl(DECLARE_AS_TRUE, ImmutableSet.of());
-            case 1:
-                return getOptionalFilterCondition()
-                        .map(immutableExpression -> new NodeTransformationProposalImpl(REPLACE_BY_NEW_NODE,
-                                query.getFactory().createFilterNode(immutableExpression),
-                                ImmutableSet.of()))
-                        .orElseGet(() -> new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD,
-                                remainingChildren.get(0), ImmutableSet.of()));
-            default:
-                return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
-        }
     }
 
     @Override

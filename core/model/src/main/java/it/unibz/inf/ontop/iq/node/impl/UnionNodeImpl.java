@@ -9,7 +9,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -24,7 +23,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.NodeTransformationProposedState.*;
 
 public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
@@ -62,59 +60,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public UnionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException {
         return transformer.transform(this);
-    }
-
-    /**
-     * Blocks an ascending substitution by inserting a construction node.
-     *
-     * Note that expects that the substitution does not rename a projected variable
-     * into a non-projected one (this would produce an invalid construction node).
-     * That is the responsibility of the SubstitutionPropagationExecutor
-     * to prevent such bindings from appearing.
-     */
-    @Override
-    public SubstitutionResults<UnionNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        /*
-         * Reduce the domain of the substitution to the variables projected out by the union node
-         */
-        ImmutableSubstitution reducedSubstitution =
-                substitution.reduceDomainToIntersectionWith(projectedVariables);
-
-        if (reducedSubstitution.isEmpty()) {
-            return DefaultSubstitutionResults.noChange();
-        }
-        /*
-         * Asks for inserting a construction node between the child node and this node.
-         * Such a construction node will contain the substitution.
-         */
-        else {
-            ConstructionNode newParentOfChildNode = query.getFactory().createConstructionNode(projectedVariables,
-                    (ImmutableSubstitution<ImmutableTerm>) reducedSubstitution);
-            return DefaultSubstitutionResults.insertConstructionNode(newParentOfChildNode, childNode);
-        }
-    }
-
-    @Override
-    public SubstitutionResults<UnionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-        ImmutableSet<Variable> newProjectedVariables = constructionTools.computeNewProjectedVariables(substitution,
-                projectedVariables);
-
-        /*
-         * Stops the substitution if does not affect the projected variables
-         */
-        if (newProjectedVariables.equals(projectedVariables)) {
-            return DefaultSubstitutionResults.noChange();
-        }
-        /*
-         * Otherwise, updates the projected variables and propagates the substitution down.
-         */
-        else {
-            UnionNode newNode = new UnionNodeImpl(newProjectedVariables, constructionTools, iqFactory, substitutionFactory, termFactory);
-            return DefaultSubstitutionResults.newNode(newNode, substitution);
-        }
     }
 
     @Override
@@ -178,32 +123,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return projectedVariables.equals(((UnionNode)node).getVariables());
         }
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-
-        /*
-         * All the children expected the given empty child
-         */
-        ImmutableList<QueryNode> children = query.getChildrenStream(this)
-                .filter(c -> c != emptyChild)
-                .collect(ImmutableCollectors.toList());
-
-        switch (children.size()) {
-            case 0:
-                return new NodeTransformationProposalImpl(DECLARE_AS_EMPTY, emptyChild.getVariables());
-            case 1:
-                return new NodeTransformationProposalImpl(REPLACE_BY_UNIQUE_NON_EMPTY_CHILD, children.get(0),
-                        ImmutableSet.of());
-            default:
-                return new NodeTransformationProposalImpl(NO_LOCAL_CHANGE, ImmutableSet.of());
-        }
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        throw new UnsupportedOperationException("The TrueNode child of a UnionNode is not expected to be removed");
     }
 
     @Override

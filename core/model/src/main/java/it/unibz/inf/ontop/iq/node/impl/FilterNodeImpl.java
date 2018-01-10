@@ -27,10 +27,9 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Optional;
-import java.util.stream.Stream;
+
 
 public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
@@ -80,20 +79,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 createExpressionEvaluator(), iqFactory);
     }
 
-    @Override
-    public SubstitutionResults<FilterNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query) {
-        return applySubstitution(substitution);
-    }
-
-    @Override
-    public SubstitutionResults<FilterNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            IntermediateQuery query) {
-        return applySubstitution(substitution);
-    }
-
+    /**
+     * TODO: remove
+     */
+    @Deprecated
     private SubstitutionResults<FilterNode> applySubstitution(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
 
@@ -175,16 +164,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof FilterNode)
                 && ((FilterNode) node).getFilterCondition().equals(this.getFilterCondition());
-    }
-
-    @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        return new NodeTransformationProposalImpl(NodeTransformationProposedState.DECLARE_AS_EMPTY, emptyChild.getVariables());
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-        throw new UnsupportedOperationException("The TrueNode child of a FilterNode is not expected to be removed");
     }
 
     @Override

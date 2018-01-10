@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -68,21 +65,6 @@ public interface QueryNode extends Cloneable {
     ImmutableSet<Variable> getLocalVariables();
 
     /**
-     * Applies a substitution coming from below
-     */
-    SubstitutionResults<? extends QueryNode> applyAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            QueryNode childNode, IntermediateQuery query)
-            throws QueryNodeSubstitutionException;
-
-    /**
-     * Applies a substitution coming from above
-     */
-    SubstitutionResults<? extends QueryNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query)
-            throws QueryNodeSubstitutionException;
-
-    /**
      * Returns true if it cannot guarantee the projected variable to be non-null
      *
      * Throws an IllegalArgumentException if the variable is not projected by the node
@@ -94,10 +76,6 @@ public interface QueryNode extends Cloneable {
      * TODO: explain
      */
     boolean isSyntacticallyEquivalentTo(QueryNode node);
-
-    NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild);
-
-    NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode);
 
     /**
      * Set of variables that this node, INDEPENDENTLY OF THE REQUIREMENTS OF ITS ANCESTORS,
