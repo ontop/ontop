@@ -72,7 +72,7 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+        return isEquivalentTo(node);
     }
 
 
@@ -93,7 +93,8 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof BoxMinusNode;
+        return (queryNode instanceof BoxMinusNode)
+                && getRange().equals(((BoxMinusNode) queryNode).getRange());
     }
 
     @Override

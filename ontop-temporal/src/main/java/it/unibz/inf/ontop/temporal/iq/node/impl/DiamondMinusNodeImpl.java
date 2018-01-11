@@ -73,7 +73,7 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+        return isEquivalentTo(node);
     }
 
     @Override
@@ -93,7 +93,8 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof DiamondMinusNode;
+        return (queryNode instanceof DiamondMinusNode)
+                && getRange().equals(((DiamondMinusNode) queryNode).getRange());
     }
 
     @Override

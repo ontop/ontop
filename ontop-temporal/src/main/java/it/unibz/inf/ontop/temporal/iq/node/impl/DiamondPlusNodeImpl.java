@@ -1,19 +1,18 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -27,10 +26,12 @@ import java.util.Optional;
 public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implements DiamondPlusNode {
 
     private static final String DIAMONDPLUS_NODE_STR = "DIAMOND PLUS" ;
+    private final IntermediateQueryFactory iqFactory;
 
     @AssistedInject
-    protected DiamondPlusNodeImpl(@Assisted TemporalRange temporalRange) {
+    protected DiamondPlusNodeImpl(@Assisted TemporalRange temporalRange, IntermediateQueryFactory iqFactory) {
         super(temporalRange);
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -72,7 +73,8 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+
+        return isEquivalentTo(node);
     }
 
     @Override
@@ -92,18 +94,27 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return false;
+        return (queryNode instanceof DiamondPlusNode)
+                && getRange().equals(((DiamondPlusNode) queryNode).getRange());
     }
-
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return null;
+        IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+        if(newChildRoot instanceof ConstructionNode ){
+            IQTree diamondLevelTree =  iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree((ConstructionNode)newChildRoot, diamondLevelTree);
+        }else if(newChildRoot instanceof EmptyNode){
+            return newChild;
+        }
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
-        return null;
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

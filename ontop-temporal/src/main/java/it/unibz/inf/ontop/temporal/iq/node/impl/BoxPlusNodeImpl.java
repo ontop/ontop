@@ -1,20 +1,18 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -28,10 +26,12 @@ import java.util.Optional;
 public class BoxPlusNodeImpl extends TemporalOperatorWithRangeImpl implements BoxPlusNode{
 
     private static final String BOXPLUS_NODE_STR = "BOX PLUS" ;
+    private final IntermediateQueryFactory iqFactory;
 
     @AssistedInject
-    protected BoxPlusNodeImpl(@Assisted TemporalRange temporalRange) {
+    protected BoxPlusNodeImpl(@Assisted TemporalRange temporalRange, IntermediateQueryFactory iqFactory) {
         super(temporalRange);
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BoxPlusNodeImpl extends TemporalOperatorWithRangeImpl implements Bo
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+        return isEquivalentTo(node);
     }
 
 
@@ -94,17 +94,27 @@ public class BoxPlusNodeImpl extends TemporalOperatorWithRangeImpl implements Bo
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return false;
+        return (queryNode instanceof BoxPlusNode)
+                && getRange().equals(((BoxPlusNode) queryNode).getRange());
     }
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return null;
+        IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+        if(newChildRoot instanceof ConstructionNode ){
+            IQTree boxLevelTree =  iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree((ConstructionNode)newChildRoot, boxLevelTree);
+        }else if(newChildRoot instanceof EmptyNode){
+            return newChild;
+        }
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
-        return null;
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

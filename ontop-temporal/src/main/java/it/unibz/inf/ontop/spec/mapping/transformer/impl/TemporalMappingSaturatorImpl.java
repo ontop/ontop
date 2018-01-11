@@ -84,8 +84,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
                         System.out.println(iq.toString());
-                        //bindingLiftOptimizer.optimize(iq);
-                        //System.out.println(iq.toString());
+                        bindingLiftOptimizer.optimize(iq);
+                        System.out.println(iq.toString());
                         //System.out.println(iq.toString());
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
                         //iq = projectionShrinkingOptimizer.optimize(iq);
