@@ -352,8 +352,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     @Override
-    public IQTree acceptTransformer(IQTransformer transformer, IQTree child) {
-        return transformer.transformConstruction(this, child);
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
+        return transformer.transformConstruction(tree,this, child);
     }
 
     /**

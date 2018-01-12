@@ -29,7 +29,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild);
 
-    IQTree acceptTransformer(IQTransformer transformer, IQTree leftChild, IQTree rightChild);
+    IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild);
 
     IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                        IQProperties currentIQProperties);

@@ -42,7 +42,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     public IQTree acceptTransformer(IQTransformer transformer) {
-        return getRootNode().acceptTransformer(transformer, getChildren());
+        return getRootNode().acceptTransformer(this, transformer, getChildren());
     }
 
     @Override

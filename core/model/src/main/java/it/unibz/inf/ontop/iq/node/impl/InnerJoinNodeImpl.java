@@ -316,8 +316,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree acceptTransformer(IQTransformer transformer, ImmutableList<IQTree> children) {
-        return transformer.transformInnerJoin(this, children);
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
+        return transformer.transformInnerJoin(tree,this, children);
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {

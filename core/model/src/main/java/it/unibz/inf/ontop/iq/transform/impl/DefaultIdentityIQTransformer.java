@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -11,12 +10,6 @@ import it.unibz.inf.ontop.iq.transform.IQTransformer;
  * To be extended by overloading the methods of interest.
  */
 public class DefaultIdentityIQTransformer implements IQTransformer {
-
-    private final IntermediateQueryFactory iqFactory;
-
-    public DefaultIdentityIQTransformer(IntermediateQueryFactory iqFactory) {
-        this.iqFactory = iqFactory;
-    }
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
@@ -44,43 +37,43 @@ public class DefaultIdentityIQTransformer implements IQTransformer {
     }
 
     @Override
-    public IQTree transformConstruction(ConstructionNode rootNode, IQTree child) {
-        return iqFactory.createUnaryIQTree(rootNode, child);
+    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
+        return tree;
     }
 
     @Override
-    public IQTree transformFilter(FilterNode rootNode, IQTree child) {
-        return iqFactory.createUnaryIQTree(rootNode, child);
+    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+        return tree;
     }
 
     @Override
-    public IQTree transformNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return iqFactory.createUnaryIQTree(rootNode, child);
+    public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+        return tree;
     }
 
     @Override
-    public IQTree transformLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        return iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild, rightChild);
+    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        return tree;
     }
 
     @Override
-    public IQTree transformNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
+    public IQTree transformNonStandardBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                                IQTree leftChild, IQTree rightChild) {
-        return iqFactory.createBinaryNonCommutativeIQTree(rootNode, leftChild, rightChild);
+        return tree;
     }
 
     @Override
-    public IQTree transformInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(rootNode, children);
+    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        return tree;
     }
 
     @Override
-    public IQTree transformUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(rootNode, children);
+    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        return tree;
     }
 
     @Override
-    public IQTree transformNonStandardNaryNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(rootNode, children);
+    public IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+        return tree;
     }
 }

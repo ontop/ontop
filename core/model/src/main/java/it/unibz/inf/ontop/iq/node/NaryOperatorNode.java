@@ -32,5 +32,5 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children);
 
-    IQTree acceptTransformer(IQTransformer transformer, ImmutableList<IQTree> children);
+    IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children);
 }

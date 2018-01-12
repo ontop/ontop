@@ -162,8 +162,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree acceptTransformer(IQTransformer transformer, IQTree leftChild, IQTree rightChild) {
-        return transformer.transformLeftJoin(this, leftChild, rightChild);
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
     }
 
     @Override

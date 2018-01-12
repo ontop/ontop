@@ -98,7 +98,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     public IQTree acceptTransformer(IQTransformer transformer) {
-        return getRootNode().acceptTransformer(transformer, getChild());
+        return getRootNode().acceptTransformer(this, transformer, getChild());
     }
 
     @Override

@@ -30,5 +30,5 @@ public interface UnaryOperatorNode extends QueryNode {
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
 
-    IQTree acceptTransformer(IQTransformer transformer, IQTree child);
+    IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child);
 }
