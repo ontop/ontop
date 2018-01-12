@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -51,6 +52,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
             return false;
         else
             throw new IllegalArgumentException("The variable" + variable + " is not projected by " + this);
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return transformer.transformIntensionalData(this);
     }
 
     @Override

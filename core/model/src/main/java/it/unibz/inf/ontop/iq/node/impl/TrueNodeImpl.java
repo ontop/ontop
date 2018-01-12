@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -91,6 +92,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return EMPTY_VARIABLE_SET;
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return transformer.transformTrue(this);
     }
 
     @Override

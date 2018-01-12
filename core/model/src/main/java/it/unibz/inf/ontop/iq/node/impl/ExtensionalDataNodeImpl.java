@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -81,6 +82,11 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
                 .allMatch(Attribute::canNull);
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return transformer.transformExtensionalData(this);
     }
 
     @Override

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -27,6 +28,8 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     }
 
     ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild);
+
+    IQTree acceptTransformer(IQTransformer transformer, IQTree leftChild, IQTree rightChild);
 
     IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                        IQProperties currentIQProperties);
