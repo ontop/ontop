@@ -24,6 +24,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.E
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.SPARQL_DATATYPE;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -1882,6 +1883,109 @@ public class BindingLiftTest {
         Assert.assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
 
     }
+
+    @Test
+    public void testLeftJoin2Join1() {
+        ExtensionalDataNode dataNode1 = buildExtensionalDataNode(TABLE1_AR1, A);
+        ExtensionalDataNode dataNode2 = buildExtensionalDataNode(TABLE2_AR1, B);
+
+        IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
+
+        IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, A, B)),
+                leftJoinTree);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, A);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, filterNodeTree);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
+
+        // Expected
+        ExtensionalDataNode newDataNode2 = buildExtensionalDataNode(TABLE2_AR1, A);
+        IQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, newDataNode2));
+
+        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newConstructionTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testLeftJoin2Join2() {
+        ExtensionalDataNode dataNode1 = buildExtensionalDataNode(TABLE1_AR1, A);
+        ExtensionalDataNode dataNode2 = buildExtensionalDataNode(TABLE2_AR2, B, C);
+
+        IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
+
+        IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, B, C)),
+                leftJoinTree);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, B);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, filterNodeTree);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
+
+        // Expected
+        ExtensionalDataNode newDataNode2 = buildExtensionalDataNode(TABLE2_AR2, B, B);
+        IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, newDataNode2));
+
+        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, newJoinTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testDescendingEqualityLeftJoinPreserved() {
+        ExtensionalDataNode dataNode1 = buildExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode dataNode2 = buildExtensionalDataNode(TABLE2_AR2, B, C);
+
+        BinaryNonCommutativeIQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
+
+        UnaryIQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, A, B)),
+                leftJoinTree);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        IQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, filterNodeTree);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
+
+        // Expected
+        ExtensionalDataNode newDataNode1 = buildExtensionalDataNode(TABLE1_AR2, A, A);
+        ExtensionalDataNode newDataNode2 = buildExtensionalDataNode(TABLE2_AR2, A, C);
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(), newDataNode1, newDataNode2);
+
+        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        System.out.println("\n Original query: \n" +  initialIQ);
+        System.out.println("\n Expected query: \n" +  expectedIQ);
+
+        IQ optimizedIQ = UNION_AND_BINDING_LIFT_OPTIMIZER.optimize(initialIQ);
+        System.out.println("\n Optimized query: \n" +  optimizedIQ);
+
+        assertEquals(expectedIQ, optimizedIQ);
+    }
+
 
     private static ExtensionalDataNode buildExtensionalDataNode(RelationPredicate predicate, VariableOrGroundTerm ... arguments) {
         return IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(predicate, arguments));
