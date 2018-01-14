@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.UnionAndBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -41,6 +42,7 @@ public class OptimizationTestingTools {
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
     public static final IQConverter IQ_CONVERTER;
     public static final ValueConstant NULL, TRUE, FALSE;
+    public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
@@ -62,6 +64,7 @@ public class OptimizationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
+        UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
