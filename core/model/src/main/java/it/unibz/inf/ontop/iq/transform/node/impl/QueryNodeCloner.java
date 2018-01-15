@@ -48,4 +48,24 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     public TrueNode transform(TrueNode trueNode) {
         return trueNode.clone();
     }
+
+    @Override
+    public DistinctNode transform(DistinctNode distinctNode) {
+        return distinctNode.clone();
+    }
+
+    @Override
+    public LimitNode transform(LimitNode limitNode) {
+        return limitNode.clone();
+    }
+
+    @Override
+    public OffsetNode transform(OffsetNode offsetNode) {
+        return offsetNode.clone();
+    }
+
+    @Override
+    public OrderByNode transform(OrderByNode orderByNode) {
+        return orderByNode.clone();
+    }
 }

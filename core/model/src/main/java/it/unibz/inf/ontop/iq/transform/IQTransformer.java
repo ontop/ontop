@@ -21,6 +21,10 @@ public interface IQTransformer {
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
     IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child);
+    IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
+    IQTree transformLimit(IQTree tree, LimitNode rootNode, IQTree child);
+    IQTree transformOffset(IQTree tree, OffsetNode rootNode, IQTree child);
+    IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
     IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child);
 
     IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild);

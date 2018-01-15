@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,6 +90,32 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     public TrueNode transform(TrueNode trueNode) {
         return trueNode.clone();
+    }
+
+    @Override
+    public DistinctNode transform(DistinctNode distinctNode) {
+        return iqFactory.createDistinctNode();
+    }
+
+    @Override
+    public LimitNode transform(LimitNode limitNode) {
+        return limitNode.clone();
+    }
+
+    @Override
+    public OffsetNode transform(OffsetNode offsetNode) {
+        return offsetNode.clone();
+    }
+
+    @Override
+    public OrderByNode transform(OrderByNode orderByNode) {
+        ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
+                .map(c -> iqFactory.createComparator(
+                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        c.isAscending()))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {

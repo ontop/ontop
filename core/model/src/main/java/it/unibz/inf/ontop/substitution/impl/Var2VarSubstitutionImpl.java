@@ -142,6 +142,14 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
+    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
+        if (term instanceof Variable)
+            return applyToVariable((Variable)term);
+        else
+            return (NonGroundTerm) applyToFunctionalTerm((ImmutableFunctionalTerm) term);
+    }
+
+    @Override
     public <T extends ImmutableTerm> T applyToTerm(T term) {
         return (T) super.apply(term);
     }

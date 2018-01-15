@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -55,6 +56,12 @@ public interface IntermediateQueryFactory {
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
     TrueNode createTrueNode();
+
+    DistinctNode createDistinctNode();
+    LimitNode createLimitNode(int limit);
+    OffsetNode createOffsetNode(int offset);
+    OrderByNode createOrderByNode(ImmutableList<OrderByNode.OrderComparator> comparators);
+    OrderByNode.OrderComparator createComparator(NonGroundTerm term, boolean isAscending);
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);

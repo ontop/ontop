@@ -147,6 +147,47 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                         + " has a child.\n" + query);
             }
         }
+
+        @Override
+        public void visit(DistinctNode distinctNode) {
+            if (query.getChildren(distinctNode).size() != 1) {
+                throw new InvalidIntermediateQueryException("DISTINCT node " + distinctNode
+                        + " must have ONE and ONLY ONE child.\n" + query);
+            }
+        }
+
+        @Override
+        public void visit(LimitNode limitNode) {
+            if (query.getChildren(limitNode).size() != 1) {
+                throw new InvalidIntermediateQueryException("LIMIT node " + limitNode
+                        + " must have ONE and ONLY ONE child.\n" + query);
+            }
+        }
+
+        @Override
+        public void visit(OffsetNode offsetNode) {
+            if (query.getChildren(offsetNode).size() != 1) {
+                throw new InvalidIntermediateQueryException("OFFSET node " + offsetNode
+                        + " must have ONE and ONLY ONE child.\n" + query);
+            }
+        }
+
+        @Override
+        public void visit(OrderByNode orderByNode) {
+            if (query.getChildren(orderByNode).size() != 1) {
+                throw new InvalidIntermediateQueryException("ORDER BY node " + orderByNode
+                        + " must have ONE and ONLY ONE child.\n" + query);
+            }
+
+            ImmutableSet<Variable> requiredVariables = orderByNode.getLocallyRequiredVariables();
+
+            for (QueryNode child : query.getChildren(orderByNode)) {
+                if (!query.getVariables(child).containsAll(requiredVariables)) {
+                    throw new InvalidIntermediateQueryException("Some variables used in the node " + this
+                            + " are not provided by its child " + child);
+                }
+            }
+        }
     }
 
     /**

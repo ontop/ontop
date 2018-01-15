@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
 /**
@@ -30,4 +31,6 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
     Optional<ImmutableSubstitution<T>> applyToSubstitution(ImmutableSubstitution<T> substitution);
 
     Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g);
+
+    NonGroundTerm applyToNonGroundTerm(NonGroundTerm term);
 }
