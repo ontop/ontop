@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -19,6 +20,8 @@ public interface IQTree {
     ImmutableList<IQTree> getChildren();
 
     ImmutableSet<Variable> getVariables();
+
+    IQTree acceptTransformer(IQTransformer transformer);
 
     IQTree liftBinding(VariableGenerator variableGenerator);
 

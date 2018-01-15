@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -93,6 +94,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         else
             return getChild().getVariables();
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return getRootNode().acceptTransformer(this, transformer, getChild());
     }
 
     @Override

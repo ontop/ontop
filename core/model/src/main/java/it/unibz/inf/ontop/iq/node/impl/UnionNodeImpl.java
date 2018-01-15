@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
@@ -110,6 +111,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 children.stream()
                         .map(c -> c.propagateDownConstraint(constraint))
                         .collect(ImmutableCollectors.toList()));
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
+        return transformer.transformUnion(tree,this, children);
     }
 
     @Override

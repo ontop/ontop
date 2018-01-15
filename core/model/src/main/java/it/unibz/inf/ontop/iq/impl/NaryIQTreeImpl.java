@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -37,6 +38,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory);
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return getRootNode().acceptTransformer(this, transformer, getChildren());
     }
 
     @Override

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -55,6 +56,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     public IQTree getRightChild() {
         return rightChild;
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTransformer transformer) {
+        return getRootNode().acceptTransformer(this, transformer, leftChild, rightChild);
     }
 
     @Override
