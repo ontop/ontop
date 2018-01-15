@@ -229,6 +229,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
 
+        if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
+            return transformIntoInnerJoinTree(leftChild, rightChild)
+                .applyDescendingSubstitution(descendingSubstitution, constraint);
+
+
         IQTree updatedLeftChild = leftChild.applyDescendingSubstitution(descendingSubstitution, constraint);
 
         Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
@@ -730,6 +735,42 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .orElse(subTree);
     }
 
+    /**
+     * Returns true when an equality between a right-specific and a term that is not a fresh variable
+     * is propagated down through a substitution.
+     */
+    private boolean containsEqualityRightSpecificVariable(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            IQTree leftChild, IQTree rightChild) {
+
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+        ImmutableSet<Variable> rightVariables = rightChild.getVariables();
+        ImmutableSet<Variable> domain = descendingSubstitution.getDomain();
+        ImmutableCollection<? extends VariableOrGroundTerm> range = descendingSubstitution.getImmutableMap().values();
+
+        return rightVariables.stream()
+                .filter(v -> !leftVariables.contains(v))
+                .anyMatch(v -> (domain.contains(v)
+                            && (!isFreshVariable(descendingSubstitution.get(v), leftVariables, rightVariables)))
+                        // The domain of the substitution is assumed not to contain fresh variables
+                        // (normalized before)
+                        || range.contains(v));
+    }
+
+    private boolean isFreshVariable(ImmutableTerm term,
+                                    ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> rightVariables) {
+        if (term instanceof Variable) {
+            Variable variable = (Variable) term;
+            return !(leftVariables.contains(variable) || rightVariables.contains(variable));
+        }
+        return false;
+    }
+
+    private IQTree transformIntoInnerJoinTree(IQTree leftChild, IQTree rightChild) {
+        return iqFactory.createNaryIQTree(
+                iqFactory.createInnerJoinNode(getOptionalFilterCondition()),
+                ImmutableList.of(leftChild, rightChild));
+    }
 
 
     private class ChildLiftingState {

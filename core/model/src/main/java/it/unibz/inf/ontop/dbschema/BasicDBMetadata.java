@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
@@ -246,6 +247,16 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
     protected AtomFactory getAtomFactory() {
         return atomFactory;
+    }
+
+    @Override
+    public ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables() {
+        return ImmutableMap.copyOf(tables);
+    }
+
+    @Override
+    public ImmutableMap<RelationID, RelationDefinition> copyRelations() {
+        return ImmutableMap.copyOf(relations);
     }
 
 }
