@@ -53,7 +53,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	}
 
 
-	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
+	protected RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
 						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory,

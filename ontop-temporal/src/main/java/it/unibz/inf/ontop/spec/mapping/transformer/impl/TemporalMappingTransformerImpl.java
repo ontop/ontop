@@ -68,7 +68,7 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
             Mapping normalizedMapping = mappingNormalizer.normalize(mappingWithFacts);
             Mapping saturatedRuleMapping = staticRuleMappingSaturator.saturate(normalizedMapping, dbMetadata, datalogMTLProgram);
 
-            TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, dbMetadata, temporalMapping, temporalDBMetadata, datalogMTLProgram);
+            TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, temporalMapping, temporalDBMetadata, datalogMTLProgram);
             //return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
         }
         else {
@@ -76,7 +76,7 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
             Mapping normalizedMapping = mappingNormalizer.normalize(mapping);
             Mapping saturatedRuleMapping = staticRuleMappingSaturator.saturate(normalizedMapping, dbMetadata, datalogMTLProgram);
 
-            TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, dbMetadata, temporalMapping, temporalDBMetadata, datalogMTLProgram);
+            TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, temporalMapping, temporalDBMetadata, datalogMTLProgram);
             //return createSpecification(mapping, dbMetadata, emptyTBox);
         }
 

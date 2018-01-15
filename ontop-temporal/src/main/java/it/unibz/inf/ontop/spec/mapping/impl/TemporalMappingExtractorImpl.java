@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
@@ -25,7 +26,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.*;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLTemporalMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -53,6 +53,10 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final UnionBasedQueryMerger queryMerger;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final JdbcTypeMapper jdbcTypeMapper;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
+
 
 
     @Inject
@@ -60,7 +64,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                          TemporalPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                          NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
                                          TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                                         AtomFactory atomFactory, TermFactory termFactory) {
+                                         AtomFactory atomFactory, TermFactory termFactory, JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory, DatalogFactory datalogFactory) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -72,16 +76,20 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         this.queryMerger = queryMerger;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.jdbcTypeMapper = jdbcTypeMapper;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
     }
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> saturatedTBox,
-                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+                                        @Nonnull ExecutorRegistry executorRegistry,
+                                        @Nonnull Optional<RDBMetadata> staticDBMetadata) throws MappingException, DBMetadataExtractionException {
 
         SQLPPMapping ppMapping = extractPPMapping(specInput);
 
-        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry);
+        return extract(ppMapping, specInput, dbMetadata, saturatedTBox, executorRegistry, staticDBMetadata);
     }
 
     private SQLPPMapping extractPPMapping(OBDASpecInput specInput)
@@ -109,10 +117,11 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                         @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> saturatedTBox,
-                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+                                        @Nonnull ExecutorRegistry executorRegistry,
+                                        @Nonnull Optional<RDBMetadata> staticDBMetadata) throws MappingException, DBMetadataExtractionException {
 
         return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, saturatedTBox,
-                executorRegistry);
+                executorRegistry, staticDBMetadata);
     }
 
     /**
@@ -124,11 +133,12 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
-                                                  ExecutorRegistry executorRegistry)
+                                                  ExecutorRegistry executorRegistry,
+                                                  Optional<RDBMetadata> staticDBMetadata)
             throws MetaMappingExpansionException, DBMetadataExtractionException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
-        RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+        RDBMetadata dbMetadata = getDBMetadata(ppMapping, optionalDBMetadata, specInput, staticDBMetadata);
         //TODO:check later if improvement is needed for expandPPMapping
         SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
 
@@ -144,6 +154,41 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
 
         return new TemporalMappingAndDBMetadataImpl(toTemporalMapping(provMapping), dbMetadata);
     }
+
+    private RDBMetadata getDBMetadata(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
+                                            OBDASpecInput specInput, Optional<RDBMetadata> staticDBMetadata) throws MetaMappingExpansionException, DBMetadataExtractionException {
+
+        RDBMetadata temporalDBMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+        return mergeDBMetadata(temporalDBMetadata, staticDBMetadata);
+    }
+
+    private RDBMetadata mergeDBMetadata(RDBMetadata temporalDBMetadata, Optional<RDBMetadata> staticDBMetadata){
+        if(staticDBMetadata.isPresent()){
+            if((staticDBMetadata.get().getDbmsProductName().equals(temporalDBMetadata.getDbmsProductName())) &&
+                    staticDBMetadata.get().getDriverName().equals(temporalDBMetadata.getDriverName()) &&
+                    staticDBMetadata.get().getDriverVersion().equals(temporalDBMetadata.getDriverVersion())){
+
+                Map<RelationID, RelationDefinition> mergedRelations = new HashMap<>();
+                mergedRelations.putAll(staticDBMetadata.get().copyRelations());
+                mergedRelations.putAll(temporalDBMetadata.copyRelations());
+
+                Map<RelationID, DatabaseRelationDefinition> mergedTables = new HashMap<>();
+                mergedTables.putAll(staticDBMetadata.get().copyTables());
+                mergedTables.putAll(temporalDBMetadata.copyTables());
+
+                List<DatabaseRelationDefinition> mergedListOfTables = new ArrayList<>();
+                mergedListOfTables.addAll(staticDBMetadata.get().getDatabaseRelations());
+                mergedListOfTables.addAll(temporalDBMetadata.getDatabaseRelations());
+
+               return new TemporalRDBMetadata(staticDBMetadata.get().getDriverName(),staticDBMetadata.get().getDriverVersion(),
+                        staticDBMetadata.get().getDbmsProductName(), ((RDBMetadata) staticDBMetadata.get()).getDbmsVersion(),
+                        staticDBMetadata.get().getQuotedIDFactory(), mergedTables,mergedRelations,mergedListOfTables, 0,
+                        jdbcTypeMapper, atomFactory, termFactory,
+                        typeFactory, datalogFactory);
+            }
+        }
+        return temporalDBMetadata;
+    };
 
     public TemporalMapping toTemporalMapping(MappingWithProvenance mappingWithProvenance){
 
@@ -292,7 +337,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         return qd;
     }
 
-    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
+    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, DBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
         MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory);

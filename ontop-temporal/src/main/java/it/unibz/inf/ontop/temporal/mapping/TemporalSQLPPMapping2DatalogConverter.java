@@ -71,7 +71,11 @@ public class TemporalSQLPPMapping2DatalogConverter {
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
                             .extract(sourceQuery.toString());
-                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
+                    ParserViewDefinition view;
+                    if(metadata instanceof TemporalRDBMetadata)
+                        view = ((TemporalRDBMetadata)metadata).createParserView(sourceQuery.toString(), attributes);
+                    else
+                        view = metadata.createParserView(sourceQuery.toString(), attributes);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()

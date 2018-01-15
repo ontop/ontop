@@ -5,9 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -18,8 +17,11 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
@@ -47,7 +49,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
     private final BindingLiftOptimizer bindingLiftOptimizer;
 
-
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
                                          RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools,
@@ -63,7 +64,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     }
 
     @Override
-    public TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata,
+    public TemporalMapping saturate(Mapping mapping,
                                     TemporalMapping temporalMapping, DBMetadata temporalDBMetadata,
                                     DatalogMTLProgram datalogMTLProgram) {
 
@@ -107,16 +108,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 }
             }
         }
-        return null;
-    }
-
-    //TODO: move it to a proper place
-    private DBMetadata mergeDBMetadatas(DBMetadata staticDBMetadata, DBMetadata temporalDBMetadata){
-        if((staticDBMetadata.getDbmsProductName().equals(temporalDBMetadata.getDbmsProductName())) &&
-                staticDBMetadata.getDriverName().equals(temporalDBMetadata.getDriverName()) &&
-                staticDBMetadata.getDriverVersion().equals(temporalDBMetadata.getDriverName())){
-        }
-
         return null;
     }
 

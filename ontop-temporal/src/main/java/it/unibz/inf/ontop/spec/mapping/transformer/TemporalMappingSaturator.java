@@ -8,5 +8,5 @@ import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 
 public interface TemporalMappingSaturator /*extends MappingSaturator*/ {
 
-    TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, DatalogMTLProgram datalogMTLProgram);
+    TemporalMapping saturate(Mapping mapping, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, DatalogMTLProgram datalogMTLProgram);
 }

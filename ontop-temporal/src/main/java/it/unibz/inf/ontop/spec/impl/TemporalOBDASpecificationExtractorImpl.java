@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -51,7 +52,7 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
 
             MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry);
+            TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
 
             return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
                     temporalMappingAndDBMetadata.getTemporalMapping(),
@@ -68,7 +69,7 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
                 ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
             TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(ppMapping, specInput, dbMetadata,
-                    optionalOntology, executorRegistry);
+                    optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
 
             return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
                     temporalMappingAndDBMetadata.getTemporalMapping(),

@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
 import it.unibz.inf.ontop.iq.node.impl.InnerJoinNodeImpl;
@@ -99,17 +98,6 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                 substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
-
-    private SubstitutionResults<TemporalJoinNode> applyEvaluation(ExpressionEvaluator.EvaluationResult evaluationResult,
-                                                               ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        if (evaluationResult.isEffectiveFalse()) {
-            return DefaultSubstitutionResults.declareAsEmpty();
-        }
-        else {
-            TemporalJoinNode newNode = changeOptionalFilterCondition(evaluationResult.getOptionalExpression());
-            return DefaultSubstitutionResults.newNode(newNode, substitution);
-        }
-    }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
