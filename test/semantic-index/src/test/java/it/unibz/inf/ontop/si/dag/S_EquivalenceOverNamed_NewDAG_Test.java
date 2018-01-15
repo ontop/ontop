@@ -36,7 +36,7 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 
 	ArrayList<String> input = new ArrayList<>();
 
-	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
+	Logger log = LoggerFactory.getLogger(S_EquivalenceOverNamed_NewDAG_Test.class);
 
 	public S_EquivalenceOverNamed_NewDAG_Test (String name){
 		super(name);

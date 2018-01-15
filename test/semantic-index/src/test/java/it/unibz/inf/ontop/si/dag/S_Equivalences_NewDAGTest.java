@@ -37,7 +37,7 @@ public class S_Equivalences_NewDAGTest extends TestCase{
 	ArrayList<String> input= new ArrayList<String>();
 	ArrayList<String> output= new ArrayList<String>();
 
-	Logger log = LoggerFactory.getLogger(S_HierarchyTestNewDAG.class);
+	Logger log = LoggerFactory.getLogger(S_Equivalences_NewDAGTest.class);
 
 	public S_Equivalences_NewDAGTest(String name){
 		super(name);
