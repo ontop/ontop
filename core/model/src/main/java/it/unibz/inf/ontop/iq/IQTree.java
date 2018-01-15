@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -75,4 +76,6 @@ public interface IQTree {
      *
      */
     IQTree propagateDownConstraint(ImmutableExpression constraint);
+
+    void validate() throws InvalidIntermediateQueryException;
 }

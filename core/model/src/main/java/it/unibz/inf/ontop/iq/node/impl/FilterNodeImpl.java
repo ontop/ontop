@@ -127,6 +127,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+        checkExpression(getFilterCondition(), ImmutableList.of(child));
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }

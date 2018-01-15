@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
@@ -24,14 +26,17 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory) {
+                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+
+        if (settings.isTestModeEnabled())
+            validate();
     }
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory) {
-        this(rootNode, child, new IQPropertiesImpl(), iqTreeTools, iqFactory);
+                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+        this(rootNode, child, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
     }
 
     @Override
@@ -94,6 +99,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         else
             return getChild().getVariables();
+    }
+
+    @Override
+    protected void validateNode() throws InvalidIntermediateQueryException {
+        getRootNode().validateNode(getChild());
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -33,4 +34,9 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children);
 
     IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children);
+
+    /**
+     * Only validates the node, not its children
+     */
+    void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException;
 }

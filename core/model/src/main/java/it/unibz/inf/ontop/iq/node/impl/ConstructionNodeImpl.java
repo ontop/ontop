@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -70,7 +71,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
-                                 ExpressionEvaluator expressionEvaluator) {
+                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
@@ -87,10 +88,14 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.expressionEvaluator = expressionEvaluator;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        if (settings.isTestModeEnabled())
+            validateNode();
     }
 
-    private void validate() {
+    /**
+     * Validates the node independently of its child
+     */
+    private void validateNode() throws InvalidQueryNodeException {
         ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
 
         // The substitution domain must be a subset of the projectedVariables
@@ -145,7 +150,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        validateNode();
     }
 
     @AssistedInject
@@ -173,7 +178,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        validateNode();
     }
 
     private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
@@ -323,6 +328,21 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return transformer.transformConstruction(tree,this, child);
     }
 
+    @Override
+    public void validateNode(IQTree child) throws InvalidQueryNodeException, InvalidIntermediateQueryException {
+        validateNode();
+
+        ImmutableSet<Variable> requiredChildVariables = getChildVariables();
+
+        ImmutableSet<Variable> childVariables = child.getVariables();
+
+        if (!childVariables.containsAll(requiredChildVariables)) {
+            throw new InvalidIntermediateQueryException("This child " + child
+                    + " does not project all the variables " +
+                    "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
+        }
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */
@@ -439,6 +459,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             throw new RuntimeException("TODO: support query modifiers");
         }
 
+        ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
+
         ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
         ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
 
@@ -457,8 +479,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
                     .orElse(child);
 
-            ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
-
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
                     .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
                     .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
@@ -472,7 +492,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .orElse(filterTree);
 
         } catch (EmptyTreeException e) {
-            return iqFactory.createEmptyNode(projectedVariables);
+            return iqFactory.createEmptyNode(newProjectedVariables);
         }
     }
 

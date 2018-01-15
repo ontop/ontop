@@ -300,6 +300,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
     }
 
+    @Override
+    public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
+        getOptionalFilterCondition()
+                .ifPresent(e -> checkExpression(e, ImmutableList.of(leftChild, rightChild)));
+    }
+
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {
 
         IQTree newLeftChild = initialConstraint
