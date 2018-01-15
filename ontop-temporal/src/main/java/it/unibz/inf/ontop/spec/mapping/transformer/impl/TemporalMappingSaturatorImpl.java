@@ -6,6 +6,8 @@ import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -108,6 +110,16 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         return null;
     }
 
+    //TODO: move it to a proper place
+    private DBMetadata mergeDBMetadatas(DBMetadata staticDBMetadata, DBMetadata temporalDBMetadata){
+        if((staticDBMetadata.getDbmsProductName().equals(temporalDBMetadata.getDbmsProductName())) &&
+                staticDBMetadata.getDriverName().equals(temporalDBMetadata.getDriverName()) &&
+                staticDBMetadata.getDriverVersion().equals(temporalDBMetadata.getDriverName())){
+        }
+
+        return null;
+    }
+
     private Map<AtomPredicate, IntermediateQuery> mergeMappings(Mapping mapping, TemporalMapping temporalMapping){
         Map <AtomPredicate, IntermediateQuery> mergedMap = new HashMap<>();
         mergedMap.putAll(mapping.getPredicates().stream()
@@ -138,13 +150,13 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
 
         TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
         TIQBuilder.init(intermediateQuery.getProjectionAtom(), intermediateQuery.getRootNode());
-        TIQBuilder = func(TIQBuilder, intermediateQuery, intermediateQuery.getRootNode());
+        TIQBuilder = removeCoalesces(TIQBuilder, intermediateQuery, intermediateQuery.getRootNode());
 
         return TIQBuilder.build();
     }
 
-    private TemporalIntermediateQueryBuilder func(TemporalIntermediateQueryBuilder TIQBuilder, IntermediateQuery query,
-                                                  QueryNode currentNode){
+    private TemporalIntermediateQueryBuilder removeCoalesces(TemporalIntermediateQueryBuilder TIQBuilder, IntermediateQuery query,
+                                                             QueryNode currentNode){
         if(currentNode instanceof TemporalCoalesceNode){
             QueryNode child = query.getFirstChild(currentNode).get();
             if(child instanceof FilterNode){
@@ -153,31 +165,31 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                     QueryNode childOfChildOfChild = query.getFirstChild(childOfChild).get();
                     TIQBuilder.addChild(currentNode, child);
                     TIQBuilder.addChild(child, childOfChildOfChild);
-                    func(TIQBuilder, query, childOfChildOfChild);
+                    removeCoalesces(TIQBuilder, query, childOfChildOfChild);
                 }else{
                     TIQBuilder.addChild(currentNode, child);
                     TIQBuilder.addChild(child, childOfChild);
-                    func(TIQBuilder, query, childOfChild);
+                    removeCoalesces(TIQBuilder, query, childOfChild);
                 }
             }else{
                 TIQBuilder.addChild(currentNode, child);
-                func(TIQBuilder, query, child);
+                removeCoalesces(TIQBuilder, query, child);
             }
         }else if (currentNode instanceof UnaryOperatorNode){
             QueryNode child = query.getFirstChild(currentNode).get();
             TIQBuilder.addChild(currentNode, child);
-            func(TIQBuilder, query,child);
+            removeCoalesces(TIQBuilder, query,child);
 
         }else if(currentNode instanceof BinaryNonCommutativeOperatorNode){
             QueryNode leftChild = query.getChild(currentNode, LEFT).get();
             QueryNode rightChild = query.getChild(currentNode, RIGHT).get();
             TIQBuilder.addChild(currentNode,leftChild,LEFT);
             TIQBuilder.addChild(currentNode,rightChild, RIGHT);
-            func(TIQBuilder, query, leftChild);
-            func(TIQBuilder, query, rightChild);
+            removeCoalesces(TIQBuilder, query, leftChild);
+            removeCoalesces(TIQBuilder, query, rightChild);
         }else if(currentNode instanceof NaryOperatorNode){
             query.getChildren(currentNode).forEach(c -> TIQBuilder.addChild(currentNode, c));
-            query.getChildren(currentNode).forEach(c -> func(TIQBuilder,query,c));
+            query.getChildren(currentNode).forEach(c -> removeCoalesces(TIQBuilder,query,c));
         }
         return TIQBuilder;
     }
