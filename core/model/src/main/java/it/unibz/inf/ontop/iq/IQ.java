@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq;
 
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -16,4 +17,6 @@ public interface IQ {
     VariableGenerator getVariableGenerator();
 
     IQ liftBinding();
+
+    void validate() throws InvalidIntermediateQueryException;
 }

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
@@ -318,6 +319,17 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
         return transformer.transformInnerJoin(tree,this, children);
+    }
+
+    @Override
+    public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
+        if (children.size() < 2) {
+            throw new InvalidIntermediateQueryException("JOIN node " + this
+                    +" does not have at least 2 children.\n" + children);
+        }
+
+        getOptionalFilterCondition()
+                .ifPresent(e -> checkExpression(e, children));
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {

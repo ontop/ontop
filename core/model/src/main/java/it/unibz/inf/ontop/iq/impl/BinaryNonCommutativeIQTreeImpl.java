@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -33,10 +35,13 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory) {
+                                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
+
+        if (settings.isTestModeEnabled())
+            validate();
     }
 
     @AssistedInject
@@ -44,8 +49,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("left") IQTree leftChild,
                                            @Assisted("right") IQTree rightChild,
                                            IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory) {
-        this(rootNode, leftChild, rightChild, new IQPropertiesImpl(), iqTreeTools, iqFactory);
+                                           IntermediateQueryFactory iqFactory,
+                                           OntopModelSettings settings) {
+        this(rootNode, leftChild, rightChild, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
     }
 
     @Override
@@ -114,5 +120,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+    }
+
+    @Override
+    protected void validateNode() throws InvalidIntermediateQueryException {
+        getRootNode().validateNode(leftChild, rightChild);
     }
 }

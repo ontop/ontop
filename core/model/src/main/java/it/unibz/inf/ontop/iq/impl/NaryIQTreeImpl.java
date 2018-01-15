@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -28,16 +30,25 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                           IntermediateQueryFactory iqFactory) {
+                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
+        nullableVariables = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+    @Override
+    protected void validateNode() throws InvalidIntermediateQueryException {
+        getRootNode().validateNode(getChildren());
     }
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
-        this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory);
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+        this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
     }
 
     @Override

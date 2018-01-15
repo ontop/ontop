@@ -323,6 +323,19 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return transformer.transformConstruction(tree,this, child);
     }
 
+    @Override
+    public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+        ImmutableSet<Variable> requiredChildVariables = getChildVariables();
+
+        ImmutableSet<Variable> childVariables = child.getVariables();
+
+        if (!childVariables.containsAll(requiredChildVariables)) {
+            throw new InvalidIntermediateQueryException("This child " + child
+                    + " does not project all the variables " +
+                    "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
+        }
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */

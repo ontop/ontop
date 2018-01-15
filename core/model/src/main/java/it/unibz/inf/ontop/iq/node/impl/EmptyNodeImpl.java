@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -116,6 +117,10 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     @Override
     public ImmutableSet<Variable> getNullableVariables() {
         return projectedVariables;
+    }
+
+    @Override
+    public void validate() throws InvalidIntermediateQueryException {
     }
 
     @Override
