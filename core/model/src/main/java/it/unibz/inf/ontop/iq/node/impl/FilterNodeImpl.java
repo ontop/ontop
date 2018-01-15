@@ -220,6 +220,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         ImmutableExpression unoptimizedExpression = descendingSubstitution.applyToBooleanExpression(getFilterCondition());
 
+        ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
+                .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
+
         try {
             ExpressionAndSubstitution expressionAndSubstitution = simplifyCondition(Optional.of(unoptimizedExpression),
                     ImmutableSet.of());
@@ -239,13 +242,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return expressionAndSubstitution.substitution.isEmpty()
                     ? filterLevelTree
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(child.getVariables(),
+                            iqFactory.createConstructionNode(newlyProjectedVariables,
                                     (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
                                             expressionAndSubstitution.substitution),
                             filterLevelTree);
         } catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(constructionNodeTools.computeNewProjectedVariables(descendingSubstitution,
-                    child.getVariables()));
+            return iqFactory.createEmptyNode(newlyProjectedVariables);
         }
 
     }

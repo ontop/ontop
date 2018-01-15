@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -78,4 +79,15 @@ public interface DBMetadata extends Serializable {
      */
     void freeze();
 
+    /**
+     * Temporary solution to enable DBMetadata merging
+     *
+     */
+    ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables();
+
+    /**
+     * Temporary solution to enable DBMetadata merging
+     *
+     */
+    ImmutableMap<RelationID, RelationDefinition> copyRelations();
 }

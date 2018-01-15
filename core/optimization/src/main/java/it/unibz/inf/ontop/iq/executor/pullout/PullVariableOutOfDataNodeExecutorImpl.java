@@ -300,41 +300,4 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
         return atomFactory.getDataAtom(formerAtom.getPredicate(), newArgumentBuilder.build());
     }
 
-    /**
-     * TODO: explain
-     */
-//    private FocusNodeUpdate generateUpdate4DelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
-//                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap)
-//            throws QueryNodeSubstitutionException {
-//
-//        /**
-//         * Generates an injective substitution to be propagated
-//         */
-//        ImmutableMap.Builder<Variable, Variable> variableBuilder = ImmutableMap.builder();
-//        for (VariableRenaming renaming : renamingMap.values()) {
-//            variableBuilder.put(renaming.originalVariable, renaming.newVariable);
-//        }
-//        InjectiveVar2VarSubstitution substitution = new InjectiveVar2VarSubstitutionImpl(variableBuilder.build());
-//
-//        SubstitutionResults<? extends DelimiterCommutativeJoinNode> substitutionResults =
-//                originalFocusNode.applyDescendingSubstitution(substitution);
-//
-//        Optional<? extends DelimiterCommutativeJoinNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
-//        Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution =
-//                substitutionResults.getSubstitutionToPropagate();
-//
-//        if (!optionalNewFocusNode.isPresent()) {
-//            throw new IllegalStateException("A DelimiterCommutativeJoinNode should remain needed " +
-//                    "after applying a substitution");
-//        }
-//        else if ((!optionalNewSubstitution.isPresent()) || (!substitution.equals(optionalNewSubstitution.get()))) {
-//            throw new IllegalStateException("This var-2-var substitution is not expected to be changed" +
-//                    "after being applied to a DelimiterCommutativeJoinNode.");
-//        }
-//
-//        return new FocusNodeUpdate(optionalNewFocusNode.get(), Optional.of(substitution),
-//                convertIntoEqualities(renamingMap));
-//    }
-
-
 }

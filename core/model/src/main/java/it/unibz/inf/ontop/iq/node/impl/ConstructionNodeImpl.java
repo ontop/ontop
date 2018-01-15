@@ -16,11 +16,8 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools.NewSubstitutionPair;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -34,7 +31,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -283,52 +279,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .reduceDomainToIntersectionWith(projectedVariables)
                 .normalizeValues();
 
-    }
-
-    private SubstitutionResults<ConstructionNode> applyDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution) {
-
-        ImmutableSubstitution<ImmutableTerm> relevantSubstitution = constructionNodeTools.extractRelevantDescendingSubstitution(
-                descendingSubstitution, projectedVariables);
-
-        ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(relevantSubstitution,
-                getVariables());
-
-        /*
-         * TODO: avoid using an exception
-         */
-        NewSubstitutionPair newSubstitutions;
-        try {
-            newSubstitutions = constructionNodeTools.traverseConstructionNode(relevantSubstitution, substitution, projectedVariables,
-                    newProjectedVariables);
-        } catch (QueryNodeSubstitutionException e) {
-            return DefaultSubstitutionResults.declareAsEmpty();
-        }
-
-        ImmutableSubstitution<? extends ImmutableTerm> substitutionToPropagate = newSubstitutions.propagatedSubstitution;
-
-        Optional<ImmutableQueryModifiers> newOptionalModifiers = updateOptionalModifiers(optionalModifiers,
-                descendingSubstitution, substitutionToPropagate);
-
-        /*
-         * The construction node is not needed anymore
-         *
-         * Currently, the root construction node is still required.
-         */
-        if (newSubstitutions.bindings.isEmpty() && !newOptionalModifiers.isPresent()) {
-            return DefaultSubstitutionResults.replaceByUniqueChild(substitutionToPropagate);
-        }
-
-        /*
-         * New construction node
-         */
-        else {
-            ConstructionNode newConstructionNode = new ConstructionNodeImpl(newProjectedVariables,
-                    newSubstitutions.bindings, newOptionalModifiers, nullabilityEvaluator, unificationTools, constructionNodeTools,
-                    substitutionTools, substitutionFactory, termFactory, iqFactory, immutabilityTools, expressionEvaluator);
-
-            return DefaultSubstitutionResults.newNode(newConstructionNode, substitutionToPropagate);
-        }
     }
 
     @Override
