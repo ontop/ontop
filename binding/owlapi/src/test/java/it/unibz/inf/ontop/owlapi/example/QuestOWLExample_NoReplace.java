@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.owlapi.example;
  */
 
 
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -44,6 +44,7 @@ public class QuestOWLExample_NoReplace {
 
     final String owlfile = "src/main/resources/example/exampleBooks.owl";
     final String obdafile = "src/main/resources/example/exampleBooks.obda";
+    final String propertiesfile = "src/main/resources/example/exampleBooks.properties";
 
     public void runQuery() throws Exception {
 
@@ -54,6 +55,7 @@ public class QuestOWLExample_NoReplace {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlfile)
                 .nativeOntopMappingFile(obdafile)
+                .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
