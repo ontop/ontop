@@ -67,7 +67,7 @@ public class JDBC2ConstantConverter {
                         .addAll(defaultDateTimeFormatter) // another common case
                         .build(),
                 ORACLE, ImmutableList.<DateTimeFormatter>builder()
-                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ HH[.][:]mm[.][:]ss[.][,][n][ a][ ZZZZZ][ VV]]").toFormatter())
+                        .add(new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern("dd-MMM-yy[ hh[.][:]mm[.][:]ss[.][,][n][ a][ ZZZZZ][ VV]]").toFormatter())
                         .addAll(defaultDateTimeFormatter)
                         .build(),
                 MSSQL, ImmutableList.<DateTimeFormatter>builder()
