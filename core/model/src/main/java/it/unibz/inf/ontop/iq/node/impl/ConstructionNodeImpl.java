@@ -452,6 +452,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             throw new RuntimeException("TODO: support query modifiers");
         }
 
+        ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
+
         ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
         ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
 
@@ -470,8 +472,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
                     .orElse(child);
 
-            ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
-
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
                     .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
                     .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
@@ -485,7 +485,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .orElse(filterTree);
 
         } catch (EmptyTreeException e) {
-            return iqFactory.createEmptyNode(projectedVariables);
+            return iqFactory.createEmptyNode(newProjectedVariables);
         }
     }
 
