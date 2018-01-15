@@ -249,39 +249,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return collectedVariableBuilder.build();
     }
 
-    /**
-     * Merges the current substitution with the ascending one
-     *
-     * This substitution is obtained by composition and then cleaned (only defines the projected variables)
-     *
-     * Note that expects that the substitution does not rename a projected variable
-     * into a non-projected one (this would produce an invalid construction node).
-     * That is the responsibility of the SubstitutionPropagationExecutor
-     * to prevent such bindings from appearing.
-     *
-     * TODO: simplify after getting rid of applyAscendingSubstitution()
-     */
-    private ImmutableSubstitution<ImmutableTerm> mergeWithAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply) {
-        ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
-        ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
-
-        if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
-            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by " +
-                    "the substitution of the current construction node");
-        }
-
-        ImmutableSubstitution<ImmutableTerm> compositeSubstitution = substitutionToApply.composeWith(localSubstitution);
-
-        /*
-         * Cleans the composite substitution by removing non-projected variables
-         */
-        return compositeSubstitution
-                .reduceDomainToIntersectionWith(projectedVariables)
-                .normalizeValues();
-
-    }
-
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         if (getChildVariables().contains(variable))
