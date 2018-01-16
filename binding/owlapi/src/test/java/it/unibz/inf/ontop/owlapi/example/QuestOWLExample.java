@@ -43,6 +43,7 @@ public class QuestOWLExample {
 
     final String owlfile = "src/main/resources/example/exampleBooks.owl";
     final String obdafile = "src/main/resources/example/exampleBooks.obda";
+    final String propertiesfile = "src/main/resources/example/exampleBooks.properties";
 
     public void runQuery() throws Exception {
 
@@ -53,6 +54,7 @@ public class QuestOWLExample {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdafile)
                 .ontologyFile(owlfile)
+                .propertyFile(propertiesfile)
                 .enableTestMode()
                 .build();
         OntopOWLReasoner reasoner = factory.createReasoner(config);
