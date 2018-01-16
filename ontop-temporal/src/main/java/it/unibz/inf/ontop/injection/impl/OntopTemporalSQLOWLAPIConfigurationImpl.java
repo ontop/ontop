@@ -3,28 +3,28 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.exception.OntologyException;
-import it.unibz.inf.ontop.injection.OntopReformulationSettings;
-import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
-import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.spec.ontology.Ontology;
 import org.apache.commons.rdf.api.Graph;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfigurationImpl implements OntopTemporalSQLOWLAPIConfiguration {
+public class OntopTemporalSQLOWLAPIConfigurationImpl
+        extends OntopSQLOWLAPIConfigurationImpl
+        implements OntopTemporalSQLOWLAPIConfiguration {
 
     public final OntopTemporalMappingSQLAllConfigurationImpl temporalConfiguration;
     private final OntopTemporalSQLOWLAPIOptions options;
 
+    private final OntopMappingOWLAPIConfigurationImpl mappingOWLConfiguration;
 
     OntopTemporalSQLOWLAPIConfigurationImpl(OntopStandaloneSQLSettings settings,
                                             OntopTemporalMappingSQLAllSettings temporalSettings,
@@ -32,6 +32,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
         super(settings, options.owlOptions);
         this.options = options;
         temporalConfiguration = new OntopTemporalMappingSQLAllConfigurationImpl(temporalSettings, options.temporalOptions);
+        mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlOptions.owlOptions);
     }
 
     @Override
@@ -45,15 +46,19 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        //super.loadOBDASpecification();
-        return temporalConfiguration.loadSpecification();
+        return temporalConfiguration.loadSpecification(()->mappingOWLConfiguration.loadOntology());
+    }
+
+    @Override
+    public Optional<OWLOntology> loadInputOntology() throws OWLOntologyCreationException {
+        return mappingOWLConfiguration.loadInputOntology();
     }
 
     static class OntopTemporalSQLOWLAPIOptions {
-        final OntopSQLOWLAPIOptions owlOptions;
+        final OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions;
         final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions;
 
-        OntopTemporalSQLOWLAPIOptions(OntopSQLOWLAPIOptions owlOptions, OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
+        OntopTemporalSQLOWLAPIOptions(OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions, OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
             this.owlOptions = owlOptions;
             this.temporalOptions = temporalOptions;
         }
@@ -63,20 +68,13 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
             extends OntopSQLOWLAPIBuilderMixin<B>
             implements OntopTemporalSQLOWLAPIConfiguration.Builder<B> {
 
-        private boolean isOntologyDefined = false;
         private final OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<B> temporalMappingBuilderFragment;
 
         OntopTemporalSQLOWLAPIBuilderMixin() {
             B builder = (B) this;
             temporalMappingBuilderFragment = new OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<>(builder,
                     this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
-        }
 
-        void declareOntologyDefined() {
-            if (isOntologyDefined) {
-                throw new InvalidOntopConfigurationException("Ontology already defined!");
-            }
-            isOntologyDefined = true;
         }
 
         @Override
@@ -119,13 +117,6 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl extends OntopSQLOWLAPIConfi
 
         final OntopTemporalMappingSQLAllSettings getTemporalSettings(){
             return new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), isTemporal());
-        }
-
-        @Override
-        protected Properties generateProperties() {
-            Properties p = super.generateProperties();
-            p.putAll(temporalMappingBuilderFragment.generateProperties());
-            return p;
         }
 
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
