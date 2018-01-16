@@ -113,8 +113,9 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
         }else if(currentExpression instanceof TemporalJoinExpression){
             TemporalJoinNode temporalJoinNode = TIQFactory.createTemporalJoinNode();
             TIQBuilder.addChild(parentNode, temporalJoinNode);
-            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(0), temporalJoinNode, TIQBuilder);
-            getBuilder(((TemporalJoinExpression) currentExpression).getOperands().get(1), temporalJoinNode, TIQBuilder);
+            ((TemporalJoinExpression)currentExpression).getChildNodes().forEach(exp ->{
+                getBuilder(exp, temporalJoinNode, TIQBuilder);
+            });
         }else if(currentExpression instanceof StaticJoinExpression){
             InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
             TIQBuilder.addChild(parentNode,innerJoinNode);

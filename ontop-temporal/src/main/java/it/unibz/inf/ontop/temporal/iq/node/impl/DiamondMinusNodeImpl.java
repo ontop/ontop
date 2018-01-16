@@ -8,8 +8,11 @@ import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.TemporalIQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -134,5 +137,19 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         return null;
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
+        if (transformer instanceof TemporalIQTransformer){
+            return ((TemporalIQTransformer) transformer).transformDiamondMinus(tree, this, child);
+        } else {
+            return transformer.transformNonStandardUnaryNode(tree, this, child);
+        }
+    }
+
+    @Override
+    public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+
     }
 }

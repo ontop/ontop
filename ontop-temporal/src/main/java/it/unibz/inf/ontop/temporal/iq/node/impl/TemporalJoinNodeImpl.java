@@ -11,12 +11,14 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
-import it.unibz.inf.ontop.iq.node.impl.InnerJoinNodeImpl;
 import it.unibz.inf.ontop.iq.node.impl.JoinLikeNodeImpl;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.TemporalIQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -182,7 +184,7 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
             }
 
             if (i >= MAX_ITERATIONS)
-                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+                throw new MinorOntopInternalBugException("TemporalJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
 
             IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition, currentIQProperties);
 
@@ -361,6 +363,26 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
         return null;
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
+        if (transformer instanceof TemporalIQTransformer){
+            return ((TemporalIQTransformer) transformer).transformTemporalJoin(tree, this, children);
+        } else {
+            return transformer.transformNonStandardNaryNode(tree, this, children);
+        }
+    }
+
+    @Override
+    public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
+        if (children.size() < 2) {
+            throw new InvalidIntermediateQueryException("TEMPORAL JOIN node " + this
+                    +" does not have at least 2 children.\n" + children);
+        }
+
+        getOptionalFilterCondition()
+                .ifPresent(e -> checkExpression(e, children));
     }
 
     private static class LiftingStepResults {

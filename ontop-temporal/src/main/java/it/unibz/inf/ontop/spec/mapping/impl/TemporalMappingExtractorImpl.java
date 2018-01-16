@@ -177,8 +177,14 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                 mergedTables.putAll(temporalDBMetadata.copyTables());
 
                 List<DatabaseRelationDefinition> mergedListOfTables = new ArrayList<>();
-                mergedListOfTables.addAll(staticDBMetadata.get().getDatabaseRelations());
-                mergedListOfTables.addAll(temporalDBMetadata.getDatabaseRelations());
+                staticDBMetadata.get().getDatabaseRelations().forEach(databaseRelationDefinition -> {
+                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
+                        mergedListOfTables.add(databaseRelationDefinition);
+                });
+                temporalDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
+                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
+                        mergedListOfTables.add(databaseRelationDefinition);
+                });
 
                return new TemporalRDBMetadata(staticDBMetadata.get().getDriverName(),staticDBMetadata.get().getDriverVersion(),
                         staticDBMetadata.get().getDbmsProductName(), ((RDBMetadata) staticDBMetadata.get()).getDbmsVersion(),

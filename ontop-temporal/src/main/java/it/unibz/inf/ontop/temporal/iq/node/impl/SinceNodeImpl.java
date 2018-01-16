@@ -7,9 +7,12 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.TemporalIQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -92,6 +95,15 @@ public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements Sinc
     }
 
     @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild) {
+        if (transformer instanceof TemporalIQTransformer){
+            return ((TemporalIQTransformer) transformer).transformSince(tree, this, leftChild, rightChild);
+        } else {
+            return transformer.transformNonStandardBinaryNonCommutativeNode(tree, this, leftChild, rightChild);
+        }
+    }
+
+    @Override
     public IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return null;
     }
@@ -114,5 +126,10 @@ public class SinceNodeImpl extends TemporalOperatorWithRangeImpl implements Sinc
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
         return null;
+    }
+
+    @Override
+    public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
+
     }
 }
