@@ -338,7 +338,8 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
 
     @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
         return null;
     }
 
