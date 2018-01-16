@@ -7,6 +7,8 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -222,6 +224,22 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         }
         else
             return conditionSimplificationResults.optionalExpression;
+    }
+
+    protected void checkExpression(ImmutableExpression expression, ImmutableList<IQTree> children)
+            throws InvalidIntermediateQueryException {
+
+        ImmutableSet<Variable> childrenVariables = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> unboundVariables = expression.getVariableStream()
+                .filter(v -> !childrenVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
+        if (!unboundVariables.isEmpty()) {
+            throw new InvalidIntermediateQueryException("Expression " + expression + " of "
+                    + expression + " uses unbound variables (" + unboundVariables +  ").\n" + this);
+        }
     }
 
 

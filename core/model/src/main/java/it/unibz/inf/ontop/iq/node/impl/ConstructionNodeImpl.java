@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -69,7 +71,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
-                                 ExpressionEvaluator expressionEvaluator) {
+                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
@@ -86,10 +88,14 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.expressionEvaluator = expressionEvaluator;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        if (settings.isTestModeEnabled())
+            validateNode();
     }
 
-    private void validate() {
+    /**
+     * Validates the node independently of its child
+     */
+    private void validateNode() throws InvalidQueryNodeException {
         ImmutableSet<Variable> substitutionDomain = substitution.getDomain();
 
         // The substitution domain must be a subset of the projectedVariables
@@ -144,7 +150,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        validateNode();
     }
 
     @AssistedInject
@@ -172,7 +178,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
-        validate();
+        validateNode();
     }
 
     private static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> projectedVariables,
@@ -248,39 +254,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return collectedVariableBuilder.build();
     }
 
-    /**
-     * Merges the current substitution with the ascending one
-     *
-     * This substitution is obtained by composition and then cleaned (only defines the projected variables)
-     *
-     * Note that expects that the substitution does not rename a projected variable
-     * into a non-projected one (this would produce an invalid construction node).
-     * That is the responsibility of the SubstitutionPropagationExecutor
-     * to prevent such bindings from appearing.
-     *
-     * TODO: simplify after getting rid of applyAscendingSubstitution()
-     */
-    private ImmutableSubstitution<ImmutableTerm> mergeWithAscendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> substitutionToApply) {
-        ImmutableSubstitution<ImmutableTerm> localSubstitution = getSubstitution();
-        ImmutableSet<Variable> boundVariables = localSubstitution.getImmutableMap().keySet();
-
-        if (substitutionToApply.getImmutableMap().keySet().stream().anyMatch(boundVariables::contains)) {
-            throw new IllegalArgumentException("An ascending substitution MUST NOT include variables bound by " +
-                    "the substitution of the current construction node");
-        }
-
-        ImmutableSubstitution<ImmutableTerm> compositeSubstitution = substitutionToApply.composeWith(localSubstitution);
-
-        /*
-         * Cleans the composite substitution by removing non-projected variables
-         */
-        return compositeSubstitution
-                .reduceDomainToIntersectionWith(projectedVariables)
-                .normalizeValues();
-
-    }
-
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
         if (getChildVariables().contains(variable))
@@ -347,6 +320,26 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         } catch (EmptyTreeException e) {
             return iqFactory.createEmptyNode(projectedVariables);
+        }
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
+        return transformer.transformConstruction(tree,this, child);
+    }
+
+    @Override
+    public void validateNode(IQTree child) throws InvalidQueryNodeException, InvalidIntermediateQueryException {
+        validateNode();
+
+        ImmutableSet<Variable> requiredChildVariables = getChildVariables();
+
+        ImmutableSet<Variable> childVariables = child.getVariables();
+
+        if (!childVariables.containsAll(requiredChildVariables)) {
+            throw new InvalidIntermediateQueryException("This child " + child
+                    + " does not project all the variables " +
+                    "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
         }
     }
 
@@ -466,6 +459,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             throw new RuntimeException("TODO: support query modifiers");
         }
 
+        ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
+
         ImmutableSubstitution<NonFunctionalTerm> tauC = tau.getNonFunctionalTermFragment();
         ImmutableSubstitution<GroundFunctionalTerm> tauF = tau.getGroundFunctionalTermFragment();
 
@@ -484,8 +479,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
                     .orElse(child);
 
-            ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
-
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
                     .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
                     .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
@@ -499,7 +492,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .orElse(filterTree);
 
         } catch (EmptyTreeException e) {
-            return iqFactory.createEmptyNode(projectedVariables);
+            return iqFactory.createEmptyNode(newProjectedVariables);
         }
     }
 

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
@@ -161,6 +162,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild) {
+        return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
+    }
+
+    @Override
     public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
                               IQProperties currentIQProperties) {
 
@@ -292,6 +298,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
         return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
+    }
+
+    @Override
+    public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
+        getOptionalFilterCondition()
+                .ifPresent(e -> checkExpression(e, ImmutableList.of(leftChild, rightChild)));
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {

@@ -8,8 +8,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
@@ -110,6 +112,29 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 children.stream()
                         .map(c -> c.propagateDownConstraint(constraint))
                         .collect(ImmutableCollectors.toList()));
+    }
+
+    @Override
+    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
+        return transformer.transformUnion(tree,this, children);
+    }
+
+    @Override
+    public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
+        if (children.size() < 2) {
+            throw new InvalidIntermediateQueryException("UNION node " + this
+                    +" does not have at least 2 children node.");
+        }
+
+        ImmutableSet<Variable> unionVariables = getVariables();
+
+        for (IQTree child : children) {
+            if (!child.getVariables().containsAll(unionVariables)) {
+                throw new InvalidIntermediateQueryException("This child " + child
+                        + " does not project all the variables " +
+                        "required by the UNION node (" + unionVariables + ")\n" + this);
+            }
+        }
     }
 
     @Override

@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.CompositeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -31,6 +33,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     @Nullable
     private ImmutableSet<Variable> knownVariables;
 
+    // Non final
+    private boolean hasBeenSuccessfullyValidate;
+
     protected final IQTreeTools iqTreeTools;
     protected final IntermediateQueryFactory iqFactory;
 
@@ -46,6 +51,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         this.iqProperties = iqProperties;
         // To be computed on-demand
         knownVariables = null;
+        hasBeenSuccessfullyValidate = false;
     }
 
     @Override
@@ -127,4 +133,20 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             throws IQTreeTools.UnsatisfiableDescendingSubstitutionException {
         return iqTreeTools.normalizeDescendingSubstitution(this, descendingSubstitution);
     }
+
+    @Override
+    public final void validate() throws InvalidIntermediateQueryException {
+        if (!hasBeenSuccessfullyValidate) {
+            validateNode();
+            // (Indirectly) recursive
+            children.forEach(IQTree::validate);
+
+            hasBeenSuccessfullyValidate = true;
+        }
+    }
+
+    /**
+     * Only validates the node, not its children
+     */
+    protected abstract void validateNode() throws InvalidIntermediateQueryException;
 }

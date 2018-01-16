@@ -3,10 +3,14 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -16,6 +20,7 @@ public class IQImpl implements IQ {
     private final DistinctVariableOnlyDataAtom projectionAtom;
     private final IQTree tree;
     private final TermFactory termFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     /**
      * Lazy (created on demand)
@@ -25,12 +30,16 @@ public class IQImpl implements IQ {
 
     @AssistedInject
     private IQImpl(@Assisted DistinctVariableOnlyDataAtom projectionAtom, @Assisted IQTree tree,
-                   TermFactory termFactory) {
+                   TermFactory termFactory, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         
         this.projectionAtom = projectionAtom;
         this.tree = tree;
         this.termFactory = termFactory;
+        this.iqFactory = iqFactory;
         this.variableGenerator = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
     }
 
 
@@ -59,7 +68,22 @@ public class IQImpl implements IQ {
         IQTree newTree = tree.liftBinding(getVariableGenerator());
         return newTree == tree
                 ? this
-                : new IQImpl(projectionAtom, newTree, termFactory);
+                : iqFactory.createIQ(projectionAtom, newTree);
+    }
+
+    @Override
+    public void validate() throws InvalidIntermediateQueryException {
+        validateProjectedVariables();
+
+        tree.validate();
+    }
+
+    private void validateProjectedVariables() throws InvalidIntermediateQueryException {
+        ImmutableSet<Variable> projectedVariables = tree.getVariables();
+        if (!projectedVariables.equals(projectionAtom.getVariables())) {
+            throw new InvalidIntermediateQueryException("The variables projected by the root node"
+                    +  projectedVariables + " do not match the projection atom " + tree.getVariables());
+        }
     }
 
     @Override
