@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.model.term.impl;
+package it.unibz.inf.ontop.datalog.impl;
 
 /*
  * #%L
@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.iq.node.QueryModifiers;
+import it.unibz.inf.ontop.datalog.OrderCondition;
+import it.unibz.inf.ontop.datalog.QueryModifiers;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.ArrayList;

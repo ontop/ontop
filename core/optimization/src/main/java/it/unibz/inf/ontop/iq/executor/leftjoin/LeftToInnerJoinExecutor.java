@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -375,11 +374,6 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
 
         static Optional<DataNodeAndSubstitution> extract(ConstructionNode rightChild, IntermediateQuery query) {
-            /*
-             * Not supported
-             */
-            if (rightChild.getOptionalModifiers().isPresent())
-                return Optional.empty();
 
             QueryNode grandChild = query.getFirstChild(rightChild).get();
 

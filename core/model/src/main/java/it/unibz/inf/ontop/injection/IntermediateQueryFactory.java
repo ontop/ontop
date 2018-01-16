@@ -34,10 +34,6 @@ public interface IntermediateQueryFactory {
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
                                             ImmutableSubstitution<ImmutableTerm> substitution);
 
-    ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
-                                            ImmutableSubstitution<ImmutableTerm> substitution,
-                                            Optional<ImmutableQueryModifiers> queryModifiers);
-
     UnionNode createUnionNode(ImmutableSet<Variable> projectedVariables);
 
     InnerJoinNode createInnerJoinNode();
@@ -58,10 +54,10 @@ public interface IntermediateQueryFactory {
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();
-    LimitNode createLimitNode(int limit);
-    OffsetNode createOffsetNode(int offset);
+    LimitNode createLimitNode(long limit);
+    OffsetNode createOffsetNode(long offset);
     OrderByNode createOrderByNode(ImmutableList<OrderByNode.OrderComparator> comparators);
-    OrderByNode.OrderComparator createComparator(NonGroundTerm term, boolean isAscending);
+    OrderByNode.OrderComparator createOrderComparator(NonGroundTerm term, boolean isAscending);
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);

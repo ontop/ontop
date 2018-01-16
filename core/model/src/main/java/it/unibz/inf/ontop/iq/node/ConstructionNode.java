@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
-import java.util.Optional;
-
 /**
  * Head node an IntermediateQuery
  *
@@ -21,11 +19,6 @@ public interface ConstructionNode extends ExplicitVariableProjectionNode, UnaryO
      * (Some) projected variable --> transformed variable
      */
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
-
-    /**
-     * TODO: explain
-     */
-    Optional<ImmutableQueryModifiers> getOptionalModifiers();
 
     @Override
     ConstructionNode clone();

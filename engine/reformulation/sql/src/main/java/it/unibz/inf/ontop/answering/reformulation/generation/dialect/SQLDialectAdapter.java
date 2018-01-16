@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.RelationID;
 

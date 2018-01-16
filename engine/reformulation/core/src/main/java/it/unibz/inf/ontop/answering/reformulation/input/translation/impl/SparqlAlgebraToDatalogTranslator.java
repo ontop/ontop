@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;

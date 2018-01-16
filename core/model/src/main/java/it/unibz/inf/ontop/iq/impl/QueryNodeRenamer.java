@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -72,9 +71,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
-                renameSubstitution(constructionNode.getSubstitution()),
-                renameOptionalModifiers(constructionNode.getOptionalModifiers())
-                );
+                renameSubstitution(constructionNode.getSubstitution()));
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
@@ -110,21 +107,12 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public OrderByNode transform(OrderByNode orderByNode) {
         ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
-                .map(c -> iqFactory.createComparator(
+                .map(c -> iqFactory.createOrderComparator(
                         renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
                         c.isAscending()))
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createOrderByNode(newComparators);
-    }
-
-    private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
-        if (optionalModifiers.isPresent()) {
-            return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
-        }
-        else {
-            return Optional.empty();
-        }
     }
 
     private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {

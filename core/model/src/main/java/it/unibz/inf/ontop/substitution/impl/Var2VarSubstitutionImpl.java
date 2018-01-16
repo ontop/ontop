@@ -4,12 +4,8 @@ import com.google.common.base.Joiner;
 
 import java.util.AbstractMap;
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -56,17 +52,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
         return substitutionFactory.getSubstitution();
-    }
-
-    @Override
-    public Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
-        ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
-
-        for (OrderCondition orderCondition : immutableQueryModifiers.getSortConditions()) {
-            Variable newVariable = applyToVariable((Variable) orderCondition.getVariable());
-            orderConditionBuilder.add(orderCondition.newVariable(newVariable));
-        }
-        return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
     }
 
     /**

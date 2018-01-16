@@ -5,9 +5,7 @@ import java.util.Optional;
 import com.google.inject.Inject;
 import fj.P2;
 import fj.data.List;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.PullOutEqualityNormalizer;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
@@ -21,7 +19,6 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 

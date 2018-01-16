@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;

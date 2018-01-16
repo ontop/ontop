@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.iq.node;
+package it.unibz.inf.ontop.datalog;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;

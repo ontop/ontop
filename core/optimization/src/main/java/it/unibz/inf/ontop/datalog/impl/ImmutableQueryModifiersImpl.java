@@ -1,9 +1,9 @@
-package it.unibz.inf.ontop.iq.node.impl;
+package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.iq.node.QueryModifiers;
+import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.OrderCondition;
+import it.unibz.inf.ontop.datalog.QueryModifiers;
 
 import java.util.Optional;
 

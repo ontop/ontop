@@ -18,16 +18,16 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public class OffsetNodeImpl extends LimitOrOffsetNodeImpl implements OffsetNode {
 
     private static final String OFFSET_NODE_STR = "OFFSET";
-    private final int offset;
+    private final long offset;
 
     @AssistedInject
-    private OffsetNodeImpl(@Assisted int offset, IntermediateQueryFactory iqFactory) {
+    private OffsetNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory) {
         super(iqFactory);
         this.offset = offset;
     }
 
     @Override
-    public int getOffset() {
+    public long getOffset() {
         return offset;
     }
 

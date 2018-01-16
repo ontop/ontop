@@ -19,16 +19,16 @@ public class LimitNodeImpl extends LimitOrOffsetNodeImpl implements LimitNode {
 
     private static final String LIMIT_NODE_STR = "LIMIT";
 
-    private final int limit;
+    private final long limit;
 
     @AssistedInject
-    private LimitNodeImpl(@Assisted int limit, IntermediateQueryFactory iqFactory) {
+    private LimitNodeImpl(@Assisted long limit, IntermediateQueryFactory iqFactory) {
         super(iqFactory);
         this.limit = limit;
     }
 
     @Override
-    public int getLimit() {
+    public long getLimit() {
         return limit;
     }
 

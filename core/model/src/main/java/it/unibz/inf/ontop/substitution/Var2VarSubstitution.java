@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.substitution;
 
 import java.util.Optional;
 
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -19,8 +18,6 @@ public interface Var2VarSubstitution extends ImmutableSubstitution<Variable> {
      * Guarantees that the term type is preserved
      */
     <T extends ImmutableTerm> T applyToTerm(T term);
-
-    Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers);
 
     /**
      * Applies the substitution to the domain and co-domain terns

@@ -45,7 +45,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
 
-    private final Optional<ImmutableQueryModifiers> optionalModifiers;
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -66,7 +65,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
-                                 @Assisted Optional<ImmutableQueryModifiers> optionalQueryModifiers,
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
@@ -75,7 +73,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.optionalModifiers = optionalQueryModifiers;
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
@@ -144,37 +141,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.iqFactory = iqFactory;
         this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
-        this.optionalModifiers = Optional.empty();
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
-        this.nullValue = termFactory.getNullConstant();
-        this.childVariables = extractChildVariables(projectedVariables, substitution);
-
-        validateNode();
-    }
-
-    @AssistedInject
-    private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
-                                 TermNullabilityEvaluator nullabilityEvaluator,
-                                 ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
-                                 ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
-
-        super(substitutionFactory, iqFactory);
-        this.projectedVariables = projectedVariables;
-        this.substitution = substitution;
-        this.nullabilityEvaluator = nullabilityEvaluator;
-        this.unificationTools = unificationTools;
-        this.constructionNodeTools = constructionNodeTools;
-        this.substitutionTools = substitutionTools;
-        this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
-        this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
-        this.expressionEvaluator = expressionEvaluator;
-        this.optionalModifiers = Optional.empty();
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
@@ -204,17 +172,12 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return substitution;
     }
 
-    @Override
-    public Optional<ImmutableQueryModifiers> getOptionalModifiers() {
-        return optionalModifiers;
-    }
-
     /**
      * Immutable fields, can be shared.
      */
     @Override
     public ConstructionNode clone() {
-        return iqFactory.createConstructionNode(projectedVariables, substitution, optionalModifiers);
+        return iqFactory.createConstructionNode(projectedVariables, substitution);
     }
 
     @Override
@@ -390,7 +353,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .map(n -> (ConstructionNode) n)
                 .filter(n -> n.getVariables().equals(projectedVariables))
                 .filter(n -> n.getSubstitution().equals(substitution))
-                .filter(n -> n.getOptionalModifiers().equals(optionalModifiers))
                 .isPresent();
     }
 
@@ -416,8 +378,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         ConstructionNode node = (ConstructionNode) queryNode;
 
         return projectedVariables.equals(node.getVariables())
-                && substitution.equals(node.getSubstitution())
-                && optionalModifiers.equals(node.getOptionalModifiers());
+                && substitution.equals(node.getSubstitution());
     }
 
     @Override
@@ -454,10 +415,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
             Optional<ImmutableExpression> constraint, IQTree child) {
-
-        if (optionalModifiers.isPresent()) {
-            throw new RuntimeException("TODO: support query modifiers");
-        }
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
 
@@ -667,74 +624,10 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         IQTree grandChildIQTree = ascendingNormalization.normalizeChild(childIQ.getChild());
 
-        /*
-         * TODO: what about updating the query modifiers? Clarify
-         */
-        Optional<ImmutableQueryModifiers> formerModifiers = getOptionalModifiers();
-        if (formerModifiers.isPresent()) {
-            Optional<ImmutableQueryModifiers> topModifiers = formerModifiers
-                    .flatMap(m1 -> childConstructionNode.getOptionalModifiers()
-                            .map(m2 -> ImmutableQueryModifiersImpl.merge(m1, m2))
-                            .orElse(Optional.of(m1)));
-            if (topModifiers.isPresent()) {
-                ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                        newSubstitution, topModifiers);
+        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
+                newSubstitution);
 
-                return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
-            }
-            /*
-             * Not mergeable query modifiers --> keeps two nodes
-             */
-            else {
-                ConstructionNode newTopConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                        newSubstitution, formerModifiers);
-
-                ConstructionNode newChildConstructionNode = iqFactory.createConstructionNode(grandChildIQTree.getVariables(),
-                        substitutionFactory.getSubstitution(), childConstructionNode.getOptionalModifiers());
-
-                UnaryIQTree newChildIQ = iqFactory.createUnaryIQTree(newChildConstructionNode, grandChildIQTree,
-                        currentIQProperties.declareLifted());
-                return iqFactory.createUnaryIQTree(newTopConstructionNode, newChildIQ,
-                        currentIQProperties.declareLifted());
-            }
-        }
-        /*
-         * No top query modifier
-         */
-        else {
-            ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                    newSubstitution, childConstructionNode.getOptionalModifiers());
-
-            return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
-        }
-    }
-
-    /**
-     * TODO: explain
-     */
-    private static Optional<ImmutableQueryModifiers> updateOptionalModifiers(
-            Optional<ImmutableQueryModifiers> optionalModifiers,
-            ImmutableSubstitution<? extends ImmutableTerm> substitution1,
-            ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
-        if (!optionalModifiers.isPresent()) {
-            return Optional.empty();
-        }
-        ImmutableQueryModifiers previousModifiers = optionalModifiers.get();
-        ImmutableList.Builder<OrderCondition> conditionBuilder = ImmutableList.builder();
-
-        for (OrderCondition condition : previousModifiers.getSortConditions()) {
-            ImmutableTerm newTerm = substitution2.apply(substitution1.apply(condition.getVariable()));
-            /**
-             * If after applying the substitution the term is still a variable,
-             * "updates" the OrderCondition.
-             *
-             * Otherwise, forgets it.
-             */
-            if (newTerm instanceof Variable) {
-                conditionBuilder.add(condition.newVariable((Variable) newTerm));
-            }
-        }
-        return previousModifiers.newSortConditions(conditionBuilder.build());
+        return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
     }
 
     private class EmptyTreeException extends Exception {

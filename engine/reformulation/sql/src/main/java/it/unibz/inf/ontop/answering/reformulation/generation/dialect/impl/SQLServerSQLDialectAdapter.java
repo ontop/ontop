@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 
 import java.sql.Types;
 import java.util.HashMap;

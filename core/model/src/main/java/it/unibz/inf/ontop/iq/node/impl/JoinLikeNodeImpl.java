@@ -101,10 +101,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                             VariableGenerator variableGenerator,
                                             LiftConverter<R> liftConverter) throws UnsatisfiableConditionException {
 
-        if (selectedChildConstructionNode.getOptionalModifiers().isPresent())
-            throw new UnsupportedOperationException("Construction with query modifiers are" +
-                    "currently not supported under a join");
-
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
         ImmutableSubstitution<NonFunctionalTerm> downPropagableFragment = selectedChildSubstitution

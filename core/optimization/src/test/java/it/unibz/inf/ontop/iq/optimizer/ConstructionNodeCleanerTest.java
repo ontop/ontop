@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
+import it.unibz.inf.ontop.datalog.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
