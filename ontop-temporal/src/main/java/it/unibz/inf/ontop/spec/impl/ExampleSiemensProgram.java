@@ -76,7 +76,13 @@ public class ExampleSiemensProgram {
         DatalogMTLExpression innerExp = f.createTemporalJoinExpression(boxMinusHRS, diamondMinusLRS);
         DatalogMTLExpression diamondInnerExp = f.createDiamondMinusExpression(rangeDiamondOuter, innerExp);
         DatalogMTLExpression boxMinusMFON = f.createBoxMinusExpression(rangeMFON, mfon);
-        StaticJoinExpression bodyCLTRS = f.createStaticJoinExpression(tb, ts, rss, isMonitoredByRS, isMonitoredByTs, isPartOfPt, isPartOfB);
+
+        StaticJoinExpression join1 = f.createStaticJoinExpression(ts, isMonitoredByTs);
+        StaticJoinExpression join2 = f.createStaticJoinExpression(rss, isMonitoredByRS);
+        StaticJoinExpression join3 = f.createStaticJoinExpression(join1, isPartOfB);
+        StaticJoinExpression join4 = f.createStaticJoinExpression(join2, isPartOfPt);
+        StaticJoinExpression bodyCLTRS = f.createStaticJoinExpression(tb, join3, join4);
+
         DatalogMTLExpression temporalPIOPart = f.createTemporalJoinExpression(boxMinusMFON, CLTRS);
         DatalogMTLExpression bodyPIO = f.createTemporalJoinExpression(temporalPIOPart, diamondInnerExp);
 
