@@ -99,12 +99,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 */
 	@Override
 	public DatalogProgram translate(IntermediateQuery query) {
-		QueryNode root = query.getRootNode();
-		
-		Optional<ImmutableQueryModifiers> optionalModifiers =  Optional.of(root)
-				.filter(r -> r instanceof ConstructionNode)
-				.map(r -> (ConstructionNode)r)
-				.flatMap(ConstructionNode::getOptionalModifiers);
+		Optional<ImmutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(query);
+		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(query);
 
         DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
@@ -120,9 +116,26 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
             dProgram = datalogFactory.getDatalogProgram();
         }
 
-		translate(query,  dProgram, root);
+		translate(query,  dProgram, topNonQueryModifierNode);
 		
 		return dProgram;
+	}
+
+	private Optional<ImmutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
+		if (query.getRootNode() instanceof QueryModifierNode) {
+			throw new RuntimeException("TODO: support query modifiers");
+		}
+		else
+			return Optional.empty();
+	}
+
+	private QueryNode getFirstNonQueryModifierNode(IntermediateQuery query) {
+		// Non-final
+		QueryNode queryNode = query.getRootNode();
+		while (queryNode instanceof QueryModifierNode) {
+			queryNode = query.getFirstChild(queryNode).get();
+		}
+		return queryNode;
 	}
 	
 	/**

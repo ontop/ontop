@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.datalog;
 
-import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 
 /**
  * ImmutableQueryModifiers contains information about:
@@ -21,6 +24,9 @@ public interface ImmutableQueryModifiers extends QueryModifiers {
     @Override
     ImmutableList<OrderCondition> getSortConditions();
 
-    Optional<ImmutableQueryModifiers> newSortConditions(ImmutableList<OrderCondition> sortConditions);
-
+    /**
+     * Inserts the relevant QueryModifierNodes at the root
+     */
+    IntermediateQueryBuilder initBuilder(IntermediateQueryFactory iqFactory, IntermediateQueryBuilder queryBuilder,
+                                         DistinctVariableOnlyDataAtom projectionAtom, QueryNode childNode);
 }

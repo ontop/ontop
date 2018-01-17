@@ -88,44 +88,8 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         IntermediateQueryBuilder queryBuilder = firstDefinition.newBuilder();
         if (optionalTopModifiers.isPresent()) {
-            ImmutableQueryModifiers modifiers = optionalTopModifiers.get();
-
-            // Non-final
-            Optional<QueryNode> offsetNode = Optional.of(modifiers.getOffset())
-                    .filter(o -> o > 0)
-                    .map(iqFactory::createOffsetNode);
-
-            Optional<QueryNode> limitNode = Optional.of(modifiers.getLimit())
-                    .filter(o -> o >= 0)
-                    .map(iqFactory::createLimitNode);
-
-            Optional<QueryNode> distinctNode = modifiers.isDistinct()
-                    ? Optional.of(iqFactory.createDistinctNode())
-                    : Optional.empty();
-
-            ImmutableList<OrderByNode.OrderComparator> orderComparators = modifiers.getSortConditions().stream()
-                    .map(o -> iqFactory.createOrderComparator(o.getVariable(),
-                            o.getDirection() == OrderCondition.ORDER_ASCENDING))
-                    .collect(ImmutableCollectors.toList());
-
-            Optional<QueryNode> orderByNode = orderComparators.isEmpty()
-                    ? Optional.empty()
-                    : Optional.of(iqFactory.createOrderByNode(orderComparators));
-
-            ImmutableList<QueryNode> modifierNodes = Stream.of(offsetNode, limitNode, distinctNode, orderByNode)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(ImmutableCollectors.toList());
-
-            if (modifierNodes.isEmpty())
-                queryBuilder.init(projectionAtom, topConstructionNode);
-            else {
-                queryBuilder.init(projectionAtom, modifierNodes.get(0));
-                IntStream.range(1, modifierNodes.size() - 1)
-                        .forEach(i -> queryBuilder.addChild(modifierNodes.get(i - 1), modifierNodes.get(i)));
-                queryBuilder.addChild(modifierNodes.get(modifierNodes.size() - 1), topConstructionNode);
-            }
-
+            optionalTopModifiers.get()
+                    .initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
         }
         else
             queryBuilder.init(projectionAtom, topConstructionNode);

@@ -138,28 +138,34 @@ public class DatalogRule2QueryConverter {
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
-        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                targetAtom.getSubstitution(), optionalModifiers);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution());
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
+            return createFact(dbMetadata, topConstructionNode, optionalModifiers, projectionAtom, executorRegistry, iqFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogFactory, datalogTools);
 
-            return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
+            return createDefinition(dbMetadata, topConstructionNode, optionalModifiers, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
                     atomClassification.optionalGroupAtom, iqFactory, executorRegistry);
         }
     }
 
-    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode rootNode,
+    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
+                                                Optional<ImmutableQueryModifiers> optionalModifiers,
                                                 DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
-                                                IntermediateQueryFactory modelFactory) {
-        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
-        queryBuilder.init(projectionAtom, rootNode);
-        queryBuilder.addChild(rootNode, modelFactory.createTrueNode());
+                                                IntermediateQueryFactory iqFactory) {
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        if (optionalModifiers.isPresent()) {
+            optionalModifiers.get().initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
+        }
+        else {
+            queryBuilder.init(projectionAtom, topConstructionNode);
+        }
+        queryBuilder.addChild(topConstructionNode, iqFactory.createTrueNode());
         return queryBuilder.build();
     }
 
@@ -167,7 +173,8 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
+    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
+                                               Optional<ImmutableQueryModifiers> optionalModifiers,
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
@@ -180,11 +187,14 @@ public class DatalogRule2QueryConverter {
          */
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
 
-        // Non final
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
-
         try {
-            queryBuilder.init(projectionAtom, rootNode);
+            // Non-final
+            IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+            if (optionalModifiers.isPresent()) {
+                optionalModifiers.get().initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
+            }
+            else
+                queryBuilder.init(projectionAtom, topConstructionNode);
 
             /*
              * Intermediate node: ConstructionNode root or GROUP node
@@ -196,7 +206,7 @@ public class DatalogRule2QueryConverter {
                 // queryBuilder.addChild(rootNode, intermediateNode);
             }
             else {
-                intermediateNode = rootNode;
+                intermediateNode = topConstructionNode;
             }
 
 
@@ -209,7 +219,7 @@ public class DatalogRule2QueryConverter {
                 queryBuilder.addChild(intermediateNode, bottomNode);
             }
             else {
-                bottomNode = rootNode;
+                bottomNode = topConstructionNode;
             }
 
             /*

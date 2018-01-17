@@ -4,8 +4,16 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.datalog.QueryModifiers;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.node.OrderByNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
 
@@ -77,14 +85,44 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
     }
 
     @Override
-    public Optional<ImmutableQueryModifiers> newSortConditions(ImmutableList<OrderCondition> newSortConditions) {
-        if (isDistinct || hasLimit() || hasOffset() || (!newSortConditions.isEmpty())) {
-            ImmutableQueryModifiers newModifiers = new ImmutableQueryModifiersImpl(isDistinct, limit, offset,
-                    newSortConditions);
-            return Optional.of(newModifiers);
-        }
+    public IntermediateQueryBuilder initBuilder(IntermediateQueryFactory iqFactory, IntermediateQueryBuilder queryBuilder,
+                                                DistinctVariableOnlyDataAtom projectionAtom, QueryNode childNode) {
+        // Non-final
+        Optional<QueryNode> offsetNode = Optional.of(getOffset())
+                .filter(o -> o > 0)
+                .map(iqFactory::createOffsetNode);
 
-        return Optional.empty();
+        Optional<QueryNode> limitNode = Optional.of(getLimit())
+                .filter(o -> o >= 0)
+                .map(iqFactory::createLimitNode);
+
+        Optional<QueryNode> distinctNode = isDistinct()
+                ? Optional.of(iqFactory.createDistinctNode())
+                : Optional.empty();
+
+        ImmutableList<OrderByNode.OrderComparator> orderComparators = getSortConditions().stream()
+                .map(o -> iqFactory.createOrderComparator(o.getVariable(),
+                        o.getDirection() == OrderCondition.ORDER_ASCENDING))
+                .collect(ImmutableCollectors.toList());
+
+        Optional<QueryNode> orderByNode = orderComparators.isEmpty()
+                ? Optional.empty()
+                : Optional.of(iqFactory.createOrderByNode(orderComparators));
+
+        ImmutableList<QueryNode> modifierNodes = Stream.of(offsetNode, limitNode, distinctNode, orderByNode)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
+
+        if (modifierNodes.isEmpty())
+            queryBuilder.init(projectionAtom, childNode);
+        else {
+            queryBuilder.init(projectionAtom, modifierNodes.get(0));
+            IntStream.range(1, modifierNodes.size() - 1)
+                    .forEach(i -> queryBuilder.addChild(modifierNodes.get(i - 1), modifierNodes.get(i)));
+            queryBuilder.addChild(modifierNodes.get(modifierNodes.size() - 1), childNode);
+        }
+        return queryBuilder;
     }
 
     @Override
