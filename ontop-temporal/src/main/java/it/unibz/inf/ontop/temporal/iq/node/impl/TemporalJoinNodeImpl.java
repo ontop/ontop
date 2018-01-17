@@ -1,18 +1,18 @@
 package it.unibz.inf.ontop.temporal.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.ConstructionNodeTools;
@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.temporal.iq.node.TemporalQueryNodeVisitor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.time.temporal.Temporal;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -342,27 +342,119 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children) {
-        return null;
+        Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
+                .map(descendingSubstitution::applyToBooleanExpression);
+
+        try {
+            ExpressionAndSubstitution expressionAndSubstitution = simplifyCondition(unoptimizedExpression,
+                    ImmutableSet.of());
+
+            Optional<ImmutableExpression> downConstraint = computeDownConstraint(constraint,
+                    expressionAndSubstitution);
+
+            ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
+                    ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
+                            .composeWith2(expressionAndSubstitution.substitution);
+
+            ImmutableList<IQTree> newChildren = children.stream()
+                    .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint))
+                    .collect(ImmutableCollectors.toList());
+
+            IQTree joinTree = iqFactory.createNaryIQTree(
+                    iqFactory.createTemporalJoinNode(expressionAndSubstitution.optionalExpression),
+                    newChildren);
+            return expressionAndSubstitution.substitution.isEmpty()
+                    ? joinTree
+                    : iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(getProjectedVariables(children),
+                            (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
+                                    expressionAndSubstitution.substitution),
+                    joinTree);
+        } catch (UnsatisfiableConditionException e) {
+            return iqFactory.createEmptyNode(computeNewlyProjectedVariables(descendingSubstitution, children));
+        }
+    }
+
+    private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
+        return children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSet<Variable> computeNewlyProjectedVariables(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> formerProjectedVariables = getProjectedVariables(children);
+
+        return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
     }
 
     @Override
     public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
-        return null;
+
+        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
+                .flatMap(c -> c.getVariables().stream()
+                        .map(v -> Maps.immutableEntry(v, c)))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap();
+
+        return variableProvenanceMap.entrySet().stream()
+                .filter(e -> e.getValue().size() == 1)
+                .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
+                .map(Map.Entry::getKey)
+                .filter(this::isFilteringNullValue)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
     public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
-        return false;
+        return children.stream()
+                .anyMatch(c -> c.isConstructed(variable));
     }
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
-        return null;
+        return IntStream.range(0, children.size()).boxed()
+                .map(i -> Maps.immutableEntry(i, children.get(i)))
+                .filter(e -> e.getValue().isConstructed(variable))
+                // index -> new child
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable)))
+                .filter(e -> {
+                    QueryNode newRootNode = e.getValue().getRootNode();
+                    return (newRootNode instanceof UnionNode)
+                            && ((UnionNode) newRootNode).hasAChildWithLiftableDefinition(variable,
+                            e.getValue().getChildren());
+                })
+                .findFirst()
+                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children))
+                .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
+    }
+
+    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren) {
+        UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet()));
+
+        return iqFactory.createNaryIQTree(newUnionNode,
+                newUnionChild.getChildren().stream()
+                        .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
+                        .collect(ImmutableCollectors.toList()));
+    }
+
+
+    private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
+        return iqFactory.createNaryIQTree(this,
+                IntStream.range(0, initialChildren.size())
+                        .boxed()
+                        .map(i -> i == childIndex
+                                ? unionGrandChild
+                                : initialChildren.get(i))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
-        return null;
+        return propagateDownCondition(Optional.of(constraint), children);
     }
 
     @Override
