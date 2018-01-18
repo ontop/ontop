@@ -1,24 +1,35 @@
 package it.unibz.inf.ontop.owlapi;
 
 
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
 
 
-/** Check failing ClassifiedTBox when equalities with top is present
- *
+/**
+ * Check  ClassifiedTBox does not fail when equalities with top is present
  */
 
 public class ClassifiedTBoxTest {
 
 
+    /*
+    top object property with domain and range, two top classes should be present in the ontology and owlthing
+     */
     @Test
-    public void test_wrong_property() throws Exception {
-        ClassifiedTBox ontology = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify("src/test/resources/ontology/venice.owl");
+    public void test_top_property() throws Exception {
+
+        ClassifiedTBox ontology = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify("src/test/resources/ontology/ontology_with_top.owl");
+        Equivalences<ClassExpression> top = ontology.classesDAG().getVertex(ClassImpl.owlThing);
+        assertEquals(3, top.getMembers().size());
+        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OClass percorso = builder.declareClass("http://my.org/navi#Percorso");
+        OClass linee = builder.declareClass("http://my.org/navi#LineeDiPercorso");
+        assertEquals(ImmutableSet.of(ClassImpl.owlThing, percorso, linee), top.getMembers());
     }
 
 }
