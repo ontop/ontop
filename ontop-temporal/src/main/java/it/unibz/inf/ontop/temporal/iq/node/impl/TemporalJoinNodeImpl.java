@@ -460,8 +460,8 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
-        return iqFactory.createNaryIQTree(this, children);
-        //return propagateDownCondition(Optional.of(constraint), children);
+        //return iqFactory.createNaryIQTree(this, children);
+        return propagateDownCondition(Optional.of(constraint), children);
     }
 
     @Override
