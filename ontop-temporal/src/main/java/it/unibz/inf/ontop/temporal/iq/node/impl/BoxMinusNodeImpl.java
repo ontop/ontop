@@ -50,6 +50,11 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public QueryNode clone() {
+        try {
+            throw new Exception("clone is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -81,16 +86,34 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        try {
+            throw new Exception("getLocallyRequiredVariables is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+
+        try {
+            throw new Exception("getRequiredVariables is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
+
+        try {
+            throw new Exception("getLocallyDefinedVariables is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -121,6 +144,12 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public ImmutableSet<Variable> getNullableVariables(IQTree child) {
+
+        try {
+            throw new Exception("getNullableVariables is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -131,12 +160,17 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        try {
+            throw new Exception("liftIncompatibleDefinitions is not implemented in box minus");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return null;
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override

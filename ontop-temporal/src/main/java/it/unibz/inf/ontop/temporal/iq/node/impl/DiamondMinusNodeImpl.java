@@ -136,7 +136,7 @@ public class DiamondMinusNodeImpl extends TemporalOperatorWithRangeImpl implemen
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return null;
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class TemporalRangeImpl implements TemporalRange {
     public boolean equals(TemporalRange temporalRange){
 
         if(this.isBeginInclusive().equals(temporalRange.isBeginInclusive()) &&
-                this.isBeginInclusive().equals(temporalRange.isEndInclusive()) &&
+                this.isEndInclusive().equals(temporalRange.isEndInclusive()) &&
                 this.getBegin().equals(temporalRange.getBegin()) &&
                 this.getEnd().equals(temporalRange.getEnd())){
 

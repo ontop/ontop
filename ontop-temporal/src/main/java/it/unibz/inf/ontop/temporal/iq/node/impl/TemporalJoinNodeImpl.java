@@ -113,6 +113,11 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
     @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
+        try {
+            throw new Exception("acceptNodeTransformer is not implemented in temporal join");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -124,12 +129,13 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        return false;
+        return isEquivalentTo(node);
     }
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return false;
+        return (queryNode instanceof TemporalJoinNode)
+                && getOptionalFilterCondition().equals(((TemporalJoinNode) queryNode).getOptionalFilterCondition());
     }
 
     @Override
@@ -454,7 +460,8 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children) {
-        return propagateDownCondition(Optional.of(constraint), children);
+        return iqFactory.createNaryIQTree(this, children);
+        //return propagateDownCondition(Optional.of(constraint), children);
     }
 
     @Override
