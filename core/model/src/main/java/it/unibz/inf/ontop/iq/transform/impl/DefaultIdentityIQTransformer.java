@@ -52,12 +52,7 @@ public class DefaultIdentityIQTransformer implements IQTransformer {
     }
 
     @Override
-    public IQTree transformLimit(IQTree tree, LimitNode rootNode, IQTree child) {
-        return tree;
-    }
-
-    @Override
-    public IQTree transformOffset(IQTree tree, OffsetNode rootNode, IQTree child) {
+    public IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child) {
         return tree;
     }
 

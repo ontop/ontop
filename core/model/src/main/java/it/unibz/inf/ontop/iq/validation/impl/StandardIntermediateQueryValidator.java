@@ -157,17 +157,9 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
         }
 
         @Override
-        public void visit(LimitNode limitNode) {
-            if (query.getChildren(limitNode).size() != 1) {
-                throw new InvalidIntermediateQueryException("LIMIT node " + limitNode
-                        + " must have ONE and ONLY ONE child.\n" + query);
-            }
-        }
-
-        @Override
-        public void visit(OffsetNode offsetNode) {
-            if (query.getChildren(offsetNode).size() != 1) {
-                throw new InvalidIntermediateQueryException("OFFSET node " + offsetNode
+        public void visit(SliceNode sliceNode) {
+            if (query.getChildren(sliceNode).size() != 1) {
+                throw new InvalidIntermediateQueryException("SLICE node " + sliceNode
                         + " must have ONE and ONLY ONE child.\n" + query);
             }
         }

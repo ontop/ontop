@@ -54,13 +54,8 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     }
 
     @Override
-    public LimitNode transform(LimitNode limitNode) {
-        return limitNode;
-    }
-
-    @Override
-    public OffsetNode transform(OffsetNode offsetNode) {
-        return offsetNode;
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode;
     }
 
     @Override

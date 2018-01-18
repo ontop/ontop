@@ -27,9 +27,7 @@ public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationP
 
     P transform(DistinctNode distinctNode);
 
-    P transform(LimitNode limitNode);
-
-    P transform(OffsetNode offsetNode);
+    P transform(SliceNode sliceNode);
 
     P transform(OrderByNode orderByNode);
 }

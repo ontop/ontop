@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
+
     @Override
     public FilterNode transform(FilterNode filterNode) {
         return filterNode.clone();
@@ -55,13 +56,8 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public LimitNode transform(LimitNode limitNode) {
-        return limitNode.clone();
-    }
-
-    @Override
-    public OffsetNode transform(OffsetNode offsetNode) {
-        return offsetNode.clone();
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode.clone();
     }
 
     @Override

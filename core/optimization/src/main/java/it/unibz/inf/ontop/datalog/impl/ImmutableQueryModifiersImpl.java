@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -87,14 +88,15 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
     @Override
     public IntermediateQueryBuilder initBuilder(IntermediateQueryFactory iqFactory, IntermediateQueryBuilder queryBuilder,
                                                 DistinctVariableOnlyDataAtom projectionAtom, QueryNode childNode) {
-        // Non-final
-        Optional<QueryNode> offsetNode = Optional.of(getOffset())
-                .filter(o -> o > 0)
-                .map(iqFactory::createOffsetNode);
 
-        Optional<QueryNode> limitNode = Optional.of(getLimit())
-                .filter(o -> o >= 0)
-                .map(iqFactory::createLimitNode);
+        long correctedOffset = offset > 0 ? offset : 0;
+
+        Optional<SliceNode> sliceNode = Optional.of(limit)
+                .filter(l -> l >= 0)
+                .map(l -> Optional.of(iqFactory.createSliceNode(correctedOffset, l)))
+                .orElseGet(() -> Optional.of(correctedOffset)
+                        .filter(o -> o > 0)
+                        .map(iqFactory::createSliceNode));
 
         Optional<QueryNode> distinctNode = isDistinct()
                 ? Optional.of(iqFactory.createDistinctNode())
@@ -109,7 +111,7 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
                 ? Optional.empty()
                 : Optional.of(iqFactory.createOrderByNode(orderComparators));
 
-        ImmutableList<QueryNode> modifierNodes = Stream.of(offsetNode, limitNode, distinctNode, orderByNode)
+        ImmutableList<QueryNode> modifierNodes = Stream.of(sliceNode, distinctNode, orderByNode)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toList());

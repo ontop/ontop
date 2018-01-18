@@ -54,8 +54,9 @@ public interface IntermediateQueryFactory {
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();
-    LimitNode createLimitNode(long limit);
-    OffsetNode createOffsetNode(long offset);
+    SliceNode createSliceNode(@Assisted("offset") long offset, @Assisted("limit") long limit);
+    SliceNode createSliceNode(long offset);
+
     OrderByNode createOrderByNode(ImmutableList<OrderByNode.OrderComparator> comparators);
     OrderByNode.OrderComparator createOrderComparator(NonGroundTerm term, boolean isAscending);
 

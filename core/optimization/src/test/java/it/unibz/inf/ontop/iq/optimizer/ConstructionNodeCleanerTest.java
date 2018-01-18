@@ -54,7 +54,7 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
 
-        LimitNode limitNode = IQ_FACTORY.createLimitNode(100);
+        SliceNode limitNode = IQ_FACTORY.createSliceNode(0,100);
         queryBuilder1.init(projectionAtom1, limitNode);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -101,7 +101,7 @@ public class ConstructionNodeCleanerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         queryBuilder1.init(projectionAtom1, constructionNode1);
 
-        LimitNode limitNode = IQ_FACTORY.createLimitNode(100);
+        SliceNode limitNode = IQ_FACTORY.createSliceNode(0,100);
         queryBuilder1.addChild(constructionNode1, limitNode);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -184,7 +184,7 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
 
-        LimitNode limitNode1 = IQ_FACTORY.createLimitNode(100);
+        SliceNode limitNode1 = IQ_FACTORY.createSliceNode(0,100);
         queryBuilder1.init(projectionAtom1, limitNode1);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
@@ -192,7 +192,7 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(Z2)));
         queryBuilder1.addChild(limitNode1, constructionNode1);
 
-        LimitNode limitNode2 = IQ_FACTORY.createLimitNode(50);
+        SliceNode limitNode2 = IQ_FACTORY.createSliceNode(0,50);
         queryBuilder1.addChild(constructionNode1, limitNode2);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -238,7 +238,7 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
 
-        LimitNode limitNode1 = IQ_FACTORY.createLimitNode(100);
+        SliceNode limitNode1 = IQ_FACTORY.createSliceNode(0,100);
         queryBuilder1.init(projectionAtom1, limitNode1);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
@@ -246,7 +246,7 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(Z2)));
         queryBuilder1.addChild(limitNode1, constructionNode1);
 
-        LimitNode limitNode2 = IQ_FACTORY.createLimitNode(50);
+        SliceNode limitNode2 = IQ_FACTORY.createSliceNode(0,50);
         queryBuilder1.addChild(constructionNode1, limitNode2);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
@@ -310,7 +310,7 @@ public class ConstructionNodeCleanerTest {
 
         queryBuilder1.addChild(constructionNode1, constructionNode2);
 
-        LimitNode limitNode = IQ_FACTORY.createLimitNode(100);
+        SliceNode limitNode = IQ_FACTORY.createSliceNode(0,100);
         queryBuilder1.addChild(constructionNode2, limitNode);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
@@ -357,7 +357,7 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
-        LimitNode limit50 = IQ_FACTORY.createLimitNode(50);
+        SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
@@ -367,7 +367,7 @@ public class ConstructionNodeCleanerTest {
                 ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1)));
 
-        LimitNode limit40 = IQ_FACTORY.createLimitNode(40);
+        SliceNode limit40 = IQ_FACTORY.createSliceNode(0,40);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y1, Z),
@@ -387,7 +387,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        LimitNode limit90 = IQ_FACTORY.createLimitNode(90);
+        SliceNode limit90 = IQ_FACTORY.createSliceNode(0,90);
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
@@ -421,19 +421,19 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
-        LimitNode limit50 = IQ_FACTORY.createLimitNode(50);
+        SliceNode limit50 = IQ_FACTORY.createSliceNode(0,50);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
 
-        LimitNode limit80 = IQ_FACTORY.createLimitNode(80);
+        SliceNode limit80 = IQ_FACTORY.createSliceNode(0,80);
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Y1)));
 
-        LimitNode limit40 = IQ_FACTORY.createLimitNode(40);
+        SliceNode limit40 = IQ_FACTORY.createSliceNode(0,40);
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X1, Y1, Z),
@@ -454,7 +454,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        LimitNode limit130 = IQ_FACTORY.createLimitNode(130);
+        SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
 
         ConstructionNode constructionNode4 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),
@@ -491,11 +491,11 @@ public class ConstructionNodeCleanerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(EMPTY_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
 
-        LimitNode limit130 = IQ_FACTORY.createLimitNode(130);
+        SliceNode limit130 = IQ_FACTORY.createSliceNode(0,130);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables());
 
-        LimitNode limit100 = IQ_FACTORY.createLimitNode(100);
+        SliceNode limit100 = IQ_FACTORY.createSliceNode(0,100);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1)));
@@ -532,7 +532,7 @@ public class ConstructionNodeCleanerTest {
 
         System.out.println("\nBefore optimization: \n" + query1);
 
-        LimitNode limit230 = IQ_FACTORY.createLimitNode(230);
+        SliceNode limit230 = IQ_FACTORY.createSliceNode(0,230);
 
         ConstructionNode constructionNode5 = IQ_FACTORY.createConstructionNode(
                 projectionAtom1.getVariables(),

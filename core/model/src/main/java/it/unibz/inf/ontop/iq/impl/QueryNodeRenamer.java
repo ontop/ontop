@@ -95,13 +95,8 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
-    public LimitNode transform(LimitNode limitNode) {
-        return limitNode.clone();
-    }
-
-    @Override
-    public OffsetNode transform(OffsetNode offsetNode) {
-        return offsetNode.clone();
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode.clone();
     }
 
     @Override

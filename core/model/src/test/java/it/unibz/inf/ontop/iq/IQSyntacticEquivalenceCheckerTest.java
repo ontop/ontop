@@ -617,14 +617,11 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(DB_METADATA, EXECUTOR_REGISTRY);
 
-        OffsetNode offsetNode = IQ_FACTORY.createOffsetNode(1);
-        queryBuilder.init(projectionAtom, offsetNode);
-
-        LimitNode limitNode = IQ_FACTORY.createLimitNode(1);
-        queryBuilder.addChild(offsetNode, limitNode);
+        SliceNode sliceNode = IQ_FACTORY.createSliceNode(1, 1);
+        queryBuilder.init(projectionAtom, sliceNode);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        queryBuilder.addChild(limitNode, distinctNode);
+        queryBuilder.addChild(sliceNode, distinctNode);
 
         OrderByNode orderByNode = IQ_FACTORY.createOrderByNode(ImmutableList.of(
                 IQ_FACTORY.createOrderComparator(X, true)));
@@ -643,14 +640,11 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
 
-        OffsetNode newOffsetNode = IQ_FACTORY.createOffsetNode(1);
-        queryBuilder1.init(projectionAtom1, newOffsetNode);
-
-        LimitNode newLimitNode = IQ_FACTORY.createLimitNode(1);
-        queryBuilder1.addChild(newOffsetNode, newLimitNode);
+        SliceNode newSliceNode = IQ_FACTORY.createSliceNode(1, 1);
+        queryBuilder1.init(projectionAtom1, newSliceNode);
 
         DistinctNode newDistinctNode = IQ_FACTORY.createDistinctNode();
-        queryBuilder1.addChild(newLimitNode, newDistinctNode);
+        queryBuilder1.addChild(newSliceNode, newDistinctNode);
 
         OrderByNode newOrderByNode = IQ_FACTORY.createOrderByNode(ImmutableList.of(
                 IQ_FACTORY.createOrderComparator(X, true)));

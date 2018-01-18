@@ -28,9 +28,7 @@ public interface QueryNodeVisitor {
 
     void visit(DistinctNode distinctNode);
 
-    void visit(LimitNode limitNode);
-
-    void visit(OffsetNode offsetNode);
+    void visit(SliceNode sliceNode);
 
     void visit(OrderByNode orderByNode);
 }
