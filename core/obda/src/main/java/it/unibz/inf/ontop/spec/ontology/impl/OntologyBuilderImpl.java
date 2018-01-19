@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.*;
@@ -51,12 +51,12 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
 
     private OntologyBuilderImpl() {
-        classes.map.put(ClassImpl.owlThingIRI, ClassImpl.owlThing);
-        classes.map.put(ClassImpl.owlNothingIRI, ClassImpl.owlNothing);
-        objectProperties.map.put(ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI, ObjectPropertyExpressionImpl.owlTopObjectProperty);
-        objectProperties.map.put(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI, ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-        dataProperties.map.put(DataPropertyExpressionImpl.owlTopDataPropertyIRI, DataPropertyExpressionImpl.owlTopDataProperty);
-        dataProperties.map.put(DataPropertyExpressionImpl.owlBottomDataPropertyIRI, DataPropertyExpressionImpl.owlBottomDataProperty);
+        classes.map.put(OWL.THING.getIRIString(), ClassImpl.owlThing);
+        classes.map.put(OWL.NOTHING.getIRIString(), ClassImpl.owlNothing);
+        objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlTopObjectProperty);
+        objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlBottomObjectProperty);
+        dataProperties.map.put(OWL.TOP_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlTopDataProperty);
+        dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlBottomDataProperty);
     }
 
     public static OntologyBuilder builder() {

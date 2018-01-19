@@ -392,19 +392,39 @@
 
         <!-- transitive dependencies -->
         <!--<dependency>-->
-            <!--<groupId>org.antlr</groupId>-->
-            <!--<artifactId>antlr</artifactId>-->
+        <!--<groupId>org.antlr</groupId>-->
+        <!--<artifactId>antlr4</artifactId>-->
         <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.antlr</groupId>-->
-            <!--<artifactId>antlr-runtime</artifactId>-->
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>antlr</groupId>-->
-                    <!--<artifactId>antlr</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+
+        <!-- antlr4 transitive dependencies start -->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.abego.treelayout</groupId>
+            <artifactId>org.abego.treelayout.core</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>58.2</version>
+        </dependency>
+        <!-- antlr4 transitive dependencies end-->
 
         <dependency>
             <groupId>net.sf.opencsv</groupId>
@@ -600,8 +620,6 @@
                         <Update-Url>https://github.com/ontop/ontop/raw/master/ontop-protege/update.properties</Update-Url>
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
-
-                        <!--<Import-Package>!au.com.bytecode.opencsv*,!org.antlr.stringtemplate,*</Import-Package>-->
 
                         <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,*</Import-Package>
 

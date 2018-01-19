@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.docker;
  */
 
 
-import it.unibz.inf.ontop.docker.test.ParallelScenarioTest;
+import it.unibz.inf.ontop.docker.testsuite.ParallelScenarioTest;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import org.eclipse.rdf4j.OpenRDFUtil;
