@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
-import it.unibz.inf.ontop.iq.node.SliceNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -52,9 +49,27 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         this.limit = null;
     }
 
+    /**
+     * Blocks substitutions
+     */
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        throw new RuntimeException("TODO: implement it");
+    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQTree newChild = child.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        if (newChildRoot instanceof SliceNode)
+            return liftSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+        else if (newChildRoot instanceof EmptyNode)
+            return newChild;
+        else
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+    }
+
+    /**
+     * TODO: implement it seriously
+     */
+    private IQTree liftSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
     }
 
     @Override
