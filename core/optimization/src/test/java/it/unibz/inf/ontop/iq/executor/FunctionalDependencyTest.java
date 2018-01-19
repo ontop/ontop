@@ -257,12 +257,15 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, Y));
-        expectedQueryBuilder.init(projectionAtom, distinctNode);
-        expectedQueryBuilder.addChild(distinctNode, newRootNode);
+        expectedQueryBuilder.init(projectionAtom, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, distinctNode);
+
+        ConstructionNode otherConstructionNode = IQ_FACTORY.createConstructionNode(newRootNode.getChildVariables());
+        expectedQueryBuilder.addChild(distinctNode, otherConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
-        expectedQueryBuilder.addChild(newRootNode, dataNode3);
+        expectedQueryBuilder.addChild(otherConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 

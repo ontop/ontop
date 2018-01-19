@@ -17,6 +17,7 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertTrue;
 
+@Ignore("TODO: support it (and update it)")
 public class ConstructionNodeCleanerTest {
 
     private static final ConstructionNodeCleaner constructionNodeCleaner = new ConstructionNodeCleaner();
