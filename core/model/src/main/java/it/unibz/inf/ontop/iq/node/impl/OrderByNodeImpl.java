@@ -8,23 +8,20 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNode {
 
@@ -45,8 +42,48 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        throw new RuntimeException("TODO: implement");
+    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQTree newChild = child.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        IQProperties liftedProperties = currentIQProperties.declareLifted();
+
+        if (newChildRoot instanceof ConstructionNode)
+            return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
+        else if (newChildRoot instanceof EmptyNode)
+            return newChild;
+        else if (newChildRoot instanceof DistinctNode) {
+            return iqFactory.createUnaryIQTree(
+                    (DistinctNode) newChildRoot,
+                    iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), liftedProperties),
+                    liftedProperties);
+        }
+        else
+            return iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
+
+    }
+
+    /**
+     * Lifts the construction node above and updates the order comparators
+     */
+    private IQTree liftChildConstructionNode(ConstructionNode newChildRoot, UnaryIQTree newChild, IQProperties liftedProperties) {
+
+        UnaryIQTree newOrderByTree = iqFactory.createUnaryIQTree(
+                applySubstitution(newChildRoot.getSubstitution()),
+                newChild.getChild(),
+                liftedProperties);
+
+        return iqFactory.createUnaryIQTree(newChildRoot, newOrderByTree, liftedProperties);
+    }
+
+    private OrderByNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        ImmutableList<OrderComparator> newComparators = comparators.stream()
+                .flatMap(c -> Stream.of(substitution.apply(c.getTerm()))
+                        .filter(t -> t instanceof NonGroundTerm)
+                        .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     @Override
@@ -57,7 +94,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+
+        OrderByNode newOrderByTree = applySubstitution(descendingSubstitution);
+        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
+
+        return iqFactory.createUnaryIQTree(newOrderByTree, newChild);
     }
 
     @Override
