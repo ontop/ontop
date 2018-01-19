@@ -56,7 +56,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	private final DataPropertyRangeExpressionImpl range;
 	
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(OWL.TOP_DATA_PROPERTY);
-    public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(OWL.BOTTOM_OBJECT_PROPERTY);
+    public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(OWL.BOTTOM_DATA_PROPERTY);
 	private final IRI iri;
 
 	DataPropertyExpressionImpl(String name) {
