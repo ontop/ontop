@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.ontology;
+package it.unibz.inf.ontop.spec.ontology.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
