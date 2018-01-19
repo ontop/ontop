@@ -135,7 +135,7 @@ public class OntopRDF4JInMemoryTest {
 				}
 				System.out.println();
 			}
-			assertEquals(23, nresults);
+			assertEquals(24, nresults);
 	
 			/*
 			 * Close result set to release resources
