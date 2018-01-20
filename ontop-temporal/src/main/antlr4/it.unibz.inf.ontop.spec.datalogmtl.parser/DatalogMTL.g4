@@ -47,11 +47,23 @@ head
   ;
 
 body
-  : expression+
+  : expression* ('{' expression* '}')*  | ('{' body '}')*  //expression+
   ;
 
+//expression
+//  : triple_with_dot+  ('('comparisonExpression')')* | ('{' expression '}')+ | (temporalOperator temporalRange '{' expression '}')+
+//  ;
+
 expression
-  : triple_with_dot+  ('('comparisonExpression')')* | ('{' expression '}')+ | (temporalOperator temporalRange '{' expression '}')+
+  : triple_with_dot | '(' comparisonExpression ')' | joinOfAtomicExpressions | temporalExpression
+  ;
+
+joinOfAtomicExpressions
+  : triple_with_dot triple_with_dot+
+  ;
+
+temporalExpression
+  : (temporalOperator temporalRange (triple_with_dot | joinOfAtomicExpressions | temporalExpression)) |(temporalOperator temporalRange ('{' expression* '}'))
   ;
 
 triple
