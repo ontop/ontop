@@ -92,7 +92,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
                 }
                 String value = m.group(1);
                 if (value.contains(".")) {
-                    throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+                    throw new IllegalArgumentException("Fully qualified columns are not accepted. Use an alias instead.");
                 }
                 toReturn.add(new ColumnString(value));
                 i = m.end();
