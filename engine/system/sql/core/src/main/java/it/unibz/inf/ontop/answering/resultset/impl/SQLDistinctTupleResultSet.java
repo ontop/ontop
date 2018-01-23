@@ -56,8 +56,12 @@ public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet imp
         List<Object> currentKey;
         do{
            foundFreshRow = rs.next();
+           // Cannot use this in the while condition: limit case where the last row was a duplicate
+           if(!foundFreshRow) {
+               break;
+           }
            currentKey = computeRowKey(rs);
-        } while(foundFreshRow && !rowKeys.add(currentKey));
+        } while(!rowKeys.add(currentKey));
 
         return foundFreshRow;
     }

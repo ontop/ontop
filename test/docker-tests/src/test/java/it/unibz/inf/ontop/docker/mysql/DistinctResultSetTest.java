@@ -126,6 +126,7 @@ public class DistinctResultSetTest { //
             catch(Exception e)
             {
                 e.printStackTrace();
+                assertTrue(false);
             }
 
         } catch (Exception e1) {
