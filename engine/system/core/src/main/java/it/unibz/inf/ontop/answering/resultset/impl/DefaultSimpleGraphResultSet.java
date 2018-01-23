@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -70,7 +71,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             //process current result set into local buffer,
             //since additional results will be collected
             while (tupleResultSet.hasNext()) {
-                results.addAll(processResults());
+                results.addAll(processResults(tupleResultSet.next()));
             }
         }
 	}
@@ -95,7 +96,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	 * In case of construct it is called upon next, to process
 	 * the only current result set.
 	 */
-    private List<Assertion> processResults()
+    private List<Assertion> processResults(OntopBindingSet bindingSet)
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
@@ -106,9 +107,9 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
             for (int i = 0; i < size / 3; i++) {
 
-                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), tupleResultSet);
-                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), tupleResultSet);
-                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), tupleResultSet);
+                ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i * 3), bindingSet);
+                Constant predicateConstant = getConstant(peList.getElements().get(i * 3 + 1), bindingSet);
+                Constant objectConstant = getConstant(peList.getElements().get(i * 3 + 2), bindingSet);
 
                 // A triple can only be constructed when none of bindings is missing
                 if (subjectConstant == null || predicateConstant == null || objectConstant==null) {
@@ -145,60 +146,55 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
     }
 
     @Override
-	public boolean hasNext() throws OntopConnectionException, OntopResultConversionException {
+    public boolean hasNext() throws OntopConnectionException, OntopResultConversionException {
         if (results.size() > 0)
             return true;
-		//in case of describe, we return the collected results list information
-		if (storeResults)
-			return false;
-		// construct
-        while (tupleResultSet.hasNext()) {
-            List<Assertion> newTriples = processResults();
+        //in case of describe, we return the collected results list information
+        if (storeResults)
+            return false;
+        // construct
+        while(tupleResultSet.hasNext()) {
+            List<Assertion> newTriples = processResults(tupleResultSet.next());
             if (!newTriples.isEmpty()) {
                 results.addAll(newTriples);
                 return true;
             }
         }
         return false;
-	}
+    }
 
-	@Override
-	public Assertion next() {
-		if (results.size() > 0)
-			return results.remove(0);
-		else
-		    throw new NoSuchElementException("Please call hasNext() before calling next()");
-	}
+    @Override
+    public Assertion next() {
+        if (results.size() > 0)
+            return results.remove(0);
+        else
+            throw new NoSuchElementException("Please call hasNext() before calling next()");
+    }
 
-    private Constant getConstant(ProjectionElem node, TupleResultSet resSet)
+    private Constant getConstant(ProjectionElem node, OntopBindingSet bindingSet)
             throws OntopResultConversionException, OntopConnectionException {
+        Constant constant = null;
         String node_name = node.getSourceName();
-
         ValueExpr ve = null;
+
         if (extMap != null) {
             ve = extMap.get(node_name);
             if (ve != null && ve instanceof Var)
                 throw new OntopResultConversionException("Invalid query. Found unbound variable: " + ve);
         }
 
-        final Constant constant;
 //		if (node_name.charAt(0) == '-') {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
                 constant = TERM_FACTORY.getConstantURI(vc.getValue().stringValue());
-            }
-            else if (vc.getValue() instanceof Literal) {
+            } else if (vc.getValue() instanceof Literal) {
                 constant = TERM_FACTORY.getConstantLiteral(vc.getValue().stringValue());
-            }
-            else {
+            } else {
                 constant = TERM_FACTORY.getConstantBNode(vc.getValue().stringValue());
             }
-        }
-        else {
-            // constant = resSet.getConstant(node_name);
-            // TODO(xiao): this fix is suspecious
-            constant = resSet.next().getConstant(node_name);
+        } else {
+            constant = bindingSet.getConstant(node_name);
         }
         return constant;
     }

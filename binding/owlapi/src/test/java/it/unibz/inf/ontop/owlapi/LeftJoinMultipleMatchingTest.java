@@ -140,6 +140,7 @@ public class LeftJoinMultipleMatchingTest {
 
                 int count = 0;
                 while (res.hasNext()) {
+                    res.next();
                     count += 1;
                 }
                 log.debug("Total result: {}", count);
@@ -202,6 +203,7 @@ public class LeftJoinMultipleMatchingTest {
 
         int count = 0;
         while (res.hasNext()) {
+            res.next();
             count += 1;
         }
         log.debug("Total result: {}", count);
