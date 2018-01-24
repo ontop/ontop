@@ -16,7 +16,9 @@ import java.util.regex.Pattern;
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
-public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+
+    protected abstract boolean validateAttributeName(String value);
 
     /**
      * Map of directives
@@ -91,11 +93,10 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
                     toReturn.add(new FixedString(text.substring(i, m.start())));
                 }
                 String value = m.group(1);
-                if (value.contains(".")) {
-                    throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+                if(validateAttributeName(value)) {
+                    toReturn.add(new ColumnString(value));
+                    i = m.end();
                 }
-                toReturn.add(new ColumnString(value));
-                i = m.end();
             } else {
                 toReturn.add(new FixedString(text.substring(i)));
                 break;

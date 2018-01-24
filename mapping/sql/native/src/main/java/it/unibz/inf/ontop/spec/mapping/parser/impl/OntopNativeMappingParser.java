@@ -393,7 +393,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private static List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes));
+        parsers.add(new TurtleOBDASQLParser(prefixes));
         return ImmutableList.copyOf(parsers);
     }
 }

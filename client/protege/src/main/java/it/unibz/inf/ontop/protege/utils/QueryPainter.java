@@ -21,17 +21,18 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -169,7 +170,7 @@ public class QueryPainter {
 			throw new Exception(msg);
 		}
 
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(apic.getMutablePrefixManager().getPrefixMap());
+		TargetQueryParser textParser = new TurtleOBDASQLParser(apic.getMutablePrefixManager().getPrefixMap());
 		ImmutableList<ImmutableFunctionalTerm> query = textParser.parse(text);
 
 		if (query == null) {
@@ -448,7 +449,7 @@ public class QueryPainter {
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query, PrefixManager man) {
 		try {
-			TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(man.getPrefixMap());
+			TargetQueryParser textParser = new TurtleOBDASQLParser(man.getPrefixMap());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;
