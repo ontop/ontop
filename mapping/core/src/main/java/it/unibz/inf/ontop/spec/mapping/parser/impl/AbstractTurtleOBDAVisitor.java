@@ -414,7 +414,9 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
-        return TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
+        String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
+        validateAttributeName(variableName);
+        return TERM_FACTORY.getVariable(variableName);
     }
 
     @Override

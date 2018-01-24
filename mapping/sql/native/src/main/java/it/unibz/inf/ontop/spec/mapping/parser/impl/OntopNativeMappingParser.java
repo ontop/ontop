@@ -308,7 +308,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     try {
                         targetQuery = loadTargetQuery(targetString, parsers);
                     } catch (UnparsableTargetQueryException e) {
-                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString},
+                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString, e.getMessage()},
                                 ERROR_PARSING_TARGET_QUERY));
                         isMappingValid = false;
                     }
