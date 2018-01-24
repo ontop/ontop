@@ -98,7 +98,7 @@ public class NoNullValuesEnforcerTest {
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS3_PREDICATE, X, Y, Z);
-        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_X_Y);
+        InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode(EQ_Y_Z);
         queryBuilder.init(projectionAtom, innerJoinNode);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_1);
         queryBuilder.addChild(innerJoinNode, DATA_NODE_3);
@@ -106,7 +106,7 @@ public class NoNullValuesEnforcerTest {
 
         IntermediateQuery transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_W);
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X);
         IntermediateQueryBuilder queryBuilder2 = query.newBuilder();
         queryBuilder2.init(projectionAtom, filterNode);
         queryBuilder2.addChild(filterNode, innerJoinNode);
