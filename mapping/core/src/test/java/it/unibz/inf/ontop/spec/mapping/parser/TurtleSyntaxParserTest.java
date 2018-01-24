@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -312,7 +312,7 @@ public class TurtleSyntaxParserTest {
 	}
 
 	private boolean compareCQIE(String input, int countBody) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap());
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -328,7 +328,7 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
+		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap());
 
 		ImmutableList<ImmutableFunctionalTerm> mapping;
 		try {
