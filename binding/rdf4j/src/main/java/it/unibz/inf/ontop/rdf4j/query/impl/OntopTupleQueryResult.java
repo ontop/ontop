@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -70,9 +71,9 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	public BindingSet next() throws QueryEvaluationException {
         try {
             return new OntopRDF4JBindingSet(res.next());
-        } catch (OntopConnectionException e) {
+        } catch (OntopConnectionException | OntopResultConversionException e) {
             throw new QueryEvaluationException(e);
-        }
+		}
 //
 //        MapBindingSet set = new MapBindingSet(this.signature.size() * 2);
 //		for (String name : this.signature) {

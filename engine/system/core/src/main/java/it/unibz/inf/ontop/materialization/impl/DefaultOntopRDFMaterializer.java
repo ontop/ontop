@@ -146,7 +146,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		@Nullable
 		private SimpleGraphResultSet tmpGraphResultSet;
 		@Nullable
-		private Assertion nextAssertion;
+//		private Assertion nextAssertion;
 
 		private Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
 		private final List<URI> possiblyIncompleteClassesAndProperties;
@@ -174,7 +174,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			ontopConnection = null;
 			tmpStatement = null;
 			tmpGraphResultSet = null;
-			nextAssertion = null;
+//			nextAssertion = null;
 		}
 
 		@Override
@@ -192,10 +192,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			if ((tmpGraphResultSet != null) && tmpGraphResultSet.hasNext()) {
 
 				// Two times in a row (can be tolerated)
-				if (nextAssertion != null)
-					return true;
+//				if (nextAssertion != null)
+//					return true;
 
-				nextAssertion = tmpGraphResultSet.next();
+//				nextAssertion = tmpGraphResultSet.next();
 				return true;
 			}
 
@@ -234,7 +234,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 					tmpGraphResultSet = tmpStatement.execute(query);
 
 					if (tmpGraphResultSet.hasNext()) {
-						nextAssertion = tmpGraphResultSet.next();
+//						nextAssertion = tmpGraphResultSet.next();
 						return true;
 					}
 				} catch (OntopQueryAnsweringException | OntopConnectionException e) {
@@ -254,14 +254,13 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		}
 
 		@Override
-		public Assertion next() {
-			if (nextAssertion != null) {
-				Assertion assertion = nextAssertion;
-				counter++;
-				nextAssertion = null;
-				return assertion;
+		public Assertion next() throws OntopQueryAnsweringException {
+			counter++;
+			try {
+				return tmpGraphResultSet.next();
+			} catch (OntopResultConversionException e) {
+			    throw new OntopQueryAnsweringException(e);
 			}
-			throw new NoSuchElementException("Please call hasNext() before calling next()");
 		}
 
 		/**

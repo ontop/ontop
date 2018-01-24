@@ -126,6 +126,7 @@ public abstract class AbstractVirtualModeTest {
         TupleOWLResultSet results = st.executeSelectQuery(query);
         int count = 0;
         while (results.hasNext()) {
+            results.next();
             count++;
         }
         assertEquals(expectedCount, count);

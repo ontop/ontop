@@ -557,12 +557,28 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			graph.addVertex(role.getInverse());
 		}
 
+		ObjectPropertyExpression top = null;
 		// property inclusions
 		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
-			// adds the direct edge and the inverse (e.g., R ISA S and R- ISA S-)
+		    if (roleIncl.getSub().isBottom() || roleIncl.getSuper().isTop())
+		        continue;
+            if (roleIncl.getSuper().isBottom()) {
+                throw new RuntimeException("BOT cannot occur on the LHS - replaced by DISJ");
+            }
+            if (roleIncl.getSub().isTop()) {
+                top = roleIncl.getSub();
+                graph.addVertex(top);
+            }
+
+            // adds the direct edge and the inverse (e.g., R ISA S and R- ISA S-)
 			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 			graph.addEdge(roleIncl.getSub().getInverse(), roleIncl.getSuper().getInverse());
 		}
+
+		if (top != null) {
+		    for (ObjectPropertyExpression ope : graph.vertexSet())
+		        graph.addEdge(ope, top);
+        }
 
 		return graph;
 	}
@@ -585,8 +601,24 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			if (!role.isBottom() && !role.isTop())
 				graph.addVertex(role);
 
-		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms())
-			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
+        DataPropertyExpression top = null;
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
+		    if (roleIncl.getSub().isBottom() || roleIncl.getSuper().isTop())
+		        continue;
+		    if (roleIncl.getSuper().isBottom()) {
+                throw new RuntimeException("BOT cannot occur on the LHS - replaced by DISJ");
+            }
+            if (roleIncl.getSub().isTop()) {
+                top = roleIncl.getSub();
+                graph.addVertex(top);
+            }
+            graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
+        }
+
+        if (top != null) {
+            for (DataPropertyExpression dpe : graph.vertexSet())
+                graph.addEdge(dpe, top);
+        }
 
 		return graph;
 	}
@@ -638,10 +670,25 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 			graph.addEdge(child.getDomainRestriction(DatatypeImpl.rdfsLiteral), parent.getDomainRestriction(DatatypeImpl.rdfsLiteral));
 		}
 
-
+		ClassExpression top = null;
 		// class inclusions from the ontology
-		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms())
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+			if (clsIncl.getSub().isBottom() || clsIncl.getSuper().isTop())
+				continue;
+			if (clsIncl.getSuper().isBottom()) {
+			    throw new RuntimeException("BOT cannot occur on the LHS - replaced by DISJ");
+			}
+			if (clsIncl.getSub().isTop()) {
+				top = clsIncl.getSub();
+				graph.addVertex(top);
+			}
 			graph.addEdge(clsIncl.getSub(), clsIncl.getSuper());
+		}
+
+        if (top != null) {
+            for (ClassExpression c : graph.vertexSet())
+                graph.addEdge(c, top);
+        }
 
 		return graph;
 	}
