@@ -130,11 +130,12 @@ public class TMappingConstantPositionsTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x a :A. }";
 		try {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			assertTrue(rs.hasNext());
-			assertTrue(rs.hasNext());
-			assertTrue(rs.hasNext());
+			for (int i = 0; i < 3; i++){
+				assertTrue(rs.hasNext());
+				rs.next();
+			}
 			assertFalse(rs.hasNext());
-		} 
+		}
 		catch (Exception e) {
 			throw e;
 		} 

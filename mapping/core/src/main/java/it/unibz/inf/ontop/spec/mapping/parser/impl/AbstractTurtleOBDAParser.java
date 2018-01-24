@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -31,18 +32,21 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.util.List;
 import java.util.Map;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
-public class TurtleOBDASyntaxParser implements TargetQueryParser {
+public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
+
+	protected TurtleOBDAVisitor visitor;
 
 	private final Map<String, String> prefixes;
 
 	/**
 	 * Default constructor;
 	 */
-	public TurtleOBDASyntaxParser() {
+	public AbstractTurtleOBDAParser() {
 		this.prefixes = ImmutableMap.of();
 	}
 
@@ -52,7 +56,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public TurtleOBDASyntaxParser(Map<String, String> prefixes) {
+	public AbstractTurtleOBDAParser(Map<String, String> prefixes) {
 		this.prefixes = prefixes;
 	}
 
@@ -79,7 +83,7 @@ public class TurtleOBDASyntaxParser implements TargetQueryParser {
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
-			return new TurtleOBDAVisitorImpl().visitParse(parser.parse()).stream()
+			return ((List<Function>)visitor.visitParse(parser.parse())).stream()
 					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
 		} catch (RuntimeException e) {

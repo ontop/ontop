@@ -16,7 +16,9 @@ import java.util.regex.Pattern;
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
-public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+
+    protected abstract boolean validateAttributeName(String value);
 
     /**
      * Map of directives
@@ -91,11 +93,10 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
                     toReturn.add(new FixedString(text.substring(i, m.start())));
                 }
                 String value = m.group(1);
-                if (value.contains(".")) {
-                    throw new IllegalArgumentException("Fully qualified columns are not accepted. Use an alias instead.");
+                if(validateAttributeName(value)) {
+                    toReturn.add(new ColumnString(value));
+                    i = m.end();
                 }
-                toReturn.add(new ColumnString(value));
-                i = m.end();
             } else {
                 toReturn.add(new FixedString(text.substring(i)));
                 break;
@@ -413,7 +414,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
-        return TERM_FACTORY.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
+        String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
+        validateAttributeName(variableName);
+        return TERM_FACTORY.getVariable(variableName);
     }
 
     @Override

@@ -133,11 +133,13 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
                 " ?movie \n" +
                 "WHERE {?movie mo:hasMaleActor ?r . \n" +
 
-                "}";
+                "} LIMIT 100000";
 
 
 
-        countResults(queryBind, 7530011);
+        // value without LIMIT
+        // countResults(queryBind, 7530011);
+        countResults(queryBind, 100000);
 
     }
 
@@ -152,10 +154,11 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
                 "SELECT  ?r " +
                 "WHERE {?r a mo:Vip . \n" +
 
-                "}";
+                "} LIMIT 100000";
 
-
-        countResults(queryBind, 7530011);
+        // value without LIMIT
+        // countResults(queryBind, 7530011);
+        countResults(queryBind, 100000);
     }
 
     @Test //no dataproperty in the ontology
@@ -172,6 +175,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
                 "}";
 
         countResults(queryBind, 705859);
+//        countResults(queryBind, 10000);
 
     }
 
@@ -191,6 +195,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
         countResults(queryBind, 444090);
+//        countResults(queryBind, 10000);
 
 
     }

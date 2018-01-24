@@ -411,5 +411,5 @@ fragment IRIREF_INNER_CHAR_EXT
   ;
 
 fragment VARIABLE_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | UCHAR)
+  : (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '%' | '&' | '$' | UCHAR)
   ;
