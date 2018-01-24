@@ -3,6 +3,7 @@ package it.unibz.inf.ontop;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.OntopModelSingletons;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -14,6 +15,7 @@ public class OntopModelTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
+    public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
     public static final TermFactory DATA_FACTORY = OntopModelSingletons.TERM_FACTORY;
 
     static {
@@ -25,5 +27,7 @@ public class OntopModelTestingTools {
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
+
+        NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
     }
 }
