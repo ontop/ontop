@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
-import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -30,7 +29,7 @@ public class MappingTestingTools {
 
     public static final TermFactory DATA_FACTORY = OntopModelSingletons.TERM_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
-    public static final MappingNormalizer MAPPING_NORMALIZER;
+    public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final Datalog2QueryMappingConverter DATALOG_2_QUERY_MAPPING_CONVERTER;
     public static final DefaultMappingTransformer DEFAULT_MAPPING_TRANSFORMER;
     public static final MappingCanonicalRewriter MAPPING_CANONICAL_REWRITER;
@@ -56,7 +55,7 @@ public class MappingTestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
-        MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
+        MAPPING_NORMALIZER = injector.getInstance(MappingVariableNameNormalizer.class);
         DATALOG_2_QUERY_MAPPING_CONVERTER = injector.getInstance(Datalog2QueryMappingConverter.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of());
