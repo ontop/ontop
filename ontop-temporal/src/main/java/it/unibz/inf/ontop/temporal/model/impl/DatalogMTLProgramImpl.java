@@ -14,7 +14,7 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
 
     private final List<DatalogMTLRule> rules;
 
-    Map<String, String> prefixes = new HashMap<>();
+    Map<String, String> prefixes;
 
     public DatalogMTLProgramImpl(Map<String, String> prefixes, List<DatalogMTLRule> rules) {
         this.prefixes = prefixes;

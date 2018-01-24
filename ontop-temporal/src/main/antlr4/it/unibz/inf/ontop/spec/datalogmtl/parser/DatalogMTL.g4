@@ -14,36 +14,36 @@ grammar DatalogMTL;
  *------------------------------------------------------------------*/
 
 parse
-  : directiveStatement* dMTLProgram EOF
+  : directiveStatement dMTLProgram EOF
   ;
 
 directiveStatement
-  : directive
+  : prefixID*
   ;
 
 dMTLProgram
   : dMTLRule+
   ;
 
-directive
-  : base
-  | prefixID
-  ;
+//directive
+//  : base
+//  | prefixID
+//  ;
 
 prefixID
   : ('prefix' | 'PREFIX') PNAME_NS IRIREF
   ;
 
-base
-  : ('base' | 'BASE') IRIREF
-  ;
+//base
+//  : ('base' | 'BASE') IRIREF
+//  ;
 
 dMTLRule
   : head ':-' body
   ;
 
 head
-  : (temporalOperator temporalRange)* triple
+  : (temporalOperator temporalRange)? triple
   ;
 
 body
@@ -86,31 +86,44 @@ temporalOperator
   : always_in_past | always_in_future | sometime_in_past | sometime_in_future
   ;
 
-always_in_past
-  : ('ALWAYS' 'IN' 'PAST') | ('always' 'in' 'past')
-  ;
+   always_in_past
+    : ('ALWAYS' 'IN' 'PAST') | ('always' 'in' 'past')
+    ;
 
-always_in_future
-  : ('ALWAYS' 'IN' 'FUTURE') | ('always' 'in' 'future')
-  ;
+   always_in_future
+    : ('ALWAYS' 'IN' 'FUTURE') | ('always' 'in' 'future')
+    ;
 
-sometime_in_past
-  : ('SOMETIME' 'IN' 'PAST') | ('sometime' 'in' 'past')
-  ;
+   sometime_in_past
+    : ('SOMETIME' 'IN' 'PAST') | ('sometime' 'in' 'past')
+    ;
 
-sometime_in_future
-  : ('SOMETIME' 'IN' 'FUTURE') | ('SOMETIME' 'IN' 'FUTURE')
-  ;
+   sometime_in_future
+    : ('SOMETIME' 'IN' 'FUTURE') | ('SOMETIME' 'IN' 'FUTURE')
+    ;
 
 temporalRange
-  : (('(' | '[') DURATION ',' DURATION (')' | ']')) | ('(' | '[') '0' ',' DURATION (')' | ']')
+  : begin_inc DURATION ',' DURATION end_inc
   ;
+
+ begin_inc
+    : '(' | '['
+    ;
+
+  end_inc
+    : ')' | ']'
+    ;
+
 
 comparisonExpression
   : (VARIABLE COMPARATOR VARIABLE) |
-  (VARIABLE COMPARATOR (INTEGER | DECIMAL | DOUBLE | ('\'' WORD '\'' ))) |
-  ((INTEGER | DECIMAL | DOUBLE | ('\'' WORD '\'' )) COMPARATOR VARIABLE)
+  (VARIABLE COMPARATOR (INTEGER | DECIMAL | DOUBLE | BOOLEAN | ('\'' WORD '\'' ))) |
+  ((INTEGER | DECIMAL | DOUBLE | BOOLEAN | ('\'' WORD '\'' )) COMPARATOR VARIABLE)
   ;
+
+//COMMENT
+//: '//' (~( [\r | \n] ))*  -> skip
+//;
 
 WS
   : ([\t\r\n\u000C] | ' ') + -> skip
@@ -121,6 +134,10 @@ WS
  - The rule matching the longest substring is applied
  - If there are several of them, the first one is applied
  *------------------------------------------------------------------*/
+
+DURATION
+  : '0' | ([1-9] [0-9]* ('D' | 'H' | 'M' | 'S' | 'MS'))
+  ;
 
 INTEGER
   : [0-9] +
@@ -134,6 +151,10 @@ DOUBLE
   : ([0-9] + '.' [0-9]* EXPONENT | '.' [0-9] + EXPONENT | [0-9] + EXPONENT)
   ;
 
+BOOLEAN
+  : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
+  ;
+
 EXPONENT
   : [eE] [+-]? [0-9] +
   ;
@@ -142,9 +163,8 @@ COMPARATOR
   : '>' | '<' | '>=' | '<=' | '=' | '<>'
   ;
 
-DURATION
-  : ([1-9] [0-9]* ('Y' | 'MN' | 'D' | 'H' | 'M' | 'S' | 'MS'))
-  ;
+
+
 
 VARIABLE
   : '?' [a-zA-Z0-9]*
@@ -185,6 +205,7 @@ UCHAR
 HEX
   : [0-9] | [A-F] | [a-f]
   ;
+
 
 fragment IRIREF_INNER_CHAR
   :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)

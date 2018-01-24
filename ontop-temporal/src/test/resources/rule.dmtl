@@ -1,0 +1,30 @@
+PREFIX ss:     <http://siemens.com/ns#>
+PREFIX st:     <http://siemenstemporal.com/ns#> 
+PREFIX obda:   <https://w3id.org/obda/vocabulary#>
+
+?tb st:monitoredByTemperatureSensor ?ts :-
+   { ?tb a ss:Turbine . ?b ss:isPartOf ?tb . ?b a ss:Burner.
+     ?b ss:isMonitoredBy ?ts . ?ts a ss:TemperatureSensor. }
+
+?tb st:monitoredBySpeedSensor ?ts  :-
+   { ?tb a ss:Turbine .  ?pt ss:isPartOf ?tb. ?pt a ss:PowerTurbine .
+     ?pt ss:isMonitoredBy ?rs . ?rs a ss:RotationSpeedSensor . }
+
+?tb obda:hasStatus st:HighRotorSpeed :- 
+    { ?tb st:rotorSpeed ?v.  (?v > 1260) }
+
+?tb obda:hasStatus st:LowRotorSpeed  :- 
+    { ?tb st:rotorSpeed ?v.  (?v < 1000) }
+
+?tb obda:hasStatus st:PurgingIsOver :- {
+    { ?tb st:monitoredByTemperatureSensor ?ts . ?tb st:monitoredBySpeedSensor ?rs . }
+    {
+        ALWAYS IN PAST (0,10S] { ?ts obda:hasStatus st:MainFlameOn . }
+        SOMETIME IN PAST (0,10M] {
+            ALWAYS IN PAST (0,30S] { ?rs obda:hasStatus st:HighRotorSpeed .}
+            SOMETIME IN PAST (0,2M] {
+                ALWAYS IN PAST (0,1M] { ?rs obda:hasStatus st:LowRotorSpeed . }
+            }
+        }
+    }
+}

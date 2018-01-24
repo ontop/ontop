@@ -20,9 +20,9 @@ public class DatalogMTLFactoryImplTest {
 
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
 
-        TemporalRange range1 = f.createTemporalRange(false, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+        TemporalRange range1 = f.createTemporalRange(false, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"), true);
 
-        TemporalRange range2 = f.createTemporalRange(true, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+        TemporalRange range2 = f.createTemporalRange(true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"), true);
 
         TermFactory odf = TestingTools.TERM_FACTORY;
         AtomFactory af = TestingTools.ATOM_FACTORY;
@@ -67,9 +67,9 @@ public class DatalogMTLFactoryImplTest {
 
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
 
-        TemporalRange range1 = f.createTemporalRange(false, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+        TemporalRange range1 = f.createTemporalRange(false, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"), true);
 
-        TemporalRange range2 = f.createTemporalRange(true, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+        TemporalRange range2 = f.createTemporalRange(true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"), true);
 
         TermFactory odf = TestingTools.TERM_FACTORY;
         AtomFactory af = TestingTools.ATOM_FACTORY;

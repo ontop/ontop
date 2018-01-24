@@ -10,7 +10,7 @@ public class TemporalRangeImplTest {
     @Test
     public void test(){
 
-        TemporalRange r = new TemporalRangeImpl(false, true, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"));
+        TemporalRange r = new TemporalRangeImpl(false, Duration.parse("PT20.345S"), Duration.parse("PT1H1M"), true);
 
         System.out.printf(r.toString());
 
