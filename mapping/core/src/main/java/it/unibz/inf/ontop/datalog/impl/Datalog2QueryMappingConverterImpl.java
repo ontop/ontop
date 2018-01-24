@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -40,16 +41,19 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
+    private final NoNullValueEnforcer noNullValueEnforcer;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
                                               SpecificationFactory specificationFactory,
                                               IntermediateQueryFactory iqFactory,
-                                              ProvenanceMappingFactory provMappingFactory){
+                                              ProvenanceMappingFactory provMappingFactory,
+                                              NoNullValueEnforcer noNullValueEnforcer){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
+        this.noNullValueEnforcer = noNullValueEnforcer;
     }
 
     @Override
@@ -68,16 +72,23 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
-        Stream<IntermediateQuery> mappingStream = ruleIndex.keySet().stream()
-                .map(predicate -> converter.convertDatalogDefinitions(dbMetadata,
-                        predicate, ruleIndex, extensionalPredicates, Optional.empty(), executorRegistry))
+        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = ruleIndex.keySet().stream()
+                .map(predicate -> converter.convertDatalogDefinitions(
+                        dbMetadata,
+                        predicate,
+                        ruleIndex,
+                        extensionalPredicates,
+                        Optional.empty(),
+                        executorRegistry
+                ))
                 .filter(Optional::isPresent)
-                .map(Optional::get);
-
-        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mappingStream
+                .map(Optional::get)
+                .map(q -> noNullValueEnforcer.transform(q))
                 .collect(ImmutableCollectors.toMap(
-                        q -> q.getProjectionAtom().getPredicate(),
-                        q -> q));
+                    q -> q.getProjectionAtom().getPredicate(),
+                    q -> q
+                ));
+
 
         return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
     }
@@ -94,9 +105,17 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(dbMetadata, e.getKey(), extensionalPredicates, Optional.empty(),
-                                iqFactory, executorRegistry),
-                        Map.Entry::getValue));
+                        e -> noNullValueEnforcer.transform(
+                                convertDatalogRule(
+                                dbMetadata,
+                                e.getKey(),
+                                extensionalPredicates,
+                                Optional.empty(),
+                                iqFactory,
+                                executorRegistry
+                        )),
+                        Map.Entry::getValue
+                ));
 
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
     }

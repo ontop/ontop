@@ -66,10 +66,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         // Normalizing language tags and equalities (SIDE-EFFECT!)
         normalizeMapping(datalogMap.keySet());
 
-        return datalogMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> LegacyIsNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
-                        Map.Entry::getValue));
+        return datalogMap;
+//        return datalogMap.entrySet().stream()
+//                .collect(ImmutableCollectors.toMap(
+//                        e -> LegacyIsNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
+//                        Map.Entry::getValue));
     }
 
     /**

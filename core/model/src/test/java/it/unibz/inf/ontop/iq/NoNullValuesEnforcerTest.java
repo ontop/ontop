@@ -37,7 +37,6 @@ public class NoNullValuesEnforcerTest {
     private final static ImmutableExpression NOT_NULL_W = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, W);
     private final static ImmutableExpression NOT_NULL_X_AND_NOT_NULL_W = DATA_FACTORY.getImmutableExpression(AND, NOT_NULL_X, NOT_NULL_W);
 
-
     private final static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
     private final static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, W));
     private final static ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.QueryTransformationException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -42,7 +43,10 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     }
 
     private ImmutableList<Variable> extractNullableVariables(IntermediateQuery query, QueryNode rootNode) {
-        return query.getVariables(rootNode).stream()
+        ImmutableSet<Variable> requiredVariables = rootNode instanceof ConstructionNode ?
+                rootNode.getRequiredVariables(query):
+                query.getVariables(rootNode);
+        return requiredVariables.stream()
                 .filter(v -> rootNode.isVariableNullable(query, v))
                 .collect(ImmutableCollectors.toList());
     }
