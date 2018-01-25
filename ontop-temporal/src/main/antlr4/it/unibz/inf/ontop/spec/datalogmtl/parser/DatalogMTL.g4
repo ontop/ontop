@@ -39,7 +39,11 @@ prefixID
 //  ;
 
 dMTLRule
-  : head ':-' body
+  :  annotation? head ':-' body
+  ;
+
+annotation
+  : '[' ('static' | 'STATIC') ']'
   ;
 
 head
@@ -47,7 +51,7 @@ head
   ;
 
 body
-  : expression* ('{' expression* '}')*  | ('{' body '}')*  //expression+
+  : expression* ('{' expression* '}')*  | ('{' body '}')  //expression+
   ;
 
 //expression
@@ -55,16 +59,22 @@ body
 //  ;
 
 expression
-  : triple_with_dot | '(' comparisonExpression ')' | joinOfAtomicExpressions | temporalExpression
+  : triple_with_dot | filterExpression | temporalExpression
   ;
 
-joinOfAtomicExpressions
-  : triple_with_dot triple_with_dot+
+filterExpression
+  : triple_with_dot '(' comparisonExpression ')'
   ;
+
+//joinOfAtomicExpressions
+//  : triple_with_dot triple_with_dot+
+//  ;
 
 temporalExpression
-  : (temporalOperator temporalRange (triple_with_dot | joinOfAtomicExpressions | temporalExpression)) |(temporalOperator temporalRange ('{' expression* '}'))
+  : (temporalOperator temporalRange (triple_with_dot | temporalExpression)) | (temporalOperator temporalRange ('{' expression+ '}'))
   ;
+//  : (temporalOperator temporalRange (triple_with_dot+ | temporalExpression)) |(temporalOperator temporalRange ('{' expression* '}'))
+//  ;
 
 triple
   : tripleItem tripleItem tripleItem
@@ -116,11 +126,17 @@ temporalRange
 
 
 comparisonExpression
-  : (VARIABLE COMPARATOR VARIABLE) |
-  (VARIABLE COMPARATOR (INTEGER | DECIMAL | DOUBLE | BOOLEAN | ('\'' WORD '\'' ))) |
-  ((INTEGER | DECIMAL | DOUBLE | BOOLEAN | ('\'' WORD '\'' )) COMPARATOR VARIABLE)
+  : (VARIABLE COMPARATOR VARIABLE) | (VARIABLE COMPARATOR literal)
+  | (literal COMPARATOR VARIABLE)
   ;
 
+literal
+  : INTEGER | DECIMAL | DOUBLE | BOOLEAN | string
+  ;
+
+string
+  : '\'' WORD '\''
+  ;
 //COMMENT
 //: '//' (~( [\r | \n] ))*  -> skip
 //;

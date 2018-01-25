@@ -7,18 +7,23 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.AbstractUnaryTemporalExpressionWithRange;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 import it.unibz.inf.ontop.temporal.model.impl.TemporalRangeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.query.algebra.Str;
 import org.mapdb.Atomic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements DatalogMTLVisitor {
     private final TermFactory termFactory;
@@ -26,6 +31,7 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     private final RDF rdfFactory;
     private final DatalogMTLFactory datalogMTLFactory;
     ImmutableMap<String, String> prefixes;
+    ImmutableList<String> headsOfStaticRules;
     private static String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
     public DatalogMTLVisitorImpl(TermFactory termFactory, AtomFactory atomFactory) {
@@ -35,38 +41,68 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
         datalogMTLFactory = new DatalogMTLFactoryImpl();
     }
 
+    private ImmutableList<String> collectStaticHeads(DatalogMTLParser.ParseContext ctx){
+
+        List <String> stringList = ctx.dMTLProgram().dMTLRule().stream()
+                .filter(dmtlRuleContext -> dmtlRuleContext.annotation() != null)
+                .map(dmtlRuleContext -> visitTriple(dmtlRuleContext.head().triple(), false).getPredicate().getName())
+                .collect(Collectors.toList());
+
+        List <String> returnList = new ArrayList<>();
+        for(String str : stringList){
+            for(String pref : prefixes.values()){
+                if(str.contains(pref))
+                    returnList.add(str.replace(pref, ""));
+            }
+        }
+
+        return ImmutableList.copyOf(returnList);
+    }
+
     @Override
     public DatalogMTLProgram visitParse(DatalogMTLParser.ParseContext ctx) {
 
         prefixes = ctx.directiveStatement().prefixID().stream()
-                .collect(ImmutableCollectors.toMap(pid -> pid.PNAME_NS().getText(), pid -> pid.IRIREF().getText()));
+                .collect(ImmutableCollectors.toMap(
+                        pid -> pid.PNAME_NS().getText(),
+                        pid -> pid.IRIREF().getText().substring(1, pid.IRIREF().getText().length()-1)));
 
-        ImmutableList<DatalogMTLRule> rules = ctx.dMTLProgram().dMTLRule().stream()
-                .map(this::visitDMTLRule).collect(ImmutableCollectors.toList());
+        headsOfStaticRules = collectStaticHeads(ctx);
+        ImmutableList<DatalogMTLRule> rules = visitDMTLProgram(ctx.dMTLProgram());
 
         return datalogMTLFactory.createProgram(prefixes, rules);
     }
 
     @Override
+    public ImmutableList<DatalogMTLRule> visitDMTLProgram(DatalogMTLParser.DMTLProgramContext ctx){
+        return ctx.dMTLRule().stream()
+                .map(this::visitDMTLRule).collect(ImmutableCollectors.toList());
+    }
+
+    @Override
     public DatalogMTLRule visitDMTLRule(DatalogMTLParser.DMTLRuleContext ctx){
-        AtomicExpression headExpression = visitHead(ctx.head());
-        DatalogMTLExpression bodyExpression = visitBody(ctx.body());
+
+        Boolean isStatic = false;
+        if(ctx.annotation() != null)
+            isStatic = true;
+
+        AtomicExpression headExpression = visitHead(ctx.head(), isStatic);
+        DatalogMTLExpression bodyExpression = visitBody(ctx.body(), isStatic);
 
         return datalogMTLFactory.createRule(headExpression, bodyExpression);
     }
 
-    @Override
-    public DatalogMTLExpression visitBody(DatalogMTLParser.BodyContext ctx){
-        return null;
-    }
+    public AtomicExpression visitHead(DatalogMTLParser.HeadContext ctx, boolean isHeadOfStaticRule){
 
-    @Override
-    public AtomicExpression visitHead(DatalogMTLParser.HeadContext ctx){
-        if (ctx.temporalOperator() == null){
-            if (ctx.temporalRange() == null){
-                return  visitTriple(ctx.triple(), false);
-            } else {
-                throw new IllegalArgumentException("Invalid temporal expression. Temporal range is missing.");
+        if(isHeadOfStaticRule){
+            return visitTriple(ctx.triple(), false);
+        }else {
+            if (ctx.temporalOperator() == null) {
+                if (ctx.temporalRange() == null) {
+                    return visitTriple(ctx.triple(), true);
+                } else {
+                    throw new IllegalArgumentException("Invalid temporal expression. Temporal range is missing.");
+                }
             }
         }
 
@@ -87,19 +123,122 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
         return null;
     }
 
-    private AbstractUnaryTemporalExpressionWithRange createUnaryTemporalExpression(
-            DatalogMTLParser.TemporalOperatorContext ctx,  TemporalRange temporalRange, TemporalAtomicExpression temporalAtomicExpression){
-        if (ctx.always_in_future() != null)
-            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createBoxPlusExpression(temporalRange, temporalAtomicExpression);
-        else if  (ctx.always_in_past()!= null)
-            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createBoxMinusExpression(temporalRange, temporalAtomicExpression);
-        else if (ctx.sometime_in_future()!= null)
-            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createDiamondPlusExpression(temporalRange, temporalAtomicExpression);
-        else
-            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createDiamondMinusExpression(temporalRange, temporalAtomicExpression);
+    public DatalogMTLExpression visitBody(DatalogMTLParser.BodyContext ctx, boolean isBodyOfStaticRule){
+
+        while(ctx.body() != null)
+            visitBody(ctx.body(), isBodyOfStaticRule);
+
+        DatalogMTLExpression expression;
+
+        if(isBodyOfStaticRule){
+            if (ctx.expression().size() > 1) {
+                expression = datalogMTLFactory.createStaticJoinExpression(ctx.expression().stream()
+                        .map(expCtx -> (StaticExpression)visitExpression(expCtx, isBodyOfStaticRule)).collect(Collectors.toList()));
+            }else {
+                expression = visitExpression(ctx.expression(0), isBodyOfStaticRule);
+            }
+        } else {
+            if (ctx.expression().size() > 1) {
+                expression = datalogMTLFactory.createTemporalJoinExpression(ctx.expression().stream()
+                        .map(expCtx -> visitExpression(expCtx, isBodyOfStaticRule)).collect(Collectors.toList()));
+            } else {
+                expression = visitExpression(ctx.expression(0), isBodyOfStaticRule);
+            }
+        }
+        return expression;
     }
 
-    public AtomicExpression visitTriple(DatalogMTLParser.TripleContext ctx, boolean isTemporal){
+
+    public DatalogMTLExpression visitExpression(DatalogMTLParser.ExpressionContext ctx, boolean isPartOfStaticRule){
+
+        if (ctx.filterExpression() != null){
+            return visitFilterExpression(ctx.filterExpression(), isPartOfStaticRule);
+        } else if (ctx.triple_with_dot() != null){
+            return visitTriple(ctx.triple_with_dot().triple(), !isPartOfStaticRule);
+        } else if (ctx.temporalExpression() != null){
+            return visitTemporalExpression(ctx.temporalExpression());
+        } else
+            throw new IllegalArgumentException("Invalid expression " + ctx.getText());
+    }
+
+    @Override
+    public TemporalExpression visitTemporalExpression(DatalogMTLParser.TemporalExpressionContext ctx){
+
+        TemporalRange temporalRange = visitTemporalRange(ctx.temporalRange());
+        if(ctx.triple_with_dot() != null){
+            return createUnaryTemporalExpression(ctx.temporalOperator(), temporalRange, (TemporalAtomicExpression)visitTriple(ctx.triple_with_dot().triple(), true));
+        } else if (ctx.temporalExpression() != null){
+            return createUnaryTemporalExpression(ctx.temporalOperator(), temporalRange, visitTemporalExpression(ctx.temporalExpression()));
+        } else if(ctx.expression() != null){
+            TemporalJoinExpression temporalJoinExpression =
+                    datalogMTLFactory.createTemporalJoinExpression(ctx.expression().stream()
+                    .map(exp -> visitExpression(exp, false))
+                    .collect(Collectors.toList()));
+
+            return createUnaryTemporalExpression(ctx.temporalOperator(), temporalRange, (TemporalExpression) temporalJoinExpression);
+        }else
+            throw new IllegalArgumentException("Invalid temporal expression " + ctx.getText());
+    }
+
+    private AbstractUnaryTemporalExpressionWithRange createUnaryTemporalExpression(
+            DatalogMTLParser.TemporalOperatorContext ctx,  TemporalRange temporalRange, TemporalExpression temporalExpression){
+
+        if (ctx.always_in_future() != null)
+            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createBoxPlusExpression(temporalRange, temporalExpression);
+        else if  (ctx.always_in_past()!= null)
+            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createBoxMinusExpression(temporalRange, temporalExpression);
+        else if (ctx.sometime_in_future()!= null)
+            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createDiamondPlusExpression(temporalRange, temporalExpression);
+        else
+            return (AbstractUnaryTemporalExpressionWithRange) datalogMTLFactory.createDiamondMinusExpression(temporalRange, temporalExpression);
+    }
+
+    public FilterExpression visitFilterExpression(DatalogMTLParser.FilterExpressionContext ctx, boolean isPartOfStaticRule){
+
+        ComparisonExpression comparisonExpression = visitComparisonExpression(ctx.comparisonExpression());
+        AtomicExpression atomicExpression = visitTriple(ctx.triple_with_dot().triple(), isPartOfStaticRule);
+
+        return datalogMTLFactory.createFilterExpression(atomicExpression, comparisonExpression);
+    }
+
+
+    @Override
+    public ComparisonExpression visitComparisonExpression(DatalogMTLParser.ComparisonExpressionContext ctx){
+
+        VariableOrGroundTerm leftTerm = getTerm(ctx, 0);
+        VariableOrGroundTerm rightTerm = getTerm(ctx, 2);
+        AtomPredicate comparator = getComparator(ctx);
+
+        return datalogMTLFactory.createComparisonExpression(comparator, leftTerm, rightTerm);
+    }
+
+    private VariableOrGroundTerm getTerm(DatalogMTLParser.ComparisonExpressionContext ctx, int idx){
+
+        if (ctx.VARIABLE().contains(ctx.getChild(idx))){
+            return termFactory.getVariable(ctx.getChild(idx).getText().substring(1));
+        } else if (ctx.literal().equals(ctx.getChild(idx))) {
+            return termFactory.getConstantLiteral(ctx.getChild(idx).getText());
+        } else
+            throw  new IllegalArgumentException("illegal argument for comparison expression "+ ctx.getText());
+    }
+
+    private AtomPredicate getComparator(DatalogMTLParser.ComparisonExpressionContext ctx){
+
+        if (ctx.COMPARATOR().getText().equals(">"))
+            return  atomFactory.getAtomPredicate("GT", 2);
+        else if (ctx.COMPARATOR().getText().equals(">="))
+            return  atomFactory.getAtomPredicate("GE", 2);
+        else if (ctx.COMPARATOR().getText().equals("<"))
+            return  atomFactory.getAtomPredicate("LT", 2);
+        else if (ctx.COMPARATOR().getText().equals("<="))
+            return  atomFactory.getAtomPredicate("LE", 2);
+        else if (ctx.COMPARATOR().getText().equals("="))
+            return  atomFactory.getAtomPredicate("EQ", 2);
+        else
+            throw new IllegalArgumentException("Invalid comparator for the comparison expression " + ctx.getText());
+    }
+
+    private AtomicExpression visitTriple(DatalogMTLParser.TripleContext ctx, boolean isTemporal){
 
         String subStr = ctx.tripleItem(0).getText();
         Variable subject;
@@ -110,11 +249,13 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
 
         String objStr = ctx.tripleItem(2).getText();
         if (ctx.tripleItem(2).VARIABLE() != null) {
-            Variable object = termFactory.getVariable(objStr.substring(1, subStr.length()));
+            Variable object = termFactory.getVariable(objStr.substring(1, objStr.length()));
             if(ctx.tripleItem(1).predicate()!= null){
-                if (!isRDFType(ctx.tripleItem(1).predicate().PNAME_NS().getText(), ctx.tripleItem(1).predicate().WORD().getText())){
+                if (!ctx.tripleItem(1).predicate().getText().equals("a") |
+                        ((ctx.tripleItem(1).predicate().PNAME_NS() != null) &&
+                                !isRDFType(ctx.tripleItem(1).predicate().PNAME_NS().getText(), ctx.tripleItem(1).predicate().WORD().getText()))){
+
                     String prefix = prefixes.get(ctx.tripleItem(1).predicate().PNAME_NS().getText());
-                    prefix = prefix.substring(1, prefix.length()-1);
                     String atomPredStr =  prefix + ctx.tripleItem(1).predicate().WORD();
                     AtomPredicate pred = atomFactory.getAtomPredicate(atomPredStr, 2);
                     if(isTemporal)
@@ -128,11 +269,19 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
         } else if (ctx.tripleItem(2).predicate() != null){
             String atomPredStr = prefixes.get(ctx.tripleItem(2).predicate().PNAME_NS().getText()) + ctx.tripleItem(2).predicate().WORD();
             AtomPredicate pred = atomFactory.getAtomPredicate(atomPredStr, 1);
-            if (isRDFType(ctx.tripleItem(1).predicate().PNAME_NS().getText(), ctx.tripleItem(1).predicate().WORD().getText())){
+            if (ctx.tripleItem(1).predicate().getText().equals("a")){
                 if(isTemporal)
                     return datalogMTLFactory.createTemporalAtomicExpression(pred, subject);
                 else
                     return datalogMTLFactory.createStaticAtomicExpression(pred, subject);
+
+            } else if (ctx.tripleItem(1).predicate().PNAME_NS() != null){
+                if(isRDFType(ctx.tripleItem(1).predicate().PNAME_NS().getText(), ctx.tripleItem(1).predicate().WORD().getText())) {
+                    if (isTemporal)
+                        return datalogMTLFactory.createTemporalAtomicExpression(pred, subject);
+                    else
+                        return datalogMTLFactory.createStaticAtomicExpression(pred, subject);
+                }
             } else
                 throw new IllegalArgumentException("Invalid predicate for the triple " + ctx.getText());
 
@@ -153,8 +302,8 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     @Override
     public TemporalRange visitTemporalRange(DatalogMTLParser.TemporalRangeContext ctx){
 
-        boolean beginInc = false;
-        boolean endInc = false;
+        boolean beginInc;
+        boolean endInc;
 
         if (ctx.begin_inc().getText().equals("("))
             beginInc = false;
@@ -178,5 +327,3 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
         return null;
     }
 }
-
-
