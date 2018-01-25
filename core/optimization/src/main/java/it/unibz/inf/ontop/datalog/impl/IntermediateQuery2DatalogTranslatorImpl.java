@@ -99,16 +99,14 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 */
 	@Override
 	public DatalogProgram translate(IntermediateQuery query) {
-		Optional<ImmutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(query);
+		// TODO: move ORDER BY above the construction node (required by Datalog)
+
+		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(query);
 		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(query);
 
         DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
-			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
-
-			// Mutable modifiers (used by the Datalog)
-			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
-			// TODO: support GROUP BY (distinct QueryNode)
+			MutableQueryModifiers mutableModifiers = optionalModifiers.get();
 
             dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
 		}
@@ -121,14 +119,70 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		return dProgram;
 	}
 
-	private Optional<ImmutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
-		if (query.getRootNode() instanceof QueryModifierNode) {
-			throw new RuntimeException("TODO: support query modifiers");
+	/**
+	 * Assumes that ORDER BY is ABOVE the first construction node
+	 * and the order between these operators is respected and they appear ONE time maximum
+	 */
+	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
+		QueryNode rootNode = query.getRootNode();
+		if (rootNode instanceof QueryModifierNode) {
+			Optional<SliceNode> sliceNode = Optional.of(rootNode)
+					.filter(n -> n instanceof SliceNode)
+					.map(n -> (SliceNode)n);
+
+			QueryNode firstNonSliceNode = sliceNode
+					.flatMap(query::getFirstChild)
+					.orElse(rootNode);
+
+			Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceNode)
+					.filter(n -> n instanceof DistinctNode)
+					.map(n -> (DistinctNode) n);
+
+			QueryNode firstNonSliceDistinctNode = distinctNode
+					.flatMap(query::getFirstChild)
+					.orElse(firstNonSliceNode);
+
+			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctNode)
+					.filter(n -> n instanceof OrderByNode)
+					.map(n -> (OrderByNode) n);
+
+			MutableQueryModifiers mutableQueryModifiers = new MutableQueryModifiersImpl();
+
+			sliceNode.ifPresent(n -> {
+							n.getLimit()
+									.ifPresent(mutableQueryModifiers::setLimit);
+							long offset = n.getOffset();
+							if (offset > 0)
+								mutableQueryModifiers.setOffset(offset);
+					});
+
+			if(distinctNode.isPresent())
+				mutableQueryModifiers.setDistinct();
+
+			orderByNode
+					.ifPresent(n -> n.getComparators()
+							.forEach(c -> convertOrderComparator(c, mutableQueryModifiers)));
+
+			return Optional.of(mutableQueryModifiers);
 		}
 		else
 			return Optional.empty();
 	}
 
+	private static void convertOrderComparator(OrderByNode.OrderComparator comparator,
+											   MutableQueryModifiers queryModifiers) {
+		NonGroundTerm term = comparator.getTerm();
+		if (term instanceof Variable)
+			queryModifiers.addOrderCondition((Variable) term,
+					comparator.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING);
+		else
+			// TODO: throw a better exception
+			throw new IllegalArgumentException("The Datalog representation only supports variable in order conditions");
+	}
+
+	/**
+	 * Assumes that ORDER BY is ABOVE the first construction node
+	 */
 	private QueryNode getFirstNonQueryModifierNode(IntermediateQuery query) {
 		// Non-final
 		QueryNode queryNode = query.getRootNode();
