@@ -16,7 +16,7 @@ import java.util.Optional;
 public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
-    private final MappingNormalizer mappingNormalizer;
+    private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
     private final ABoxFactIntoMappingConverter factConverter;
     private final MappingMerger mappingMerger;
@@ -26,7 +26,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     @Inject
     private DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter,
-                                     MappingNormalizer mappingNormalizer,
+                                     MappingVariableNameNormalizer mappingNormalizer,
                                      MappingSaturator mappingSaturator,
                                      ABoxFactIntoMappingConverter inserter,
                                      MappingMerger mappingMerger,
