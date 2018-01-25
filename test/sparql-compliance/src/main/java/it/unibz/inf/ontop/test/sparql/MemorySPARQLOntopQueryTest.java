@@ -123,7 +123,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			basicManifest + "term-7",
 
 			/* DATA-R2: BOOLEAN EFFECTIVE VALUE */
-			//Cannot return the SQL type for: w
+			//Cannot return the SQL type for: w is not lifted from the right side of left join
 			booleanManifest + "dawg-bev-5",
 
 			/* DATA-R2: CAST
@@ -172,10 +172,10 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
 //			exprBuiltInManifest + "dawg-str-2",
 
-//			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype.
+//			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype. missing cast to char on a URI
 			exprBuiltInManifest + "dawg-str-3",
 
-//			//NumberFormatException: For input string: "" (it should not be considered as a number)
+//			//NumberFormatException: For input string: "" (it should not be considered as a number) missing cast to char on a URI
 			exprBuiltInManifest + "dawg-str-4",
 
             //unknownType not supported, custom datatype
@@ -195,7 +195,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 //			exprEqualsManifest + "eq-1",
 //			exprEqualsManifest + "eq-2",
 
-			//Data conversion error converting "zzz" Bad datatype handling by the classic mode.
+			//Data conversion error converting "zzz" Bad datatype handling by the classic mode. missing cast to char on a URI
 			exprEqualsManifest + "eq-4",
 
 
@@ -279,7 +279,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 					String testURI, String name, String queryFileURL,
 					String resultFileURL, Dataset dataSet,
 					boolean laxCardinality, boolean checkOrder) {
-				if(ignoreFailures && !IGNORE.contains(testURI)) {
+				if(!ignoreFailures || !IGNORE.contains(testURI)) {
 					return new MemorySPARQLOntopQueryTest(testURI, name,
 							queryFileURL, resultFileURL, dataSet, laxCardinality,
 							checkOrder);

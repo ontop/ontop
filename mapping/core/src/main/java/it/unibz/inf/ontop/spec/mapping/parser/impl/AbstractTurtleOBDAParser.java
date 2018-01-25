@@ -28,7 +28,9 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.List;
 import java.util.Map;
@@ -85,7 +87,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());
 		} catch (RuntimeException e) {
-			throw new TargetQueryParserException(input, e);
+			throw new TargetQueryParserException(e.getMessage(), e);
 		}
 	}
 
