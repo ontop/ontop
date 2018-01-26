@@ -26,11 +26,11 @@ public class ExampleSiemensProgram {
         prefixes.put("st:", "http://siemens.com/temporal/ns#");
         prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
 
-        TemporalRange rangeLRS = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT1M"));
-        TemporalRange rangeHRS = f.createTemporalRange(false, true, Duration.parse("PT0S"), Duration.parse("PT30S"));
-        TemporalRange rangeMFON = f.createTemporalRange(false, true, Duration.parse("PT0S"), Duration.parse("PT10S"));
-        TemporalRange rangeDiamondInner = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT2M"));
-        TemporalRange rangeDiamondOuter = f.createTemporalRange(false, true, Duration.parse("PT0M"), Duration.parse("PT10M"));
+        TemporalRange rangeLRS = f.createTemporalRange(false, Duration.parse("PT0M"), Duration.parse("PT1M"), true);
+        TemporalRange rangeHRS = f.createTemporalRange(false, Duration.parse("PT0S"), Duration.parse("PT30S"), true);
+        TemporalRange rangeMFON = f.createTemporalRange(false, Duration.parse("PT0S"), Duration.parse("PT10S"), true);
+        TemporalRange rangeDiamondInner = f.createTemporalRange(false, Duration.parse("PT0M"), Duration.parse("PT2M"), true);
+        TemporalRange rangeDiamondOuter = f.createTemporalRange(false, Duration.parse("PT0M"), Duration.parse("PT10M"), true);
 
         final AtomPredicate conceptLRS = af.getAtomPredicate(prefixes.get("st:") + "LowRotorSpeed", 1);
         final AtomPredicate conceptHRS = af.getAtomPredicate(prefixes.get("st:") + "HighRotorSpeed",1);

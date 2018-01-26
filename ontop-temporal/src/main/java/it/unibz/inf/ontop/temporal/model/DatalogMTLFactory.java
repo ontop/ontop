@@ -38,7 +38,9 @@ public interface DatalogMTLFactory {
 
     DatalogMTLProgram createProgram(Map<String, String> prefixes, DatalogMTLRule... rules);
 
-    TemporalRange createTemporalRange(boolean beginInclusive, boolean endInclusive, Duration begin, Duration end);
+    TemporalRange createTemporalRange(boolean beginInclusive, Duration begin, Duration end, boolean endInclusive);
+
+    TemporalRange createTemporalRange(boolean beginInclusive, String begin, String end, boolean endInclusive);
 
     TemporalInterval createTemporalInterval(boolean beginInclusive, boolean endInclusive, Instant begin, Instant end);
 

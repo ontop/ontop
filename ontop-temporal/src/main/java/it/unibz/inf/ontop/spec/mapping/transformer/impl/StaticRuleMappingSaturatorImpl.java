@@ -91,7 +91,7 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
                         dProg.appendRule(rule);
                         IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
                                 dbMetadata, dProg, ImmutableList.of(), mapping.getExecutorRegistry());
-
+                        System.out.println(intermediateQuery.toString());
                         intermediateQuery = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mappingMap));
                         System.out.println(intermediateQuery.toString());
                         intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);

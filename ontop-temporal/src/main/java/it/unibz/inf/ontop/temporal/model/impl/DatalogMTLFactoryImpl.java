@@ -84,8 +84,13 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public TemporalRange createTemporalRange(boolean beginInclusive, boolean endInclusive, Duration begin, Duration end) {
-        return new TemporalRangeImpl(beginInclusive, endInclusive, begin, end);
+    public TemporalRange createTemporalRange(boolean beginInclusive, Duration begin, Duration end,  boolean endInclusive) {
+        return new TemporalRangeImpl(beginInclusive, begin, end, endInclusive);
+    }
+
+    @Override
+    public TemporalRange createTemporalRange(boolean beginInclusive, String begin, String end, boolean endInclusive) {
+        return new TemporalRangeImpl(beginInclusive, begin, end, endInclusive);
     }
 
     @Override

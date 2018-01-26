@@ -1,0 +1,33 @@
+PREFIX ss:     <http://siemens.com/ns#>
+PREFIX st:     <http://siemenstemporal.com/ns#> 
+PREFIX obda:   <https://w3id.org/obda/vocabulary#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+[static]
+?tb st:monitoredByTemperatureSensor ?ts :-
+   { ?tb a ss:Turbine . ?b ss:isPartOf ?tb . ?b a ss:Burner.
+     ?b ss:isMonitoredBy ?ts . ?ts a ss:TemperatureSensor. }
+
+[static]
+?tb st:monitoredBySpeedSensor ?ts  :-
+   { ?tb a ss:Turbine .  ?pt ss:isPartOf ?tb. ?pt a ss:PowerTurbine .
+     ?pt ss:isMonitoredBy ?rs . ?rs a ss:RotationSpeedSensor . }
+
+?tb rdf:type st:HighRotorSpeed :-
+    { ?tb st:rotorSpeed ?v.  (?v > 1260) }
+
+?tb rdf:type st:LowRotorSpeed  :-
+    { ?tb st:rotorSpeed ?v.  (?v < 1000) }
+
+?tb rdf:type st:PurgingIsOver :- {
+    { ?tb st:monitoredByTemperatureSensor ?ts . ?tb st:monitoredBySpeedSensor ?rs . }
+    {
+        ALWAYS IN PAST (0,10S] { ?ts a st:MainFlameOn . }
+        SOMETIME IN PAST (0,10M] {
+            ALWAYS IN PAST (0,30S] { ?rs a st:HighRotorSpeed .}
+            SOMETIME IN PAST (0,2M] {
+                ALWAYS IN PAST (0,1M] { ?rs a st:LowRotorSpeed . }
+            }
+        }
+    }
+}

@@ -39,12 +39,20 @@ public class TemporalRangeImpl implements TemporalRange {
     }
 
     //@Inject
-    public TemporalRangeImpl(Boolean beginInclusive, Boolean endInclusive, Duration begin, Duration end) {
+    public TemporalRangeImpl(Boolean beginInclusive, Duration begin, Duration end, Boolean endInclusive) {
         this.beginInclusive = beginInclusive;
         this.endInclusive = endInclusive;
         this.begin = begin;
         this.end = end;
     }
+
+    public TemporalRangeImpl(Boolean beginInclusive, String beginStr, String endStr, Boolean endInclusive) {
+        this.beginInclusive = beginInclusive;
+        this.endInclusive = endInclusive;
+        this.begin = createDuration(beginStr);
+        this.end = createDuration(endStr);
+    }
+
 
     @Override
     public boolean equals(TemporalRange temporalRange){
@@ -58,5 +66,20 @@ public class TemporalRangeImpl implements TemporalRange {
         }
 
         return false;
+    }
+
+    private Duration createDuration(String durText){
+        if (durText.contains("MS")) {
+            durText = durText.substring(0, durText.indexOf("MS"));
+            int ms = Integer.parseInt(durText);
+            return Duration.parse("PT" + (ms / 1000) + "S");
+        } else if (durText.contains("D")) {
+            return Duration.parse("P" + durText);
+        } else if (durText.contains("H") | durText.contains("M") | durText.contains("S")) {
+            return Duration.parse("PT" + durText);
+        } else if(durText.equals("0")) {
+            return Duration.parse("PT0S");
+        } else
+            throw  new IllegalArgumentException("invalid duration "+ durText);
     }
 }

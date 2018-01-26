@@ -20,7 +20,7 @@ public class WeatherUseCaseTest {
 
         DatalogMTLFactory f = DatalogMTLFactoryImpl.getInstance();
 
-        TemporalRange range = f.createTemporalRange(true, true, Duration.parse("PT0H"), Duration.parse("PT1H"));
+        TemporalRange range = f.createTemporalRange(true, Duration.parse("PT0H"), Duration.parse("PT1H"), true);
 
         TermFactory odf = TestingTools.TERM_FACTORY;
         AtomFactory af = TestingTools.ATOM_FACTORY;
