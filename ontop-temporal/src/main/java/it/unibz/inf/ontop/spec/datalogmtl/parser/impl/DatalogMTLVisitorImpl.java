@@ -1,26 +1,21 @@
-package it.unibz.inf.ontop.spec.datalogmtl.parser;
+package it.unibz.inf.ontop.spec.datalogmtl.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.impl.IRITermType;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLBaseVisitor;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLParser;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLVisitor;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.AbstractUnaryTemporalExpressionWithRange;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
-import it.unibz.inf.ontop.temporal.model.impl.TemporalRangeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
-import org.eclipse.rdf4j.query.algebra.Str;
-import org.mapdb.Atomic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements DatalogMTLVisitor {

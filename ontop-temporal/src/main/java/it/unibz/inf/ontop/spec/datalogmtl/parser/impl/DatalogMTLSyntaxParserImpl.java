@@ -1,15 +1,11 @@
 package it.unibz.inf.ontop.spec.datalogmtl.parser.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLLexer;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLParser;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
-import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLVisitorImpl;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
