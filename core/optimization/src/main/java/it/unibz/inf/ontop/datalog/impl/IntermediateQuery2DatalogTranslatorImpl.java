@@ -373,7 +373,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			return body;
 
 		} else {
-			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
+			 throw new UnsupportedOperationException("Unexpected type of node in the intermediate tree: " + node);
 		}
 
 	}
