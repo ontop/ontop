@@ -34,7 +34,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
             return optimizeSubtree(
                     rootChild.get(),
                     query,
-                    rootNode.getLocallyRequiredVariables()
+                    query.getVariables(query.getRootNode())
             );
         }
         return query;
@@ -45,13 +45,13 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         Optional<ProjectionShrinkingProposal> optionalProposal = Optional.empty();
 
         if (focusNode instanceof UnionNode || focusNode instanceof ConstructionNode) {
-            optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, query, retainedVariables);
+            optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, retainedVariables);
         }
 
         if (focusNode instanceof JoinOrFilterNode) {
             retainedVariables = updateRetainedVariables((JoinOrFilterNode) focusNode, query, retainedVariables);
         } else if (focusNode instanceof ConstructionNode) {
-            retainedVariables = updateRetainedVariables((ConstructionNode) focusNode, query, retainedVariables);
+            retainedVariables = updateRetainedVariables((ConstructionNode) focusNode);
         }
 
 
@@ -72,7 +72,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         return query;
     }
 
-    private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, IntermediateQuery query, ImmutableSet<Variable> allRetainedVariables) {
+    private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, ImmutableSet<Variable> allRetainedVariables) {
 
 
         if (node instanceof UnionNode || node instanceof ConstructionNode) {
@@ -125,8 +125,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         return ImmutableSet.copyOf(Sets.union(allRetainedVariables, joinOrFilterVariables));
     }
 
-    private ImmutableSet<Variable> updateRetainedVariables(ConstructionNode constructionNode, IntermediateQuery query,
-                                                           ImmutableSet<Variable> allRetainedVariables) {
+    private ImmutableSet<Variable> updateRetainedVariables(ConstructionNode constructionNode) {
 
 
         /**
