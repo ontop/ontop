@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
@@ -21,23 +22,17 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
     @Override
     public IntermediateQuery optimize(IntermediateQuery query) {
 
-        /**
-         * Contains all (non discarded) variables projected out by some node previously traversed,
-         * plus all variables appearing in an (explicit or implicit) condition of some join node already traversed
-         *
-         * Immutable only for safety (updated in practice).
-         * Question: shall we keep it as immutable ?
+        /*
+          Contains all (non discarded) variables projected out by some node previously traversed,
+          plus all variables appearing in an (explicit or implicit) condition of some join node already traversed
+
+          Immutable only for safety (updated in practice).
+          Question: shall we keep it as immutable ?
          */
-        QueryNode rootNode = query.getRootNode();
-        Optional<QueryNode> rootChild = query.getFirstChild(rootNode);
-        if (rootChild.isPresent()) {
-            return optimizeSubtree(
-                    rootChild.get(),
-                    query,
-                    query.getVariables(query.getRootNode())
-            );
-        }
-        return query;
+        return optimizeSubtree(
+                query.getRootNode(),
+                query,
+                query.getProjectionAtom().getVariables());
     }
 
     private IntermediateQuery optimizeSubtree(QueryNode focusNode, IntermediateQuery query, ImmutableSet<Variable> retainedVariables) {
@@ -77,7 +72,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
 
         if (node instanceof UnionNode || node instanceof ConstructionNode) {
             Map<Boolean, List<Variable>> splitVariables = node.getVariables().stream()
-                    .collect(Collectors.partitioningBy(v -> allRetainedVariables.contains(v)));
+                    .collect(Collectors.partitioningBy(allRetainedVariables::contains));
 
             if (splitVariables.get(false).iterator().hasNext()) {
                 return Optional.of(
@@ -96,8 +91,8 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
     private ImmutableSet<Variable> updateRetainedVariables(JoinOrFilterNode joinOrFilterNode, IntermediateQuery query,
                                                            ImmutableSet<Variable> allRetainedVariables) {
 
-        /**
-         * Add all variables encountered in filtering or explicit joining conditions
+        /*
+          Add all variables encountered in filtering or explicit joining conditions
          */
         Set<Variable> joinOrFilterVariables = new HashSet<>();
         Optional<ImmutableExpression> explicitJoiningCondition = joinOrFilterNode.getOptionalFilterCondition();
@@ -105,9 +100,9 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
             joinOrFilterVariables.addAll(explicitJoiningCondition.get().getVariables());
         }
 
-        /**
-         * Add all variables encountered in implicit joining conditions,
-         * i.e. projected out by at least two children subtrees of a JoinLikeNode
+        /*
+          Add all variables encountered in implicit joining conditions,
+          i.e. projected out by at least two children subtrees of a JoinLikeNode
          */
         Set<Variable> repeatedVariables = new HashSet<>();
         if (joinOrFilterNode instanceof JoinLikeNode) {
@@ -128,10 +123,10 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
     private ImmutableSet<Variable> updateRetainedVariables(ConstructionNode constructionNode) {
 
 
-        /**
-         * Retain only:
-         * - variables required by the substitution
-         * - variables projected independently of the substitution
+        /*
+          Retain only:
+          - variables required by the substitution
+          - variables projected independently of the substitution
          */
         //P: all projected variables
         ImmutableSet<Variable> projectedVariables = constructionNode.getVariables();
@@ -143,7 +138,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
                 .collect(ImmutableCollectors.toSet());
         //R: variables required by the substitution
         ImmutableSet<Variable> variablesRequiredBySubstitution = constructionNode.getSubstitution().getImmutableMap().values().stream()
-                .flatMap(t -> t.getVariableStream()).collect(ImmutableCollectors.toSet());
+                .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet());
 
         //return P' + R
         return ImmutableSet.<Variable>builder()

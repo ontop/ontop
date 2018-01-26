@@ -216,11 +216,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         );
 
         // Possibly adjust the proposal, to enforce that the second exception (see the class comments) holds
-        return Optional.of(
-                adjustProposal(
-                        proposal,
-                        query
-                ));
+        return adjustProposal(proposal, query);
     }
 
     private Optional<PushUpBooleanExpressionProposal> makeProposalForUnionNode(UnionNode unionNode, IntermediateQuery query) {
@@ -350,7 +346,8 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
     }
 
     // If the expression was blocked by a union or the root of the query
-    private PushUpBooleanExpressionProposal adjustProposal(PushUpBooleanExpressionProposal proposal, IntermediateQuery query) {
+    private Optional<PushUpBooleanExpressionProposal> adjustProposal(PushUpBooleanExpressionProposal proposal,
+                                                            IntermediateQuery query) {
 
         QueryNode currentNode = proposal.getUpMostPropagatingNode();
         Optional<QueryNode> optChild;
@@ -365,7 +362,12 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 currentNode = optChild.get();
                 continue;
             }
+            // Note that the iteration is stopped (among other) by any binary operator
             break;
+        }
+        // If we went back to the provider node
+        if(proposal.getProvider2NonPropagatedExpressionMap().keySet().contains(currentNode)){
+            return Optional.empty();
         }
         // adjust the upmost propagating node
         QueryNode upMostPropagatingNode = currentNode;
@@ -379,13 +381,14 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 removedProjectors.build()
         );
 
-        return new PushUpBooleanExpressionProposalImpl(
-                proposal.getPropagatedExpression(),
-                proposal.getProvider2NonPropagatedExpressionMap(),
-                upMostPropagatingNode,
-                recipient,
-                inbetweenProjectors
-        );
+        return Optional.of(
+                new PushUpBooleanExpressionProposalImpl(
+                    proposal.getPropagatedExpression(),
+                    proposal.getProvider2NonPropagatedExpressionMap(),
+                    upMostPropagatingNode,
+                    recipient,
+                    inbetweenProjectors
+                ));
     }
 
     private <T> ImmutableSet<T> computeIntersection(ImmutableSet<T> s1, ImmutableSet<T> s2) {
