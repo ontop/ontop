@@ -4,11 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.impl.IRITermType;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.AbstractUnaryTemporalExpressionWithRange;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
@@ -222,9 +220,25 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
         if (ctx.VARIABLE().contains(ctx.getChild(idx))){
             return termFactory.getVariable(ctx.getChild(idx).getText().substring(1));
         } else if (ctx.literal().equals(ctx.getChild(idx))) {
-            return termFactory.getConstantLiteral(ctx.getChild(idx).getText());
+            return getTypedConstant(ctx.literal());
         } else
             throw  new IllegalArgumentException("illegal argument for comparison expression "+ ctx.getText());
+    }
+
+    private ValueConstant getTypedConstant(DatalogMTLParser.LiteralContext ctx){
+        String value = ctx.getText();
+        if(ctx.BOOLEAN() != null)
+            return termFactory.getConstantLiteral(value, XSD.BOOLEAN);
+        else if (ctx.DECIMAL() != null)
+            return termFactory.getConstantLiteral(value, XSD.DECIMAL);
+        else if (ctx.DOUBLE() != null)
+            return termFactory.getConstantLiteral(value, XSD.DOUBLE);
+        else if (ctx.INTEGER() != null)
+            return termFactory.getConstantLiteral(value, XSD.INTEGER);
+        else if (ctx.string() != null)
+            return termFactory.getConstantLiteral(value, XSD.STRING);
+        else
+            throw new IllegalArgumentException("unrecognized constant type for " + ctx.getText());
     }
 
     private AtomPredicate getComparator(DatalogMTLParser.ComparisonExpressionContext ctx){
