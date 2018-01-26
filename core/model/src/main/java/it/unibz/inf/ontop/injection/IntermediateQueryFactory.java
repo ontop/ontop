@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -33,10 +34,6 @@ public interface IntermediateQueryFactory {
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
                                             ImmutableSubstitution<ImmutableTerm> substitution);
 
-    ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
-                                            ImmutableSubstitution<ImmutableTerm> substitution,
-                                            Optional<ImmutableQueryModifiers> queryModifiers);
-
     UnionNode createUnionNode(ImmutableSet<Variable> projectedVariables);
 
     InnerJoinNode createInnerJoinNode();
@@ -55,6 +52,13 @@ public interface IntermediateQueryFactory {
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
     TrueNode createTrueNode();
+
+    DistinctNode createDistinctNode();
+    SliceNode createSliceNode(@Assisted("offset") long offset, @Assisted("limit") long limit);
+    SliceNode createSliceNode(long offset);
+
+    OrderByNode createOrderByNode(ImmutableList<OrderByNode.OrderComparator> comparators);
+    OrderByNode.OrderComparator createOrderComparator(NonGroundTerm term, boolean isAscending);
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);

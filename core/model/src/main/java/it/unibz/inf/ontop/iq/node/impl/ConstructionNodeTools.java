@@ -5,10 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -55,18 +53,7 @@ public class ConstructionNodeTools {
                         .filter(e -> !projectedVariables.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap()));
 
-        if (parentConstructionNode.getOptionalModifiers().isPresent()
-                && childConstructionNode.getOptionalModifiers().isPresent()) {
-            // TODO: find a better exception
-            throw new RuntimeException("TODO: support combination of modifiers");
-        }
-
-        // TODO: should update the modifiers?
-        Optional<ImmutableQueryModifiers> optionalModifiers = parentConstructionNode.getOptionalModifiers()
-                .map(Optional::of)
-                .orElseGet(childConstructionNode::getOptionalModifiers);
-
-        return iqFactory.createConstructionNode(projectedVariables, newSubstitution, optionalModifiers);
+        return iqFactory.createConstructionNode(projectedVariables, newSubstitution);
     }
 
     public ImmutableSet<Variable> computeNewProjectedVariables(
@@ -84,18 +71,6 @@ public class ConstructionNodeTools {
         return Stream.concat(newVariableStream, remainingVariableStream)
                 .collect(ImmutableCollectors.toSet());
     }
-
-    public ImmutableSubstitution<ImmutableTerm> extractRelevantDescendingSubstitution(
-            ImmutableSubstitution<? extends ImmutableTerm> descendingSubstitution,
-            ImmutableSet<Variable> projectedVariables) {
-        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = descendingSubstitution.getImmutableMap().entrySet().stream()
-                .filter(e -> projectedVariables.contains(e.getKey()))
-                .map(e -> (Map.Entry<Variable, ImmutableTerm>) e)
-                .collect(ImmutableCollectors.toMap());
-
-        return substitutionFactory.getSubstitution(newSubstitutionMap);
-    }
-
 
     /**
      *

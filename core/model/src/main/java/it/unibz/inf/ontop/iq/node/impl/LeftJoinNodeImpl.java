@@ -521,10 +521,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         ConstructionNode rightConstructionNode = (ConstructionNode) liftedRightChild.getRootNode();
 
-        // Not supported
-        if (rightConstructionNode.getOptionalModifiers().isPresent())
-            return state;
-
         IQTree rightGrandChild = ((UnaryIQTree) liftedRightChild).getChild();
 
         ImmutableSubstitution<ImmutableTerm> rightSubstitution = rightConstructionNode.getSubstitution();

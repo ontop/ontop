@@ -363,13 +363,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                                ImmutableSet<Variable> projectedVariables) {
         ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
 
-        /*
-         * TODO: remove this test after removing the query modifiers from the construction nodes
-         */
-        if (constructionNode.getOptionalModifiers().isPresent())
-            throw new UnsupportedOperationException("ConstructionNodes with query modifiers are not supported " +
-                    "under a union node");
-
         ConstructionNodeTools.NewSubstitutionPair substitutionPair = constructionTools.traverseConstructionNode(
                 mergedSubstitution, constructionNode.getSubstitution(),
                 constructionNode.getVariables(), projectedVariables);
@@ -398,9 +391,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private IQTree projectAwayUnnecessaryVariables(IQTree child, IQProperties currentIQProperties) {
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
-
-            if (constructionNode.getOptionalModifiers().isPresent())
-                return child;
 
             AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
                     constructionNode.getSubstitution(), projectedVariables);

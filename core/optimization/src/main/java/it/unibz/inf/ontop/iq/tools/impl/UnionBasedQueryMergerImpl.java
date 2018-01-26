@@ -5,12 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -30,6 +29,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Singleton
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
@@ -83,14 +84,18 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();
 
-        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                substitutionFactory.getSubstitution(), optionalTopModifiers);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables());
 
         IntermediateQueryBuilder queryBuilder = firstDefinition.newBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
+        if (optionalTopModifiers.isPresent()) {
+            optionalTopModifiers.get()
+                    .initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
+        }
+        else
+            queryBuilder.init(projectionAtom, topConstructionNode);
 
         UnionNode unionNode = iqFactory.createUnionNode(projectionAtom.getVariables());
-        queryBuilder.addChild(rootNode, unionNode);
+        queryBuilder.addChild(topConstructionNode, unionNode);
 
         // First definition can be added safely
         appendFirstDefinition(queryBuilder, unionNode, firstDefinition);

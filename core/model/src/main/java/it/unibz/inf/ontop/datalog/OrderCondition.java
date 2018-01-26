@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.iq.node;
+package it.unibz.inf.ontop.datalog;
 
 import it.unibz.inf.ontop.model.term.Variable;
 

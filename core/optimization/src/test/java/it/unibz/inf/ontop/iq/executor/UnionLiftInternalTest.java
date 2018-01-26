@@ -169,7 +169,7 @@ public class UnionLiftInternalTest {
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.empty());
+                SUBSTITUTION_FACTORY.getSubstitution());
 
         UnionNode unionNode1  = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();

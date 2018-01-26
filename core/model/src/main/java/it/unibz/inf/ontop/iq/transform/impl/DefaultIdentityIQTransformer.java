@@ -47,6 +47,21 @@ public class DefaultIdentityIQTransformer implements IQTransformer {
     }
 
     @Override
+    public IQTree transformDistinct(IQTree tree, DistinctNode distinctNode, IQTree child) {
+        return tree;
+    }
+
+    @Override
+    public IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child) {
+        return tree;
+    }
+
+    @Override
+    public IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child) {
+        return tree;
+    }
+
+    @Override
     public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return tree;
     }

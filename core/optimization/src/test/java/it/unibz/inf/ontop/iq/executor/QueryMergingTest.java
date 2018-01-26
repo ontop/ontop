@@ -3,16 +3,13 @@ package it.unibz.inf.ontop.iq.executor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.NoDependencyTestDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -909,15 +906,13 @@ public class QueryMergingTest {
         expectedQueryBuilder.addChild(rootNode, joinNode);
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateString(B))),
-                Optional.empty());
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateString(B))));
         expectedQueryBuilder.addChild(joinNode, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, firstNameDataNode);
 
         Variable b1 = TERM_FACTORY.getVariable("bf0");
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Z),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(D), Z, generateString(b1))),
-                Optional.empty());
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(D), Z, generateString(b1))));
         expectedQueryBuilder.addChild(joinNode, rightConstructionNode);
 
         ExtensionalDataNode expectedlastNameDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -1089,8 +1084,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER))),
-                Optional.empty());
+                        ImmutableMap.of(X, TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER))));
         mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(P3_PREDICATE, X), mappingRootNode);
         mappingBuilder.addChild(mappingRootNode, IQ_FACTORY.createTrueNode());
         IntermediateQuery mapping = mappingBuilder.build();

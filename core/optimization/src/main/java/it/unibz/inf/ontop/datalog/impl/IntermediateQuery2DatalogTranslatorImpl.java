@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.slf4j.Logger;
@@ -58,6 +57,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private final SubstitutionFactory substitutionFactory;
 	private final DatalogFactory datalogFactory;
 	private final ImmutabilityTools immutabilityTools;;
+	private final OrderByLifter orderByLifter;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -81,12 +81,13 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	@Inject
 	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
 													SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-													ImmutabilityTools immutabilityTools) {
+													ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.datalogFactory = datalogFactory;
 		this.immutabilityTools = immutabilityTools;
+		this.orderByLifter = orderByLifter;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -99,21 +100,16 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * with y > subqueryCounter.
 	 */
 	@Override
-	public DatalogProgram translate(IntermediateQuery query) {
-		QueryNode root = query.getRootNode();
-		
-		Optional<ImmutableQueryModifiers> optionalModifiers =  Optional.of(root)
-				.filter(r -> r instanceof ConstructionNode)
-				.map(r -> (ConstructionNode)r)
-				.flatMap(ConstructionNode::getOptionalModifiers);
+	public DatalogProgram translate(IntermediateQuery initialQuery) {
+
+		IntermediateQuery query = normalizeIQ(initialQuery);
+
+		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(query);
+		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(query);
 
         DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
-			QueryModifiers immutableQueryModifiers = optionalModifiers.get();
-
-			// Mutable modifiers (used by the Datalog)
-			MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
-			// TODO: support GROUP BY (distinct QueryNode)
+			MutableQueryModifiers mutableModifiers = optionalModifiers.get();
 
             dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
 		}
@@ -121,9 +117,99 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
             dProgram = datalogFactory.getDatalogProgram();
         }
 
-		translate(query,  dProgram, root);
+		translate(query,  dProgram, topNonQueryModifierNode);
 		
 		return dProgram;
+	}
+
+	/**
+	 * Move ORDER BY above the highest construction node (required by Datalog)
+	 */
+	private IntermediateQuery normalizeIQ(IntermediateQuery initialQuery) {
+		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(initialQuery);
+
+		if (initialQuery.getFirstChild(topNonQueryModifierNode)
+				.filter(c -> c instanceof OrderByNode)
+				.isPresent()) {
+			return orderByLifter.liftOrderBy(initialQuery);
+		}
+		else
+			return initialQuery;
+	}
+
+
+
+	/**
+	 * Assumes that ORDER BY is ABOVE the first construction node
+	 * and the order between these operators is respected and they appear ONE time maximum
+	 */
+	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
+		QueryNode rootNode = query.getRootNode();
+		if (rootNode instanceof QueryModifierNode) {
+			Optional<SliceNode> sliceNode = Optional.of(rootNode)
+					.filter(n -> n instanceof SliceNode)
+					.map(n -> (SliceNode)n);
+
+			QueryNode firstNonSliceNode = sliceNode
+					.flatMap(query::getFirstChild)
+					.orElse(rootNode);
+
+			Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceNode)
+					.filter(n -> n instanceof DistinctNode)
+					.map(n -> (DistinctNode) n);
+
+			QueryNode firstNonSliceDistinctNode = distinctNode
+					.flatMap(query::getFirstChild)
+					.orElse(firstNonSliceNode);
+
+			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctNode)
+					.filter(n -> n instanceof OrderByNode)
+					.map(n -> (OrderByNode) n);
+
+			MutableQueryModifiers mutableQueryModifiers = new MutableQueryModifiersImpl();
+
+			sliceNode.ifPresent(n -> {
+							n.getLimit()
+									.ifPresent(mutableQueryModifiers::setLimit);
+							long offset = n.getOffset();
+							if (offset > 0)
+								mutableQueryModifiers.setOffset(offset);
+					});
+
+			if(distinctNode.isPresent())
+				mutableQueryModifiers.setDistinct();
+
+			orderByNode
+					.ifPresent(n -> n.getComparators()
+							.forEach(c -> convertOrderComparator(c, mutableQueryModifiers)));
+
+			return Optional.of(mutableQueryModifiers);
+		}
+		else
+			return Optional.empty();
+	}
+
+	private static void convertOrderComparator(OrderByNode.OrderComparator comparator,
+											   MutableQueryModifiers queryModifiers) {
+		NonGroundTerm term = comparator.getTerm();
+		if (term instanceof Variable)
+			queryModifiers.addOrderCondition((Variable) term,
+					comparator.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING);
+		else
+			// TODO: throw a better exception
+			throw new IllegalArgumentException("The Datalog representation only supports variable in order conditions");
+	}
+
+	/**
+	 * Assumes that ORDER BY is ABOVE the first construction node
+	 */
+	private QueryNode getFirstNonQueryModifierNode(IntermediateQuery query) {
+		// Non-final
+		QueryNode queryNode = query.getRootNode();
+		while (queryNode instanceof QueryModifierNode) {
+			queryNode = query.getFirstChild(queryNode).get();
+		}
+		return queryNode;
 	}
 	
 	/**
@@ -307,7 +393,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			return body;
 
 		} else {
-			 throw new UnsupportedOperationException("Type of node in the intermediate tree is unknown!!");
+			 throw new UnsupportedOperationException("Unexpected type of node in the intermediate tree: " + node);
 		}
 
 	}
