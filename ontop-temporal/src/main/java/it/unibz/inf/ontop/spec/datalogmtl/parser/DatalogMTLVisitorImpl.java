@@ -26,14 +26,12 @@ import java.util.stream.Collectors;
 public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements DatalogMTLVisitor {
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
-    private final RDF rdfFactory;
     private final DatalogMTLFactory datalogMTLFactory;
     ImmutableMap<String, String> prefixes;
     ImmutableList<String> headsOfStaticRules;
     private static String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
     public DatalogMTLVisitorImpl(TermFactory termFactory, AtomFactory atomFactory) {
-        this.rdfFactory = new SimpleRDF();
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         datalogMTLFactory = new DatalogMTLFactoryImpl();
@@ -65,7 +63,7 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
                         pid -> pid.PNAME_NS().getText(),
                         pid -> pid.IRIREF().getText().substring(1, pid.IRIREF().getText().length()-1)));
 
-        headsOfStaticRules = collectStaticHeads(ctx);
+        //headsOfStaticRules = collectStaticHeads(ctx);
         ImmutableList<DatalogMTLRule> rules = visitDMTLProgram(ctx.dMTLProgram());
 
         return datalogMTLFactory.createProgram(prefixes, rules);
