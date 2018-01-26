@@ -42,6 +42,18 @@ public class DatalogMTLParserTest {
         TestCase.assertTrue(result);
     }
 
+    @Test
+    public void test2() {
+        final boolean result = parse(readFile("src/test/resources/rule2.dmtl"));
+        TestCase.assertTrue(result);
+    }
+
+    @Test
+    public void test3() {
+        final boolean result = parse(readFile("src/test/resources/rule3.dmtl"));
+        TestCase.assertTrue(result);
+    }
+
     private boolean parse(String input) {
         DatalogMTLSyntaxParser parser = new DatalogMTLSyntaxParserImpl(getPrefixManager().getPrefixMap(), ATOM_FACTORY,
                 TERM_FACTORY);

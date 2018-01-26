@@ -75,10 +75,11 @@ public class TemporalRangeImpl implements TemporalRange {
             return Duration.parse("PT" + (ms / 1000) + "S");
         } else if (durText.contains("D")) {
             return Duration.parse("P" + durText);
-        }
-        else if (durText.contains("H") | durText.contains("M") | durText.contains("S")) {
+        } else if (durText.contains("H") | durText.contains("M") | durText.contains("S")) {
             return Duration.parse("PT" + durText);
-        }
-        return null;
+        } else if(durText.equals("0")) {
+            return Duration.parse("PT0S");
+        } else
+            throw  new IllegalArgumentException("invalid duration "+ durText);
     }
 }
