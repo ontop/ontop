@@ -57,6 +57,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private final SubstitutionFactory substitutionFactory;
 	private final DatalogFactory datalogFactory;
 	private final ImmutabilityTools immutabilityTools;;
+	private final OrderByLifter orderByLifter;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -80,12 +81,13 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	@Inject
 	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
 													SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-													ImmutabilityTools immutabilityTools) {
+													ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.datalogFactory = datalogFactory;
 		this.immutabilityTools = immutabilityTools;
+		this.orderByLifter = orderByLifter;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -98,8 +100,9 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * with y > subqueryCounter.
 	 */
 	@Override
-	public DatalogProgram translate(IntermediateQuery query) {
-		// TODO: move ORDER BY above the construction node (required by Datalog)
+	public DatalogProgram translate(IntermediateQuery initialQuery) {
+
+		IntermediateQuery query = normalizeIQ(initialQuery);
 
 		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(query);
 		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(query);
@@ -118,6 +121,23 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		
 		return dProgram;
 	}
+
+	/**
+	 * Move ORDER BY above the highest construction node (required by Datalog)
+	 */
+	private IntermediateQuery normalizeIQ(IntermediateQuery initialQuery) {
+		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(initialQuery);
+
+		if (initialQuery.getFirstChild(topNonQueryModifierNode)
+				.filter(c -> c instanceof OrderByNode)
+				.isPresent()) {
+			return orderByLifter.liftOrderBy(initialQuery);
+		}
+		else
+			return initialQuery;
+	}
+
+
 
 	/**
 	 * Assumes that ORDER BY is ABOVE the first construction node
