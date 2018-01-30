@@ -1148,12 +1148,9 @@ public class OneShotSQLGeneratorEngine {
 			if (functionSymbol.getType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
-
-			// NOTE: Issue #242 Language tag appended in literal part of a lang string.
-			// I have added the literal lang predicate checking in order to avoid the
-			// getSQLStringForTemplateFunction, in which the two terms of a langString
-			// are concatenated mixing the literal part with the language tag in the
-			// results.
+			// Note: datatype functions are unary.
+			// The only exception of rdf langString (represented internally as a binary predicate string + language
+			// tag), but in this case the first argument only is used for SQL generation.
 
 			// atoms of the form integer(x)
 			return getSQLString(function.getTerm(0), index, false);
