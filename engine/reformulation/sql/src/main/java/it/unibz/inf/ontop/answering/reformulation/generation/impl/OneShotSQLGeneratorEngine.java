@@ -41,17 +41,11 @@ import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.utils.EncodeForURI;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +54,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -1155,27 +1148,23 @@ public class OneShotSQLGeneratorEngine {
 			if (functionSymbol.getType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
-			
+
 			// NOTE: Issue #242 Language tag appended in literal part of a lang string.
 			// I have added the literal lang predicate checking in order to avoid the
 			// getSQLStringForTemplateFunction, in which the two terms of a langString
 			// are concatenated mixing the literal part with the language tag in the
 			// results.
-			if (size == 1 || functionSymbol.equals(LITERAL_LANG_PREDICATE)) {
-				// atoms of the form integer(x)
-				return getSQLString(function.getTerm(0), index, false);
-			}
-			else {
-				return getSQLStringForTemplateFunction(function.getTerms(), index);
-			}
+
+			// atoms of the form integer(x)
+			return getSQLString(function.getTerm(0), index, false);
 		}
-		else if (functionSymbol instanceof URITemplatePredicate
+		if (functionSymbol instanceof URITemplatePredicate
 				|| functionSymbol instanceof BNodePredicate) {
 
 		 	// The atom must be of the form uri("...", x, y)
 			return getSQLStringForTemplateFunction(function.getTerms(), index);
 		}
-		else if (operations.containsKey(functionSymbol)) {
+		if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
 			switch (function.getArity()) {
 				case 0:
@@ -1194,10 +1183,10 @@ public class OneShotSQLGeneratorEngine {
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 		}
-		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
+		if (functionSymbol == ExpressionOperation.IS_TRUE) {
 			return effectiveBooleanValue(function.getTerm(0), index);
 		}
-		else if (functionSymbol == ExpressionOperation.REGEX) {
+		if (functionSymbol == ExpressionOperation.REGEX) {
 			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
 			if (function.getArity() == 3) {
 				String options = function.getTerm(2).toString();
@@ -1209,7 +1198,7 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
-		else if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
+		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
 			Variable var = (Variable) function.getTerm(0);
 			Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
 			if (!lang.isPresent())
@@ -1219,12 +1208,12 @@ public class OneShotSQLGeneratorEngine {
 		/**
 		 * TODO: replace by a switch
 		 */
-		else if (functionSymbol.equals(ExpressionOperation.IF_ELSE_NULL)) {
+		if (functionSymbol.equals(ExpressionOperation.IF_ELSE_NULL)) {
 			String condition = getSQLString(function.getTerm(0), index, false);
 			String value = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.ifElseNull(condition, value);
 		}
-		else if (functionSymbol == ExpressionOperation.QUEST_CAST) {
+		if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			String datatype = ((Constant) function.getTerm(1)).getValue();
 			int sqlDatatype = datatype.equals(XMLSchema.STRING.stringValue())
@@ -1232,11 +1221,11 @@ public class OneShotSQLGeneratorEngine {
 					: Types.LONGVARCHAR;
 			return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, sqlDatatype);
 		}
-		else if (functionSymbol == ExpressionOperation.SPARQL_STR) {
+		if (functionSymbol == ExpressionOperation.SPARQL_STR) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, Types.VARCHAR);
 		}
-		else if (functionSymbol == ExpressionOperation.REPLACE) {
+		if (functionSymbol == ExpressionOperation.REPLACE) {
 			String orig = getSQLString(function.getTerm(0), index, false);
 			String out_str = getSQLString(function.getTerm(1), index, false);
 			String in_str = getSQLString(function.getTerm(2), index, false);
@@ -1244,93 +1233,93 @@ public class OneShotSQLGeneratorEngine {
 			// TODO: handle flags
 			return result;
 		}
-		else if (functionSymbol == ExpressionOperation.CONCAT) {
+		if (functionSymbol == ExpressionOperation.CONCAT) {
 			String left = getSQLString(function.getTerm(0), index, false);
 			String right = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.strConcat(new String[]{left, right});
 		}
-		else if (functionSymbol == ExpressionOperation.STRLEN) {
+		if (functionSymbol == ExpressionOperation.STRLEN) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strLength(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.YEAR) {
+		if (functionSymbol == ExpressionOperation.YEAR) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateYear(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.MINUTES) {
+		if (functionSymbol == ExpressionOperation.MINUTES) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateMinutes(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.DAY) {
+		if (functionSymbol == ExpressionOperation.DAY) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateDay(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.MONTH) {
+		if (functionSymbol == ExpressionOperation.MONTH) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateMonth(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.SECONDS) {
+		if (functionSymbol == ExpressionOperation.SECONDS) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateSeconds(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.HOURS) {
+		if (functionSymbol == ExpressionOperation.HOURS) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateHours(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.TZ) {
+		if (functionSymbol == ExpressionOperation.TZ) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateTZ(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
+		if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strEncodeForUri(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.UCASE) {
+		if (functionSymbol == ExpressionOperation.UCASE) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strUcase(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.MD5) {
+		if (functionSymbol == ExpressionOperation.MD5) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.MD5(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.SHA1) {
+		if (functionSymbol == ExpressionOperation.SHA1) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.SHA1(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.SHA256) {
+		if (functionSymbol == ExpressionOperation.SHA256) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.SHA256(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.SHA512) {
+		if (functionSymbol == ExpressionOperation.SHA512) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.SHA512(literal); //TODO FIX
 		}
-		else if (functionSymbol == ExpressionOperation.LCASE) {
+		if (functionSymbol == ExpressionOperation.LCASE) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strLcase(literal);
 		}
-		else if (functionSymbol == ExpressionOperation.SUBSTR2) {
+		if (functionSymbol == ExpressionOperation.SUBSTR2) {
 			String string = getSQLString(function.getTerm(0), index, false);
 			String start = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.strSubstr(string, start);
 		}
-		else if (functionSymbol == ExpressionOperation.SUBSTR3) {
+		if (functionSymbol == ExpressionOperation.SUBSTR3) {
 			String string = getSQLString(function.getTerm(0), index, false);
 			String start = getSQLString(function.getTerm(1), index, false);
 			String end = getSQLString(function.getTerm(2), index, false);
 			return sqladapter.strSubstr(string, start, end);
 		}
-		else if (functionSymbol == ExpressionOperation.STRBEFORE) {
+		if (functionSymbol == ExpressionOperation.STRBEFORE) {
 			String string = getSQLString(function.getTerm(0), index, false);
 			String before = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.strBefore(string, before);
 		}
-		else if (functionSymbol == ExpressionOperation.STRAFTER) {
+		if (functionSymbol == ExpressionOperation.STRAFTER) {
 			String string = getSQLString(function.getTerm(0), index, false);
 			String after = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.strAfter(string, after);
 		}
-		else if (functionSymbol == ExpressionOperation.COUNT) {
+		if (functionSymbol == ExpressionOperation.COUNT) {
 			if (function.getTerm(0).toString().equals("*")) {
 				return "COUNT(*)";
 			}
@@ -1338,12 +1327,12 @@ public class OneShotSQLGeneratorEngine {
 			//havingCond = true;
 			return "COUNT(" + columnName + ")";
 		}
-		else if (functionSymbol == ExpressionOperation.AVG) {
+		if (functionSymbol == ExpressionOperation.AVG) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			//havingCond = true;
 			return "AVG(" + columnName + ")";
 		}
-		else if (functionSymbol == ExpressionOperation.SUM) {
+		if (functionSymbol == ExpressionOperation.SUM) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			//havingCond = true;
 			return "SUM(" + columnName + ")";
