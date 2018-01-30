@@ -1149,8 +1149,8 @@ public class OneShotSQLGeneratorEngine {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
 			// Note: datatype functions are unary.
-			// The only exception of rdf langString (represented internally as a binary predicate string + language
-			// tag), but in this case the first argument only is used for SQL generation.
+			// The only exception is rdf:langString (represented internally as a binary predicate, with string and
+			// language tag as arguments), but in this case the first argument only is used for SQL generation.
 
 			// atoms of the form integer(x)
 			return getSQLString(function.getTerm(0), index, false);
