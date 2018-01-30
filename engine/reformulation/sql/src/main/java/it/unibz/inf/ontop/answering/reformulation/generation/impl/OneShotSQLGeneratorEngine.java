@@ -42,6 +42,7 @@ import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
@@ -78,6 +79,12 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.*;
  *
  */
 public class OneShotSQLGeneratorEngine {
+	
+	/**
+	 * The literal lang predicate.
+	 */
+	private static final DatatypePredicate LITERAL_LANG_PREDICATE = TYPE_FACTORY
+            .getTypePredicate(LANG_STRING);
 
 	/**
 	 * Formatting templates
@@ -1148,7 +1155,13 @@ public class OneShotSQLGeneratorEngine {
 			if (functionSymbol.getType(0) == UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
-			if (size == 1) {
+			
+			// NOTE: Issue #242 Language tag appended in literal part of a lang string.
+			// I have added the literal lang predicate checking in order to avoid the
+			// getSQLStringForTemplateFunction, in which the two terms of a langString
+			// are concatenated mixing the literal part with the language tag in the
+			// results.
+			if (size == 1 || functionSymbol.equals(LITERAL_LANG_PREDICATE)) {
 				// atoms of the form integer(x)
 				return getSQLString(function.getTerm(0), index, false);
 			}
