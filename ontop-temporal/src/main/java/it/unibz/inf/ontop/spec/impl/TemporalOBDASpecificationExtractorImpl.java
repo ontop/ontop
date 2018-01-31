@@ -2,23 +2,21 @@ package it.unibz.inf.ontop.spec.impl;
 
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.exception.OntologyException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.TOBDASpecInput;
+import it.unibz.inf.ontop.spec.datalogmtl.DatalogMTLProgramExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -30,6 +28,7 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
     private final MappingTransformer mappingTransformer;
     private final TemporalMappingTransformer temporalMappingTransformer;
     private final OntopMappingSettings settings;
+    private final DatalogMTLProgramExtractor ruleExtractor;
 
     @Inject
     private TemporalOBDASpecificationExtractorImpl(
@@ -37,12 +36,13 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
             MappingTransformer mappingTransformer,
             TemporalMappingExtractor temporalMappingExtractor,
             TemporalMappingTransformer temporalMappingTransformer,
-            OntopMappingSettings settings) {
+            OntopMappingSettings settings, DatalogMTLProgramExtractor ruleExtractor) {
         this.mappingExtractor = mappingExtractor;
         this.temporalMappingExtractor = temporalMappingExtractor;
         this.mappingTransformer = mappingTransformer;
         this.temporalMappingTransformer = temporalMappingTransformer;
         this.settings = settings;
+        this.ruleExtractor = ruleExtractor;
     }
 
     @Override
@@ -50,14 +50,16 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
 
-            MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry);
+        MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
+        TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata, optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
 
-            return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
-                    temporalMappingAndDBMetadata.getTemporalMapping(),
-                    temporalMappingAndDBMetadata.getDBMetadata(),
-                    ExampleSiemensProgram.getSampleProgram());
+        DatalogMTLProgram datalogMTLProgram = ruleExtractor.extract((TOBDASpecInput) specInput, mappingAndDBMetadata.getMapping());
+
+        return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
+                temporalMappingAndDBMetadata.getTemporalMapping(),
+                temporalMappingAndDBMetadata.getDBMetadata(),
+                datalogMTLProgram);
     }
 
     @Override
@@ -68,12 +70,14 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
         MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
                 ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
-            TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(ppMapping, specInput, dbMetadata,
+        TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(ppMapping, specInput, dbMetadata,
                     optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
 
-            return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
-                    temporalMappingAndDBMetadata.getTemporalMapping(),
-                    temporalMappingAndDBMetadata.getDBMetadata(),
-                    ExampleSiemensProgram.getSampleProgram());
+        DatalogMTLProgram datalogMTLProgram = ruleExtractor.extract((TOBDASpecInput) specInput, mappingAndDBMetadata.getMapping());
+
+        return temporalMappingTransformer.transform(mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology,
+                temporalMappingAndDBMetadata.getTemporalMapping(),
+                temporalMappingAndDBMetadata.getDBMetadata(),
+                datalogMTLProgram);
     }
 }

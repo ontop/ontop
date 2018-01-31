@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.temporal.datalogmtl.parser;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLNormalizerImpl;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLFactory;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
+import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -21,14 +21,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import static it.unibz.inf.ontop.spec.impl.TestingTools.*;
+import static it.unibz.inf.ontop.spec.impl.TestingTools.ATOM_FACTORY;
+import static it.unibz.inf.ontop.spec.impl.TestingTools.TERM_FACTORY;
 
-public class DatalogMTLParserTest {
-
+public class DatalogMTLNormalizerTest {
     private final static Logger log = LoggerFactory.getLogger(DatalogMTLParserTest.class);
     private final SpecificationFactory specificationFactory;
 
-    public DatalogMTLParserTest() {
+    public DatalogMTLNormalizerTest() {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .enableTestMode()
                 .build();
@@ -42,25 +42,16 @@ public class DatalogMTLParserTest {
         TestCase.assertTrue(result);
     }
 
-    @Test
-    public void test2() {
-        final boolean result = parse(readFile("src/test/resources/rule2.dmtl"));
-        TestCase.assertTrue(result);
-    }
-
-    @Test
-    public void test3() {
-        final boolean result = parse(readFile("src/test/resources/rule3.dmtl"));
-        TestCase.assertTrue(result);
-    }
-
     private boolean parse(String input) {
+        DatalogMTLFactory datalogMTLFactory = new DatalogMTLFactoryImpl();
         DatalogMTLSyntaxParser parser = new DatalogMTLSyntaxParserImpl(ATOM_FACTORY,
                 TERM_FACTORY);
 
+        DatalogMTLNormalizerImpl normalizer = new DatalogMTLNormalizerImpl(datalogMTLFactory);
         DatalogMTLProgram program;
         try {
             program = parser.parse(input);
+            //program = normalizer.normalize(program);
             log.debug("mapping " + program);
         } catch (Exception e) {
             log.debug(e.getMessage());
@@ -94,5 +85,4 @@ public class DatalogMTLParserTest {
         }
         return null;
     }
-
 }

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.datalogmtl.parser.impl;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLLexer;
@@ -14,12 +15,11 @@ import java.util.Map;
 
 public class DatalogMTLSyntaxParserImpl implements DatalogMTLSyntaxParser {
 
-    private final Map<String, String> prefixes;
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
 
-    public DatalogMTLSyntaxParserImpl(Map<String, String> prefixes, AtomFactory atomFactory, TermFactory termFactory) {
-        this.prefixes = prefixes;
+    @Inject
+    public DatalogMTLSyntaxParserImpl(AtomFactory atomFactory, TermFactory termFactory) {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
     }

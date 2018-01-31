@@ -7,6 +7,10 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
+import it.unibz.inf.ontop.spec.datalogmtl.DatalogMTLProgramExtractor;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLNormalizer;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.mapping.*;
@@ -22,6 +26,7 @@ import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLFactory;
 
 /**
  * Created by elem on 08/08/2017.
@@ -60,6 +65,10 @@ public class OntopTemporalModule extends OntopAbstractModule {
         bindFromSettings(StaticRuleMappingSaturator.class);
         bindFromSettings(DatalogMTLToIntermediateQueryConverter.class);
         bindFromSettings(RuleUnfolder.class);
+        bindFromSettings(DatalogMTLFactory.class);
+        bindFromSettings(DatalogMTLSyntaxParser.class);
+        bindFromSettings(DatalogMTLNormalizer.class);
+        bindFromSettings(DatalogMTLProgramExtractor.class);
         //bindFromSettings(TemporalQuadrupleMapping.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(
@@ -67,7 +76,8 @@ public class OntopTemporalModule extends OntopAbstractModule {
                 MappingMetadata.class,
                 Mapping.class,
                 OBDASpecification.class,
-                TemporalMapping.class
+                TemporalMapping.class,
+                TemporalOBDASpecification.class
         ), TemporalSpecificationFactory.class);
         install(specFactoryModule);
 

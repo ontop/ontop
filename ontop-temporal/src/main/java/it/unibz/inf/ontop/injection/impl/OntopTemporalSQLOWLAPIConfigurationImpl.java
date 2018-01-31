@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -12,6 +13,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
@@ -21,7 +24,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         extends OntopSQLOWLAPIConfigurationImpl
         implements OntopTemporalSQLOWLAPIConfiguration {
 
-    public final OntopTemporalMappingSQLAllConfigurationImpl temporalConfiguration;
+    private final OntopTemporalMappingSQLAllConfigurationImpl temporalConfiguration;
     private final OntopTemporalSQLOWLAPIOptions options;
 
     private final OntopMappingOWLAPIConfigurationImpl mappingOWLConfiguration;
@@ -46,7 +49,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return temporalConfiguration.loadSpecification(()->mappingOWLConfiguration.loadOntology());
+        return temporalConfiguration.loadSpecification(mappingOWLConfiguration::loadOntology, options.ruleFile);
     }
 
     @Override
@@ -55,13 +58,68 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
     }
 
     static class OntopTemporalSQLOWLAPIOptions {
+        final Optional<File> ruleFile;
+        final Optional<Reader> ruleReader;
         final OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions;
         final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions;
 
-        OntopTemporalSQLOWLAPIOptions(OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions, OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
+        OntopTemporalSQLOWLAPIOptions(Optional<File> ruleFile, Optional<Reader> ruleReader, OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions, OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
+            this.ruleFile = ruleFile;
+            this.ruleReader = ruleReader;
             this.owlOptions = owlOptions;
             this.temporalOptions = temporalOptions;
         }
+    }
+
+    static class StandardOntopTemporalSQLOWLAPIBuilderFragment<B extends OntopTemporalSQLOWLAPIConfiguration.Builder<B>>
+    implements OntopTemporalSQLOWLAPIBuilderFragment {
+
+
+        private final B builder;
+
+        Optional<File> ruleFile = Optional.empty();
+        Optional<Reader> ruleReader = Optional.empty();
+
+        boolean useRule = false;
+
+        protected StandardOntopTemporalSQLOWLAPIBuilderFragment(B builder) {
+            this.builder = builder;
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleFile(@Nonnull File ruleFile) {
+            this.ruleFile = Optional.of(ruleFile);
+            useRule = true;
+            return builder;
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleFile(@Nonnull String ruleFilename) {
+            try {
+                URI fileURI = new URI(ruleFilename);
+                String scheme = fileURI.getScheme();
+                if (scheme == null) {
+                    this.ruleFile = Optional.of(new File(fileURI.getPath()));
+                } else if (scheme.equals("file")) {
+                    this.ruleFile = Optional.of(new File(fileURI));
+                } else {
+                    throw new InvalidOntopConfigurationException("Currently only local files are supported" +
+                            "as rule files");
+                }
+            } catch (URISyntaxException e) {
+                throw new InvalidOntopConfigurationException("Invalid rule file path: " + e.getMessage());
+            }
+            useRule = true;
+            return builder;
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleReader(@Nonnull Reader ruleReader) {
+            this.ruleReader = Optional.of(ruleReader);
+            useRule = true;
+            return builder;
+        }
+
     }
 
     static abstract class OntopTemporalSQLOWLAPIBuilderMixin<B extends OntopTemporalSQLOWLAPIConfiguration.Builder<B>>
@@ -69,12 +127,29 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             implements OntopTemporalSQLOWLAPIConfiguration.Builder<B> {
 
         private final OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<B> temporalMappingBuilderFragment;
+        private final StandardOntopTemporalSQLOWLAPIBuilderFragment<B> localFragmentBuilder;
 
         OntopTemporalSQLOWLAPIBuilderMixin() {
-            B builder = (B) this;
+            B builder = (B)this;
+            localFragmentBuilder = new StandardOntopTemporalSQLOWLAPIBuilderFragment<>(builder);
             temporalMappingBuilderFragment = new OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<>(builder,
                     this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
 
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleFile(@Nonnull File ruleFile) {
+            return localFragmentBuilder.nativeOntopTemporalRuleFile(ruleFile);
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleFile(@Nonnull String ruleFilename) {
+            return localFragmentBuilder.nativeOntopTemporalRuleFile(ruleFilename);
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleReader(@Nonnull Reader ruleReader) {
+            return localFragmentBuilder.nativeOntopTemporalRuleReader(ruleReader);
         }
 
         @Override
@@ -120,7 +195,8 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         }
 
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
-            return new OntopTemporalSQLOWLAPIOptions(generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
+            return new OntopTemporalSQLOWLAPIOptions(localFragmentBuilder.ruleFile, localFragmentBuilder.ruleReader,
+                    generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
         }
 
     }
