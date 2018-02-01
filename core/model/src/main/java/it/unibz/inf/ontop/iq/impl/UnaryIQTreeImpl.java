@@ -36,7 +36,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, child, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
+        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }
 
     @Override

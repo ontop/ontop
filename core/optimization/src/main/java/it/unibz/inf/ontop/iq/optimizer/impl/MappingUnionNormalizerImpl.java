@@ -5,28 +5,33 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
+/**
+ * Lifts unions above projections, until a fixed point is reached.
+ * Also merges consecutive unions and projections.
+ * <p>
+ * This normalization may be needed for datalog-based mapping optimizers.
+ */
 public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final MappingUnionNormalizerTreeTransformer transformer;
 
-    private class MappingUnionNormalizerTreeTransformer extends DefaultRecursiveIQTransformer implements IQTransformer {
+    private class TreeTransformer extends DefaultRecursiveIQTransformer {
 
-        @Inject
-        private MappingUnionNormalizerTreeTransformer(IntermediateQueryFactory iqFactory) {
+        private final VariableGenerator variableGenerator;
+
+        private TreeTransformer(VariableGenerator variableGenerator) {
             super(iqFactory);
+            this.variableGenerator = variableGenerator;
         }
 
         @Override
@@ -35,68 +40,66 @@ public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
             IQTree transformedChild = child.acceptTransformer(this);
             QueryNode transformedChildRoot = transformedChild.getRootNode();
 
-            // If the child is a union, lift it
+            // if the child is a union, lift it
             if (transformedChildRoot instanceof UnionNode) {
-
-                UnionNode updatedUnion = iqFactory.createUnionNode(rootCn.getVariables());
                 return iqFactory.createNaryIQTree(
-                        updatedUnion,
+                        iqFactory.createUnionNode(rootCn.getVariables()),
                         transformedChild.getChildren().stream()
                                 .map(t -> iqFactory.createUnaryIQTree(rootCn, t))
                                 .collect(ImmutableCollectors.toList())
                 );
             }
-
             // if the child is a construction node, merge it
             if (transformedChildRoot instanceof ConstructionNode) {
-
-                ImmutableSubstitution composition = rootCn.getSubstitution().composeWith(
-                        ((ConstructionNode) transformedChildRoot).getSubstitution());
-
-                return iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(
-                                rootCn.getVariables(),
-                                composition
-                        ),
-                        ((UnaryIQTree) transformedChild).getChild()
+                return rootCn.liftBinding(
+                        transformedChild,
+                        variableGenerator,
+                        iqFactory.createIQProperties()
                 );
             }
             return iqFactory.createUnaryIQTree(rootCn, transformedChild);
         }
 
         @Override
-        // Merge consecutive unions
+        // merge consecutive unions
         public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
-            Stream<IQTree> transformedChildren = children.stream().
-                    map(t -> t.acceptTransformer(this));
-            Stream<IQTree> unionChildren = transformedChildren.
-                    filter(t -> t.getRootNode() instanceof UnionNode);
-            Stream<IQTree> nonUnionChildren = transformedChildren.
-                    filter(t -> !(t.getRootNode() instanceof UnionNode));
+            ImmutableList<IQTree> transformedChildren = children.stream()
+                    .map(t -> t.acceptTransformer(this))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<IQTree> unionGrandChildren = transformedChildren.stream()
+                    .filter(t -> t.getRootNode() instanceof UnionNode)
+                    .flatMap(t -> t.getChildren().stream())
+                    .collect(ImmutableCollectors.toList());
 
             return iqFactory.createNaryIQTree(
                     rootNode,
                     Stream.concat(
-                            nonUnionChildren,
-                            unionChildren.
-                                    flatMap(t -> t.getChildren().stream())
+                            transformedChildren.stream()
+                                    .filter(t -> !(t.getRootNode() instanceof UnionNode)),
+                            unionGrandChildren.stream()
                     ).collect(ImmutableCollectors.toList())
             );
         }
     }
 
     @Inject
-    public MappingUnionNormalizerImpl(IntermediateQueryFactory iqFactory, MappingUnionNormalizerTreeTransformer transformer) {
+    private MappingUnionNormalizerImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.transformer = transformer;
     }
 
     @Override
     public IQ optimize(IQ query) {
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                query.getTree().acceptTransformer(transformer)
-        );
+        TreeTransformer treeTransformer = new TreeTransformer(query.getVariableGenerator());
+        IQ prev;
+        do {
+            prev = query;
+            query = iqFactory.createIQ(
+                    query.getProjectionAtom(),
+                    query.getTree().acceptTransformer(treeTransformer)
+            );
+        } while (!prev.equals(query));
+        return query;
     }
 }
