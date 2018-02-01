@@ -392,8 +392,18 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return CONSTRUCTION_NODE_STR + " " + projectedVariables + " " + "[" + substitution + "]" ;
     }
 
+    /**
+     * TODO: refactor
+     */
     @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(child, variableGenerator, currentIQProperties);
+    }
+
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
@@ -402,7 +412,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             return iqFactory.createEmptyNode(projectedVariables);
         }
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareNormalizedForOptimization());
     }
 
     /**
@@ -627,7 +637,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
 
-        return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareLifted());
+        return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private class EmptyTreeException extends Exception {

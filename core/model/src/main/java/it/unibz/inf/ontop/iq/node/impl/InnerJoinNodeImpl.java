@@ -151,11 +151,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
+
     /**
-     * TODO: explain
+     * TODO: refactor
      */
-    @Override
-    public IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator,
+    private IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator,
                               IQProperties currentIQProperties) {
         IQTree newParentTree = propagateDownCondition(Optional.empty(), initialChildren);
 
@@ -170,7 +170,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             /*
              * Otherwise, goes back to the general method
              */
-            return newParentTree.liftBinding(variableGenerator);
+            return newParentTree.normalizeForOptimization(variableGenerator);
     }
 
     /**
@@ -220,12 +220,20 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                             .filter(vars -> !vars.equals(childrenVariables))
                             .map(iqFactory::createConstructionNode))
                     .map(constructionNode -> (IQTree) iqFactory.createUnaryIQTree(constructionNode, newJoinIQ,
-                            currentIQProperties.declareLifted()))
+                            currentIQProperties.declareNormalizedForOptimization()))
                     .orElse(newJoinIQ);
 
         } catch (EmptyIQException e) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
+    }
+
+    /**
+     * TODO: refactor
+     */
+    @Override
+    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(children, variableGenerator, currentIQProperties);
     }
 
     @Override
@@ -483,7 +491,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
                         ? this
                         : changeOptionalFilterCondition(currentJoiningCondition);
-                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, currentIQProperties.declareLifted());
+                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, currentIQProperties.declareNormalizedForOptimization());
         }
     }
 

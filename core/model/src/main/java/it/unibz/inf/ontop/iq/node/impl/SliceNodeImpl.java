@@ -50,10 +50,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     /**
-     * Blocks substitutions
+     *
+     * TODO: should not block substitutions anymore!
+     *
+     * TODO: refactor
      */
-    @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree newChild = child.liftBinding(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
@@ -62,19 +64,27 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     /**
      * TODO: implement it seriously
      */
     private IQTree liftSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
-        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
         throw new RuntimeException("TODO: implement it");
+    }
+
+    /**
+     * TODO: refactor
+     */
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(child, variableGenerator, currentIQProperties);
     }
 
     @Override

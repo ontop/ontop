@@ -166,8 +166,19 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return transformer.transformLeftJoin(tree,this, leftChild, rightChild);
     }
 
+    /**
+     * TODO: refactor
+     */
     @Override
-    public IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
+    public IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
+                                           IQProperties currentIQProperties) {
+        return liftBinding(leftChild, rightChild, variableGenerator, currentIQProperties);
+    }
+
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree initialLeftChild, IQTree initialRightChild, VariableGenerator variableGenerator,
                               IQProperties currentIQProperties) {
 
         ImmutableSet<Variable> projectedVariables = Stream.of(initialLeftChild, initialRightChild)
@@ -728,12 +739,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                     // LJ
                     .map(rightChild -> (IQTree) iqFactory.createBinaryNonCommutativeIQTree(
                         iqFactory.createLeftJoinNode(liftingState.ljCondition),
-                        liftingState.leftChild, liftingState.rightChild, currentIQProperties.declareLifted()))
+                        liftingState.leftChild, liftingState.rightChild, currentIQProperties.declareNormalizedForOptimization()))
                     // Left child
                     .orElse(liftingState.leftChild));
 
         return topConstructionNode
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, currentIQProperties.declareLifted()))
+                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, subTree, currentIQProperties.declareNormalizedForOptimization()))
                 .orElse(subTree);
     }
 

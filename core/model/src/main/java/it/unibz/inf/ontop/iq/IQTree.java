@@ -24,7 +24,7 @@ public interface IQTree {
 
     IQTree acceptTransformer(IQTransformer transformer);
 
-    IQTree liftBinding(VariableGenerator variableGenerator);
+    IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 
     /**
      * Tries to lift unions when they have incompatible definitions
@@ -32,9 +32,6 @@ public interface IQTree {
      *
      * Union branches with compatible definitions are kept together
      *
-     * Assumes that a "regular" binding lift has already been applied
-     *   --> the remaining "non-lifted" definitions are conflicting with
-     *       others.
      */
     IQTree liftIncompatibleDefinitions(Variable variable);
 

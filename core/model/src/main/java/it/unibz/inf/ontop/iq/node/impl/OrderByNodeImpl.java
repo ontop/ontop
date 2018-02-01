@@ -41,12 +41,14 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         return comparators;
     }
 
-    @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.liftBinding(variableGenerator);
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
-        IQProperties liftedProperties = currentIQProperties.declareLifted();
+        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
 
         if (newChildRoot instanceof ConstructionNode)
             return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
@@ -89,6 +91,14 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
         throw new RuntimeException("TODO: implement");
+    }
+
+    /**
+     * TODO: refactor
+     */
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(child, variableGenerator, currentIQProperties);
     }
 
     @Override

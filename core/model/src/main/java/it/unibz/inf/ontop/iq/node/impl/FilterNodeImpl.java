@@ -158,8 +158,10 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         return FILTER_NODE_STR + getOptionalFilterString();
     }
 
-    @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree newParentTree = propagateDownCondition(childIQTree, Optional.empty());
 
         /*
@@ -221,7 +223,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return liftedChildIQTree;
         }
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareNormalizedForOptimization());
+    }
+
+    /**
+     * TODO: refactor
+     */
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(child, variableGenerator, currentIQProperties);
     }
 
     @Override
@@ -271,7 +281,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                                IQProperties currentIQProperties, VariableGenerator variableGenerator) {
         IQTree grandChildIQTree = liftedChildIQ.getChild();
 
-        IQProperties liftedProperties = currentIQProperties.declareLifted();
+        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
 
         ImmutableExpression unoptimizedExpression = childConstructionNode.getSubstitution()
                 .applyToBooleanExpression(getFilterCondition());

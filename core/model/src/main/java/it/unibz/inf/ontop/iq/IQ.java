@@ -16,7 +16,7 @@ public interface IQ {
 
     VariableGenerator getVariableGenerator();
 
-    IQ liftBinding();
+    IQ normalizeForOptimization();
 
     void validate() throws InvalidIntermediateQueryException;
 }

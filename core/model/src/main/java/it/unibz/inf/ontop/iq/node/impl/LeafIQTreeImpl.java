@@ -37,7 +37,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         return this;
     }
 

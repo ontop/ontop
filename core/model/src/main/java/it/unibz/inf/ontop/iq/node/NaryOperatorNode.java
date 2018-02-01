@@ -19,8 +19,8 @@ import java.util.Optional;
  */
 public interface NaryOperatorNode extends QueryNode {
 
-    IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
-                       IQProperties currentIQProperties);
+    IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
+                                    IQProperties currentIQProperties);
 
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children);
@@ -29,6 +29,7 @@ public interface NaryOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, ImmutableList<IQTree> children);
 
+    @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children);

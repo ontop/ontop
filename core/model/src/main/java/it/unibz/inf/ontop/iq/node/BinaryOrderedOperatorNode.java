@@ -32,8 +32,8 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild);
 
-    IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
-                       IQProperties currentIQProperties);
+    IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
+                                    IQProperties currentIQProperties);
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild);
 

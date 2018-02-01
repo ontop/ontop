@@ -70,11 +70,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         IQProperties properties = getProperties();
-        if (properties.isLifted())
+        if (properties.isNormalizedForOptimization())
             return this;
-        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator, properties);
+        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, properties);
     }
 
     @Override

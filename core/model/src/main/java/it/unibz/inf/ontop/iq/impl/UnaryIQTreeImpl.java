@@ -40,16 +40,13 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
-        if (getProperties().isLifted())
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        if (getProperties().isNormalizedForOptimization())
             return this;
         else
-            return getRootNode().liftBinding(getChild(), variableGenerator, getProperties());
+            return getRootNode().normalizeForOptimization(getChild(), variableGenerator, getProperties());
     }
 
-    /**
-     * TODO: use the properties for optimization purposes
-     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable) {
         return getRootNode().liftIncompatibleDefinitions(variable, getChild());

@@ -34,8 +34,18 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         this.substitutionFactory = substitutionFactory;
     }
 
+    /**
+     * TODO: refactor
+     */
     @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        return liftBinding(child, variableGenerator, currentIQProperties);
+    }
+
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQTree newChild = child.liftBinding(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
@@ -46,13 +56,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private IQTree liftBindingConstructionChild(IQTree child, ConstructionNode constructionNode,
                                                 IQProperties currentIQProperties) {
 
-        IQProperties liftedProperties = currentIQProperties.declareLifted();
+        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = constructionNode.getSubstitution();
 

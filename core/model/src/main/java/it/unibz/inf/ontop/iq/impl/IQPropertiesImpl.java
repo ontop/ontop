@@ -4,23 +4,23 @@ import it.unibz.inf.ontop.iq.IQProperties;
 
 public class IQPropertiesImpl implements IQProperties {
 
-    private final boolean isLifted;
+    private final boolean isNormalized;
 
     protected IQPropertiesImpl() {
-        this.isLifted = false;
+        this.isNormalized = false;
     }
 
-    private IQPropertiesImpl(boolean isLifted) {
-        this.isLifted = false;
-    }
-
-    @Override
-    public boolean isLifted() {
-        return isLifted;
+    private IQPropertiesImpl(boolean isNormalized) {
+        this.isNormalized = false;
     }
 
     @Override
-    public IQProperties declareLifted() {
+    public boolean isNormalizedForOptimization() {
+        return isNormalized;
+    }
+
+    @Override
+    public IQProperties declareNormalizedForOptimization() {
         return new IQPropertiesImpl(true);
     }
 }

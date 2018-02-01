@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -38,7 +37,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
 
     @Override
     public IQ optimize(IQ query) {
-        IQ bindingLiftedQuery = query.liftBinding();
+        IQ bindingLiftedQuery = query.normalizeForOptimization();
         return liftUnionsInTree(bindingLiftedQuery);
     }
 

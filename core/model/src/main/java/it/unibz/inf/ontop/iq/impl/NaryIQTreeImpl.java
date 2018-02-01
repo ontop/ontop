@@ -57,10 +57,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
-        return getProperties().isLifted()
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        return getProperties().isNormalizedForOptimization()
                 ? this
-                : getRootNode().liftBinding(getChildren(), variableGenerator, getProperties());
+                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getProperties());
     }
 
     /**
