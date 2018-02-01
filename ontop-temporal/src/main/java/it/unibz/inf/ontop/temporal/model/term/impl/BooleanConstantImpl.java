@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.temporal.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
 import it.unibz.inf.ontop.temporal.model.term.BooleanConstant;
-import it.unibz.inf.ontop.temporal.model.term.VariableOrBooleanConstant;
 
 import javax.annotation.Nonnull;
 
