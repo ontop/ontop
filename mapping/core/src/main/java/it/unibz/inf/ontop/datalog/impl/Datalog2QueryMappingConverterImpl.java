@@ -11,6 +11,11 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -29,7 +34,6 @@ import java.util.Optional;
 
 /**
  * Convert mapping assertions from Datalog to IntermediateQuery
- *
  */
 @Singleton
 public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingConverter {
@@ -39,7 +43,11 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
+    private final MappingUnionNormalizer mappingUnionNormalizer;
     private final DatalogRule2QueryConverter datalogRule2QueryConverter;
+    private final BindingLiftOptimizer bindingLifter;
+    private final IQConverter iqConverter;
+
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
@@ -47,13 +55,19 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                               IntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory,
                                               NoNullValueEnforcer noNullValueEnforcer,
-                                              DatalogRule2QueryConverter datalogRule2QueryConverter){
+                                              MappingUnionNormalizer mappingUnionNormalizer,
+                                              DatalogRule2QueryConverter datalogRule2QueryConverter,
+                                              BindingLiftOptimizer bindingLifter,
+                                              IQConverter iqConverter) {
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
         this.noNullValueEnforcer = noNullValueEnforcer;
+        this.mappingUnionNormalizer = mappingUnionNormalizer;
         this.datalogRule2QueryConverter = datalogRule2QueryConverter;
+        this.bindingLifter = bindingLifter;
+        this.iqConverter = iqConverter;
     }
 
     @Override
@@ -83,10 +97,10 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 ))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(noNullValueEnforcer::transform)
+                .map(q -> normalizeMappingIQ(q))
                 .collect(ImmutableCollectors.toMap(
-                    q -> q.getProjectionAtom().getPredicate(),
-                    q -> q
+                        q -> q.getProjectionAtom().getPredicate(),
+                        q -> q
                 ));
 
 
@@ -97,26 +111,42 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap,
                                                      DBMetadata dbMetadata, ExecutorRegistry executorRegistry,
                                                      MappingMetadata mappingMetadata) {
+
         ImmutableSet<Predicate> extensionalPredicates = datalogMap.keySet().stream()
                 .flatMap(r -> r.getBody().stream())
                 .flatMap(Datalog2QueryTools::extractPredicates)
                 .collect(ImmutableCollectors.toSet());
 
-
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> noNullValueEnforcer.transform(
+                        e -> Optional.of(
                                 datalogRule2QueryConverter.convertDatalogRule(
-                                dbMetadata,
-                                e.getKey(),
-                                extensionalPredicates,
-                                Optional.empty(),
-                                iqFactory,
-                                executorRegistry
-                        )),
+                                        dbMetadata,
+                                        e.getKey(),
+                                        extensionalPredicates,
+                                        Optional.empty(),
+                                        iqFactory,
+                                        executorRegistry
+                                )).map(q -> normalizeMappingIQ(q)).get(),
                         Map.Entry::getValue
                 ));
 
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
+    }
+
+    private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
+        IntermediateQuery queryAfterUnionNormalization;
+        try {
+            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
+            IQ iqAfterUnionNormalization = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
+            queryAfterUnionNormalization = iqConverter.convert(
+                    iqAfterUnionNormalization,
+                    queryAfterBindingLift.getDBMetadata(),
+                    query.getExecutorRegistry()
+            );
+        } catch (EmptyQueryException e) {
+            throw new IllegalStateException("The query should not become empty");
+        }
+        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
     }
 }

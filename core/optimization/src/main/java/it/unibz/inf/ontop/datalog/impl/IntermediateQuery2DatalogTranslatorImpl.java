@@ -235,6 +235,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		Map<QueryNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
 		subQueryProjectionAtoms.put(root, query.getProjectionAtom());
 
+//		if(root instanceof UnionNode){
+//			query.getChildren(root).stream()
+//					.filter(n -> n instanceof ConstructionNode)
+//					.forEach(n -> subQueryProjectionAtoms.put(n, query.getProjectionAtom()));
+//		}
+
 		//In heads we keep the heads of the sub-rules in the program, e.g. ans5() :- LeftJoin(....)
 		while(!heads.isEmpty()) {
 
@@ -280,7 +286,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			ConstructionNode constructionNode = (ConstructionNode) node;
 			DataAtom projectionAtom = Optional.ofNullable(
 					subQueryProjectionAtoms.get(constructionNode))
-					//.map(atom -> adaptProjectionAtom(atom, constructionNode))
+//					.map(atom -> adaptProjectionAtom(atom, constructionNode))
 					.orElseGet(() -> generateProjectionAtom(constructionNode.getVariables()));
 
 			heads.add(new RuleHead(constructionNode.getSubstitution(), projectionAtom,te.getFirstChild(constructionNode)));
