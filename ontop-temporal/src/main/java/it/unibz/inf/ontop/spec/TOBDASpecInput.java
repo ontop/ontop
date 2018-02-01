@@ -17,6 +17,10 @@ public interface TOBDASpecInput extends OBDASpecInput {
         return getFile(TEMPORAL_MAPPING_KEY);
     }
 
+    default Optional<File> getTemporalRuleFile() {
+        return getFile(TEMPORAL_RULE_KEY);
+    }
+
     interface Builder {
 
         TOBDASpecInput.Builder addFile(String key, File file);
@@ -33,6 +37,10 @@ public interface TOBDASpecInput extends OBDASpecInput {
             return addFile(TEMPORAL_MAPPING_KEY, temporalMappingFile);
         }
 
+        default TOBDASpecInput.Builder addTemporalRuleFile(File temporalRuleFile) {
+            return addFile(TEMPORAL_RULE_KEY, temporalRuleFile);
+        }
+
         default TOBDASpecInput.Builder addMappingReader(Reader mappingReader) {
             return addReader(MAPPING_KEY, mappingReader);
         }
@@ -47,4 +55,5 @@ public interface TOBDASpecInput extends OBDASpecInput {
     }
 
     String TEMPORAL_MAPPING_KEY = "temporalMapping";
+    String TEMPORAL_RULE_KEY = "temporalRule";
 }

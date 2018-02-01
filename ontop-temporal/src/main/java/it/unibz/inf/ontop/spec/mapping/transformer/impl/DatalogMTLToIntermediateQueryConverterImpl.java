@@ -60,23 +60,18 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
 
         if (rule.getHead() instanceof TemporalAtomicExpression) {
             if (!teStack.empty()) {
-                //ImmutableMap<Variable, Variable> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping,temporalMappingMap);
-
                 //creating construction node for the head of the rule
                 TargetAtom targetAtom = datalogMTLConversionTools
                         .convertFromDatalogDataAtom(termFactory.getFunction(rule.getHead()
                                 .getPredicate(), rule.getHead().getTerms()));
-                //varMap.values().stream().map(v->(Term)v).collect(Collectors.toList())
                 DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
                 ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables());
                 TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
                 TIQBuilder.init(projectionAtom, constructionNode);
                 TIQBuilder = getBuilder(rule.getBody(), constructionNode, TIQBuilder);
-                IntermediateQuery intermediateQuery = TIQBuilder.build();
-                return intermediateQuery;
+                return TIQBuilder.build();
             }
         }
-
         return null;
     }
 

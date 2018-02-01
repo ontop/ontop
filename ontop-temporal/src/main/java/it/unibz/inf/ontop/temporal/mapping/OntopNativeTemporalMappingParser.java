@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
+import it.unibz.inf.ontop.temporal.model.term.BooleanConstant;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
@@ -273,7 +274,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         //isBeginInclusive
         Predicate beginInclusive = atomFactory.getAtomPredicate(QuadrupleElements.isBeginInclusive.toString(),2);
 
-        ngComponentsList.add(termFactory.getImmutableFunctionalTerm(beginInclusive, intervalURITemplate, termFactory.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isBeginInclusive())));
+        ngComponentsList.add(termFactory.getImmutableFunctionalTerm(beginInclusive, intervalURITemplate, termFactory.getBooleanConstant(((BooleanConstant)temporalTriplesMap.getTemporalMappingInterval().isBeginInclusive()).getBooleanValue())));
 
         //hasBeginning
         Predicate hasBeginning = atomFactory.getAtomPredicate(QuadrupleElements.hasBeginning.toString(),2);
@@ -293,7 +294,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
         //isEndInclusive
         Predicate endInclusive = atomFactory.getAtomPredicate(QuadrupleElements.isEndInclusive.toString(),2);
 
-        ngComponentsList.add(termFactory.getImmutableFunctionalTerm(endInclusive, intervalURITemplate, termFactory.getBooleanConstant(temporalTriplesMap.getTemporalMappingInterval().isEndInclusive())));
+        ngComponentsList.add(termFactory.getImmutableFunctionalTerm(endInclusive, intervalURITemplate, termFactory.getBooleanConstant(((BooleanConstant)temporalTriplesMap.getTemporalMappingInterval().isEndInclusive()).getBooleanValue())));
 
         //hasEnd
         Predicate hasEnd = atomFactory.getAtomPredicate(QuadrupleElements.hasEnd.toString(),2);

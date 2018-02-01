@@ -19,6 +19,7 @@ public class TemporalMappingParserTest extends TestCase {
                 .ontologyFile("src/test/resources/siemens.owl")
                 .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
                 .nativeOntopMappingFile("src/test/resources/siemens.obda")
+                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)

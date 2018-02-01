@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
+
+    @Inject
+    public DatalogMTLFactoryImpl(){}
 
     public static DatalogMTLFactory getInstance() {
         return new DatalogMTLFactoryImpl();

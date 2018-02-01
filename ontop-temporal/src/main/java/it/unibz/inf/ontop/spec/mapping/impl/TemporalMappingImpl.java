@@ -70,7 +70,7 @@ public class TemporalMappingImpl implements TemporalMapping {
 
     @Override
     public ImmutableCollection<IntermediateQuery> getQueries() {
-        return definitions.values().stream().map(i-> i.getIntermediateQuery()).collect(ImmutableCollectors.toList());
+        return definitions.values().stream().map(IntervalAndIntermediateQuery::getIntermediateQuery).collect(ImmutableCollectors.toList());
     }
 
     @Override
@@ -81,5 +81,10 @@ public class TemporalMappingImpl implements TemporalMapping {
     @Override
     public IntervalAndIntermediateQuery getIntervalAndIntermediateQuery(AtomPredicate predicate) {
         return definitions.get(predicate);
+    }
+
+    @Override
+    public ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> getDefinitions() {
+        return definitions;
     }
 }

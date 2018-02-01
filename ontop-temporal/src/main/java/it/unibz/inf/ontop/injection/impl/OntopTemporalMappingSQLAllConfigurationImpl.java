@@ -56,32 +56,21 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
         return loadSpecification(Optional::empty);
     }
 
-    OBDASpecification loadSpecification(OntologySupplier ontologySupplier)
-            throws OBDASpecificationException {
-
-        return loadTemporalSpecification(ontologySupplier,
-                () -> options.temporalMappingFile,
-                () -> options.mappingFile,
-                () -> options.mappingReader,
-                () -> options.mappingGraph,
-                () -> options.constraintFile);
+    public OBDASpecification loadOBDASpecification(OntologySupplier ontologySupplier) throws OBDASpecificationException {
+        return loadSpecification(ontologySupplier, Optional.empty());
     }
 
-    OBDASpecification loadTemporalSpecification(OntologySupplier ontologySupplier,
-                                        Supplier<Optional<File>> temporalMappingFileSupplier,
-                                        Supplier<Optional<File>> mappingFileSupplier,
-                                        Supplier<Optional<Reader>> mappingReaderSupplier,
-                                        Supplier<Optional<Graph>> mappingGraphSupplier,
-                                        Supplier<Optional<File>> constraintFileSupplier)
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier, Optional<File> ruleFile)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
                 () -> options.mappingSQLOptions.mappingSQLOptions.ppMapping.map(m -> (PreProcessedMapping) m),
-                temporalMappingFileSupplier,
-                mappingFileSupplier,
-                mappingReaderSupplier,
-                mappingGraphSupplier,
-                constraintFileSupplier
+                () -> options.temporalMappingFile,
+                () -> options.mappingFile,
+                () -> options.mappingReader,
+                () -> options.mappingGraph,
+                () -> options.constraintFile,
+                () -> ruleFile
         );
     }
 
@@ -91,7 +80,8 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
                                         Supplier<Optional<File>> mappingFileSupplier,
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
-                                        Supplier<Optional<File>> constraintFileSupplier
+                                        Supplier<Optional<File>> constraintFileSupplier,
+                                        Supplier<Optional<File>> ruleFileSupplier
     ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -104,8 +94,9 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
         Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
 
         TOBDASpecInput.Builder specInputBuilder = TOBDASpecInput.defaultBuilder();
-        constraintFileSupplier.get()
-                .ifPresent(specInputBuilder::addConstraintFile);
+        constraintFileSupplier.get().ifPresent(specInputBuilder::addConstraintFile);
+
+        ruleFileSupplier.get().ifPresent(specInputBuilder::addTemporalRuleFile);
 
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();

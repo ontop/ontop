@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -17,17 +17,18 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
+import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
+import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -48,16 +49,20 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
     private final BindingLiftOptimizer bindingLiftOptimizer;
+    private final TemporalSpecificationFactory specificationFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
                                          RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools,
-                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory, BindingLiftOptimizer bindingLiftOptimizer) {
+                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory, BindingLiftOptimizer bindingLiftOptimizer, TemporalSpecificationFactory specificationFactory, TermFactory termFactory) {
         this.dMTLConverter = dMTLConverter;
         this.ruleUnfolder = ruleUnfolder;
         this.immutabilityTools = immutabilityTools;
         TIQFactory = tiqFactory;
         this.bindingLiftOptimizer = bindingLiftOptimizer;
+        this.specificationFactory = specificationFactory;
+        this.termFactory = termFactory;
         this.pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
         projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -89,7 +94,6 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         System.out.println(iq.toString());
                         bindingLiftOptimizer.optimize(iq);
                         System.out.println(iq.toString());
-                        //System.out.println(iq.toString());
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
                         //iq = projectionShrinkingOptimizer.optimize(iq);
                         //iq = joinLikeOptimizer.optimize(iq);
@@ -108,7 +112,31 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 }
             }
         }
-        return null;
+        return specificationFactory.createTemporalMapping(temporalMapping.getMetadata(), getOnlyTemporalMappings(mergedMap, mapping, temporalMapping), temporalMapping.getExecutorRegistry());
+    }
+
+    private ImmutableMap<AtomPredicate, IntervalAndIntermediateQuery> getOnlyTemporalMappings(Map<AtomPredicate, IntermediateQuery> mergedmap,
+                                                                                     Mapping staticMapping, TemporalMapping temporalMapping){
+        Map<AtomPredicate, IntervalAndIntermediateQuery> map = new HashMap<>();
+        temporalMapping.getDefinitions().keySet().forEach(k -> map.put(k,temporalMapping.getDefinitions().get(k)));
+
+
+        for(AtomPredicate predicate : mergedmap.keySet()){
+            if (staticMapping.getPredicates().stream().noneMatch(p -> p.equals(predicate))){
+                map.putIfAbsent(predicate, getIntvAndIQ(mergedmap.get(predicate), predicate));
+            }
+        }
+        return ImmutableMap.copyOf(map);
+    }
+
+    private IntervalAndIntermediateQuery getIntvAndIQ(IntermediateQuery iq, AtomPredicate predicate){
+        TemporalMappingInterval tmi = new TemporalMappingIntervalImpl(
+                (termFactory.getVariable(predicate.getName() + "_beginInc")),
+                (termFactory.getVariable(predicate.getName() + "_endInc")),
+                termFactory.getVariable(predicate.getName() + "_begin"),
+                termFactory.getVariable(predicate.getName() + "_end"));
+
+        return new IntervalAndIntermediateQuery(tmi, iq);
     }
 
     private Map<AtomPredicate, IntermediateQuery> mergeMappings(Mapping mapping, TemporalMapping temporalMapping){
@@ -128,6 +156,14 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
             return true;
 
         return false;
+
+//        ImmutableList<AtomicExpression> list = atomicExpressionsList.stream().filter(ae -> !(ae instanceof ComparisonExpression)).collect(ImmutableCollectors.toList());
+//
+//         for (AtomicExpression ae : list){
+//             if (mergedMap.keySet().stream().noneMatch(atomPredicate -> atomPredicate.getName().equals(ae.getPredicate().getName())))
+//                 return false;
+//         }
+//        return true;
     }
 
     private ImmutableList<AtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {

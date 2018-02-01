@@ -65,23 +65,32 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
             Mapping factsAsMapping = factConverter.convert(ontology.get().abox(), mapping.getExecutorRegistry(),
                     settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
             Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-            Mapping normalizedMapping = mappingNormalizer.normalize(mappingWithFacts);
+
+            //copied from createSpecification method
+            Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mappingWithFacts, dbMetadata);
+            Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
+            Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, ontology.get().tbox());
+            Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
             Mapping saturatedRuleMapping = staticRuleMappingSaturator.saturate(normalizedMapping, dbMetadata, datalogMTLProgram);
 
             TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, temporalMapping, temporalDBMetadata, datalogMTLProgram);
-            //return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
+            return temporalSpecificationFactory.createTemporalSpecification(saturatedRuleMapping, dbMetadata, temporalSaturatedMapping, temporalDBMetadata, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder().build().tbox();
-            Mapping normalizedMapping = mappingNormalizer.normalize(mapping);
+
+            //copied from createSpecification method
+            Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
+            Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
+            Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, ontology.get().tbox());
+            Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+
             Mapping saturatedRuleMapping = staticRuleMappingSaturator.saturate(normalizedMapping, dbMetadata, datalogMTLProgram);
 
             TemporalMapping temporalSaturatedMapping = temporalMappingSaturator.saturate(saturatedRuleMapping, temporalMapping, temporalDBMetadata, datalogMTLProgram);
-            //return createSpecification(mapping, dbMetadata, emptyTBox);
+            return temporalSpecificationFactory.createTemporalSpecification(saturatedRuleMapping, dbMetadata, temporalSaturatedMapping, temporalDBMetadata, emptyTBox);
         }
-
-        return null;
-        //return temporalSpecificationFactory.createSpecification(temporalSaturatedMapping, dbMetadata, tBox, ontology.getVocabulary());
     }
 
     @Override
