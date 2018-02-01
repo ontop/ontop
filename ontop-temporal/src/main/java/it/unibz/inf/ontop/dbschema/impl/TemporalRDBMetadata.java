@@ -1,7 +1,8 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;

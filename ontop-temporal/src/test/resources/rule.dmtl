@@ -1,5 +1,5 @@
 PREFIX ss:     <http://siemens.com/ns#>
-PREFIX st:     <http://siemenstemporal.com/ns#> 
+PREFIX st:     <http://siemens.com/temporal/ns#>
 PREFIX obda:   <https://w3id.org/obda/vocabulary#>
 PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 

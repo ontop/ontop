@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.temporal.mapping;
 
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.temporal.model.term.VariableOrBooleanConstant;
 
 public interface TemporalMappingInterval {
 
-    boolean isBeginInclusive();
+    VariableOrGroundTerm isBeginInclusive();
 
-    boolean isEndInclusive();
+    VariableOrGroundTerm isEndInclusive();
 
     Variable getBegin();
 

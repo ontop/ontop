@@ -1,23 +1,25 @@
 package it.unibz.inf.ontop.temporal.mapping.impl;
 
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
+import it.unibz.inf.ontop.temporal.model.term.BooleanConstant;
 
 public class TemporalMappingIntervalImpl implements TemporalMappingInterval {
 
-    private boolean beginInclusive;
-    private boolean endInclusive;
+    private VariableOrGroundTerm beginInclusive;
+    private VariableOrGroundTerm endInclusive;
 
     private Variable begin;
     private Variable end;
 
     @Override
-    public boolean isBeginInclusive() {
+    public VariableOrGroundTerm isBeginInclusive() {
         return beginInclusive;
     }
 
     @Override
-    public boolean isEndInclusive() {
+    public VariableOrGroundTerm isEndInclusive() {
         return endInclusive;
     }
 
@@ -43,11 +45,13 @@ public class TemporalMappingIntervalImpl implements TemporalMappingInterval {
 
     @Override
     public String toString() {
-        return (beginInclusive ? "[" : "(") + begin + "," + end + (endInclusive ? "]" : ")");
-
+        if(beginInclusive instanceof BooleanConstant)
+            return (((BooleanConstant)beginInclusive).getBooleanValue() ? "[" : "(") + begin + "," + end + (((BooleanConstant)endInclusive).getBooleanValue() ? "]" : ")");
+        else
+            return ((Variable)beginInclusive).getName() + " " + begin + "," + end + " " + ((Variable)endInclusive).getName();
     }
 
-    public TemporalMappingIntervalImpl(boolean beginInclusive, boolean endInclusive, Variable begin, Variable end) {
+    public TemporalMappingIntervalImpl(VariableOrGroundTerm beginInclusive, VariableOrGroundTerm endInclusive, Variable begin, Variable end) {
         this.beginInclusive = beginInclusive;
         this.endInclusive = endInclusive;
         this.begin = begin;

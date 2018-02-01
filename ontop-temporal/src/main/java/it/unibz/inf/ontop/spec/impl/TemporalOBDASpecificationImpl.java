@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
-import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.temporal.spec.ImmutableTemporalVocabulary;
-
-import java.time.temporal.Temporal;
 
 public class TemporalOBDASpecificationImpl implements TemporalOBDASpecification {
 
@@ -20,7 +17,7 @@ public class TemporalOBDASpecificationImpl implements TemporalOBDASpecification 
     private final ClassifiedTBox saturatedTBox;
 
     @Inject
-    private TemporalOBDASpecificationImpl(Mapping staticMapping, DBMetadata dbMetadata, TemporalMapping temporalMapping, DBMetadata temporalDBMetadata, ClassifiedTBox saturatedTBox) {
+    private TemporalOBDASpecificationImpl(@Assisted Mapping staticMapping, @Assisted("dbMetadata") DBMetadata dbMetadata, @Assisted TemporalMapping temporalMapping, @Assisted("temporalDBMetadata") DBMetadata temporalDBMetadata, @Assisted ClassifiedTBox saturatedTBox) {
         this.staticMapping = staticMapping;
         this.dbMetadata = dbMetadata;
         this.temporalMapping = temporalMapping;
