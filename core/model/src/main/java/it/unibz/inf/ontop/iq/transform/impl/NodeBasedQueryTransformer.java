@@ -39,7 +39,7 @@ public abstract class NodeBasedQueryTransformer
      * <p>
      * TODO: avoid the use of a recursive method. Use a stack instead.
      */
-    private IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
+    protected IntermediateQueryBuilder convertToBuilderAndTransform(IntermediateQuery originalQuery,
                                                                   HomogeneousQueryNodeTransformer nodeTransformer,
                                                                   DistinctVariableOnlyDataAtom transformedProjectionAtom) {
         IntermediateQueryBuilder queryBuilder = originalQuery.newBuilder();

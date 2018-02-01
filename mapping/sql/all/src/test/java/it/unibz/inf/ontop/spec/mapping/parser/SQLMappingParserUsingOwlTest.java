@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -39,7 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
 
 import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -50,7 +50,7 @@ public class SQLMappingParserUsingOwlTest {
     private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
 
-    private TurtleOBDASyntaxParser parser;
+    private TargetQueryParser parser;
 
     private String[][] mappings = {
             { "M1", "select id, fname, lname, age from student",
@@ -91,7 +91,7 @@ public class SQLMappingParserUsingOwlTest {
 
         // Setting up the CQ parser
         prefixes = prefixManager.getPrefixMap();
-        parser = new TurtleOBDASyntaxParser(prefixes, ATOM_FACTORY, TERM_FACTORY);
+        parser = new TurtleOBDASQLParser(prefixes, ATOM_FACTORY, TERM_FACTORY);
     }
 
     @Test

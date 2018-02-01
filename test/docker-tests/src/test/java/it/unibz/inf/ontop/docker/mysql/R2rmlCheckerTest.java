@@ -377,6 +377,7 @@ public class R2rmlCheckerTest {
 		try {
 			TupleOWLResultSet  rs = st.executeSelectQuery(query);
 			while (rs.hasNext()) {
+				rs.next();
 				n++;
 			}
 			// log.info("description: " + n);

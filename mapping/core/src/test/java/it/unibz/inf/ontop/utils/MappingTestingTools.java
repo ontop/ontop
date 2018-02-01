@@ -37,7 +37,7 @@ public class MappingTestingTools {
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
-    public static final MappingNormalizer MAPPING_NORMALIZER;
+    public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
@@ -51,7 +51,7 @@ public class MappingTestingTools {
     public static final IntermediateQuery2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSaturator MAPPING_SATURATOR;
 
-    public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER ;
+    public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER;
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
 
@@ -64,7 +64,7 @@ public class MappingTestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
-        MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
+        MAPPING_NORMALIZER = injector.getInstance(MappingVariableNameNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);

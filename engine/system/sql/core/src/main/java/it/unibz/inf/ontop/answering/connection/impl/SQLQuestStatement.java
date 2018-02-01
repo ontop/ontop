@@ -200,8 +200,10 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return settings.isDistinctPostProcessingEnabled()
-                    ? new SQLDistinctTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary, termFactory, typeFactory)
-                    : new SQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary, termFactory, typeFactory);
+                    ? new SQLDistinctTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary,
+                    termFactory, typeFactory)
+                    : new DelegatedIriSQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary,
+                    termFactory, typeFactory);
         } catch (SQLException e) {
             throw new OntopQueryEvaluationException(e);
         }
@@ -223,7 +225,7 @@ public class SQLQuestStatement extends QuestStatement {
         else {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new SQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata,
+                tuples = new DelegatedIriSQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata,
                         iriDictionary, termFactory, typeFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());

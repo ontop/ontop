@@ -145,7 +145,7 @@ public class BindTest {
 
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
-            rs.hasNext();
+//            rs.hasNext();
             final OWLBindingSet bindingSet = rs.next();
             OWLObject ind1 = bindingSet.getOWLObject("title");
             OWLObject ind2 = bindingSet.getOWLObject("price");

@@ -34,4 +34,23 @@ public class SQLOntopBinding implements OntopBinding {
             return getName() + "=";
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SQLOntopBinding that = (SQLOntopBinding) o;
+
+        if (!getName().equals(that.getName())) return false;
+        if (!constantRetriever.equals(that.constantRetriever)) return false;
+        return cell.equals(that.cell);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getName().hashCode();
+        result = 31 * result + cell.hashCode();
+        return result;
+    }
 }

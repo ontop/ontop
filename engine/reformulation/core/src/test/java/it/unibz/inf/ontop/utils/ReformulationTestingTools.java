@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -33,7 +32,6 @@ public class ReformulationTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final Relation2Predicate RELATION_2_PREDICATE;
     public static final SpecificationFactory MAPPING_FACTORY;
-    public static final MappingNormalizer MAPPING_NORMALIZER;
     public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -50,7 +48,6 @@ public class ReformulationTestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
-        MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);

@@ -79,7 +79,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl implements Extensional
         RelationID relationId = relation2Predicate.createRelationFromPredicateName(
                 metadata.getQuotedIDFactory(),
                 atom.getPredicate());
-        DatabaseRelationDefinition relation = metadata.getDatabaseRelation(relationId);
+        RelationDefinition relation = metadata.getRelation(relationId);
 
         if (relation == null)
             throw new MissingRelationForExtensionalDataNodeException("Bug: required relation for " + this + " not found");

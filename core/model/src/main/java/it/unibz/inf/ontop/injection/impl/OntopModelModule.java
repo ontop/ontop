@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
@@ -41,6 +42,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(FilterNullableVariableQueryTransformer.class);
         bindFromSettings(VariableDefinitionExtractor.class);
+        bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
