@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,7 +19,9 @@ import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 
-public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+
+    protected abstract boolean validateAttributeName(String value);
 
     /**
      * Map of directives
@@ -37,7 +38,7 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
 
-    public TurtleOBDAVisitorImpl(TermFactory termFactory, AtomFactory atomFactory) {
+    public AbstractTurtleOBDAVisitor(TermFactory termFactory, AtomFactory atomFactory) {
         this.rdfFactory = new SimpleRDF();
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
@@ -104,11 +105,10 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
                     toReturn.add(new FixedString(text.substring(i, m.start())));
                 }
                 String value = m.group(1);
-                if (value.contains(".")) {
-                    throw new IllegalArgumentException("Fully qualified columns are not accepted.");
+                if(validateAttributeName(value)) {
+                    toReturn.add(new ColumnString(value));
+                    i = m.end();
                 }
-                toReturn.add(new ColumnString(value));
-                i = m.end();
             } else {
                 toReturn.add(new FixedString(text.substring(i)));
                 break;
@@ -422,7 +422,9 @@ public class TurtleOBDAVisitorImpl extends TurtleOBDABaseVisitor implements Turt
 
     @Override
     public Variable visitVariable(VariableContext ctx) {
-        return termFactory.getVariable(removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText()));
+        String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
+        validateAttributeName(variableName);
+        return termFactory.getVariable(variableName);
     }
 
     @Override

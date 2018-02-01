@@ -28,7 +28,7 @@ public class OntopMappingModule extends OntopAbstractModule {
     protected void configure() {
         bindTMappingExclusionConfig();
         bind(OntopMappingSettings.class).toInstance(configuration.getSettings());
-        bindFromSettings(MappingNormalizer.class);
+        bindFromSettings(MappingVariableNameNormalizer.class);
         bindFromSettings(MappingSaturator.class);
         bindFromSettings(MappingCanonicalRewriter.class);
         bindFromSettings(Datalog2QueryMappingConverter.class);

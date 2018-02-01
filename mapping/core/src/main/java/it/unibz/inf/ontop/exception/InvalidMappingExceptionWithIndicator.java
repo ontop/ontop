@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-import java.util.List;
-
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+
+import java.util.List;
 
 /**
  * This happens if users insert an invalid mapping, i.e., one or more conditions below are occurred:
@@ -92,7 +92,9 @@ public class InvalidMappingExceptionWithIndicator extends InvalidMappingExceptio
                         sb.append(String.format("MappingId = '%s'\n", mappingId));
                     }
                     String targetString = hints2[1];
-                    sb.append(String.format("Line %d: Invalid target: '%s'\n\n", lineNumber, targetString));
+                    sb.append(String.format("Line %d: Invalid target: '%s'\n", lineNumber, targetString));
+                    String exceptions = hints2[2];
+                    sb.append(String.format("Debug information\n%s\n", exceptions));
                     break;
                 }
             }
