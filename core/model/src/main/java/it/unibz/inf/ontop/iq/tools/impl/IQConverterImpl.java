@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
@@ -85,23 +86,19 @@ public class IQConverterImpl implements IQConverter {
      */
     private void insertChildren(QueryNode parentNode, ImmutableList<IQTree> childrenTrees,
                                 IntermediateQueryBuilder queryBuilder) {
-
-        ImmutableList<QueryNode> newChildren = childrenTrees.stream()
+        AtomicInteger i = new AtomicInteger(0);
+        childrenTrees.stream()
                 .map(IQTree::getRootNode)
                 .map(n -> queryBuilder.contains(n) ? n.clone() : n)
-                .collect(ImmutableCollectors.toList());
+                .forEach(t -> insertChildTree(parentNode, t, childrenTrees.get(i.get()), queryBuilder, i.getAndIncrement()));
+    }
 
-        if (parentNode instanceof BinaryOrderedOperatorNode) {
-
-            queryBuilder.addChild(parentNode, newChildren.get(0), LEFT);
-            queryBuilder.addChild(parentNode, newChildren.get(1), RIGHT);
+    private void insertChildTree(QueryNode parent, QueryNode child, IQTree childTree, IntermediateQueryBuilder queryBuilder, int position) {
+        if (parent instanceof BinaryOrderedOperatorNode) {
+            queryBuilder.addChild(parent, child, (position == 0)? LEFT : RIGHT);
+        } else {
+            queryBuilder.addChild(parent, child);
         }
-        else {
-            newChildren
-                    .forEach(c -> queryBuilder.addChild(parentNode, c));
-        }
-
-        IntStream.range(0, childrenTrees.size())
-                .forEach(i -> insertChildren(newChildren.get(i), childrenTrees.get(i).getChildren(), queryBuilder));
+        insertChildren(child, childTree.getChildren(), queryBuilder);
     }
 }
