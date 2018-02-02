@@ -104,7 +104,10 @@ public class SQLPPMapping2DatalogConverter {
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
-                        Function head = renameVariables(atom, lookupTable, bindingAtoms, idfac);
+
+                        ImmutableMap<Term, Term> bindMap = bindingAtoms.stream().collect(ImmutableCollectors.toMap(b -> b.getTerm(0), b-> b.getTerm(1)));
+
+                        Function head = renameVariables(atom, lookupTable, bindMap, idfac);
                         CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
@@ -137,16 +140,10 @@ public class SQLPPMapping2DatalogConverter {
      *  according to the {@code attributes} lookup table
      */
     private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            ImmutableList<Function> bindingAtoms, QuotedIDFactory idfac) throws AttributeNotFoundException {
+                                            ImmutableMap<Term, Term> bindMap, QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
-        ImmutableMap<Term, Term> bindmap;
-        if(!bindingAtoms.isEmpty()){
-             bindmap = bindingAtoms.stream().collect(ImmutableCollectors.toMap(b -> b.getTerm(0), b-> b.getTerm(1)));
-        }
-        else{
-            bindmap =  ImmutableMap.of();
-        }
+
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {
@@ -164,7 +161,7 @@ public class SQLPPMapping2DatalogConverter {
                                     + " (variable " + var.getName() + ") required by the target atom.");
                     }
 
-                        Term substitute = bindmap.get(newTerm);
+                        Term substitute = bindMap.get(newTerm);
 
                         if (substitute != null) {
 
@@ -174,7 +171,7 @@ public class SQLPPMapping2DatalogConverter {
 
             }
             else if (term instanceof Function)
-                newTerm = renameVariables((Function) term, attributes, bindingAtoms, idfac);
+                newTerm = renameVariables((Function) term, attributes, bindMap, idfac);
             else if (term instanceof Constant)
                 newTerm = term.clone();
             else
