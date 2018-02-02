@@ -34,7 +34,8 @@ import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
@@ -588,7 +589,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private SQLPPTriplesMap mapping;
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
+        TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
 				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
 		try {
 			return textParser.parse(query);

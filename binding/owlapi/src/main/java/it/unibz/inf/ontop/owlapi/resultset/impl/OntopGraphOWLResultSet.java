@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.owlapi.resultset.impl;
 
+import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
-import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
+import it.unibz.inf.ontop.spec.ontology.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 

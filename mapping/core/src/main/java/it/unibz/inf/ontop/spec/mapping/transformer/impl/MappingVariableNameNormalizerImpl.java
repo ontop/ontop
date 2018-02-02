@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingNormalizer;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 
 @Singleton
-public class MappingNormalizerImpl implements MappingNormalizer {
+public class MappingVariableNameNormalizerImpl implements MappingVariableNameNormalizer {
 
     private final SpecificationFactory specificationFactory;
     private final QueryTransformerFactory transformerFactory;
@@ -31,10 +31,10 @@ public class MappingNormalizerImpl implements MappingNormalizer {
     private final TermFactory termFactory;
 
     @Inject
-    private MappingNormalizerImpl(SpecificationFactory specificationFactory,
-                                  QueryTransformerFactory transformerFactory,
-                                  SubstitutionFactory substitutionFactory,
-                                  TermFactory termFactory) {
+    private MappingVariableNameNormalizerImpl(SpecificationFactory specificationFactory,
+                                              QueryTransformerFactory transformerFactory,
+                                              SubstitutionFactory substitutionFactory,
+                                              TermFactory termFactory) {
         this.specificationFactory = specificationFactory;
         this.transformerFactory = transformerFactory;
         this.substitutionFactory = substitutionFactory;
@@ -51,7 +51,8 @@ public class MappingNormalizerImpl implements MappingNormalizer {
         ImmutableMap<AtomPredicate, IntermediateQuery> normalizedMappingMap = renameQueries(queryStream)
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
-                        q -> q));
+                        q -> q
+                ));
 
         return specificationFactory.createMapping(mapping.getMetadata(), normalizedMappingMap,
                 mapping.getExecutorRegistry());

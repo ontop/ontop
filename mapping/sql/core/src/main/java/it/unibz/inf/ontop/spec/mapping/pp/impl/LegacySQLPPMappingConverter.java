@@ -4,27 +4,23 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
+import it.unibz.inf.ontop.datalog.EQNormalizer;
+import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.impl.LegacyIsNotNullDatalogMappingFiller;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 
 /**
@@ -34,18 +30,15 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
     private final Datalog2QueryMappingConverter mappingConverter;
-    private final LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller;
     private final TermFactory termFactory;
     private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
     private final EQNormalizer eqNormalizer;
 
     @Inject
     private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter,
-                                        LegacyIsNotNullDatalogMappingFiller isNotNullDatalogMappingFiller,
                                         TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter,
                                         EQNormalizer eqNormalizer) {
         this.mappingConverter = mappingConverter;
-        this.isNotNullDatalogMappingFiller = isNotNullDatalogMappingFiller;
         this.termFactory = termFactory;
         this.ppMapping2DatalogConverter = ppMapping2DatalogConverter;
         this.eqNormalizer = eqNormalizer;
@@ -76,10 +69,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         // Normalizing language tags and equalities (SIDE-EFFECT!)
         normalizeMapping(datalogMap.keySet());
 
-        return datalogMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> isNotNullDatalogMappingFiller.addNotNull(e.getKey(), dbMetadata),
-                        Map.Entry::getValue));
+        return datalogMap;
     }
 
     /**
