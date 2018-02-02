@@ -123,7 +123,7 @@ public class DatalogQueryServices {
 						SubstitutionUtilities.applySubstitution(newquery, mgu, false);
 						
 						// REDUCE
-						EQNormalizer.enforceEqualities(newquery);
+//						EQNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						CQCUtilities.removeRundantAtoms(newquery);
