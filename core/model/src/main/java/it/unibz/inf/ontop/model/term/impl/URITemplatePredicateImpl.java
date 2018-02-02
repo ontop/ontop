@@ -39,7 +39,8 @@ public class URITemplatePredicateImpl extends PredicateImpl implements URITempla
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())
-				.collect(ImmutableCollectors.toList()));
+				.collect(ImmutableCollectors.toList()),
+				false);
 		type = typeFactory.getIRITermType();
 	}
 	

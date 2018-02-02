@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
@@ -21,159 +23,166 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	/* Numeric operations */
 
-	MINUS("minus", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT), // TODO (ROMAN): check -- never used
-	ADD("add", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
-	SUBTRACT("subtract", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
-	MULTIPLY("multiply", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
-	DIVIDE("divide", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT),
-	ABS("abs", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
-	ROUND("round", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
-	CEIL("ceil", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
-	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
-	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE),
-	
+	MINUS("minus", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, true), // TODO (ROMAN): check -- never used
+	ADD("add", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT, false),
+	SUBTRACT("subtract", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT, false),
+	MULTIPLY("multiply", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT, false),
+	DIVIDE("divide", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, ONTOP_NUMERIC_DT, ONTOP_NUMERIC_DT, false),
+	ABS("abs", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
+	ROUND("round", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
+	CEIL("ceil", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
+	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
+	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE, true),
+
 	/* Boolean operations */
 
-	AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
-	OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
-	NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT),
-	
-	EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
-	NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
+	AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT, false),
+	OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT, false),
+	NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, true),
+
+	EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE, false),
+	NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE, false),
 	/*
 	 * BC: is it defined for IRIs?
 	 */
-	GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
+	GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
+	LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
+	LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
 
-	IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+	IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
 
-	STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-	STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-	CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-	
+	STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR, false),
+	STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR, false),
+	CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR, false),
+
 	/* SPARQL String functions */
 
-	STRLEN("STRLEN", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_STRING_DT),
-	UCASE("UCASE", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT),
-	LCASE("LCASE", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT),
-	SUBSTR2("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT),
-	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT, XSD_INTEGER_DT),
-	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR),
-	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR),
-	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, XSD_STRING_DT, XSD_STRING_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	STRLEN("STRLEN", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_STRING_DT, false),
+	UCASE("UCASE", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, false),
+	LCASE("LCASE", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, false),
+	SUBSTR2("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT, false),
+	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT, XSD_INTEGER_DT, false),
+	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR, false),
+	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR, false),
+	REPLACE("REPLACE", TermTypeInferenceRules.STRING_LANG_RULE, XSD_STRING_DT, XSD_STRING_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
 	// TODO: enforce XSD_STRING
-	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, XSD_STRING_DT, RDFS_LITERAL_DT),
-	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT),
+	CONCAT("CONCAT", TermTypeInferenceRules.STRING_LANG_RULE, XSD_STRING_DT, RDFS_LITERAL_DT, false),
+	ENCODE_FOR_URI("ENCODE_FOR_URI", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, true),
 
 	/* Hash functions */
-	
-	MD5("MD5", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT),
-	SHA1("SHA1", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT),
-	SHA512("SHA521", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT),
-	SHA256("SHA256", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT),
+
+	MD5("MD5", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
+	SHA1("SHA1", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
+	SHA512("SHA521", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
+	SHA256("SHA256", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
 
 	/* SPARQL Functions on Dates and Times */
 
-	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE),
-	YEAR("YEAR", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
-	DAY("DAY", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
-	MONTH("MONTH", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
-	HOURS("HOURS", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE,  XSD_DATETIME_DT),
-	MINUTES("MINUTES", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT),
-	SECONDS("SECONDS", TermTypeInferenceRules.PREDEFINED_DECIMAL_RULE, XSD_DATETIME_DT),
-	TZ("TZ", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_DATETIME_DT),
-	
+	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE, true),
+	YEAR("YEAR", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT, false),
+	DAY("DAY", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT, false),
+	MONTH("MONTH", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT, false),
+	HOURS("HOURS", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE,  XSD_DATETIME_DT, false),
+	MINUTES("MINUTES", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_DATETIME_DT, false),
+	SECONDS("SECONDS", TermTypeInferenceRules.PREDEFINED_DECIMAL_RULE, XSD_DATETIME_DT, false),
+	TZ("TZ", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_DATETIME_DT, false),
+
 	/* SPARQL built-in functions */
 
 	// NB: str() not defined for blank nodes!!!!
-	SPARQL_STR("str", TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDF_TERM_TYPE),
-	SPARQL_DATATYPE("datatype", TermTypeInferenceRules.PREDEFINED_IRI_RULE, RDFS_LITERAL_DT),
-	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDFS_LITERAL_DT),
-	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE),
-	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE),
+	SPARQL_STR("str", TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDF_TERM_TYPE, false),
+	SPARQL_DATATYPE("datatype", TermTypeInferenceRules.PREDEFINED_IRI_RULE, RDFS_LITERAL_DT, false),
+	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDFS_LITERAL_DT, false),
+	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE, true),
+	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE, true),
 
 	/* SPARQL built-in predicates */
 
-	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	
-	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-	SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, false),
+	LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
+	REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
 
-	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE), // TODO: refactor
+	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
+	SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, false),
+
+	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE, false), // TODO: refactor
 
 	/*
 	* Set functions (for aggregation)
 	* TODO: consider a non-atomic datatype
 	*/
 
-	AVG("AVG", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, RDF_TERM_TYPE),
-	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
-	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
-	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE),
-	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE),
+	AVG("AVG", TermTypeInferenceRules.NON_INTEGER_NUMERIC_RULE, RDF_TERM_TYPE, false),
+	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
+	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
+	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
+	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE, false),
 
 	/*
  	 * Conditional
  	 */
-	IF_ELSE_NULL("IF_ELSE_NULL", TermTypeInferenceRules.SECOND_ARG_RULE, XSD_BOOLEAN_DT, RDF_TERM_TYPE);
+	IF_ELSE_NULL("IF_ELSE_NULL", TermTypeInferenceRules.SECOND_ARG_RULE, XSD_BOOLEAN_DT, RDF_TERM_TYPE, false);
 
 
 	// 0-ary operations
-    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule) {
+    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of());
+		this.isInjective = isInjective;
 	}
 
 	// unary operations
     ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull TermType arg1) {
+						@Nonnull TermType arg1, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1));
+		this.isInjective = isInjective;
 	}
 	// binary operations
     ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull TermType arg1, @Nonnull TermType arg2) {
+						@Nonnull TermType arg1, @Nonnull TermType arg2, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2));
+		this.isInjective = isInjective;
 	}
 	// ternary operations
     ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull TermType arg1, @Nonnull TermType arg2, @Nonnull TermType arg3) {
+						@Nonnull TermType arg1, @Nonnull TermType arg2, @Nonnull TermType arg3, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2, arg3));
+		this.isInjective = isInjective;
 	}
 	// Quad operations
 	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1,
-						@Nonnull TermType arg2, @Nonnull TermType arg3, @Nonnull TermType arg4) {
+						@Nonnull TermType arg2, @Nonnull TermType arg3, @Nonnull TermType arg4, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2, arg3, arg4));
+		this.isInjective = isInjective;
 	}
 
 	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull ArgumentValidator argumentValidator) {
+						@Nonnull ArgumentValidator argumentValidator, boolean isInjective) {
 		this.name = name;
 		this.termTypeInferenceRule = termTypeInferenceRule;
 		this.argumentValidator = argumentValidator;
+		this.isInjective = isInjective;
 	}
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
 	private final ArgumentValidator argumentValidator;
+	private final boolean isInjective;
 
 
 
@@ -190,6 +199,13 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public boolean isTriplePredicate() {
 		return false;
+	}
+
+
+	@Override
+	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
+							   ImmutableSet<Variable> nonNullVariables) {
+		throw new RuntimeException("TODO: implement ExpressionOperation.isInjective(...)");
 	}
 
 	@Override

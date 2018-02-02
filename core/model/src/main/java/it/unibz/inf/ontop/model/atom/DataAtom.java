@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.model.atom;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 /**
@@ -27,4 +29,13 @@ public interface DataAtom<P extends AtomPredicate> extends ImmutableFunctionalTe
     ImmutableList<? extends VariableOrGroundTerm> getArguments();
 
     boolean containsGroundTerms();
+
+    /**
+     * TODO: get rid of it after splitting data atoms and functional terms
+     *
+     * Is expected to return false
+     */
+    @Deprecated
+    @Override
+    boolean isInjective(ImmutableSet<Variable> nonNullVariables);
 }

@@ -114,4 +114,9 @@ public abstract class ImmutableFunctionalTermImpl extends AbstractFunctionalTerm
         return toString().hashCode();
     }
 
+    @Override
+    public boolean isInjective(ImmutableSet<Variable> nonNullVariables) {
+        return getFunctionSymbol().isInjective(getArguments(), nonNullVariables);
+    }
+
 }

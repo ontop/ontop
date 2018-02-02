@@ -72,12 +72,14 @@ public class TermFactoryImpl implements TermFactory {
 				.map(i -> rootTermType)
 				.collect(ImmutableCollectors.toList());
 
-			return new PredicateImpl(name, arity, expectedArgumentTypes);
+		// By default, we consider it as non-injective
+		return new PredicateImpl(name, arity, expectedArgumentTypes, false);
 	}
 	
 	@Override
 	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
-		return new PredicateImpl(uri, types.size(), types);
+		// By default, we consider it as non-injective
+		return new PredicateImpl(uri, types.size(), types, false);
 	}
 
 	@Override

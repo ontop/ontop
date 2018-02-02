@@ -38,7 +38,8 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())
-				.collect(ImmutableCollectors.toList()));
+				.collect(ImmutableCollectors.toList()),
+				false);
 		type = typeFactory.getBlankNodeType();
 	}
 

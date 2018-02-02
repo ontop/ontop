@@ -13,13 +13,13 @@ import it.unibz.inf.ontop.model.type.TermType;
 public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
 
     protected AtomPredicateImpl(String name, int arity, ImmutableList<TermType> expectedBaseTypes) {
-        super(name, arity, expectedBaseTypes);
+        super(name, arity, expectedBaseTypes, false);
     }
 
     protected AtomPredicateImpl(Predicate datalogPredicate) {
         super(datalogPredicate.getName(),
                 datalogPredicate.getArity(),
-                datalogPredicate.getExpectedBaseArgumentTypes());
+                datalogPredicate.getExpectedBaseArgumentTypes(), false);
         if (datalogPredicate instanceof BuiltinPredicate) {
             throw new IllegalArgumentException("The predicate must corresponds to a data atom!");
         }

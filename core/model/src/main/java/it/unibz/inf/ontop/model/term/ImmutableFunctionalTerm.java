@@ -52,4 +52,6 @@ public interface ImmutableFunctionalTerm extends Function, NonVariableTerm {
     @Deprecated
     @Override
     void setPredicate(Predicate p);
+
+    boolean isInjective(ImmutableSet<Variable> nonNullVariables);
 }
