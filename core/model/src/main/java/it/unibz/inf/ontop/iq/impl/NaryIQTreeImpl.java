@@ -48,7 +48,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
+        this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }
 
     @Override

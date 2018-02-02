@@ -51,7 +51,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
                                            OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
+        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }
 
     @Override
