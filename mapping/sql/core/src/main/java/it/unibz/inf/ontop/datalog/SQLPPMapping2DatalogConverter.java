@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -67,11 +68,13 @@ public class SQLPPMapping2DatalogConverter {
 
                 List<Function> body;
                 ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
+                ImmutableList<Function> bindingAtoms;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
+                    bindingAtoms = re.getBindingAtoms();
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
                     body.addAll(re.getDataAtoms());
@@ -90,6 +93,7 @@ public class SQLPPMapping2DatalogConverter {
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    bindingAtoms = ImmutableList.of();
 
                     List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
@@ -100,7 +104,7 @@ public class SQLPPMapping2DatalogConverter {
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
-                        Function head = renameVariables(atom, lookupTable, idfac);
+                        Function head = renameVariables(atom, lookupTable, bindingAtoms, idfac);
                         CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
@@ -133,27 +137,44 @@ public class SQLPPMapping2DatalogConverter {
      *  according to the {@code attributes} lookup table
      */
     private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
+                                            ImmutableList<Function> bindingAtoms, QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
+        ImmutableMap<Term, Term> bindmap;
+        if(!bindingAtoms.isEmpty()){
+             bindmap = bindingAtoms.stream().collect(ImmutableCollectors.toMap(b -> b.getTerm(0), b-> b.getTerm(1)));
+        }
+        else{
+            bindmap =  ImmutableMap.of();
+        }
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {
-                Variable var = (Variable) term;
-                QuotedID attribute = idfac.createAttributeID(var.getName());
-                newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                if (newTerm == null) {
-                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+                    Variable var = (Variable) term;
+                    QuotedID attribute = idfac.createAttributeID(var.getName());
+                    newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                    if (newTerm == null)
-                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
-                                + " (variable " + var.getName() + ") required by the target atom.");
-                }
+                    if (newTerm == null) {
+                        QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                        newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+
+                        if (newTerm == null)
+                            throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
+                                    + " (variable " + var.getName() + ") required by the target atom.");
+                    }
+                    else {
+                        Term substitute = bindmap.get(newTerm);
+
+                        if (substitute != null) {
+
+                            newTerm = substitute;
+                        }
+                    }
+
             }
             else if (term instanceof Function)
-                newTerm = renameVariables((Function) term, attributes, idfac);
+                newTerm = renameVariables((Function) term, attributes, bindingAtoms, idfac);
             else if (term instanceof Constant)
                 newTerm = term.clone();
             else

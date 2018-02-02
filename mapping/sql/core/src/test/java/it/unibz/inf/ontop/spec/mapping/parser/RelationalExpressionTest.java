@@ -59,6 +59,7 @@ public class RelationalExpressionTest {
 
         re1 = new RAExpression(ImmutableList.of(f1),
                 ImmutableList.of(),
+                ImmutableList.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
                         ImmutableMap.of(attX, ImmutableSet.of(table1), attY, ImmutableSet.of(table1))));
@@ -81,6 +82,7 @@ public class RelationalExpressionTest {
 
         re2 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
+                ImmutableList.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTu, u,qaTv, v, qaNu, u, qaNv, v),
                         ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2))));
@@ -102,6 +104,7 @@ public class RelationalExpressionTest {
         re3 = new RAExpression(
                 ImmutableList.of(f3),
                 ImmutableList.of(),
+                ImmutableList.of(),
                 RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3)
         );
 
@@ -115,6 +118,7 @@ public class RelationalExpressionTest {
         // and it is used to simulate an exception during the operations of:
         // "cross join" and "join on" and "natural join"
         re1_1 = new RAExpression(ImmutableList.of(f2),
+                ImmutableList.of(),
                 ImmutableList.of(),
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x), table1));
 
@@ -231,6 +235,7 @@ public class RelationalExpressionTest {
         // a new relationId without any common attribute with the re1 is created to simulate an exception
         RAExpression re2 =  new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
+                ImmutableList.of(),
                 RAExpressionAttributes.create(
                         ImmutableMap.of(MDFAC.createAttributeID("C"), u,  MDFAC.createAttributeID("D"), v),
                         MDFAC.createRelationID(null, "Q")));
@@ -279,6 +284,7 @@ public class RelationalExpressionTest {
     public void  create_test(){
         RAExpression actual = new RAExpression(re1.getDataAtoms(),
                 re1.getFilterAtoms(),
+                re1.getBindingAtoms(),
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), table1));
         System.out.println(actual);
 

@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -64,6 +65,28 @@ public class SelectQueryParser {
         }
     }
 
+    public RAExpression parse(String sql, IntermediateQueryBuilder queryBuilder) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+        try {
+            Statement statement = CCJSqlParserUtil.parse(sql);
+            if (!(statement instanceof Select))
+                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
+
+            RAExpression re = select(((Select) statement).getSelectBody());
+            return re;
+        }
+        catch (JSQLParserException e) {
+            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
+        }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (TokenMgrError e) {
+            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
+        }
+    }
 
 
 
@@ -149,7 +172,7 @@ public class SelectQueryParser {
         }
 
         return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<Function>builder().addAll(filterAtoms).addAll(assignmentsBuilder.build()).build(),
+                ImmutableList.<Function>builder().addAll(filterAtoms).build(), ImmutableList.<Function>builder().addAll(assignmentsBuilder.build()).build(),
                 new RAExpressionAttributes(attributes, null));
     }
 
@@ -250,7 +273,7 @@ public class SelectQueryParser {
             else
                 attrs = RAExpressionAttributes.create(attributes.build(), alias);
 
-            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
+            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), ImmutableList.of(), attrs);
         }
 
 
