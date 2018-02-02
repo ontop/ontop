@@ -14,7 +14,6 @@ public class TemporalMappingParserTest extends TestCase {
         String username = "postgres";
         String password = "postgres";
 
-        //OntopTemporalMappingSQLAllConfiguration configuration = OntopTemporalMappingSQLAllConfiguration.defaultBuilder()
         OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile("src/test/resources/siemens.owl")
                 .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
@@ -26,24 +25,11 @@ public class TemporalMappingParserTest extends TestCase {
                 .enableTestMode()
                 .build();
 
-        //Injector injector = configuration.getInjector();
-        //OntopNativeTemporalMappingParser tmParser = (OntopNativeTemporalMappingParser) injector.getInstance(SQLMappingParser.class);
-
         try {
             configuration.loadSpecification();
         } catch (OBDASpecificationException e) {
             e.printStackTrace();
         }
-
-//        try {
-//            tmParser.parse(new File("src/test/resources/siemens.tobda"));
-//        } catch (InvalidMappingException e) {
-//            e.printStackTrace();
-//        } catch (DuplicateMappingException e) {
-//            e.printStackTrace();
-//        } catch (MappingIOException e) {
-//            e.printStackTrace();
-//        }
 
     }
 }

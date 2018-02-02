@@ -38,14 +38,14 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlOptions.owlOptions);
     }
 
-    @Override
+    /*@Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(super.buildGuiceModules(), Stream.concat(
                 new OntopReformulationConfigurationImpl(getSettings(),
                         options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules(),
                 Stream.of(new OntopTemporalModule(this)))
         );
-    }
+    }*/
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {

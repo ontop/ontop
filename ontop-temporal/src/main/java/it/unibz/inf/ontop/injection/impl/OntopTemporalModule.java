@@ -36,10 +36,10 @@ public class OntopTemporalModule extends OntopAbstractModule {
     private final OntopMappingSQLAllSettings settings;
 
     //TODO this method can be removed
-    protected OntopTemporalModule(OntopTemporalSQLOWLAPIConfiguration configuration) {
+    /*protected OntopTemporalModule(OntopTemporalSQLOWLAPIConfiguration configuration) {
         super(configuration.getSettings());
         settings = ((OntopTemporalMappingSQLAllConfiguration)configuration).getSettings();
-    }
+    }*/
 
     OntopTemporalModule(OntopTemporalMappingSQLAllConfigurationImpl configuration) {
         super(configuration.getSettings());
