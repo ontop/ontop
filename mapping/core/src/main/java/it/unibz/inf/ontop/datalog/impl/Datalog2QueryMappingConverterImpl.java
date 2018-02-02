@@ -7,25 +7,26 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -145,7 +146,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                     query.getExecutorRegistry()
             );
         } catch (EmptyQueryException e) {
-            throw new IllegalStateException("The query should not become empty");
+            throw new DatalogConversionException("The query should not become empty");
         }
         return noNullValueEnforcer.transform(queryAfterUnionNormalization);
     }
