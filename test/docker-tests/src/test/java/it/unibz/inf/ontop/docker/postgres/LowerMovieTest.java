@@ -39,7 +39,7 @@ public class LowerMovieTest extends AbstractVirtualModeTest{
 
 
         String name = runQueryAndReturnStringOfLiteralX(queryBind);
-        assertEquals("\"A.J.\"^^xsd:string", name);
+        assertEquals("\"a.j.\"^^xsd:string", name);
 
     }
 

@@ -127,7 +127,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			// TODO: fix cloning
 			CQIE rule = query.clone();
 			// TODO: get rid of EQNormalizer
-//			EQNormalizer.enforceEqualities(rule);
+			EQNormalizer.enforceEqualities(rule);
 
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
 				topLevelPredicate = rule.getHead().getFunctionSymbol();

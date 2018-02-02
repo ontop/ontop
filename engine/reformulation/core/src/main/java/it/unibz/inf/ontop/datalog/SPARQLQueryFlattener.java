@@ -108,9 +108,9 @@ public class SPARQLQueryFlattener {
 		
 		// We need to enforce equality again, because at this point it is 
 		//  possible that there is still some EQ(...) 
-//		for (CQIE query : workingSet) {
-//			EQNormalizer.enforceEqualities(query);
-//		}
+		for (CQIE query : workingSet) {
+			EQNormalizer.enforceEqualities(query);
+		}
 
 		return workingSet;
 	}

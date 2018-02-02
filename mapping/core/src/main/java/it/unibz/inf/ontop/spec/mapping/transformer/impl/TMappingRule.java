@@ -174,7 +174,7 @@ public class TMappingRule {
 			combinedBody = databaseAtoms;
 		
 		CQIE cq = DATALOG_FACTORY.getCQIE(head, combinedBody);
-//		EQNormalizer.enforceEqualities(cq);
+		EQNormalizer.enforceEqualities(cq);
 		return cq;
 	}
 	

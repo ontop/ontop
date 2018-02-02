@@ -37,7 +37,7 @@ public class EQNormalizer {
 			Function atom = body.get(i);
 			SubstitutionUtilities.applySubstitution(atom, mgu);
 
-            if (atom.getFunctionSymbol() == ExpressionOperation.EQ) {
+            if (atom.getFunctionSymbol() == ExpressionOperation.EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function)) ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
@@ -84,7 +84,7 @@ public class EQNormalizer {
                 SubstitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
-                if (t2.getFunctionSymbol() == ExpressionOperation.EQ) {
+                if (t2.getFunctionSymbol() == ExpressionOperation.EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function))) {
                     if (!mgu.composeTerms(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     

@@ -60,7 +60,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         LOGGER.debug("Original mapping size: {}", datalogMap.size());
 
         // Normalizing language tags and equalities (SIDE-EFFECT!)
-//        normalizeMapping(datalogMap.keySet());
+        normalizeMapping(datalogMap.keySet());
 
         return datalogMap;
     }
@@ -95,7 +95,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         }
 
         // Normalizing equalities
-//        for (CQIE cq: unfoldingProgram)
-//            EQNormalizer.enforceEqualities(cq);
+        for (CQIE cq: unfoldingProgram)
+            EQNormalizer.enforceEqualities(cq);
     }
 }

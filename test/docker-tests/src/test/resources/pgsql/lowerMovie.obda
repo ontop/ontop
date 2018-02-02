@@ -22,7 +22,7 @@ source		select person_id from cast_info where cast_info.role_id = 1
 
 mappingId	Person has Birth Name
 target		imdb:name/{person_id} dbpedia:birthName {nname}^^xsd:string .
-source		select name.id as person_id, name.name as nname from name where lower(name)=lower('a.J.')
+source		select name.id as person_id, lower(name.name) as nname from name where lower(name)=lower('a.J.')
 
 
 mappingId	Movie has title and production year

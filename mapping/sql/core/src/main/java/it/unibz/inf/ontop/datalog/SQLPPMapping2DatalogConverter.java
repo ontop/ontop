@@ -163,14 +163,14 @@ public class SQLPPMapping2DatalogConverter {
                             throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
                                     + " (variable " + var.getName() + ") required by the target atom.");
                     }
-                    else {
+
                         Term substitute = bindmap.get(newTerm);
 
                         if (substitute != null) {
 
                             newTerm = substitute;
                         }
-                    }
+
 
             }
             else if (term instanceof Function)
