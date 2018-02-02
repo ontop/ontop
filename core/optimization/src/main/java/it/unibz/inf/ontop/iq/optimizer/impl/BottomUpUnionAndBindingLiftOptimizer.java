@@ -42,7 +42,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
     }
 
     /**
-     *
+     * TODO: refactor
      */
     private IQ liftUnionsInTree(IQ query) {
         VariableGenerator variableGenerator = query.getVariableGenerator();
@@ -54,7 +54,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
         do {
             previousTree = newTree;
             newTree = liftTree(previousTree, variableGenerator)
-                    .liftBinding(variableGenerator);
+                    .normalizeForOptimization(variableGenerator);
 
         } while (!newTree.equals(previousTree) && (++i < ITERATION_BOUND));
 
@@ -108,6 +108,10 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
 
     }
 
+
+    /**
+     * TODO: refactor
+     */
     private IQTree liftInnerJoin(NaryIQTree queryTree, ImmutableList<IQTree> newChildren, VariableGenerator variableGenerator) {
         InnerJoinNode joinNode = (InnerJoinNode) queryTree.getRootNode();
 
@@ -120,7 +124,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)
-                .liftBinding(variableGenerator);
+                .normalizeForOptimization(variableGenerator);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -158,6 +162,9 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                     : iqFactory.createBinaryNonCommutativeIQTree(root, newLeftChild, newRightChild);
     }
 
+    /**
+     * TODO: refactor
+     */
     private IQTree liftLJJoin(BinaryNonCommutativeIQTree queryTree, IQTree newLeftChild, IQTree newRightChild,
                               VariableGenerator variableGenerator) {
         LeftJoinNode leftJoinNode = (LeftJoinNode) queryTree.getRootNode();
@@ -174,7 +181,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)
-                .liftBinding(variableGenerator);
+                .normalizeForOptimization(variableGenerator);
     }
 
 }

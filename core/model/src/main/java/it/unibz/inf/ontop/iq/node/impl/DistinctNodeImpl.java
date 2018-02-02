@@ -46,7 +46,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
      * TODO: refactor
      */
     private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.liftBinding(variableGenerator);
+        IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
         if (newChildRoot instanceof ConstructionNode)

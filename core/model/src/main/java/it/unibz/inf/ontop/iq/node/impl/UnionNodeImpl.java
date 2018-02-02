@@ -194,7 +194,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
 
         ImmutableList<IQTree> liftedChildren = children.stream()
-                .map(c -> c.liftBinding(variableGenerator))
+                .map(c -> c.normalizeForOptimization(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .map(c -> projectAwayUnnecessaryVariables(c, currentIQProperties))
                 .collect(ImmutableCollectors.toList());

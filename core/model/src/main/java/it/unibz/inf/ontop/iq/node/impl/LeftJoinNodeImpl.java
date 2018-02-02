@@ -185,7 +185,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
 
-        IQTree liftedLeftChild = initialLeftChild.liftBinding(variableGenerator);
+        IQTree liftedLeftChild = initialLeftChild.normalizeForOptimization(variableGenerator);
         if (liftedLeftChild.isDeclaredAsEmpty())
             return iqFactory.createEmptyNode(projectedVariables);
 
@@ -518,9 +518,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
 
+    /**
+     * TODO: refactor
+     */
     private ChildLiftingState liftRightChild(ChildLiftingState state, VariableGenerator variableGenerator) {
 
-        IQTree liftedRightChild = state.rightChild.liftBinding(variableGenerator);
+        IQTree liftedRightChild = state.rightChild.normalizeForOptimization(variableGenerator);
         if (!(liftedRightChild.getRootNode() instanceof ConstructionNode)) {
             if (state.rightChild.equals(liftedRightChild))
                 return state;

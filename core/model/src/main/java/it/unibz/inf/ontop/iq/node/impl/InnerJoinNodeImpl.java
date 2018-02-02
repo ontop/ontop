@@ -415,12 +415,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     /**
      * Lifts the binding OF AT MOST ONE child
+     *
+     * TODO: refactor
      */
     private LiftingStepResults liftChildBinding(ImmutableList<IQTree> initialChildren,
                                                 Optional<ImmutableExpression> initialJoiningCondition,
                                                 VariableGenerator variableGenerator) throws EmptyIQException {
         ImmutableList<IQTree> liftedChildren = initialChildren.stream()
-                .map(c -> c.liftBinding(variableGenerator))
+                .map(c -> c.normalizeForOptimization(variableGenerator))
                 .filter(c -> !(c.getRootNode() instanceof TrueNode))
                 .collect(ImmutableCollectors.toList());
 

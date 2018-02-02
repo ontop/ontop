@@ -176,7 +176,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             /*
              * Otherwise, goes back to the general method
              */
-            return newParentTree.liftBinding(variableGenerator);
+            return newParentTree.normalizeForOptimization(variableGenerator);
     }
 
     private IQTree propagateDownCondition(IQTree child, Optional<ImmutableExpression> initialConstraint) {
@@ -213,9 +213,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     }
 
+    /**
+     * TODO: refactor
+     */
     private IQTree liftBindingAfterPropagatingCondition(IQTree childIQTree, VariableGenerator variableGenerator,
                                                         IQProperties currentIQProperties) {
-        IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
+        IQTree liftedChildIQTree = childIQTree.normalizeForOptimization(variableGenerator);
         QueryNode childRoot = liftedChildIQTree.getRootNode();
         if (childRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) childRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties, variableGenerator);
@@ -276,6 +279,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     /**
      * TODO: let the filter node simplify (interpret) expressions in the lifted substitution
+     *
+     * TODO: refactor
      */
     private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree liftedChildIQ,
                                IQProperties currentIQProperties, VariableGenerator variableGenerator) {
@@ -315,7 +320,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
                 // Recursive
                 return iqFactory.createUnaryIQTree(childConstructionNode, filterParentTree, currentIQProperties)
-                        .liftBinding(variableGenerator);
+                        .normalizeForOptimization(variableGenerator);
             }
 
         } catch (UnsatisfiableConditionException e) {

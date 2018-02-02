@@ -103,7 +103,7 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         IQ renamedIQ = iqConverter.convert(renamedSubQuery);
         IQTree unifiedSubTree = renamedIQ.getTree()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
-                .liftBinding(renamedIQ.getVariableGenerator());
+                .normalizeForOptimization(renamedIQ.getVariableGenerator());
 
         treeComponent.replaceSubTreeByIQ(intensionalDataNode, unifiedSubTree);
     }

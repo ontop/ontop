@@ -404,7 +404,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
      * TODO: refactor
      */
     private IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree liftedChildIQTree = childIQTree.liftBinding(variableGenerator);
+        IQTree liftedChildIQTree = childIQTree.normalizeForOptimization(variableGenerator);
         QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
             return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
