@@ -657,7 +657,8 @@ public class SQLParserTest {
 	public void test_7_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT ('ID-' || student.id) as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
@@ -665,7 +666,8 @@ public class SQLParserTest {
 	public void test_7_1_b() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
@@ -674,7 +676,8 @@ public class SQLParserTest {
 	public void test_7_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT (grade.score * 30 / 100) as percentage from grade");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
@@ -808,7 +811,8 @@ public class SQLParserTest {
 	public void test_13() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
@@ -912,7 +916,8 @@ public class SQLParserTest {
 	public void test_concatOracle() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
@@ -920,7 +925,8 @@ public class SQLParserTest {
 	public void test_RegexpReplace() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(1, re.getBindingAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
 	}
 
