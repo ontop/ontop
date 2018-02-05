@@ -283,5 +283,11 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				":S_{id} a :Student .");
 	}
 
+    public void testAnalysis_28() throws Exception {
+        runAnalysis(
+                "select lower(id) as lid from Student",
+                ":S_{lid} a :Student .");
+    }
+
 
 }

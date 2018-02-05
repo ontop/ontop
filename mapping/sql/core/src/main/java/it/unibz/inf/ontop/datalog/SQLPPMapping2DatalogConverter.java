@@ -22,25 +22,23 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-
-import java.util.*;
-
+import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-
-import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
@@ -67,11 +65,13 @@ public class SQLPPMapping2DatalogConverter {
 
                 List<Function> body;
                 ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
+                ImmutableMap<Variable, Term> assignments;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
+                    assignments = re.getAssignments();
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
                     body.addAll(re.getDataAtoms());
@@ -90,6 +90,7 @@ public class SQLPPMapping2DatalogConverter {
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    assignments = ImmutableMap.of();
 
                     List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
@@ -100,7 +101,8 @@ public class SQLPPMapping2DatalogConverter {
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
-                        Function head = renameVariables(atom, lookupTable, idfac);
+
+                        Function head = renameVariables(atom, lookupTable, assignments, idfac);
                         CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
@@ -133,27 +135,38 @@ public class SQLPPMapping2DatalogConverter {
      *  according to the {@code attributes} lookup table
      */
     private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
+                                            ImmutableMap<Variable, Term> bindMap, QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
+
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {
-                Variable var = (Variable) term;
-                QuotedID attribute = idfac.createAttributeID(var.getName());
-                newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                if (newTerm == null) {
-                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+                    Variable var = (Variable) term;
+                    QuotedID attribute = idfac.createAttributeID(var.getName());
+                    newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                    if (newTerm == null)
-                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
-                                + " (variable " + var.getName() + ") required by the target atom.");
-                }
+                    if (newTerm == null) {
+                        QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                        newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+
+                        if (newTerm == null)
+                            throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
+                                    + " (variable " + var.getName() + ") required by the target atom.");
+                    }
+
+                        Term substitute = bindMap.get(newTerm);
+
+                        if (substitute != null) {
+
+                            newTerm = substitute;
+                        }
+
+
             }
             else if (term instanceof Function)
-                newTerm = renameVariables((Function) term, attributes, idfac);
+                newTerm = renameVariables((Function) term, attributes, bindMap, idfac);
             else if (term instanceof Constant)
                 newTerm = term.clone();
             else
