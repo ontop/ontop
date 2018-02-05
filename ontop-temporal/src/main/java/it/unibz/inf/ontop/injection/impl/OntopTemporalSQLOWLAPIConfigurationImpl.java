@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.spec.TOBDASpecInput;
 import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -38,14 +36,14 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         mappingOWLConfiguration = new OntopMappingOWLAPIConfigurationImpl(settings, options.owlOptions.owlOptions);
     }
 
-    /*@Override
+    @Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(super.buildGuiceModules(), Stream.concat(
                 new OntopReformulationConfigurationImpl(getSettings(),
                         options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules(),
-                Stream.of(new OntopTemporalModule(this)))
+                Stream.of(new OntopTemporalModule(temporalConfiguration)))
         );
-    }*/
+    }
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
@@ -186,17 +184,24 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             return temporalMappingBuilderFragment.isTemporal();
         }
 
-        final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions generateTemporalMappingSQLAllOptions() {
-            return temporalMappingBuilderFragment.generateMappingSQLTemporalOptions(generateMappingSQLOptions());
+        boolean isR2rml(){
+            return temporalMappingBuilderFragment.isR2rml();
         }
 
-        final OntopTemporalMappingSQLAllSettings getTemporalSettings(){
-            return new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), isTemporal());
+        final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions generateTemporalMappingSQLAllOptions() {
+            return temporalMappingBuilderFragment.generateMappingSQLTemporalOptions(generateMappingSQLOptions());
         }
 
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
             return new OntopTemporalSQLOWLAPIOptions(localFragmentBuilder.ruleFile, localFragmentBuilder.ruleReader,
                     generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
+        }
+
+        @Override
+        protected Properties generateProperties() {
+            Properties p = super.generateProperties();
+            p.putAll(temporalMappingBuilderFragment.generateProperties());
+            return p;
         }
 
     }
@@ -206,11 +211,15 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
         @Override
         public OntopTemporalSQLOWLAPIConfiguration build() {
-
-            return new OntopTemporalSQLOWLAPIConfigurationImpl(
-                    new OntopStandaloneSQLSettingsImpl(generateProperties(), isR2rml()),
-                    getTemporalSettings(),
-                    generateTemporalSQLOWLAPIOptions());
+            OntopTemporalMappingSQLAllSettingsImpl temporalSettings =
+                    new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), isTemporal());
+            Properties standaloneProperties = generateProperties();
+            standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator",
+                    "it.unibz.inf.ontop.answering.reformulation.input.translation.impl.TemporalDatalogSparqlQueryTranslatorImpl");
+            OntopStandaloneSQLSettingsImpl standaloneSQLSettings =
+                    new OntopStandaloneSQLSettingsImpl(standaloneProperties, isR2rml());
+            return new OntopTemporalSQLOWLAPIConfigurationImpl(standaloneSQLSettings,
+                    temporalSettings, generateTemporalSQLOWLAPIOptions());
         }
     }
 

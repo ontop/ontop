@@ -27,16 +27,16 @@ public class QueryAnsweringTest {
                 "PREFIX st:  <http://siemens.com/temporal/ns#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX time: <http://www.w3.org/2006/time#>" +
-                        "SELECT ?pio ?b ?e" +
+                        "SELECT ?tb ?b ?e " +
                         "WHERE {" +
-                            "GRAPH ?g {?pio rdf:type st:PurgingIsOver .}" +
-                            "?g time:hasTime ?intv ." +
-                            "?intv time:hasBeginning ?beginInst ." +
-                            "?beginInst rdf:type time:Instant ." +
-                            "?beginInst time:inXSDDateTime ?b ." +
-                            "?intv time:hasEnd ?endInst ." +
-                            "?endInst rdf:type time:Instant ." +
-                            "?endInst time:inXSDDateTime ?e ." +
+                            "GRAPH ?g {?tb rdf:type st:PurgingIsOver .}" +
+                            "?g time:hasTime _:intv ." +
+                            "_:intv time:hasBeginning _:beginInst ." +
+                            "_:beginInst rdf:type time:Instant ." +
+                            "_:beginInst time:inXSDDateTime ?b ." +
+                            "_:intv time:hasEnd _:endInst ." +
+                            "_:endInst rdf:type time:Instant ." +
+                            "_:endInst time:inXSDDateTime ?e ." +
                         "}";
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

@@ -2,6 +2,12 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
+import it.unibz.inf.ontop.answering.reformulation.input.translation.TemporalDatalogSparqlQueryTranslator;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
+import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
@@ -35,12 +41,6 @@ public class OntopTemporalModule extends OntopAbstractModule {
 
     private final OntopMappingSQLAllSettings settings;
 
-    //TODO this method can be removed
-    /*protected OntopTemporalModule(OntopTemporalSQLOWLAPIConfiguration configuration) {
-        super(configuration.getSettings());
-        settings = ((OntopTemporalMappingSQLAllConfiguration)configuration).getSettings();
-    }*/
-
     OntopTemporalModule(OntopTemporalMappingSQLAllConfigurationImpl configuration) {
         super(configuration.getSettings());
         settings = configuration.getSettings();
@@ -69,7 +69,7 @@ public class OntopTemporalModule extends OntopAbstractModule {
         bindFromSettings(DatalogMTLSyntaxParser.class);
         bindFromSettings(DatalogMTLNormalizer.class);
         bindFromSettings(DatalogMTLProgramExtractor.class);
-        //bindFromSettings(TemporalQuadrupleMapping.class);
+        //bindFromSettings(InputQueryTranslator.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(
                 PrefixManager.class,
@@ -115,14 +115,14 @@ public class OntopTemporalModule extends OntopAbstractModule {
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 
-        /*Module translationFactoryModule = buildFactory(
-                ImmutableList.of(
-                        QueryUnfolder.class,
-                        NativeQueryGenerator.class,
-                        SameAsRewriter.class,
-                        InputQueryTranslator.class),
-                TranslationFactory.class);
-        install(translationFactoryModule);*/
+//        Module translationFactoryModule = buildFactory(
+//                ImmutableList.of(
+//                        QueryUnfolder.class,
+//                        NativeQueryGenerator.class,
+//                        SameAsRewriter.class,
+//                        InputQueryTranslator.class),
+//                TranslationFactory.class);
+//        install(translationFactoryModule);
 
     }
 }
