@@ -137,7 +137,7 @@ public class SelectQueryParser {
                         .parseBooleanExpression(plainSelect.getWhere()))
                 .build();
 
-        ImmutableList.Builder<Function> assignmentsBuilder = ImmutableList.builder();
+        ImmutableMap.Builder<Variable, Term> assignmentsBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
         SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
 
@@ -148,7 +148,7 @@ public class SelectQueryParser {
             attributesBuilder.putAll(attrs);
 
             if (sip.assignment != null)
-                assignmentsBuilder.add(sip.assignment);
+                assignmentsBuilder.putAll(sip.assignment);
         });
 
         ImmutableMap<QualifiedAttributeID, Variable> attributes;
@@ -172,7 +172,7 @@ public class SelectQueryParser {
         }
 
         return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<Function>builder().addAll(filterAtoms).build(), ImmutableList.<Function>builder().addAll(assignmentsBuilder.build()).build(),
+                ImmutableList.<Function>builder().addAll(filterAtoms).build(), assignmentsBuilder.build(),
                 new RAExpressionAttributes(attributes, null));
     }
 
@@ -273,7 +273,7 @@ public class SelectQueryParser {
             else
                 attrs = RAExpressionAttributes.create(attributes.build(), alias);
 
-            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), ImmutableList.of(), attrs);
+            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), ImmutableMap.of(), attrs);
         }
 
 
@@ -326,7 +326,7 @@ public class SelectQueryParser {
         final ImmutableMap<QualifiedAttributeID, Variable> attributes;
 
         ImmutableMap<QualifiedAttributeID, Variable> map;
-        Function assignment;
+        ImmutableMap<Variable, Term> assignment;
 
         SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
             this.attributes = attributes;
@@ -389,8 +389,8 @@ public class SelectQueryParser {
                 Variable var = TERM_FACTORY.getVariable(name.getName() + relationIndex);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
 
-                Term term = new ExpressionParser(idfac, attributes).parseTerm(expr);
-                assignment = TERM_FACTORY.getFunctionEQ(var, term);
+                Term term =  new ExpressionParser(idfac, attributes).parseTerm(expr);
+                assignment = ImmutableMap.of(var, term);
             }
         }
     }

@@ -3,11 +3,12 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -21,7 +22,7 @@ public class RAExpression {
 
     private ImmutableList<Function> dataAtoms;
     private ImmutableList<Function> filterAtoms;
-    private ImmutableList<Function> bindingAtoms;
+    private ImmutableMap<Variable, Term> assignments;
     private RAExpressionAttributes attributes;
 
     /**
@@ -33,11 +34,11 @@ public class RAExpression {
      */
     public RAExpression(ImmutableList<Function> dataAtoms,
                         ImmutableList<Function> filterAtoms,
-                        ImmutableList<Function> bindingAtoms,
+                        ImmutableMap<Variable, Term> assignments,
                         RAExpressionAttributes attributes) {
         this.dataAtoms = dataAtoms;
         this.filterAtoms = filterAtoms;
-        this.bindingAtoms = bindingAtoms;
+        this.assignments = assignments;
         this.attributes = attributes;
     }
 
@@ -50,8 +51,8 @@ public class RAExpression {
         return filterAtoms;
     }
 
-    public ImmutableList<Function> getBindingAtoms() {
-        return bindingAtoms;
+    public ImmutableMap<Variable, Term> getAssignments() {
+        return assignments;
     }
 
     public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
@@ -72,7 +73,7 @@ public class RAExpression {
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms), union(re1.bindingAtoms, re2.bindingAtoms), attributes);
+                union(re1.filterAtoms, re2.filterAtoms), union(re1.assignments, re2.assignments), attributes);
     }
 
 
@@ -93,7 +94,7 @@ public class RAExpression {
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getAtomOnExpression.apply(attributes.getAttributes())), union(re1.bindingAtoms, re2.bindingAtoms, getAtomOnExpression.apply(attributes.getAttributes())),
+                        getAtomOnExpression.apply(attributes.getAttributes())), union(re1.assignments, re2.assignments),
                 attributes);
     }
 
@@ -117,7 +118,7 @@ public class RAExpression {
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getJoinOnFilter(re1.attributes, re2.attributes, shared)), union(re1.bindingAtoms, re2.bindingAtoms, getJoinOnFilter(re1.attributes, re2.attributes, shared)),
+                        getJoinOnFilter(re1.attributes, re2.attributes, shared)), union(re1.assignments, re2.assignments),
                 attributes);
     }
 
@@ -140,8 +141,7 @@ public class RAExpression {
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getJoinOnFilter(re1.attributes, re2.attributes, using)), union(re1.bindingAtoms, re2.bindingAtoms,
-                getJoinOnFilter(re1.attributes, re2.attributes, using)),
+                        getJoinOnFilter(re1.attributes, re2.attributes, using)), union(re1.assignments, re2.assignments),
                 attributes);
     }
 
@@ -182,7 +182,7 @@ public class RAExpression {
      */
 
     public static RAExpression alias(RAExpression re, RelationID alias) {
-        return new RAExpression(re.dataAtoms, re.filterAtoms, re.bindingAtoms,
+        return new RAExpression(re.dataAtoms, re.filterAtoms, re.assignments,
                 RAExpressionAttributes.alias(re.attributes, alias));
     }
 
@@ -192,6 +192,10 @@ public class RAExpression {
         return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).build();
     }
 
+    private static ImmutableMap<Variable, Term>  union(ImmutableMap<Variable, Term>  atoms1, ImmutableMap<Variable, Term>  atoms2) {
+        return ImmutableMap.<Variable, Term>builder().putAll(atoms1).putAll(atoms2).build();
+    }
+
     private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2, ImmutableList<Function> atoms3) {
         return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
     }
@@ -199,7 +203,7 @@ public class RAExpression {
 
     @Override
     public String toString() {
-        return "RAExpression : " + dataAtoms + " FILTER " + filterAtoms + " with " + attributes;
+        return "RAExpression : " + dataAtoms + " FILTER " + filterAtoms + " with " + attributes + " and assignments " + assignments;
     }
 
 
