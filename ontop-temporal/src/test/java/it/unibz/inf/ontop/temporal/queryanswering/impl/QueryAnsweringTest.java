@@ -80,8 +80,64 @@ public class QueryAnsweringTest {
                         "PREFIX st:  <http://siemens.com/temporal/ns#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX time: <http://www.w3.org/2006/time#>" +
+                        "SELECT ?tb ?b ?e " +
+                        "WHERE {" +
+                        "GRAPH ?g {?tb rdf:type st:PurgingIsOver . ?tb rdf:type st:MainFlameOn .}" +
+                        "?g time:hasTime _:intv ." +
+                        "_:intv time:hasBeginning _:beginInst ." +
+                        "_:beginInst rdf:type time:Instant ." +
+                        "_:beginInst time:inXSDDateTime ?b ." +
+                        "_:intv time:hasEnd _:endInst ." +
+                        "_:endInst rdf:type time:Instant ." +
+                        "_:endInst time:inXSDDateTime ?e ." +
+                        "}";
+
+
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+
+        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
+                .ontologyFile("src/test/resources/siemens.owl")
+                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
+                .nativeOntopMappingFile("src/test/resources/siemens.obda")
+                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
+                .jdbcUrl(url)
+                .jdbcUser(username)
+                .jdbcPassword(password)
+                .enableTestMode()
+                .build();
+
+        try {
+            reasoner = factory.createReasoner(configuration);
+            // Now we are ready for querying
+            conn = reasoner.getConnection();
+            OWLStatement st = conn.createStatement();
+            st.executeSelectQuery(query);
+
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+        } catch (OWLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    @Test
+    public void test3(){
+
+        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
+        String username = "postgres";
+        String password = "postgres";
+
+        String query =
+                "PREFIX : <http://siemens.com/ns#>\n" +
+                        "PREFIX st:  <http://siemens.com/temporal/ns#>" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX time: <http://www.w3.org/2006/time#>" +
                         "SELECT ?tb ?b ?e ?b2 ?e2 " +
                         "WHERE {" +
+                        "GRAPH ?g {?tb rdf:type st:PurgingIsOver .}" +
+                        "GRAPH ?g2 {?tb rdf:type st:PurgingIsOver .}" +
                         "?g time:hasTime _:intv ." +
                         "_:intv time:hasBeginning _:beginInst ." +
                         "_:beginInst rdf:type time:Instant ." +
@@ -96,8 +152,6 @@ public class QueryAnsweringTest {
                         "_:intv2 time:hasEnd _:endInst2 ." +
                         "_:endInst2 rdf:type time:Instant ." +
                         "_:endInst2 time:inXSDDateTime ?e2 ." +
-                        "GRAPH ?g {?tb rdf:type st:PurgingIsOver .}" +
-                        "GRAPH ?g2 {?tb rdf:type st:PurgingIsOver .}" +
                         "}";
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
