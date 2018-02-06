@@ -49,8 +49,8 @@ public class TemporalDatalogSparqlQueryTranslatorImpl implements TemporalDatalog
     public InternalSparqlQuery translate(ParsedQuery inputParsedQuery)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
-        SparqlAlgebraToDatalogTranslator mutableTranslator =
-                new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary, atomFactory, termFactory,
+        TemporalSparqlAlgebraToDatalogTranslator mutableTranslator =
+                new TemporalSparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary, atomFactory, termFactory,
                         typeFactory, datalogFactory);
 
         return mutableTranslator.translate(inputParsedQuery);
