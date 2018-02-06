@@ -183,7 +183,7 @@ public class QueryPainter {
 			for (String predicate : invalidPredicates) {
 				invalidList += "- " + predicate + "\n";
 			}
-			String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s", invalidList);
+			String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s Note: null indicates an unknown prefix.", invalidList);
 			invalid = true;
 			throw new Exception(msg);
 		}

@@ -343,7 +343,7 @@ public class OBDAModel {
             fireMappingDeleted(dataSourceURI, mappingId);
     }
 
-    public void updateMappingsSourceQuery(URI sourceURI, String triplesMapId, OBDASQLQuery sourceQuery) {
+    public void updateMappingsSourceQuery(String triplesMapId, OBDASQLQuery sourceQuery) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(triplesMapId);
 
         if (formerTriplesMap != null) {
@@ -354,7 +354,7 @@ public class OBDAModel {
         }
     }
 
-    public void updateTargetQueryMapping(URI sourceID, String id, ImmutableList<ImmutableFunctionalTerm> targetQuery) {
+    public void updateTargetQueryMapping(String id, ImmutableList<ImmutableFunctionalTerm> targetQuery) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(id);
 
         if (formerTriplesMap != null) {
@@ -365,7 +365,7 @@ public class OBDAModel {
         }
     }
 
-    public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
+    public void updateMapping( String formerMappingId, String newMappingId) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
 
         if (formerTriplesMap != null) {
