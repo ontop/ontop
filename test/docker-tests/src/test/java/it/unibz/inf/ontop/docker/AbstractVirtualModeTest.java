@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import org.junit.Before;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,8 @@ public abstract class AbstractVirtualModeTest {
             assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("x");
-            retval = ind1.toString();
+//            retval = ind1.getLiteral();
+            retval = ToStringRenderer.getInstance().getRendering(ind1);
 
         } catch (Exception e) {
             throw e;
@@ -297,9 +299,9 @@ public abstract class AbstractVirtualModeTest {
         rs.close();
         long t2 = System.currentTimeMillis();
 
-                /* 
-                * Print the query summary 
-                */
+        /*
+         * Print the query summary
+         */
         String sqlQuery = ((SQLExecutableQuery) st.getExecutableQuery(query)).getSQL();
         log.info("");
         log.info("The input SPARQL query:");
