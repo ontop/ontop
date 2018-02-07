@@ -28,12 +28,11 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.EncodeForURI;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 public class DirectMappingAxiomProducer {
 
@@ -166,7 +165,7 @@ public class DirectMappingAxiomProducer {
      * @return table IRI
      */
 	private String getTableIRI(RelationID tableId) {
-		return baseIRI + percentEncode(tableId.getTableName());
+		return baseIRI + R2RMLIRISafeEncoder.encode(tableId.getTableName());
 	}
 
     /**
@@ -182,8 +181,8 @@ public class DirectMappingAxiomProducer {
      *   - the percent-encoded form of the column name.
      */
     private String getLiteralPropertyIRI(Attribute attr) {
-        return baseIRI + percentEncode(attr.getRelation().getID().getTableName())
-                + "#" + percentEncode(attr.getID().getName());
+        return baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
+                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName());
     }
 
     /*
@@ -201,9 +200,9 @@ public class DirectMappingAxiomProducer {
     private String getReferencePropertyIRI(ForeignKeyConstraint fk) {
         List<String> attributes = new ArrayList<>(fk.getComponents().size());
  		for (Component component : fk.getComponents())
-            attributes.add(percentEncode(component.getAttribute().getID().getName()));
+            attributes.add(R2RMLIRISafeEncoder.encode(component.getAttribute().getID().getName()));
         
-        return baseIRI + percentEncode(fk.getRelation().getID().getTableName())
+        return baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
                 + "#ref-" + Joiner.on(";").join(attributes);
     }
 
@@ -233,9 +232,9 @@ public class DirectMappingAxiomProducer {
 			
 			List<String> attributes = new ArrayList<>(pk.getAttributes().size());
 			for (Attribute att : pk.getAttributes()) 
-				attributes.add(percentEncode(att.getID().getName()) + "={}");
+				attributes.add(R2RMLIRISafeEncoder.encode(att.getID().getName()) + "={}");
 			
-			String template = baseIRI + percentEncode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
+			String template = baseIRI + R2RMLIRISafeEncoder.encode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
 			terms.add(df.getConstantLiteral(template));
 			
 			for (Attribute att : pk.getAttributes())
@@ -251,20 +250,6 @@ public class DirectMappingAxiomProducer {
 			return df.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
 		}
 	}
-    
 
-	/*
-	 * percent encoding for a String
-	 */
-	private static String percentEncode(String pe) {
-		pe = pe.replace("'", "%27");
-		pe = pe.replace("-", "%2D");
-		pe = pe.replace(".", "%2E");
-		for (Entry<String, String> e : EncodeForURI.TABLE.entrySet())
-			if (!e.getKey().equals("%22"))
-				pe = pe.replace(e.getValue(), e.getKey());
-
-		return pe;
-	}
 
 }

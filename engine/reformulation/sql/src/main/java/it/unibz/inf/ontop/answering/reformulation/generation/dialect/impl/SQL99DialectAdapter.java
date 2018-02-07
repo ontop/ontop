@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.utils.EncodeForURI;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.sql.Types;
 import java.util.Collection;
@@ -43,7 +43,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     static {
     	StringBuilder sb1 = new StringBuilder();
     	StringBuilder sb2 = new StringBuilder();
-    	for (Entry<String, String> e : EncodeForURI.TABLE.entrySet()) {
+    	for (Entry<String, String> e : R2RMLIRISafeEncoder.TABLE.entrySet()) {
     		sb1.append("REPLACE(");
     		sb2.append(", '").append(e.getValue()).append("', '").append(e.getKey()).append("')");
     	}

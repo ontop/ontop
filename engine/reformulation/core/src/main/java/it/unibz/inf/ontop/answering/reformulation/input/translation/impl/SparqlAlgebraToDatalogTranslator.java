@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.utils.EncodeForURI;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.eclipse.rdf4j.model.IRI;
@@ -545,7 +545,8 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
 
-        String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
+         // String uri = R2RMLIRISafeEncoder.decode(v.stringValue());
+        String uri = v.stringValue();
 
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);
