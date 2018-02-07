@@ -22,7 +22,6 @@ public class RAExpression {
 
     private ImmutableList<Function> dataAtoms;
     private ImmutableList<Function> filterAtoms;
-    private ImmutableMap<Variable, Term> assignments;
     private RAExpressionAttributes attributes;
 
     /**
@@ -34,11 +33,9 @@ public class RAExpression {
      */
     public RAExpression(ImmutableList<Function> dataAtoms,
                         ImmutableList<Function> filterAtoms,
-                        ImmutableMap<Variable, Term> assignments,
                         RAExpressionAttributes attributes) {
         this.dataAtoms = dataAtoms;
         this.filterAtoms = filterAtoms;
-        this.assignments = assignments;
         this.attributes = attributes;
     }
 
@@ -51,11 +48,7 @@ public class RAExpression {
         return filterAtoms;
     }
 
-    public ImmutableMap<Variable, Term> getAssignments() {
-        return assignments;
-    }
-
-    public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
+    public ImmutableMap<QualifiedAttributeID, Term> getAttributes() {
         return attributes.getAttributes();
     }
 
@@ -73,7 +66,7 @@ public class RAExpression {
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms), union(re1.assignments, re2.assignments), attributes);
+                union(re1.filterAtoms, re2.filterAtoms), attributes);
     }
 
 
@@ -87,15 +80,14 @@ public class RAExpression {
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RAExpression joinOn(RAExpression re1, RAExpression re2,
-                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Variable>, ImmutableList<Function>> getAtomOnExpression) throws IllegalJoinException {
+                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Term>, ImmutableList<Function>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getAtomOnExpression.apply(attributes.getAttributes())), union(re1.assignments, re2.assignments),
-                attributes);
+                        getAtomOnExpression.apply(attributes.getAttributes())), attributes);
     }
 
     /**
@@ -118,8 +110,7 @@ public class RAExpression {
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getJoinOnFilter(re1.attributes, re2.attributes, shared)), union(re1.assignments, re2.assignments),
-                attributes);
+                        getJoinOnFilter(re1.attributes, re2.attributes, shared)), attributes);
     }
 
     /**
@@ -141,8 +132,7 @@ public class RAExpression {
 
         return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
                 union(re1.filterAtoms, re2.filterAtoms,
-                        getJoinOnFilter(re1.attributes, re2.attributes, using)), union(re1.assignments, re2.assignments),
-                attributes);
+                        getJoinOnFilter(re1.attributes, re2.attributes, using)), attributes);
     }
 
     /**
@@ -161,12 +151,12 @@ public class RAExpression {
                 .map(id -> new QualifiedAttributeID(null, id))
                 .map(id -> {
                     // TODO: this will be removed later, when OBDA factory will start checking non-nulls
-                    Variable v1 = re1.getAttributes().get(id);
+                    Term v1 = re1.getAttributes().get(id);
                     if (v1 == null)
-                        throw new IllegalArgumentException("Variable " + id + " not found in " + re1);
-                    Variable v2 = re2.getAttributes().get(id);
+                        throw new IllegalArgumentException("Term " + id + " not found in " + re1);
+                    Term v2 = re2.getAttributes().get(id);
                     if (v2 == null)
-                        throw new IllegalArgumentException("Variable " + id + " not found in " + re2);
+                        throw new IllegalArgumentException("Term " + id + " not found in " + re2);
                     return TERM_FACTORY.getFunctionEQ(v1, v2);
                 })
                 .collect(ImmutableCollectors.toList());
@@ -182,7 +172,7 @@ public class RAExpression {
      */
 
     public static RAExpression alias(RAExpression re, RelationID alias) {
-        return new RAExpression(re.dataAtoms, re.filterAtoms, re.assignments,
+        return new RAExpression(re.dataAtoms, re.filterAtoms,
                 RAExpressionAttributes.alias(re.attributes, alias));
     }
 
@@ -203,7 +193,7 @@ public class RAExpression {
 
     @Override
     public String toString() {
-        return "RAExpression : " + dataAtoms + " FILTER " + filterAtoms + " with " + attributes + " and assignments " + assignments;
+        return "RAExpression : " + dataAtoms + " FILTER " + filterAtoms + " with " + attributes;
     }
 
 
