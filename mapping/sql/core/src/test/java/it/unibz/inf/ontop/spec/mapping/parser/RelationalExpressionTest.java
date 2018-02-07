@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -59,7 +60,6 @@ public class RelationalExpressionTest {
 
         re1 = new RAExpression(ImmutableList.of(f1),
                 ImmutableList.of(),
-                ImmutableMap.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
                         ImmutableMap.of(attX, ImmutableSet.of(table1), attY, ImmutableSet.of(table1))));
@@ -82,7 +82,6 @@ public class RelationalExpressionTest {
 
         re2 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                ImmutableMap.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTu, u,qaTv, v, qaNu, u, qaNv, v),
                         ImmutableMap.of(attu, ImmutableSet.of(table2), attv, ImmutableSet.of(table2))));
@@ -104,7 +103,6 @@ public class RelationalExpressionTest {
         re3 = new RAExpression(
                 ImmutableList.of(f3),
                 ImmutableList.of(),
-                ImmutableMap.of(),
                 RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3)
         );
 
@@ -119,7 +117,6 @@ public class RelationalExpressionTest {
         // "cross join" and "join on" and "natural join"
         re1_1 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                ImmutableMap.of(),
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x), table1));
 
         System.out.println("****************************************************");
@@ -235,7 +232,6 @@ public class RelationalExpressionTest {
         // a new relationId without any common attribute with the re1 is created to simulate an exception
         RAExpression re2 =  new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                ImmutableMap.of(),
                 RAExpressionAttributes.create(
                         ImmutableMap.of(MDFAC.createAttributeID("C"), u,  MDFAC.createAttributeID("D"), v),
                         MDFAC.createRelationID(null, "Q")));
@@ -273,7 +269,7 @@ public class RelationalExpressionTest {
 
         assertTrue(actual.getDataAtoms().contains(f1));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = actual.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaNy));
         assertEquals(x, attrs.get(qaAx));
@@ -284,11 +280,10 @@ public class RelationalExpressionTest {
     public void  create_test(){
         RAExpression actual = new RAExpression(re1.getDataAtoms(),
                 re1.getFilterAtoms(),
-                re1.getAssignments(),
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), table1));
         System.out.println(actual);
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = actual.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaNy));
         assertEquals(x, attrs.get(qaTx));
@@ -302,7 +297,7 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
         assertTrue(relationalExpression.getFilterAtoms().contains(eq));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(null, attrs.get(qaTx));
         assertEquals(y, attrs.get(qaTy));
@@ -317,7 +312,7 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getDataAtoms().contains(f1));
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaTx));
         assertEquals(null, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaTy));

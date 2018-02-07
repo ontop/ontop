@@ -64,14 +64,12 @@ public class SQLPPMapping2DatalogConverter {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
                 List<Function> body;
-                ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
-                ImmutableMap<Variable, Term> assignments;
+                ImmutableMap<QualifiedAttributeID, Term> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
-                    assignments = re.getAssignments();
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
                     body.addAll(re.getDataAtoms());
@@ -90,7 +88,6 @@ public class SQLPPMapping2DatalogConverter {
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                    assignments = ImmutableMap.of();
 
                     List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
@@ -102,7 +99,7 @@ public class SQLPPMapping2DatalogConverter {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
 
-                        Function head = renameVariables(atom, lookupTable, assignments, idfac);
+                        Function head = renameVariables(atom, lookupTable, idfac);
                         CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
@@ -134,39 +131,29 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            ImmutableMap<Variable, Term> bindMap, QuotedIDFactory idfac) throws AttributeNotFoundException {
+    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
+                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
 
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {
+                Variable var = (Variable) term;
+                QuotedID attribute = idfac.createAttributeID(var.getName());
+                newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                    Variable var = (Variable) term;
-                    QuotedID attribute = idfac.createAttributeID(var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
+                if (newTerm == null) {
+                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
 
-                    if (newTerm == null) {
-                        QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                        newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
-
-                        if (newTerm == null)
-                            throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
-                                    + " (variable " + var.getName() + ") required by the target atom.");
-                    }
-
-                        Term substitute = bindMap.get(newTerm);
-
-                        if (substitute != null) {
-
-                            newTerm = substitute;
-                        }
-
-
+                    if (newTerm == null)
+                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
+                                + " (variable " + var.getName() + ") required by the target atom.");
+                }
             }
             else if (term instanceof Function)
-                newTerm = renameVariables((Function) term, attributes, bindMap, idfac);
+                newTerm = renameVariables((Function) term, attributes, idfac);
             else if (term instanceof Constant)
                 newTerm = term.clone();
             else
