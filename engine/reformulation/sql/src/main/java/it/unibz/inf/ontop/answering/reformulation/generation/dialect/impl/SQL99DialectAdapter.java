@@ -46,12 +46,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         for (Entry<String, String> e : R2RMLIRISafeEncoder.TABLE.entrySet()) {
             sb1.append("REPLACE(");
             String value = e.getValue();
-            // escape single quote
-            value = value.equals("'") ? escapedSingleQuote() : value;
             String encode = e.getKey();
-            sb2.append(", '").append(value)
-                    .append("', '").append(encode)
-                    .append("')");
+            sb2.append(", ").append(getSQLLexicalFormString(value))
+                    .append(", ").append(getSQLLexicalFormString(encode))
+                    .append(")");
+
         }
         ENCODE_FOR_URI_START = sb1.toString();
         ENCODE_FOR_URI_END = sb2.toString();
