@@ -58,8 +58,10 @@ public interface SQLDialectAdapter {
 	public String strUcase(String str);
 	
 	public String strLcase(String str);
-	
-	public String strEncodeForUri(String str);
+
+	String escapedSingleQuote();
+
+	public String iriSafeEncode(String str);
 
 	public String strBefore(String str, String before);
 	

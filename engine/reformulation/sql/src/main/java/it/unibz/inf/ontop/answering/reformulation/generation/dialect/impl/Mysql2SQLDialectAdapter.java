@@ -252,5 +252,9 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		
 		return bf.toString();
 	}
+
+	 @Override public String escapedSingleQuote(){
+		return "\\'";
+	 }
 	
 }

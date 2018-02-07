@@ -2,11 +2,23 @@ package it.unibz.inf.ontop.utils;
 
 import org.junit.Test;
 
+import java.util.Map;
+
 import static it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder.decode;
 import static it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder.encode;
 import static org.junit.Assert.assertEquals;
 
 public class R2RMLIRISafeEncoderTest {
+
+    @Test
+    public void testTable() {
+        for (Map.Entry<String, String> entry : R2RMLIRISafeEncoder.TABLE.entrySet()) {
+            String key = entry.getKey();
+            assertEquals(3, key.length());
+            assertEquals(Integer.parseInt(key.substring(1, 3), 16),
+                    entry.getValue().charAt(0));
+        }
+    }
 
     @Test
     public void testEncode() {
@@ -25,4 +37,6 @@ public class R2RMLIRISafeEncoderTest {
         assertEquals("~A_17.1-2", decode("~A_17.1-2"));
         assertEquals("葉篤正", decode("葉篤正"));
     }
+
+
 }
