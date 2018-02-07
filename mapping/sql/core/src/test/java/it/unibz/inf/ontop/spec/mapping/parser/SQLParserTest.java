@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
@@ -33,6 +34,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class SQLParserTest {
 
@@ -658,16 +660,18 @@ public class SQLParserTest {
 	public void test_7_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT ('ID-' || student.id) as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test
 	public void test_7_1_b() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 
@@ -675,8 +679,9 @@ public class SQLParserTest {
 	public void test_7_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT (grade.score * 30 / 100) as percentage from grade");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL
@@ -809,8 +814,9 @@ public class SQLParserTest {
 	public void test_13() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 
@@ -913,16 +919,18 @@ public class SQLParserTest {
 	public void test_concatOracle() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test
 	public void test_RegexpReplace() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
 		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().size());
+		assertFalse(re.getAttributes().keySet().iterator().next() instanceof Variable);
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class)
@@ -962,5 +970,20 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().size());
 	}
 
+    @Test
+    public void test_lower() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+        RAExpression re = sqp.parse("select id, name from student where lower(name)=lower('ColleeN')");
+        assertEquals(1, re.getDataAtoms().size());
+        assertEquals(1, re.getFilterAtoms().size());
+        assertEquals(2, re.getAttributes().size());
+    }
+
+    @Test
+    public void test_lower2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+        RAExpression re = sqp.parse("select id, lower(name) as lower_name from student");
+        assertEquals(1, re.getDataAtoms().size());
+        assertEquals(0, re.getFilterAtoms().size());
+        assertEquals(2, re.getAttributes().size());
+    }
 
 }

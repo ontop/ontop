@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpressionAttributes;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -273,7 +274,7 @@ public class RelationalExpressionTest {
 
         assertTrue(actual.getDataAtoms().contains(f1));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = actual.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaNy));
         assertEquals(x, attrs.get(qaAx));
@@ -287,7 +288,7 @@ public class RelationalExpressionTest {
                 RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), table1), TERM_FACTORY);
         System.out.println(actual);
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = actual.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = actual.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaNy));
         assertEquals(x, attrs.get(qaTx));
@@ -301,7 +302,7 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
         assertTrue(relationalExpression.getFilterAtoms().contains(eq));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaNx));
         assertEquals(null, attrs.get(qaTx));
         assertEquals(y, attrs.get(qaTy));
@@ -316,7 +317,7 @@ public class RelationalExpressionTest {
         assertTrue(relationalExpression.getDataAtoms().contains(f1));
         assertTrue(relationalExpression.getDataAtoms().contains(f2));
 
-        ImmutableMap<QualifiedAttributeID, Variable> attrs = relationalExpression.getAttributes();
+        ImmutableMap<QualifiedAttributeID, Term> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaTx));
         assertEquals(null, attrs.get(qaNx));
         assertEquals(y, attrs.get(qaTy));

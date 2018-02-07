@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -19,7 +20,7 @@ import static java.util.function.Function.identity;
  */
 public class RAExpressionAttributes {
 
-    private ImmutableMap<QualifiedAttributeID, Variable> attributes;
+    private ImmutableMap<QualifiedAttributeID, Term> attributes;
     private ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences;
 
     /**
@@ -28,7 +29,7 @@ public class RAExpressionAttributes {
      * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
      * @param attributeOccurrences an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link RelationID}>>
      */
-    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, Variable> attributes,
+    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, Term> attributes,
                                   ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences) {
         this.attributes = attributes;
         this.attributeOccurrences = attributeOccurrences;
@@ -56,7 +57,7 @@ public class RAExpressionAttributes {
         return (occurrences != null) && occurrences.size() == 1;
     }
 
-    public ImmutableMap<QualifiedAttributeID, Variable> getAttributes() {
+    public ImmutableMap<QualifiedAttributeID, Term> getAttributes() {
         return attributes;
     }
 
@@ -72,7 +73,7 @@ public class RAExpressionAttributes {
 
         checkRelationAliasesConsistency(re1, re2);
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, Term> attributes = merge(
                 re1.selectAttributes(id ->
                         (id.getRelation() != null) || re2.isAbsent(id.getAttribute())),
 
@@ -132,7 +133,7 @@ public class RAExpressionAttributes {
                             (!ambiguous.isEmpty() ? "Attribute(s) " + ambiguous + " are ambiguous" : ""));
         }
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, Term> attributes = merge(
                 re1.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
                                 || (id.getRelation() == null && re2.isAbsent(id.getAttribute()))
@@ -158,10 +159,10 @@ public class RAExpressionAttributes {
      * @return a {@link RAExpressionAttributes}
      */
 
-    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Term> unqualifiedAttributes,
                                                 RelationID alias) {
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, Term> attributes = merge(
                 unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
@@ -178,10 +179,10 @@ public class RAExpressionAttributes {
         return new RAExpressionAttributes(attributes, attributeOccurrences);
     }
 
-    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Variable> unqualifiedAttributes,
+    public static RAExpressionAttributes create(ImmutableMap<QuotedID, Term> unqualifiedAttributes,
                                                 RelationID alias, RelationID schemalessId) {
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, Term> attributes = merge(
                 unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
@@ -212,7 +213,7 @@ public class RAExpressionAttributes {
 
     public static RAExpressionAttributes alias(RAExpressionAttributes re, RelationID alias) {
 
-        ImmutableMap<QuotedID, Variable> unqualifiedAttributes =
+        ImmutableMap<QuotedID, Term> unqualifiedAttributes =
                 re.attributes.entrySet().stream()
                         .filter(e -> e.getKey().getRelation() == null)
                         .collect(ImmutableCollectors.toMap(
@@ -222,15 +223,15 @@ public class RAExpressionAttributes {
     }
 
 
-    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1,
-                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs2) {
-        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).build();
+    private static ImmutableMap<QualifiedAttributeID, Term> merge(ImmutableMap<QualifiedAttributeID, Term> attrs1,
+                                                                      ImmutableMap<QualifiedAttributeID, Term> attrs2) {
+        return ImmutableMap.<QualifiedAttributeID, Term>builder().putAll(attrs1).putAll(attrs2).build();
     }
 
-    private static ImmutableMap<QualifiedAttributeID, Variable> merge(ImmutableMap<QualifiedAttributeID, Variable> attrs1,
-                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs2,
-                                                                      ImmutableMap<QualifiedAttributeID, Variable> attrs3) {
-        return ImmutableMap.<QualifiedAttributeID, Variable>builder().putAll(attrs1).putAll(attrs2).putAll(attrs3).build();
+    private static ImmutableMap<QualifiedAttributeID, Term> merge(ImmutableMap<QualifiedAttributeID, Term> attrs1,
+                                                                      ImmutableMap<QualifiedAttributeID, Term> attrs2,
+                                                                      ImmutableMap<QualifiedAttributeID, Term> attrs3) {
+        return ImmutableMap.<QualifiedAttributeID, Term>builder().putAll(attrs1).putAll(attrs2).putAll(attrs3).build();
     }
 
     /**
@@ -258,7 +259,7 @@ public class RAExpressionAttributes {
         return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
     }
 
-    private ImmutableMap<QualifiedAttributeID, Variable> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
+    private ImmutableMap<QualifiedAttributeID, Term> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
 
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()))

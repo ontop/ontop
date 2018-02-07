@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -70,6 +71,28 @@ public class SelectQueryParser {
         }
     }
 
+    public RAExpression parse(String sql, IntermediateQueryBuilder queryBuilder) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+        try {
+            Statement statement = CCJSqlParserUtil.parse(sql);
+            if (!(statement instanceof Select))
+                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
+
+            RAExpression re = select(((Select) statement).getSelectBody());
+            return re;
+        }
+        catch (JSQLParserException e) {
+            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
+        }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (TokenMgrError e) {
+            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
+        }
+    }
 
 
 
@@ -120,21 +143,17 @@ public class SelectQueryParser {
                         .parseBooleanExpression(plainSelect.getWhere()))
                 .build();
 
-        ImmutableList.Builder<Function> assignmentsBuilder = ImmutableList.builder();
-        ImmutableMap.Builder<QualifiedAttributeID, Variable> attributesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<QualifiedAttributeID, Term> attributesBuilder = ImmutableMap.builder();
         SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
 
         plainSelect.getSelectItems().forEach(si -> {
-            ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
+            ImmutableMap<QualifiedAttributeID, Term> attrs = sip.getAttributes(si);
 
             // attributesBuilder.build() below checks that the keys in attrs do not intersect
             attributesBuilder.putAll(attrs);
-
-            if (sip.assignment != null)
-                assignmentsBuilder.add(sip.assignment);
         });
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        ImmutableMap<QualifiedAttributeID, Term> attributes;
         try {
             attributes = attributesBuilder.build();
         }
@@ -142,8 +161,8 @@ public class SelectQueryParser {
             SelectItemProcessor sip2 = new SelectItemProcessor(current.getAttributes());
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, Variable> attrs = sip2.getAttributes(si);
-                for (Map.Entry<QualifiedAttributeID, Variable> a : attrs.entrySet())
+                ImmutableMap<QualifiedAttributeID, Term> attrs = sip2.getAttributes(si);
+                for (Map.Entry<QualifiedAttributeID, Term> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
             throw new InvalidSelectQueryRuntimeException(
@@ -155,7 +174,7 @@ public class SelectQueryParser {
         }
 
         return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<Function>builder().addAll(filterAtoms).addAll(assignmentsBuilder.build()).build(),
+                ImmutableList.<Function>builder().addAll(filterAtoms).build(),
                 new RAExpressionAttributes(attributes, null), termFactory);
     }
 
@@ -306,17 +325,15 @@ public class SelectQueryParser {
     }
 
     private class SelectItemProcessor implements SelectItemVisitor {
-        final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        final ImmutableMap<QualifiedAttributeID, Term> attributes;
 
-        ImmutableMap<QualifiedAttributeID, Variable> map;
-        Function assignment;
+        ImmutableMap<QualifiedAttributeID, Term> map;
 
-        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
             this.attributes = attributes;
         }
 
-        ImmutableMap<QualifiedAttributeID, Variable> getAttributes(SelectItem si) {
-            assignment = null;
+        ImmutableMap<QualifiedAttributeID, Term> getAttributes(SelectItem si) {
             si.accept(this);
             return map;
         }
@@ -351,7 +368,7 @@ public class SelectQueryParser {
                         ? new QualifiedAttributeID(null, id)
                         : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
 
-                Variable var = attributes.get(attr);
+                Term var = attributes.get(attr);
                 if (var != null) {
                     Alias columnAlias = selectExpressionItem.getAlias();
                     QuotedID name = (columnAlias == null || columnAlias.getName() == null)
@@ -369,11 +386,10 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
 
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                Variable var = termFactory.getVariable(name.getName() + relationIndex);
-                map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
+                //Variable var = termFactory.getVariable(name.getName() + relationIndex);
 
-                Term term = new ExpressionParser(idfac, attributes, termFactory, typeFactory).parseTerm(expr);
-                assignment = termFactory.getFunctionEQ(var, term);
+                Term term =  new ExpressionParser(idfac, attributes, termFactory, typeFactory).parseTerm(expr);
+                map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
             }
         }
     }
