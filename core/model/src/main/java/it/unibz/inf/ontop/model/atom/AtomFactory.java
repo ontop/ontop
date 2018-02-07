@@ -74,6 +74,14 @@ public interface AtomFactory {
 
     AtomPredicate getQuadrupleAtomPredicate();
 
+    Function getTupleAtom(Term subject, Term predicate, Term object, Term begin, Term end);
+
+
+    ImmutableFunctionalTerm getImmutableTupleAtom(ImmutableTerm subject, ImmutableTerm predicate,
+                                                         ImmutableTerm object, ImmutableTerm begin, ImmutableTerm end);
+
+    AtomPredicate getTupleAtomPredicate();
+
     /**
      * TODO: create an abstraction of DataAtom (Atom) that accepts arbitrary ImmutableTerms as arguments
      * (not only Variable or ground terms)

@@ -20,6 +20,7 @@ import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 
 public class AtomFactoryImpl implements AtomFactory {
 
+    private final AtomPredicate tuplePredicate;
     private final AtomPredicate quadruplePredicate;
     private final AtomPredicate triplePredicate;
     private final TermFactory termFactory;
@@ -34,6 +35,7 @@ public class AtomFactoryImpl implements AtomFactory {
         this.typeFactory = typeFactory;
         triplePredicate = getAtomPredicate("triple", 3);
         this.quadruplePredicate = getAtomPredicate("quadruple", 4);;
+        this.tuplePredicate = getAtomPredicate("tuple", 5);
         objectRDFType = typeFactory.getAbstractObjectRDFType();
         rootRdfTermType = typeFactory.getAbstractRDFTermType();
         rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
@@ -201,6 +203,24 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public AtomPredicate getQuadrupleAtomPredicate() {
         return quadruplePredicate;
+    }
+
+
+    @Override
+    public Function getTupleAtom(Term subject, Term predicate, Term object, Term begin, Term end) {
+        return termFactory.getFunction(tuplePredicate,subject, predicate, object, begin, end);
+    }
+
+
+    @Override
+    public ImmutableFunctionalTerm getImmutableTupleAtom(ImmutableTerm subject, ImmutableTerm predicate,
+                                                             ImmutableTerm object, ImmutableTerm begin, ImmutableTerm end) {
+        return termFactory.getImmutableFunctionalTerm(tuplePredicate, subject, predicate, object, begin, end);
+    }
+
+    @Override
+    public AtomPredicate getTupleAtomPredicate() {
+        return tuplePredicate;
     }
 
 

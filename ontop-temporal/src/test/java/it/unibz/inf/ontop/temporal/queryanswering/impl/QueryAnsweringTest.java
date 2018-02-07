@@ -28,6 +28,7 @@ public class QueryAnsweringTest {
                 "PREFIX time: <http://www.w3.org/2006/time#>" +
                         "SELECT ?tb ?b ?e " +
                         "WHERE {" +
+                            "?tb a :Turbine ." +
                             "GRAPH ?g {?tb rdf:type st:PurgingIsOver .}" +
                             "?g time:hasTime _:intv ." +
                             "_:intv time:hasBeginning _:beginInst ." +

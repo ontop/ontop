@@ -119,6 +119,10 @@ public class TemporalSparqlAlgebraToDatalogTranslator {
         if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
             // order elements of the set in some way by converting it into the list
             answerVariables = new ArrayList<>(body.variables);
+
+            //put the projected interval variables back
+            List<Term>intvTerms = pruner.getVariablesRemovedFromProjection().stream().map(termFactory::getVariable).collect(Collectors.toList());
+            answerVariables.addAll(intvTerms);
         }
         else {
             // ASK queries have no answer variables
@@ -429,11 +433,36 @@ public class TemporalSparqlAlgebraToDatalogTranslator {
         return termFactory.getFunctionIsTrue(term);
     }
 
+    private TranslationResult translateTriplePatternWithContext(StatementPattern statementPattern) throws OntopUnsupportedInputQueryException {
+
+        ImmutableSet.Builder<Variable> variables = ImmutableSet.builder();
+        Value s = statementPattern.getSubjectVar().getValue();
+        Value p = statementPattern.getPredicateVar().getValue();
+        Value o = statementPattern.getObjectVar().getValue();
+
+        Term sTerm = (s == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(s);
+        Term pTerm = (p == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(p);
+        Term oTerm = (o == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(o);
+
+        String cName = statementPattern.getContextVar().getName();
+
+        Term bTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getBegin());
+        Term eTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getEnd());
+
+        Function atom = atomFactory.getTupleAtom(sTerm, pTerm, oTerm, bTerm, eTerm);
+
+        return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
+    }
+
     private TranslationResult translateTriplePattern(StatementPattern statementPattern) throws OntopUnsupportedInputQueryException {
 
         // A triple pattern is member of the set (RDF-T + V) x (I + V) x (RDF-T + V)
         // VarOrTerm ::=  Var | GraphTerm
         // GraphTerm ::=  iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | NIL
+
+        if (statementPattern.getContextVar() != null){
+            return translateTriplePatternWithContext(statementPattern);
+        }
 
         ImmutableSet.Builder<Variable> variables = ImmutableSet.builder();
         Function atom;

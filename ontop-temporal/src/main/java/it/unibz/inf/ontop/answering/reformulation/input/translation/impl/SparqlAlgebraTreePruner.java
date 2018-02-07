@@ -11,13 +11,19 @@ import java.util.Map;
 
 public class SparqlAlgebraTreePruner {
     private Map<String, IntervalVariables> timeIntvVariableMap;
+    private List <String> variablesRemovedFromProjection;
 
     public SparqlAlgebraTreePruner(){
         timeIntvVariableMap = new HashMap();
+        variablesRemovedFromProjection = new ArrayList<>();
     }
 
     public Map<String, IntervalVariables> getTimeIntvVariableMap() {
         return timeIntvVariableMap;
+    }
+
+    public List<String> getVariablesRemovedFromProjection() {
+        return variablesRemovedFromProjection;
     }
 
     TupleExpr updateProjectionElemList(TupleExpr node) {
@@ -27,6 +33,8 @@ public class SparqlAlgebraTreePruner {
                 if(timeIntvVariableMap.values().stream()
                         .allMatch(iv -> !iv.getBegin().equals(elem.getSourceName()) && !iv.getEnd().equals(elem.getSourceName()))){
                     newProjectionList.add(elem);
+                } else {
+                    variablesRemovedFromProjection.add(elem.getSourceName());
                 }
             }
             ((Projection) node).setProjectionElemList(new ProjectionElemList(newProjectionList));
@@ -241,7 +249,7 @@ public class SparqlAlgebraTreePruner {
         return false;
     }
 
-    private class IntervalVariables{
+    public class IntervalVariables{
         private String begin;
         private String end;
 
@@ -250,11 +258,11 @@ public class SparqlAlgebraTreePruner {
             this.end = end;
         }
 
-        private String getBegin(){
+        String getBegin(){
             return this.begin;
         }
 
-        private String getEnd(){
+        String getEnd(){
             return this.end;
         }
 
