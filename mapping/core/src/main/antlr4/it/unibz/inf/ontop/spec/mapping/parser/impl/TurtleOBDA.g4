@@ -344,7 +344,7 @@ PN_CHARS_U
   ;
 
 PN_CHARS
-  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
+  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '=' | ';'
   ;
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
