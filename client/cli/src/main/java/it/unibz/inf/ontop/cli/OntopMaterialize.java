@@ -57,6 +57,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final String TURTLE = "turtle";
     private static final String N3 = "n3";
 
+
+    @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
+            title = "output", description = "output file (default) or directory (only for --separate-files)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    protected String outputFile;
+
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, owlxml, turtle, n3. " +
