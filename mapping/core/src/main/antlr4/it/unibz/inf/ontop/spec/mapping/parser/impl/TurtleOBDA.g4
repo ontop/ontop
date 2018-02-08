@@ -329,7 +329,14 @@ ANON
   ;
 
 PN_CHARS_BASE
-  : 'A' .. 'Z' | 'a' .. 'z' | '\u00C0' .. '\u00D6' | '\u00D8' .. '\u00F6' | '\u00F8' .. '\u02FF' | '\u0370' .. '\u037D' | '\u037F' .. '\u1FFF' | '\u200C' .. '\u200D' | '\u2070' .. '\u218F' | '\u2C00' .. '\u2FEF' | '\u3001' .. '\uD7FF' | '\uF900' .. '\uFDCF' | '\uFDF0' .. '\uFFFD'
+  : 'A' .. 'Z' | 'a' .. 'z' | '\u00C0' .. '\u00D6' | '\u00D8' .. '\u00F6' | '\u00F8' .. '\u02FF' | '\u0370' .. '\u037D' |
+  '\u037F' .. '\u1FFF' | '\u200C' .. '\u200D' | '\u2070' .. '\u218F' | '\u2C00' .. '\u2FEF' | '\u3001' .. '\uD7FF' |
+    '\uF900' .. '\uFDCF' | '\uFDF0' .. '\uFFFD'
+// Limitation: Unicode Characters beyond \uFFFF are not (yet?) supported by ANTLR
+//    | '\u10000' .. '\u1FFFD' | '\u20000' .. '\u2FFFD' |
+//    '\u30000' .. '\u3FFFD' | '\u40000' .. '\u4FFFD' | '\u50000' .. '\u5FFFD' | '\u60000' .. '\u6FFFD' |
+//    '\u70000' .. '\u7FFFD' | '\u80000' .. '\u8FFFD' | '\u90000' .. '\u9FFFD' | '\uA0000' .. '\uAFFFD' |
+//    '\uB0000' .. '\uBFFFD' | '\uC0000' .. '\uCFFFD' | '\uD0000' .. '\uDFFFD' | '\uE1000' .. '\uEFFFD'
   ;
 
 PN_CHARS_U
@@ -337,7 +344,7 @@ PN_CHARS_U
   ;
 
 PN_CHARS
-  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040]
+  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
@@ -362,6 +369,7 @@ HEX
   : [0-9] | [A-F] | [a-f]
   ;
 
+// RDF-specific: the backslash (first character) is ignored when parsing the IRI
 PN_LOCAL_ESC
   : '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
   ;

@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -69,7 +70,7 @@ public class SelectQueryAttributeExtractor2 {
 
     }
 
-    public ImmutableMap<QualifiedAttributeID, Variable> getQueryBodyAttributes(PlainSelect plainSelect) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    public ImmutableMap<QualifiedAttributeID, Term> getQueryBodyAttributes(PlainSelect plainSelect) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
         if (plainSelect.getFromItem() == null)
             throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", plainSelect);
@@ -92,13 +93,13 @@ public class SelectQueryAttributeExtractor2 {
     }
 
 
-    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+    public ImmutableMap<QualifiedAttributeID, Term> expandStar(ImmutableMap<QualifiedAttributeID, Term> attributes) {
         return attributes.entrySet().stream()
                 .filter(e -> e.getKey().getRelation() == null)
                 .collect(ImmutableCollectors.toMap());
     }
 
-    public ImmutableMap<QualifiedAttributeID, Variable> expandStar(ImmutableMap<QualifiedAttributeID, Variable> attributes, Table table) {
+    public ImmutableMap<QualifiedAttributeID, Term> expandStar(ImmutableMap<QualifiedAttributeID, Term> attributes, Table table) {
         RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
 
         return attributes.entrySet().stream()
@@ -125,7 +126,7 @@ public class SelectQueryAttributeExtractor2 {
 
     private RAExpressionAttributes select(PlainSelect plainSelect) {
 
-        ImmutableMap<QualifiedAttributeID, Variable> currentAttributes;
+        ImmutableMap<QualifiedAttributeID, Term> currentAttributes;
         try {
             currentAttributes = getQueryBodyAttributes(plainSelect);
         }
@@ -136,7 +137,7 @@ public class SelectQueryAttributeExtractor2 {
             throw new UnsupportedSelectQueryRuntimeException(e.getMessage(), null);
         }
 
-        ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        ImmutableMap<QualifiedAttributeID, Term> attributes;
         try {
             attributes = plainSelect.getSelectItems().stream()
                     .map(si -> new SelectItemProcessor(currentAttributes).getAttributes(si).entrySet())
@@ -147,8 +148,8 @@ public class SelectQueryAttributeExtractor2 {
             SelectItemProcessor sip = new SelectItemProcessor(currentAttributes);
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, Variable> attrs = sip.getAttributes(si);
-                for (Map.Entry<QualifiedAttributeID, Variable> a : attrs.entrySet())
+                ImmutableMap<QualifiedAttributeID, Term> attrs = sip.getAttributes(si);
+                for (Map.Entry<QualifiedAttributeID, Term> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
             throw new InvalidSelectQueryRuntimeException(
@@ -234,7 +235,7 @@ public class SelectQueryAttributeExtractor2 {
                     ? idfac.createRelationID(null, tableName.getAlias().getName())
                     : relation.getID();
 
-            ImmutableMap<QuotedID, Variable> attributes = relation.getAttributes().stream()
+            ImmutableMap<QuotedID, Term> attributes = relation.getAttributes().stream()
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
@@ -301,15 +302,15 @@ public class SelectQueryAttributeExtractor2 {
     }
 
     private class SelectItemProcessor implements SelectItemVisitor {
-        final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        final ImmutableMap<QualifiedAttributeID, Term> attributes;
 
-        ImmutableMap<QualifiedAttributeID, Variable> map;
+        ImmutableMap<QualifiedAttributeID, Term> map;
 
-        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
             this.attributes = attributes;
         }
 
-        ImmutableMap<QualifiedAttributeID, Variable> getAttributes(SelectItem si) {
+        ImmutableMap<QualifiedAttributeID, Term> getAttributes(SelectItem si) {
             si.accept(this);
             return map;
         }
@@ -328,7 +329,7 @@ public class SelectQueryAttributeExtractor2 {
         public void visit(SelectExpressionItem selectExpressionItem) {
             Expression expr = selectExpressionItem.getExpression();
             QuotedID name = getSelectItemAliasedId(selectExpressionItem);
-            final Variable var;
+            final Term var;
             if (expr instanceof Column) {
                 Column column = (Column) expr;
                 QuotedID columnId = idfac.createAttributeID(column.getColumnName());
