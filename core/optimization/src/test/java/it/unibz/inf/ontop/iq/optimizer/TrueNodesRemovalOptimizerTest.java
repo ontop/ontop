@@ -366,8 +366,7 @@ public class TrueNodesRemovalOptimizerTest {
         // Expected query
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, un);
+        expectedQueryBuilder.init(projectionAtom, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
         expectedQueryBuilder.addChild(un, DATA_NODE_1);
 

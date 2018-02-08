@@ -393,26 +393,26 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     /**
-     * TODO: refactor
+     *  - Merges with a child construction
+     *  - Removes itself if useless
      */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return liftBinding(child, variableGenerator, currentIQProperties);
-    }
 
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree liftedChildIQTree = childIQTree.normalizeForOptimization(variableGenerator);
-        QueryNode liftedChildRoot = liftedChildIQTree.getRootNode();
+        IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
+        QueryNode liftedChildRoot = liftedChild.getRootNode();
         if (liftedChildRoot instanceof ConstructionNode)
-            return liftBinding((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChildIQTree, currentIQProperties);
-        else if (liftedChildIQTree.isDeclaredAsEmpty()) {
+            return mergeWithChild((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChild, currentIQProperties);
+        else if (liftedChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
+        /*
+         * If useless, returns the child
+         */
+        else if (liftedChild.getVariables().equals(projectedVariables))
+            return liftedChild;
         else
-            return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createUnaryIQTree(this, liftedChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     /**
@@ -625,19 +625,21 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return termFactory.getImmutableExpression(EQ, t1, t2);
     }
 
-    private IQTree liftBinding(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
+    private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
 
         AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
                 childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 
-        IQTree grandChildIQTree = ascendingNormalization.normalizeChild(childIQ.getChild());
+        IQTree grandChild = ascendingNormalization.normalizeChild(childIQ.getChild());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
 
-        return iqFactory.createUnaryIQTree(newConstructionNode, grandChildIQTree, currentIQProperties.declareNormalizedForOptimization());
+        return grandChild.getVariables().equals(newConstructionNode.getVariables())
+                ? grandChild
+                : iqFactory.createUnaryIQTree(newConstructionNode, grandChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private class EmptyTreeException extends Exception {

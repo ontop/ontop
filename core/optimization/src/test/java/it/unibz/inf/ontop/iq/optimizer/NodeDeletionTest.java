@@ -161,10 +161,10 @@ public class NodeDeletionTest {
         IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
-        assertTrue(viceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
-        assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
+        QueryNode newRootNode = optimizedQuery.getRootNode();
+        assertTrue(newRootNode instanceof ExtensionalDataNode);
+        assertEquals(((ExtensionalDataNode) newRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
+        assertTrue(optimizedQuery.getChildren(newRootNode).isEmpty());
     }
 
     @Test
@@ -228,9 +228,9 @@ public class NodeDeletionTest {
         IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
-        QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
-        assertTrue(viceRootNode instanceof UnionNode);
-        assertEquals(optimizedQuery.getChildren(viceRootNode).size(), 2);
+        QueryNode optimizedRootNode = optimizedQuery.getRootNode();
+        assertTrue(optimizedRootNode instanceof UnionNode);
+        assertEquals(optimizedQuery.getChildren(optimizedRootNode).size(), 2);
     }
 
     @Test(expected = EmptyQueryException.class)

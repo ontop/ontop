@@ -1693,9 +1693,6 @@ public class BindingLiftTest {
 
         IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
 
-        ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution());
-
         ConstructionNode emptyConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables());
         ConstructionNode emptyConstructionNode2 = emptyConstructionNode.clone();
 
@@ -1739,8 +1736,7 @@ public class BindingLiftTest {
         ExtensionalDataNode table5DataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_AR3, X, Y, Z));
         ExtensionalDataNode table5DataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_AR3, A, B, C));
 
-        originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
-        originalBuilder.addChild(rootConstructionNode, unionNode1);
+        originalBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, unionNode1);
         originalBuilder.addChild(unionNode1, emptyConstructionNode);
         originalBuilder.addChild(emptyConstructionNode, joinNode);
         originalBuilder.addChild(unionNode1, emptyConstructionNode2);
@@ -1792,8 +1788,7 @@ public class BindingLiftTest {
         InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
 
 
-        expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, rootConstructionNode);
-        expectedBuilder.addChild(rootConstructionNode, unionNode3);
+        expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, unionNode3);
         expectedBuilder.addChild(unionNode3, constructionNode1);
         expectedBuilder.addChild(unionNode3, table5DataNode1);
         expectedBuilder.addChild(constructionNode1, joinNode2);
@@ -1871,8 +1866,7 @@ public class BindingLiftTest {
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, newDataNode2));
 
-        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
-        IQ expectedIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newConstructionTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), joinTree);
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
@@ -1901,8 +1895,7 @@ public class BindingLiftTest {
         IQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataNode1, newDataNode2));
 
-        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, newJoinTree);
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newJoinTree);
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
@@ -2078,8 +2071,7 @@ public class BindingLiftTest {
         BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(), newDataNode1, newDataNode2);
 
-        IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, newLeftJoinTree);
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newLeftJoinTree);
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }

@@ -376,10 +376,8 @@ public class QueryMergingTest {
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(ANS1_X_ATOM, expectedRootNode);
-        ConstructionNode expectedIntermediateConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
-        expectedBuilder.addChild(expectedRootNode, expectedIntermediateConstructionNode);
         ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, THREE));
-        expectedBuilder.addChild(expectedIntermediateConstructionNode, expectedDataNode);
+        expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
     }
