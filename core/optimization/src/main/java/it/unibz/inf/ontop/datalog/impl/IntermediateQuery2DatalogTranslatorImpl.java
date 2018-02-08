@@ -127,7 +127,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
             dProgram = datalogFactory.getDatalogProgram();
         }
 
-		normalizeIQ(initialQuery)
+		normalizeIQ(orderLiftedQuery)
 				.forEach(q -> translate(q,  dProgram));
 
 		return dProgram;
