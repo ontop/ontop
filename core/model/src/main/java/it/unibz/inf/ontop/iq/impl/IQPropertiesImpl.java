@@ -1,16 +1,20 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQProperties;
 
 public class IQPropertiesImpl implements IQProperties {
 
     private final boolean isNormalized;
 
-    protected IQPropertiesImpl() {
+    @AssistedInject
+    private IQPropertiesImpl() {
         this.isNormalized = false;
     }
 
-    private IQPropertiesImpl(boolean isNormalized) {
+    @AssistedInject
+    private IQPropertiesImpl(@Assisted boolean isNormalized) {
         this.isNormalized = false;
     }
 

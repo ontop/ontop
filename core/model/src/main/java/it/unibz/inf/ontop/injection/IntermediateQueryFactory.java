@@ -75,4 +75,7 @@ public interface IntermediateQueryFactory {
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
+
+    IQProperties createIQProperties();
+    IQProperties createIQProperties(boolean isLifted);
 }

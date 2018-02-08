@@ -4,17 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -35,25 +34,6 @@ public class ConstructionNodeTools {
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
-    }
-
-    public ConstructionNode merge(ConstructionNode parentConstructionNode,
-                                  ConstructionNode childConstructionNode, IntermediateQueryFactory iqFactory) {
-
-        ImmutableSubstitution<ImmutableTerm> composition = childConstructionNode.getSubstitution().composeWith(
-                parentConstructionNode.getSubstitution());
-
-        ImmutableSet<Variable> projectedVariables = parentConstructionNode.getVariables();
-
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = projectedVariables.containsAll(
-                childConstructionNode.getVariables())
-                ? composition
-                : substitutionFactory.getSubstitution(
-                composition.getImmutableMap().entrySet().stream()
-                        .filter(e -> !projectedVariables.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
-
-        return iqFactory.createConstructionNode(projectedVariables, newSubstitution);
     }
 
     public ImmutableSet<Variable> computeNewProjectedVariables(

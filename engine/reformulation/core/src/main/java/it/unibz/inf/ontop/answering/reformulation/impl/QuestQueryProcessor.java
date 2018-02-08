@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
@@ -70,6 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final InputQueryFactory inputQueryFactory;
 	private final DatalogFactory datalogFactory;
 	private final DatalogNormalizer datalogNormalizer;
+	private final FlattenUnionOptimizer flattenUnionOptimizer;
 	private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
@@ -88,15 +90,17 @@ public class QuestQueryProcessor implements QueryReformulator {
 								InputQueryFactory inputQueryFactory,
 								LinearInclusionDependencyTools inclusionDependencyTools,
 								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-								DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
-								UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-								CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools) {
+								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
+								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
+								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
+								ImmutabilityTools immutabilityTools) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
 		this.datalogFactory = datalogFactory;
 		this.datalogNormalizer = datalogNormalizer;
+		this.flattenUnionOptimizer = flattenUnionOptimizer;
 		this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
@@ -235,6 +239,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
 				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
+				intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
+				log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 //				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
 //				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());

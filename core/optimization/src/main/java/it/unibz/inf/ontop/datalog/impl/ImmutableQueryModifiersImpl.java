@@ -120,7 +120,7 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
             queryBuilder.init(projectionAtom, childNode);
         else {
             queryBuilder.init(projectionAtom, modifierNodes.get(0));
-            IntStream.range(1, modifierNodes.size() - 1)
+            IntStream.range(1, modifierNodes.size())
                     .forEach(i -> queryBuilder.addChild(modifierNodes.get(i - 1), modifierNodes.get(i)));
             queryBuilder.addChild(modifierNodes.get(modifierNodes.size() - 1), childNode);
         }
