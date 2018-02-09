@@ -194,5 +194,12 @@ public class H2IdentifierTest {
 		}
 		return retval;
 	}
+
+	@Test
+	public void testLowerCaseTableWithSymbol() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :NoCountry} ORDER BY ?x";
+		String val =  runQueryReturnIndividual(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#CountryNo-Atlantis>", val);
+	}
 }
 
