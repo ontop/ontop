@@ -78,7 +78,7 @@ public class OptimizationTestingTools {
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
-    public static final Constant ONE;
+    public static final Constant ONE, TWO;
 
     public static final AtomPredicate ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,  ANS1_AR4_PREDICATE;
 
@@ -148,6 +148,7 @@ public class OptimizationTestingTools {
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
         ONE = TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER);
+        TWO = TERM_FACTORY.getConstantLiteral("2", XSD.INTEGER);
 
         ANS1_AR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
         ANS1_AR2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
