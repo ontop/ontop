@@ -35,11 +35,11 @@ import java.util.Optional;
 public class TemporalDatalogProgram2QueryConverterImpl implements TemporalDatalogProgram2QueryConverter {
     private final TemporalIntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final DatalogRule2QueryConverter datalogRuleConverter;
+    private final TemporalDatalogRule2QueryConverter datalogRuleConverter;
 
     @Inject
     private TemporalDatalogProgram2QueryConverterImpl(TemporalIntermediateQueryFactory iqFactory,
-                                                      UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
+                                                      UnionBasedQueryMerger queryMerger, TemporalDatalogRule2QueryConverter datalogRuleConverter) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;

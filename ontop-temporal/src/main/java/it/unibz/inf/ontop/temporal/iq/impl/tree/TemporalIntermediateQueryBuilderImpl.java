@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.impl.tree.DefaultIntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.impl.tree.QueryTree;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.iq.validation.impl.TemporalIntermediateQueryValidator;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
@@ -20,7 +21,7 @@ public class TemporalIntermediateQueryBuilderImpl extends DefaultIntermediateQue
     protected TemporalIntermediateQueryBuilderImpl(@Assisted DBMetadata dbMetadata,
                                               @Assisted ExecutorRegistry executorRegistry,
                                                    TemporalIntermediateQueryFactory iqFactory,
-                                                   IntermediateQueryValidator validator,
+                                                   TemporalIntermediateQueryValidator validator,
                                                    TermFactory termFactory,
                                                    OntopModelSettings settings) {
         super(dbMetadata, executorRegistry, iqFactory, validator, termFactory, settings);

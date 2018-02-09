@@ -216,6 +216,8 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             Properties standaloneProperties = generateProperties();
             standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator",
                     "it.unibz.inf.ontop.answering.reformulation.input.translation.impl.TemporalDatalogSparqlQueryTranslatorImpl");
+            standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.QueryReformulator",
+                    "it.unibz.inf.ontop.answering.reformulation.impl.TemporalQueryProcessor");
             OntopStandaloneSQLSettingsImpl standaloneSQLSettings =
                     new OntopStandaloneSQLSettingsImpl(standaloneProperties, isR2rml());
             return new OntopTemporalSQLOWLAPIConfigurationImpl(standaloneSQLSettings,

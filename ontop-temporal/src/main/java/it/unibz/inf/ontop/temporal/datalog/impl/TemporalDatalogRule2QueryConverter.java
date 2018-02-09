@@ -10,11 +10,13 @@ import it.unibz.inf.ontop.datalog.TargetAtom;
 import it.unibz.inf.ontop.datalog.impl.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Function;
@@ -23,6 +25,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -107,17 +110,19 @@ public class TemporalDatalogRule2QueryConverter {
     private final DatalogConversionTools datalogConversionTools;
     private final DatalogTools datalogTools;
     private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
+    private final AtomFactory atomFactory;
 
     @Inject
     private TemporalDatalogRule2QueryConverter(TermFactory termFactory, DatalogFactory datalogFactory,
-                                       DatalogConversionTools datalogConversionTools,
-                                       DatalogTools datalogTools,
-                                       PullOutEqualityNormalizerImpl pullOutEqualityNormalizer) {
+                                               DatalogConversionTools datalogConversionTools,
+                                               DatalogTools datalogTools,
+                                               PullOutEqualityNormalizerImpl pullOutEqualityNormalizer, AtomFactory atomFactory) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         this.datalogConversionTools = datalogConversionTools;
         this.datalogTools = datalogTools;
         this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
+        this.atomFactory = atomFactory;
     }
     /**
      * TODO: describe
@@ -125,7 +130,7 @@ public class TemporalDatalogRule2QueryConverter {
     public IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                       IntermediateQueryFactory iqFactory,
+                                                       TemporalIntermediateQueryFactory iqFactory,
                                                        ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
@@ -166,7 +171,7 @@ public class TemporalDatalogRule2QueryConverter {
                                                       Collection<Predicate> tablePredicates,
                                                       List<Function> dataAndCompositeAtoms,
                                                       List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
-                                                      IntermediateQueryFactory iqFactory,
+                                                      TemporalIntermediateQueryFactory iqFactory,
                                                       ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /**
@@ -175,7 +180,7 @@ public class TemporalDatalogRule2QueryConverter {
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
 
         // Non final
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        TemporalIntermediateQueryBuilder queryBuilder = iqFactory.createTemporalIQBuilder(dbMetadata, executorRegistry);
 
         try {
             queryBuilder.init(projectionAtom, rootNode);
@@ -221,7 +226,7 @@ public class TemporalDatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private Optional<JoinOrFilterNode> createFilterOrJoinNode(IntermediateQueryFactory iqFactory,
+    private Optional<JoinOrFilterNode> createFilterOrJoinNode(TemporalIntermediateQueryFactory iqFactory,
                                                                      List<Function> dataAndCompositeAtoms,
                                                                      List<Function> booleanAtoms) {
         Optional<ImmutableExpression> optionalFilter = createFilterExpression(booleanAtoms);
@@ -233,10 +238,20 @@ public class TemporalDatalogRule2QueryConverter {
          * Filter as a root node
          */
         if (optionalFilter.isPresent() && (dataAndCompositeAtomCount == 1)) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createFilterNode(optionalFilter.get()));
+            optionalRootNode = Optional.of(iqFactory.createFilterNode(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
-            optionalRootNode = Optional.of((JoinOrFilterNode) iqFactory.createInnerJoinNode(optionalFilter));
+            boolean flag = false;
+            for (Function f : dataAndCompositeAtoms){
+              if (f.getFunctionSymbol().equals(atomFactory.getTupleAtomPredicate())){
+                  flag = true;
+                  break;
+              }
+            }
+            if (flag == true)
+                optionalRootNode = Optional.of(iqFactory.createTemporalJoinNode(optionalFilter));
+            else
+                optionalRootNode = Optional.of(iqFactory.createInnerJoinNode(optionalFilter));
         }
         /**
          * No need to create a special root node (will be the unique data atom)
@@ -257,8 +272,8 @@ public class TemporalDatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    private  IntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
-                                                                        IntermediateQueryBuilder queryBuilder,
+    private  TemporalIntermediateQueryBuilder convertDataOrCompositeAtoms(final List<Function> atoms,
+                                                                        TemporalIntermediateQueryBuilder queryBuilder,
                                                                         final QueryNode parentNode,
                                                                         Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
                                                                         Collection<Predicate> tablePredicates)
@@ -310,7 +325,7 @@ public class TemporalDatalogRule2QueryConverter {
         return queryBuilder;
     }
 
-    private IntermediateQueryBuilder convertLeftJoinAtom(IntermediateQueryBuilder queryBuilder,
+    private TemporalIntermediateQueryBuilder convertLeftJoinAtom(TemporalIntermediateQueryBuilder queryBuilder,
                                                                 QueryNode parentNodeOfTheLJ,
                                                                 List<Function> subAtomsOfTheLJ,
                                                                 Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,
@@ -348,7 +363,7 @@ public class TemporalDatalogRule2QueryConverter {
      * TODO: explain
      *
      */
-    private IntermediateQueryBuilder convertJoinAtom(IntermediateQueryBuilder queryBuilder,
+    private TemporalIntermediateQueryBuilder convertJoinAtom(TemporalIntermediateQueryBuilder queryBuilder,
                                                             QueryNode parentNodeOfTheJoinNode,
                                                             List<Function> subAtomsOfTheJoin,
                                                             Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition,

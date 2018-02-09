@@ -180,7 +180,52 @@ public class QueryAnsweringTest {
         } catch (OWLException e) {
             e.printStackTrace();
         }
-
-
     }
+
+//    @Test
+//    public void test4(){
+//
+//        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
+//        String username = "postgres";
+//        String password = "postgres";
+//
+//        String query =
+//                "PREFIX : <http://siemens.com/ns#>\n" +
+//                        "PREFIX st:  <http://siemens.com/temporal/ns#>" +
+//                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+//                        "PREFIX time: <http://www.w3.org/2006/time#>" +
+//                        "SELECT ?tb ?beginInst ?bv " +
+//                        "WHERE {" +
+//                        "?tb a :Turbine ." +
+//                        "?tb time:hasBeginning ?beginInst ." +
+//                        "?beginInst time:inXSDDateTime ?bv ." +
+//                        "}";
+//
+//
+//        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+//
+//        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
+//                .ontologyFile("src/test/resources/siemens.owl")
+//                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
+//                .nativeOntopMappingFile("src/test/resources/siemens.obda")
+//                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
+//                .jdbcUrl(url)
+//                .jdbcUser(username)
+//                .jdbcPassword(password)
+//                .enableTestMode()
+//                .build();
+//
+//        try {
+//            reasoner = factory.createReasoner(configuration);
+//            // Now we are ready for querying
+//            conn = reasoner.getConnection();
+//            OWLStatement st = conn.createStatement();
+//            st.executeSelectQuery(query);
+//
+//        } catch (OWLOntologyCreationException e) {
+//            e.printStackTrace();
+//        } catch (OWLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
