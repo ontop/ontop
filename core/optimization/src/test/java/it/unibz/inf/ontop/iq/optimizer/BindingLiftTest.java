@@ -1778,14 +1778,19 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
-        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B));
+        UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, BF4F5));
         UnionNode unionNode5 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A,C));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateURI1(A), Y, generateURI2(B), Z, generateURI1(C))));
+                        X, generateURI1(A), Y, generateURI2(BF4F5), Z, generateURI1(C))));
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         InnerJoinNode joinNode3 = IQ_FACTORY.createInnerJoinNode();
+
+        ExtensionalDataNode newTable1DataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, BF4F5));
+        ExtensionalDataNode newTable3DataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, BF4F5));
 
 
         expectedBuilder.init(ROOT_CONSTRUCTION_NODE_ATOM, unionNode3);
@@ -1793,8 +1798,8 @@ public class BindingLiftTest {
         expectedBuilder.addChild(unionNode3, table5DataNode1);
         expectedBuilder.addChild(constructionNode1, joinNode2);
         expectedBuilder.addChild(joinNode2, unionNode4);
-        expectedBuilder.addChild(unionNode4, table1DataNode.clone());
-        expectedBuilder.addChild(unionNode4, table3DataNode.clone());
+        expectedBuilder.addChild(unionNode4, newTable1DataNode);
+        expectedBuilder.addChild(unionNode4, newTable3DataNode);
         expectedBuilder.addChild(joinNode2, unionNode5);
         expectedBuilder.addChild(unionNode5, table4DataNode.clone());
         expectedBuilder.addChild(unionNode5, joinNode3);

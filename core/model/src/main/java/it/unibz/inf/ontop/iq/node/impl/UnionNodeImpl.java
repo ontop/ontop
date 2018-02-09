@@ -264,7 +264,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (mergedSubstitution.isEmpty()) {
             return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareNormalizedForOptimization());
         }
-
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, mergedSubstitution);
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
@@ -312,14 +311,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     /**
      * Compare and combine the bindings, returning only the compatible (partial) values.
-     * In case of variable, we generate and return a new variable to avoid inconsistency during propagation
      *
      */
     private Optional<ImmutableTerm> combineDefinitions(ImmutableTerm d1, ImmutableTerm d2,
                                                        VariableGenerator variableGenerator,
                                                        boolean topLevel) {
         if (d1.equals(d2)) {
-            return Optional.of(d1);
+            return Optional.of(
+                    // Top-level var-to-var must not be renamed since they are about projected variables
+                    (d1.isGround() || (topLevel && (d1 instanceof Variable)))
+                            ? d1
+                            : replaceVariablesByFreshOnes((NonGroundTerm)d1, variableGenerator));
         }
         else if (d1 instanceof Variable)  {
             return topLevel
@@ -365,6 +367,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         else {
             return Optional.empty();
         }
+    }
+
+    private NonGroundTerm replaceVariablesByFreshOnes(NonGroundTerm term, VariableGenerator variableGenerator) {
+        if (term instanceof Variable)
+            return variableGenerator.generateNewVariableFromVar((Variable) term);
+        NonGroundFunctionalTerm functionalTerm = (NonGroundFunctionalTerm) term;
+
+        return termFactory.getNonGroundFunctionalTerm(functionalTerm.getFunctionSymbol(),
+                    functionalTerm.getArguments().stream()
+                        .map(a -> a.isGround()
+                                ? a
+                                // RECURSIVE
+                                : replaceVariablesByFreshOnes((NonGroundTerm) a, variableGenerator))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     /**
