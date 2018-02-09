@@ -344,7 +344,7 @@ PN_CHARS_U
   ;
 
 PN_CHARS
-  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040]
+  : PN_CHARS_U | '-' | [0-9] | '\u00B7' | [\u0300-\u036F] | [\u203F-\u2040] | '?' | '='
   ;
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
@@ -383,7 +383,7 @@ fragment RIGHT_PART_FIRST_CHAR_EXT
   ;
 
 fragment RIGHT_PART_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | '#' | '=' | '?' | ';' | PLX)
+  : (PN_CHARS | '.' | ':' | '/' | '#' | ';' | PLX)
   ;
 
 fragment RIGHT_PART_CHAR_EXT
@@ -411,7 +411,7 @@ fragment RIGHT_PART_TAIL_EXT_MAND
   ;
 
 fragment IRIREF_INNER_CHAR
-  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | '=' | '?' | ';' | UCHAR)
+  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
   ;
 
 fragment IRIREF_INNER_CHAR_EXT
