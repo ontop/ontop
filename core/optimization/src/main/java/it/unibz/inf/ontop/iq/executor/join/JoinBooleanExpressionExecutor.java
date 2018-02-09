@@ -23,7 +23,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.iq.executor.join.JoinExtractionUtils.*;
 
 /**
-* TODO: explain
+* TODO: replace it by IQ.normalizeForOptimization()
 */
 @Singleton
 public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
@@ -39,17 +39,21 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
 
     /**
      * Standard method (InternalProposalExecutor)
+     *
+     * Undesired effect: if the join node is at the root, insert a ConstructionNode
+     *  (due to the design of TreeComponent.replaceNodesByOneNode())
+     *
      */
     @Override
     public NodeCentricOptimizationResults<InnerJoinNode> apply(InnerJoinOptimizationProposal proposal, IntermediateQuery query,
                                                                QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
 
         InnerJoinNode originalTopJoinNode = proposal.getFocusNode();
 
         ImmutableList<JoinOrFilterNode> filterOrJoinNodes = extractFilterAndInnerJoinNodes(originalTopJoinNode, query);
 
-        QueryNode parentNode = query.getParent(originalTopJoinNode).get();
+        Optional<QueryNode> optionalParentNode = query.getParent(originalTopJoinNode);
 
         Optional<ImmutableExpression> optionalAggregatedFilterCondition;
         try {
@@ -78,9 +82,18 @@ public class JoinBooleanExpressionExecutor implements InnerJoinExecutor {
              */
             InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(optionalAggregatedFilterCondition);
 
+            QueryNode parentNode;
+            if (optionalParentNode.isPresent())
+                parentNode = optionalParentNode.get();
+            else {
+                parentNode = iqFactory.createConstructionNode(query.getProjectionAtom().getVariables());
+                treeComponent.insertParent(originalTopJoinNode, parentNode);
+            }
+
             Optional<ArgumentPosition> optionalPosition = treeComponent.getOptionalPosition(parentNode, originalTopJoinNode);
-            treeComponent.replaceNodesByOneNode(ImmutableList.<QueryNode>copyOf(filterOrJoinNodes), newJoinNode, parentNode,
-                    optionalPosition);
+
+            treeComponent.replaceNodesByOneNode(ImmutableList.copyOf(filterOrJoinNodes), newJoinNode,
+                    parentNode, optionalPosition);
 
             return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
         }
