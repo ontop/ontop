@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.sql.Types;
@@ -29,10 +32,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.dbschema.RelationID;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
@@ -477,7 +476,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     @Override
     public String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views) {
-        return buildDefaultName(prefix, tableName, suffix);
+        return sqlQuote(buildDefaultName(prefix, tableName, suffix));
     }
 
     @Override

@@ -363,7 +363,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 				.map(RelationID::getSQLRendering)
 				.collect(Collectors.toSet());
 
-		return nameViewOrVariable(prefix, tableName, suffix, viewNames, false);
+		return nameViewOrVariable(prefix, tableName, suffix, viewNames, true);
 	}
 
 	/**

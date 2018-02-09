@@ -21,13 +21,13 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
  */
 
 
+import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.model.term.Variable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.dbschema.RelationID;
 
 public interface SQLDialectAdapter {
 	
@@ -143,7 +143,7 @@ public interface SQLDialectAdapter {
 	public String sqlGroupBy(List<Variable> groupby, String viewname);
     
 	/**
-	 * Returns an UNQUOTED view name.
+	 * Returns a QUOTED view name.
 	 */
 	String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views);
 
