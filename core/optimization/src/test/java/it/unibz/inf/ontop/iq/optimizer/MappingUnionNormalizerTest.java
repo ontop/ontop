@@ -195,9 +195,12 @@ public class MappingUnionNormalizerTest {
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y, Z));
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, Y, Z));
+
         IQTree union1 = IQ_FACTORY.createNaryIQTree(
                 unionNode1,
-                ImmutableList.of(DATA_NODE1, DATA_NODE4)
+                ImmutableList.of(newDataNode1, DATA_NODE4)
         );
         IQTree c1 = IQ_FACTORY.createUnaryIQTree(
                 cn1,
@@ -237,7 +240,7 @@ public class MappingUnionNormalizerTest {
                         ),
                         IQ_FACTORY.createUnaryIQTree(
                                 cn3,
-                                DATA_NODE1
+                                newDataNode1
                         ),
                         IQ_FACTORY.createUnaryIQTree(
                                 cn3,
