@@ -73,5 +73,18 @@ public class R2rmlConversionTest {
 
     }
 
+    @Test
+    public void testLang() throws Exception {
+        Collection<TriplesMap> triplesMaps = execute("src/test/resources/langstring-mapping.obda");
+        for (TriplesMap triplesMap :triplesMaps){
+            ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
+            assertEquals("title", objectMap.getColumn());
+            assertNull(objectMap.getDatatype());
+            assertEquals("en", objectMap.getLanguageTag());
+            assertNull(objectMap.getTemplate());
+        }
+
+    }
+
 }
 

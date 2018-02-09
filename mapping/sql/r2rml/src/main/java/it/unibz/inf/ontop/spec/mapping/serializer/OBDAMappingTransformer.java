@@ -227,7 +227,7 @@ public class OBDAMappingTransformer {
 							//check if literal with lang value
 							if(objectPred.getArity()==2){
 
-								Term langTerm = ((Function) objectTerm).getTerm(1);
+								Term langTerm = ((Function) object).getTerm(1);
 
 
 								if(langTerm instanceof Constant) {
