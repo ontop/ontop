@@ -10,11 +10,11 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-rotorSpeed
 target		:RotationSpeedSensor/{sensor_id} temp:rotorSpeed {value}.
-interval    [{ts_begin}^^xsd:dateTimeStamp, {ts_end}^^xsd:dateTimeStamp)
-source		SELECT tb_measurement.sensor_id, value, timestamp AS ts_begin, LEAD(timestamp, 1) OVER (PARTITION BY tb_measurement.sensor_id ORDER BY timestamp) AS ts_end FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 0
+interval    [{rs_begin}^^xsd:dateTimeStamp, {rs_end}^^xsd:dateTimeStamp)
+source		SELECT tb_measurement.sensor_id, value, 'TRUE' AS rs_begin_inc, timestamp AS rs_begin, LEAD(timestamp, 1) OVER (PARTITION BY tb_measurement.sensor_id ORDER BY timestamp) AS rs_end, 'FALSE' AS rs_end_inc FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 0
 
 mappingId	urn:Map-mainFlameOn
 target		:TemperatureSensor/{sensor_id} a temp:MainFlameOn.
 interval    [{ts_begin}^^xsd:dateTimeStamp, {ts_end}^^xsd:dateTimeStamp)
-source		SELECT sensor_id, value, ts_begin, ts_end FROM (SELECT tb_measurement.sensor_id AS sensor_id, value, timestamp AS ts_begin, LEAD(timestamp, 1) OVER (PARTITION BY tb_measurement.sensor_id ORDER BY timestamp) AS ts_end FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 1) SUBQ WHERE value > 1
+source		SELECT sensor_id, value, 'TRUE' AS ts_begin_inc, ts_begin, ts_end, 'FALSE' AS ts_end_inc FROM (SELECT tb_measurement.sensor_id AS sensor_id, value, timestamp AS ts_begin, LEAD(timestamp, 1) OVER (PARTITION BY tb_measurement.sensor_id ORDER BY timestamp) AS ts_end FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 1) SUBQ WHERE value > 1
 ]]
