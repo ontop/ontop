@@ -241,6 +241,7 @@ public class TemporalDatalogRule2QueryConverter {
             optionalRootNode = Optional.of(iqFactory.createFilterNode(optionalFilter.get()));
         }
         else if (dataAndCompositeAtomCount > 1) {
+            //optionalRootNode = Optional.of(iqFactory.createInnerJoinNode(optionalFilter));
             boolean flag = false;
             for (Function f : dataAndCompositeAtoms){
               if (f.getFunctionSymbol().equals(atomFactory.getTupleAtomPredicate())){
