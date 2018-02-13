@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIndicator.*;
 
@@ -383,7 +385,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
                     // Save the mapping to the model (if valid) at this point
                     if (isMappingValid) {
                         currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, intevalQuery, currentSourceMappings);
+                                addNewMapping(mappingId, sourceQuery.toString(),  appendTemporalComponents(targetQuery, intevalQuery), intevalQuery, currentSourceMappings);
                         mappingId = "";
                         sourceQuery = null;
                         targetQuery = null;
@@ -466,11 +468,25 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery, intevalQuery,
+            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), appendTemporalComponents(targetQuery, intevalQuery), intevalQuery,
                     currentSourceMappings);
         }
 
         return currentSourceMappings;
+    }
+
+    private ImmutableList<ImmutableFunctionalTerm> appendTemporalComponents(ImmutableList<ImmutableFunctionalTerm> targetQuery, TemporalMappingInterval intervalQuery ){
+        List <ImmutableFunctionalTerm> newList = new ArrayList<>();
+        for (ImmutableFunctionalTerm f : targetQuery){
+            List<ImmutableTerm> newArglist = new ArrayList<>(f.getArguments());
+            newArglist.add(intervalQuery.isBeginInclusive());
+            newArglist.add(intervalQuery.getBegin());
+            newArglist.add(intervalQuery.getEnd());
+            newArglist.add(intervalQuery.isEndInclusive());
+            AtomPredicate newAtom = atomFactory.getAtomPredicate(f.getFunctionSymbol().getName(), f.getFunctionSymbol().getArity() + 4);
+            newList.add(termFactory.getImmutableFunctionalTerm(newAtom, ImmutableList.copyOf(newArglist)));
+        }
+        return ImmutableList.copyOf(newList);
     }
     //TODO: extend NativeQueryLanguageComponentFactory to support creating temporal mapping axioms
     //TODO: replace TemporalMappingFactory with NativeQueryLanguageComponentFactory
@@ -487,7 +503,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
     }
 
     public static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
-                                                                          List<TargetQueryParser> parsers) throws it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException {
+                                                                          List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
         for (TargetQueryParser parser : parsers) {
             try {
@@ -513,8 +529,9 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
     private TemporalMappingInterval loadTemporalIntervalQuery(String intervalString){
         intervalString = intervalString.trim();
-        if(IntervalQueryParser.temporalMappingIntervalValidator(intervalString))
-            return intervalQueryParser.parse(intervalString);
-        return null;
+        return intervalQueryParser.parse(intervalString);
+//        if(IntervalQueryParser.temporalMappingIntervalValidator(intervalString))
+//            return intervalQueryParser.parse(intervalString);
+//        return null;
     }
 }

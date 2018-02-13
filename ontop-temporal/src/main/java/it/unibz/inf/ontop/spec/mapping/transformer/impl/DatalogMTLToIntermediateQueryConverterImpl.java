@@ -13,10 +13,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
@@ -26,13 +23,11 @@ import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalJoinNode;
+import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToIntermediateQueryConverter{
@@ -64,7 +59,10 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                 TargetAtom targetAtom = datalogMTLConversionTools
                         .convertFromDatalogDataAtom(termFactory.getFunction(rule.getHead()
                                 .getPredicate(), rule.getHead().getTerms()));
-                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+                AtomPredicate newPredicate = atomFactory.getAtomPredicate(targetAtom.getProjectionAtom().getPredicate().getName(),
+                        targetAtom.getProjectionAtom().getPredicate().getArity() + 4);
+                DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(newPredicate,
+                        appendTemporalComponentsToHead(targetAtom.getProjectionAtom().getArguments()));
                 ConstructionNode constructionNode = TIQFactory.createConstructionNode(projectionAtom.getVariables());
                 TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
                 TIQBuilder.init(projectionAtom, constructionNode);
@@ -90,19 +88,50 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
         return termFactory.getImmutableExpression(expressionOperation, comparisonExpression.getLeftOperand(), comparisonExpression.getRightOperand());
     }
 
+    private ImmutableList<Variable> appendTemporalComponentsToHead(ImmutableList<Variable> projectionVariables){
+
+        List<Variable> newArglist = new ArrayList<>(projectionVariables);
+        newArglist.add(termFactory.getVariable("beginInc"));
+        newArglist.add(termFactory.getVariable("begin"));
+        newArglist.add(termFactory.getVariable("end"));
+        newArglist.add(termFactory.getVariable("endInc"));
+
+        return ImmutableList.copyOf(newArglist);
+    }
+
+    private ImmutableList<VariableOrGroundTerm> appendTemporalComponents(ImmutableList<VariableOrGroundTerm> projectionVariables){
+
+            List<VariableOrGroundTerm> newArglist = new ArrayList<>(projectionVariables);
+            newArglist.add(termFactory.getVariable("beginInc"));
+            newArglist.add(termFactory.getVariable("begin"));
+            newArglist.add(termFactory.getVariable("end"));
+            newArglist.add(termFactory.getVariable("endInc"));
+
+            return ImmutableList.copyOf(newArglist);
+    }
+
     private TemporalIntermediateQueryBuilder getBuilder(DatalogMTLExpression currentExpression,
                                                         QueryNode parentNode, TemporalIntermediateQueryBuilder TIQBuilder){
         if (currentExpression instanceof AtomicExpression) {
-            IntensionalDataNode intensionalDataNode =
-                    TIQFactory.createIntensionalDataNode(atomFactory
-                            .getDataAtom(((AtomicExpression) currentExpression).getPredicate(),
-                            ((AtomicExpression)currentExpression).getVariableOrGroundTerms()));
-            if(currentExpression instanceof TemporalAtomicExpression
-                    && !(parentNode instanceof TemporalCoalesceNode)) {
-                TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
-                TIQBuilder.addChild(parentNode, coalesceNode);
-                TIQBuilder.addChild(coalesceNode, intensionalDataNode);
+            if(currentExpression instanceof TemporalAtomicExpression) {
+                AtomPredicate newPred = atomFactory.getAtomPredicate(((AtomicExpression) currentExpression).getPredicate().getName(),
+                        ((AtomicExpression) currentExpression).getPredicate().getArity() + 4);
+                IntensionalDataNode intensionalDataNode =
+                        TIQFactory.createIntensionalDataNode(atomFactory
+                                .getDataAtom(newPred,
+                                        appendTemporalComponents(((AtomicExpression)currentExpression).getVariableOrGroundTerms())));
+                if (!(parentNode instanceof TemporalCoalesceNode)) {
+                    TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                    TIQBuilder.addChild(parentNode, coalesceNode);
+                    TIQBuilder.addChild(coalesceNode, intensionalDataNode);
+                } else {
+                    TIQBuilder.addChild(parentNode, intensionalDataNode);
+                }
             }else{
+                IntensionalDataNode intensionalDataNode =
+                        TIQFactory.createIntensionalDataNode(atomFactory
+                                .getDataAtom(((AtomicExpression) currentExpression).getPredicate(),
+                                        ((AtomicExpression)currentExpression).getVariableOrGroundTerms()));
                 TIQBuilder.addChild(parentNode, intensionalDataNode);
             }
         }else if(currentExpression instanceof TemporalJoinExpression){

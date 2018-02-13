@@ -74,11 +74,11 @@ public interface AtomFactory {
 
     AtomPredicate getQuadrupleAtomPredicate();
 
-    Function getTupleAtom(Term subject, Term predicate, Term object, Term begin, Term end);
+    Function getTupleAtom(Term subject, Term predicate, Term object, Term beginInc, Term begin, Term end, Term endInc);
 
 
     ImmutableFunctionalTerm getImmutableTupleAtom(ImmutableTerm subject, ImmutableTerm predicate,
-                                                         ImmutableTerm object, ImmutableTerm begin, ImmutableTerm end);
+                                                  ImmutableTerm object, ImmutableTerm beginInc, ImmutableTerm begin, ImmutableTerm end, ImmutableTerm endInc);
 
     AtomPredicate getTupleAtomPredicate();
 

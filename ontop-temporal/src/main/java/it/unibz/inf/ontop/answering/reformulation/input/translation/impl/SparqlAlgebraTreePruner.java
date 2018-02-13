@@ -31,7 +31,10 @@ public class SparqlAlgebraTreePruner {
             List<ProjectionElem> newProjectionList = new ArrayList<>();
             for (ProjectionElem elem : ((Projection) node).getProjectionElemList().getElements()) {
                 if(timeIntvVariableMap.values().stream()
-                        .allMatch(iv -> !iv.getBegin().equals(elem.getSourceName()) && !iv.getEnd().equals(elem.getSourceName()))){
+                        .allMatch(iv -> !iv.getBeginInc().equals(elem.getSourceName())
+                                && !iv.getBegin().equals(elem.getSourceName())
+                                && !iv.getEnd().equals(elem.getSourceName())
+                                && !iv.getEndInc().equals(elem.getSourceName()))){
                     newProjectionList.add(elem);
                 } else {
                     variablesRemovedFromProjection.add(elem.getSourceName());
@@ -130,52 +133,68 @@ public class SparqlAlgebraTreePruner {
     private TupleExpr getSubTree(TupleExpr rootJoinNode){
         TupleExpr left = ((Join)rootJoinNode).getRightArg();
         TupleExpr right;
+        String beginInc = null;
         String begin = null;
         String end = null;
+        String endInc = null;
         String graphVar = null;
         if(left instanceof StatementPattern){
-            if(isInXSDTimeLike((StatementPattern) left)){
-                right = ((Join)rootJoinNode).getLeftArg();
-                end = ((StatementPattern) left).getObjectVar().getName();
-                if (right instanceof Join){
+            if(isEndInclusive((StatementPattern) left)) {
+                right = ((Join) rootJoinNode).getLeftArg();
+                endInc = ((StatementPattern) left).getObjectVar().getName();
+                if (right instanceof Join) {
                     left = ((Join) right).getRightArg();
-                    if(left instanceof StatementPattern){
-                        if(isInstant((StatementPattern) left)){
-                            right = ((Join)right).getLeftArg();
-                            if (right instanceof Join){
-                                left = ((Join) right).getRightArg();
-                                if(left instanceof StatementPattern){
-                                    if(isHasEnd((StatementPattern)left)){
-                                        right = ((Join)right).getLeftArg();
-                                        if (right instanceof Join){
-                                            left = ((Join) right).getRightArg();
-                                            if(left instanceof StatementPattern){
-                                                if(isInXSDTimeLike((StatementPattern)left)){
-                                                    right = ((Join)right).getLeftArg();
-                                                    begin = ((StatementPattern) left).getObjectVar().getName();
-                                                    if (right instanceof Join){
-                                                        left = ((Join) right).getRightArg();
-                                                        if(left instanceof StatementPattern){
-                                                            if(isInstant((StatementPattern)left)){
-                                                                right = ((Join)right).getLeftArg();
-                                                                if (right instanceof Join){
-                                                                    left = ((Join) right).getRightArg();
-                                                                    if(left instanceof StatementPattern){
-                                                                        if(isHasBeginning((StatementPattern)left)){
-                                                                            right = ((Join)right).getLeftArg();
-                                                                            if (right instanceof StatementPattern){
-                                                                                if(isHasTime((StatementPattern)right)){
-                                                                                    graphVar = ((StatementPattern) right).getSubjectVar().getName();
-                                                                                    timeIntvVariableMap.put(graphVar, new IntervalVariables(begin, end));
-                                                                                    return null;
-                                                                                }
-                                                                            } else if (right instanceof Join){
-                                                                                left = ((Join) right).getRightArg();
-                                                                                if(left instanceof StatementPattern){
-                                                                                    if(isHasTime((StatementPattern)left)){
-                                                                                        graphVar = ((StatementPattern) left).getSubjectVar().getName();
-                                                                                        timeIntvVariableMap.put(graphVar, new IntervalVariables(begin, end));
-                                                                                        return ((Join) right).getLeftArg();
+                    if (isInXSDTimeLike((StatementPattern) left)) {
+                        right = ((Join) right).getLeftArg();
+                        end = ((StatementPattern) left).getObjectVar().getName();
+                        if (right instanceof Join) {
+                            left = ((Join) right).getRightArg();
+                            if (left instanceof StatementPattern) {
+                                if (isInstant((StatementPattern) left)) {
+                                    right = ((Join) right).getLeftArg();
+                                    if (right instanceof Join) {
+                                        left = ((Join) right).getRightArg();
+                                        if (left instanceof StatementPattern) {
+                                            if (isHasEnd((StatementPattern) left)) {
+                                                right = ((Join) right).getLeftArg();
+                                                if (right instanceof Join) {
+                                                    left = ((Join) right).getRightArg();
+                                                    if (left instanceof StatementPattern) {
+                                                        if (isInXSDTimeLike((StatementPattern) left)) {
+                                                            right = ((Join) right).getLeftArg();
+                                                            begin = ((StatementPattern) left).getObjectVar().getName();
+                                                            if (right instanceof Join) {
+                                                                left = ((Join) right).getRightArg();
+                                                                if (left instanceof StatementPattern) {
+                                                                    if (isInstant((StatementPattern) left)) {
+                                                                        right = ((Join) right).getLeftArg();
+                                                                        if (right instanceof Join) {
+                                                                            left = ((Join) right).getRightArg();
+                                                                            if (left instanceof StatementPattern) {
+                                                                                if (isHasBeginning((StatementPattern) left)) {
+                                                                                    right = ((Join) right).getLeftArg();
+                                                                                    if (right instanceof Join) {
+                                                                                        left = ((Join) right).getRightArg();
+                                                                                        if (isBeginInclusive((StatementPattern) left)) {
+                                                                                            beginInc = ((StatementPattern) left).getObjectVar().getName();
+                                                                                            right = ((Join) right).getLeftArg();
+                                                                                            if (right instanceof StatementPattern) {
+                                                                                                if (isHasTime((StatementPattern) right)) {
+                                                                                                    graphVar = ((StatementPattern) right).getSubjectVar().getName();
+                                                                                                    timeIntvVariableMap.put(graphVar, new IntervalVariables(beginInc, begin, end, endInc));
+                                                                                                    return null;
+                                                                                                }
+                                                                                            } else if (right instanceof Join) {
+                                                                                                left = ((Join) right).getRightArg();
+                                                                                                if (left instanceof StatementPattern) {
+                                                                                                    if (isHasTime((StatementPattern) left)) {
+                                                                                                        graphVar = ((StatementPattern) left).getSubjectVar().getName();
+                                                                                                        timeIntvVariableMap.put(graphVar, new IntervalVariables(beginInc, begin, end, endInc));
+                                                                                                        return ((Join) right).getLeftArg();
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
@@ -240,6 +259,22 @@ public class SparqlAlgebraTreePruner {
         return false;
     }
 
+    private Boolean isBeginInclusive(StatementPattern statementPattern){
+        if (statementPattern.getSubjectVar().isAnonymous() &&
+                statementPattern.getPredicateVar().getValue().stringValue().equals("http://www.w3.org/2006/time#isBeginInclusive")){
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean isEndInclusive(StatementPattern statementPattern){
+        if (statementPattern.getSubjectVar().isAnonymous() &&
+                statementPattern.getPredicateVar().getValue().stringValue().equals("http://www.w3.org/2006/time#isEndInclusive")){
+            return true;
+        }
+        return false;
+    }
+
     private Boolean isHasTime(StatementPattern statementPattern){
         if (!statementPattern.getSubjectVar().isAnonymous() &&
                 statementPattern.getPredicateVar().getValue().stringValue().equals("http://www.w3.org/2006/time#hasTime") &&
@@ -250,12 +285,24 @@ public class SparqlAlgebraTreePruner {
     }
 
     public class IntervalVariables{
+        private String beginInc;
         private String begin;
         private String end;
+        private String endInc;
 
-        private IntervalVariables(String begin, String end){
+        private IntervalVariables(String beginInc, String begin, String end, String endInc){
+            this.beginInc = beginInc;
             this.begin = begin;
             this.end = end;
+            this.endInc = endInc;
+        }
+
+        public String getBeginInc() {
+            return beginInc;
+        }
+
+        public String getEndInc() {
+            return endInc;
         }
 
         String getBegin(){

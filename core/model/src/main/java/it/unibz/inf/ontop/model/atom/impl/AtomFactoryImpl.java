@@ -35,7 +35,7 @@ public class AtomFactoryImpl implements AtomFactory {
         this.typeFactory = typeFactory;
         triplePredicate = getAtomPredicate("triple", 3);
         this.quadruplePredicate = getAtomPredicate("quadruple", 4);;
-        this.tuplePredicate = getAtomPredicate("tuple", 5);
+        this.tuplePredicate = getAtomPredicate("tuple", 7);
         objectRDFType = typeFactory.getAbstractObjectRDFType();
         rootRdfTermType = typeFactory.getAbstractRDFTermType();
         rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
@@ -207,15 +207,15 @@ public class AtomFactoryImpl implements AtomFactory {
 
 
     @Override
-    public Function getTupleAtom(Term subject, Term predicate, Term object, Term begin, Term end) {
-        return termFactory.getFunction(tuplePredicate,subject, predicate, object, begin, end);
+    public Function getTupleAtom(Term subject, Term predicate, Term object, Term beginInc, Term begin, Term end, Term endInc) {
+        return termFactory.getFunction(tuplePredicate,subject, predicate, object, beginInc, begin, end, endInc);
     }
 
 
     @Override
     public ImmutableFunctionalTerm getImmutableTupleAtom(ImmutableTerm subject, ImmutableTerm predicate,
-                                                             ImmutableTerm object, ImmutableTerm begin, ImmutableTerm end) {
-        return termFactory.getImmutableFunctionalTerm(tuplePredicate, subject, predicate, object, begin, end);
+                                                             ImmutableTerm object, ImmutableTerm beginInc, ImmutableTerm begin, ImmutableTerm end, ImmutableTerm endInc) {
+        return termFactory.getImmutableFunctionalTerm(tuplePredicate, subject, predicate, object,  beginInc, begin, end, endInc);
     }
 
     @Override

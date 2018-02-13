@@ -133,7 +133,7 @@ public class TemporalSparqlAlgebraToDatalogTranslator {
         Function head = termFactory.getFunction(pred, answerVariables);
         appendRule(head, body.atoms);
 
-        List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
+        List<String> signature = answerVariables.stream().map(t -> ((Variable) t).getName()).collect(Collectors.toList());
 
         //System.out.println("PROGRAM\n" + program.program);
         return new InternalSparqlQuery(program, signature);
@@ -436,20 +436,57 @@ public class TemporalSparqlAlgebraToDatalogTranslator {
     private TranslationResult translateTriplePatternWithContext(StatementPattern statementPattern) throws OntopUnsupportedInputQueryException {
 
         ImmutableSet.Builder<Variable> variables = ImmutableSet.builder();
+        Function atom;
+
         Value s = statementPattern.getSubjectVar().getValue();
         Value p = statementPattern.getPredicateVar().getValue();
         Value o = statementPattern.getObjectVar().getValue();
 
-        Term sTerm = (s == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(s);
-        Term pTerm = (p == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(p);
-        Term oTerm = (o == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(o);
-
         String cName = statementPattern.getContextVar().getName();
-
+        Term bIncTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getBeginInc());
         Term bTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getBegin());
         Term eTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getEnd());
+        Term eIncTerm = termFactory.getVariable(pruner.getTimeIntvVariableMap().get(cName).getEndInc());
 
-        Function atom = atomFactory.getTupleAtom(sTerm, pTerm, oTerm, bTerm, eTerm);
+        Term sTerm = (s == null) ? getTermForVariable(statementPattern.getSubjectVar(), variables) : getTermForLiteralOrIri(s);
+
+        if (p == null) {
+            //  term variable term .
+            Term pTerm = getTermForVariable(statementPattern.getPredicateVar(), variables);
+            Term oTerm = (o == null) ? getTermForVariable(statementPattern.getObjectVar(), variables) : getTermForLiteralOrIri(o);
+            atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
+        }
+        else if (p instanceof IRI) {
+            if (p.equals(RDF.TYPE)) {
+                if (o == null) {
+                    // term rdf:type variable .
+                    Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF_TYPE));
+                    Term oTerm = getTermForVariable(statementPattern.getObjectVar(), variables);
+                    atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
+                }
+                else if (o instanceof IRI) {
+                    // term rdf:type uri .
+                    atom = typeFactory.getOptionalDatatype(rdfFactory.createIRI(o.stringValue()))
+                            // datatype
+                            .map(rdfDatatype -> termFactory.getFunction(termFactory.getRequiredTypePredicate(rdfDatatype), sTerm, bIncTerm, bTerm, eTerm, eIncTerm))
+                            // class //ugly implementation TODO:fix it
+                            .orElseGet(() -> termFactory.getFunction(atomFactory.getAtomPredicate(o.stringValue(), 5), sTerm, bIncTerm, bTerm, eTerm, eIncTerm));
+                }
+                else
+                    throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
+            }
+            else {
+                // term uri term . (where uri is either an object or a datatype property)
+                Term oTerm = (o == null) ? getTermForVariable(statementPattern.getObjectVar(), variables) : getTermForLiteralOrIri(o);
+                Predicate predicate = termFactory.getPredicate(p.stringValue(), ImmutableList.of(
+                        typeFactory.getAbstractObjectRDFType(),
+                        typeFactory.getAbstractRDFTermType()));
+                atom = termFactory.getFunction(predicate, sTerm, oTerm, bIncTerm, bTerm, eTerm, eIncTerm);
+            }
+        }
+        else
+            // if predicate is a variable or literal
+            throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
 
         return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
     }
