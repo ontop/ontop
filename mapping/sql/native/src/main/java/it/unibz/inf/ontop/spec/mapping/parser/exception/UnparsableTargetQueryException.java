@@ -52,14 +52,14 @@ public class UnparsableTargetQueryException extends IOException {
             msg.append("\n");
             counter++;
         }
-        msg.append("\nDetailed logs:\n");
+        msg.append("\nDetails:\n");
         for (TargetQueryParser parser : exceptions.keySet()) {
             Throwable exception = exceptions.get(parser);
             msg.append("--------------------------------------------------------------------------------\n");
             msg.append("Parser: ");
             msg.append(parser.getClass().getSimpleName());
             msg.append("\n");
-            msg.append(exception.getMessage());
+            msg.append(exception.getMessage() != null ? exception.getMessage() : "Check the log for more info about the error");
             msg.append("\n\n");
         }
         return msg.toString();
