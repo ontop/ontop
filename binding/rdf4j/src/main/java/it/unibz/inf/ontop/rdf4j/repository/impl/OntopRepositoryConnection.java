@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
@@ -41,7 +41,10 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.util.*;
 
@@ -261,7 +264,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 			if (obj instanceof IRI) {
 				o = "<" + obj.stringValue() + ">";
 			} else {
-				o = obj.stringValue();
+				o = obj.toString();
 			}
 		}
 		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";	
