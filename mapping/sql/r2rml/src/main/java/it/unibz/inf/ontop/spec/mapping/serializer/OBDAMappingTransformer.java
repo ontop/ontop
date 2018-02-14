@@ -27,9 +27,12 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
@@ -223,23 +226,15 @@ public class OBDAMappingTransformer {
 							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
 							//set the datatype for the typed literal
 							obm.setTermType(R2RMLVocabulary.literal);
-
-							//check if literal with lang value
-							if(objectPred.getArity()==2){
-
-								Term langTerm = ((Function) object).getTerm(1);
-
-
-								if(langTerm instanceof Constant) {
-									obm.setLanguageTag(((Constant) langTerm).getValue());
-								}
+							
+							RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
+							Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
+							if (optionalLangTag.isPresent()) {
+								obm.setLanguageTag(optionalLangTag.get().getFullString());
 							}
 							else {
-								//set the datatype for the typed literal
-								obm.setDatatype(rdf4j.createIRI(objectPred.getName()));
+								obm.setDatatype(objectDatatype.getIRI());
 							}
-
-
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(rdf4j.createTriple(objNode, R2RMLVocabulary.constant, rdf4j.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(rdf4j.createLiteral(((Constant) objectTerm).getValue()).stringValue());
