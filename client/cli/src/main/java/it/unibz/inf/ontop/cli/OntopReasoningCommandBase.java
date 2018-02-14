@@ -19,7 +19,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
     public boolean disableReasoning = false;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
-            title = "output", description = "output file (default) or directory (only for --separate-files)")
+            title = "output", description = "output file (default)")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     protected String outputFile;
 
@@ -70,8 +70,6 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         return newOntology;
     }
 
-    protected boolean isR2rmlFile(String mappingFile) {
-        return !mappingFile.endsWith(".obda");
-    }
+
 
 }

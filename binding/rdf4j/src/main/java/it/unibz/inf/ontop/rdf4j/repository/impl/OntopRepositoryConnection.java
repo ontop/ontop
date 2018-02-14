@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
@@ -36,12 +36,16 @@ import org.eclipse.rdf4j.model.impl.NamespaceImpl;
 import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.*;
+import org.eclipse.rdf4j.queryrender.RenderUtils;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.util.*;
 
@@ -240,31 +244,15 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 		//The result is optionally restricted to the specified set of named contexts. 
 		
 		//construct query for it
-		String queryString = "CONSTRUCT {";
-		String s="", p="", o="";
-		if (subj == null)
-			s = "?s ";
-		else {		
-			s = subj.toString();
-			if (subj instanceof IRI) {
-				s = "<" + s + ">";
-			}
-		}
-		
-		if (pred == null)
-			p = " ?p ";
-		else 
-			p = "<" + pred.stringValue()  + ">";
-		if (obj == null)
-			o = " ?o ";
-		else {
-			if (obj instanceof IRI) {
-				o = "<" + obj.stringValue() + ">";
-			} else {
-				o = obj.stringValue();
-			}
-		}
-		queryString+= s+p+o+"} WHERE {"+s+p+o+"}";	
+		StringBuilder queryString = new StringBuilder("CONSTRUCT {");
+
+		StringBuilder spo = subj == null ? new StringBuilder("?s ") : RenderUtils.toSPARQL(subj, new StringBuilder());
+
+		spo = pred == null ? spo.append( " ?p ") : RenderUtils.toSPARQL(pred, spo);
+
+		spo = obj == null ? spo.append( " ?o ") : RenderUtils.toSPARQL(obj, spo);
+
+		queryString.append(spo).append("} WHERE {").append(spo).append("}");
 		
 		//execute construct query
 		try {
@@ -272,7 +260,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 			
 			if (contexts.length == 0 || (contexts.length > 0 && contexts[0] == null)) {
 					GraphQuery query = prepareGraphQuery(QueryLanguage.SPARQL,
-							queryString);
+							queryString.toString());
 					GraphQueryResult result = query.evaluate();
 
 					// System.out.println("result: "+result.hasNext());

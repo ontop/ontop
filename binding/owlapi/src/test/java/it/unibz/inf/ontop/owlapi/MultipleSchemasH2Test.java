@@ -139,7 +139,7 @@ public class MultipleSchemasH2Test {
      */
     @Test
     public void testSingleColum() throws Exception {
-        String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore> a ?x}";
+        String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore> a ?x}";
         runTests(query, 1);
     }
 }
