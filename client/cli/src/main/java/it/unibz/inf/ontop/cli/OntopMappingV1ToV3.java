@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.model.impl.StatementImpl;
 import org.eclipse.rdf4j.model.impl.URIImpl;
 import org.eclipse.rdf4j.rio.*;
 
-
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -208,7 +207,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             String[] tokens = line.split("[\t| ]+", 2);
 
             final String parameter = tokens[0].trim();
-            final String inputParameter = tokens[1].trim();
+            final String inputParameter = tokens.length > 1 ? tokens[1].trim() : "";
 
             if (parameter.equals(Label.sourceUri.name())) {
                 dataSourceProperties.put(OntopSQLCoreSettings.JDBC_NAME, inputParameter);

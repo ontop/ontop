@@ -1053,7 +1053,7 @@ public class OneShotSQLGeneratorEngine {
 						: sqladapter.sqlCast(arg, Types.VARCHAR);
 				// empty placeholder: the correct uri is in the column of DB no need to replace
 				vex.add((split.length > 0 && isIRISafeEncodingEnabled)
-						? sqladapter.strEncodeForUri(cast)
+						? sqladapter.iriSafeEncode(cast)
 						: cast);
 				if (i < split.length) { // fragment after the current {} (if it exists)
 					vex.add(sqladapter.getSQLLexicalFormString(split[i]));
@@ -1318,7 +1318,7 @@ public class OneShotSQLGeneratorEngine {
 		}
 		if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
 			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.strEncodeForUri(literal);
+			return sqladapter.iriSafeEncode(literal);
 		}
 		if (functionSymbol == ExpressionOperation.UCASE) {
 			String literal = getSQLString(function.getTerm(0), index, false);

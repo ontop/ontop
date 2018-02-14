@@ -28,6 +28,13 @@ public class SQLMappingParserTest {
 		configuration.loadProvidedPPMapping();
 	}
 
+	@Test
+	public void testBootstrappedMapping() throws Exception {
+		OntopMappingSQLAllConfiguration configuration = createConfiguration(
+				"src/test/resources/format/obda/bootstrapped.obda");
+		configuration.loadProvidedPPMapping();
+	}
+
 	private static OntopMappingSQLAllConfiguration createConfiguration(String obdaFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(obdaFile)
