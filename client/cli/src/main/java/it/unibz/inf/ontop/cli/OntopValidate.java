@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Command(name = "validate",
         description = "Validate Ontology and Mappings")
-public class OntopValidate extends OntopReasoningCommandBase {
+public class OntopValidate extends OntopMappingOntologyRelatedCommand {
 
     public OntopValidate() {
     }

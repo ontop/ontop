@@ -214,7 +214,7 @@ public class ReverseURIH2Test {
 	 */
 	@Test
 	public void testSingleColum2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore> a ?x}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore> a ?x}";
 		runTests(query, 1);
 	}
 
@@ -236,7 +236,7 @@ public class ReverseURIH2Test {
 	 */
 	@Test
 	public void testTwoColum2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore> a ?x}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore> a ?x}";
 		runTests(query, 1);
 	}
 
@@ -258,7 +258,7 @@ public class ReverseURIH2Test {
 	 */
 	@Test
 	public void testTwoColum22Vaule() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore%202> a ?x}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore%202> a ?x}";
 		runTests(query, 1);
 	}
 
@@ -280,7 +280,7 @@ public class ReverseURIH2Test {
 	 */
 	@Test
 	public void testThreeColum2() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore-Cote%20D%22ivore> a ?x}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore-Cote%20D%27ivore> a ?x}";
 		runTests(query, 1);
 	}
 
@@ -302,7 +302,7 @@ public class ReverseURIH2Test {
 	 */
 	@Test
 	public void testThreeColum23Value() throws Exception {
-		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%22ivore-Cote%20D%22ivore%202-Cote%20D%22ivore%203> a ?x}";
+		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {<http://www.ontop.org/test-Cote%20D%27ivore-Cote%20D%27ivore%202-Cote%20D%27ivore%203> a ?x}";
 		runTests(query, 1);
 	}
 

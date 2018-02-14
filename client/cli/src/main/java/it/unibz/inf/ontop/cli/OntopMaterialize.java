@@ -31,8 +31,8 @@ import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
+import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
@@ -70,12 +70,18 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final String TURTLE = "turtle";
     private static final String N3 = "n3";
 
+
+    @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
+            title = "output", description = "output file (default) or directory (only for --separate-files)")
+    //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
+    protected String outputFile;
+
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, owlxml, turtle, n3. " +
                     "Default: rdfxml")
     @AllowedValues(allowedValues = {RDF_XML, OWL_XML, TURTLE, N3})
-    public String format;
+    public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
             description = "generating separate files for different classes/properties. This is useful for" +

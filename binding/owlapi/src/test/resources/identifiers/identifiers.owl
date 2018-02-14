@@ -36,6 +36,9 @@
     <Declaration>
         <Class IRI="#Country5"/>
     </Declaration>
+    <Declaration>
+         <Class IRI="#CountryNo"/>
+    </Declaration>
 </Ontology>
 
 

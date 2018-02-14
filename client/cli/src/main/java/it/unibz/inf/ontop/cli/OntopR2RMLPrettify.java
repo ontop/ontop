@@ -25,7 +25,6 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.Required;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -50,26 +49,6 @@ public class OntopR2RMLPrettify implements OntopCommand {
             description = "Input mapping file in Ontop native format (.obda)")
     @Required
     protected String outputMappingFile;
-
-    public static void main(String[] args) throws FileNotFoundException {
-
-//        if(args.length != 2){
-//            System.err.println("Usage: org.semanticweb.ontop.cli.R2RMLPrettify r2rml.ttl prettified_r2rml.ttl");
-//            System.err.println("");
-//            System.exit(0);
-//        }
-//
-//        String r2rmlFile = args[0];
-//
-//        String outputR2RMLFile = args[1];
-//
-//        Model model = RDFDataMgr.loadModel(new File(r2rmlFile).toURI().toString(), Lang.TURTLE);
-//
-//        OutputStream out = new FileOutputStream(outputR2RMLFile);
-//
-//        RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
-
-    }
 
     @Override
     public void run() {

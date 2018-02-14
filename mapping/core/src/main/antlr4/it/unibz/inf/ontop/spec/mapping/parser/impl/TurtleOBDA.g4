@@ -208,7 +208,7 @@ BOOLEAN_LITERAL
   : 'true' | 'TRUE' | 'True' | 'false'| 'FALSE'| 'False'
   ;
 
-// extends IRIREF to allow curly brackets, and force one curly bracket
+// extends IRIREF to allow curly brackets, and forces one curly bracket
 IRIREF_EXT
   : '<' IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+ '>'
   ;
@@ -344,7 +344,7 @@ PN_CHARS
 
 // extends PN_LOCAL to allow curly brackets, and force at least one (opening) curly bracket
 PN_LOCAL_EXT
-  : '{' RIGHT_PART_TAIL_EXT ? | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
+  : '{' RIGHT_PART_TAIL_EXT + | RIGHT_PART_FIRST_CHAR RIGHT_PART_TAIL_EXT_MAND
   ;
 
 // extends PN_LOCAL in the original grammar to allow '/' and '#'
@@ -378,7 +378,7 @@ fragment RIGHT_PART_FIRST_CHAR_EXT
   ;
 
 fragment RIGHT_PART_CHAR
-  : (PN_CHARS | '.' | ':' | '/' | '#' | PLX)
+  : (PN_CHARS | '.' | ':' | '/' | '#' | ';' | PLX)
   ;
 
 fragment RIGHT_PART_CHAR_EXT
@@ -406,7 +406,7 @@ fragment RIGHT_PART_TAIL_EXT_MAND
   ;
 
 fragment IRIREF_INNER_CHAR
-  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | UCHAR)
+  :  (PN_CHARS | '.' | ':' | '/' | '\\' | '#' | '@' | '%' | '&' | ';' | UCHAR)
   ;
 
 fragment IRIREF_INNER_CHAR_EXT
