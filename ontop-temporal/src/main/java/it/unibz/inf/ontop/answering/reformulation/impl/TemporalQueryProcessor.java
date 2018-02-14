@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
@@ -31,11 +32,15 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -43,7 +48,10 @@ import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
@@ -73,22 +81,25 @@ public class TemporalQueryProcessor implements QueryReformulator {
     private final SubstitutionUtilities substitutionUtilities;
     private final CQCUtilities cqcUtilities;
     private final ImmutabilityTools immutabilityTools;
+    private final RuleUnfolder ruleUnfolder;
+
+    ImmutableMap<AtomPredicate, IntermediateQuery> mergedMappingMap;
 
     @AssistedInject
     private TemporalQueryProcessor(@Assisted OBDASpecification obdaSpecification,
-                                @Assisted ExecutorRegistry executorRegistry,
-                                QueryCache queryCache,
-                                BindingLiftOptimizer bindingLiftOptimizer, OntopReformulationSettings settings,
-                                TemporalDatalogProgram2QueryConverter datalogConverter,
-                                TranslationFactory translationFactory,
-                                QueryRewriter queryRewriter,
-                                JoinLikeOptimizer joinLikeOptimizer,
-                                InputQueryFactory inputQueryFactory,
-                                LinearInclusionDependencyTools inclusionDependencyTools,
-                                AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-                                DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
-                                UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-                                CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools) {
+                                   @Assisted ExecutorRegistry executorRegistry,
+                                   QueryCache queryCache,
+                                   BindingLiftOptimizer bindingLiftOptimizer, OntopReformulationSettings settings,
+                                   TemporalDatalogProgram2QueryConverter datalogConverter,
+                                   TranslationFactory translationFactory,
+                                   QueryRewriter queryRewriter,
+                                   JoinLikeOptimizer joinLikeOptimizer,
+                                   InputQueryFactory inputQueryFactory,
+                                   LinearInclusionDependencyTools inclusionDependencyTools,
+                                   AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+                                   DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
+                                   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+                                   CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools, RuleUnfolder ruleUnfolder) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.settings = settings;
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -100,6 +111,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
         this.substitutionUtilities = substitutionUtilities;
         this.cqcUtilities = cqcUtilities;
         this.immutabilityTools = immutabilityTools;
+        this.ruleUnfolder = ruleUnfolder;
         ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
         this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -107,12 +119,15 @@ public class TemporalQueryProcessor implements QueryReformulator {
         this.rewriter.setTBox(saturatedTBox, sigma);
 
         Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
+        TemporalMapping temporalSaturatedMapping = ((TemporalOBDASpecification)obdaSpecification).getTemporalSaturatedMapping();
+
+        mergedMappingMap = mergeMappings(saturatedMapping, temporalSaturatedMapping);
 
         if(log.isDebugEnabled()){
             log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
         }
 
-        this.queryUnfolder = translationFactory.create(saturatedMapping);
+        this.queryUnfolder = translationFactory.create(temporalSaturatedMapping);
 
         this.dbMetadata = obdaSpecification.getDBMetadata();
         this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
@@ -208,30 +223,31 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Start the unfolding...");
 
-                intermediateQuery = queryUnfolder.optimize(intermediateQuery);
+                //intermediateQuery = queryUnfolder.optimize(intermediateQuery);
+                intermediateQuery = ruleUnfolder.unfold(intermediateQuery, mergedMappingMap);
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
 
                 //lift bindings and union when it is possible
-                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
-                log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
-
-                log.debug("New lifted query: \n" + intermediateQuery.toString());
+//                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+//                log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
+//
+//                log.debug("New lifted query: \n" + intermediateQuery.toString());
 
                 /*
                  * TODO: USE INJECTION!
-                 */
-                intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
-                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
-
-                intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
-
-                log.debug("After projection shrinking: \n" + intermediateQuery.toString());
-
-
-                intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
-                log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
+//                 */
+//                intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
+//                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+//
+//                intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
+//
+//                log.debug("After projection shrinking: \n" + intermediateQuery.toString());
+//
+//
+//                intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+//                log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
 //				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
 //				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
@@ -241,11 +257,13 @@ public class TemporalQueryProcessor implements QueryReformulator {
 //				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
-                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
-                        ImmutableList.copyOf(translation.getSignature()));
-                queryCache.put(inputQuery, executableQuery);
-                return executableQuery;
+                //TODO: implement this part
+//                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
+//                        ImmutableList.copyOf(translation.getSignature()));
+//                queryCache.put(inputQuery, executableQuery);
+//                return executableQuery;
 
+                return null;
             }
             /**
              * No solution.
@@ -300,5 +318,15 @@ public class TemporalQueryProcessor implements QueryReformulator {
     @Override
     public InputQueryFactory getInputQueryFactory() {
         return inputQueryFactory;
+    }
+
+    //merge temporal and static saturated mappings
+    private ImmutableMap<AtomPredicate, IntermediateQuery> mergeMappings(Mapping mapping, TemporalMapping temporalMapping){
+        Map <AtomPredicate, IntermediateQuery> mergedMap = new HashMap<>();
+        mergedMap.putAll(mapping.getPredicates().stream()
+                .collect(Collectors.toMap(p-> p, p-> mapping.getDefinition(p).get())));
+        mergedMap.putAll(temporalMapping.getPredicates().stream()
+                .collect(Collectors.toMap(p-> p, p -> temporalMapping.getDefinition(p).get())));
+        return ImmutableMap.copyOf(mergedMap);
     }
 }
