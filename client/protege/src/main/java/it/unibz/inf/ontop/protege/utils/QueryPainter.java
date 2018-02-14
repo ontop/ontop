@@ -237,6 +237,9 @@ public class QueryPainter {
 					}
 					parent.setToolTipText(getHTMLErrorMessage(errorstring));
 				}
+				else{
+					parent.setToolTipText("Syntax error, check log");
+				}
 
 			}
 			setStateBorder(errorBorder);
