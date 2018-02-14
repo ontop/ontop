@@ -82,7 +82,7 @@ public class ConditionSimplifier {
      *
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                                                ImmutableSet<Variable> nonLiftableVariables)
+                                                                           ImmutableSet<Variable> nonLiftableVariables)
             throws UnsatisfiableConditionException {
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();

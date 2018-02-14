@@ -211,11 +211,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 .normalizeChild(variableGenerator);
 
         for(int i=0; i < MAX_NORMALIZATION_ITERATIONS; i++) {
-            state = state.liftBindingsAndDistinct()
-                    .mergeWithChild()
-                    .simplifyAndPropagateDownConstraint();
+            FilterNormalizationState stateBeforeSimplification = state.liftBindingsAndDistinct()
+                    .mergeWithChild();
 
-            FilterNormalizationState newState = state.normalizeChild(variableGenerator);
+            FilterNormalizationState newState = stateBeforeSimplification.simplifyAndPropagateDownConstraint()
+                    .normalizeChild(variableGenerator);
 
             // Convergence
             if (newState.child.equals(state.child))
