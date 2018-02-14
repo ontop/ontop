@@ -24,11 +24,14 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.node.impl.ConditionSimplifier.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements JoinLikeNode {
+
+    private final ConditionSimplifier conditionSimplifier;
 
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
                                TermNullabilityEvaluator nullabilityEvaluator,
@@ -36,9 +39,11 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TypeFactory typeFactory, DatalogTools datalogTools,
                                ExpressionEvaluator defaultExpressionEvaluator,
                                ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
-                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                               ConditionSimplifier conditionSimplifier) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     /**
@@ -119,7 +124,7 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         InjectiveVar2VarSubstitution freshRenaming = computeOtherChildrenRenaming(nonDownPropagableFragment,
                 otherChildrenVariables, variableGenerator);
 
-        ExpressionAndSubstitution expressionResults = simplifyCondition(
+        ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
                 nonLiftableVariables);
         Optional<ImmutableExpression> newCondition = expressionResults.optionalExpression;

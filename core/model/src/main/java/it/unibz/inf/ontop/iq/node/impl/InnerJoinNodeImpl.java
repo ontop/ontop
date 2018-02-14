@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -37,6 +38,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private static final String JOIN_NODE_STR = "JOIN" ;
     private static final int MAX_ITERATIONS = 100000;
     private final ConstructionNodeTools constructionNodeTools;
+    private final ConditionSimplifier conditionSimplifier;
 
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
@@ -45,10 +47,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
-                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                                ConditionSimplifier conditionSimplifier) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
+                conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     @AssistedInject
@@ -58,10 +63,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              ConditionSimplifier conditionSimplifier) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
+                conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     @AssistedInject
@@ -70,10 +78,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
-                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
+                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
+                              ConditionSimplifier conditionSimplifier) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools, conditionSimplifier);
         this.constructionNodeTools = constructionNodeTools;
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     @Override
@@ -83,9 +93,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode clone() {
-        return new InnerJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
+        return iqFactory.createInnerJoinNode(getOptionalFilterCondition());
     }
 
     @Override
@@ -96,9 +104,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return new InnerJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(),
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
-                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
+        return iqFactory.createInnerJoinNode(newOptionalFilterCondition);
     }
 
     @Override
@@ -244,8 +250,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(descendingSubstitution::applyToBooleanExpression);
 
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = simplifyCondition(unoptimizedExpression,
-                    ImmutableSet.of());
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
+                    unoptimizedExpression, ImmutableSet.of());
 
             Optional<ImmutableExpression> downConstraint = computeDownConstraint(constraint,
                     expressionAndSubstitution);
@@ -342,8 +348,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
         try {
-            ExpressionAndSubstitution conditionSimplificationResults =
-                    simplifyCondition(getOptionalFilterCondition(), ImmutableSet.of());
+            ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
+                    getOptionalFilterCondition(), ImmutableSet.of());
 
             Optional<ImmutableExpression> downConstraint = computeDownConstraint(initialConstraint,
                     conditionSimplificationResults);

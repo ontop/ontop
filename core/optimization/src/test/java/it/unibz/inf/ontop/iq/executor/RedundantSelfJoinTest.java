@@ -558,10 +558,8 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(LT, O, N));
-        queryBuilder1.init(projectionAtom1, filterNode);
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder1.addChild(filterNode, joinNode1);
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(LT, O, N));
+        queryBuilder1.init(projectionAtom1, joinNode1);
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
         ExtensionalDataNode dataNode6 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, N, O));
 
