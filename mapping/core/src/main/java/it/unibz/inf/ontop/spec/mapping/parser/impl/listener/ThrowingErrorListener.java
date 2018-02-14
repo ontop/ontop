@@ -16,7 +16,7 @@ public class ThrowingErrorListener extends BaseErrorListener {
             throws ParseCancellationException {
 
         log.debug("Syntax error location: column " + charPositionInLine + "\n" + msg);
-        throw new ParseCancellationException("Syntax error location: line " + line + ", column " + charPositionInLine + "\n" + msg);
+        throw new ParseCancellationException("Syntax error location: column " + charPositionInLine + "\n" + msg);
 
     }
 }
