@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.node.normalization.impl.JoinLikeChildBindingLifter;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -40,6 +41,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private static final int MAX_ITERATIONS = 100000;
     private final ConstructionNodeTools constructionNodeTools;
     private final ConditionSimplifier conditionSimplifier;
+    private final JoinLikeChildBindingLifter bindingLift;
 
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
@@ -49,12 +51,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                                ConditionSimplifier conditionSimplifier) {
+                                ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
-                conditionSimplifier);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
+        this.bindingLift = bindingLift;
     }
 
     @AssistedInject
@@ -65,12 +67,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier) {
+                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools,
-                conditionSimplifier);
+                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
+        this.bindingLift = bindingLift;
     }
 
     @AssistedInject
@@ -80,11 +82,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier) {
+                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools, conditionSimplifier);
+                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
+        this.bindingLift = bindingLift;
     }
 
     @Override
@@ -456,7 +459,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         IQTree selectedGrandChild = selectedLiftedChild.getChild();
 
         try {
-            return liftRegularChildBinding(selectedChildConstructionNode,
+            return bindingLift.liftRegularChildBinding(selectedChildConstructionNode,
                     selectedChildPosition,
                     selectedGrandChild,
                     liftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,

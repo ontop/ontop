@@ -15,7 +15,7 @@ public class IQPropertiesImpl implements IQProperties {
 
     @AssistedInject
     private IQPropertiesImpl(@Assisted boolean isNormalized) {
-        this.isNormalized = false;
+        this.isNormalized = isNormalized;
     }
 
     @Override
