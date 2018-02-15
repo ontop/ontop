@@ -319,6 +319,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         protected Properties generateProperties() {
             Properties properties = new Properties();
             properties.putAll(super.generateProperties());
+            properties.putAll(modelBuilderFragment.generateProperties());
             properties.putAll(mappingBuilderFragment.generateProperties());
             properties.putAll(optimizationBuilderFragment.generateProperties());
 
