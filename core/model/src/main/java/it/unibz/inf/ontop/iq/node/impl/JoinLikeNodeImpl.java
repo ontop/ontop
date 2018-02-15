@@ -46,36 +46,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         this.conditionSimplifier = conditionSimplifier;
     }
 
-    /**
-     * TODO: explain
-     */
-    protected Optional<ExpressionEvaluator.EvaluationResult> computeAndEvaluateNewCondition(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution,
-            Optional<ImmutableExpression> optionalNewEqualities) {
-
-        Optional<ImmutableExpression> updatedExistingCondition = getOptionalFilterCondition()
-                .map(substitution::applyToBooleanExpression);
-
-        Optional<ImmutableExpression> newCondition = immutabilityTools.foldBooleanExpressions(
-                Stream.concat(
-                    Stream.of(updatedExistingCondition),
-                    Stream.of(optionalNewEqualities))
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .flatMap(e -> e.flattenAND().stream()));
-
-        return newCondition
-                .map(cond -> createExpressionEvaluator()
-                        .evaluateExpression(cond));
-    }
-
-    protected static ImmutableSet<Variable> union(ImmutableSet<Variable> set1, ImmutableSet<Variable> set2) {
-        return Stream.concat(
-                set1.stream(),
-                set2.stream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         ImmutableMultiset<Variable> childrenVariableBag = query.getChildren(this).stream()
