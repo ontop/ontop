@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -26,6 +27,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.E
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 
+@Singleton
 public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
     private static final int MAX_ITERATIONS = 10000;
@@ -76,7 +78,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             state = newState;
         }
-        throw new MinorOntopInternalBugException("LJ.liftBinding() did not converge after " + MAX_ITERATIONS);
+        throw new MinorOntopInternalBugException("LJ.normalizeForOptimization() did not converge after " + MAX_ITERATIONS);
     }
 
 
@@ -142,7 +144,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 try {
                     return bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
                             ImmutableList.of(liftedLeftChild,rightChild),
-                            leftGrandChild.getVariables(), ljCondition, variableGenerator, this::convertIntoState);
+                            leftGrandChild.getVariables(), ljCondition, variableGenerator, this::applyLeftChildBindingLift);
                 }
                 /*
                  * Replaces the LJ by the left child
@@ -166,7 +168,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         ancestors, variableGenerator);
         }
 
-        private LJNormalizationState convertIntoState(
+        private LJNormalizationState applyLeftChildBindingLift(
                 ImmutableList<IQTree> children, IQTree leftGrandChild, int leftChildPosition,
                 Optional<ImmutableExpression> ljCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
                 ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {

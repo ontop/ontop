@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -24,7 +25,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
 
-
+@Singleton
 public class FilterNormalizerImpl implements FilterNormalizer {
 
     private static final int MAX_NORMALIZATION_ITERATIONS = 10000;
