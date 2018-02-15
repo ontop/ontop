@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.impl.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -20,7 +19,6 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 
 public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implements JoinOrFilterNode {
@@ -101,32 +99,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
         return ImmutableSet.of();
-    }
-
-    protected Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                                  ExpressionAndSubstitution conditionSimplificationResults)
-            throws UnsatisfiableConditionException {
-        if (optionalConstraint.isPresent()) {
-            ImmutableExpression substitutedConstraint = conditionSimplificationResults.substitution
-                    .applyToBooleanExpression(optionalConstraint.get());
-
-            ImmutableExpression combinedExpression = conditionSimplificationResults.optionalExpression
-                    .flatMap(e -> immutabilityTools.foldBooleanExpressions(
-                            Stream.concat(
-                                    e.flattenAND().stream(),
-                                    substitutedConstraint.flattenAND().stream())))
-                    .orElse(substitutedConstraint);
-
-            ExpressionEvaluator.EvaluationResult evaluationResults = createExpressionEvaluator()
-                    .evaluateExpression(combinedExpression);
-
-            if (evaluationResults.isEffectiveFalse())
-                throw new UnsatisfiableConditionException();
-
-            return evaluationResults.getOptionalExpression();
-        }
-        else
-            return conditionSimplificationResults.optionalExpression;
     }
 
     protected void checkExpression(ImmutableExpression expression, ImmutableList<IQTree> children)

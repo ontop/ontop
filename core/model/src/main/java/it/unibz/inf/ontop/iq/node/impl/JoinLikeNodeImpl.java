@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -24,7 +26,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.node.impl.ConditionSimplifier.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
 
@@ -97,12 +98,12 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
         ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
                 nonLiftableVariables);
-        Optional<ImmutableExpression> newCondition = expressionResults.optionalExpression;
+        Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
 
-        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = expressionResults.substitution.composeWith(
+        ImmutableSubstitution<ImmutableTerm> ascendingSubstitution = expressionResults.getSubstitution().composeWith(
                 selectedChildSubstitution);
         ImmutableSubstitution<NonFunctionalTerm> descendingSubstitution =
-                        expressionResults.substitution.composeWith2(freshRenaming)
+                        expressionResults.getSubstitution().composeWith2(freshRenaming)
                                 .composeWith2(downPropagableFragment);
 
         return liftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,

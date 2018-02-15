@@ -1,10 +1,12 @@
-package it.unibz.inf.ontop.iq.node.impl;
+package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
+import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 
-public class ConditionSimplifier {
+public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
@@ -29,10 +31,10 @@ public class ConditionSimplifier {
     private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
-    private ConditionSimplifier(SubstitutionFactory substitutionFactory, ImmutabilityTools immutabilityTools,
-                                TermFactory termFactory, ImmutableUnificationTools unificationTools,
-                                ImmutableSubstitutionTools substitutionTools,
-                                ExpressionEvaluator defaultExpressionEvaluator) {
+    private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory, ImmutabilityTools immutabilityTools,
+                                    TermFactory termFactory, ImmutableUnificationTools unificationTools,
+                                    ImmutableSubstitutionTools substitutionTools,
+                                    ExpressionEvaluator defaultExpressionEvaluator) {
         this.substitutionFactory = substitutionFactory;
         this.immutabilityTools = immutabilityTools;
         this.termFactory = termFactory;
@@ -41,13 +43,16 @@ public class ConditionSimplifier {
         this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
+
+    @Override
     public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression)
-            throws UnsatisfiableConditionException{
+            throws UnsatisfiableConditionException {
         return simplifyCondition(Optional.of(expression), ImmutableSet.of());
     }
 
+    @Override
     public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
-                                                       ImmutableSet<Variable> nonLiftableVariables)
+                                                                                  ImmutableSet<Variable> nonLiftableVariables)
             throws UnsatisfiableConditionException {
 
         Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
@@ -65,10 +70,10 @@ public class ConditionSimplifier {
                 // May throw an exception if unification is rejected
                 return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables);
             else
-                return new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution());
+                return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
         }
         else
-            return new ExpressionAndSubstitution(Optional.empty(), substitutionFactory.getSubstitution());
+            return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
     }
 
     private ExpressionEvaluator.EvaluationResult evaluateExpression(ImmutableExpression expression) {
@@ -82,7 +87,7 @@ public class ConditionSimplifier {
      *
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                           ImmutableSet<Variable> nonLiftableVariables)
+                                                                                                      ImmutableSet<Variable> nonLiftableVariables)
             throws UnsatisfiableConditionException {
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
@@ -114,7 +119,7 @@ public class ConditionSimplifier {
                                 .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
                 ));
 
-        return new ExpressionAndSubstitution(newExpression, normalizedUnifier);
+        return new ExpressionAndSubstitutionImpl(newExpression, normalizedUnifier);
     }
 
     private ImmutableSubstitution<NonFunctionalTerm> unify(
@@ -136,17 +141,31 @@ public class ConditionSimplifier {
                 .orElseThrow(UnsatisfiableConditionException::new);
     }
 
+    @Override
+    public Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
+                                                               ExpressionAndSubstitution conditionSimplificationResults)
+            throws UnsatisfiableConditionException {
+        if (optionalConstraint.isPresent()) {
+            ImmutableExpression substitutedConstraint = conditionSimplificationResults.getSubstitution()
+                    .applyToBooleanExpression(optionalConstraint.get());
 
-    protected static class ExpressionAndSubstitution {
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        public final Optional<ImmutableExpression> optionalExpression;
-        public final ImmutableSubstitution<NonFunctionalTerm> substitution;
+            ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
+                    .flatMap(e -> immutabilityTools.foldBooleanExpressions(
+                            Stream.concat(
+                                    e.flattenAND().stream(),
+                                    substitutedConstraint.flattenAND().stream())))
+                    .orElse(substitutedConstraint);
 
-        protected ExpressionAndSubstitution(Optional<ImmutableExpression> optionalExpression,
-                                            ImmutableSubstitution<NonFunctionalTerm> substitution) {
-            this.optionalExpression = optionalExpression;
-            this.substitution = substitution;
+            ExpressionEvaluator.EvaluationResult evaluationResults = evaluateExpression(combinedExpression);
+
+            if (evaluationResults.isEffectiveFalse())
+                throw new UnsatisfiableConditionException();
+
+            return evaluationResults.getOptionalExpression();
         }
+        else
+            return conditionSimplificationResults.getOptionalExpression();
     }
+
 
 }
