@@ -22,6 +22,8 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.proposal.*;
 
+import javax.annotation.Nonnull;
+import java.io.File;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -118,24 +120,20 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
 
     }
 
-    /**
-     * Inherits from DefaultOntopModelBuilderFragment because it has more methods
-     * than DefaultOntopOptimizationBuilderFragment (more convenient).
-     */
     protected static abstract class AbstractOntopOptimizationBuilderMixin<B extends OntopOptimizationConfiguration.Builder<B>>
-            extends DefaultOntopModelBuilderFragment<B>
             implements OntopOptimizationConfiguration.Builder<B> {
 
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
+        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         protected AbstractOntopOptimizationBuilderMixin() {
             optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>((B)this);
+            modelBuilderFragment= new DefaultOntopModelBuilderFragment<>((B) this);
         }
 
-        @Override
         protected Properties generateProperties() {
             // Properties from OntopModelBuilderFragmentImpl
-            Properties properties = super.generateProperties();
+            Properties properties = modelBuilderFragment.generateProperties();
             // Higher priority (however should be orthogonal) for the OntopOptimizationBuilderFragment.
             properties.putAll(optimizationBuilderFragment.generateProperties());
 
@@ -143,8 +141,28 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         }
 
         protected OntopOptimizationOptions generateOntopOptimizationConfigurationOptions() {
-            OntopModelConfigurationOptions modelOptions = generateModelOptions();
+            OntopModelConfigurationOptions modelOptions = modelBuilderFragment.generateModelOptions();
             return optimizationBuilderFragment.generateOptimizationOptions(modelOptions);
+        }
+
+        @Override
+        public B properties(@Nonnull Properties properties) {
+            return modelBuilderFragment.properties(properties);
+        }
+
+        @Override
+        public B propertyFile(File propertyFile) {
+            return modelBuilderFragment.propertyFile(propertyFile);
+        }
+
+        @Override
+        public B propertyFile(String propertyFilePath) {
+            return modelBuilderFragment.propertyFile(propertyFilePath);
+        }
+
+        @Override
+        public B enableTestMode() {
+            return modelBuilderFragment.enableTestMode();
         }
     }
 
