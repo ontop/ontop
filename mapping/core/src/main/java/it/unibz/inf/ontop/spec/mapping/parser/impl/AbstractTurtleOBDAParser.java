@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -81,8 +82,17 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 		try {
 			CharStream inputStream = CharStreams.fromString(bf.toString());
 			TurtleOBDALexer lexer = new TurtleOBDALexer(inputStream);
+
+			//substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
+            lexer.removeErrorListeners();
+			lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+
 			CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 			TurtleOBDAParser parser = new TurtleOBDAParser(tokenStream);
+            //substitute the standard ConsoleErrorListener (simply print out the error) with ThrowingErrorListener
+			parser.removeErrorListeners();
+			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+
 			return ((List<Function>)visitor.visitParse(parser.parse())).stream()
 					.map(TERM_FACTORY::getImmutableFunctionalTerm)
 					.collect(ImmutableCollectors.toList());

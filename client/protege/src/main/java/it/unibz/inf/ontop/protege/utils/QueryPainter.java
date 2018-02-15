@@ -216,7 +216,7 @@ public class QueryPainter {
 			else {
 
 				Throwable cause = e.getCause();
-				String errorstring =  null;
+				String errorstring;
 				if(cause!=null) {
 					errorstring = cause.getMessage();
 				}
@@ -225,17 +225,11 @@ public class QueryPainter {
 				}
 
 				if(errorstring != null) {
-					int index = errorstring.indexOf("Location: line");
-					if (index != -1) {
-						String location = errorstring.substring(index + 15);
-						int prefixlines = apic.getMutablePrefixManager().getPrefixMap().keySet().size();
-						String[] coordinates = location.split(":");
 
-						int errorline = Integer.valueOf(coordinates[0]) - prefixlines;
-						int errorcol = Integer.valueOf(coordinates[1]);
-						errorstring = errorstring.replace(errorstring.substring(index), "Location: line " + errorline + " column " + errorcol);
-					}
 					parent.setToolTipText(getHTMLErrorMessage(errorstring));
+				}
+				else{
+					parent.setToolTipText("Syntax error, check log");
 				}
 
 			}
