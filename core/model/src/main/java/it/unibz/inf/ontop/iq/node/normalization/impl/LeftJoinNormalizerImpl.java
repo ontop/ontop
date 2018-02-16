@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
@@ -23,9 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 @Singleton
 public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
@@ -73,6 +72,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             LJNormalizationState newState = state
                     .optimizeLeftJoinCondition()
                     .liftRightChild()
+                    // A DISTINCT on the left might have been waiting because of a not-yet distinct right child
                     .liftLeftChild();
 
             if (state.equals(newState))
@@ -116,6 +116,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
         private LJNormalizationState updateConditionAndRightChild(Optional<ImmutableExpression> newLJCondition,
                                                                   IQTree newRightChild) {
+            if (ljCondition.equals(newLJCondition) && rightChild.equals(newRightChild))
+                return this;
+
             return new LJNormalizationState(projectedVariables, leftChild, newRightChild, newLJCondition,
                     ancestors, variableGenerator);
         }
@@ -152,8 +155,10 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return liftLeftConstruction((UnaryIQTree) liftedLeftChild);
             else if (leftRootNode instanceof DistinctNode)
                 return liftLeftDistinct((UnaryIQTree) liftedLeftChild);
-            else if (leftRootNode instanceof CommutativeJoinOrFilterNode)
-                return liftLeftCommutativeJoinOrFilter(liftedLeftChild);
+            else if (leftRootNode instanceof FilterNode)
+                return liftLeftFilterNode((UnaryIQTree) liftedLeftChild);
+            else if (leftRootNode instanceof CommutativeJoinNode)
+                return liftLeftCommutativeJoin(liftedLeftChild);
             else if (liftedLeftChild.isDeclaredAsEmpty())
                 // Stops the liftLeftChild() recursion
                 return new LJNormalizationState(projectedVariables, liftedLeftChild,
@@ -223,18 +228,62 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return updateConditionAndRightChild(ljCondition, liftedRightChild);
         }
 
-        /**
-         * TODO: implement it seriously
-         */
-        private LJNormalizationState liftLeftCommutativeJoinOrFilter(IQTree liftedLeftChild) {
-            return updateLeftChild(liftedLeftChild);
+        private LJNormalizationState liftLeftFilterNode(UnaryIQTree liftedLeftChild) {
+            FilterNode filterNode = (FilterNode) liftedLeftChild.getRootNode();
+            return updateParentConditionChildren(filterNode, ljCondition, liftedLeftChild.getChild(), rightChild);
         }
 
-        /**
-         * TODO: implement seriously
-         */
-        private LJNormalizationState liftRightCommutativeJoinOrFilter(IQTree liftedRightChild) {
-            return updateConditionAndRightChild(ljCondition, liftedRightChild);
+        private LJNormalizationState liftLeftCommutativeJoin(IQTree liftedLeftChild) {
+            CommutativeJoinNode joinNode = (CommutativeJoinNode) liftedLeftChild.getRootNode();
+
+            Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
+            if (filterCondition.isPresent()) {
+
+                FilterNode newParent = iqFactory.createFilterNode(filterCondition.get());
+
+                NaryIQTree newLeftChild = iqFactory.createNaryIQTree(
+                        joinNode.changeOptionalFilterCondition(Optional.empty()),
+                        liftedLeftChild.getChildren());
+
+                return updateParentConditionChildren(newParent, ljCondition, newLeftChild, rightChild);
+            }
+            else
+                return updateLeftChild(liftedLeftChild);
+        }
+
+
+        private LJNormalizationState liftRightFilter(UnaryIQTree liftedRightChild) {
+            FilterNode filterNode = (FilterNode) liftedRightChild.getRootNode();
+
+            ImmutableExpression newLJCondition = ljCondition
+                    .map(c -> immutabilityTools.foldBooleanExpressions(Stream.concat(
+                            c.flattenAND().stream(),
+                            filterNode.getFilterCondition().flattenAND().stream())).get())
+                    .orElseGet(filterNode::getFilterCondition);
+
+            return updateConditionAndRightChild(Optional.of(newLJCondition), liftedRightChild.getChild());
+        }
+
+        private LJNormalizationState liftRightCommutativeJoin(IQTree liftedRightChild) {
+            CommutativeJoinNode joinNode = (CommutativeJoinNode) liftedRightChild.getRootNode();
+
+            Optional<ImmutableExpression> filterCondition = joinNode.getOptionalFilterCondition();
+            if (filterCondition.isPresent()) {
+                ImmutableExpression condition = filterCondition.get();
+                ImmutableExpression newLJCondition = ljCondition
+                        .map(c -> immutabilityTools.foldBooleanExpressions(Stream.concat(
+                                c.flattenAND().stream(),
+                                condition.flattenAND().stream())).get())
+                        .orElse(condition);
+
+                NaryIQTree newRightChild = iqFactory.createNaryIQTree(
+                        joinNode.changeOptionalFilterCondition(Optional.empty()),
+                        liftedRightChild.getChildren());
+
+                return updateConditionAndRightChild(Optional.of(newLJCondition), newRightChild);
+            }
+            else
+                return updateConditionAndRightChild(ljCondition, liftedRightChild);
         }
 
         private LJNormalizationState applyLeftChildBindingLift(
@@ -328,8 +377,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             else if (rightRootNode instanceof DistinctNode) {
                 return liftRightDistinct((UnaryIQTree) liftedRightChild);
             }
-            else if (rightRootNode instanceof CommutativeJoinOrFilterNode) {
-                return liftRightCommutativeJoinOrFilter(liftedRightChild);
+            else if (rightRootNode instanceof FilterNode) {
+                return liftRightFilter((UnaryIQTree)liftedRightChild);
+            }
+            else if (rightRootNode instanceof CommutativeJoinNode) {
+                return liftRightCommutativeJoin(liftedRightChild);
             }
             else
                 return updateConditionAndRightChild(
