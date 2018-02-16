@@ -367,7 +367,7 @@ public class OBDAModel {
 
     public void updateMappingId(String formerMappingId, String newMappingId) throws DuplicateMappingException {
         //if the id are the same no need to update the mapping
-        if(formerMappingId != newMappingId) {
+        if(!formerMappingId.equals(newMappingId)) {
             SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
 
             if (formerTriplesMap != null) {
