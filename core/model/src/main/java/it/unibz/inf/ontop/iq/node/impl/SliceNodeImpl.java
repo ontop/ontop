@@ -95,6 +95,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public boolean isDistinct(IQTree child) {
+        return child.isDistinct();
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
         return transformer.transformSlice(tree, this, child);
     }

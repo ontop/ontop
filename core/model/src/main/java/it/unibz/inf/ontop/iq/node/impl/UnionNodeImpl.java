@@ -80,7 +80,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return false;
     }
 
-
     @Override
     public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
         return children.stream()
@@ -92,6 +91,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     public boolean isConstructed(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
                 .anyMatch(c -> c.isConstructed(variable));
+    }
+
+    /**
+     * TODO: detect when children are disjoint and distinct
+     */
+    @Override
+    public boolean isDistinct(ImmutableList<IQTree> children) {
+        return false;
     }
 
     /**

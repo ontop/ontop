@@ -29,7 +29,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree rightChild;
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> nullableVariables;
+    private ImmutableSet<Variable> nullableVariables = null;
+    @Nullable
+    private Boolean isDistinct = null;
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
@@ -103,6 +105,13 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     public boolean isConstructed(Variable variable) {
         return getVariables().contains(variable)
                 && getRootNode().isConstructed(variable, leftChild, rightChild);
+    }
+
+    @Override
+    public boolean isDistinct() {
+        if (isDistinct == null)
+            isDistinct = getRootNode().isDistinct(leftChild, rightChild);
+        return isDistinct;
     }
 
     @Override

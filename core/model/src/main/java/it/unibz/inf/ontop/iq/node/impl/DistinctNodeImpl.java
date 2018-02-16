@@ -127,6 +127,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
+    public boolean isDistinct(IQTree child) {
+        return true;
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
         return transformer.transformDistinct(tree, this, child);
     }

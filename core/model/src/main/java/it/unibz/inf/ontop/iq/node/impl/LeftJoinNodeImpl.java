@@ -272,6 +272,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
+    public boolean isDistinct(IQTree leftChild, IQTree rightChild) {
+        return leftChild.isDistinct() && rightChild.isDistinct();
+    }
+
+    @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
         return propagateDownCondition(Optional.of(constraint), leftChild, rightChild);
     }

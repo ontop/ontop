@@ -312,6 +312,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
+    public boolean isDistinct(ImmutableList<IQTree> children) {
+        return children.stream().allMatch(IQTree::isDistinct);
+    }
+
+    @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
         return IntStream.range(0, children.size()).boxed()
                 .map(i -> Maps.immutableEntry(i, children.get(i)))

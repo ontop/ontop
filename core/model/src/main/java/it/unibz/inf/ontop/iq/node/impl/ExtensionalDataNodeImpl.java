@@ -90,6 +90,14 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
         return transformer.transformExtensionalData(this);
     }
 
+    /**
+     * Is distinct if it has at least one unique constraint
+     */
+    @Override
+    public boolean isDistinct() {
+        return !getProjectionAtom().getPredicate().getRelationDefinition().getUniqueConstraints().isEmpty();
+    }
+
     @Override
     public ImmutableSet<Variable> getNullableVariables() {
         if (nullableVariables == null) {

@@ -26,6 +26,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     // Lazy
     @Nullable
     private ImmutableSet<Variable> nullableVariables;
+    @Nullable
+    private Boolean isDistinct;
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -94,6 +96,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     public boolean isConstructed(Variable variable) {
         return getVariables().contains(variable) && getRootNode().isConstructed(variable, getChildren());
+    }
+
+    @Override
+    public boolean isDistinct() {
+        if (isDistinct == null)
+            isDistinct = getRootNode().isDistinct(getChildren());
+        return isDistinct;
     }
 
     @Override

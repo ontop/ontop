@@ -53,6 +53,11 @@ public interface IQTree {
     boolean isConstructed(Variable variable);
 
     /**
+     * Returns true if it guarantees that all its results will be distinct
+     */
+    boolean isDistinct();
+
+    /**
      * Returns true if corresponds to a EmptyNode
      */
     boolean isDeclaredAsEmpty();

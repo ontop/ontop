@@ -29,6 +29,8 @@ public interface NaryOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, ImmutableList<IQTree> children);
 
+    boolean isDistinct(ImmutableList<IQTree> children);
+
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children);
 

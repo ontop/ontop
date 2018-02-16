@@ -246,6 +246,14 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 || (getChildVariables().contains(variable) && child.isConstructed(variable));
     }
 
+    /**
+     * TODO: implement it seriously!
+     */
+    @Override
+    public boolean isDistinct(IQTree child) {
+        return false;
+    }
+
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
         if (!childVariables.contains(variable)) {

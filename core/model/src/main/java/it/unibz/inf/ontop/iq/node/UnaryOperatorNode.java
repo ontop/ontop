@@ -27,6 +27,8 @@ public interface UnaryOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, IQTree child);
 
+    boolean isDistinct(IQTree child);
+
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child);
 

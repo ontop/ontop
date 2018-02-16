@@ -112,6 +112,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
+    public boolean isDistinct(IQTree child) {
+        return child.isDistinct();
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
         return transformer.transformOrderBy(tree, this, child);
     }

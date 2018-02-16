@@ -102,6 +102,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
+    public boolean isDistinct() {
+        return true;
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return true;
     }

@@ -60,6 +60,14 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         return transformer.transformIntensionalData(this);
     }
 
+    /**
+     * Intensional data nodes are assumed to correspond to triple/quad patterns, which are distinct by definition
+     */
+    @Override
+    public boolean isDistinct() {
+        return true;
+    }
+
     @Override
     public ImmutableSet<Variable> getNullableVariables() {
         return ImmutableSet.of();
