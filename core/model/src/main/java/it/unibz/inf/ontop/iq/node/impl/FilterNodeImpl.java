@@ -179,6 +179,9 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         return child.isConstructed(variable);
     }
 
+    /**
+     * TODO: detect minus encodings
+     */
     @Override
     public boolean isDistinct(IQTree child) {
         return child.isDistinct();
