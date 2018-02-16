@@ -151,9 +151,9 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
         }
 
         /**
-         * To be called ONLY by sub-classes
+         * To be called ONLY by the local BuilderImpl static class
          */
-        protected DefaultOntopModelBuilderFragment() {
+        private DefaultOntopModelBuilderFragment() {
             this.builder = (B) this;
         }
 
