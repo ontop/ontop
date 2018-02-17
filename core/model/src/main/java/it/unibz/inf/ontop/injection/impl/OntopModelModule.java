@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
@@ -51,6 +52,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(IQConverter.class);
         bindFromSettings(ConditionSimplifier.class);
         bindFromSettings(FilterNormalizer.class);
+        bindFromSettings(InnerJoinNormalizer.class);
         bindFromSettings(LeftJoinNormalizer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
