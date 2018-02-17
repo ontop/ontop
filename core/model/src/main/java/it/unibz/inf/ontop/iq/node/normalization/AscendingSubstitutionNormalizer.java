@@ -20,7 +20,7 @@ public interface AscendingSubstitutionNormalizer {
 
         Optional<ConstructionNode> generateTopConstructionNode();
 
-        IQTree normalizeChild(IQTree child);
+        IQTree updateChild(IQTree child);
 
         ImmutableSubstitution<ImmutableTerm> getAscendingSubstitution();
     }

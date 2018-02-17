@@ -82,7 +82,7 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
         }
 
         @Override
-        public IQTree normalizeChild(IQTree child) {
+        public IQTree updateChild(IQTree child) {
             return downRenamingSubstitution.isEmpty()
                     ? child
                     : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty());

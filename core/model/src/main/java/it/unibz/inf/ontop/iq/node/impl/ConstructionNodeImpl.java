@@ -647,7 +647,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 
-        IQTree grandChild = ascendingNormalization.normalizeChild(childIQ.getChild());
+        IQTree grandChild = ascendingNormalization.updateChild(childIQ.getChild());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);

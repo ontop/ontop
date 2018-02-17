@@ -468,12 +468,19 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         iqFactory.createLeftJoinNode(ljCondition), leftChild, rightChild, normalizedProperties);
             }
 
-            return ancestors.stream()
+            IQTree ancestorTree = ancestors.stream()
                     .reduce(ljLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
                             // Should not be called
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("The order must be respected"); })
-                    // Normalizes the ancestors (recursive)
-                    .normalizeForOptimization(variableGenerator);
+                            (t1, t2) -> {
+                                throw new MinorOntopInternalBugException("The order must be respected");
+                            });
+
+            IQTree nonNormalizedTree = ancestorTree.getVariables().equals(projectedVariables)
+                    ? ancestorTree
+                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), ancestorTree);
+
+            // Normalizes the ancestors (recursive)
+            return nonNormalizedTree.normalizeForOptimization(variableGenerator);
         }
 
         /**

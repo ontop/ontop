@@ -15,13 +15,13 @@ import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -35,13 +35,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final JoinLikeChildBindingLifter bindingLift;
     private final IntermediateQueryFactory iqFactory;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
+    private final ConditionSimplifier conditionSimplifier;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
-                                    AscendingSubstitutionNormalizer substitutionNormalizer) {
+                                    AscendingSubstitutionNormalizer substitutionNormalizer,
+                                    ConditionSimplifier conditionSimplifier) {
         this.bindingLift = bindingLift;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
+        this.conditionSimplifier = conditionSimplifier;
     }
 
     @Override
@@ -51,7 +54,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         State state = new State(children, innerJoinNode.getOptionalFilterCondition(), variableGenerator);
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-            state = state.liftChildBinding();
+            state = state
+                    .propagateDownCondition()
+                    .liftChildBinding();
+
             if (state.hasConverged())
                 return state.createNormalizedTree(currentIQProperties);
         }
@@ -182,7 +188,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .map(i -> i == selectedChildPosition
                             ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
                             : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
-                    .map(normalization::normalizeChild)
+                    .map(normalization::updateChild)
                     .collect(ImmutableCollectors.toList());
 
             return newParent
@@ -228,6 +234,46 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(joiningCondition);
                     return iqFactory.createNaryIQTree(newJoinNode, children,
                             normalizedIQProperties);
+            }
+        }
+
+        /**
+         * TODO: collect the constraint
+         */
+        public State propagateDownCondition() {
+            // TODO: consider that case as well
+            if (!joiningCondition.isPresent())
+                return this;
+
+            try {
+                ConditionSimplifier.ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
+                        joiningCondition.get());
+
+                Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
+                // TODO: build a proper constraint (more than just the joining condition)
+
+                ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
+                        .filter(s -> !s.isEmpty())
+                        .map(s -> children.stream()
+                                .map(child -> child.applyDescendingSubstitution(s, newJoiningCondition))
+                                .collect(ImmutableCollectors.toList()))
+                        .orElseGet(() -> newJoiningCondition
+                                .map(s -> children.stream()
+                                        .map(child -> child.propagateDownConstraint(s))
+                                        .collect(ImmutableCollectors.toList()))
+                                .orElse(children));
+
+                Optional<ConstructionNode> newParent = Optional.of(conditionSimplificationResults.getSubstitution())
+                        .filter(s -> !s.isEmpty())
+                        .map(s -> iqFactory.createConstructionNode(extractProjectedVariables(children),
+                                (ImmutableSubstitution<ImmutableTerm>) (ImmutableSubstitution<?>) s));
+
+                return newParent
+                        .map(p -> updateParentConditionAndChildren(p, newJoiningCondition, newChildren))
+                        .orElseGet(() -> updateConditionAndChildren(newJoiningCondition, newChildren));
+
+            } catch (UnsatisfiableConditionException e) {
+                return declareAsEmpty();
             }
         }
 

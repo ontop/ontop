@@ -440,7 +440,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     .isPresent())
                 return child;
 
-            IQTree grandChild = normalization.normalizeChild(((UnaryIQTree) child).getChild());
+            IQTree grandChild = normalization.updateChild(((UnaryIQTree) child).getChild());
 
             return proposedConstructionNode
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareNormalizedForOptimization()))
