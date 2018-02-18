@@ -30,13 +30,14 @@ public interface IntermediateQueryBuilder {
     void addChild(QueryNode parentNode, QueryNode child, BinaryOrderedOperatorNode.ArgumentPosition position)
             throws IntermediateQueryBuilderException;
 
+    void appendSubtree(QueryNode subQueryRoot, IntermediateQuery sourceQuery);
+
     /**
      * For commodity
      */
     void addChild(QueryNode parentNode, QueryNode child,
                   Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition)
             throws IntermediateQueryBuilderException;
-
 
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 

@@ -3,9 +3,11 @@ package it.unibz.inf.ontop.iq.impl.tree;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
+import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -24,6 +26,12 @@ import java.util.Optional;
  * TODO: explain
  */
 public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder {
+
+    private class NodeNotInQueryException extends OntopInternalBugException {
+        private NodeNotInQueryException(String message) {
+            super(message);
+        }
+    }
 
     private final DBMetadata dbMetadata;
     private final ExecutorRegistry executorRegistry;
@@ -100,6 +108,21 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
         else {
             addChild(parentNode, child);
         }
+    }
+
+    @Override
+    public void appendSubtree(QueryNode subQueryRoot, IntermediateQuery sourceQuery) {
+        if(sourceQuery.contains(subQueryRoot)) {
+            ImmutableList<QueryNode> children = sourceQuery.getChildren(subQueryRoot);
+            if(subQueryRoot instanceof BinaryOrderedOperatorNode){
+                addChild(subQueryRoot, children.get(0), Optional.of(ArgumentPosition.LEFT));
+                addChild(subQueryRoot, children.get(1), Optional.of(ArgumentPosition.RIGHT));
+            } else {
+                children.forEach(n -> addChild(subQueryRoot, n));
+            }
+            children.forEach(n -> appendSubtree(n, sourceQuery));
+        }
+        throw new NodeNotInQueryException("Node "+subQueryRoot+" is not in the query");
     }
 
     @Override
