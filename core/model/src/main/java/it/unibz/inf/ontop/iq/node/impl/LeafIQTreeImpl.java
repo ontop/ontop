@@ -80,4 +80,9 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     public IQTree liftIncompatibleDefinitions(Variable variable) {
         return this;
     }
+
+    @Override
+    public IQTree removeDistincts() {
+        return this;
+    }
 }

@@ -13,8 +13,14 @@ public interface IQProperties {
 
     boolean isNormalizedForOptimization();
 
+    boolean areDistinctAlreadyRemoved();
+
     /**
      * Creates a NEW (immutable) object
      */
     IQProperties declareNormalizedForOptimization();
+
+    IQProperties declareDistinctRemovalWithoutEffect();
+
+    IQProperties declareDistinctRemovalWithEffect();
 }

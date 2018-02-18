@@ -132,6 +132,14 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public IQTree removeDistincts() {
+        IQProperties properties = getProperties();
+        return properties.areDistinctAlreadyRemoved()
+                ? this
+                : getRootNode().removeDistincts(leftChild, rightChild, properties);
+    }
+
+    @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(leftChild, rightChild);
     }

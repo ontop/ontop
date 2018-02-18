@@ -51,4 +51,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
      * Only validates the node, not its children
      */
     void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException;
+
+    IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties);
 }

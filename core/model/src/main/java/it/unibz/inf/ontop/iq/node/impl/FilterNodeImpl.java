@@ -175,6 +175,17 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }

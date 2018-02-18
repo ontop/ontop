@@ -278,6 +278,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .ifPresent(e -> checkExpression(e, children));
     }
 
+    @Override
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(IQTree::removeDistincts)
+                .collect(ImmutableCollectors.toList());
+
+        IQProperties newProperties = newChildren.equals(children)
+                ? properties.declareDistinctRemovalWithoutEffect()
+                : properties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createNaryIQTree(this, children, newProperties);
+    }
+
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(

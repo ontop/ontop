@@ -150,6 +150,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(IQTree::removeDistincts)
+                .collect(ImmutableCollectors.toList());
+
+        IQProperties newProperties = newChildren.equals(children)
+                ? properties.declareDistinctRemovalWithoutEffect()
+                : properties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createNaryIQTree(this, children, newProperties);
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }

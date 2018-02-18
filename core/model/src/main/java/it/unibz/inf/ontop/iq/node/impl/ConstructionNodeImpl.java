@@ -321,6 +321,17 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         }
     }
 
+    @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */
