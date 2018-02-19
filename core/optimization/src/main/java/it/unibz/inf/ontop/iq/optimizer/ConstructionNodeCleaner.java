@@ -107,8 +107,8 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
         }
 
         boolean deleteConstructionNodeChain = modifiers.isIdle() &&
-                constructionNodeChainRoot.getSubstitution().isEmpty() &&
-                !constructionNodeChainRoot.equals(query.getRootNode());
+                constructionNodeChainRoot.getSubstitution().isEmpty();
+//                !constructionNodeChainRoot.equals(query.getRootNode());
 
         /* special case of a non-deletable unary chain */
         if (currentParentNode.equals(constructionNodeChainRoot) && !deleteConstructionNodeChain) {

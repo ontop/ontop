@@ -97,7 +97,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(q -> normalizeMappingIQ(q))
-                .map(q -> noNullValueEnforcer.transform(q))
                 .collect(ImmutableCollectors.toMap(
                     q -> q.getProjectionAtom().getPredicate(),
                     q -> q
@@ -116,28 +115,26 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .flatMap(Datalog2QueryTools::extractPredicates)
                 .collect(ImmutableCollectors.toSet());
 
-
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> noNullValueEnforcer.transform(
+                        e -> Optional.of(
                                 convertDatalogRule(
-                                dbMetadata,
-                                e.getKey(),
-                                extensionalPredicates,
-                                Optional.empty(),
-                                iqFactory,
-                                executorRegistry
-                        )),
+                                        dbMetadata,
+                                        e.getKey(),
+                                        extensionalPredicates,
+                                        Optional.empty(),
+                                        iqFactory,
+                                        executorRegistry
+                                )).map(q -> normalizeMappingIQ(q)).get(),
                         Map.Entry::getValue
                 ));
-
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
     }
 
 
     /**
      * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
-     * Then flatten nested unions.
+     * Then flatten nested unions, and enforce non-nullability
      */
     private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
         IntermediateQuery queryAfterUnionNormalization;
@@ -150,19 +147,4 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
         }
         return noNullValueEnforcer.transform(queryAfterUnionNormalization);
     }
-//    private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
-//        IntermediateQuery queryAfterUnionNormalization;
-//        try {
-//            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-//            IntermediateQuery
-//            IQ iqAfterUnionNormalization = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
-//            queryAfterUnionNormalization = iqConverter.convert(
-//                    iqAfterUnionNormalization,
-//                    queryAfterBindingLift.getDBMetadata(),
-//                    query.getExecutorRegistry()
-//            );
-//        } catch (EmptyQueryException e) {
-//        }
-//        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
-//    }
 }

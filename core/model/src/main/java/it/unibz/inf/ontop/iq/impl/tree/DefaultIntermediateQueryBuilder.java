@@ -114,16 +114,26 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public void appendSubtree(QueryNode subQueryRoot, IntermediateQuery sourceQuery) {
         if(sourceQuery.contains(subQueryRoot)) {
             ImmutableList<QueryNode> children = sourceQuery.getChildren(subQueryRoot);
-            if(subQueryRoot instanceof BinaryOrderedOperatorNode){
-                addChild(subQueryRoot, children.get(0), Optional.of(ArgumentPosition.LEFT));
-                addChild(subQueryRoot, children.get(1), Optional.of(ArgumentPosition.RIGHT));
-            } else {
-                children.forEach(n -> addChild(subQueryRoot, n));
-            }
+            addChildren(subQueryRoot, children);
             children.forEach(n -> appendSubtree(n, sourceQuery));
+        }else {
+            throw new NodeNotInQueryException("Node " + subQueryRoot + " is not in the query");
         }
-        throw new NodeNotInQueryException("Node "+subQueryRoot+" is not in the query");
     }
+
+    @Override
+    public void addChildren(QueryNode parent, ImmutableList<QueryNode> children) {
+        if(parent instanceof BinaryOrderedOperatorNode){
+            if(children.size() != 2){
+                throw new IntermediateQueryBuilderException("2 children expected");
+            }
+            addChild(parent, children.get(0), Optional.of(ArgumentPosition.LEFT));
+            addChild(parent, children.get(1), Optional.of(ArgumentPosition.RIGHT));
+        } else {
+            children.forEach(n -> addChild(parent, n));
+        }
+    }
+
 
     @Override
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
@@ -164,7 +174,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     }
 
     @Override
-    public ImmutableList<QueryNode> getSubNodesOf(QueryNode node)
+    public ImmutableList<QueryNode> getChildren(QueryNode node)
             throws IntermediateQueryBuilderException {
         checkInitialization();
         return tree.getChildren(node);

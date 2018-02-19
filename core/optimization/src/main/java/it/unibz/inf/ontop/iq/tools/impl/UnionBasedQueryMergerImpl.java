@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
-import it.unibz.inf.ontop.iq.optimizer.impl.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -35,10 +35,18 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
+    private final BindingLiftOptimizer bindingLifter;
+    private final ConstructionNodeCleaner constructionNodeCleaner;
+    private final FlattenUnionOptimizer unionFlattener;
 
     @Inject
-    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory) {
+    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, BindingLiftOptimizer bindingLifter,
+                                      ConstructionNodeCleaner constructionNodeCleaner,
+                                      FlattenUnionOptimizer unionFlattener) {
         this.iqFactory = iqFactory;
+        this.bindingLifter = bindingLifter;
+        this.constructionNodeCleaner = constructionNodeCleaner;
+        this.unionFlattener = unionFlattener;
     }
 
     @Override
@@ -112,7 +120,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 });
 
 
-        return Optional.of(queryBuilder.build());
+        return Optional.of(normalizeIQ(queryBuilder.build()));
     }
 
     /**
@@ -192,6 +200,20 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     .collect(ImmutableCollectors.toMap());
 
             return Optional.of(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(newMap));
+        }
+    }
+
+    /**
+     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
+     * Then flatten nested unions.
+     */
+    private IntermediateQuery normalizeIQ(IntermediateQuery query) {
+        try {
+            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
+            IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
+            return unionFlattener.optimize(queryAfterCNodeCleaning);
+        }catch (EmptyQueryException e){
+            throw new IllegalStateException("The query should not be emptied by applying this normalization");
         }
     }
 }
