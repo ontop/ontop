@@ -59,7 +59,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .propagateDownCondition()
                     .liftChildBinding()
                     .liftDistincts()
-                    .liftConditions();
+                    .liftConditionAndMergeJoins();
 
             if (state.hasConverged())
                 return state.createNormalizedTree(currentIQProperties);
@@ -304,73 +304,65 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return this;
         }
 
-        /**
-         * TODO: also merge joins
-         */
-        public State liftConditions() {
+
+        public State liftConditionAndMergeJoins() {
             if (children.stream()
                     .noneMatch(c -> c.getRootNode() instanceof CommutativeJoinOrFilterNode))
                 return this;
 
-            ImmutableList<ConditionAndTree> conditionAndTrees = children.stream()
-                    .map(this::extractCondition)
+            ImmutableList<ConditionAndTrees> conditionAndTrees = children.stream()
+                    .map(this::extractConditionAndSubtrees)
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableList<ImmutableExpression> conditions = conditionAndTrees.stream()
+            Stream<ImmutableExpression> conditions = conditionAndTrees.stream()
                     .map(ct -> ct.condition)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .flatMap(c -> c.flattenAND().stream())
-                    .collect(ImmutableCollectors.toList());
-
-            if (conditions.isEmpty())
-                return this;
+                    .flatMap(c -> c.flattenAND().stream());
 
             Optional<ImmutableExpression> newJoiningCondition = immutabilityTools.foldBooleanExpressions(joiningCondition
-                    .map(c -> Stream.concat(c.flattenAND().stream(), conditions.stream()))
-                    .orElseGet(conditions::stream));
+                    .map(c -> Stream.concat(c.flattenAND().stream(), conditions))
+                    .orElse(conditions));
 
             ImmutableList<IQTree> newChildren = conditionAndTrees.stream()
-                    .map(ct -> ct.tree)
+                    .flatMap(ct -> ct.trees)
                     .collect(ImmutableCollectors.toList());
 
             return updateConditionAndChildren(newJoiningCondition, newChildren);
         }
 
-        private ConditionAndTree extractCondition(IQTree tree) {
+        private ConditionAndTrees extractConditionAndSubtrees(IQTree tree) {
             QueryNode rootNode = tree.getRootNode();
 
             if (rootNode instanceof CommutativeJoinNode) {
                 CommutativeJoinNode joinNode = (CommutativeJoinNode) rootNode;
                 return joinNode.getOptionalFilterCondition()
-                        .map(c -> new ConditionAndTree(c,
-                                iqFactory.createNaryIQTree(joinNode.changeOptionalFilterCondition(Optional.empty()),
-                                tree.getChildren())))
-                        .orElseGet(() -> new ConditionAndTree(tree));
+                        .map(c -> new ConditionAndTrees(c, tree.getChildren().stream()))
+                        .orElseGet(() -> new ConditionAndTrees(tree.getChildren().stream()));
 
             } else if (rootNode instanceof FilterNode) {
-                return new ConditionAndTree(((FilterNode)rootNode).getFilterCondition(), ((UnaryIQTree)tree).getChild());
+                return new ConditionAndTrees(((FilterNode)rootNode).getFilterCondition(), tree.getChildren().stream());
 
             } else
-                return new ConditionAndTree(tree);
+                return new ConditionAndTrees(Stream.of(tree));
 
         }
 
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class ConditionAndTree {
+    private static class ConditionAndTrees {
         final Optional<ImmutableExpression> condition;
-        final IQTree tree;
+        final Stream<IQTree> trees;
 
-        ConditionAndTree(ImmutableExpression condition, IQTree tree) {
+        ConditionAndTrees(ImmutableExpression condition, Stream<IQTree> trees) {
             this.condition = Optional.of(condition);
-            this.tree = tree;
+            this.trees = trees;
         }
 
-        ConditionAndTree(IQTree tree) {
+        ConditionAndTrees(Stream<IQTree> trees) {
             this.condition = Optional.empty();
-            this.tree = tree;
+            this.trees = trees;
         }
     }
 
