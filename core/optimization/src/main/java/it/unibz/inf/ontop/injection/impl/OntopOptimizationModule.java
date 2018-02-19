@@ -64,9 +64,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(FlattenUnionExecutor.class);
         bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(DatalogProgram2QueryConverter.class);
-        bindFromSettings(DatalogFactory.class);
-        bindFromSettings(AtomFactory.class);
-        bindFromSettings(SubstitutionFactory.class);
         bindFromSettings(QueryUnionSplitter.class);
         bindFromSettings(InnerJoinOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
