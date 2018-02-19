@@ -53,7 +53,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             state = state
                     .propagateDownCondition()
-                    .liftChildBinding();
+                    .liftChildBinding()
+                    .liftDistincts();
 
             if (state.hasConverged())
                 return state.createNormalizedTree(currentIQProperties);
@@ -92,18 +93,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         /**
-         * When empty
-         */
-        private State(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
-            this.projectedVariables = projectedVariables;
-            this.ancestors = ImmutableList.of();
-            this.children = ImmutableList.of();
-            this.joiningCondition = Optional.empty();
-            this.variableGenerator = variableGenerator;
-            this.hasConverged = true;
-        }
-
-        /**
          * Initial constructor
          */
         public State(ImmutableList<IQTree> children, Optional<ImmutableExpression> joiningCondition,
@@ -121,7 +110,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             return new State(projectedVariables, ancestors, newChildren, newCondition, variableGenerator, hasConverged);
         }
 
-        private State updateParentConditionAndChildren(ConstructionNode newParent, Optional<ImmutableExpression> newCondition,
+        private State updateParentConditionAndChildren(UnaryOperatorNode newParent, Optional<ImmutableExpression> newCondition,
                                                        ImmutableList<IQTree> newChildren) {
             ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
                     .add(newParent)
@@ -289,6 +278,25 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         public boolean hasConverged() {
             return hasConverged;
+        }
+
+        public State liftDistincts() {
+            Optional<DistinctNode> distinctNode = children.stream()
+                    .filter(c -> c.getRootNode() instanceof DistinctNode)
+                    .map(c -> (DistinctNode) c.getRootNode())
+                    .findFirst();
+
+            if (distinctNode.isPresent() && children.stream().allMatch(IQTree::isDistinct)) {
+                DistinctNode newParent = distinctNode.get();
+
+                ImmutableList<IQTree> newChildren = children.stream()
+                        .map(IQTree::removeDistincts)
+                        .collect(ImmutableCollectors.toList());
+
+                return updateParentConditionAndChildren(newParent, joiningCondition, newChildren);
+            }
+            else
+                return this;
         }
     }
 
