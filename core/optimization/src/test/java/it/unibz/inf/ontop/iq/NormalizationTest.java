@@ -1277,6 +1277,23 @@ public class NormalizationTest {
     }
 
     @Test
+    public void testJoin2() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR0_PREDICATE);
+
+        TrueNode trueNode = IQ_FACTORY.createTrueNode();
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(joinNode,
+                ImmutableList.of(trueNode, trueNode));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, trueNode);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
     public void testJoinDistinct1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 

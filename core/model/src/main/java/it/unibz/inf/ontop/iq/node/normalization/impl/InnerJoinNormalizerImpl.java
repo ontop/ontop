@@ -8,10 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.TrueNode;
-import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
@@ -95,6 +92,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         /**
+         * When empty
+         */
+        private State(ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
+            this.projectedVariables = projectedVariables;
+            this.ancestors = ImmutableList.of();
+            this.children = ImmutableList.of();
+            this.joiningCondition = Optional.empty();
+            this.variableGenerator = variableGenerator;
+            this.hasConverged = true;
+        }
+
+        /**
          * Initial constructor
          */
         public State(ImmutableList<IQTree> children, Optional<ImmutableExpression> joiningCondition,
@@ -126,7 +135,9 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
          * No child is interpreted as EMPTY
          */
         private State declareAsEmpty() {
-            return new State(projectedVariables, ImmutableList.of(), ImmutableList.of(),
+            EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
+
+            return new State(projectedVariables, ImmutableList.of(), ImmutableList.of(emptyChild),
                     Optional.empty(), variableGenerator, true);
         }
 
@@ -222,9 +233,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         private IQTree createJoinOrFilterOrEmpty(IQProperties normalizedIQProperties) {
             switch (children.size()) {
-                // Internal convention for emptiness
                 case 0:
-                    return iqFactory.createEmptyNode(projectedVariables);
+                    return iqFactory.createTrueNode();
                 case 1:
                     IQTree uniqueChild = children.get(0);
                     return joiningCondition
