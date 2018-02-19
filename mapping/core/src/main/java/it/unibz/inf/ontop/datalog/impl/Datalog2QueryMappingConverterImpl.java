@@ -7,10 +7,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
+import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -26,7 +31,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter.convertDatalogRule;
 
@@ -42,18 +46,27 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
+    private final BindingLiftOptimizer bindingLifter;
+    private final ConstructionNodeCleaner constructionNodeCleaner;
+    private final FlattenUnionOptimizer unionFlattener;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
                                               SpecificationFactory specificationFactory,
                                               IntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory,
-                                              NoNullValueEnforcer noNullValueEnforcer){
+                                              NoNullValueEnforcer noNullValueEnforcer,
+                                              BindingLiftOptimizer bindingLifter,
+                                              ConstructionNodeCleaner constructionNodeCleaner,
+                                              FlattenUnionOptimizer unionFlattener){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
         this.noNullValueEnforcer = noNullValueEnforcer;
+        this.bindingLifter = bindingLifter;
+        this.constructionNodeCleaner = constructionNodeCleaner;
+        this.unionFlattener = unionFlattener;
     }
 
     @Override
@@ -83,6 +96,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 ))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .map(q -> normalizeMappingIQ(q))
                 .map(q -> noNullValueEnforcer.transform(q))
                 .collect(ImmutableCollectors.toMap(
                     q -> q.getProjectionAtom().getPredicate(),
@@ -119,4 +133,36 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
     }
+
+
+    /**
+     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
+     * Then flatten nested unions.
+     */
+    private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
+        IntermediateQuery queryAfterUnionNormalization;
+        try {
+            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
+            IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
+            queryAfterUnionNormalization = unionFlattener.optimize(queryAfterCNodeCleaning);
+        }catch (EmptyQueryException e){
+            throw new DatalogConversionException("The query should not become empty");
+        }
+        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
+    }
+//    private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
+//        IntermediateQuery queryAfterUnionNormalization;
+//        try {
+//            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
+//            IntermediateQuery
+//            IQ iqAfterUnionNormalization = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
+//            queryAfterUnionNormalization = iqConverter.convert(
+//                    iqAfterUnionNormalization,
+//                    queryAfterBindingLift.getDBMetadata(),
+//                    query.getExecutorRegistry()
+//            );
+//        } catch (EmptyQueryException e) {
+//        }
+//        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
+//    }
 }

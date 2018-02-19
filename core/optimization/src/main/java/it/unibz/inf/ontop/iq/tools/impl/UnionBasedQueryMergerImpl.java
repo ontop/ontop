@@ -35,17 +35,10 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
-    private final FixedPointBindingLiftOptimizer bindingLifter;
-    private final ConstructionNodeCleaner constructionNodeCleaner;
-    private final FlattenUnionOptimizer unionFlattener;
 
     @Inject
-    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, FixedPointBindingLiftOptimizer bindingLifter,
-                                      ConstructionNodeCleaner constructionNodeCleaner, FlattenUnionOptimizer unionFlattener) {
+    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
-        this.bindingLifter = bindingLifter;
-        this.constructionNodeCleaner = constructionNodeCleaner;
-        this.unionFlattener = unionFlattener;
     }
 
     @Override
@@ -119,7 +112,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 });
 
 
-        return Optional.of(normalizeIQ(queryBuilder.build()));
+        return Optional.of(queryBuilder.build());
     }
 
     /**
@@ -199,20 +192,6 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     .collect(ImmutableCollectors.toMap());
 
             return Optional.of(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(newMap));
-        }
-    }
-
-    /**
-     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
-     * Then flatten nested unions.
-     */
-    private IntermediateQuery normalizeIQ(IntermediateQuery query) {
-        try {
-            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-            IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
-            return unionFlattener.optimize(queryAfterCNodeCleaning);
-        }catch (EmptyQueryException e){
-            throw new IllegalStateException("The query should not be emptied by applying this normalization");
         }
     }
 }
