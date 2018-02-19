@@ -22,26 +22,21 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -51,6 +46,11 @@ import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
 import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -599,16 +599,22 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private ImmutableTerm createObjectTerm(String column, Predicate datatype) {
-		List<FormatString> columnStrings = parse(column);
-		if (columnStrings.size() > 1) {
-			throw new RuntimeException("Invalid column mapping: " + column);
+		ImmutableTerm object;
+		if(column.matches("\"([\\w.]+)?\"")){
+			object = TERM_FACTORY.getConstantLiteral(column.substring(1, column.length()-1));
 		}
-		String columnName = columnStrings.get(0).toString();
-		Variable var = TERM_FACTORY.getVariable(columnName);
+		else {
+			List<FormatString> columnStrings = parse(column);
+			if (columnStrings.size() > 1) {
+				throw new RuntimeException("Unsupported column mapping: " + column);
+			}
+			String columnName = columnStrings.get(0).toString();
+			object = TERM_FACTORY.getVariable(columnName);
+		}
 		if (datatype == null) {
-			return var;
+			return object;
 		} else {
-			return TERM_FACTORY.getImmutableFunctionalTerm(datatype, var);
+			return TERM_FACTORY.getImmutableFunctionalTerm(datatype, object);
 		}
 	}
 
