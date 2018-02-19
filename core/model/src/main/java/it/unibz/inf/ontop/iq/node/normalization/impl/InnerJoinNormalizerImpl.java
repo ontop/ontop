@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -25,6 +26,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
@@ -33,15 +35,17 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
     private final ConditionSimplifier conditionSimplifier;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
                                     AscendingSubstitutionNormalizer substitutionNormalizer,
-                                    ConditionSimplifier conditionSimplifier) {
+                                    ConditionSimplifier conditionSimplifier, ImmutabilityTools immutabilityTools) {
         this.bindingLift = bindingLift;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.conditionSimplifier = conditionSimplifier;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -54,7 +58,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             state = state
                     .propagateDownCondition()
                     .liftChildBinding()
-                    .liftDistincts();
+                    .liftDistincts()
+                    .liftConditions();
 
             if (state.hasConverged())
                 return state.createNormalizedTree(currentIQProperties);
@@ -297,6 +302,75 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             }
             else
                 return this;
+        }
+
+        /**
+         * TODO: also merge joins
+         */
+        public State liftConditions() {
+            if (children.stream()
+                    .noneMatch(c -> c.getRootNode() instanceof CommutativeJoinOrFilterNode))
+                return this;
+
+            ImmutableList<ConditionAndTree> conditionAndTrees = children.stream()
+                    .map(this::extractCondition)
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<ImmutableExpression> conditions = conditionAndTrees.stream()
+                    .map(ct -> ct.condition)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .flatMap(c -> c.flattenAND().stream())
+                    .collect(ImmutableCollectors.toList());
+
+            if (conditions.isEmpty())
+                return this;
+
+            Optional<ImmutableExpression> newJoiningCondition = immutabilityTools.foldBooleanExpressions(joiningCondition
+                    .map(c -> Stream.concat(c.flattenAND().stream(), conditions.stream()))
+                    .orElseGet(conditions::stream));
+
+            ImmutableList<IQTree> newChildren = conditionAndTrees.stream()
+                    .map(ct -> ct.tree)
+                    .collect(ImmutableCollectors.toList());
+
+            return updateConditionAndChildren(newJoiningCondition, newChildren);
+        }
+
+        private ConditionAndTree extractCondition(IQTree tree) {
+            QueryNode rootNode = tree.getRootNode();
+
+            if (rootNode instanceof CommutativeJoinNode) {
+                CommutativeJoinNode joinNode = (CommutativeJoinNode) rootNode;
+                return joinNode.getOptionalFilterCondition()
+                        .map(c -> new ConditionAndTree(c,
+                                iqFactory.createNaryIQTree(joinNode.changeOptionalFilterCondition(Optional.empty()),
+                                tree.getChildren())))
+                        .orElseGet(() -> new ConditionAndTree(tree));
+
+            } else if (rootNode instanceof FilterNode) {
+                return new ConditionAndTree(((FilterNode)rootNode).getFilterCondition(), ((UnaryIQTree)tree).getChild());
+
+            } else
+                return new ConditionAndTree(tree);
+
+        }
+
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static class ConditionAndTree {
+        final Optional<ImmutableExpression> condition;
+        final IQTree tree;
+
+        ConditionAndTree(ImmutableExpression condition, IQTree tree) {
+            this.condition = Optional.of(condition);
+            this.tree = tree;
+        }
+
+        ConditionAndTree(IQTree tree) {
+            this.condition = Optional.empty();
+            this.tree = tree;
         }
     }
 
