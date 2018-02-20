@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
-import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -48,7 +48,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final BindingLiftOptimizer bindingLifter;
     private final ConstructionNodeCleaner constructionNodeCleaner;
-    private final FlattenUnionOptimizer unionFlattener;
+    private final MappingUnionNormalizer mappingUnionNormalizer;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
@@ -58,7 +58,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                               NoNullValueEnforcer noNullValueEnforcer,
                                               BindingLiftOptimizer bindingLifter,
                                               ConstructionNodeCleaner constructionNodeCleaner,
-                                              FlattenUnionOptimizer unionFlattener){
+                                              MappingUnionNormalizer mappingUnionNormalizer){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
@@ -66,7 +66,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.bindingLifter = bindingLifter;
         this.constructionNodeCleaner = constructionNodeCleaner;
-        this.unionFlattener = unionFlattener;
+        this.mappingUnionNormalizer = mappingUnionNormalizer;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
         try {
             IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
             IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
-            queryAfterUnionNormalization = unionFlattener.optimize(queryAfterCNodeCleaning);
+            queryAfterUnionNormalization = mappingUnionNormalizer.optimize(queryAfterCNodeCleaning);
         }catch (EmptyQueryException e){
             throw new DatalogConversionException("The query should not become empty");
         }

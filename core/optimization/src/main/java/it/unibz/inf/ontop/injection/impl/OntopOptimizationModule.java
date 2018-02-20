@@ -21,11 +21,8 @@ import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.executor.unsatisfiable.RemoveEmptyNodesExecutor;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.LeftJoinOptimizer;
 import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -71,6 +68,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(BindingLiftOptimizer.class);
         bindFromSettings(IntermediateQuery2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
+        bindFromSettings(MappingUnionNormalizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;
