@@ -375,8 +375,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 						.map(n -> query.getSubquery(
 								n,
 								query.getProjectionAtom()
-						))
-						.map(this::enforceRootCn):
+						)):
 				Stream.of(query);
 	}
 
@@ -389,10 +388,10 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 				query.getDBMetadata(),
 				query.getExecutorRegistry()
 		);
-		builder.init(
-				query.getProjectionAtom(),
-				iqFactory.createConstructionNode(query.getVariables(root))
-		);
+		ConstructionNode rootCn = iqFactory.createConstructionNode(query.getVariables(root));
+		builder.init(query.getProjectionAtom(), rootCn);
+		builder.addChild(rootCn, root);
+		builder.appendSubtree(root, query);
         return builder.build();
 	}
 }
