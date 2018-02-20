@@ -91,36 +91,6 @@ public class ExpressionEvaluatorTest {
         return expectedQuery;
     }
 
-    private IntermediateQuery getExpectedQuery2() {
-        //----------------------------------------------------------------------
-        // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);;
-
-
-        DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, languageTag)));
-
-        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
-
-        //construct expected innerjoin
-
-        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
-        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
-
-
-        expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D)));
-
-        expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B)));
-
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-        return expectedQuery;
-    }
-
     /**
      * test LangMatches matching a lang function with a  typed literal value
      * @throws EmptyQueryException
@@ -216,7 +186,33 @@ public class ExpressionEvaluatorTest {
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQuery expectedQuery = getExpectedQuery2();
+        //----------------------------------------------------------------------
+        // Construct expected query
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);;
+
+
+        DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
+        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, languageTag)));
+
+        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
+
+        //construct expected innerjoin
+
+        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
+        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
+
+
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D)));
+
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, C, B)));
+
+        //build expected query
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+        System.out.println("\n Expected query: \n" +  expectedQuery);
+
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
