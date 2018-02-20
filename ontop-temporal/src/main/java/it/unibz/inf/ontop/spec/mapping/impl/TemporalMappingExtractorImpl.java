@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.TemporalRDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.NativeQueryLanguageComponentFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -54,9 +53,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final UnionBasedQueryMerger queryMerger;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final JdbcTypeMapper jdbcTypeMapper;
-    private final TypeFactory typeFactory;
-    private final DatalogFactory datalogFactory;
+    private final DBMetadataMerger dbMetadataMerger;
 
 
 
@@ -65,7 +62,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                          TemporalPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                          NativeQueryLanguageComponentFactory nativeQLFactory, OntopMappingSQLSettings settings,
                                          TemporalSpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                                         AtomFactory atomFactory, TermFactory termFactory, JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+                                         AtomFactory atomFactory, TermFactory termFactory, DBMetadataMerger dbMetadataMerger) {
 
         this.mappingParser = mappingParser;
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -77,9 +74,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
         this.queryMerger = queryMerger;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.jdbcTypeMapper = jdbcTypeMapper;
-        this.typeFactory = typeFactory;
-        this.datalogFactory = datalogFactory;
+        this.dbMetadataMerger = dbMetadataMerger;
     }
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
@@ -160,42 +155,10 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                             OBDASpecInput specInput, Optional<RDBMetadata> staticDBMetadata) throws MetaMappingExpansionException, DBMetadataExtractionException {
 
         RDBMetadata temporalDBMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
-        return mergeDBMetadata(temporalDBMetadata, staticDBMetadata);
+        if(staticDBMetadata.isPresent())
+            return dbMetadataMerger.mergeDBMetadata(temporalDBMetadata, staticDBMetadata.get());
+        else return temporalDBMetadata;
     }
-
-    private RDBMetadata mergeDBMetadata(RDBMetadata temporalDBMetadata, Optional<RDBMetadata> staticDBMetadata){
-        if(staticDBMetadata.isPresent()){
-            if((staticDBMetadata.get().getDbmsProductName().equals(temporalDBMetadata.getDbmsProductName())) &&
-                    staticDBMetadata.get().getDriverName().equals(temporalDBMetadata.getDriverName()) &&
-                    staticDBMetadata.get().getDriverVersion().equals(temporalDBMetadata.getDriverVersion())){
-
-                Map<RelationID, RelationDefinition> mergedRelations = new HashMap<>();
-                mergedRelations.putAll(staticDBMetadata.get().copyRelations());
-                mergedRelations.putAll(temporalDBMetadata.copyRelations());
-
-                Map<RelationID, DatabaseRelationDefinition> mergedTables = new HashMap<>();
-                mergedTables.putAll(staticDBMetadata.get().copyTables());
-                mergedTables.putAll(temporalDBMetadata.copyTables());
-
-                List<DatabaseRelationDefinition> mergedListOfTables = new ArrayList<>();
-                staticDBMetadata.get().getDatabaseRelations().forEach(databaseRelationDefinition -> {
-                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
-                        mergedListOfTables.add(databaseRelationDefinition);
-                });
-                temporalDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
-                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
-                        mergedListOfTables.add(databaseRelationDefinition);
-                });
-
-               return new TemporalRDBMetadata(staticDBMetadata.get().getDriverName(),staticDBMetadata.get().getDriverVersion(),
-                        staticDBMetadata.get().getDbmsProductName(), ((RDBMetadata) staticDBMetadata.get()).getDbmsVersion(),
-                        staticDBMetadata.get().getQuotedIDFactory(), mergedTables,mergedRelations,mergedListOfTables, 0,
-                        jdbcTypeMapper, atomFactory, termFactory,
-                        typeFactory, datalogFactory);
-            }
-        }
-        return temporalDBMetadata;
-    };
 
     public TemporalMapping toTemporalMapping(MappingWithProvenance mappingWithProvenance){
 

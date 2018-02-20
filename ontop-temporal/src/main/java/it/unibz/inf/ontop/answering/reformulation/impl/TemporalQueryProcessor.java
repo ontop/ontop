@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.TemporalNativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
@@ -19,10 +20,13 @@ import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataMerger;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
+import it.unibz.inf.ontop.injection.TemporalTranslationFactory;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -59,10 +63,10 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
     private final QueryRewriter rewriter;
     private final LinearInclusionDependencies sigma;
-    private final NativeQueryGenerator datasourceQueryGenerator;
+    private final TemporalNativeQueryGenerator datasourceQueryGenerator;
     private final QueryCache queryCache;
 
-    private final QueryUnfolder queryUnfolder;
+    //private final QueryUnfolder queryUnfolder;
     private final SameAsRewriter sameAsRewriter;
     private final BindingLiftOptimizer bindingLiftOptimizer;
 
@@ -71,6 +75,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
     private final TemporalDatalogProgram2QueryConverter datalogConverter;
     private final OntopReformulationSettings settings;
     private final DBMetadata dbMetadata;
+    private final DBMetadata temporalDBMetadata;
     private final JoinLikeOptimizer joinLikeOptimizer;
     private final InputQueryTranslator inputQueryTranslator;
     private final InputQueryFactory inputQueryFactory;
@@ -99,7 +104,9 @@ public class TemporalQueryProcessor implements QueryReformulator {
                                    AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                    DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-                                   CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools, RuleUnfolder ruleUnfolder) {
+                                   CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools, RuleUnfolder ruleUnfolder,
+                                   TemporalTranslationFactory temporalTranslationFactory,
+                                   DBMetadataMerger dbMetadataMerger) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.settings = settings;
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -127,10 +134,12 @@ public class TemporalQueryProcessor implements QueryReformulator {
             log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
         }
 
-        this.queryUnfolder = translationFactory.create(temporalSaturatedMapping);
+        //this.queryUnfolder = translationFactory.create(temporalSaturatedMapping);
 
         this.dbMetadata = obdaSpecification.getDBMetadata();
-        this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
+        this.temporalDBMetadata = ((TemporalOBDASpecification)obdaSpecification).getTemporalDBMetadata();
+        this.datasourceQueryGenerator = temporalTranslationFactory
+                .create(dbMetadataMerger.mergeDBMetadata((RDBMetadata) temporalDBMetadata, (RDBMetadata) dbMetadata));
         this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
                 .getUriTemplateMatcher());
         this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
@@ -258,12 +267,11 @@ public class TemporalQueryProcessor implements QueryReformulator {
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
                 //TODO: implement this part
-//                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
-//                        ImmutableList.copyOf(translation.getSignature()));
-//                queryCache.put(inputQuery, executableQuery);
-//                return executableQuery;
+                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
+                        ImmutableList.copyOf(translation.getSignature()));
+                queryCache.put(inputQuery, executableQuery);
+                return executableQuery;
 
-                return null;
             }
             /**
              * No solution.

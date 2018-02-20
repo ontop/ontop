@@ -39,9 +39,10 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
     @Override
     protected Stream<Module> buildGuiceModules() {
         return Stream.concat(super.buildGuiceModules(), Stream.concat(
+                Stream.of(new OntopTemporalModule(temporalConfiguration)),
                 new OntopReformulationConfigurationImpl(getSettings(),
-                        options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules(),
-                Stream.of(new OntopTemporalModule(temporalConfiguration)))
+                        options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules()
+                )
         );
     }
 
