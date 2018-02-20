@@ -276,6 +276,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         getOptionalFilterCondition()
                 .ifPresent(e -> checkExpression(e, children));
+
+        checkNonProjectedVariables(children);
     }
 
     @Override

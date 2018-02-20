@@ -285,6 +285,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
         getOptionalFilterCondition()
                 .ifPresent(e -> checkExpression(e, ImmutableList.of(leftChild, rightChild)));
+
+        checkNonProjectedVariables(ImmutableList.of(leftChild, rightChild));
     }
 
     @Override
