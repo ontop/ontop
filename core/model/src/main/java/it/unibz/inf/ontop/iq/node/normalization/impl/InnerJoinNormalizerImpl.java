@@ -55,14 +55,15 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         State state = new State(children, innerJoinNode.getOptionalFilterCondition(), variableGenerator);
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-            state = state
+            State newState = state
                     .propagateDownCondition()
                     .liftChildBinding()
                     .liftDistincts()
                     .liftConditionAndMergeJoins();
 
-            if (state.hasConverged())
-                return state.createNormalizedTree(currentIQProperties);
+            if (newState.equals(state))
+                return newState.createNormalizedTree(currentIQProperties);
+            state = newState;
         }
 
         throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
@@ -82,19 +83,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         private final ImmutableList<UnaryOperatorNode> ancestors;
         private final ImmutableList<IQTree> children;
         private final Optional<ImmutableExpression> joiningCondition;
-        private final boolean hasConverged;
         private final VariableGenerator variableGenerator;
 
         private State(ImmutableSet<Variable> projectedVariables,
                       ImmutableList<UnaryOperatorNode> ancestors, ImmutableList<IQTree> children,
-                      Optional<ImmutableExpression> joiningCondition, VariableGenerator variableGenerator,
-                      boolean hasConverged) {
+                      Optional<ImmutableExpression> joiningCondition, VariableGenerator variableGenerator) {
             this.projectedVariables = projectedVariables;
             this.ancestors = ancestors;
             this.children = children;
             this.joiningCondition = joiningCondition;
             this.variableGenerator = variableGenerator;
-            this.hasConverged = hasConverged;
         }
 
         /**
@@ -103,16 +101,16 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         public State(ImmutableList<IQTree> children, Optional<ImmutableExpression> joiningCondition,
                      VariableGenerator variableGenerator) {
             this(extractProjectedVariables(children), ImmutableList.of(), children,
-                    joiningCondition, variableGenerator, false);
+                    joiningCondition, variableGenerator);
         }
 
-        private State updateChildren(ImmutableList<IQTree> newChildren, boolean hasConverged) {
-            return new State(projectedVariables, ancestors, newChildren, joiningCondition, variableGenerator, hasConverged);
+        private State updateChildren(ImmutableList<IQTree> newChildren) {
+            return new State(projectedVariables, ancestors, newChildren, joiningCondition, variableGenerator);
         }
 
         private State updateConditionAndChildren(Optional<ImmutableExpression> newCondition,
                                                  ImmutableList<IQTree> newChildren) {
-            return new State(projectedVariables, ancestors, newChildren, newCondition, variableGenerator, hasConverged);
+            return new State(projectedVariables, ancestors, newChildren, newCondition, variableGenerator);
         }
 
         private State updateParentConditionAndChildren(UnaryOperatorNode newParent, Optional<ImmutableExpression> newCondition,
@@ -122,7 +120,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .addAll(ancestors)
                     .build();
 
-            return new State(projectedVariables, newAncestors, newChildren, newCondition, variableGenerator, false);
+            return new State(projectedVariables, newAncestors, newChildren, newCondition, variableGenerator);
         }
 
         /**
@@ -132,7 +130,25 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
 
             return new State(projectedVariables, ImmutableList.of(), ImmutableList.of(emptyChild),
-                    Optional.empty(), variableGenerator, true);
+                    Optional.empty(), variableGenerator);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this)
+                return true;
+            if (!(o instanceof State))
+                return false;
+            State other = (State) o;
+
+            return joiningCondition.equals(other.joiningCondition)
+                    && children.size() == other.children.size()
+                    && IntStream.range(0, children.size())
+                        .allMatch(i -> children.get(i).isEquivalentTo(other.children.get(i)))
+                    && ancestors.size() == other.ancestors.size()
+                    && IntStream.range(0, ancestors.size())
+                    .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)))
+                    && projectedVariables.equals(other.projectedVariables);
         }
 
         /**
@@ -159,7 +175,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
              * No substitution to lift -> converged
              */
             if (!optionalSelectedLiftedChildPosition.isPresent())
-                return updateChildren(liftedChildren, true);
+                return updateChildren(liftedChildren);
 
             int selectedChildPosition = optionalSelectedLiftedChildPosition.getAsInt();
             UnaryIQTree selectedLiftedChild = (UnaryIQTree) liftedChildren.get(selectedChildPosition);
@@ -279,10 +295,6 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             } catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
             }
-        }
-
-        public boolean hasConverged() {
-            return hasConverged;
         }
 
         public State liftDistincts() {

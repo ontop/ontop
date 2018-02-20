@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
@@ -307,7 +308,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return leftChild.isEquivalentTo(other.leftChild)
                     && rightChild.isEquivalentTo(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
-                    && ancestors.equals(other.ancestors);
+                    && ancestors.size() == other.ancestors.size()
+                    && IntStream.range(0, ancestors.size())
+                        .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)));
         }
 
         private LJNormalizationState optimizeLeftJoinCondition() {

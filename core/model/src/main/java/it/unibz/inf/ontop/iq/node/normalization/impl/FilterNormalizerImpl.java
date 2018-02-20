@@ -60,7 +60,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     .normalizeChild(variableGenerator);
 
             // Convergence
-            if (newState.child.equals(state.child))
+            if (newState.child.isEquivalentTo(state.child))
                 return newState.createNormalizedTree(variableGenerator, currentIQProperties);
 
             state = newState;
