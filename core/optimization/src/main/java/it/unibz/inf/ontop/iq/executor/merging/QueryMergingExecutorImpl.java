@@ -222,10 +222,12 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         /**
          * Gets the parent of the intensional node and remove the latter
          */
-        QueryNode parentOfTheIntensionalNode = treeComponent.getParent(intensionalDataNode)
-                .orElseThrow(()-> new IllegalStateException("Bug: the intensional does not have a parent"));
-        Optional<BinaryOrderedOperatorNode.ArgumentPosition> topOptionalPosition = treeComponent.getOptionalPosition(
-                parentOfTheIntensionalNode, intensionalDataNode);
+
+        Optional<QueryNode> intensionalNodeParent = treeComponent.getParent(intensionalDataNode);
+//                .orElseThrow(()-> new IllegalStateException("Bug: the intensional does not have a parent"));
+        Optional<BinaryOrderedOperatorNode.ArgumentPosition> topOptionalPosition = intensionalNodeParent.isPresent() ?
+        treeComponent.getOptionalPosition(intensionalNodeParent.get(), intensionalDataNode):
+                Optional.empty();
         treeComponent.removeSubTree(intensionalDataNode);
 
 
@@ -251,8 +253,14 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
                 .filter(s -> !s.isEmpty());
 
         Queue<Transformation> originalNodesToVisit = new LinkedList<>();
-        originalNodesToVisit.add(new Transformation(renamedSubQuery, rootNode, optionalTau, parentOfTheIntensionalNode,
-                topOptionalPosition));
+        intensionalNodeParent.ifPresent(n -> originalNodesToVisit.add(
+                new Transformation(
+                        renamedSubQuery,
+                        rootNode,
+                        optionalTau,
+                        n,
+                        topOptionalPosition
+                )));
 
 
         /**
