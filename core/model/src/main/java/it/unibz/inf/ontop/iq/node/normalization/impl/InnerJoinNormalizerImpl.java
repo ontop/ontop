@@ -172,7 +172,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .findFirst();
 
             /*
-             * No substitution to lift -> converged
+             * No substitution to lift
              */
             if (!optionalSelectedLiftedChildPosition.isPresent())
                 return updateChildren(liftedChildren);
@@ -196,11 +196,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         private State convertIntoState(
                 ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
-                Optional<ImmutableExpression> newCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
+                Optional<ImmutableExpression> notNormalizedCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
                 ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
             AscendingSubstitutionNormalization normalization = substitutionNormalizer
                     .normalizeAscendingSubstitution(ascendingSubstitution, extractProjectedVariables(liftedChildren));
+
+            Optional<ImmutableExpression> newCondition = notNormalizedCondition
+                    .map(normalization::updateExpression);
 
             Optional<ConstructionNode> newParent = normalization.generateTopConstructionNode();
 

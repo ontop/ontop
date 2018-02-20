@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -86,6 +87,13 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
             return downRenamingSubstitution.isEmpty()
                     ? child
                     : child.applyDescendingSubstitution(downRenamingSubstitution, Optional.empty());
+        }
+
+        @Override
+        public ImmutableExpression updateExpression(ImmutableExpression expression) {
+            return downRenamingSubstitution.isEmpty()
+                    ? expression
+                    : downRenamingSubstitution.applyToBooleanExpression(expression);
         }
 
         @Override
