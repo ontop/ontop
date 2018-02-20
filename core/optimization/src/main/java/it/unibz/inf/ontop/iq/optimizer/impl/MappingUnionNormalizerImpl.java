@@ -64,8 +64,7 @@ public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
                 query.getDBMetadata(),
                 query.getExecutorRegistry()
         );
-        lift(builder, query.getRootNode(), Optional.empty(), query, query.getRootNode(), query.getProjectionAtom
-                ());
+        lift(builder, query.getRootNode(), Optional.empty(), query, query.getRootNode(), query.getProjectionAtom());
         return builder.build();
     }
 
@@ -116,10 +115,10 @@ public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
             UnionNode updatedUnion = iqFactory.createUnionNode(bufferNode.getVariables());
             // append the union to the builder
             append(builder, parentInBuilder, updatedUnion, projectionAtom);
-            // go on for each operand of the union, with the current Cn buffer, and the union as parent
+            // go on for each operand of the union, with (a clone of) the current Cn buffer, and the union as parent
             sourceQuery.getChildren(sourceQueryNode).forEach(c -> liftCn(
                     builder,
-                    bufferNode,
+                    bufferNode.clone(),
                     Optional.of(updatedUnion),
                     sourceQuery,
                     c,
