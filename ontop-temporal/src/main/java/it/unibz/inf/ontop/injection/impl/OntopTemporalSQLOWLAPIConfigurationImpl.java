@@ -38,11 +38,9 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
     @Override
     protected Stream<Module> buildGuiceModules() {
-        return Stream.concat(super.buildGuiceModules(), Stream.concat(
-                Stream.of(new OntopTemporalModule(temporalConfiguration)),
-                new OntopReformulationConfigurationImpl(getSettings(),
-                        options.owlOptions.sqlOptions.systemOptions.sqlTranslationOptions.reformulationOptions).buildGuiceModules()
-                )
+        return Stream.concat(super.buildGuiceModules(),
+                Stream.of(new OntopTemporalModule(temporalConfiguration),
+                new OntopTemporalPostModule(super.getSettings()))
         );
     }
 
@@ -219,6 +217,8 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
                     "it.unibz.inf.ontop.answering.reformulation.input.translation.impl.TemporalDatalogSparqlQueryTranslatorImpl");
             standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.QueryReformulator",
                     "it.unibz.inf.ontop.answering.reformulation.impl.TemporalQueryProcessor");
+            standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.generation.TemporalNativeQueryGenerator",
+                    "it.unibz.inf.ontop.answering.reformulation.generation.impl.TemporalSQLGenerator");
             OntopStandaloneSQLSettingsImpl standaloneSQLSettings =
                     new OntopStandaloneSQLSettingsImpl(standaloneProperties, isR2rml());
             return new OntopTemporalSQLOWLAPIConfigurationImpl(standaloneSQLSettings,

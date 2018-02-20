@@ -63,7 +63,7 @@
 
     <modules>
         <module>binding</module>
-        <module>build</module>
+        <!--<module>build</module>-->
         <module>client</module>
         <module>core</module>
         <module>db</module>

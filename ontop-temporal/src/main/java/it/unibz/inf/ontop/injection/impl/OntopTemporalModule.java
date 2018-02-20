@@ -118,11 +118,5 @@ public class OntopTemporalModule extends OntopAbstractModule {
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
 
-        Module temporalTranslationFactoryModule = buildFactory(
-                ImmutableList.of(
-                        TemporalNativeQueryGenerator.class),
-                TemporalTranslationFactory.class);
-        install(temporalTranslationFactoryModule);
-
     }
 }
