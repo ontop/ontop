@@ -30,7 +30,9 @@ import java.util.stream.Stream;
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
-    private static final int MAX_ITERATIONS = 100000;
+    private static final int MAX_ITERATIONS = 10000;
+    private static final int BINDING_LIFT_ITERATIONS = 1000;
+
     private final JoinLikeChildBindingLifter bindingLift;
     private final IntermediateQueryFactory iqFactory;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
@@ -57,7 +59,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             State newState = state
                     .propagateDownCondition()
-                    .liftChildBinding()
+                    .liftBindings()
                     .liftDistincts()
                     .liftConditionAndMergeJoins();
 
@@ -105,6 +107,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         }
 
         private State updateChildren(ImmutableList<IQTree> newChildren) {
+            if (children.equals(newChildren))
+                return this;
             return new State(projectedVariables, ancestors, newChildren, joiningCondition, variableGenerator);
         }
 
@@ -151,12 +155,26 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     && projectedVariables.equals(other.projectedVariables);
         }
 
+
+        public State liftBindings() {
+            // Non-final
+            State state = this;
+
+            for (int i = 0; i < BINDING_LIFT_ITERATIONS; i++) {
+                State newState = state.liftChildBinding();
+
+                if (newState.equals(state))
+                    return newState;
+                state = newState;
+            }
+            return state;
+        }
+
         /**
          * Lifts the binding OF AT MOST ONE child
-         *
-         * TODO: refactor
+         * 
          */
-        public State liftChildBinding() {
+        private State liftChildBinding() {
             ImmutableList<IQTree> liftedChildren = children.stream()
                     .map(c -> c.normalizeForOptimization(variableGenerator))
                     .filter(c -> !(c.getRootNode() instanceof TrueNode))
