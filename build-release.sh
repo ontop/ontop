@@ -32,10 +32,10 @@ echo ""
 
 JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
 #echo version "$version"
-if [[ "$JAVA_VER" != "java 8" ]]; then
-    echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
-    exit 1
-fi
+#if [[ "$JAVA_VER" != "java 8" ]]; then
+#    echo "ERROR: Java 8 is required for building Ontop! Current Java version: $JAVA_VER"
+#    exit 1
+#fi
 
 echo '$ mvn -version'
 mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }

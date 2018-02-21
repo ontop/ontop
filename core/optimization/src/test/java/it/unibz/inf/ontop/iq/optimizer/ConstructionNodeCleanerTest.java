@@ -673,8 +673,7 @@ public class ConstructionNodeCleanerTest {
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
-        queryBuilder2.init(projectionAtom1, constructionNode1);
-        queryBuilder2.addChild(constructionNode1, unionNode1);
+        queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
         queryBuilder2.addChild(unionNode1, dataNode2);
         queryBuilder2.addChild(unionNode1, dataNode3);

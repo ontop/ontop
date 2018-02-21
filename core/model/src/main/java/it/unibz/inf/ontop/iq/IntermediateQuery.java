@@ -151,4 +151,6 @@ public interface IntermediateQuery {
      * Therefore this method should not be used for validation.
      */
     ImmutableSet<Variable> getVariablesRequiredByAncestors(QueryNode queryNode);
+
+    IntermediateQuery getSubquery(QueryNode root, DistinctVariableOnlyDataAtom projectionAtom);
 }

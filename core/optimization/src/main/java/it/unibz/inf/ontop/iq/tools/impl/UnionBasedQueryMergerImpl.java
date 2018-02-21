@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
-import it.unibz.inf.ontop.iq.optimizer.impl.FixedPointBindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -35,13 +35,14 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
-    private final FixedPointBindingLiftOptimizer bindingLifter;
+    private final BindingLiftOptimizer bindingLifter;
     private final ConstructionNodeCleaner constructionNodeCleaner;
     private final FlattenUnionOptimizer unionFlattener;
 
     @Inject
-    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, FixedPointBindingLiftOptimizer bindingLifter,
-                                      ConstructionNodeCleaner constructionNodeCleaner, FlattenUnionOptimizer unionFlattener) {
+    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, BindingLiftOptimizer bindingLifter,
+                                      ConstructionNodeCleaner constructionNodeCleaner,
+                                      FlattenUnionOptimizer unionFlattener) {
         this.iqFactory = iqFactory;
         this.bindingLifter = bindingLifter;
         this.constructionNodeCleaner = constructionNodeCleaner;
