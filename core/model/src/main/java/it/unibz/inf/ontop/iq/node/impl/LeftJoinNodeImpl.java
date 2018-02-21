@@ -285,6 +285,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
         getOptionalFilterCondition()
                 .ifPresent(e -> checkExpression(e, ImmutableList.of(leftChild, rightChild)));
+
+        checkNonProjectedVariables(ImmutableList.of(leftChild, rightChild));
+    }
+
+    @Override
+    public IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties) {
+        IQTree newLeftChild = leftChild.removeDistincts();
+        IQTree newRightChild = rightChild.removeDistincts();
+
+        IQProperties newProperties = (newLeftChild.equals(leftChild) && newRightChild.equals(rightChild))
+                ? properties.declareDistinctRemovalWithoutEffect()
+                : properties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newProperties);
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {

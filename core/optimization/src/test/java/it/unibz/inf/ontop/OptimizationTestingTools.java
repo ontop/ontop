@@ -80,7 +80,8 @@ public class OptimizationTestingTools {
     public static final Variable N;
     public static final Constant ONE, TWO;
 
-    public static final AtomPredicate ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,  ANS1_AR4_PREDICATE;
+    public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
+            ANS1_AR4_PREDICATE, ANS1_AR5_PREDICATE;
 
     static {
 
@@ -150,10 +151,12 @@ public class OptimizationTestingTools {
         ONE = TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER);
         TWO = TERM_FACTORY.getConstantLiteral("2", XSD.INTEGER);
 
+        ANS1_AR0_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 0);
         ANS1_AR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
         ANS1_AR2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
         ANS1_AR3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
         ANS1_AR4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
+        ANS1_AR5_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 5);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {

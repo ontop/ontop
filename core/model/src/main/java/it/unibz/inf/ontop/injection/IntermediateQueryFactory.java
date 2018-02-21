@@ -77,5 +77,4 @@ public interface IntermediateQueryFactory {
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 
     IQProperties createIQProperties();
-    IQProperties createIQProperties(boolean isLifted);
 }

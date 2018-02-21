@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
@@ -198,11 +199,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private LJNormalizationState liftLeftDistinct(UnaryIQTree liftedLeftChild) {
             DistinctNode distinctNode = (DistinctNode) liftedLeftChild.getRootNode();
             if (rightChild.isDistinct()) {
-                IQTree newRightChild = Optional.of(rightChild.getRootNode())
-                        .filter(r -> r instanceof DistinctNode)
-                        .map(r -> ((UnaryIQTree) rightChild).getChild())
-                        .orElse(rightChild);
-
+                IQTree newRightChild = rightChild.removeDistincts();
                 IQTree newLeftChild = liftedLeftChild.getChild();
                 return updateParentConditionChildren(distinctNode, ljCondition, newLeftChild, newRightChild)
                         // Recursive (for optimization purposes)
@@ -216,11 +213,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private LJNormalizationState liftRightDistinct(UnaryIQTree liftedRightChild) {
             DistinctNode distinctNode = (DistinctNode) liftedRightChild.getRootNode();
             if (leftChild.isDistinct()) {
-                IQTree newLeftChild = Optional.of(leftChild.getRootNode())
-                        .filter(r -> r instanceof DistinctNode)
-                        .map(r -> ((UnaryIQTree) leftChild).getChild())
-                        .orElse(leftChild);
-
+                IQTree newLeftChild = leftChild.removeDistincts();
                 IQTree newRightChild = liftedRightChild.getChild();
                 return updateParentConditionChildren(distinctNode, ljCondition, newLeftChild, newRightChild);
             }
@@ -315,7 +308,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return leftChild.isEquivalentTo(other.leftChild)
                     && rightChild.isEquivalentTo(other.rightChild)
                     && ljCondition.equals(other.ljCondition)
-                    && ancestors.equals(other.ancestors);
+                    && ancestors.size() == other.ancestors.size()
+                    && IntStream.range(0, ancestors.size())
+                        .allMatch(i -> ancestors.get(i).isEquivalentTo(other.ancestors.get(i)));
         }
 
         private LJNormalizationState optimizeLeftJoinCondition() {
@@ -468,12 +463,19 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         iqFactory.createLeftJoinNode(ljCondition), leftChild, rightChild, normalizedProperties);
             }
 
-            return ancestors.stream()
+            IQTree ancestorTree = ancestors.stream()
                     .reduce(ljLevelTree, (t, n) -> iqFactory.createUnaryIQTree(n, t),
                             // Should not be called
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("The order must be respected"); })
-                    // Normalizes the ancestors (recursive)
-                    .normalizeForOptimization(variableGenerator);
+                            (t1, t2) -> {
+                                throw new MinorOntopInternalBugException("The order must be respected");
+                            });
+
+            IQTree nonNormalizedTree = ancestorTree.getVariables().equals(projectedVariables)
+                    ? ancestorTree
+                    : iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(projectedVariables), ancestorTree);
+
+            // Normalizes the ancestors (recursive)
+            return nonNormalizedTree.normalizeForOptimization(variableGenerator);
         }
 
         /**

@@ -40,4 +40,6 @@ public interface UnaryOperatorNode extends QueryNode {
      * Only validates the node, not its child
      */
     void validateNode(IQTree child) throws InvalidIntermediateQueryException;
+
+    IQTree removeDistincts(IQTree child, IQProperties iqProperties);
 }

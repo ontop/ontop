@@ -123,6 +123,14 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
+    public IQTree removeDistincts() {
+        IQProperties properties = getProperties();
+        return properties.areDistinctAlreadyRemoved()
+                ? this
+                : getRootNode().removeDistincts(getChildren(), properties);
+    }
+
+    @Override
     public boolean containsNullableVariable(Variable variable) {
         return getNullableVariables().contains(variable);
     }

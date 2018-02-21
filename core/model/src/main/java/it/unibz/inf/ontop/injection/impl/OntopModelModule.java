@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
-import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -50,7 +48,9 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
         bindFromSettings(ConditionSimplifier.class);
+        bindFromSettings(AscendingSubstitutionNormalizer.class);
         bindFromSettings(FilterNormalizer.class);
+        bindFromSettings(InnerJoinNormalizer.class);
         bindFromSettings(LeftJoinNormalizer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(

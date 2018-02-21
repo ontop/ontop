@@ -19,6 +19,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -61,6 +63,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private final ValueConstant nullValue;
     private final ImmutabilityTools immutabilityTools;
     private final ExpressionEvaluator expressionEvaluator;
+    private final AscendingSubstitutionNormalizer substitutionNormalizer;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -69,7 +72,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
-                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings) {
+                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings,
+                                 AscendingSubstitutionNormalizer substitutionNormalizer) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
@@ -83,6 +87,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.iqFactory = iqFactory;
         this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
+        this.substitutionNormalizer = substitutionNormalizer;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         if (settings.isTestModeEnabled())
@@ -130,7 +135,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator,
+                                 AscendingSubstitutionNormalizer substitutionNormalizer) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -145,6 +151,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.substitutionFactory = substitutionFactory;
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
+        this.substitutionNormalizer = substitutionNormalizer;
 
         validateNode();
     }
@@ -312,6 +319,17 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     + " does not project all the variables " +
                     "required by the CONSTRUCTION node (" + requiredChildVariables + ")\n" + this);
         }
+    }
+
+    @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
     }
 
     /**
@@ -635,12 +653,12 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
 
-        AscendingSubstitutionNormalization ascendingNormalization = normalizeAscendingSubstitution(
+        AscendingSubstitutionNormalization ascendingNormalization = substitutionNormalizer.normalizeAscendingSubstitution(
                 childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 
-        IQTree grandChild = ascendingNormalization.normalizeChild(childIQ.getChild());
+        IQTree grandChild = ascendingNormalization.updateChild(childIQ.getChild());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);

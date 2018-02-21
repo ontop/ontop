@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -34,17 +36,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final AscendingSubstitutionNormalizer substitutionNormalizer;
 
     @AssistedInject
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
-                          SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                          SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                          AscendingSubstitutionNormalizer substitutionNormalizer) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.substitutionNormalizer = substitutionNormalizer;
     }
 
     @Override
@@ -55,7 +60,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public UnionNode clone() {
         return new UnionNodeImpl(projectedVariables, constructionTools, iqFactory,
-                substitutionFactory, termFactory);
+                substitutionFactory, termFactory, substitutionNormalizer);
     }
 
     @Override
@@ -142,6 +147,19 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         "required by the UNION node (" + unionVariables + ")\n" + this);
             }
         }
+    }
+
+    @Override
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(IQTree::removeDistincts)
+                .collect(ImmutableCollectors.toList());
+
+        IQProperties newProperties = newChildren.equals(children)
+                ? properties.declareDistinctRemovalWithoutEffect()
+                : properties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createNaryIQTree(this, children, newProperties);
     }
 
     @Override
@@ -426,7 +444,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
-            AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
+            AscendingSubstitutionNormalization normalization = substitutionNormalizer.normalizeAscendingSubstitution(
                     constructionNode.getSubstitution(), projectedVariables);
             Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
 
@@ -435,7 +453,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     .isPresent())
                 return child;
 
-            IQTree grandChild = normalization.normalizeChild(((UnaryIQTree) child).getChild());
+            IQTree grandChild = normalization.updateChild(((UnaryIQTree) child).getChild());
 
             return proposedConstructionNode
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareNormalizedForOptimization()))

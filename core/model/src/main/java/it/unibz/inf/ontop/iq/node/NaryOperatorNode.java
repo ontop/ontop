@@ -42,4 +42,6 @@ public interface NaryOperatorNode extends QueryNode {
      * Only validates the node, not its children
      */
     void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException;
+
+    IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties);
 }

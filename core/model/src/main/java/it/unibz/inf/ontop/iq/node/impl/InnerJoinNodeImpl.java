@@ -5,13 +5,13 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.JoinLikeChildBindingLifter;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -31,17 +31,15 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
 
     private static final String JOIN_NODE_STR = "JOIN" ;
-    private static final int MAX_ITERATIONS = 100000;
     private final ConstructionNodeTools constructionNodeTools;
     private final ConditionSimplifier conditionSimplifier;
-    private final JoinLikeChildBindingLifter bindingLift;
+    private final InnerJoinNormalizer normalizer;
 
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
@@ -51,12 +49,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                                ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
+                                ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift,
+                                InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
-        this.bindingLift = bindingLift;
+        this.normalizer = normalizer;
     }
 
     @AssistedInject
@@ -67,12 +66,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
+                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift, InnerJoinNormalizer normalizer) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
-        this.bindingLift = bindingLift;
+        this.normalizer = normalizer;
     }
 
     @AssistedInject
@@ -82,12 +81,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift) {
+                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift, InnerJoinNormalizer normalizer) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
-        this.bindingLift = bindingLift;
+        this.normalizer = normalizer;
     }
 
     @Override
@@ -161,89 +160,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
-
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftBinding(ImmutableList<IQTree> initialChildren, VariableGenerator variableGenerator,
-                              IQProperties currentIQProperties) {
-        IQTree newParentTree = propagateDownCondition(Optional.empty(), initialChildren);
-
-        /*
-         * If after propagating down the condition the root is still a join node, goes to the next step
-         */
-        if (newParentTree.getRootNode() instanceof InnerJoinNodeImpl) {
-            return ((InnerJoinNodeImpl)newParentTree.getRootNode()).liftBindingAfterPropagatingCondition(
-                    newParentTree.getChildren(), variableGenerator, currentIQProperties);
-        }
-        else
-            /*
-             * Otherwise, goes back to the general method
-             */
-            return newParentTree.normalizeForOptimization(variableGenerator);
-    }
-
-    /**
-     * TODO: explain
-     */
-    private IQTree liftBindingAfterPropagatingCondition(ImmutableList<IQTree> initialChildren,
-                                                        VariableGenerator variableGenerator,
-                                                        IQProperties currentIQProperties) {
-        final ImmutableSet<Variable> projectedVariables = getProjectedVariables(initialChildren);
-
-        // Non-final
-        ImmutableList<IQTree> currentChildren = initialChildren;
-        ImmutableSubstitution<ImmutableTerm> currentSubstitution = substitutionFactory.getSubstitution();
-        Optional<ImmutableExpression> currentJoiningCondition = getOptionalFilterCondition();
-        boolean hasConverged = false;
-
-        try {
-
-            int i = 0;
-            while ((!hasConverged) && (i++ < MAX_ITERATIONS)) {
-                LiftingStepResults results = liftChildBinding(currentChildren, currentJoiningCondition, variableGenerator);
-                hasConverged = results.hasConverged;
-                currentChildren = results.children;
-                currentSubstitution = results.substitution.composeWith(currentSubstitution);
-                currentJoiningCondition = results.joiningCondition;
-            }
-
-            if (i >= MAX_ITERATIONS)
-                throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
-
-            IQTree joinIQ = createJoinOrFilterOrTrue(currentChildren, currentJoiningCondition, currentIQProperties);
-
-            AscendingSubstitutionNormalization ascendingNormalization =
-                    normalizeAscendingSubstitution(currentSubstitution, projectedVariables);
-
-            IQTree newJoinIQ = ascendingNormalization.normalizeChild(joinIQ);
-
-            ImmutableSet<Variable> childrenVariables = getProjectedVariables(currentChildren);
-
-            /*
-             * NB: creates a construction if a substitution needs to be propagated and/or if some variables
-             * have to be projected away
-             */
-            return ascendingNormalization.generateTopConstructionNode()
-                    .map(Optional::of)
-                    .orElseGet(() -> Optional.of(projectedVariables)
-                            .filter(vars -> !vars.equals(childrenVariables))
-                            .map(iqFactory::createConstructionNode))
-                    .map(constructionNode -> (IQTree) iqFactory.createUnaryIQTree(constructionNode, newJoinIQ,
-                            currentIQProperties.declareNormalizedForOptimization()))
-                    .orElse(newJoinIQ);
-
-        } catch (EmptyIQException e) {
-            return iqFactory.createEmptyNode(projectedVariables);
-        }
-    }
-
     /**
      * TODO: refactor
      */
     @Override
-    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return liftBinding(children, variableGenerator, currentIQProperties);
+    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
+                                           IQProperties currentIQProperties) {
+        return normalizer.normalizeForOptimization(this, children, variableGenerator, currentIQProperties);
     }
 
     @Override
@@ -353,6 +276,21 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
         getOptionalFilterCondition()
                 .ifPresent(e -> checkExpression(e, children));
+
+        checkNonProjectedVariables(children);
+    }
+
+    @Override
+    public IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(IQTree::removeDistincts)
+                .collect(ImmutableCollectors.toList());
+
+        IQProperties newProperties = newChildren.equals(children)
+                ? properties.declareDistinctRemovalWithoutEffect()
+                : properties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createNaryIQTree(this, children, newProperties);
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
@@ -426,112 +364,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         ImmutableSet<Variable> formerProjectedVariables = getProjectedVariables(children);
 
         return constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, formerProjectedVariables);
-    }
-
-    /**
-     * Lifts the binding OF AT MOST ONE child
-     *
-     * TODO: refactor
-     */
-    private LiftingStepResults liftChildBinding(ImmutableList<IQTree> initialChildren,
-                                                Optional<ImmutableExpression> initialJoiningCondition,
-                                                VariableGenerator variableGenerator) throws EmptyIQException {
-        ImmutableList<IQTree> liftedChildren = initialChildren.stream()
-                .map(c -> c.normalizeForOptimization(variableGenerator))
-                .filter(c -> !(c.getRootNode() instanceof TrueNode))
-                .collect(ImmutableCollectors.toList());
-
-        if (liftedChildren.stream()
-                .anyMatch(IQTree::isDeclaredAsEmpty))
-            throw new EmptyIQException();
-
-
-        OptionalInt optionalSelectedLiftedChildPosition = IntStream.range(0, liftedChildren.size())
-                .filter(i -> liftedChildren.get(i).getRootNode() instanceof ConstructionNode)
-                .findFirst();
-
-        /*
-         * No substitution to lift -> converged
-         */
-        if (!optionalSelectedLiftedChildPosition.isPresent())
-            return new InnerJoinNodeImpl.LiftingStepResults(substitutionFactory.getSubstitution(), liftedChildren,
-                    initialJoiningCondition, true);
-
-        int selectedChildPosition = optionalSelectedLiftedChildPosition.getAsInt();
-        UnaryIQTree selectedLiftedChild = (UnaryIQTree) liftedChildren.get(selectedChildPosition);
-
-        ConstructionNode selectedChildConstructionNode = (ConstructionNode) selectedLiftedChild.getRootNode();
-        IQTree selectedGrandChild = selectedLiftedChild.getChild();
-
-        try {
-            return bindingLift.liftRegularChildBinding(selectedChildConstructionNode,
-                    selectedChildPosition,
-                    selectedGrandChild,
-                    liftedChildren, ImmutableSet.of(), initialJoiningCondition, variableGenerator,
-                    this::convertIntoLiftingStepResults);
-        } catch (UnsatisfiableConditionException e) {
-            throw new EmptyIQException();
-        }
-    }
-
-    /**
-     * TODO: should we try to preserve the children order?
-     */
-    private LiftingStepResults convertIntoLiftingStepResults(
-            ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
-            Optional<ImmutableExpression> newCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        ImmutableList<IQTree> newChildren = IntStream.range(0, liftedChildren.size())
-                .boxed()
-                .map(i -> i == selectedChildPosition
-                        ? selectedGrandChild.applyDescendingSubstitution(descendingSubstitution, newCondition)
-                        : liftedChildren.get(i).applyDescendingSubstitution(descendingSubstitution, newCondition))
-                .collect(ImmutableCollectors.toList());
-
-        return new LiftingStepResults(ascendingSubstitution, newChildren, newCondition, false);
-    }
-
-
-
-    private IQTree createJoinOrFilterOrTrue(ImmutableList<IQTree> currentChildren,
-                                            Optional<ImmutableExpression> currentJoiningCondition,
-                                            IQProperties currentIQProperties) {
-        switch (currentChildren.size()) {
-            case 0:
-                return iqFactory.createTrueNode();
-            case 1:
-                IQTree uniqueChild = currentChildren.get(0);
-                return currentJoiningCondition
-                        .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), uniqueChild))
-                        .orElse(uniqueChild);
-            default:
-                InnerJoinNode newJoinNode = currentJoiningCondition.equals(getOptionalFilterCondition())
-                        ? this
-                        : changeOptionalFilterCondition(currentJoiningCondition);
-                return iqFactory.createNaryIQTree(newJoinNode, currentChildren, currentIQProperties.declareNormalizedForOptimization());
-        }
-    }
-
-
-
-    private static class LiftingStepResults {
-        public final ImmutableSubstitution<ImmutableTerm> substitution;
-        public final ImmutableList<IQTree> children;
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        public final Optional<ImmutableExpression> joiningCondition;
-        public final boolean hasConverged;
-
-        private LiftingStepResults(ImmutableSubstitution<ImmutableTerm> substitution, ImmutableList<IQTree> children,
-                                   Optional<ImmutableExpression> joiningCondition, boolean hasConverged) {
-            this.substitution = substitution;
-            this.children = children;
-            this.joiningCondition = joiningCondition;
-            this.hasConverged = hasConverged;
-        }
-    }
-
-
-    private static class EmptyIQException extends Exception {
     }
 
  }

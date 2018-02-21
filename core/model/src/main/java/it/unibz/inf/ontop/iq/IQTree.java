@@ -79,5 +79,10 @@ public interface IQTree {
      */
     IQTree propagateDownConstraint(ImmutableExpression constraint);
 
+    /**
+     * TODO: find a better name
+     */
+    IQTree removeDistincts();
+
     void validate() throws InvalidIntermediateQueryException;
 }

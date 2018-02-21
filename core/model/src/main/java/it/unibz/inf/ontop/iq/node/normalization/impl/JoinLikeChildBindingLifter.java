@@ -50,7 +50,7 @@ public class JoinLikeChildBindingLifter {
                                             ImmutableSet<Variable> nonLiftableVariables,
                                             Optional<ImmutableExpression> initialJoiningCondition,
                                             VariableGenerator variableGenerator,
-                                            LiftConverter<R> liftConverter) throws UnsatisfiableConditionException {
+                                            BindingLiftConverter<R> bindingLiftConverter) throws UnsatisfiableConditionException {
 
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
@@ -81,7 +81,7 @@ public class JoinLikeChildBindingLifter {
                 expressionResults.getSubstitution().composeWith2(freshRenaming)
                         .composeWith2(downPropagableFragment);
 
-        return liftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
+        return bindingLiftConverter.convert(children, selectedGrandChild, selectedChildPosition, newCondition,
                 ascendingSubstitution, descendingSubstitution);
     }
 
@@ -114,7 +114,7 @@ public class JoinLikeChildBindingLifter {
     }
 
     @FunctionalInterface
-    public interface LiftConverter<R> {
+    public interface BindingLiftConverter<R> {
 
         R convert(ImmutableList<IQTree> liftedChildren, IQTree selectedGrandChild, int selectedChildPosition,
                   Optional<ImmutableExpression> newCondition,
