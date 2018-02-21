@@ -229,6 +229,11 @@ public class SaveQueryPanel extends JPanel {
 				JOptionPane.showMessageDialog(this, "The group ID can't be blank!", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
+			//query and group ID have not yet been added to the queryController elements, but we need to prevent the use of the same name for both
+			if (id.equals(group)){
+                JOptionPane.showMessageDialog(this, "The group ID can't have the same name as the query ID!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 			try {
 				queryController.createGroup(group);
 				queryController.addQuery(query, id, group);
