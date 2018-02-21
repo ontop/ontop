@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
+import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
@@ -19,15 +21,13 @@ import it.unibz.inf.ontop.iq.executor.truenode.TrueNodeRemovalExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.executor.unsatisfiable.RemoveEmptyNodesExecutor;
-import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
-import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.LeftJoinOptimizer;
+import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 import it.unibz.inf.ontop.iq.tools.RootConstructionNodeEnforcer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
@@ -69,7 +69,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(BindingLiftOptimizer.class);
         bindFromSettings(IntermediateQuery2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
-        bindFromSettings(MappingUnionNormalizer.class);
         bindFromSettings(RootConstructionNodeEnforcer.class);
 
         // Releases the configuration (enables some GC)
