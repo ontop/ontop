@@ -31,8 +31,8 @@ import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.RootConstructionNodeEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -61,6 +61,7 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
 
 	private final IntermediateQueryFactory iqFactory;
+	private final RootConstructionNodeEnforcer rootCnEnforcer;
 
 	private static class RuleHead {
 		private final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -82,8 +83,9 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private int dummyPredCounter;
 
 	@Inject
-	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory) {
+	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, RootConstructionNodeEnforcer rootCnEnforcer) {
 		this.iqFactory = iqFactory;
+		this.rootCnEnforcer = rootCnEnforcer;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -364,7 +366,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 	private ImmutableList<IntermediateQuery> normalizeIQ(IntermediateQuery query) {
 		return splitRootUnion(query)
-				.map(this::enforceRootCn)
+				.map(rootCnEnforcer::enforceRootCn)
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -377,22 +379,6 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 								query.getProjectionAtom()
 						)):
 				Stream.of(query);
-	}
-
-	private IntermediateQuery enforceRootCn(IntermediateQuery query) {
-		QueryNode root = query.getRootNode();
-		if(root instanceof ConstructionNode){
-			return query;
-		}
-		IntermediateQueryBuilder builder = iqFactory.createIQBuilder(
-				query.getDBMetadata(),
-				query.getExecutorRegistry()
-		);
-		ConstructionNode rootCn = iqFactory.createConstructionNode(query.getVariables(root));
-		builder.init(query.getProjectionAtom(), rootCn);
-		builder.addChild(rootCn, root);
-		builder.appendSubtree(root, query);
-        return builder.build();
 	}
 }
 

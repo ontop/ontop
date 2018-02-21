@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.RootConstructionNodeEnforcer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -39,12 +40,15 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final RootConstructionNodeEnforcer rootCnEnforcer;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
-                                              UnionBasedQueryMerger queryMerger) {
+                                              UnionBasedQueryMerger queryMerger,
+                                              RootConstructionNodeEnforcer rootCnEnforcer) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
+        this.rootCnEnforcer = rootCnEnforcer;
     }
 
 
@@ -117,6 +121,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 for(IntensionalDataNode intensionalNode : intensionalMatches) {
 
                     if (intermediateQuery.contains(intensionalNode)) {
+                        intermediateQuery = rootCnEnforcer.enforceRootCn(intermediateQuery);
                         QueryMergingProposal mergingProposal = new QueryMergingProposalImpl(intensionalNode,
                                 optionalSubQuery);
                         intermediateQuery.applyProposal(mergingProposal);
