@@ -256,7 +256,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             return expressionAndSubstitution.substitution.isEmpty()
                     ? joinTree
                     : iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(getProjectedVariables(children),
+                    iqFactory.createConstructionNode(getProjectedVariables(newChildren),
                             (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)
                                     expressionAndSubstitution.substitution),
                     joinTree);

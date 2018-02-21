@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 
-public interface InnerJoinNode extends CommutativeJoinNode {
+public interface InnerJoinNode extends InnerJoinLikeNode {
 
     @Override
     InnerJoinNode clone();
