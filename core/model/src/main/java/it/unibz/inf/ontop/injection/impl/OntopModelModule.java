@@ -52,6 +52,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(FilterNormalizer.class);
         bindFromSettings(InnerJoinNormalizer.class);
         bindFromSettings(LeftJoinNormalizer.class);
+        bindFromSettings(OrderByNormalizer.class);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,

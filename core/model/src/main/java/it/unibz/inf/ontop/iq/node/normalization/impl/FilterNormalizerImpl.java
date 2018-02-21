@@ -148,7 +148,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                     iqFactory.createEmptyNode(projectedVariables));
         }
 
-
         public State normalizeChild(VariableGenerator variableGenerator) {
             return updateChild(child.normalizeForOptimization(variableGenerator));
         }

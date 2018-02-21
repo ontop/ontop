@@ -8,10 +8,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -28,12 +28,15 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     private static final String ORDER_BY_NODE_STR = "ORDER BY";
 
     private final ImmutableList<OrderComparator> comparators;
+    private final OrderByNormalizer normalizer;
 
 
     @AssistedInject
-    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory) {
+    private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
+                            OrderByNormalizer normalizer) {
         super(iqFactory);
         this.comparators = comparators;
+        this.normalizer = normalizer;
     }
 
     @Override
@@ -41,44 +44,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         return comparators;
     }
 
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode newChildRoot = newChild.getRootNode();
-
-        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
-
-        if (newChildRoot instanceof ConstructionNode)
-            return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
-        else if (newChildRoot instanceof EmptyNode)
-            return newChild;
-        else if (newChildRoot instanceof DistinctNode) {
-            return iqFactory.createUnaryIQTree(
-                    (DistinctNode) newChildRoot,
-                    iqFactory.createUnaryIQTree(this, ((UnaryIQTree)newChild).getChild(), liftedProperties),
-                    liftedProperties);
-        }
-        else
-            return iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
-
-    }
-
-    /**
-     * Lifts the construction node above and updates the order comparators
-     */
-    private IQTree liftChildConstructionNode(ConstructionNode newChildRoot, UnaryIQTree newChild, IQProperties liftedProperties) {
-
-        UnaryIQTree newOrderByTree = iqFactory.createUnaryIQTree(
-                applySubstitution(newChildRoot.getSubstitution()),
-                newChild.getChild(),
-                liftedProperties);
-
-        return iqFactory.createUnaryIQTree(newChildRoot, newOrderByTree, liftedProperties);
-    }
-
-    private OrderByNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    @Override
+    public OrderByNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList<OrderComparator> newComparators = comparators.stream()
                 .flatMap(c -> Stream.of(substitution.apply(c.getTerm()))
                         .filter(t -> t instanceof NonGroundTerm)
@@ -93,12 +60,9 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         throw new RuntimeException("TODO: implement");
     }
 
-    /**
-     * TODO: refactor
-     */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return liftBinding(child, variableGenerator, currentIQProperties);
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
     }
 
     @Override
