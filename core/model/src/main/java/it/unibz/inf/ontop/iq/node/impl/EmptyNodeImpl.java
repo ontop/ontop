@@ -90,7 +90,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    protected IQTree applyDescendingSubstitution(
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         return iqFactory.createEmptyNode(
                 constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));

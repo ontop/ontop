@@ -102,6 +102,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+
+        OrderByNode newOrderByTree = applySubstitution(descendingSubstitution);
+        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+
+        return iqFactory.createUnaryIQTree(newOrderByTree, newChild);
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
         return transformer.transformOrderBy(tree, this, child);
     }

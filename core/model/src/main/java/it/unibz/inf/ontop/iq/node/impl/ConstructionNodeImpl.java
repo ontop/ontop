@@ -405,16 +405,46 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             return iqFactory.createUnaryIQTree(this, liftedChildIQTree, currentIQProperties.declareLifted());
     }
 
-    /**
-     * TODO: refactor
-     *
-     * TODO: handle the constraint
-     *
-     */
+
     @Override
     public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> tau,
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree child) {
+
+        return applyDescendingSubstitution(descendingSubstitution, child,
+                (c, r) -> propagateDescendingSubstitutionToChild(c, r, constraint));
+    }
+
+    /**
+     *
+     * TODO: better handle the constraint
+     *
+     * Returns the new child
+     */
+    private IQTree propagateDescendingSubstitutionToChild(IQTree child,
+                                                          PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
+                                                          Optional<ImmutableExpression> constraint) throws EmptyTreeException {
+        Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
+                constraint);
+
+        return Optional.of(tauFPropagationResults.delta)
+                .filter(delta -> !delta.isEmpty())
+                .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
+                .orElse(child);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        return applyDescendingSubstitution(descendingSubstitution, child,
+                (c, r) -> Optional.of(r.delta)
+                        .filter(delta -> !delta.isEmpty())
+                        .map(c::applyDescendingSubstitutionWithoutOptimizing)
+                        .orElse(c));
+    }
+
+    private IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> tau, IQTree child,
+            DescendingSubstitutionChildUpdateFunction updateChildFct) {
 
         ImmutableSet<Variable> newProjectedVariables = constructionNodeTools.computeNewProjectedVariables(tau, projectedVariables);
 
@@ -428,13 +458,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             Optional<FilterNode> filterNode = tauFPropagationResults.filter
                     .map(iqFactory::createFilterNode);
 
-            Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
-                    constraint);
-
-            IQTree newChild = Optional.of(tauFPropagationResults.delta)
-                    .filter(delta -> !delta.isEmpty())
-                    .map(delta -> child.applyDescendingSubstitution(delta, descendingConstraint))
-                    .orElse(child);
+            IQTree newChild = updateChildFct.apply(child, tauFPropagationResults);
 
             Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
                     .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
@@ -661,5 +685,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             this.delta = delta;
             this.filter = newF;
         }
+    }
+
+    @FunctionalInterface
+    private interface DescendingSubstitutionChildUpdateFunction {
+
+        IQTree apply(IQTree child, PropagationResults<VariableOrGroundTerm> tauFPropagationResults)
+                throws EmptyTreeException;
+
     }
 }
