@@ -50,6 +50,12 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
 
     @Override
     public QueryNode clone() {
+        try {
+            return new DiamondPlusNodeImpl(this.getRange().clone(), this.iqFactory);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

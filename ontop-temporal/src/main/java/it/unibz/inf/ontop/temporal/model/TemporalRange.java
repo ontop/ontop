@@ -13,4 +13,6 @@ public interface TemporalRange {
     Duration getEnd();
 
     boolean equals(TemporalRange temporalRange);
+
+    TemporalRange clone();
 }

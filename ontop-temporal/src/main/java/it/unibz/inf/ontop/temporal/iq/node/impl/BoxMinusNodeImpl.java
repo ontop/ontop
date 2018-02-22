@@ -51,7 +51,8 @@ public class BoxMinusNodeImpl extends TemporalOperatorWithRangeImpl implements B
     @Override
     public QueryNode clone() {
         try {
-            throw new Exception("clone is not implemented in box minus");
+            return new BoxMinusNodeImpl(this.getRange().clone(), this.iqFactory);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

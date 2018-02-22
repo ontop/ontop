@@ -68,6 +68,11 @@ public class TemporalRangeImpl implements TemporalRange {
         return false;
     }
 
+    @Override
+    public TemporalRange clone() {
+        return new TemporalRangeImpl(this.beginInclusive, this.begin, this.end, this.endInclusive);
+    }
+
     private Duration createDuration(String durText){
         if (durText.contains("MS")) {
             durText = durText.substring(0, durText.indexOf("MS"));

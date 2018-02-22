@@ -50,6 +50,12 @@ public class BoxPlusNodeImpl extends TemporalOperatorWithRangeImpl implements Bo
 
     @Override
     public QueryNode clone() {
+        try {
+            return new BoxPlusNodeImpl(this.getRange().clone(), this.iqFactory);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
