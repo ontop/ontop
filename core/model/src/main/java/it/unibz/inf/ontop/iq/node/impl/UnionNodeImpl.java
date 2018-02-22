@@ -228,6 +228,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
+                descendingSubstitution, projectedVariables);
+
+        ImmutableList<IQTree> updatedChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
+        return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+    }
+
 
     /**
      * Has at least two children

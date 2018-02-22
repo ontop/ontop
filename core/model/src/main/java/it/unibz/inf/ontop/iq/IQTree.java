@@ -42,10 +42,23 @@ public interface IQTree {
         return getChildren().isEmpty();
     }
 
+    /**
+     * Applies the descending substitution and performs SOME optimizations.
+     *
+     * Designed to be called DURING the "structural/semantic optimization" phase.
+     *
+     */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint);
+
+    /**
+     * Applies the descending substitution WITHOUT applying any additional optimization.
+     *
+     * Designed to be called AFTER the "structural/semantic optimization" phase.
+     */
+    IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
 
     ImmutableSet<Variable> getKnownVariables();
 
