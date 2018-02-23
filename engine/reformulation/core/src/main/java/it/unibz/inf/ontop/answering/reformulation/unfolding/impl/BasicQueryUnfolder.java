@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.unfolding.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.iq.tools.RootConstructionNodeEnforcer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.iq.optimizer.TrueNodesRemovalOptimizer;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -17,10 +18,12 @@ import java.util.Optional;
 public class BasicQueryUnfolder implements QueryUnfolder {
 
     private final Mapping mapping;
+    private final RootConstructionNodeEnforcer rootCnEnforcer;
 
     @AssistedInject
-    private BasicQueryUnfolder(@Assisted Mapping mapping) {
+    private BasicQueryUnfolder(@Assisted Mapping mapping, RootConstructionNodeEnforcer rootCnEnforcer) {
         this.mapping = mapping;
+        this.rootCnEnforcer = rootCnEnforcer;
     }
 
     @Override
@@ -37,6 +40,7 @@ public class BasicQueryUnfolder implements QueryUnfolder {
             Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
                     intensionalNode.getProjectionAtom().getPredicate());
 
+            query = rootCnEnforcer.enforceRootCn(query);
             QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalNode, optionalMappingAssertion);
             query.applyProposal(queryMerging);
 

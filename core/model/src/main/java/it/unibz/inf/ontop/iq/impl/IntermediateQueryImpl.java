@@ -2,21 +2,23 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeException;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
+import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.iq.proposal.ProposalResults;
+import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
-import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.proposal.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -352,6 +354,14 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return getVariables(queryNode).stream()
                 .filter(requiredVariables::contains)
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public IntermediateQuery getSubquery(QueryNode subQueryRoot, DistinctVariableOnlyDataAtom projectionAtom) {
+        IntermediateQueryBuilder builder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        builder.init(projectionAtom, subQueryRoot);
+        builder.appendSubtree(subQueryRoot, this);
+        return builder.build();
     }
 
     private void validate() throws InvalidIntermediateQueryException {

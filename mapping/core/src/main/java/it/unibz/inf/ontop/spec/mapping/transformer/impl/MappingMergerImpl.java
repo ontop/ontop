@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
@@ -24,13 +25,15 @@ public class MappingMergerImpl implements MappingMerger {
 
     private final SpecificationFactory specificationFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final MappingIQNormalizer mappingIQNormalizer;
     private final TermFactory termFactory;
 
     @Inject
     private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                              TermFactory termFactory) {
+                              MappingIQNormalizer mappingIQNormalizer, TermFactory termFactory) {
         this.specificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
+        this.mappingIQNormalizer = mappingIQNormalizer;
         this.termFactory = termFactory;
     }
 
@@ -112,6 +115,7 @@ public class MappingMergerImpl implements MappingMerger {
      */
     private IntermediateQuery mergeDefinitions(Collection<IntermediateQuery> queries) {
         return queryMerger.mergeDefinitions(queries)
+                .map(mappingIQNormalizer::normalize)
                 .orElseThrow(() -> new MappingMergingException("The query should be present"));
     }
 

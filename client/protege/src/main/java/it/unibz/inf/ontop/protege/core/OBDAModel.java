@@ -388,15 +388,18 @@ public class OBDAModel {
         }
     }
 
-    public void updateMapping( String formerMappingId, String newMappingId) {
-        SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
+    public void updateMappingId(String formerMappingId, String newMappingId) throws DuplicateMappingException {
+        //if the id are the same no need to update the mapping
+        if(!formerMappingId.equals(newMappingId)) {
+            SQLPPTriplesMap formerTriplesMap = getTriplesMap(formerMappingId);
 
-        if (formerTriplesMap != null) {
-            SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, formerTriplesMap.getSourceQuery(),
-                    formerTriplesMap.getTargetAtoms());
-            triplesMapMap.remove(formerMappingId);
-            triplesMapMap.put(newMappingId, newTriplesMap);
-            fireMappingUpdated();
+            if (formerTriplesMap != null) {
+                SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(newMappingId, formerTriplesMap.getSourceQuery(),
+                        formerTriplesMap.getTargetAtoms());
+                addTriplesMap(newTriplesMap, false);
+                triplesMapMap.remove(formerMappingId);
+                fireMappingUpdated();
+            }
         }
     }
 

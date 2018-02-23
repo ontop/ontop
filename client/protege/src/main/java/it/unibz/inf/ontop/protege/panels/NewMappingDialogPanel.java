@@ -198,9 +198,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						mapcon.addTriplesMap(newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
-						mapcon.updateMappingsSourceQuery(mapping.getId(), body);
-						mapcon.updateTargetQueryMapping(mapping.getId(), targetQuery);
-						mapcon.updateMapping(mapping.getId(), newId);
+                        mapcon.updateMappingId(mapping.getId(), newId);
+                        mapcon.updateMappingsSourceQuery(newId, body);
+                        mapcon.updateTargetQueryMapping(newId, targetQuery);
+
 					}
 				} catch (DuplicateMappingException e) {
 					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");

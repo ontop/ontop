@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeCleaningProposalImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.NodeCentricDepthFirstOptimizer;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,7 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
 
         boolean deleteConstructionNodeChain = modifiers.isIdle() &&
                 constructionNodeChainRoot.getSubstitution().isEmpty() &&
-                !constructionNodeChainRoot.equals(query.getRootNode());
+                !isMandatoryRoot(constructionNodeChainRoot, query);
 
         /* special case of a non-deletable unary chain */
         if (currentParentNode.equals(constructionNodeChainRoot) && !deleteConstructionNodeChain) {
@@ -126,6 +127,18 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
                                 currentParentNode,
                         deleteConstructionNodeChain
                 ));
+    }
+
+    private boolean isMandatoryRoot(ConstructionNode cn, IntermediateQuery query){
+        if(cn.equals(query.getRootNode())){
+            if(!query.getProjectionAtom().getVariables().equals(
+                    query.getVariables(
+                            query.getChildren(cn).iterator().next()
+                    ))){
+                return true;
+            }
+        }
+        return false;
     }
 
     private Optional<ImmutableQueryModifiers> combineModifiers(ImmutableQueryModifiers parentModifiers,

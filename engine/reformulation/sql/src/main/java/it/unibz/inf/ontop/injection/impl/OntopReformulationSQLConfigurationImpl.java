@@ -7,8 +7,10 @@ import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.DefaultOntopSQLCoreBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopSQLCoreConfigurationImpl.OntopSQLCoreOptions;
 
+import javax.annotation.Nonnull;
 import java.util.Properties;
 import java.util.stream.Stream;
+import java.io.File;
 
 public class OntopReformulationSQLConfigurationImpl extends OntopReformulationConfigurationImpl
         implements OntopReformulationSQLConfiguration {
@@ -84,16 +86,19 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
 
         private final DefaultOntopReformulationSQLBuilderFragment<B> localBuilderFragment;
         private final DefaultOntopSQLCoreBuilderFragment<B> sqlBuilderFragment;
+        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopReformulationSQLBuilderMixin() {
             B builder = (B) this;
             localBuilderFragment = new DefaultOntopReformulationSQLBuilderFragment<>(builder);
             sqlBuilderFragment = new DefaultOntopSQLCoreBuilderFragment<>(builder);
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
         }
 
         @Override
         protected Properties generateProperties() {
             Properties properties = super.generateProperties();
+            properties.putAll(modelBuilderFragment.generateProperties());
             properties.putAll(sqlBuilderFragment.generateProperties());
             properties.putAll(localBuilderFragment.generateProperties());
             return properties;
@@ -120,6 +125,26 @@ public class OntopReformulationSQLConfigurationImpl extends OntopReformulationCo
         @Override
         public B jdbcDriver(String jdbcDriver) {
             return sqlBuilderFragment.jdbcDriver(jdbcDriver);
+        }
+
+        @Override
+        public B properties(@Nonnull Properties properties) {
+            return modelBuilderFragment.properties(properties);
+        }
+
+        @Override
+        public B propertyFile(String propertyFilePath) {
+            return modelBuilderFragment.propertyFile(propertyFilePath);
+        }
+
+        @Override
+        public B propertyFile(File propertyFile) {
+            return modelBuilderFragment.propertyFile(propertyFile);
+        }
+
+        @Override
+        public B enableTestMode() {
+            return modelBuilderFragment.enableTestMode();
         }
     }
 
