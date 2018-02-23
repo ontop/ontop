@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -49,42 +50,40 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         this.limit = null;
     }
 
-    /**
-     *
-     * TODO: should not block substitutions anymore!
-     *
-     * TODO: refactor
-     */
-    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+
         IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
-        if (newChildRoot instanceof SliceNode)
-            return liftSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+        if (newChildRoot instanceof ConstructionNode)
+            return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
+        else if (newChildRoot instanceof SliceNode)
+            return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
             return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
+    private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
+                                         VariableGenerator variableGenerator) {
+        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree)
+                .normalizeForOptimization(variableGenerator);
+        return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
+                iqFactory.createIQProperties().declareNormalizedForOptimization());
+    }
+
     /**
      * TODO: implement it seriously
      */
-    private IQTree liftSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
         return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
-    }
-
-    @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
-    }
-
-    /**
-     * TODO: refactor
-     */
-    @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return liftBinding(child, variableGenerator, currentIQProperties);
     }
 
     @Override
