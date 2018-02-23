@@ -7,16 +7,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -38,7 +35,6 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
     private final BindingLiftOptimizer bindingLifter;
-    private final MappingUnionNormalizer mappingUnionNormalizer;
     private final IQConverter iqConverter;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
@@ -46,13 +42,11 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, BindingLiftOptimizer bindingLifter,
-                                      MappingUnionNormalizer mappingUnionNormalizer,
                                       IQConverter iqConverter,
                                       SubstitutionFactory substitutionFactory,
                                       AtomFactory atomFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
         this.bindingLifter = bindingLifter;
-        this.mappingUnionNormalizer = mappingUnionNormalizer;
         this.iqConverter = iqConverter;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
@@ -134,7 +128,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                 });
 
 
-        return Optional.of(normalizeIQ(queryBuilder.build()));
+        return Optional.of(queryBuilder.build());
     }
 
     /**
@@ -213,24 +207,6 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     .collect(ImmutableCollectors.toMap());
 
             return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(newMap));
-        }
-    }
-
-    /**
-     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
-     * Then flatten nested unions.
-     */
-    private IntermediateQuery normalizeIQ(IntermediateQuery query) {
-        try {
-            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-            IQ iqAfterUnionNormalization = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
-            return iqConverter.convert(
-                    iqAfterUnionNormalization,
-                    queryAfterBindingLift.getDBMetadata(),
-                    query.getExecutorRegistry()
-            );
-        }catch (EmptyQueryException e){
-            throw new IllegalStateException("The query should not be emptied by applying this normalization");
         }
     }
 }

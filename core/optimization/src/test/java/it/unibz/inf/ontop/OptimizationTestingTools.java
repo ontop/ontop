@@ -33,7 +33,6 @@ public class OptimizationTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
-    public static final MappingUnionNormalizer MAPPING_UNION_NORMALIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
@@ -63,7 +62,6 @@ public class OptimizationTestingTools {
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
-        MAPPING_UNION_NORMALIZER = injector.getInstance(MappingUnionNormalizer.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
