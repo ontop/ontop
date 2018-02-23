@@ -127,6 +127,12 @@ public class DiamondPlusNodeImpl extends TemporalOperatorWithRangeImpl implement
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        return iqFactory.createUnaryIQTree(this, newChild);
+    }
+
+    @Override
     public ImmutableSet<Variable> getNullableVariables(IQTree child) {
         return null;
     }

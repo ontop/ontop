@@ -23,26 +23,24 @@ package it.unibz.inf.ontop.datalog;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-
-import java.util.*;
-
+import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-
-import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 public class SQLPPMapping2DatalogConverter {
@@ -75,7 +73,7 @@ public class SQLPPMapping2DatalogConverter {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
                 List<Function> body;
-                ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
+                ImmutableMap<QualifiedAttributeID, Term> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
@@ -109,6 +107,7 @@ public class SQLPPMapping2DatalogConverter {
                 for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
+
                         Function head = renameVariables(atom, lookupTable, idfac);
                         CQIE rule = datalogFactory.getCQIE(head, body);
 
@@ -141,10 +140,11 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
                                             QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
+
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {

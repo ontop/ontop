@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.temporal.datalog.impl;
 import com.google.inject.Inject;
 import fj.P2;
 import fj.data.List;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.PullOutEqualityNormalizer;
-import it.unibz.inf.ontop.datalog.TargetAtom;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -27,6 +24,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 
+import java.time.temporal.Temporal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -138,27 +136,35 @@ public class TemporalDatalogRule2QueryConverter {
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
-        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                targetAtom.getSubstitution(), optionalModifiers);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution());
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(dbMetadata, rootNode, projectionAtom, executorRegistry, iqFactory);
+            return createFact(dbMetadata, topConstructionNode, optionalModifiers, projectionAtom, executorRegistry, iqFactory);
         }
         else {
+
             AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogFactory, datalogTools);
 
-            return createDefinition(dbMetadata, rootNode, projectionAtom, tablePredicates,
+            return createDefinition(dbMetadata, topConstructionNode, optionalModifiers, projectionAtom, tablePredicates,
                     atomClassification.dataAndCompositeAtoms, atomClassification.booleanAtoms,
                     atomClassification.optionalGroupAtom, iqFactory, executorRegistry);
         }
     }
 
-    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode rootNode,
+    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
+                                                Optional<ImmutableQueryModifiers> optionalModifiers,
                                                 DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
-                                                IntermediateQueryFactory modelFactory) {
-        IntermediateQueryBuilder queryBuilder = modelFactory.createIQBuilder(dbMetadata, executorRegistry);
-        queryBuilder.init(projectionAtom, rootNode);
+                                                IntermediateQueryFactory iqFactory) {
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        if (optionalModifiers.isPresent()) {
+            optionalModifiers.get().initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
+        }
+        else {
+            queryBuilder.init(projectionAtom, topConstructionNode);
+        }
+        queryBuilder.addChild(topConstructionNode, iqFactory.createTrueNode());
         return queryBuilder.build();
     }
 
@@ -166,26 +172,30 @@ public class TemporalDatalogRule2QueryConverter {
     /**
      * TODO: explain
      */
-    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode rootNode,
-                                                      DistinctVariableOnlyDataAtom projectionAtom,
-                                                      Collection<Predicate> tablePredicates,
-                                                      List<Function> dataAndCompositeAtoms,
-                                                      List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
-                                                      TemporalIntermediateQueryFactory iqFactory,
-                                                      ExecutorRegistry executorRegistry)
+    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
+                                               Optional<ImmutableQueryModifiers> optionalModifiers,
+                                               DistinctVariableOnlyDataAtom projectionAtom,
+                                               Collection<Predicate> tablePredicates,
+                                               List<Function> dataAndCompositeAtoms,
+                                               List<Function> booleanAtoms, Optional<Function> optionalGroupAtom,
+                                               TemporalIntermediateQueryFactory iqFactory,
+                                               ExecutorRegistry executorRegistry)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        /**
+        /*
          * TODO: explain
          */
         Optional<JoinOrFilterNode> optionalFilterOrJoinNode = createFilterOrJoinNode(iqFactory, dataAndCompositeAtoms, booleanAtoms);
 
-        // Non final
-        TemporalIntermediateQueryBuilder queryBuilder = iqFactory.createTemporalIQBuilder(dbMetadata, executorRegistry);
-
         try {
-            queryBuilder.init(projectionAtom, rootNode);
+            // Non-final
+            TemporalIntermediateQueryBuilder queryBuilder = iqFactory.createTemporalIQBuilder(dbMetadata, executorRegistry);
+            if (optionalModifiers.isPresent()) {
+                optionalModifiers.get().initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
+            }
+            else
+                queryBuilder.init(projectionAtom, topConstructionNode);
 
-            /**
+            /*
              * Intermediate node: ConstructionNode root or GROUP node
              */
             QueryNode intermediateNode;
@@ -195,11 +205,11 @@ public class TemporalDatalogRule2QueryConverter {
                 // queryBuilder.addChild(rootNode, intermediateNode);
             }
             else {
-                intermediateNode = rootNode;
+                intermediateNode = topConstructionNode;
             }
 
 
-            /**
+            /*
              * Bottom node: intermediate node or JOIN or FILTER
              */
             QueryNode bottomNode;
@@ -208,10 +218,10 @@ public class TemporalDatalogRule2QueryConverter {
                 queryBuilder.addChild(intermediateNode, bottomNode);
             }
             else {
-                bottomNode = rootNode;
+                bottomNode = topConstructionNode;
             }
 
-            /**
+            /*
              * TODO: explain
              */
             queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, bottomNode, NO_POSITION,

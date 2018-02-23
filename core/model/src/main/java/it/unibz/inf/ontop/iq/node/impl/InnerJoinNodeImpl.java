@@ -267,6 +267,22 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+
+        InnerJoinNode newJoinNode = getOptionalFilterCondition()
+                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(iqFactory::createInnerJoinNode)
+                .orElseGet(iqFactory::createInnerJoinNode);
+
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createNaryIQTree(newJoinNode, newChildren);
+    }
+
     private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
         return children.stream()
                     .flatMap(c -> c.getVariables().stream())

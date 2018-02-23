@@ -41,6 +41,10 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild);
 
+    IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            IQTree leftChild, IQTree rightChild);
+
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild);

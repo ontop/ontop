@@ -12,4 +12,13 @@ public class OWL {
 
     public static final IRI REAL =  RDF_FACTORY.createIRI(PREFIX + "real");
     public static final IRI RATIONAL =  RDF_FACTORY.createIRI(PREFIX + "rational");
+
+    public static final IRI THING = RDF_FACTORY.createIRI(PREFIX + "Thing");
+    public static final IRI NOTHING  = RDF_FACTORY.createIRI(PREFIX + "Nothing");
+
+    public static final IRI TOP_OBJECT_PROPERTY =  RDF_FACTORY.createIRI(PREFIX + "topObjectProperty");
+    public static final IRI BOTTOM_OBJECT_PROPERTY = RDF_FACTORY.createIRI(PREFIX +"bottomObjectProperty");
+
+    public static final IRI TOP_DATA_PROPERTY = RDF_FACTORY.createIRI(PREFIX + "topDataProperty");
+    public static final IRI BOTTOM_DATA_PROPERTY  = RDF_FACTORY.createIRI(PREFIX + "bottomDataProperty");
 }

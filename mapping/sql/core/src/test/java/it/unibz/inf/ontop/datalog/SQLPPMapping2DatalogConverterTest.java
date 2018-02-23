@@ -30,7 +30,8 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -98,7 +99,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
+		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY);
 		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
 				.map(TERM_FACTORY::getImmutableFunctionalTerm)
 				.collect(ImmutableCollectors.toList());
@@ -285,6 +286,12 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				"SELECT id FROM Student  WHERE (id,  year) IN (SELECT i_id, MAX(year) FROM Student GROUP BY id) INTERSECT SELECT student_id FROM Enrollment",
 				":S_{id} a :Student .");
 	}
+
+    public void testAnalysis_28() throws Exception {
+        runAnalysis(
+                "select lower(id) as lid from Student",
+                ":S_{lid} a :Student .");
+    }
 
 
 }

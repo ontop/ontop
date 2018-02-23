@@ -52,7 +52,6 @@ public class QueryAnsweringTest {
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)
-                .enableTestMode()
                 .build();
 
         try {
@@ -108,7 +107,6 @@ public class QueryAnsweringTest {
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)
-                .enableTestMode()
                 .build();
 
         try {
@@ -169,7 +167,6 @@ public class QueryAnsweringTest {
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)
-                .enableTestMode()
                 .build();
 
         try {

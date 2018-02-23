@@ -24,11 +24,10 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.atom.PredicateConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.datalog.impl.MutableQueryModifiersImpl;
 
 import java.util.Arrays;
 import java.util.List;

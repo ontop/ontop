@@ -23,6 +23,10 @@ mappingId	Countries5
 target		:Country5-{COL} a :Country5 . 
 source		select "primary_key" col FROM countries
 
+mappingId	CountriesUnknown
+target		:CountryNo-{country_name} a :NoCountry .
+source		select country_name  FROM "unknown-countries"
+
 
 ]]
 

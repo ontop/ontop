@@ -48,7 +48,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, children, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
+        this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }
 
     @Override
@@ -82,6 +82,18 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
                     .orElseGet(() -> constraint
                             .map(this::propagateDownConstraint)
                             .orElse(this));
+
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChildren()))
+                    .orElse(this);
 
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));

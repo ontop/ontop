@@ -41,11 +41,11 @@ import java.util.stream.Stream;
 public class ExpressionParser {
 
     private final QuotedIDFactory idfac;
-    private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+    private final ImmutableMap<QualifiedAttributeID, Term> attributes;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
 
-    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Variable> attributes,
+    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Term> attributes,
                             TermFactory termFactory, TypeFactory typeFactory) {
         this.idfac = idfac;
         this.attributes = attributes;
@@ -87,7 +87,7 @@ public class ExpressionParser {
         // concurrent evaluation is not possible
         private ImmutableList<Function> result;
 
-        BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
             termVisitor = new TermVisitor(attributes);
         }
 
@@ -680,13 +680,13 @@ public class ExpressionParser {
      */
     private class TermVisitor implements ExpressionVisitor {
 
-        private final ImmutableMap<QualifiedAttributeID, Variable> attributes;
+        private final ImmutableMap<QualifiedAttributeID, Term> attributes;
 
         // CAREFUL: this variable gets reset in each visit method implementation
         // concurrent evaluation is not possible
         private Term result;
 
-        TermVisitor(ImmutableMap<QualifiedAttributeID, Variable> attributes) {
+        TermVisitor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
             this.attributes = attributes;
         }
 
@@ -870,7 +870,7 @@ public class ExpressionParser {
                     ? idfac.createRelationID(table.getSchemaName(), table.getName())
                     : null;
             QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
-            Variable var = attributes.get(qa);
+            Term var = attributes.get(qa);
 
             if (var == null) {
                 // can be

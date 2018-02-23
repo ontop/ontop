@@ -4,24 +4,31 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.datalog.impl.IntermediateQuery2DatalogTranslatorImpl;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.datalog.impl.MutableQueryModifiersImpl;
+import it.unibz.inf.ontop.datalog.impl.OrderByLifter;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class TemporalIntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator{
     private final TemporalIntermediateQueryFactory iqFactory;
@@ -29,6 +36,8 @@ public class TemporalIntermediateQuery2DatalogTranslatorImpl implements Intermed
     private final SubstitutionFactory substitutionFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;;
+    private final OrderByLifter orderByLifter;
+    private final IQConverter iqConverter;
 
 private static class RuleHead {
     public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -51,13 +60,15 @@ private static class RuleHead {
 
     @Inject
     private TemporalIntermediateQuery2DatalogTranslatorImpl(TemporalIntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-                                                    SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-                                                    ImmutabilityTools immutabilityTools) {
+                                                            SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
+                                                            ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter, IQConverter iqConverter) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
+        this.orderByLifter = orderByLifter;
+        this.iqConverter = iqConverter;
         this.subQueryCounter = 0;
         this.dummyPredCounter = 0;
     }
@@ -70,21 +81,15 @@ private static class RuleHead {
      * with y > subqueryCounter.
      */
     @Override
-    public DatalogProgram translate(IntermediateQuery query) {
-        QueryNode root = query.getRootNode();
+    public DatalogProgram translate(IntermediateQuery initialQuery) {
 
-        Optional<ImmutableQueryModifiers> optionalModifiers =  Optional.of(root)
-                .filter(r -> r instanceof ConstructionNode)
-                .map(r -> (ConstructionNode)r)
-                .flatMap(ConstructionNode::getOptionalModifiers);
+        IntermediateQuery orderLiftedQuery = liftOrderBy(initialQuery);
+        Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(orderLiftedQuery);
 
+        // Mutable
         DatalogProgram dProgram;
         if (optionalModifiers.isPresent()){
-            QueryModifiers immutableQueryModifiers = optionalModifiers.get();
-
-            // Mutable modifiers (used by the Datalog)
-            MutableQueryModifiers mutableModifiers = new MutableQueryModifiersImpl(immutableQueryModifiers);
-            // TODO: support GROUP BY (distinct QueryNode)
+            MutableQueryModifiers mutableModifiers = optionalModifiers.get();
 
             dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
         }
@@ -92,25 +97,160 @@ private static class RuleHead {
             dProgram = datalogFactory.getDatalogProgram();
         }
 
-        translate(query,  dProgram, root);
+        normalizeIQ(orderLiftedQuery)
+                .forEach(q -> translate(q,  dProgram));
 
         return dProgram;
     }
 
+     /* Assumes that ORDER BY is ABOVE the first construction node
+	 * and the order between these operators is respected and they appear ONE time maximum
+	 */
+    private Optional<MutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
+        QueryNode rootNode = query.getRootNode();
+        if (rootNode instanceof QueryModifierNode) {
+            Optional<SliceNode> sliceNode = Optional.of(rootNode)
+                    .filter(n -> n instanceof SliceNode)
+                    .map(n -> (SliceNode)n);
+
+            QueryNode firstNonSliceNode = sliceNode
+                    .flatMap(query::getFirstChild)
+                    .orElse(rootNode);
+
+            Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceNode)
+                    .filter(n -> n instanceof DistinctNode)
+                    .map(n -> (DistinctNode) n);
+
+            QueryNode firstNonSliceDistinctNode = distinctNode
+                    .flatMap(query::getFirstChild)
+                    .orElse(firstNonSliceNode);
+
+            Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctNode)
+                    .filter(n -> n instanceof OrderByNode)
+                    .map(n -> (OrderByNode) n);
+
+            MutableQueryModifiers mutableQueryModifiers = new MutableQueryModifiersImpl();
+
+            sliceNode.ifPresent(n -> {
+                n.getLimit()
+                        .ifPresent(mutableQueryModifiers::setLimit);
+                long offset = n.getOffset();
+                if (offset > 0)
+                    mutableQueryModifiers.setOffset(offset);
+            });
+
+            if(distinctNode.isPresent())
+                mutableQueryModifiers.setDistinct();
+
+            orderByNode
+                    .ifPresent(n -> n.getComparators()
+                            .forEach(c -> convertOrderComparator(c, mutableQueryModifiers)));
+
+            return Optional.of(mutableQueryModifiers);
+        }
+        else
+            return Optional.empty();
+    }
+
+    private static void convertOrderComparator(OrderByNode.OrderComparator comparator,
+                                               MutableQueryModifiers queryModifiers) {
+        NonGroundTerm term = comparator.getTerm();
+        if (term instanceof Variable)
+            queryModifiers.addOrderCondition((Variable) term,
+                    comparator.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING);
+        else
+            // TODO: throw a better exception
+            throw new IllegalArgumentException("The Datalog representation only supports variable in order conditions");
+    }
+
+
+
+
+    /**
+     * Move ORDER BY above the highest construction node (required by Datalog)
+     */
+    private IntermediateQuery liftOrderBy(IntermediateQuery iq) {
+        QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(iq);
+        if (iq.getFirstChild(topNonQueryModifierNode)
+                .filter(c -> c instanceof OrderByNode)
+                .isPresent()) {
+            return orderByLifter.liftOrderBy(iq);
+        }
+        return iq;
+    }
+
+    /**
+     * Assumes that ORDER BY is ABOVE the first construction node
+     */
+    private QueryNode getFirstNonQueryModifierNode(IntermediateQuery query) {
+        // Non-final
+        QueryNode queryNode = query.getRootNode();
+        while (queryNode instanceof QueryModifierNode) {
+            queryNode = query.getFirstChild(queryNode).get();
+        }
+        return queryNode;
+    }
+
+    private ImmutableList<IntermediateQuery> normalizeIQ(IntermediateQuery query) {
+        IQTree tree = iqConverter.convert(query).getTree();
+        while(tree.getRootNode() instanceof QueryModifierNode){
+            tree = ((UnaryIQTree)tree).getChild();
+        }
+        return splitRootUnion(tree)
+                .map(t -> enforceRootCn(t))
+                .map(t -> convertAndCopyMetadata(t, query))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private Stream<IQTree> splitRootUnion(IQTree tree) {
+        return (tree.getRootNode() instanceof UnionNode) ?
+                tree.getChildren().stream() :
+                Stream.of(tree);
+    }
+
+    private IQTree enforceRootCn(IQTree tree) {
+        return (tree.getRootNode() instanceof ConstructionNode)?
+                tree:
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(tree.getVariables()),
+                        tree
+                );
+    }
+
+    private IntermediateQuery convertAndCopyMetadata(IQTree tree, IntermediateQuery query) {
+        try {
+            return iqConverter.convert(
+                    iqFactory.createIQ(
+                            query.getProjectionAtom(),
+                            tree
+                    ),
+                    query.getDBMetadata(),
+                    query.getExecutorRegistry()
+            );
+        } catch (EmptyQueryException e) {
+            throw new DatalogConversionException("The query should not become empty");
+        }
+    }
+
     /**
      * Translate a given IntermediateQuery query object to datalog program.
+     * Note that (the object ref of the) datalog program is passed as argument
      *
+     * Assumption: the root is a construction node
      *
      * @return Datalog program that represents the construction of the SPARQL
      *         query.
      */
-    private void translate(IntermediateQuery query, DatalogProgram pr, QueryNode root) {
+    private void translate(IntermediateQuery query, DatalogProgram pr) {
+        QueryNode root = query.getRootNode();
+        if(!(root instanceof ConstructionNode)){
+            throw new DatalogConversionException("the root is expected to be a Construction Node");
+        }
 
+        ConstructionNode rootCn = (ConstructionNode) root;
         Queue<RuleHead> heads = new LinkedList<>();
 
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(root)
-                .filter(r -> r instanceof ConstructionNode)
-                .map(r -> (ConstructionNode) r)
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(rootCn)
                 .map(ConstructionNode::getSubstitution)
                 .orElseGet(substitutionFactory::getSubstitution);
 

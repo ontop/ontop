@@ -22,7 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
@@ -207,7 +207,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
     public List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, atomFactory, termFactory));
         return ImmutableList.copyOf(parsers);
     }
 

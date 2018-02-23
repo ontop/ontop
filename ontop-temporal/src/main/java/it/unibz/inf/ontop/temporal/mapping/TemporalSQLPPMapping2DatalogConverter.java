@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.TemporalRDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
@@ -57,7 +58,7 @@ public class TemporalSQLPPMapping2DatalogConverter {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
                 List<Function> body;
-                ImmutableMap<QualifiedAttributeID, Variable> lookupTable;
+                ImmutableMap<QualifiedAttributeID, Term> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
@@ -127,10 +128,11 @@ public class TemporalSQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Variable> attributes,
-                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
+    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
+                                     QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
+
         for (Term term : terms) {
             Term newTerm;
             if (term instanceof Variable) {

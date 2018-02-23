@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
+import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
@@ -34,12 +35,12 @@ import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASyntaxParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
-import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -186,7 +186,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			if (invalidPredicates.isEmpty()) {
 				try {
 					OBDAModel mapcon = obdaModel;
-					URI sourceID = dataSource.getSourceID();
 
 					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
 
@@ -199,9 +198,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 						mapcon.addTriplesMap(newmapping, false);
 					} else {
 						// Case when we are updating an existing mapping
-						mapcon.updateMappingsSourceQuery(sourceID, newId, body);
-						mapcon.updateTargetQueryMapping(sourceID, newId, targetQuery);
-						mapcon.updateMapping(sourceID, mapping.getId(), txtMappingID.getText().trim());
+						mapcon.updateMappingsSourceQuery(mapping.getId(), body);
+						mapcon.updateTargetQueryMapping(mapping.getId(), targetQuery);
+						mapcon.updateMapping(mapping.getId(), newId);
 					}
 				} catch (DuplicateMappingException e) {
 					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
@@ -588,7 +587,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private SQLPPTriplesMap mapping;
 
 	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
+        TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
 				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
 		try {
 			return textParser.parse(query);

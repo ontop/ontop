@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 
 import java.sql.Types;
 import java.util.*;
@@ -363,7 +363,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 				.map(RelationID::getSQLRendering)
 				.collect(Collectors.toSet());
 
-		return nameViewOrVariable(prefix, tableName, suffix, viewNames, false);
+		return nameViewOrVariable(prefix, tableName, suffix, viewNames, true);
 	}
 
 	/**

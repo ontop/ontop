@@ -381,6 +381,20 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
         }
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+        TemporalJoinNode newJoinNode = getOptionalFilterCondition()
+                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(iqFactory::createTemporalJoinNode)
+                .orElseGet(iqFactory::createTemporalJoinNode);
+
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createNaryIQTree(newJoinNode, newChildren);
+    }
+
     private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
         return children.stream()
                 .flatMap(c -> c.getVariables().stream())

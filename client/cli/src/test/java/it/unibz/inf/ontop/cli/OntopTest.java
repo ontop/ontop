@@ -23,6 +23,11 @@ public class OntopTest {
     }
 
     @Test
+    public void testOntopHelpMaterialize(){
+        Ontop.main("help", "materialize");
+    }
+
+    @Test
     public void testOntopHelpMapping_ToR2rml(){
         Ontop.main("help", "mapping", "to-r2rml");
     }

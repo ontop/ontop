@@ -228,6 +228,20 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> updatedProjectedVariables = constructionTools.computeNewProjectedVariables(
+                descendingSubstitution, projectedVariables);
+
+        ImmutableList<IQTree> updatedChildren = children.stream()
+                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
+        return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+    }
+
 
     /**
      * Has at least two children
@@ -253,7 +267,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (mergedSubstitution.isEmpty()) {
             return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareLifted());
         }
-
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, mergedSubstitution);
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
@@ -301,14 +314,17 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     /**
      * Compare and combine the bindings, returning only the compatible (partial) values.
-     * In case of variable, we generate and return a new variable to avoid inconsistency during propagation
      *
      */
     private Optional<ImmutableTerm> combineDefinitions(ImmutableTerm d1, ImmutableTerm d2,
                                                        VariableGenerator variableGenerator,
                                                        boolean topLevel) {
         if (d1.equals(d2)) {
-            return Optional.of(d1);
+            return Optional.of(
+                    // Top-level var-to-var must not be renamed since they are about projected variables
+                    (d1.isGround() || (topLevel && (d1 instanceof Variable)))
+                            ? d1
+                            : replaceVariablesByFreshOnes((NonGroundTerm)d1, variableGenerator));
         }
         else if (d1 instanceof Variable)  {
             return topLevel
@@ -356,19 +372,26 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         }
     }
 
+    private NonGroundTerm replaceVariablesByFreshOnes(NonGroundTerm term, VariableGenerator variableGenerator) {
+        if (term instanceof Variable)
+            return variableGenerator.generateNewVariableFromVar((Variable) term);
+        NonGroundFunctionalTerm functionalTerm = (NonGroundFunctionalTerm) term;
+
+        return termFactory.getNonGroundFunctionalTerm(functionalTerm.getFunctionSymbol(),
+                    functionalTerm.getArguments().stream()
+                        .map(a -> a.isGround()
+                                ? a
+                                // RECURSIVE
+                                : replaceVariablesByFreshOnes((NonGroundTerm) a, variableGenerator))
+                        .collect(ImmutableCollectors.toList()));
+    }
+
     /**
      * TODO: find a better name
      */
     private IQTree updateChild(UnaryIQTree liftedChildTree, ImmutableSubstitution<ImmutableTerm> mergedSubstitution,
                                ImmutableSet<Variable> projectedVariables) {
         ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
-
-        /*
-         * TODO: remove this test after removing the query modifiers from the construction nodes
-         */
-        if (constructionNode.getOptionalModifiers().isPresent())
-            throw new UnsupportedOperationException("ConstructionNodes with query modifiers are not supported " +
-                    "under a union node");
 
         ConstructionNodeTools.NewSubstitutionPair substitutionPair = constructionTools.traverseConstructionNode(
                 mergedSubstitution, constructionNode.getSubstitution(),
@@ -398,9 +421,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private IQTree projectAwayUnnecessaryVariables(IQTree child, IQProperties currentIQProperties) {
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
-
-            if (constructionNode.getOptionalModifiers().isPresent())
-                return child;
 
             AscendingSubstitutionNormalization normalization = normalizeAscendingSubstitution(
                     constructionNode.getSubstitution(), projectedVariables);

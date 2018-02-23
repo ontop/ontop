@@ -93,7 +93,7 @@ public class PullVariableOutOfSubTreeExecutorImpl<N extends JoinLikeNode> implem
                                                 IntermediateQuery query, QueryTreeComponent treeComponent) {
 
         IQTree propagatedSubTree = iqConverter.convertTree(query, originalSubTreeNode)
-                .applyDescendingSubstitution(substitution, Optional.empty());
+                .applyDescendingSubstitutionWithoutOptimizing(substitution);
 
         return treeComponent.replaceSubTreeByIQ(originalSubTreeNode, propagatedSubTree);
     }

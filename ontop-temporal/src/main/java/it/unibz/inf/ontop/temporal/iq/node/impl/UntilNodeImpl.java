@@ -119,6 +119,11 @@ public class UntilNodeImpl extends TemporalOperatorWithRangeImpl implements Unti
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree leftChild, IQTree rightChild) {
+        return null;
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild) {
         return false;
     }

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.OClass;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -27,24 +28,24 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class ClassImpl implements OClass {
 
-	private static final long serialVersionUID = -4930755519806785384L;
 	private static final RDF RDF_FACTORY = new SimpleRDF();
 
 	private final IRI iri;
 	private final String name;
 	private final boolean isNothing, isThing;
-
-	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
-	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
 	
-    public static final OClass owlThing = new ClassImpl(owlThingIRI); 
-    public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
+    public static final OClass owlThing = new ClassImpl(OWL.THING);
+    public static final OClass owlNothing = new ClassImpl(OWL.NOTHING);
 
 	ClassImpl(String name) {
-		this.iri = RDF_FACTORY.createIRI(name);
-		this.name = name;
-		this.isNothing = name.equals(owlNothingIRI);
-		this.isThing = name.equals(owlThingIRI);
+		this(RDF_FACTORY.createIRI(name));
+	}
+
+	ClassImpl(IRI iri) {
+		this.iri = iri;
+		this.name = iri.getIRIString();
+		this.isNothing = iri.equals(OWL.NOTHING);
+		this.isThing = iri.equals(OWL.THING);
 	}
 
 	@Override

@@ -48,5 +48,20 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     @Override
     public TrueNode transform(TrueNode trueNode) { return trueNode; }
 
+    @Override
+    public DistinctNode transform(DistinctNode distinctNode) {
+        return distinctNode;
+    }
+
+    @Override
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode;
+    }
+
+    @Override
+    public OrderByNode transform(OrderByNode orderByNode) {
+        return orderByNode;
+    }
+
 }
 

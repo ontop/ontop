@@ -263,6 +263,16 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        FilterNode newFilterNode = iqFactory.createFilterNode(
+                descendingSubstitution.applyToBooleanExpression(getFilterCondition()));
+
+        return iqFactory.createUnaryIQTree(newFilterNode,
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
 
     /**
      * TODO: let the filter node simplify (interpret) expressions in the lifted substitution

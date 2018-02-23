@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.model.term.*;
@@ -1026,7 +1025,7 @@ public class TemporalOneShotSQLGeneratorEngine {
                         : sqladapter.sqlCast(arg, Types.VARCHAR);
                 // empty placeholder: the correct uri is in the column of DB no need to replace
                 vex.add((split.length > 0 && isIRISafeEncodingEnabled)
-                        ? sqladapter.strEncodeForUri(cast)
+                        ? sqladapter.iriSafeEncode(cast)
                         : cast);
                 if (i < split.length) { // fragment after the current {} (if it exists)
                     vex.add(sqladapter.getSQLLexicalFormString(split[i]));
@@ -1292,7 +1291,7 @@ public class TemporalOneShotSQLGeneratorEngine {
         }
         else if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
             String literal = getSQLString(function.getTerm(0), index, false);
-            return sqladapter.strEncodeForUri(literal);
+            return sqladapter.iriSafeEncode(literal);
         }
         else if (functionSymbol == ExpressionOperation.UCASE) {
             String literal = getSQLString(function.getTerm(0), index, false);

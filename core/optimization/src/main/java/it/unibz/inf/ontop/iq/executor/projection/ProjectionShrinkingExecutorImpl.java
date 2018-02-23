@@ -35,7 +35,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
     public NodeCentricOptimizationResults<ExplicitVariableProjectionNode> apply(ProjectionShrinkingProposal proposal,
                                                                                 IntermediateQuery query,
                                                                                 QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
 
         ExplicitVariableProjectionNode focusNode = proposal.getFocusNode();
         ImmutableSet<Variable> retainedVariables = proposal.getRetainedVariables();
@@ -55,8 +55,7 @@ public class ProjectionShrinkingExecutorImpl implements ProjectionShrinkingExecu
 
                 ConstructionNode replacingNode = iqFactory.createConstructionNode(
                         retainedVariables,
-                        substitutionFactory.getSubstitution(shrinkedMap),
-                        ((ConstructionNode) focusNode).getOptionalModifiers()
+                        substitutionFactory.getSubstitution(shrinkedMap)
                 );
                 treeComponent.replaceNode(focusNode, replacingNode);
                 return new NodeCentricOptimizationResultsImpl<>(query, replacingNode);

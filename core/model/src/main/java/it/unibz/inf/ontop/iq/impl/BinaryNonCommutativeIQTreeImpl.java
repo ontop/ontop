@@ -51,7 +51,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
                                            OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, new IQPropertiesImpl(), iqTreeTools, iqFactory, settings);
+        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }
 
     @Override
@@ -94,6 +94,17 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                             .map(this::propagateDownConstraint)
                             .orElse(this));
 
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, leftChild, rightChild))
+                    .orElse(this);
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }

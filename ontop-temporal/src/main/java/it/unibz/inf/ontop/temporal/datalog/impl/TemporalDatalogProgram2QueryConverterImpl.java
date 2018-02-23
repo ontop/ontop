@@ -4,19 +4,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
+import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -125,6 +120,7 @@ public class TemporalDatalogProgram2QueryConverterImpl implements TemporalDatalo
 
         return intermediateQuery;
     }
+
 
     private static ImmutableSet<IntensionalDataNode> findIntensionalDataNodes(IntermediateQuery query,
                                                                               DataAtom subQueryProjectionAtom) {

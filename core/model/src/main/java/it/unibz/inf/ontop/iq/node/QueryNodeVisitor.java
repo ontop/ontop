@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.iq.node;
 
-import it.unibz.inf.ontop.iq.node.*;
-
 /**
  * Visits QueryNodes without having effect on them and the intermediate query.
  *
@@ -27,4 +25,10 @@ public interface QueryNodeVisitor {
     void visit(EmptyNode emptyNode);
 
     void visit(TrueNode trueNode);
+
+    void visit(DistinctNode distinctNode);
+
+    void visit(SliceNode sliceNode);
+
+    void visit(OrderByNode orderByNode);
 }
