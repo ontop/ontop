@@ -10,7 +10,9 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -22,6 +24,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
+import java.sql.Types;
 import java.util.stream.Stream;
 
 public class MappingTestingTools {
@@ -53,6 +56,14 @@ public class MappingTestingTools {
     public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER;
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
+    public static final MappingUnionNormalizer MAPPING_UNION_NORMALIZER;
+
+
+    public static final RelationPredicate TABLE1_AR2;
+    public static final RelationPredicate TABLE2_AR2;
+    public static final RelationPredicate TABLE1_AR3;
+    public static final RelationPredicate TABLE2_AR3;
+    public static final RelationPredicate TABLE3_AR3;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -77,6 +88,7 @@ public class MappingTestingTools {
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
         INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IntermediateQuery2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
+        MAPPING_UNION_NORMALIZER = injector.getInstance(MappingUnionNormalizer.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
@@ -88,6 +100,17 @@ public class MappingTestingTools {
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
+
+        BasicDBMetadata dbMetadataWithPredicates = createDummyMetadata();
+        QuotedIDFactory idFactory = dbMetadataWithPredicates.getQuotedIDFactory();
+
+        TABLE1_AR2 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 1, 2);
+        TABLE2_AR2 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 2, 2);
+        TABLE1_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 4, 3);
+        TABLE2_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 5, 3);
+        TABLE3_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 6, 3);
+
+        dbMetadataWithPredicates.freeze();
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
@@ -96,5 +119,16 @@ public class MappingTestingTools {
 
     public static BasicDBMetadata createDummyMetadata() {
         return DEFAULT_DUMMY_DB_METADATA.clone();
+    }
+
+
+    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
+                                                             int tableNumber, int arity) {
+        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+                "TABLE" + tableNumber + "AR" + arity));
+        for (int i=1 ; i <= arity; i++) {
+            tableDef.addAttribute(idFactory.createAttributeID("col" + i), Types.VARCHAR, null, false);
+        }
+        return tableDef.getAtomPredicate();
     }
 }
