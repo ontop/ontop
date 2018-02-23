@@ -37,7 +37,6 @@ public class TestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
-    public static final MappingNormalizer MAPPING_NORMALIZER;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
@@ -64,7 +63,6 @@ public class TestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
-        MAPPING_NORMALIZER = injector.getInstance(MappingNormalizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);

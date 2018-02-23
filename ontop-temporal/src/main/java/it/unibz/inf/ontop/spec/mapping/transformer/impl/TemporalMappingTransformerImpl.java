@@ -21,7 +21,7 @@ import java.util.Optional;
 public class TemporalMappingTransformerImpl implements TemporalMappingTransformer {
 
     private final MappingCanonicalRewriter mappingCanonicalRewriter;
-    private final MappingNormalizer mappingNormalizer;
+    private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
     private final ABoxFactIntoMappingConverter factConverter;
     private final MappingMerger mappingMerger;
@@ -34,7 +34,7 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
 
     @Inject
     private TemporalMappingTransformerImpl(MappingCanonicalRewriter mappingCanonicalRewriter,
-                                           MappingNormalizer mappingNormalizer,
+                                           MappingVariableNameNormalizer mappingNormalizer,
                                            MappingSaturator mappingSaturator,
                                            ABoxFactIntoMappingConverter inserter,
                                            MappingMerger mappingMerger,
@@ -95,7 +95,6 @@ public class TemporalMappingTransformerImpl implements TemporalMappingTransforme
 
     @Override
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
-
         if (ontology.isPresent()) {
             Mapping factsAsMapping = factConverter.convert(ontology.get().abox(), mapping.getExecutorRegistry(),
                     settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
