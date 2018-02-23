@@ -266,6 +266,25 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                              IQTree leftChild, IQTree rightChild) {
+        if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
+            return transformIntoInnerJoinTree(leftChild, rightChild)
+                    .applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+
+        IQTree newLeftChild = leftChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+        IQTree newRightChild = rightChild.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+
+        LeftJoinNode newLJNode = getOptionalFilterCondition()
+                .map(descendingSubstitution::applyToBooleanExpression)
+                .map(iqFactory::createLeftJoinNode)
+                .orElse(this);
+
+        return iqFactory.createBinaryNonCommutativeIQTree(newLJNode, newLeftChild, newRightChild);
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild) {
         return Stream.of(leftChild, rightChild)
                 .anyMatch(c -> c.isConstructed(variable));

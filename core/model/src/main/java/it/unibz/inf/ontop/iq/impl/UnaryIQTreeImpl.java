@@ -74,6 +74,18 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, getChild()))
+                    .orElse(this);
+
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    @Override
     public boolean isConstructed(Variable variable) {
         return getVariables().contains(variable)
                 && getRootNode().isConstructed(variable, getChild());

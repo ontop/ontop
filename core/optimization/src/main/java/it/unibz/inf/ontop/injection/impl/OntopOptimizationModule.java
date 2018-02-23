@@ -62,7 +62,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(IntermediateQuery2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
-        bindFromSettings(MappingUnionNormalizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

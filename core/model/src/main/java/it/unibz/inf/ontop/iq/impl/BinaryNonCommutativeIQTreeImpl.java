@@ -102,6 +102,17 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        try {
+            return normalizeDescendingSubstitution(descendingSubstitution)
+                    .map(s -> getRootNode().applyDescendingSubstitutionWithoutOptimizing(s, leftChild, rightChild))
+                    .orElse(this);
+        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
+            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
+        }
+    }
+
+    @Override
     public boolean isConstructed(Variable variable) {
         return getVariables().contains(variable)
                 && getRootNode().isConstructed(variable, leftChild, rightChild);

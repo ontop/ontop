@@ -265,6 +265,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         } catch (UnsatisfiableConditionException e) {
             return iqFactory.createEmptyNode(newlyProjectedVariables);
         }
+    }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        FilterNode newFilterNode = iqFactory.createFilterNode(
+                descendingSubstitution.applyToBooleanExpression(getFilterCondition()));
+
+        return iqFactory.createUnaryIQTree(newFilterNode,
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
     }
 }

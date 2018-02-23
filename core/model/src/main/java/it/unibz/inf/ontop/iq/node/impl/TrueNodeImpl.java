@@ -101,7 +101,7 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    protected IQTree applyDescendingSubstitution(
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         return this;
     }

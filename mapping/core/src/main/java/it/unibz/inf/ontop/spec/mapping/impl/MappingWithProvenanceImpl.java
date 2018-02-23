@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -25,18 +26,21 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     private final ExecutorRegistry executorRegistry;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final MappingIQNormalizer mappingIQNormalizer;
 
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
                                       @Assisted ExecutorRegistry executorRegistry,
                                       SpecificationFactory specFactory,
-                                      UnionBasedQueryMerger queryMerger) {
+                                      UnionBasedQueryMerger queryMerger,
+                                      MappingIQNormalizer mappingIQNormalizer) {
         this.provenanceMap = provenanceMap;
         this.mappingMetadata = mappingMetadata;
         this.executorRegistry = executorRegistry;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
+        this.mappingIQNormalizer = mappingIQNormalizer;
     }
 
     @Override
@@ -66,18 +70,13 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
 
         return specFactory.createMapping(mappingMetadata, definitionMap, executorRegistry);
 
-    }
-
-    @Override
-    public MappingWithProvenance newMappingWithProvenance(
-            ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> newProvenanceMap) {
-        return new MappingWithProvenanceImpl(newProvenanceMap, mappingMetadata, executorRegistry, specFactory, queryMerger);
     }
 
     @Override

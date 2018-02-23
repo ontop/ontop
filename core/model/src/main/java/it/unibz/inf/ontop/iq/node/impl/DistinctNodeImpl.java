@@ -126,6 +126,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        return iqFactory.createUnaryIQTree(this,
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
+    @Override
     public boolean isDistinct(IQTree child) {
         return true;
     }

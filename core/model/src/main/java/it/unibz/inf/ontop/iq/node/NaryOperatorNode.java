@@ -25,6 +25,10 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children);
 
+    IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+            ImmutableList<IQTree> children);
+
     ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children);
 
     boolean isConstructed(Variable variable, ImmutableList<IQTree> children);

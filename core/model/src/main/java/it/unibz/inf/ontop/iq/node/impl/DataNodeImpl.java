@@ -47,7 +47,7 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     }
 
     @Override
-    protected IQTree applyDescendingSubstitution(
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
         return newAtom(newAtom);

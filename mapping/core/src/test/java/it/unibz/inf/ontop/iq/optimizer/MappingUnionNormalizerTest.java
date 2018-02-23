@@ -13,14 +13,14 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
-import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static junit.framework.TestCase.assertTrue;
 
 public class MappingUnionNormalizerTest {
 
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans", 2);
+    private final static Variable A = TERM_FACTORY.getVariable("a");
     private final static Variable W = TERM_FACTORY.getVariable("W");
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
@@ -32,13 +32,13 @@ public class MappingUnionNormalizerTest {
             (ANS2_PREDICATE, W, Z);
 
     private final static ExtensionalDataNode DATA_NODE1 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z)
+            ATOM_FACTORY.getDataAtom(TABLE1_AR3, X, Y, Z)
     );
     private final static ExtensionalDataNode DATA_NODE2 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE5_AR3, X, Y, Z)
+            ATOM_FACTORY.getDataAtom(TABLE2_AR3, X, Y, Z)
     );
     private final static ExtensionalDataNode DATA_NODE3 = IQ_FACTORY.createExtensionalDataNode(
-            ATOM_FACTORY.getDataAtom(TABLE6_AR3, X, Y, Z)
+            ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, Y, Z)
     );
     private final static ExtensionalDataNode DATA_NODE4 = IQ_FACTORY.createExtensionalDataNode(
             ATOM_FACTORY.getDataAtom(TABLE1_AR2, Y, Z)

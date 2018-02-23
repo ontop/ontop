@@ -27,8 +27,6 @@ public interface MappingWithProvenance {
      */
     Mapping toRegularMapping();
 
-    MappingWithProvenance newMappingWithProvenance(ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap);
-
     ExecutorRegistry getExecutorRegistry();
 
     MappingMetadata getMetadata();

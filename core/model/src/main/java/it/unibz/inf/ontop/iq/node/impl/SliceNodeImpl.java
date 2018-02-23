@@ -95,6 +95,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        return iqFactory.createUnaryIQTree(this,
+                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
+    @Override
     public boolean isDistinct(IQTree child) {
         return child.isDistinct();
     }
