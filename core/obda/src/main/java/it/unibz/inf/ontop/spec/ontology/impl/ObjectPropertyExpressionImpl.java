@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 import org.apache.commons.rdf.api.IRI;
@@ -52,11 +53,9 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	private final boolean isTop, isBottom;
 
 	private static final RDF RDF_FACTORY = new SimpleRDF();
-	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
-	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
 	
-	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI); 
-	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI);
+	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(OWL.TOP_OBJECT_PROPERTY);
+	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(OWL.BOTTOM_OBJECT_PROPERTY);
 
 	/**
 	 * general constructor 
@@ -65,11 +64,15 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	 */
 
 	ObjectPropertyExpressionImpl(String name) {
-		this.iri = RDF_FACTORY.createIRI(name);
+		this(RDF_FACTORY.createIRI(name));
+	}
+
+	ObjectPropertyExpressionImpl(IRI iri) {
+		this.iri = iri;
 		this.isInverse = false;
-		this.string = name;
-		this.isTop = name.equals(owlTopObjectPropertyIRI);
-		this.isBottom = name.equals(owlBottomObjectPropertyIRI);
+		this.string = iri.getIRIString();
+		this.isTop = iri.equals(OWL.TOP_OBJECT_PROPERTY);
+		this.isBottom = iri.equals(OWL.BOTTOM_OBJECT_PROPERTY);
 		if (isTop || isBottom) 
 			this.inverseProperty = this;   // rule [R6] 
 		else
@@ -77,6 +80,8 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
+
+
 
 	/**
 	 * special constructor for creating the inverse of an object property

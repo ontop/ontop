@@ -317,7 +317,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     try {
                         targetQuery = loadTargetQuery(targetString, parsers);
                     } catch (UnparsableTargetQueryException e) {
-                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString},
+                        invalidMappingIndicators.add(new Indicator(lineNumber, new String[] {mappingId, targetString, e.getMessage()},
                                 ERROR_PARSING_TARGET_QUERY));
                         isMappingValid = false;
                     }
@@ -402,7 +402,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASyntaxParser(prefixes, atomFactory, termFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, atomFactory, termFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

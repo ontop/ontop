@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.EncodeForURI;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -565,7 +565,10 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
 
-        String uri = EncodeForURI.decodeURIEscapeCodes(v.stringValue());
+        // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
+        // string of an IRI might be a part of an IRI template, but not from database value.
+         String uri = R2RMLIRISafeEncoder.decode(v.stringValue());
+        //String uri = v.stringValue();
 
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);

@@ -1,12 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.ConstructionNodeCleaningProposalImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.NodeCentricDepthFirstOptimizer;
@@ -40,7 +37,10 @@ import java.util.Optional;
  * and c' = c_1 otherwise.
  * Then replace in q the subtree rooted in c' by the subtree rooted in the child of c_n.
  * <p>
- * TODO: make it more robust (handle complex substitutions, modifiers) ?
+ *
+ * UPDATE: Old-style query modifier handling removed BUT NOT REPLACED
+ * TODO: mark it as deprecated?
+ *
  */
 public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<ConstructionNodeCleaningProposal> {
 
@@ -61,19 +61,9 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
     protected Optional<ConstructionNodeCleaningProposal> evaluateNode(QueryNode node, IntermediateQuery query) {
         if (node instanceof ConstructionNode) {
             ConstructionNode castNode = (ConstructionNode) node;
-            Optional<ImmutableQueryModifiers> optModifiers = castNode.getOptionalModifiers();
-            ImmutableQueryModifiers modifiers = optModifiers.isPresent() ?
-                    optModifiers.get() :
-                    new ImmutableQueryModifiersImpl(
-                            false,
-                            -1,
-                            -1,
-                            ImmutableList.of()
-                    );
             return makeProposal(
                     query,
                     castNode,
-                    modifiers,
                     castNode,
                     query.getFirstChild(castNode)
             );
@@ -83,30 +73,10 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
 
     private Optional<ConstructionNodeCleaningProposal> makeProposal(IntermediateQuery query,
                                                                     ConstructionNode constructionNodeChainRoot,
-                                                                    ImmutableQueryModifiers modifiers,
                                                                     ConstructionNode currentParentNode,
                                                                     Optional<QueryNode> currentChildNode) {
 
-        if (currentChildNode.isPresent() && currentChildNode.get() instanceof ConstructionNode) {
-            ConstructionNode castChild = (ConstructionNode) currentChildNode.get();
-            if (castChild.getSubstitution().isEmpty()) {
-                Optional<ImmutableQueryModifiers> combinedModifiers = combineModifiers(
-                        modifiers,
-                        castChild.getOptionalModifiers()
-                );
-                if (combinedModifiers.isPresent()) {
-                    return makeProposal(
-                            query,
-                            constructionNodeChainRoot,
-                            combinedModifiers.get(),
-                            castChild,
-                            query.getFirstChild(castChild)
-                    );
-                }
-            }
-        }
-
-        boolean deleteConstructionNodeChain = modifiers.isIdle() &&
+        boolean deleteConstructionNodeChain =
                 constructionNodeChainRoot.getSubstitution().isEmpty() &&
                 !constructionNodeChainRoot.equals(query.getRootNode());
 
@@ -118,24 +88,10 @@ public class ConstructionNodeCleaner extends NodeCentricDepthFirstOptimizer<Cons
         return Optional.of(
                 new ConstructionNodeCleaningProposalImpl(
                         constructionNodeChainRoot,
-                        modifiers.isIdle() ?
-                                Optional.empty() :
-                                Optional.of(modifiers),
                         currentChildNode.isPresent() ?
                                 currentChildNode.get() :
                                 currentParentNode,
                         deleteConstructionNodeChain
                 ));
-    }
-
-    private Optional<ImmutableQueryModifiers> combineModifiers(ImmutableQueryModifiers parentModifiers,
-                                                               Optional<ImmutableQueryModifiers> optChildModifiers) {
-        if (optChildModifiers.isPresent()) {
-            return ImmutableQueryModifiersImpl.merge(
-                    parentModifiers,
-                    optChildModifiers.get()
-            );
-        }
-        return Optional.of(parentModifiers);
     }
 }

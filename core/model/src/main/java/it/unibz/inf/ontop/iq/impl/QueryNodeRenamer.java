@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,9 +71,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
-                renameSubstitution(constructionNode.getSubstitution()),
-                renameOptionalModifiers(constructionNode.getOptionalModifiers())
-                );
+                renameSubstitution(constructionNode.getSubstitution()));
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
@@ -90,13 +89,25 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return trueNode.clone();
     }
 
-    private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
-        if (optionalModifiers.isPresent()) {
-            return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
-        }
-        else {
-            return Optional.empty();
-        }
+    @Override
+    public DistinctNode transform(DistinctNode distinctNode) {
+        return iqFactory.createDistinctNode();
+    }
+
+    @Override
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode.clone();
+    }
+
+    @Override
+    public OrderByNode transform(OrderByNode orderByNode) {
+        ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
+                .map(c -> iqFactory.createOrderComparator(
+                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        c.isAscending()))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {

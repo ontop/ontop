@@ -31,7 +31,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
     @Override
     public PushUpBooleanExpressionResults apply(PushUpBooleanExpressionProposal proposal, IntermediateQuery query,
                                                 QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
         ImmutableExpression expressionToPropagate = proposal.getPropagatedExpression();
 
         /**
@@ -95,8 +95,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
         }
         if (replacedNode instanceof ConstructionNode) {
             return Optional.of(iqFactory.createConstructionNode(allProjectedVariablesBuilder.build(),
-                    ((ConstructionNode) replacedNode).getSubstitution(),
-                    ((ConstructionNode) replacedNode).getOptionalModifiers()));
+                    ((ConstructionNode) replacedNode).getSubstitution()));
         }
         throw new IllegalStateException("Unsupported node type");
 

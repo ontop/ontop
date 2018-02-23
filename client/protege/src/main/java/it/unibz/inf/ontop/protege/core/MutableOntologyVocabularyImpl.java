@@ -25,10 +25,8 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.ObjectPropertyExpressionImpl;
 import org.semanticweb.owlapi.model.IRI;
+import org.semarglproject.vocab.OWL;
 
 import java.util.*;
 import java.util.function.Function;
@@ -81,7 +79,6 @@ public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary 
 		public Iterator<Predicate> iterator() { return entities.values().iterator(); }
 	}
 
-	private final AtomFactory atomFactory;
 	private final MutableOntologyVocabularyCategoryImpl classes;
 
 	private final MutableOntologyVocabularyCategoryImpl objectProperties;
@@ -90,24 +87,21 @@ public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary 
 
 	// package only
 	MutableOntologyVocabularyImpl(AtomFactory atomFactory) {
-		this.atomFactory = atomFactory;
 		classes = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(ClassImpl.owlThingIRI, ClassImpl.owlNothingIRI),
-				c -> atomFactory.getClassPredicate(c));
+				ImmutableSet.of(OWL.THING, OWL.NOTHING),
+				atomFactory::getClassPredicate);
 
 		objectProperties = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI,
-						ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI),
-				c -> atomFactory.getObjectPropertyPredicate(c));
+				ImmutableSet.of(OWL.BOTTOM_OBJECT_PROPERTY, OWL.TOP_OBJECT_PROPERTY),
+				atomFactory::getObjectPropertyPredicate);
 
 		dataProperties = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(DataPropertyExpressionImpl.owlBottomDataPropertyIRI,
-						DataPropertyExpressionImpl.owlTopDataPropertyIRI),
-				c -> atomFactory.getDataPropertyPredicate(c));
+				ImmutableSet.of(OWL.BOTTOM_DATA_PROPERTY, OWL.TOP_DATA_PROPERTY),
+				atomFactory::getDataPropertyPredicate);
 
 		annotationProperties = new MutableOntologyVocabularyCategoryImpl(
 				ImmutableSet.of(),
-				c -> atomFactory.getAnnotationPropertyPredicate(c));
+				atomFactory::getAnnotationPropertyPredicate);
 	}
 
 	@Override

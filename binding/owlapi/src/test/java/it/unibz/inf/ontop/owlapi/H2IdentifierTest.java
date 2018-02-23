@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.owlapi;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -195,6 +193,13 @@ public class H2IdentifierTest {
 			reasoner.dispose();
 		}
 		return retval;
+	}
+
+	@Test
+	public void testLowerCaseTableWithSymbol() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE {?x a :NoCountry} ORDER BY ?x";
+		String val =  runQueryReturnIndividual(query);
+		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#CountryNo-Atlantis>", val);
 	}
 }
 

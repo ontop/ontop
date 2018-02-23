@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -228,10 +228,13 @@ public class TargetQueryRenderer {
 				sb.append(">");
 			}
 		
-		} else if (term instanceof ValueConstant) {
+		} else if (term instanceof ValueConstant ) {
 			sb.append("\"");
 			sb.append(((ValueConstant) term).getValue());
 			sb.append("\"");
+		}
+		else if (term instanceof BNode){
+			sb.append(((BNode) term).getName());
 		}
 		return sb.toString();
 	}

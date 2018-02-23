@@ -22,12 +22,14 @@ package it.unibz.inf.ontop.owlapi.resultset.impl;
 
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /***
  * A wrapper for TupleResultSet that presents the results as OWLAPI objects.
@@ -95,10 +97,8 @@ public class OntopTupleOWLResultSet implements TupleOWLResultSet {
     public OWLBindingSet next() throws OWLException {
         try {
             return new OntopOWLBindingSet(res.next());
-        } catch (OntopConnectionException e) {
+        } catch (OntopConnectionException | OntopResultConversionException | NoSuchElementException e) {
             throw new OntopOWLException(e);
-        }
-    }
-
-
+		}
+	}
 }

@@ -4,6 +4,12 @@ CREATE TABLE "COUNTRIES" (
 	"COUNTRY_NAME" VARCHAR(100)
 );
 
+CREATE TABLE "unknown-countries" (
+	"primary_key" INT,
+	PRIMARY KEY("primary_key"),
+	"COUNTRY_NAME" VARCHAR(100)
+);
+
 
 CREATE TABLE "movies" (
 	"Primary_Key" INT,
@@ -17,3 +23,6 @@ INSERT INTO COUNTRIES ("primary_key", COUNTRY_NAME)
              
 INSERT INTO "movies" ("Primary_Key", MOVIE_NAME)
               VALUES (2020, 'BladeRunner' );
+
+INSERT INTO "unknown-countries" ("primary_key", COUNTRY_NAME)
+              VALUES (1010, 'Atlantis' );
