@@ -113,5 +113,4 @@ public class TemporalPPMappingConverterImpl implements TemporalPPMappingConverte
         for (CQIE cq: unfoldingProgram)
             eqNormalizer.enforceEqualities(cq);
     }
-
 }
