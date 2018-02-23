@@ -117,14 +117,15 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
     }
 
     static abstract class OntopOBDAConfigurationBuilderMixin<B extends OntopOBDAConfiguration.Builder<B>>
-            extends DefaultOntopModelBuilderFragment<B>
             implements OntopOBDAConfiguration.Builder<B> {
 
         private final DefaultOntopOBDABuilderFragment<B> localBuilderFragment;
+        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
 
         OntopOBDAConfigurationBuilderMixin() {
             localBuilderFragment = new DefaultOntopOBDABuilderFragment<>(
                     (B) this, this::declareOBDASpecificationAssigned);
+            modelBuilderFragment = new DefaultOntopModelBuilderFragment<>((B) this);
         }
 
         @Override
@@ -138,12 +139,11 @@ public abstract class OntopOBDAConfigurationImpl extends OntopModelConfiguration
         }
 
         final OntopOBDAOptions generateOBDAOptions() {
-            return localBuilderFragment.generateOBDAOptions(generateModelOptions());
+            return localBuilderFragment.generateOBDAOptions(modelBuilderFragment.generateModelOptions());
         }
 
-        @Override
         protected Properties generateProperties() {
-            Properties properties = super.generateProperties();
+            Properties properties = modelBuilderFragment.generateProperties();
             properties.putAll(localBuilderFragment.generateProperties());
             return properties;
         }

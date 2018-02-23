@@ -20,7 +20,6 @@ import static junit.framework.TestCase.assertTrue;
 @Ignore("TODO: support it (and update it)")
 public class ConstructionNodeCleanerTest {
 
-    private static final ConstructionNodeCleaner constructionNodeCleaner = new ConstructionNodeCleaner();
 
     private final static AtomPredicate R1_PREDICATE = ATOM_FACTORY.getAtomPredicate("r1", 2);
     private final static AtomPredicate R2_PREDICATE = ATOM_FACTORY.getAtomPredicate("r2", 2);
@@ -46,6 +45,9 @@ public class ConstructionNodeCleanerTest {
 
     private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+
+    // TODO: choose an implementation
+    private static IntermediateQueryOptimizer constructionNodeCleaner = null;
 
 
     @Test
@@ -682,8 +684,7 @@ public class ConstructionNodeCleanerTest {
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(EMPTY_METADATA);
 
-        queryBuilder2.init(projectionAtom1, constructionNode1);
-        queryBuilder2.addChild(constructionNode1, unionNode1);
+        queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
         queryBuilder2.addChild(unionNode1, dataNode2);
         queryBuilder2.addChild(unionNode1, dataNode3);

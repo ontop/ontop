@@ -9,19 +9,13 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -43,32 +37,22 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
-    private final NoNullValueEnforcer noNullValueEnforcer;
-    private final MappingUnionNormalizer mappingUnionNormalizer;
+    private final MappingIQNormalizer mappingIQNormalizer;
     private final DatalogRule2QueryConverter datalogRule2QueryConverter;
-    private final BindingLiftOptimizer bindingLifter;
-    private final IQConverter iqConverter;
-
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
                                               SpecificationFactory specificationFactory,
                                               IntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory,
-                                              NoNullValueEnforcer noNullValueEnforcer,
-                                              MappingUnionNormalizer mappingUnionNormalizer,
-                                              DatalogRule2QueryConverter datalogRule2QueryConverter,
-                                              BindingLiftOptimizer bindingLifter,
-                                              IQConverter iqConverter) {
+                                              MappingIQNormalizer mappingIQNormalizer,
+                                              DatalogRule2QueryConverter datalogRule2QueryConverter){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
-        this.noNullValueEnforcer = noNullValueEnforcer;
-        this.mappingUnionNormalizer = mappingUnionNormalizer;
+        this.mappingIQNormalizer = mappingIQNormalizer;
         this.datalogRule2QueryConverter = datalogRule2QueryConverter;
-        this.bindingLifter = bindingLifter;
-        this.iqConverter = iqConverter;
     }
 
     @Override
@@ -98,7 +82,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 ))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(q -> normalizeMappingIQ(q))
+                .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q
@@ -118,6 +102,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .flatMap(Datalog2QueryTools::extractPredicates)
                 .collect(ImmutableCollectors.toSet());
 
+
         ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> Optional.of(
@@ -128,26 +113,9 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                         Optional.empty(),
                                         iqFactory,
                                         executorRegistry
-                                )).map(q -> normalizeMappingIQ(q)).get(),
+                                )).map(mappingIQNormalizer::normalize).get(),
                         Map.Entry::getValue
                 ));
-
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
-    }
-
-    private IntermediateQuery normalizeMappingIQ(IntermediateQuery query) {
-        IntermediateQuery queryAfterUnionNormalization;
-        try {
-            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-            IQ iqAfterUnionNormalization = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
-            queryAfterUnionNormalization = iqConverter.convert(
-                    iqAfterUnionNormalization,
-                    queryAfterBindingLift.getDBMetadata(),
-                    query.getExecutorRegistry()
-            );
-        } catch (EmptyQueryException e) {
-            throw new DatalogConversionException("The query should not become empty");
-        }
-        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
     }
 }

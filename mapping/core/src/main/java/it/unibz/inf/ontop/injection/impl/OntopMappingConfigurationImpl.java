@@ -257,6 +257,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         private final DefaultOntopMappingBuilderFragment<B> mappingBuilderFragment;
         private final DefaultOntopOptimizationBuilderFragment<B> optimizationBuilderFragment;
+        private final DefaultOntopModelBuilderFragment<B> modelBuilderFragment;
         private boolean isMappingDefined;
         private boolean isDBMetadataDefined;
 
@@ -265,6 +266,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             this.mappingBuilderFragment = new DefaultOntopMappingBuilderFragment<>(builder,
                     this::declareDBMetadataDefined);
             this.optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
+            this.modelBuilderFragment = new DefaultOntopModelBuilderFragment<>(builder);
             this.isMappingDefined = false;
             this.isDBMetadataDefined = false;
         }
@@ -317,6 +319,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
         protected Properties generateProperties() {
             Properties properties = new Properties();
             properties.putAll(super.generateProperties());
+            properties.putAll(modelBuilderFragment.generateProperties());
             properties.putAll(mappingBuilderFragment.generateProperties());
             properties.putAll(optimizationBuilderFragment.generateProperties());
 
@@ -358,6 +361,26 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
 
         protected final boolean isMappingDefined() {
             return isMappingDefined;
+        }
+
+        @Override
+        public B properties(@Nonnull Properties properties) {
+            return modelBuilderFragment.properties(properties);
+        }
+
+        @Override
+        public B propertyFile(String propertyFilePath) {
+            return modelBuilderFragment.propertyFile(propertyFilePath);
+        }
+
+        @Override
+        public B propertyFile(File propertyFile) {
+            return modelBuilderFragment.propertyFile(propertyFile);
+        }
+
+        @Override
+        public B enableTestMode() {
+            return modelBuilderFragment.enableTestMode();
         }
     }
 

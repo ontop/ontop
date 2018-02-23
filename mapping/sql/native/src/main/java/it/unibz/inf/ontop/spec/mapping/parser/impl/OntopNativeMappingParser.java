@@ -273,8 +273,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	                    sourceQuery = null;
 	                    targetQuery = null;
 	                }
+
+
             	}
-            	isMappingValid = true;
+            	else {
+                    isMappingValid = true;
+                }
             	continue;
             }
 

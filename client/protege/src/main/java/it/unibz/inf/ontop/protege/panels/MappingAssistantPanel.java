@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
@@ -35,9 +38,6 @@ import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -603,16 +603,22 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private ImmutableTerm createObjectTerm(String column, Predicate datatype) {
-		List<FormatString> columnStrings = parse(column);
-		if (columnStrings.size() > 1) {
-			throw new RuntimeException("Invalid column mapping: " + column);
+		ImmutableTerm object;
+		if(column.matches("\"([\\w.]+)?\"")){
+			object = termFactory.getConstantLiteral(column.substring(1, column.length()-1));
 		}
-		String columnName = columnStrings.get(0).toString();
-		Variable var = termFactory.getVariable(columnName);
+		else {
+			List<FormatString> columnStrings = parse(column);
+			if (columnStrings.size() > 1) {
+				throw new RuntimeException("Unsupported column mapping: " + column);
+			}
+			String columnName = columnStrings.get(0).toString();
+			object = termFactory.getVariable(columnName);
+		}
 		if (datatype == null) {
-			return var;
+			return object;
 		} else {
-			return termFactory.getImmutableFunctionalTerm(datatype, var);
+			return termFactory.getImmutableFunctionalTerm(datatype, object);
 		}
 	}
 
