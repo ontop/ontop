@@ -22,7 +22,10 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
@@ -929,7 +932,7 @@ public class OneShotSQLGeneratorEngine {
 		if (ht instanceof Variable) {
 			return index.getLangColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
-					.orElse("NULL");
+					.orElse(sqladapter.getNullForLang());
 		}
 		else {
 			return optionalTermType
@@ -940,7 +943,7 @@ public class OneShotSQLGeneratorEngine {
 										.map(tag -> getSQLString(tag, index, false))
 										.orElseThrow(() -> new IllegalStateException(
 												"Inconsistent term type: the language tag must be defined for any LANG_STRING"))))
-					.orElse("NULL");
+					.orElse(sqladapter.getNullForLang());
 		}
     }
 

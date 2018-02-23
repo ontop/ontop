@@ -148,4 +148,6 @@ public interface SQLDialectAdapter {
 	String nameView(String prefix, String tableName, String suffix, Collection<RelationID> views);
 
     String ifElseNull(String condition, String valueIfTrue);
+
+    String getNullForLang();
 }
