@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.generation.TemporalNativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.CalciteBasedSQLGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
 import it.unibz.inf.ontop.dbschema.DBMetadataMerger;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.*;
@@ -43,7 +45,8 @@ public class OntopTemporalPostModule extends OntopAbstractModule {
     protected void configure() {
         Module temporalTranslationFactoryModule = buildFactory(
                 ImmutableList.of(
-                        TemporalNativeQueryGenerator.class),
+                        TemporalNativeQueryGenerator.class,
+                        TemporalCalciteBasedSQLGenerator.class),
                 TemporalTranslationFactory.class);
         install(temporalTranslationFactoryModule);
 

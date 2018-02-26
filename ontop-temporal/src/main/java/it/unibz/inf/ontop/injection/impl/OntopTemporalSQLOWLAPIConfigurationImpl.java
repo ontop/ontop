@@ -219,6 +219,8 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
                     "it.unibz.inf.ontop.answering.reformulation.impl.TemporalQueryProcessor");
             standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.generation.TemporalNativeQueryGenerator",
                     "it.unibz.inf.ontop.answering.reformulation.generation.impl.TemporalSQLGenerator");
+            standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator",
+                    "it.unibz.inf.ontop.answering.reformulation.generation.calcite.impl.TemporalCalciteBasedSQLGeneratorImpl");
             OntopStandaloneSQLSettingsImpl standaloneSQLSettings =
                     new OntopStandaloneSQLSettingsImpl(standaloneProperties, isR2rml());
             return new OntopTemporalSQLOWLAPIConfigurationImpl(standaloneSQLSettings,

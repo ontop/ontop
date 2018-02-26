@@ -1,0 +1,946 @@
+package it.unibz.inf.ontop.answering.reformulation.generation.calcite.impl;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.CalciteBasedSQLGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.CalciteBasedSQLGeneratorImpl;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
+import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.injection.TemporalTranslationFactory;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
+import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.temporal.iq.node.*;
+import org.apache.calcite.adapter.jdbc.JdbcSchema;
+import org.apache.calcite.jdbc.*;
+import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.JoinRelType;
+import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
+import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rex.RexBuilder;
+import org.apache.calcite.rex.RexInputRef;
+import org.apache.calcite.rex.RexLiteral;
+import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.SqlDialectFactoryImpl;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
+import org.apache.calcite.sql.type.SqlTypeFamily;
+import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.calcite.tools.FrameworkConfig;
+import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.tools.RelBuilder;
+import org.apache.commons.rdf.simple.SimpleRDF;
+import org.eclipse.rdf4j.model.Literal;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.OBJECT;
+import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
+import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
+import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
+
+public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBasedSQLGenerator {
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TemporalCalciteBasedSQLGeneratorImpl.class);
+    private final RelDataTypeFactory typeFactory;
+    private final RexBuilder rexBuilder;
+    private final OntopSQLCredentialSettings settings;
+    private final PullOutVariableOptimizer pullOutVariableOptimizer;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final SimpleRDF rdfFactory;
+    private final TemporalTranslationFactory temporalTranslationFactory;
+
+    private SchemaPlus rootSchema = null;
+
+    private SqlDialect dialect;
+
+    @AssistedInject
+    private TemporalCalciteBasedSQLGeneratorImpl(@Assisted DBMetadata metadata,
+//                                    @Nullable IRIDictionary iriDictionary,
+                                                 OntopSQLCredentialSettings coreSettings,
+                                                 //JdbcTypeMapper jdbcTypeMapper,
+                                                 PullOutVariableOptimizer pullOutVariableOptimizer,
+                                                 TermFactory termFactory,
+                                                 SubstitutionFactory substitutionFactory, TemporalTranslationFactory temporalTranslationFactory) {
+
+        this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+        this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.temporalTranslationFactory = temporalTranslationFactory;
+        //this.rootSchema = new OntopSchemaPlus(metadata);
+        this.typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
+        this.rdfFactory = new SimpleRDF();
+        this.rexBuilder = new RexBuilder(typeFactory);
+        this.settings = coreSettings;
+        try {
+            this.rootSchema = configRootSchema(metadata);
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private SchemaPlus configRootSchema(DBMetadata metadata) throws ClassNotFoundException, SQLException {
+        Class.forName("org.apache.calcite.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:calcite:");
+        CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
+        SchemaPlus rootSchema = calciteConnection.getRootSchema();
+
+        CalciteJdbc41Factory fac = new  CalciteJdbc41Factory();
+        //CalciteConnection con  = fac.newConnection(new Driver(), fac, "jdbc:calcite:", new Properties(), (CalciteSchema) rootSchema, new JavaTypeFactoryImpl());
+
+//        DatabaseMetaData md = calciteConnection.getMetaData();
+//        ResultSet tables = md.getTables(null, null, "%", null);
+//        printResultSet(tables);
+
+//        JdbcDataSource ds = new JdbcDataSource();
+//        ds.setURL(settings.getJdbcUrl());
+//        ds.setUser(settings.getJdbcUser());
+//        ds.setPassword(settings.getJdbcPassword());
+
+
+        // use the original connection information to build a JDBC DatabaseMetaData
+        //dialect = SqlDialect.create(ds.getConnection().getMetaData());
+
+        Connection jdbcConnection = DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
+        dialect = new SqlDialectFactoryImpl().create(jdbcConnection.getMetaData());
+
+
+
+
+        final List<String> schemaNames = metadata.getDatabaseRelations()
+                .stream()
+                .map(databaseRelationDefinition -> databaseRelationDefinition.getID().getSchemaName())
+                .collect(toList());
+
+        Map<String, Object> operand = ImmutableMap.<String, Object>builder()
+                .put("jdbcUrl", settings.getJdbcUrl())
+                .put("jdbcDriver", settings.getJdbcDriver().orElse(""))
+                .put("jdbcUser", settings.getJdbcUser())
+                .put("jdbcPassword", settings.getJdbcPassword())
+                .build();
+
+        for (String schemaName : schemaNames) {
+            //final JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, schemaName, ds, null, schemaName);
+            final JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, schemaName, operand);
+            rootSchema.add(schemaName, jdbcSchema);
+        }
+
+        return rootSchema;
+    }
+
+    @Override
+    public ExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature) {
+        IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
+
+        final FrameworkConfig calciteFrameworkConfig = Frameworks.newConfigBuilder()
+                .defaultSchema(rootSchema)
+                .build();
+
+        final RelBuilder relBuilder = RelBuilder.create(calciteFrameworkConfig);
+
+        final NodeProcessor np = new NodeProcessor(normalizedQuery, relBuilder, signature);
+
+        normalizedQuery.getRootNode().acceptVisitor(np);
+
+        String sql = np.getSQL();
+
+        return new SQLExecutableQuery(sql, signature);
+    }
+
+    @Override
+    public ExecutableQuery generateEmptyQuery(ImmutableList<String> signature) {
+        return null;
+    }
+
+    private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
+
+        IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+                .optimize(intermediateQuery);
+        log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+
+        IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
+        log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+
+        return queryAfterPullOut;
+    }
+
+    @Override
+    public TemporalCalciteBasedSQLGenerator clone(DBMetadata dbMetadata) {
+        return temporalTranslationFactory.createSQLGenerator(dbMetadata);
+    }
+
+    public class NodeProcessor implements TemporalQueryNodeVisitor {
+
+        private final IntermediateQuery query;
+        private final RelBuilder relBuilder;
+        private final ImmutableList<Variable> signature;
+        private final ImmutableMap<Variable, Variable> IQ2answerVar;
+
+
+        public NodeProcessor(IntermediateQuery query, RelBuilder relBuilder, ImmutableList<String> signature) {
+            this.query = query;
+            this.relBuilder = relBuilder;
+            this.signature = signature.stream()
+                    .map(termFactory::getVariable)
+                    .collect(toList());
+            IQ2answerVar = buildIQ2AnswerVArMap(this.signature);
+        }
+
+        private ImmutableMap<Variable, Variable> buildIQ2AnswerVArMap(ImmutableList<Variable> signature) {
+            ImmutableList<Variable> queryVariables = query.getProjectionAtom().getArguments();
+
+            return IntStream
+                    .range(0, signature.size()).boxed()
+                    .collect(toMap(
+                            i -> queryVariables.get(i),
+                            i -> signature.get(i)
+                    ));
+        }
+
+        @Override
+        public void visit(ConstructionNode constructionNode) {
+            // only one child
+            query.getChildrenStream(constructionNode).forEach(n -> n.acceptVisitor(this));
+
+            boolean isRoot = constructionNode.equals(query.getRootNode());
+            ImmutableSubstitution<ImmutableTerm> substitution = getCnSubstitution(isRoot, constructionNode);
+
+            if (constructionNode.getVariables().isEmpty()) {
+                // Only for ASK
+                final RexNode trueAsX = relBuilder.alias(rexBuilder.makeLiteral(true), "x");
+                relBuilder.project(ImmutableList.of(trueAsX));
+            } else {
+                Stream<Variable> variableStream;
+                if(isRoot){
+                    // respects the order in the root node
+                    variableStream = signature.stream();
+                } else {
+                    variableStream = constructionNode.getVariables().stream();
+                }
+
+                final ImmutableList<RexNode> project = variableStream
+                        .flatMap(v -> getColumnsForVariable(v, substitution, isRoot))
+                        .collect(toList());
+
+                relBuilder.project(project);
+            }
+
+//            constructionNode.getOptionalModifiers().ifPresent(
+//                    modifiers -> {
+//                        if (modifiers.hasOrder()) {
+//                            final ImmutableList<RexNode> orderByConditions = modifiers
+//                                    .getSortConditions()
+//                                    .stream()
+//                                    .map(s -> {
+//                                        final RexInputRef field = relBuilder.field(s.getVariable().getName());
+//                                        return (s.getDirection() == DESCENDING) ?
+//                                                relBuilder.desc(field) : field;
+//                                    })
+//                                    .collect(toList());
+//                            relBuilder.sort(orderByConditions);
+//                        }
+//
+//                        if (modifiers.hasLimit() || modifiers.hasOffset()) {
+//                            relBuilder.limit((int) modifiers.getOffset(), (int) modifiers.getLimit());
+//                        }
+//
+//                        if (modifiers.isDistinct()) {
+//                            relBuilder.distinct();
+//                        }
+//                    }
+//            );
+        }
+
+        private ImmutableSubstitution<ImmutableTerm> getCnSubstitution(boolean isRoot, ConstructionNode constructionNode) {
+            ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
+            if (isRoot){
+                substitution = substitutionFactory.getSubstitution(
+                        substitution.getImmutableMap().entrySet().stream()
+                                .collect(toMap(
+                                        e -> IQ2answerVar.get(e.getKey()),
+                                        e -> e.getValue()
+                                )));
+            }
+            return substitution;
+        }
+
+        private Stream<RexNode> getColumnsForVariable(Variable v, ImmutableSubstitution<ImmutableTerm> substitution, boolean isRoot) {
+            //if (isRoot) {
+            return Stream.of(
+                    getTypeColumnForVariable(v, substitution),
+                    getLangColumnForVariable(v, substitution),
+                    getMainColumnForVariable(v, substitution));
+//            } else {
+//                return Stream.of(getMainColumnForVariable(v, substitution));
+//            }
+        }
+
+        private RexNode getTypeColumnForVariable(Variable v, ImmutableSubstitution<ImmutableTerm> substitution) {
+            ImmutableTerm def = v;
+
+            if (substitution.getDomain().contains(v)) {
+                def = substitution.get(v);
+            }
+
+            RexNode typeDefinition = rexBuilder.makeExactLiteral(new BigDecimal(OBJECT.getQuestCode()));
+            int questCode;
+            if (def instanceof Variable) {
+
+                final List<String> fieldNames = relBuilder.peek().getRowType().getFieldNames();
+
+                if(fieldNames.contains(((Variable) def).getName() + "Type")){
+                    typeDefinition = relBuilder.field(((Variable) def).getName() + "Type");
+                }
+
+
+            } else if (def instanceof Function) {
+                final Predicate functionSymbol = ((Function) def).getFunctionSymbol();
+                if (functionSymbol instanceof URITemplatePredicate) {
+                    questCode = OBJECT.getQuestCode();
+                } else if (functionSymbol.getName().equals("BNODE")){
+                    questCode = COL_TYPE.BNODE.getQuestCode();
+                } else {
+                    final String f = functionSymbol.getName();
+                    questCode = COL_TYPE.getColType(rdfFactory.createIRI(f))
+                            .getQuestCode();
+                }
+                typeDefinition = rexBuilder.makeExactLiteral(new BigDecimal(questCode));
+            }
+
+
+            return relBuilder.call(SqlStdOperatorTable.AS,
+                    typeDefinition,
+                    //rexBuilder.makeNullLiteral(typeFactory.createSqlType(SqlTypeName.VARCHAR)),
+                    rexBuilder.makeLiteral(v.getName() + "Type"));
+        }
+
+        private RexNode getLangColumnForVariable(Variable v, ImmutableSubstitution<ImmutableTerm> substitution) {
+            return relBuilder.call(SqlStdOperatorTable.AS,
+                    // TODO
+                    rexBuilder.makeNullLiteral(typeFactory.createSqlType(SqlTypeName.VARCHAR)),
+                    rexBuilder.makeLiteral(v.getName() + "Lang"));
+        }
+
+        private RexNode getMainColumnForVariable(Variable v, ImmutableSubstitution<ImmutableTerm> substitution) {
+            if (substitution.getDomain().contains(v)) {
+                return relBuilder.alias(termToRexNode(substitution.get(v)), v.getName());
+            } else {
+                return relBuilder.field(v.getName());
+            }
+        }
+
+        private RexNode termToRexNode(ImmutableTerm immutableTerm) {
+            return termToRexNode(immutableTerm, 1);
+        }
+
+
+        @Override
+        public void visit(UnionNode unionNode) {
+            query.getChildrenStream(unionNode).forEach(n -> n.acceptVisitor(this));
+            relBuilder.union(true, query.getChildren(unionNode).size());
+
+            // WORKAROUND
+            // Add an explict project in order to workaround a bug that calcite does not handle projection properly
+//            final ImmutableList<RexNode> projectNodes = unionNode.getVariables()
+//                    .stream()
+//                    .flatMap(v -> getColumnsForVariable(v, EMPTY_SUBSTITUTION, false))
+//                    .collect(toList());
+//
+//            relBuilder.project(projectNodes);
+        }
+
+        @Override
+        public void visit(InnerJoinNode innerJoinNode) {
+            boolean first = true;
+
+            for (QueryNode queryNode : query.getChildren(innerJoinNode)) {
+                queryNode.acceptVisitor(this);
+                if (!first) {
+                    relBuilder.join(JoinRelType.INNER);
+                }
+                first = false;
+            }
+
+            innerJoinNode.getOptionalFilterCondition().ifPresent(filter -> {
+                relBuilder.filter(expressionToRexNode(filter, 1));
+            });
+        }
+
+        @Override
+        public void visit(LeftJoinNode leftJoinNode) {
+            // Left Join is always binary
+            query.getChildrenStream(leftJoinNode).forEach(n -> n.acceptVisitor(this));
+
+            if (leftJoinNode.getOptionalFilterCondition().isPresent()) {
+                final ImmutableExpression expression = leftJoinNode.getOptionalFilterCondition().get();
+                relBuilder.join(JoinRelType.LEFT, getJoinCondition(expression, 2));
+            } else {
+                relBuilder.join(JoinRelType.LEFT);
+            }
+        }
+
+        private RexNode getJoinCondition(ImmutableExpression expression, int inputCount) {
+            final RexNode condition = expressionToRexNode(expression, 2);
+
+            // TODO: if condition is not boolean, convert to effective boolean
+            // if(condition.getType())
+
+            return condition;
+        }
+
+        @Override
+        public void visit(FilterNode filterNode) {
+            // only one child
+            query.getChildrenStream(filterNode).forEach(n -> n.acceptVisitor(this));
+            final ImmutableExpression filterCondition = filterNode.getFilterCondition();
+            final RexNode rexNode = checkNotNull(expressionToRexNode(filterCondition, 1));
+            relBuilder.filter(rexNode);
+        }
+
+        private RexNode expressionToRexNode(ImmutableExpression filterCondition, int inputCount) {
+            final OperationPredicate functionSymbol = filterCondition.getFunctionSymbol();
+            final ImmutableList<RexNode> args = filterCondition.getArguments()
+                    .stream()
+                    .map(a -> termToRexNode(a, inputCount))
+                    .collect(toList());
+
+            if (functionSymbol instanceof ExpressionOperation) {
+                switch ((ExpressionOperation) functionSymbol) {
+                    case MINUS:
+                        return relBuilder.call(SqlStdOperatorTable.MINUS, args);
+                    case ADD:
+                        return relBuilder.call(SqlStdOperatorTable.PLUS, args);
+                    case SUBTRACT:
+                        return relBuilder.call(SqlStdOperatorTable.MINUS, args);
+                    case MULTIPLY:
+                        return relBuilder.call(SqlStdOperatorTable.MULTIPLY, args);
+                    case DIVIDE:
+                        return relBuilder.call(SqlStdOperatorTable.DIVIDE, args);
+                    case ABS:
+                        return relBuilder.call(SqlStdOperatorTable.ABS, args);
+                    case ROUND:
+                        return relBuilder.call(SqlStdOperatorTable.ROUND, args);
+                    case CEIL:
+                        return relBuilder.call(SqlStdOperatorTable.CEIL, args);
+                    case FLOOR:
+                        return relBuilder.call(SqlStdOperatorTable.FLOOR, args);
+                    case RAND:
+                        return relBuilder.call(SqlStdOperatorTable.RAND, args);
+                    case AND:
+                        return relBuilder.call(SqlStdOperatorTable.AND, args);
+                    case OR:
+                        return relBuilder.call(SqlStdOperatorTable.OR, args);
+                    case NOT:
+                        return relBuilder.call(SqlStdOperatorTable.NOT, args);
+                    case EQ:
+                        return relBuilder.call(SqlStdOperatorTable.EQUALS, args);
+                    case NEQ:
+                        return relBuilder.call(SqlStdOperatorTable.NOT_EQUALS, args);
+                    case GTE:
+                        return relBuilder.call(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, args);
+                    case GT:
+                        return relBuilder.call(SqlStdOperatorTable.GREATER_THAN, args);
+                    case LTE:
+                        return relBuilder.call(SqlStdOperatorTable.LESS_THAN_OR_EQUAL, args);
+                    case LT:
+                        return relBuilder.call(SqlStdOperatorTable.LESS_THAN, args);
+                    case IS_NULL:
+                        return relBuilder.call(SqlStdOperatorTable.IS_NULL, args);
+                    case IS_NOT_NULL:
+                        return relBuilder.call(SqlStdOperatorTable.IS_NOT_NULL, args);
+                    case IS_TRUE:
+                        notImplemented(filterCondition);
+                    case STR_STARTS:
+                        notImplemented(filterCondition);
+                    case STR_ENDS:
+                        notImplemented(filterCondition);
+                    case CONTAINS:
+                        notImplemented(filterCondition);
+                    case STRLEN:
+                        return relBuilder.call(SqlStdOperatorTable.CHAR_LENGTH, args);
+                    case UCASE:
+                        return relBuilder.call(SqlStdOperatorTable.UPPER, args);
+                    case LCASE:
+                        return relBuilder.call(SqlStdOperatorTable.LOWER, args);
+                    case SUBSTR2:
+                        notImplemented(filterCondition);
+                    case SUBSTR3:
+                        notImplemented(filterCondition);
+                    case STRBEFORE:
+                        notImplemented(filterCondition);
+                    case STRAFTER:
+                        notImplemented(filterCondition);
+                    case REPLACE:
+                        return relBuilder.call(SqlStdOperatorTable.REPLACE, args);
+                    case CONCAT:
+                        return relBuilder.call(SqlStdOperatorTable.CONCAT, args);
+                    case ENCODE_FOR_URI:
+                        break;
+                    case MD5:
+                        notImplemented(filterCondition);
+                    case SHA1:
+                        notImplemented(filterCondition);
+                    case SHA512:
+                        notImplemented(filterCondition);
+                    case SHA256:
+                        notImplemented(filterCondition);
+                    case NOW:
+                        notImplemented(filterCondition);
+                    case YEAR:
+                        notImplemented(filterCondition);
+                    case DAY:
+                        notImplemented(filterCondition);
+                    case MONTH:
+                        notImplemented(filterCondition);
+                    case HOURS:
+                        notImplemented(filterCondition);
+                    case MINUTES:
+                        notImplemented(filterCondition);
+                    case SECONDS:
+                        notImplemented(filterCondition);
+                    case TZ:
+                        notImplemented(filterCondition);
+                    case SPARQL_STR:
+                        notImplemented(filterCondition);
+                    case SPARQL_DATATYPE:
+                        notImplemented(filterCondition);
+                    case SPARQL_LANG:
+                        notImplemented(filterCondition);
+                    case UUID:
+                        notImplemented(filterCondition);
+                    case STRUUID:
+                        notImplemented(filterCondition);
+                    case IS_LITERAL:
+                        notImplemented(filterCondition);
+                    case IS_IRI:
+                        notImplemented(filterCondition);
+                    case IS_BLANK:
+                        notImplemented(filterCondition);
+                    case LANGMATCHES:
+                        notImplemented(filterCondition);
+                    case REGEX:
+                        notImplemented(filterCondition);
+                    case SQL_LIKE:
+                        notImplemented(filterCondition);
+                    case QUEST_CAST:
+                        assert args.size() == 2;
+                        // TODO use the right type for casting
+                        return relBuilder.cast(args.get(0), SqlTypeName.CHAR);
+                    case AVG:
+                        return relBuilder.call(SqlStdOperatorTable.AVG, args);
+                    case SUM:
+                        return relBuilder.call(SqlStdOperatorTable.SUM, args);
+                    case MAX:
+                        return relBuilder.call(SqlStdOperatorTable.MAX, args);
+                    case MIN:
+                        return relBuilder.call(SqlStdOperatorTable.MIN, args);
+                    case COUNT:
+                        return relBuilder.call(SqlStdOperatorTable.COUNT, args);
+                }
+
+            }
+            notImplemented(filterCondition);
+            // not reachable
+            return null;
+        }
+
+        private RexNode termToRexNode(Term a, int inputCount) {
+            if (a instanceof Expression) {
+                return expressionToRexNode((ImmutableExpression) a, inputCount);
+            }
+            // note that not all functions are expressions
+            else if (a instanceof Function) {
+                final Function a1 = (Function) a;
+                final Predicate f = a1.getFunctionSymbol();
+                if (f instanceof URITemplatePredicate) {
+                    return getRexNodeTemplateFunction(a1);
+                } else if (f.getName().equals("BNODE")) {
+                    Term term = a1.getTerms().get(0);
+                    return termToRexNode(term, inputCount);
+                } else if (a1.isDataTypeFunction()) {
+                    /*
+                     * Case where we have a typing function in the head (this is the
+                     * case for all literal columns
+                     */
+                    RexNode termStr = null;
+                    int size = a1.getTerms().size();
+                    if ((a1 instanceof Literal) || size > 2) {
+                        //termStr = getSQLStringForTemplateFunction(ov, index);
+                    } else {
+                        Term term = a1.getTerms().get(0);
+                        termStr = termToRexNode(term, inputCount);
+
+                    }
+                    return termStr;
+                } else {
+                    notImplemented(a);
+                }
+            } else if (a instanceof Variable) {
+                return getField((Variable) a, inputCount);
+            } else if (a instanceof Constant) {
+                final Constant constant = (Constant) a;
+                TermType termType = constant.getType();
+
+                if(termType.equals(XSD_INTEGER_DT)) {
+                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+                } else if (termType.equals(XSD_DATETIME_DT)){
+                    return rexBuilder.makeLiteral(constant.getValue());
+                } else if (termType.equals(XSD_STRING_DT)){
+                    return rexBuilder.makeLiteral(constant.getValue());
+                } else if (termType.equals(XSD_DATETIMESTAMP_DT)){
+                    return rexBuilder.makeLiteral(constant.getValue());
+                } else if (termType.equals(XSD_BOOLEAN_DT)){
+                    return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
+                } else {
+                    notImplemented(a);
+                }
+
+
+//                switch (constant.getType()) {
+//                    case UNSUPPORTED:
+//                        notImplemented(a);
+//                    case NULL:
+//                        return rexBuilder.makeNullLiteral(SqlTypeName.ANY);
+//                    case OBJECT:
+//                        notImplemented(a);
+//                    case BNODE:
+//                        notImplemented(a);
+//                    case LITERAL:
+//                        return rexBuilder.makeLiteral(constant.getValue());
+//                    case LITERAL_LANG:
+//                        notImplemented(a);
+//                    case DOUBLE:
+//                    case FLOAT:
+//                        notImplemented(a);
+//                    case STRING:
+//                        return rexBuilder.makeLiteral(constant.getValue());
+//                    case DATETIME:
+//                        notImplemented(a);
+//                    case BOOLEAN:
+//                        return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
+//                    case DATE:
+//                        notImplemented(a);
+//                    case TIME:
+//                        notImplemented(a);
+//                    case YEAR:
+//                        notImplemented(a);
+//                    case DECIMAL:
+//                    case INTEGER:
+//                    case LONG:
+//                    case NEGATIVE_INTEGER:
+//                    case NON_NEGATIVE_INTEGER:
+//                    case POSITIVE_INTEGER:
+//                    case NON_POSITIVE_INTEGER:
+//                    case INT:
+//                    case UNSIGNED_INT:
+//                        return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+//                    case DATETIME_STAMP:
+//                        notImplemented(a);
+//                }
+            } else {
+                notImplemented(a);
+            }
+            notImplemented(a);
+            // not reachable
+            return null;
+        }
+
+        private RexInputRef getField(Variable a, int inputCount) {
+            // final RelNode relNode = relBuilder.peek(2);
+            String fieldName = a.getName();
+
+            if (inputCount == 1) {
+                return relBuilder.field(a.getName());
+            }
+
+            for (int inputOrdinal = 0; inputOrdinal < inputCount; inputOrdinal++) {
+                final List<String> fieldNames = relBuilder.peek(inputCount, inputOrdinal)
+                        .getRowType().getFieldNames();
+
+                int i = fieldNames.indexOf(fieldName);
+                if (i >= 0) {
+                    return relBuilder.field(inputCount, inputOrdinal, i);
+                }
+            }
+
+            throw new IllegalArgumentException("field [" + a.getName() + "] not found ");
+        }
+
+        @Override
+        public void visit(IntensionalDataNode intensionalDataNode) {
+            throw new UnsupportedOperationException("not implemented");
+        }
+
+        @Override
+        public void visit(ExtensionalDataNode extensionalDataNode) {
+            final DataAtom projectionAtom = extensionalDataNode.getProjectionAtom();
+            final ImmutableList<? extends VariableOrGroundTerm> arguments = projectionAtom.getArguments();
+
+            final String predicateName = projectionAtom.getPredicate().getName();
+
+            relBuilder.scan(predicateName.split("\\."));
+
+            ImmutableList<RexNode> rexNodes = IntStream
+                    .range(0, arguments.size())
+                    .mapToObj(relBuilder::field)
+                    .collect(toList());
+
+            final ImmutableList<String> names = IntStream
+                    .range(0, arguments.size())
+                    .mapToObj(i -> arguments.get(i).toString())
+                    .collect(toList());
+
+            // "force: true" is important to workaround a bug of calcite, otherwise, the renaming might be ignored
+            relBuilder.project(rexNodes, names, true);
+        }
+
+        @Override
+        public void visit(EmptyNode emptyNode) {
+            throw new UnsupportedOperationException(emptyNode.getClass().getName() +" not implemented");
+        }
+
+        @Override
+        public void visit(TrueNode trueNode) {
+            throw new UnsupportedOperationException(trueNode.getClass().getName() +" not implemented");
+        }
+
+        @Override
+        public void visit(DistinctNode distinctNode) {
+            throw new UnsupportedOperationException(distinctNode.getClass().getName() +" not implemented");
+        }
+
+        @Override
+        public void visit(SliceNode sliceNode) {
+            throw new UnsupportedOperationException(sliceNode.getClass().getName() +" not implemented");
+        }
+
+        @Override
+        public void visit(OrderByNode orderByNode) {
+            throw new UnsupportedOperationException(orderByNode.getClass().getName() +" not implemented");
+        }
+
+
+        RexNode getRexNodeTemplateFunction(Function ov) {
+            /*
+             * The first inner term determines the form of the result
+             */
+            Term t = ov.getTerms().get(0);
+
+            String literalValue = "";
+
+            if (t instanceof ValueConstant || t instanceof BNode) {
+                /*
+                 * The function is actually a template. The first parameter is a
+                 * string of the form http://.../.../ or empty "{}" with place holders of the form
+                 * {}. The rest are variables or constants that should be put in
+                 * place of the place holders. We need to tokenize and form the
+                 * CONCAT
+                 */
+                if (t instanceof BNode) {
+                    //TODO: why getValue and not getName(). Change coming from v1.
+                    literalValue = ((BNode) t).getName();
+                } else {
+                    literalValue = ((ValueConstant) t).getValue();
+                }
+
+                Predicate pred = ov.getFunctionSymbol();
+
+                String template = trimLiteral(literalValue);
+
+                String[] split = template.split("[{][}]");
+
+                List<RexNode> vex = new ArrayList<>();
+                if (split.length > 0 && !split[0].isEmpty()) {
+                    vex.add(rexBuilder.makeLiteral(split[0]));
+                }
+
+                /*
+                 * New we concat the rest of the function, note that if there is
+                 * only 1 element there is nothing to concatenate
+                 */
+                if (ov.getTerms().size() > 1) {
+                    int size = ov.getTerms().size();
+                    if (pred == ExpressionOperation.IS_LITERAL) {
+                        size--;
+                    }
+                    for (int termIndex = 1; termIndex < size; termIndex++) {
+                        Term currentTerm = ov.getTerms().get(termIndex);
+                        RexNode repl = termToRexNode(currentTerm, 1);
+                        // TODO: replaces for IRI-safe version of string
+                        if (repl.getType().getFamily() != SqlTypeFamily.CHARACTER) {
+                            repl = relBuilder.cast(repl, SqlTypeName.CHAR);
+                        }
+
+                        vex.add(repl);
+                        if (termIndex < split.length) {
+                            final RexLiteral e = rexBuilder.makeLiteral(split[termIndex]);
+                            vex.add(e);
+                        }
+                    }
+                }
+
+
+                if (vex.size() == 1) {
+                    return vex.get(0);
+                } else {
+                    RexNode toReturn = null;
+                    boolean first = true;
+                    for (RexNode rn : vex) {
+                        if (first) {
+                            toReturn = rn;
+                        } else {
+                            toReturn = relBuilder.call(SqlStdOperatorTable.CONCAT, toReturn, rn);
+                        }
+                        first = false;
+                    }
+                    return toReturn;
+                    //return relBuilder.call(SqlStdOperatorTable.CONCAT, vex);
+                }
+//                String[] params = new String[vex.size()];
+//                int i = 0;
+//                for (String param : vex) {
+//                    params[i] = param;
+//                    i += 1;
+//                }
+//                return getStringConcatenation(params);
+
+            } else if (t instanceof Variable) {
+                /*
+                 * The function is of the form uri(x), we need to simply return the
+                 * value of X
+                 */
+                return relBuilder.field(((Variable) t).getName());
+            } else if (t instanceof URIConstant) {
+                /*
+                 * The function is of the form uri("http://some.uri/"), i.e., a
+                 * concrete URI, we return the string representing that URI.
+                 */
+                return rexBuilder.makeLiteral(((URIConstant) t).getValue());
+            }
+            /*
+             * Complex first argument: treats it as a string and ignore other arguments
+             */
+            else {
+                /*
+                 * The function is for example of the form uri(CONCAT("string",x)),we simply return the value from the database.
+                 */
+                throw new UnsupportedOperationException("not implemented");
+                //return getSQLString(t, index, false);
+            }
+        }
+
+        public String getSQL() {
+
+            //SqlDialect dialect = SqlDialect.DatabaseProduct.H2.getDialect();
+            final RelNode node = relBuilder.build();
+            final RelToSqlConverter converter = new RelToSqlConverter(dialect);
+            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
+            return sqlNode.toSqlString(dialect).getSql();
+        }
+
+        @Override
+        public void visit(TemporalJoinNode temporalJoinNode) {
+            throw new UnsupportedOperationException(temporalJoinNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(BoxMinusNode boxMinusNode) {
+            throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(BoxPlusNode boxPlusNode) {
+            throw new UnsupportedOperationException(boxPlusNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(DiamondMinusNode diamondMinusNode) {
+            throw new UnsupportedOperationException(diamondMinusNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(DiamondPlusNode diamondPlusNode) {
+            throw new UnsupportedOperationException(diamondPlusNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(SinceNode sinceNode) {
+            throw new UnsupportedOperationException(sinceNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(UntilNode untilNode) {
+            throw new UnsupportedOperationException(untilNode.getClass().getName());
+        }
+
+        @Override
+        public void visit(TemporalCoalesceNode temporalCoalesceNode) {
+            throw new UnsupportedOperationException(temporalCoalesceNode.getClass().getName());
+        }
+    }
+
+
+    private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
+
+    private static String trimLiteral(String string) {
+        while (pQuotes.matcher(string).matches()) {
+            string = string.substring(1, string.length() - 1);
+        }
+        return string;
+    }
+
+    public static void notImplemented(Object o) {
+        throw new UnsupportedOperationException(o.toString() + " not implemented!");
+    }
+
+    private static void printResultSet(ResultSet resultSet) throws SQLException {
+        final StringBuilder buf = new StringBuilder();
+        while (resultSet.next()) {
+            int n = resultSet.getMetaData().getColumnCount();
+            for (int i = 1; i <= n; i++) {
+                buf.append(i > 1 ? "; " : "")
+                        .append(resultSet.getMetaData().getColumnLabel(i))
+                        .append("=")
+                        .append(resultSet.getObject(i));
+            }
+            System.out.println(buf.toString());
+            buf.setLength(0);
+        }
+    }
+
+
+}
