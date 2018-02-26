@@ -27,6 +27,11 @@ public class TemporalMappingParserTest extends TestCase {
 
         try {
             configuration.loadSpecification();
+//            final FrameworkConfig
+//                    calciteFrameworkConfig = Frameworks.newConfigBuilder().defaultSchema(rootSchema)
+//                    .build();
+//
+//            final RelBuilder b = RelBuilder.create(calciteFrameworkConfig);
         } catch (OBDASpecificationException e) {
             e.printStackTrace();
         }

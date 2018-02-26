@@ -14,6 +14,7 @@ public class TermTypeInferenceRules {
     public static final RDFDatatype XSD_BOOLEAN_DT;
     public static final RDFDatatype XSD_DECIMAL_DT;
     public static final RDFDatatype XSD_DATETIME_DT;
+    public static final RDFDatatype XSD_DATETIMESTAMP_DT;
     public static final RDFDatatype XSD_DOUBLE_DT;
     public static final RDFDatatype XSD_STRING_DT;
     public static final RDFDatatype RDFS_LITERAL_DT;
@@ -56,7 +57,8 @@ public class TermTypeInferenceRules {
      * TODO: explain
      */
     public static final TermTypeInferenceRule SECOND_ARG_RULE;
-    
+
+
     static {
         // UGLY!! Temporary hack
         TypeFactory typeFactory = OntopModelConfiguration.defaultBuilder().build().getTypeFactory();
@@ -66,6 +68,7 @@ public class TermTypeInferenceRules {
         XSD_BOOLEAN_DT = typeFactory.getXsdBooleanDatatype();
         XSD_DECIMAL_DT = typeFactory.getXsdDecimalDatatype();
         XSD_DATETIME_DT = typeFactory.getXsdDatetimeDatatype();
+        XSD_DATETIMESTAMP_DT = typeFactory.getXsdDatetimeStampDatatype();
         XSD_DOUBLE_DT = typeFactory.getXsdDoubleDatatype();
         XSD_STRING_DT = typeFactory.getXsdStringDatatype();
         RDFS_LITERAL_DT = typeFactory.getAbstractRDFSLiteral();
