@@ -4,18 +4,18 @@ The [-ontop-](http://ontop.inf.ubibz.it) framework is an open source project ava
 [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.txt). 
 By downloading these packages you are agreeing with them.
 
-* Current version: 3.0-BETA-1
-* Release date: 11/08/2017
+* Current version: 3.0.0-beta-2
+* Release date: 27/02/2018
 * [Changelog](https://github.com/ontop/ontop/wiki/OntopReleases)
 
 
 ## Main downloads
 
-- `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or Sesame and from the command line.
+- `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
 
 - `it.unibz.inf.ontop.protege.jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
-- `ontop-sesame-webapps.zip`: WAR files required to create a Quest SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server (currently ONLY Jetty is supported).
+- `ontop-webapps.zip`: WAR files required to create a Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server .
 
 ## Bundles
 
