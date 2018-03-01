@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.URIConstant;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.Stream;
 
@@ -31,26 +32,24 @@ import java.util.stream.Stream;
 /**
  * Provides a storage to put the URI constant.
  */
-public class URIConstantImpl implements URIConstant {
+public class IRIConstantImpl implements IRIConstant {
 
-	private static final long serialVersionUID = -1263974895010238519L;
-	
 	private final int identifier;
-	private final String iristr;
+	private final IRI iri;
 	private final ObjectRDFType type;
 
-	protected URIConstantImpl(String iri, TypeFactory typeFactory) {
-		this.iristr = iri;
+	protected IRIConstantImpl(IRI iri, TypeFactory typeFactory) {
+		this.iri = iri;
 		this.identifier = iri.hashCode();
 		this.type = typeFactory.getIRITermType();
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof URIConstantImpl)) {
+		if (obj == null || !(obj instanceof IRIConstantImpl)) {
 			return false;
 		}
-		URIConstantImpl uri2 = (URIConstantImpl) obj;
+		IRIConstantImpl uri2 = (IRIConstantImpl) obj;
 		return this.identifier == uri2.identifier;
 	}
 
@@ -60,12 +59,12 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public String getURI() {
-		return iristr;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	@Override
-	public URIConstant clone() {
+	public IRIConstant clone() {
 		return this;
 	}
 
@@ -81,7 +80,7 @@ public class URIConstantImpl implements URIConstant {
 
 	@Override
 	public String toString() {
-		return "<" + iristr + ">";
+		return "<" + iri.getIRIString() + ">";
 	}
 
 	@Override
@@ -89,13 +88,8 @@ public class URIConstantImpl implements URIConstant {
 		return type;
 	}
 
-
-	public String getName() {
-		return iristr;
-	}
-
 	@Deprecated
 	public String getValue() {
-		return iristr;
+		return iri.getIRIString();
 	}
 }

@@ -21,12 +21,13 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class CQCUtilitiesTest {
 
 	Term x = TERM_FACTORY.getVariable("x");
 	Term y = TERM_FACTORY.getVariable("y");
-	Term c1 = TERM_FACTORY.getConstantURI("URI1");
+	Term c1 = TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI("URI1"));
 	Term c2 = TERM_FACTORY.getConstantLiteral("m");
 
 	private Function getFunction(String name, List<Term> terms) {
@@ -116,7 +117,7 @@ public class CQCUtilitiesTest {
     	final String CANy2 = ((ValueConstant)head.get(3)).getValue(); //    "f1" if standalone (f47 in travis)
 		
 		assertTrue(head.get(0).equals(TERM_FACTORY.getConstantLiteral(CANx1)));
-		assertTrue(head.get(1).equals(TERM_FACTORY.getConstantURI("URI1")));
+		assertTrue(head.get(1).equals(TERM_FACTORY.getConstantIRI("URI1")));
 		assertTrue(head.get(2).equals(TERM_FACTORY.getConstantLiteral("m")));
 		assertTrue(head.get(3).equals(TERM_FACTORY.getConstantLiteral(CANy2)));
 		FunctionalTermImpl f1 = (FunctionalTermImpl) head.get(4);

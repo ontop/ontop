@@ -6,7 +6,7 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class RDF {
 
-    private static final String PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    public static final String PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
     public final static IRI TYPE;
 

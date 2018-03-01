@@ -13,11 +13,12 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
@@ -279,7 +280,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     private static boolean isRDFType(Term pred) {
         if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant) {
             String c = ((Constant) ((Function) pred).getTerm(0)).getValue();
-            return c.equals(RDF_TYPE);
+            return c.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString());
         }
         return false;
     }
@@ -356,7 +357,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (rc != null) {
             return visitResource(rc);
         }
-        return termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF_TYPE));
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
     }
 
     @Override

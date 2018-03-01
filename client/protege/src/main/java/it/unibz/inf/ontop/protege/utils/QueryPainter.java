@@ -23,9 +23,9 @@ package it.unibz.inf.ontop.protege.utils;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.URIConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -418,13 +418,13 @@ public class QueryPainter {
 			if (atom.getArity() == 2) {
 				term2 = atom.getTerm(1);
 			}
-			if (term1 instanceof URIConstant) {
-				String rendered = man.getShortForm(((URIConstant) term1).getURI().toString());
+			if (term1 instanceof IRIConstant) {
+				String rendered = man.getShortForm(((IRIConstant) term1).getIRI().toString());
 				ColorTask task = new ColorTask(rendered, individual);
 				tasks.add(task);
 			}
-			if (term2 instanceof URIConstant) {
-				String rendered = man.getShortForm(((URIConstant) term2).getURI().toString());
+			if (term2 instanceof IRIConstant) {
+				String rendered = man.getShortForm(((IRIConstant) term2).getIRI().toString());
 				ColorTask task = new ColorTask(rendered, individual);
 				tasks.add(task);
 			}

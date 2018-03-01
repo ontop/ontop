@@ -22,11 +22,12 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.List;
 
@@ -36,8 +37,8 @@ import java.util.List;
  * in the program followed by the rules.
  */
 public class DatalogToSparqlTranslator {
-	
-	private final URIConstant RDF_TYPE;
+
+	private final IRIConstant RDF_TYPE;
 	private final TermFactory termFactory;
 
 	private PrefixManager prefixManager;
@@ -67,7 +68,7 @@ public class DatalogToSparqlTranslator {
 	 */
 	public DatalogToSparqlTranslator(DatalogFactory datalogFactory, PrefixManager prefixManager, TermFactory termFactory) {
 		this.termFactory = termFactory;
-		RDF_TYPE = this.termFactory.getConstantURI(IriConstants.RDF_TYPE);
+		RDF_TYPE = this.termFactory.getConstantIRI(RDF.TYPE);
 		this.prefixManager = prefixManager;
 		this.datalogFactory = datalogFactory;
 	}
@@ -135,7 +136,7 @@ public class DatalogToSparqlTranslator {
 		if (term instanceof Variable) {
 			return "?" + term;
 		} 
-		else if (term instanceof URIConstant) {
+		else if (term instanceof IRIConstant) {
 			return shortenName(term.toString());
 		} 
 		else if (term instanceof Function) {
@@ -259,7 +260,7 @@ public class DatalogToSparqlTranslator {
 
 	private Term getPredicate(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		return termFactory.getConstantURI(predicate.getName());
+		return termFactory.getConstantIRI(new SimpleRDF().createIRI(predicate.getName()));
 	}
 
 	private Term getObject(Function function) {

@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
@@ -97,10 +98,10 @@ public class DataTypeComboBox extends JComboBox {
 				if (value instanceof Predicate) {
 					Predicate item = (Predicate) value;
 					String name = item.toString();
-					if (name.contains(IriConstants.NS_XSD)) {
-						name = name.replace(IriConstants.NS_XSD, "xsd:");
-					} else if (name.contains(IriConstants.NS_RDFS)) {
-						name = name.replace(IriConstants.NS_RDFS, "rdfs:");
+					if (name.contains(XSD.PREFIX)) {
+						name = name.replace(XSD.PREFIX, OntopInternal.PREFIX_XSD);
+					} else if (name.contains(RDFS.PREFIX)) {
+						name = name.replace(RDFS.PREFIX, OntopInternal.PREFIX_RDFS);
 					}
 					setText(name);
 					setIcon(IconLoader.getImageIcon("images/datarange.png"));

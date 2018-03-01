@@ -24,9 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -82,8 +84,8 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	@Deprecated
-	public URIConstant getConstantURI(String uriString) {
-		return new URIConstantImpl(uriString, typeFactory);
+	public IRIConstant getConstantIRI(IRI iri) {
+		return new IRIConstantImpl(iri, typeFactory);
 	}
 	
 	@Override

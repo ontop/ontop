@@ -5,7 +5,7 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class RDFS {
 
-    private static final String PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
+    public static final String PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
 
     public final static IRI RESOURCE;
 

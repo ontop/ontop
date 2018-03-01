@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +167,7 @@ public class AutomaticMGUTestDataGenerator {
 		} else if (termstr.charAt(0) == '"') {
 			return TERM_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
-			return TERM_FACTORY.getConstantURI(termstr.substring(1, termstr.length() - 1));
+			return TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI(termstr.substring(1, termstr.length() - 1)));
 //		} else if (termstr.equals("#")) {
 //			return TERM_FACTORY.getVariableNondistinguished();
 		} else {

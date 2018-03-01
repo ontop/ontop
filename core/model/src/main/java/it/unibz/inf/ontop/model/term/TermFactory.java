@@ -148,7 +148,7 @@ public interface TermFactory {
 	public Expression getFunctionCast(Term term1, Term term2);
 
 	/**
-	 * Construct a {@link URIConstant} object. This type of term is written as a
+	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification
 	 * (RFC 3986).
 	 * <p>
@@ -166,11 +166,11 @@ public interface TermFactory {
 	 * <p>
 	 * are all well-formed URI strings.
 	 * 
-	 * @param uri
+	 * @param iri
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getConstantURI(String uri);
+	public IRIConstant getConstantIRI(IRI iri);
 	
 	public BNode getConstantBNode(String name);
 

@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -138,7 +137,7 @@ public class CanonicalIRIRewriter {
     }
 
     private static boolean isCanonicalIRI(Predicate predicate) {
-        return predicate.getName().equals(IriConstants.CANONICAL_IRI);
+        return predicate.getName().equals(Ontop.CANONICAL_IRI.getIRIString());
     }
 
 

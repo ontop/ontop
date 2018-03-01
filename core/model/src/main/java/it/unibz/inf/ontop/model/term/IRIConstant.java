@@ -21,15 +21,17 @@ package it.unibz.inf.ontop.model.term;
  */
 
 
+import org.apache.commons.rdf.api.IRI;
+
 /**
- * Provides an interface for storing the URI constant.
+ * Provides an interface for storing the IRI constant.
  */
-public interface URIConstant extends ObjectConstant {
+public interface IRIConstant extends ObjectConstant {
 
 	/**
-	 * Get the URI object from this constant.
+	 * Get the IRI object from this constant.
 	 *
-	 * @return the URI object.
+	 * @return the IRI object.
 	 */
-	public String getURI();
+	public IRI getIRI();
 }

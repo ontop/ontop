@@ -268,7 +268,7 @@ public class MappingDataTypeCompletion {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
                     // NO-OP
-                } else if (t instanceof URIConstant) {
+                } else if (t instanceof IRIConstant) {
                     // NO-OP
                 }
                 // fabad (4 Oct 2017) Quick fix if there are constants in arguments.

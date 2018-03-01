@@ -26,32 +26,27 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  */
 
 
-import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.exception.MappingIOException;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.*;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-
 import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.model.Join;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
+import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
+import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import java.io.File;
@@ -59,12 +54,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class R2RMLManager {
 
@@ -318,7 +308,7 @@ public class R2RMLManager {
 				//for each predicate if there are more in the same node
 				
 				//check if predicate = rdf:type
-				if (bodyPred.toString().equals(IriConstants.RDF_TYPE)) {
+				if (bodyPred.toString().equals(RDF.TYPE.toString())) {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
 					Set<Variable> vars = new HashSet<>();
@@ -345,7 +335,7 @@ public class R2RMLManager {
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						ImmutableFunctionalTerm rdftype = termFactory.getImmutableUriTemplate(
-								termFactory.getConstantLiteral(IriConstants.RDF_TYPE));
+								termFactory.getConstantLiteral(RDF.TYPE.toString()));
 						//terms.add(rdftype);
 						//terms.add(objectAtom);
 						ImmutableFunctionalTerm bodyAtom = atomFactory.getImmutableTripleAtom(subjectAtom, rdftype, objectAtom);

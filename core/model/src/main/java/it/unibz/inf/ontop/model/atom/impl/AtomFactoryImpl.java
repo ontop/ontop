@@ -2,13 +2,13 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -112,12 +112,12 @@ public class AtomFactoryImpl implements AtomFactory {
 
     @Override
     public AtomPredicate getOWLSameAsPredicate() {
-        return new AtomPredicateImpl(IriConstants.SAME_AS, 2, ImmutableList.of(objectRDFType, objectRDFType));
+        return new AtomPredicateImpl(OWL.SAME_AS.getIRIString(), 2, ImmutableList.of(objectRDFType, objectRDFType));
     }
 
     @Override
     public AtomPredicate getOBDACanonicalIRI() {
-        return new AtomPredicateImpl(IriConstants.CANONICAL_IRI, 2, ImmutableList.of(objectRDFType, objectRDFType));
+        return new AtomPredicateImpl(Ontop.CANONICAL_IRI.getIRIString(), 2, ImmutableList.of(objectRDFType, objectRDFType));
     }
 
     @Override

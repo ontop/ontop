@@ -3,15 +3,15 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -55,7 +55,7 @@ public class LegacyMappingSameAsInverseRewriter implements MappingSameAsInverseR
     private ImmutableList<CQIE> addSameAsInverse(ImmutableList<CQIE> mappingRules) {
         Stream<CQIE> newRuleStream = mappingRules.stream()
                 // the targets are already split. We have only one target atom
-                .filter(r -> r.getHead().getFunctionSymbol().getName().equals(IriConstants.SAME_AS))
+                .filter(r -> r.getHead().getFunctionSymbol().getName().equals(OWL.SAME_AS.getIRIString()))
                 .map(r -> {
                     Function head = r.getHead();
                     Function inversedHead = termFactory.getFunction(head.getFunctionSymbol(),

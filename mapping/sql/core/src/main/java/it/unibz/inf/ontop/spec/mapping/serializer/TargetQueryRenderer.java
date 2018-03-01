@@ -21,13 +21,12 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,7 +176,7 @@ public class TargetQueryRenderer {
 						}
 					}
 					String originalUri = String.format(templateFormat, varNames.toArray());
-					if (originalUri.equals(IriConstants.RDF_TYPE)) {
+					if (originalUri.equals(RDF.TYPE.getIRIString())) {
 						sb.append("a");
 					} else {
 						String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
@@ -215,7 +214,7 @@ public class TargetQueryRenderer {
 			sb.append("{");
 			sb.append(((Variable) term).getName());
 			sb.append("}");
-		} else if (term instanceof URIConstant) {
+		} else if (term instanceof IRIConstant) {
 			String originalUri = term.toString();
 			
 			String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible

@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class TargetQueryValidator  {
                 || vocabulary.dataProperties().contains(p.getName())
                 || vocabulary.annotationProperties().contains(p.getName())
                 || p.isTriplePredicate()
-                || p.getName().equals(IriConstants.SAME_AS)
-                || p.getName().equals(IriConstants.CANONICAL_IRI);
+                || p.getName().equals(OWL.SAME_AS.getIRIString())
+                || p.getName().equals(Ontop.CANONICAL_IRI.getIRIString());
     }
 }
