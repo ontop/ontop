@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.generation.calcite.CalciteBasedSQLGenerator;
-import it.unibz.inf.ontop.answering.reformulation.generation.calcite.CalciteBasedSQLGeneratorImpl;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalRelBuilder;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -23,15 +23,22 @@ import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.temporal.iq.node.*;
+import it.unibz.inf.ontop.temporal.model.TemporalRange;
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
+import org.apache.calcite.avatica.util.TimeUnit;
 import org.apache.calcite.jdbc.*;
+import org.apache.calcite.jdbc.Driver;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -41,36 +48,44 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlDialectFactoryImpl;
+import org.apache.calcite.sql.SqlIntervalQualifier;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.RelBuilder;
+import org.apache.calcite.util.DateString;
+import org.apache.calcite.util.TimeString;
+import org.apache.calcite.util.TimestampString;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Literal;
 import org.slf4j.LoggerFactory;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.BNODE;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.OBJECT;
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.UNSUPPORTED;
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
+import static org.apache.calcite.rel.type.RelDataType.PRECISION_NOT_SPECIFIED;
 
 public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBasedSQLGenerator {
 
@@ -170,7 +185,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 .defaultSchema(rootSchema)
                 .build();
 
-        final RelBuilder relBuilder = RelBuilder.create(calciteFrameworkConfig);
+        final TemporalRelBuilder relBuilder = TemporalRelBuilder.create(calciteFrameworkConfig);
 
         final NodeProcessor np = new NodeProcessor(normalizedQuery, relBuilder, signature);
 
@@ -206,12 +221,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     public class NodeProcessor implements TemporalQueryNodeVisitor {
 
         private final IntermediateQuery query;
-        private final RelBuilder relBuilder;
+        private final TemporalRelBuilder relBuilder;
         private final ImmutableList<Variable> signature;
         private final ImmutableMap<Variable, Variable> IQ2answerVar;
 
 
-        public NodeProcessor(IntermediateQuery query, RelBuilder relBuilder, ImmutableList<String> signature) {
+        public NodeProcessor(IntermediateQuery query, TemporalRelBuilder relBuilder, ImmutableList<String> signature) {
             this.query = query;
             this.relBuilder = relBuilder;
             this.signature = signature.stream()
@@ -226,8 +241,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             return IntStream
                     .range(0, signature.size()).boxed()
                     .collect(toMap(
-                            i -> queryVariables.get(i),
-                            i -> signature.get(i)
+                            queryVariables::get,
+                            signature::get
                     ));
         }
 
@@ -615,62 +630,67 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 final Constant constant = (Constant) a;
                 TermType termType = constant.getType();
 
-                if(termType.equals(XSD_INTEGER_DT)) {
-                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
-                } else if (termType.equals(XSD_DATETIME_DT)){
-                    return rexBuilder.makeLiteral(constant.getValue());
-                } else if (termType.equals(XSD_STRING_DT)){
-                    return rexBuilder.makeLiteral(constant.getValue());
-                } else if (termType.equals(XSD_DATETIMESTAMP_DT)){
-                    return rexBuilder.makeLiteral(constant.getValue());
-                } else if (termType.equals(XSD_BOOLEAN_DT)){
-                    return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
-                } else {
-                    notImplemented(a);
-                }
+//                if (termType.isA(XSD.DECIMAL))
+//                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
 
-
-//                switch (constant.getType()) {
-//                    case UNSUPPORTED:
-//                        notImplemented(a);
-//                    case NULL:
-//                        return rexBuilder.makeNullLiteral(SqlTypeName.ANY);
-//                    case OBJECT:
-//                        notImplemented(a);
-//                    case BNODE:
-//                        notImplemented(a);
-//                    case LITERAL:
-//                        return rexBuilder.makeLiteral(constant.getValue());
-//                    case LITERAL_LANG:
-//                        notImplemented(a);
-//                    case DOUBLE:
-//                    case FLOAT:
-//                        notImplemented(a);
-//                    case STRING:
-//                        return rexBuilder.makeLiteral(constant.getValue());
-//                    case DATETIME:
-//                        notImplemented(a);
-//                    case BOOLEAN:
-//                        return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
-//                    case DATE:
-//                        notImplemented(a);
-//                    case TIME:
-//                        notImplemented(a);
-//                    case YEAR:
-//                        notImplemented(a);
-//                    case DECIMAL:
-//                    case INTEGER:
-//                    case LONG:
-//                    case NEGATIVE_INTEGER:
-//                    case NON_NEGATIVE_INTEGER:
-//                    case POSITIVE_INTEGER:
-//                    case NON_POSITIVE_INTEGER:
-//                    case INT:
-//                    case UNSIGNED_INT:
-//                        return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
-//                    case DATETIME_STAMP:
-//                        notImplemented(a);
+//                if(termType.equals(XSD_INTEGER_DT)) {
+//                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+//                } else if (termType.equals(XSD_DATETIME_DT)){
+//                    return rexBuilder.makeLiteral(constant.getValue());
+//                } else if (termType.equals(XSD_STRING_DT)){
+//                    return rexBuilder.makeLiteral(constant.getValue());
+//                } else if (termType.equals(XSD_DATETIMESTAMP_DT)){
+//                    return rexBuilder.makeLiteral(constant.getValue());
+//                } else if (termType.equals(XSD_BOOLEAN_DT)){
+//                    return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
+//                } else {
+//                    notImplemented(a);
 //                }
+
+
+                COL_TYPE colType = extractColType(constant.getType()).orElse(UNSUPPORTED);
+                switch (colType) {
+                    case UNSUPPORTED:
+                        notImplemented(a);
+                    case NULL:
+                        return rexBuilder.makeNullLiteral(SqlTypeName.ANY);
+                    case OBJECT:
+                        notImplemented(a);
+                    case BNODE:
+                        notImplemented(a);
+                    //case LITERAL:
+                    //    return rexBuilder.makeLiteral(constant.getValue());
+                    //case LITERAL_LANG:
+                    //    notImplemented(a);
+                    case DOUBLE:
+                    case FLOAT:
+                        notImplemented(a);
+                    case STRING:
+                        return rexBuilder.makeLiteral(constant.getValue());
+                    case DATETIME:
+                        notImplemented(a);
+                    case BOOLEAN:
+                        return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
+                    case DATE:
+                        return rexBuilder.makeDateLiteral(new DateString(constant.getValue()));
+                    case TIME:
+                        return rexBuilder.makeTimeLiteral(new TimeString(constant.getValue()), PRECISION_NOT_SPECIFIED);
+                    case YEAR:
+                    case DECIMAL:
+                    case INTEGER:
+                    case LONG:
+                        rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+                    case NEGATIVE_INTEGER:
+                        rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+                    case NON_NEGATIVE_INTEGER:
+                    case POSITIVE_INTEGER:
+                    case NON_POSITIVE_INTEGER:
+                    case INT:
+                    case UNSIGNED_INT:
+                        return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
+                    case DATETIME_STAMP:
+                        return rexBuilder.makeTimestampLiteral(new TimestampString(constant.getValue()), PRECISION_NOT_SPECIFIED);
+                }
             } else {
                 notImplemented(a);
             }
@@ -678,6 +698,19 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             // not reachable
             return null;
         }
+
+        private Optional<COL_TYPE> extractColType(TermType termType) {
+            if (termType instanceof ObjectRDFType) {
+                COL_TYPE colType = ((ObjectRDFType)termType).isBlankNode() ? BNODE : OBJECT;
+                return Optional.of(colType);
+            }
+            else if (termType instanceof RDFDatatype) {
+                return Optional.of(COL_TYPE.getColType(((RDFDatatype)termType).getIRI()));
+            }
+            else
+                return Optional.empty();
+        }
+
 
         private RexInputRef getField(Variable a, int inputCount) {
             // final RelNode relNode = relBuilder.peek(2);
@@ -708,7 +741,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         @Override
         public void visit(ExtensionalDataNode extensionalDataNode) {
             final DataAtom projectionAtom = extensionalDataNode.getProjectionAtom();
-            final ImmutableList<? extends VariableOrGroundTerm> arguments = projectionAtom.getArguments();
+            final ImmutableList arguments = projectionAtom.getArguments();
 
             final String predicateName = projectionAtom.getPredicate().getName();
 
@@ -879,7 +912,20 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(BoxMinusNode boxMinusNode) {
-            throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
+            TemporalRange range = boxMinusNode.getRange();
+            TemporalRangeRelNode temporalRangeRelNode =
+                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeLiteral(range.isEndInclusive()));
+
+            query.getChildrenStream(boxMinusNode).forEach(n -> n.acceptVisitor(this));
+            //throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
+        }
+
+        private SqlIntervalQualifier getSQLIQualifier(){
+            return new SqlIntervalQualifier(TimeUnit.MILLISECOND,
+                    TimeUnit.MILLISECOND, SqlParserPos.ZERO);
         }
 
         @Override

@@ -19,6 +19,9 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 ?rs rdf:type st:LowRotorSpeed  :-
     { ?rs st:rotorSpeed ?v.  (?v < 1000) }
 
+?rs rdf:type st:LowRotorSpeedForTenSec  :-
+    { ALWAYS IN PAST (0,10S] { ?rs a st:LowRotorSpeed . }}
+
 ?tb rdf:type st:PurgingIsOver :- {
     { ?tb st:monitoredByTemperatureSensor ?ts . ?tb st:monitoredBySpeedSensor ?rs . }
     {
