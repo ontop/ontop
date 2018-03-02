@@ -81,6 +81,11 @@ public class TemporalRelBuilder extends RelBuilder {
         return this;
     }
 
+    public TemporalRelBuilder temporalCoalesce(RelNode operand){
+        push (temporalCoalesceFactory.createTemporalCoalesce(operand));
+        return this;
+    }
+
     public TemporalRangeRelNode temporalRange(RexNode beginInc, RexNode begin, RexNode end, RexNode endInc){
         return temporalRangeFactory.createTemporalRange(beginInc, begin, end, endInc);
     }

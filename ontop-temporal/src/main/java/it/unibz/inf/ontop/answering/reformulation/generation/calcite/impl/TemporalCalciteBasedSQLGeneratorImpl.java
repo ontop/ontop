@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalRelBuilder;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.BoxMinusRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
@@ -912,6 +913,9 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(BoxMinusNode boxMinusNode) {
+
+            query.getChildrenStream(boxMinusNode).forEach(n -> n.acceptVisitor(this));
+
             TemporalRange range = boxMinusNode.getRange();
             TemporalRangeRelNode temporalRangeRelNode =
                     relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
@@ -919,7 +923,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                             rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
                             rexBuilder.makeLiteral(range.isEndInclusive()));
 
-            query.getChildrenStream(boxMinusNode).forEach(n -> n.acceptVisitor(this));
+            RelNode operand = relBuilder.build();
+            relBuilder.boxMinus(operand, temporalRangeRelNode);
             //throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
         }
 
@@ -955,7 +960,10 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(TemporalCoalesceNode temporalCoalesceNode) {
-            throw new UnsupportedOperationException(temporalCoalesceNode.getClass().getName());
+            query.getChildrenStream(temporalCoalesceNode).forEach(n -> n.acceptVisitor(this));
+            RelNode operand = relBuilder.build();
+            relBuilder.temporalCoalesce(operand);
+            //throw new UnsupportedOperationException(temporalCoalesceNode.getClass().getName());
         }
     }
 

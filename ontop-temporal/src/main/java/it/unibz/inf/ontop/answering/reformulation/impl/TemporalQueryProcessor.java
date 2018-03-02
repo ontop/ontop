@@ -138,8 +138,8 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
         this.dbMetadata = obdaSpecification.getDBMetadata();
         this.temporalDBMetadata = ((TemporalOBDASpecification)obdaSpecification).getTemporalDBMetadata();
-        this.datasourceQueryGenerator = temporalTranslationFactory
-                .create(dbMetadataMerger.mergeDBMetadata((RDBMetadata) temporalDBMetadata, (RDBMetadata) dbMetadata));
+        DBMetadata mergedDBMetadata = dbMetadataMerger.mergeDBMetadata((RDBMetadata) temporalDBMetadata, (RDBMetadata) dbMetadata);
+        this.datasourceQueryGenerator = temporalTranslationFactory.create(mergedDBMetadata);
         this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
                 .getUriTemplateMatcher());
         this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
