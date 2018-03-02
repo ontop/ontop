@@ -17,7 +17,11 @@ public class TemporalOBDASpecificationImpl implements TemporalOBDASpecification 
     private final ClassifiedTBox saturatedTBox;
 
     @Inject
-    private TemporalOBDASpecificationImpl(@Assisted Mapping staticMapping, @Assisted("dbMetadata") DBMetadata dbMetadata, @Assisted TemporalMapping temporalMapping, @Assisted("temporalDBMetadata") DBMetadata temporalDBMetadata, @Assisted ClassifiedTBox saturatedTBox) {
+    private TemporalOBDASpecificationImpl(@Assisted Mapping staticMapping,
+                                          @Assisted("dbMetadata") DBMetadata dbMetadata,
+                                          @Assisted TemporalMapping temporalMapping,
+                                          @Assisted("temporalDBMetadata") DBMetadata temporalDBMetadata,
+                                          @Assisted ClassifiedTBox saturatedTBox) {
         this.staticMapping = staticMapping;
         this.dbMetadata = dbMetadata;
         this.temporalMapping = temporalMapping;

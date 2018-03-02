@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.Tem
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.TemporalTranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -47,6 +48,7 @@ import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.impl.ViewTable;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlDialectFactoryImpl;
 import org.apache.calcite.sql.SqlIntervalQualifier;
@@ -175,6 +177,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             rootSchema.add(schemaName, jdbcSchema);
         }
 
+        //rootSchema.add(new ViewTable(null, null, ((RDBMetadata)metadata).getDatabaseRelation("view_0")));
         return rootSchema;
     }
 

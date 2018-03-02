@@ -37,7 +37,7 @@ public class TemporalSQLGenerator implements TemporalNativeQueryGenerator {
     @Override
     public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
             throws OntopReformulationException {
-        return queryGenerator.clone(dbMetadata)
+        return queryGenerator//.clone(dbMetadata)
                 .generateSourceQuery(query, signature);
         //return queryGenerator.clone().generateSourceQuery(query, signature);
     }

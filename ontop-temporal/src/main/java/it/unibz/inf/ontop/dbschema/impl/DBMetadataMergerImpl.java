@@ -34,20 +34,22 @@ public class DBMetadataMergerImpl implements DBMetadataMerger{
                     staticDBMetadata.getDriverVersion().equals(temporalDBMetadata.getDriverVersion())){
 
                 Map<RelationID, RelationDefinition> mergedRelations = new HashMap<>();
-                mergedRelations.putAll(staticDBMetadata.copyRelations());
                 mergedRelations.putAll(temporalDBMetadata.copyRelations());
+                mergedRelations.putAll(staticDBMetadata.copyRelations());
 
                 Map<RelationID, DatabaseRelationDefinition> mergedTables = new HashMap<>();
-                mergedTables.putAll(staticDBMetadata.copyTables());
                 mergedTables.putAll(temporalDBMetadata.copyTables());
+                mergedTables.putAll(staticDBMetadata.copyTables());
 
                 List<DatabaseRelationDefinition> mergedListOfTables = new ArrayList<>();
-                staticDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
-                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
+
+                temporalDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
+                    if (mergedListOfTables.stream().noneMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
                         mergedListOfTables.add(databaseRelationDefinition);
                 });
-                temporalDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
-                    if (!mergedListOfTables.stream().anyMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
+
+                staticDBMetadata.getDatabaseRelations().forEach(databaseRelationDefinition -> {
+                    if (mergedListOfTables.stream().noneMatch(d -> d.getID().toString().equals(databaseRelationDefinition.getID().toString())))
                         mergedListOfTables.add(databaseRelationDefinition);
                 });
 
