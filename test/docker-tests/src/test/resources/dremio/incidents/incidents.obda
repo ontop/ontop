@@ -8,7 +8,12 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-Incident
-target		:incident{IncidntNum} a :Incident ; :hasCity :city{zip} . 
+target		:incident{IncidntNum} a :Incident .
+source		SELECT IncidntNum
+			  FROM SFincidents.incidents_trunc
+
+mappingId	MAPID-IncidenthasCity
+target		:incident{IncidntNum} :hasCity :city{zip} .
 source		SELECT inc.IncidntNum, join_zip.zip
 			  FROM SFincidents.incidents_trunc AS inc
 			 LEFT JOIN SFincidents.zip_lookup AS join_zip ON inc.Lon = join_zip.Lon AND inc.Lat = join_zip.Lat
