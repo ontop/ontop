@@ -57,6 +57,8 @@ public class SQLAdapterFactory {
                 return new MonetDBSQLDialectAdapter();
             case "com.sap.db.jdbc.Driver":
                 return new SAPHANASQLDialectAdapter();
+			case "com.dremio.jdbc.Driver":
+				return new DremioSQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");
