@@ -81,10 +81,10 @@ public class ResultSetTableModel implements TableModel {
 	public void close() {
 		try {
 			Statement statement = set.getStatement();
-			if (!statement.isClosed())
+			if (statement!=null)
 				statement.close();
 			// Normally not necessary (according to the JDBC standard)
-			if (!set.isClosed())
+			if (set!=null)
 				set.close();
 		} catch (SQLException e) {
 			// NO-OP
