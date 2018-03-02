@@ -964,7 +964,7 @@ public class OneShotSQLGeneratorEngine {
 		if (ht instanceof Variable) {
 			return index.getLangColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
-					.orElse("NULL");
+					.orElse(sqladapter.getNullForLang());
 		}
 		else {
 			return optionalTermType
@@ -972,7 +972,7 @@ public class OneShotSQLGeneratorEngine {
 					.map(t -> (RDFDatatype)t)
 					.flatMap(RDFDatatype::getLanguageTag)
 					.map(tag -> sqladapter.getSQLLexicalFormString(tag.getFullString()))
-					.orElse("NULL");
+					.orElseGet(sqladapter::getNullForLang);
 		}
     }
 
