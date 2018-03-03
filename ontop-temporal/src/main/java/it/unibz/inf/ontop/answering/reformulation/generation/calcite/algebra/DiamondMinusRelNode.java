@@ -71,7 +71,7 @@ public class DiamondMinusRelNode implements RelNode{
 
     @Override
     public RelDataType getRowType() {
-        return null;
+        return operand.getRowType();
     }
 
     @Override

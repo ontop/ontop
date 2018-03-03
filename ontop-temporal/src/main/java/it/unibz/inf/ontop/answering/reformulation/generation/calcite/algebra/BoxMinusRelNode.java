@@ -71,7 +71,7 @@ public class BoxMinusRelNode implements RelNode {
 
     @Override
     public RelDataType getRowType() {
-        throw new UnsupportedOperationException("getRowType is not implemented");
+        return operand.getRowType();
     }
 
     @Override

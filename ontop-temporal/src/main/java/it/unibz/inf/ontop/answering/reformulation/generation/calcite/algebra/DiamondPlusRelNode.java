@@ -71,7 +71,7 @@ public class DiamondPlusRelNode implements RelNode {
 
     @Override
     public RelDataType getRowType() {
-        return null;
+        return operand.getRowType();
     }
 
     @Override
