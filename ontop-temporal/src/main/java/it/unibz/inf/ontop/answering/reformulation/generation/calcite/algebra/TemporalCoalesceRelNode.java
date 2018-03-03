@@ -16,10 +16,10 @@ import java.util.Set;
 
 public class TemporalCoalesceRelNode implements RelNode{
 
-    private final RelNode operand;
+    private final RelNode input;
 
-    public TemporalCoalesceRelNode(RelNode operand) {
-        this.operand = operand;
+    public TemporalCoalesceRelNode(RelNode input) {
+        this.input = input;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class TemporalCoalesceRelNode implements RelNode{
 
     @Override
     public RelDataType getRowType() {
-        return operand.getRowType();
+        return input.getRowType();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class TemporalCoalesceRelNode implements RelNode{
 
     @Override
     public RelOptCluster getCluster() {
-        return null;
+        return input.getCluster();
     }
 
     @Override

@@ -911,7 +911,19 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(TemporalJoinNode temporalJoinNode) {
-            throw new UnsupportedOperationException(temporalJoinNode.getClass().getName());
+            boolean first = true;
+
+            for (QueryNode queryNode : query.getChildren(temporalJoinNode)) {
+                queryNode.acceptVisitor(this);
+                if (!first) {
+                    relBuilder.temporalJoin();
+                }
+                first = false;
+            }
+
+            temporalJoinNode.getOptionalFilterCondition().ifPresent(filter -> {
+                relBuilder.filter(expressionToRexNode(filter, 1));
+            });
         }
 
         @Override
@@ -938,17 +950,47 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(BoxPlusNode boxPlusNode) {
-            throw new UnsupportedOperationException(boxPlusNode.getClass().getName());
+            query.getChildrenStream(boxPlusNode).forEach(n -> n.acceptVisitor(this));
+
+            TemporalRange range = boxPlusNode.getRange();
+            TemporalRangeRelNode temporalRangeRelNode =
+                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeLiteral(range.isEndInclusive()));
+
+            RelNode operand = relBuilder.build();
+            relBuilder.boxPlus(operand, temporalRangeRelNode);
         }
 
         @Override
         public void visit(DiamondMinusNode diamondMinusNode) {
-            throw new UnsupportedOperationException(diamondMinusNode.getClass().getName());
+            query.getChildrenStream(diamondMinusNode).forEach(n -> n.acceptVisitor(this));
+
+            TemporalRange range = diamondMinusNode.getRange();
+            TemporalRangeRelNode temporalRangeRelNode =
+                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeLiteral(range.isEndInclusive()));
+
+            RelNode operand = relBuilder.build();
+            relBuilder.diamondMinus(operand, temporalRangeRelNode);
         }
 
         @Override
         public void visit(DiamondPlusNode diamondPlusNode) {
-            throw new UnsupportedOperationException(diamondPlusNode.getClass().getName());
+            query.getChildrenStream(diamondPlusNode).forEach(n -> n.acceptVisitor(this));
+
+            TemporalRange range = diamondPlusNode.getRange();
+            TemporalRangeRelNode temporalRangeRelNode =
+                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+                            rexBuilder.makeLiteral(range.isEndInclusive()));
+
+            RelNode operand = relBuilder.build();
+            relBuilder.diamondPlus(operand, temporalRangeRelNode);
         }
 
         @Override

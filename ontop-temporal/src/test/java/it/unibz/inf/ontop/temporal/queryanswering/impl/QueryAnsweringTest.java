@@ -304,8 +304,8 @@ public class QueryAnsweringTest {
 
         OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
+                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
+                .nativeOntopMappingFile("src/test/resources/siemens.obda")
                 .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
                 .jdbcUrl(url)
                 .jdbcUser(username)

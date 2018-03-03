@@ -76,14 +76,33 @@ public class TemporalRelBuilder extends RelBuilder {
         return new TemporalRelBuilder(config.getContext(), clusters[0], relOptSchemas[0]);
     }
 
-    public TemporalRelBuilder boxMinus(RelNode operand, TemporalRangeRelNode range){
-        push (boxMinusFactory.createBoxMinus(operand, range));
+    public TemporalRelBuilder boxMinus(RelNode input, TemporalRangeRelNode range){
+        push (boxMinusFactory.createBoxMinus(input, range));
+        return this;
+    }
+
+    public TemporalRelBuilder boxPlus(RelNode input, TemporalRangeRelNode range){
+        push (boxPlusFactory.createBoxPlus(input, range));
+        return this;
+    }
+
+    public TemporalRelBuilder diamondMinus(RelNode input, TemporalRangeRelNode range){
+        push (diamondMinusFactory.createDiamondMinus(input, range));
+        return this;
+    }
+
+    public TemporalRelBuilder diamondPlus(RelNode input, TemporalRangeRelNode range){
+        push (diamondPlusFactory.createDiamondPlus(input, range));
         return this;
     }
 
     public TemporalRelBuilder temporalCoalesce(RelNode operand){
         push (temporalCoalesceFactory.createTemporalCoalesce(operand));
         return this;
+    }
+
+    public TemporalRelBuilder temporalJoin(){
+        return null;
     }
 
     public TemporalRangeRelNode temporalRange(RexNode beginInc, RexNode begin, RexNode end, RexNode endInc){

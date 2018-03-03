@@ -16,11 +16,11 @@ import java.util.Set;
 
 public class BoxPlusRelNode implements RelNode {
 
-    private final RelNode operand;
+    private final RelNode input;
     private final TemporalRangeRelNode temporalRangeRelNode;
 
-    public BoxPlusRelNode(RelNode operand, TemporalRangeRelNode temporalRangeRelNode) {
-        this.operand = operand;
+    public BoxPlusRelNode(RelNode input, TemporalRangeRelNode temporalRangeRelNode) {
+        this.input = input;
         this.temporalRangeRelNode = temporalRangeRelNode;
     }
 
@@ -71,7 +71,7 @@ public class BoxPlusRelNode implements RelNode {
 
     @Override
     public RelDataType getRowType() {
-        return operand.getRowType();
+        return input.getRowType();
     }
 
     @Override
@@ -91,7 +91,7 @@ public class BoxPlusRelNode implements RelNode {
 
     @Override
     public RelOptCluster getCluster() {
-        return null;
+        return input.getCluster();
     }
 
     @Override
