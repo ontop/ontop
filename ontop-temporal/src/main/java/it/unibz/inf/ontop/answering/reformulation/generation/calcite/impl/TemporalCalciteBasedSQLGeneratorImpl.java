@@ -195,6 +195,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         normalizedQuery.getRootNode().acceptVisitor(np);
 
+        log.debug("Temporal Calcite Relational Algebra has been created.");
+
         String sql = np.getSQL();
 
         return new SQLExecutableQuery(sql, signature);

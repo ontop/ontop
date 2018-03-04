@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.calcite;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
 import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.Contexts;
@@ -102,7 +103,12 @@ public class TemporalRelBuilder extends RelBuilder {
     }
 
     public TemporalRelBuilder temporalJoin(){
-        return null;
+        RelNode right = this.build();
+        RelNode left = this.build();
+        final RelNode temporalJoin;
+        temporalJoin = temporalJoinFactory.createTemporalJoin(left, right);
+        push(temporalJoin);
+        return this;
     }
 
     public TemporalRangeRelNode temporalRange(RexNode beginInc, RexNode begin, RexNode end, RexNode endInc){

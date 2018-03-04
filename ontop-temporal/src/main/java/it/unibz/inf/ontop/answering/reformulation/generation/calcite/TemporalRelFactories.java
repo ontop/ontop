@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.calcite;
 
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.*;
+import org.apache.calcite.plan.Convention;
+import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rex.RexNode;
 
@@ -50,7 +53,7 @@ public class TemporalRelFactories  {
     }
 
     public interface TemporalJoinFactory {
-        RelNode createTemporalJoin(RelNode ... input);
+        RelNode createTemporalJoin(RelNode left, RelNode right);
     }
 
     public interface TemporalRangeFactory{
@@ -99,15 +102,12 @@ public class TemporalRelFactories  {
 
     private static class TemporalJoinFactoryImpl implements TemporalJoinFactory {
 
-        public RelNode createTemporalJoin(RelNode ... operands) {
-
-            return new TemporalJoinRelNode(operands);
+        public RelNode createTemporalJoin(RelNode left, RelNode right) {
+            final RelOptCluster cluster = left.getCluster();
+            final RelTraitSet traitSet = cluster.traitSetOf(Convention.NONE);
+            return new TemporalJoinRelNode(cluster, traitSet, left, right);
         }
 
-        public RelNode createTemporalJoin(List<RelNode> operands) {
-
-            return new TemporalJoinRelNode(operands);
-        }
     }
 
     public static class TemporalRangeFactoryImpl implements TemporalRangeFactory{
