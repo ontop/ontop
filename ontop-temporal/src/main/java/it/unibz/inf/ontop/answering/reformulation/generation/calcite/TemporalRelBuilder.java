@@ -2,18 +2,24 @@ package it.unibz.inf.ontop.answering.reformulation.generation.calcite;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptSchema;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.server.CalciteServerStatement;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.util.Util;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TemporalRelBuilder extends RelBuilder {
 
@@ -25,9 +31,12 @@ public class TemporalRelBuilder extends RelBuilder {
     private final TemporalRelFactories.TemporalJoinFactory temporalJoinFactory;
     private final TemporalRelFactories.TemporalRangeFactory temporalRangeFactory;
 
-    protected TemporalRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema) {
+    private final Map<RelationID, RelationDefinition> ontopViews;
+
+    protected TemporalRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema, Map<RelationID, RelationDefinition> ontopViews) {
 
         super(context, cluster, relOptSchema);
+        this.ontopViews = ontopViews;
 
         if (context == null) {
             context = Contexts.EMPTY_CONTEXT;
@@ -59,9 +68,14 @@ public class TemporalRelBuilder extends RelBuilder {
         this.temporalRangeFactory =
                 Util.first(context.unwrap(TemporalRelFactories.TemporalRangeFactory.class),
                         TemporalRelFactories.DEFAULT_TEMPORALRANGE_FACTORY);
+
     }
 
-    /** Creates a RelBuilder. */
+    public Map<RelationID, RelationDefinition> getOntopViews() {
+        return ontopViews;
+    }
+
+    /** Creates a TemporalRelBuilder. */
     public static TemporalRelBuilder create(FrameworkConfig config) {
         final RelOptCluster[] clusters = {null};
         final RelOptSchema[] relOptSchemas = {null};
@@ -74,7 +88,25 @@ public class TemporalRelBuilder extends RelBuilder {
                         return null;
                     }
                 });
-        return new TemporalRelBuilder(config.getContext(), clusters[0], relOptSchemas[0]);
+
+        return new TemporalRelBuilder(config.getContext(), clusters[0], relOptSchemas[0], getOntopViews(config));
+    }
+
+    private static Map<RelationID, RelationDefinition> getOntopViews(FrameworkConfig config){
+
+        Map<RelationID, RelationDefinition> totalOntopViewMap = new HashMap<>();
+
+        for(String schemaName : config.getDefaultSchema().getSubSchemaNames()){
+            SchemaPlus subSchema = config.getDefaultSchema().getSubSchema(schemaName);
+            try{
+            OntopJDBCSchema ontopJDBCSchema = subSchema.unwrap(OntopJDBCSchema.class);
+            totalOntopViewMap.putAll(ontopJDBCSchema.getOntopViews());
+            } catch (Exception e) {
+
+            }
+        }
+
+        return totalOntopViewMap;
     }
 
     public TemporalRelBuilder boxMinus(RelNode input, TemporalRangeRelNode range){

@@ -5,14 +5,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.generation.calcite.OntopJDBCSchema;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalRelBuilder;
-import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.BoxMinusRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.TemporalTranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -28,19 +29,19 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
-import org.apache.calcite.adapter.jdbc.JdbcSchema;
 import org.apache.calcite.avatica.util.TimeUnit;
 import org.apache.calcite.jdbc.*;
-import org.apache.calcite.jdbc.Driver;
+import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.plan.RelOptTable;
+import org.apache.calcite.prepare.PlannerImpl;
+import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
-import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -48,35 +49,30 @@ import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.schema.impl.ViewTable;
-import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlDialectFactoryImpl;
-import org.apache.calcite.sql.SqlIntervalQualifier;
-import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.parser.SqlParseException;
+import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
-import org.apache.calcite.tools.FrameworkConfig;
-import org.apache.calcite.tools.Frameworks;
-import org.apache.calcite.tools.RelBuilder;
+import org.apache.calcite.sql.validate.SqlValidatorImpl;
+import org.apache.calcite.sql2rel.SqlToRelConverter;
+import org.apache.calcite.sql2rel.StandardConvertletTable;
+import org.apache.calcite.tools.*;
 import org.apache.calcite.util.DateString;
 import org.apache.calcite.util.TimeString;
 import org.apache.calcite.util.TimestampString;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Literal;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 
+import java.awt.*;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -85,9 +81,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.BNODE;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.OBJECT;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.UNSUPPORTED;
-import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
+import static it.unibz.inf.ontop.utils.ImmutableCollectors.toSet;
 import static org.apache.calcite.rel.type.RelDataType.PRECISION_NOT_SPECIFIED;
 
 public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBasedSQLGenerator {
@@ -103,6 +99,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     private final TemporalTranslationFactory temporalTranslationFactory;
 
     private SchemaPlus rootSchema = null;
+    private FrameworkConfig calciteFrameworkConfig;
 
     private SqlDialect dialect;
 
@@ -126,6 +123,9 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         this.settings = coreSettings;
         try {
             this.rootSchema = configRootSchema(metadata);
+            calciteFrameworkConfig = Frameworks.newConfigBuilder()
+                    .defaultSchema(rootSchema)
+                    .build();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
@@ -137,7 +137,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
         SchemaPlus rootSchema = calciteConnection.getRootSchema();
 
-        CalciteJdbc41Factory fac = new  CalciteJdbc41Factory();
+        //CalciteJdbc41Factory fac = new  CalciteJdbc41Factory();
         //CalciteConnection con  = fac.newConnection(new Driver(), fac, "jdbc:calcite:", new Properties(), (CalciteSchema) rootSchema, new JavaTypeFactoryImpl());
 
 //        DatabaseMetaData md = calciteConnection.getMetaData();
@@ -156,13 +156,10 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         Connection jdbcConnection = DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         dialect = new SqlDialectFactoryImpl().create(jdbcConnection.getMetaData());
 
-
-
-
-        final List<String> schemaNames = metadata.getDatabaseRelations()
+        final Set<String> schemaNames = metadata.getDatabaseRelations()
                 .stream()
                 .map(databaseRelationDefinition -> databaseRelationDefinition.getID().getSchemaName())
-                .collect(toList());
+                .collect(toSet());
 
         Map<String, Object> operand = ImmutableMap.<String, Object>builder()
                 .put("jdbcUrl", settings.getJdbcUrl())
@@ -171,23 +168,37 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 .put("jdbcPassword", settings.getJdbcPassword())
                 .build();
 
+        ImmutableMap<RelationID, RelationDefinition> diffMap = getDiffMap(metadata);
+
         for (String schemaName : schemaNames) {
             //final JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, schemaName, ds, null, schemaName);
-            final JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, schemaName, operand);
-            rootSchema.add(schemaName, jdbcSchema);
+            final OntopJDBCSchema ontopJDBCSchema = OntopJDBCSchema.create(rootSchema, schemaName, operand, diffMap);
+            rootSchema.add(schemaName, ontopJDBCSchema);
         }
 
         //rootSchema.add(new ViewTable(null, null, ((RDBMetadata)metadata).getDatabaseRelation("view_0")));
         return rootSchema;
     }
 
+    private ImmutableMap<RelationID, RelationDefinition> getDiffMap(DBMetadata metadata){
+        Map<RelationID, RelationDefinition> diffMap = new HashMap<>();
+        ImmutableMap<RelationID, RelationDefinition> relationMap = metadata.copyRelations();
+
+        for(RelationID rid : relationMap.keySet()){
+            if(metadata.copyTables().keySet().stream().noneMatch(k -> k.equals(rid))){
+                diffMap.put(rid, relationMap.get(rid));
+            }
+        }
+        return ImmutableMap.copyOf(diffMap);
+    }
+
     @Override
     public ExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature) {
         IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
-        final FrameworkConfig calciteFrameworkConfig = Frameworks.newConfigBuilder()
-                .defaultSchema(rootSchema)
-                .build();
+//        final FrameworkConfig calciteFrameworkConfig = Frameworks.newConfigBuilder()
+//                .defaultSchema(rootSchema)
+//                .build();
 
         final TemporalRelBuilder relBuilder = TemporalRelBuilder.create(calciteFrameworkConfig);
 
@@ -744,6 +755,22 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             throw new UnsupportedOperationException("not implemented");
         }
 
+
+        private RelNode convertSqlNodeToRelNode(SqlNode sqlNode){
+
+            Planner planner = Frameworks.getPlanner(calciteFrameworkConfig);
+
+            SqlNode validatedSqlNode = null;
+            RelNode relNode = null;
+            try {
+                validatedSqlNode = planner.validate(sqlNode);
+                relNode = planner.rel(validatedSqlNode).project();
+            } catch (ValidationException | RelConversionException e) {
+                e.printStackTrace();
+            }
+            return relNode;
+        }
+
         @Override
         public void visit(ExtensionalDataNode extensionalDataNode) {
             final DataAtom projectionAtom = extensionalDataNode.getProjectionAtom();
@@ -751,7 +778,20 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             final String predicateName = projectionAtom.getPredicate().getName();
 
-            relBuilder.scan(predicateName.split("\\."));
+            if (relBuilder.getOntopViews().keySet().stream().anyMatch(k -> k.getTableName().equals(predicateName))){
+                SqlParser parser = SqlParser.create(predicateName);
+                try {
+                    SqlNode node = parser.parseQuery();
+                    RelNode ontopViewRelNode = convertSqlNodeToRelNode(node);
+                    relBuilder.push(ontopViewRelNode);
+
+                } catch (SqlParseException e) {
+                    e.printStackTrace();
+                }
+            } else {
+
+                relBuilder.scan(predicateName.split("\\."));
+            }
 
             ImmutableList<RexNode> rexNodes = IntStream
                     .range(0, arguments.size())
