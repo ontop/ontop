@@ -21,17 +21,13 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.utils.ConnectionTools;
-import it.unibz.inf.ontop.protege.utils.CustomTraversalPolicy;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
-import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.protege.editor.owl.OWLEditorKit;
 
 import javax.swing.*;
@@ -220,7 +216,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
         txtJdbcDriver.setEditable(true);
         txtJdbcDriver.setFont(new java.awt.Font("Courier New", 1, 13)); // NOI18N
-        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+        txtJdbcDriver.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
         txtJdbcDriver.setMinimumSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.setPreferredSize(new java.awt.Dimension(180, 24));
         txtJdbcDriver.addActionListener(new java.awt.event.ActionListener() {
@@ -387,33 +383,43 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
         lblConnectionStatus.setText("Establishing connection...");
         lblConnectionStatus.setForeground(Color.BLACK);
 
-        Runnable run = () -> {
-            JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
-            try {
-                try {
-                    connm.closeConnection();
-                } catch (Exception e) {
-                    // NO-OP
-                }
-                Connection conn = ConnectionTools.getConnection(obdaModel.getDatasource());
-                if (conn == null)
-                    throw new SQLException("Error connecting to the database");
-                lblConnectionStatus.setForeground(Color.GREEN.darker());
-                lblConnectionStatus.setText("Connection is OK");
-            } catch (SQLException e) { // if fails
-                String help = "";
-                if (e.getMessage().startsWith("No suitable driver")) {
-                    help = "<br/><br/> HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drives\" tab." +
-                            " (Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...) " +
-                            "<br/> More information is on the Wiki: " +
-                            "<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>";
-                }
-                lblConnectionStatus.setForeground(Color.RED);
-                lblConnectionStatus.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
-            }
+        OBDADataSource datasource = obdaModel.getDatasource();
+        String driver  = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+        if(driver.isEmpty()){
+            lblConnectionStatus.setForeground(Color.RED);
+            lblConnectionStatus.setText("Please, select or type the JDBC Driver class.");
+        }
+        else {
+            Runnable run = () -> {
 
-        };
-        SwingUtilities.invokeLater(run);
+                JDBCConnectionManager connm = JDBCConnectionManager.getJDBCConnectionManager();
+                try {
+                    try {
+                        connm.closeConnection();
+                    } catch (Exception e) {
+                        // NO-OP
+                    }
+
+                    Connection conn = ConnectionTools.getConnection(datasource);
+                    if (conn == null)
+                        throw new SQLException("Error connecting to the database");
+                    lblConnectionStatus.setForeground(Color.GREEN.darker());
+                    lblConnectionStatus.setText("Connection is OK");
+                } catch (SQLException e) { // if fails
+                    String help = "";
+                    if (e.getMessage().startsWith("No suitable driver")) {
+                        help = "<br/><br/> HINT: To setup JDBC drivers, open the Preference panel and go to the \"JDBC Drives\" tab." +
+                                " (Windows and Linux: Files &gt; Preferences..., Mac OS X: Protege &gt; Preferences...) " +
+                                "<br/> More information is on the Wiki: " +
+                                "<a href='https://github.com/ontop/ontop/wiki/FAQ'>https://github.com/ontop/ontop/wiki/FAQ</a>";
+                    }
+                    lblConnectionStatus.setForeground(Color.RED);
+                    lblConnectionStatus.setText(String.format("<html>%s (ERR-CODE: %s)%s</html>", e.getMessage(), e.getErrorCode(), help));
+                }
+
+            };
+            SwingUtilities.invokeLater(run);
+        }
 
     }// GEN-LAST:event_cmdTestConnectionActionPerformed
 
