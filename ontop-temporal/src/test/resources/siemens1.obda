@@ -29,7 +29,7 @@ source		SELECT turbine_id, component_id, sensor_id FROM tb_sensors, tb_component
 
 mappingId	urn:Map-RotSpeedSensor
 target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor ;  :measures {sensor_id}^^xsd:integer .
-source		SELECT sensor_id FROM (SELECT sensor_id, LAG(sensor_id) OVER() AS lag_sensor_id  FROM tb_sensors WHERE sensor_type = 0) SUBQUERY
+source		SELECT "sensor_id" FROM (SELECT "sensor_id", LAG("sensor_id") OVER() AS lag_sensor_id  FROM "public"."tb_sensors" WHERE "sensor_type" = 0) SUBQUERY
 
 mappingId	urn:Map-PowerTurbine
 target		:PowerTurbine/{turbine_id}/{component_id} a :PowerTurbine ; :isPartOf :Turbine/{turbine_id} .

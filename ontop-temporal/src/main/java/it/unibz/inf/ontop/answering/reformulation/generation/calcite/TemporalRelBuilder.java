@@ -31,9 +31,12 @@ public class TemporalRelBuilder extends RelBuilder {
     private final TemporalRelFactories.TemporalJoinFactory temporalJoinFactory;
     private final TemporalRelFactories.TemporalRangeFactory temporalRangeFactory;
 
-    private final Map<RelationID, RelationDefinition> ontopViews;
+    private final Map<String, RelationDefinition> ontopViews;
 
-    protected TemporalRelBuilder(Context context, RelOptCluster cluster, RelOptSchema relOptSchema, Map<RelationID, RelationDefinition> ontopViews) {
+    protected TemporalRelBuilder(Context context,
+                                 RelOptCluster cluster,
+                                 RelOptSchema relOptSchema,
+                                 Map<String, RelationDefinition> ontopViews) {
 
         super(context, cluster, relOptSchema);
         this.ontopViews = ontopViews;
@@ -71,7 +74,7 @@ public class TemporalRelBuilder extends RelBuilder {
 
     }
 
-    public Map<RelationID, RelationDefinition> getOntopViews() {
+    public Map<String, RelationDefinition> getOntopViews() {
         return ontopViews;
     }
 
@@ -92,15 +95,16 @@ public class TemporalRelBuilder extends RelBuilder {
         return new TemporalRelBuilder(config.getContext(), clusters[0], relOptSchemas[0], getOntopViews(config));
     }
 
-    private static Map<RelationID, RelationDefinition> getOntopViews(FrameworkConfig config){
+    private static Map<String, RelationDefinition> getOntopViews(FrameworkConfig config){
 
-        Map<RelationID, RelationDefinition> totalOntopViewMap = new HashMap<>();
+        Map<String, RelationDefinition> totalOntopViewMap = new HashMap<>();
 
         for(String schemaName : config.getDefaultSchema().getSubSchemaNames()){
             SchemaPlus subSchema = config.getDefaultSchema().getSubSchema(schemaName);
             try{
             OntopJDBCSchema ontopJDBCSchema = subSchema.unwrap(OntopJDBCSchema.class);
-            totalOntopViewMap.putAll(ontopJDBCSchema.getOntopViews());
+            ontopJDBCSchema.getOntopViews().forEach((k,v) -> totalOntopViewMap.put(k.getTableName(), v));
+            //totalOntopViewMap.putAll(ontopJDBCSchema.getOntopViews());
             } catch (Exception e) {
 
             }

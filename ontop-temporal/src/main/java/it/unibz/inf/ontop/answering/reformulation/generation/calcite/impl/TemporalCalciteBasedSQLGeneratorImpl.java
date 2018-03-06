@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.Tem
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.ParserViewDefinition;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -110,7 +111,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                                                  //JdbcTypeMapper jdbcTypeMapper,
                                                  PullOutVariableOptimizer pullOutVariableOptimizer,
                                                  TermFactory termFactory,
-                                                 SubstitutionFactory substitutionFactory, TemporalTranslationFactory temporalTranslationFactory) {
+                                                 SubstitutionFactory substitutionFactory,
+                                                 TemporalTranslationFactory temporalTranslationFactory) {
 
         this.pullOutVariableOptimizer = pullOutVariableOptimizer;
         this.termFactory = termFactory;
@@ -755,17 +757,19 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             throw new UnsupportedOperationException("not implemented");
         }
 
-
-        private RelNode convertSqlNodeToRelNode(SqlNode sqlNode){
+        private RelNode convertSqlNodeToRelNode(String sqlString){
 
             Planner planner = Frameworks.getPlanner(calciteFrameworkConfig);
 
-            SqlNode validatedSqlNode = null;
+            //sqlString = "SELECT \"sensor_id\" FROM (SELECT \"sensor_id\", LAG(\"sensor_id\") OVER() AS lag_sensor_id  FROM \"public\".\"tb_sensors\" WHERE \"sensor_type\" = 0) SUBQUERY";
+
             RelNode relNode = null;
             try {
-                validatedSqlNode = planner.validate(sqlNode);
+                SqlNode parsedNode = planner.parse(sqlString);
+
+                SqlNode validatedSqlNode = planner.validate(parsedNode);
                 relNode = planner.rel(validatedSqlNode).project();
-            } catch (ValidationException | RelConversionException e) {
+            } catch (ValidationException | RelConversionException | SqlParseException e) {
                 e.printStackTrace();
             }
             return relNode;
@@ -778,16 +782,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             final String predicateName = projectionAtom.getPredicate().getName();
 
-            if (relBuilder.getOntopViews().keySet().stream().anyMatch(k -> k.getTableName().equals(predicateName))){
-                SqlParser parser = SqlParser.create(predicateName);
-                try {
-                    SqlNode node = parser.parseQuery();
-                    RelNode ontopViewRelNode = convertSqlNodeToRelNode(node);
-                    relBuilder.push(ontopViewRelNode);
+            if (relBuilder.getOntopViews().containsKey(predicateName)){
+                String sqlString = ((ParserViewDefinition) relBuilder.getOntopViews().get(predicateName)).getStatement();
 
-                } catch (SqlParseException e) {
-                    e.printStackTrace();
-                }
+                RelNode ontopViewRelNode = convertSqlNodeToRelNode(sqlString);
+                relBuilder.push(ontopViewRelNode);
+
             } else {
 
                 relBuilder.scan(predicateName.split("\\."));
