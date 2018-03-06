@@ -103,8 +103,21 @@ public class MetaMappingExpander {
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
 
 		for (SQLPPTriplesMap mapping : mappings) {
+
+			//serach for not grounded elements in the predicate of each mapping (position 2 or 3)
 			ImmutableList<ImmutableFunctionalTerm> toBeExpanded = mapping.getTargetAtoms().stream()
-					.filter(atom -> atom.getFunctionSymbol().isTriplePredicate())
+					.filter(atom -> {
+						ImmutableList<? extends ImmutableTerm> arguments = atom.getArguments();
+						ImmutableTerm immutableTerm = arguments.get(1);
+							if(isURIRDFType(immutableTerm)){
+								//check if the class is grounded
+								return  !arguments.get(2).isGround();
+							}
+							else{
+								return !immutableTerm.isGround();
+							}
+
+						})
 					.collect(ImmutableCollectors.toList());
 
 			if (toBeExpanded.isEmpty()) {
