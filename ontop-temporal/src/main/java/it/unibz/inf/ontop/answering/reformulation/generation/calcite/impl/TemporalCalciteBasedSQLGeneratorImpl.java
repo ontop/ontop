@@ -85,6 +85,7 @@ import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TY
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toSet;
+import static java.lang.Math.toIntExact;
 import static org.apache.calcite.rel.type.RelDataType.PRECISION_NOT_SPECIFIED;
 
 public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBasedSQLGenerator {
@@ -819,17 +820,28 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(DistinctNode distinctNode) {
-            throw new UnsupportedOperationException(distinctNode.getClass().getName() +" not implemented");
+            query.getChildrenStream(distinctNode).forEach(n -> n.acceptVisitor(this));
+            relBuilder.distinct();
         }
 
         @Override
         public void visit(SliceNode sliceNode) {
-            throw new UnsupportedOperationException(sliceNode.getClass().getName() +" not implemented");
+            query.getChildrenStream(sliceNode).forEach(n -> n.acceptVisitor(this));
+            relBuilder.limit((int) sliceNode.getOffset(),  toIntExact(sliceNode.getLimit().get()));
         }
 
         @Override
         public void visit(OrderByNode orderByNode) {
-            throw new UnsupportedOperationException(orderByNode.getClass().getName() +" not implemented");
+            query.getChildrenStream(orderByNode).forEach(n -> n.acceptVisitor(this));
+            final ImmutableList<RexNode> orderByConditions = orderByNode.getComparators()
+                    .stream()
+                    .map(s -> {
+                        final RexInputRef field = relBuilder.field(((Variable)s.getTerm()).getName());
+                        return (!s.isAscending()) ?
+                                relBuilder.desc(field) : field;
+                    })
+                    .collect(toList());
+            relBuilder.sort(orderByConditions);
         }
 
 
