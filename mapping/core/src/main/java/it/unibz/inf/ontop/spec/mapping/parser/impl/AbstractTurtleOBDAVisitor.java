@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -230,60 +228,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
      * </ul>
      */
     private Function makeAtom(Term subject, Term pred, Term object) {
-        Function atom;
 
-        if (isRDFType(pred)) {
-            if (object instanceof Function) {
-                if (QueryUtils.isGrounded(object)) {
-                    ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
-                    Predicate predicate = atomFactory.getClassPredicate(c.getValue());
-                    atom = termFactory.getFunction(predicate, subject);
-                } else {
-                    atom = atomFactory.getTripleAtom(subject, pred, object);
-                }
-            } else if (object instanceof Variable) {
-                Term uriOfPred = termFactory.getUriTemplate(pred);
-                Term uriOfObject = termFactory.getUriTemplate(object);
-                atom = atomFactory.getTripleAtom(subject, uriOfPred, uriOfObject);
-            } else {
-                throw new IllegalArgumentException("parser cannot handle object " + object);
-            }
-        } else if (!QueryUtils.isGrounded(pred)) {
-            atom = atomFactory.getTripleAtom(subject, pred, object);
-        } else {
-            Predicate predicate;
-            if (pred instanceof Function) {
-                ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-                if (object instanceof Variable) {
-                    predicate = atomFactory.getDataPropertyPredicate(pr.getValue());
-                } else {
-                    if (object instanceof Function) {
-                        if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
-
-                            predicate = atomFactory.getObjectPropertyPredicate(pr.getValue());
-                        } else {
-                            predicate = atomFactory.getDataPropertyPredicate(pr.getValue());
-                        }
-                    } else {
-                        throw new IllegalArgumentException("parser cannot handle object " + object);
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException("predicate should be a URI Function");
-            }
-            atom = termFactory.getFunction(predicate, subject, object);
-        }
-        return atom;
+        return  atomFactory.getTripleAtom(subject, pred, object);
     }
 
-
-    private static boolean isRDFType(Term pred) {
-        if (pred instanceof Function && ((Function) pred).getTerm(0) instanceof Constant) {
-            String c = ((Constant) ((Function) pred).getTerm(0)).getValue();
-            return c.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString());
-        }
-        return false;
-    }
 
     private String concatPrefix(String prefixedName) {
         String[] tokens = prefixedName.split(":", 2);

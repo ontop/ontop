@@ -34,7 +34,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.ATOM_FACTORY;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
 
 
 /**
@@ -55,7 +56,8 @@ public class TurtleSyntaxParserTest {
 		Injector injector = configuration.getInjector();
         specificationFactory = injector.getInstance(SpecificationFactory.class);
     }
-	
+
+    @Test
 	public void test_1_1() {
 		final boolean result = parse(":Person-{id} a :Person .");
 		TestCase.assertTrue(result);
