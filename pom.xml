@@ -153,6 +153,7 @@
         <commons-rdf.version>0.3.0-incubating</commons-rdf.version>
         <guava.version>18.0</guava.version>
         <jsqlparser.version>1.0</jsqlparser.version>
+        <calcite.version>1.16.0-SNAPSHOT</calcite.version>
     </properties>
 
     <build>
@@ -408,9 +409,14 @@
             <dependency>
                 <groupId>org.apache.calcite</groupId>
                 <artifactId>calcite-core</artifactId>
-                <version>1.16.0-SNAPSHOT</version>
+                <version>${calcite.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-server</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
 
             <!-- OWL API -->
             <dependency>

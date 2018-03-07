@@ -43,6 +43,7 @@ import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
+import org.apache.calcite.rel.rel2sql.SqlImplementor;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -140,22 +141,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
         SchemaPlus rootSchema = calciteConnection.getRootSchema();
 
-        //CalciteJdbc41Factory fac = new  CalciteJdbc41Factory();
-        //CalciteConnection con  = fac.newConnection(new Driver(), fac, "jdbc:calcite:", new Properties(), (CalciteSchema) rootSchema, new JavaTypeFactoryImpl());
-
-//        DatabaseMetaData md = calciteConnection.getMetaData();
-//        ResultSet tables = md.getTables(null, null, "%", null);
-//        printResultSet(tables);
-
-//        JdbcDataSource ds = new JdbcDataSource();
-//        ds.setURL(settings.getJdbcUrl());
-//        ds.setUser(settings.getJdbcUser());
-//        ds.setPassword(settings.getJdbcPassword());
-
-
-        // use the original connection information to build a JDBC DatabaseMetaData
-        //dialect = SqlDialect.create(ds.getConnection().getMetaData());
-
         Connection jdbcConnection = DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         dialect = new SqlDialectFactoryImpl().create(jdbcConnection.getMetaData());
 
@@ -174,21 +159,19 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         ImmutableMap<RelationID, RelationDefinition> diffMap = getDiffMap(metadata);
 
         for (String schemaName : schemaNames) {
-            //final JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, schemaName, ds, null, schemaName);
             final OntopJDBCSchema ontopJDBCSchema = OntopJDBCSchema.create(rootSchema, schemaName, operand, diffMap);
             rootSchema.add(schemaName, ontopJDBCSchema);
         }
 
-        //rootSchema.add(new ViewTable(null, null, ((RDBMetadata)metadata).getDatabaseRelation("view_0")));
         return rootSchema;
     }
 
-    private ImmutableMap<RelationID, RelationDefinition> getDiffMap(DBMetadata metadata){
+    private ImmutableMap<RelationID, RelationDefinition> getDiffMap(DBMetadata metadata) {
         Map<RelationID, RelationDefinition> diffMap = new HashMap<>();
         ImmutableMap<RelationID, RelationDefinition> relationMap = metadata.copyRelations();
 
-        for(RelationID rid : relationMap.keySet()){
-            if(metadata.copyTables().keySet().stream().noneMatch(k -> k.equals(rid))){
+        for (RelationID rid : relationMap.keySet()) {
+            if (metadata.copyTables().keySet().stream().noneMatch(k -> k.equals(rid))) {
                 diffMap.put(rid, relationMap.get(rid));
             }
         }
@@ -280,7 +263,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 relBuilder.project(ImmutableList.of(trueAsX));
             } else {
                 Stream<Variable> variableStream;
-                if(isRoot){
+                if (isRoot) {
                     // respects the order in the root node
                     variableStream = signature.stream();
                 } else {
@@ -322,7 +305,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         private ImmutableSubstitution<ImmutableTerm> getCnSubstitution(boolean isRoot, ConstructionNode constructionNode) {
             ImmutableSubstitution<ImmutableTerm> substitution = constructionNode.getSubstitution();
-            if (isRoot){
+            if (isRoot) {
                 substitution = substitutionFactory.getSubstitution(
                         substitution.getImmutableMap().entrySet().stream()
                                 .collect(toMap(
@@ -357,7 +340,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
                 final List<String> fieldNames = relBuilder.peek().getRowType().getFieldNames();
 
-                if(fieldNames.contains(((Variable) def).getName() + "Type")){
+                if (fieldNames.contains(((Variable) def).getName() + "Type")) {
                     typeDefinition = relBuilder.field(((Variable) def).getName() + "Type");
                 }
 
@@ -366,7 +349,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 final Predicate functionSymbol = ((Function) def).getFunctionSymbol();
                 if (functionSymbol instanceof URITemplatePredicate) {
                     questCode = OBJECT.getQuestCode();
-                } else if (functionSymbol.getName().equals("BNODE")){
+                } else if (functionSymbol.getName().equals("BNODE")) {
                     questCode = COL_TYPE.BNODE.getQuestCode();
                 } else {
                     final String f = functionSymbol.getName();
@@ -678,10 +661,10 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                         notImplemented(a);
                     case BNODE:
                         notImplemented(a);
-                    //case LITERAL:
-                    //    return rexBuilder.makeLiteral(constant.getValue());
-                    //case LITERAL_LANG:
-                    //    notImplemented(a);
+                        //case LITERAL:
+                        //    return rexBuilder.makeLiteral(constant.getValue());
+                        //case LITERAL_LANG:
+                        //    notImplemented(a);
                     case DOUBLE:
                     case FLOAT:
                         notImplemented(a);
@@ -721,13 +704,11 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         private Optional<COL_TYPE> extractColType(TermType termType) {
             if (termType instanceof ObjectRDFType) {
-                COL_TYPE colType = ((ObjectRDFType)termType).isBlankNode() ? BNODE : OBJECT;
+                COL_TYPE colType = ((ObjectRDFType) termType).isBlankNode() ? BNODE : OBJECT;
                 return Optional.of(colType);
-            }
-            else if (termType instanceof RDFDatatype) {
-                return Optional.of(COL_TYPE.getColType(((RDFDatatype)termType).getIRI()));
-            }
-            else
+            } else if (termType instanceof RDFDatatype) {
+                return Optional.of(COL_TYPE.getColType(((RDFDatatype) termType).getIRI()));
+            } else
                 return Optional.empty();
         }
 
@@ -758,11 +739,75 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             throw new UnsupportedOperationException("not implemented");
         }
 
-        private RelNode convertSqlNodeToRelNode(String sqlString){
+        private RelNode convertSqlNodeToRelNode(String sqlString) {
 
             Planner planner = Frameworks.getPlanner(calciteFrameworkConfig);
 
             //sqlString = "SELECT \"sensor_id\" FROM (SELECT \"sensor_id\", LAG(\"sensor_id\") OVER() AS lag_sensor_id  FROM \"public\".\"tb_sensors\" WHERE \"sensor_type\" = 0) SUBQUERY";
+
+            sqlString = "WITH C1_AP_1 AS (\n" +
+                    "SELECT dFrom, dTo \n" +
+                    "FROM (\n" +
+                    "SELECT \"timestamp\" AS dFrom,\n" +
+                    "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+                    "FROM \"public\".\"tb_measurement\") F\n" +
+                    "WHERE \"value\" > 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+                    "),\n" +
+                    "C2_AP_1 (Start_ts, End_ts, ts) AS (\n" +
+                    "SELECT 1, 0 , dFrom\n" +
+                    "FROM C1_AP_1 \n" +
+                    "UNION ALL\n" +
+                    "SELECT 0, 1, dTo\n" +
+                    "FROM C1_AP_1  \n" +
+                    "),\n" +
+                    "C3_AP_1 AS (\n" +
+                    "SELECT \n" +
+                    "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_1,\n" +
+                    "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_2,\n" +
+                    "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_1,\n" +
+                    "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_2,\n" +
+                    "ts\n" +
+                    "FROM C2_AP_1\n" +
+                    "),\n" +
+                    "\n" +
+                    "C4_AP_1 AS (\n" +
+                    "SELECT (Crt_Total_ts_1 - Crt_Total_ts_2) AS Crt_Total_ts, (Prv_Total_ts_1 - Prv_Total_ts_2) AS Prv_Total_ts, ts\n" +
+                    "FROM C3_AP_1\n" +
+                    "WHERE (Crt_Total_ts_1 - Crt_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) IS NULL\n" +
+                    "),\n" +
+                    "DIAMOND_AP_1 AS ( \n" +
+                    "SELECT prevTs  as dFrom, ts AS dTo FROM (\n" +
+                    "SELECT LAG(ts,1) OVER (ORDER BY ts, crt_total_ts) As prevTs,\n" +
+                    "ts,\n" +
+                    "Crt_Total_ts\n" +
+                    "FROM C4_AP_1) F \n" +
+                    "WHERE Crt_Total_ts = 0 ), \n" +
+                    "AP_2 AS (\n" +
+                    "SELECT dFrom + interval '1' MINUTE AS dFrom, dTo \n" +
+                    "FROM C1_AP_1 \n" +
+                    "WHERE (dTo - interval \'1 \' MINUTE) >= dFrom ) \n" +
+                    "SELECT\n" +
+                    "CASE \n" +
+                    "WHEN DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom THEN DIAMOND_AP_1.dFrom\n" +
+                    "WHEN AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom THEN AP_2.dFrom\n" +
+                    "WHEN DIAMOND_AP_1.dFrom = AP_2.dFrom THEN DIAMOND_AP_1.dFrom\n" +
+                    "END AS dFrom,\n" +
+                    "CASE \n" +
+                    "WHEN DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom THEN DIAMOND_AP_1.dTo\n" +
+                    "WHEN AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom THEN AP_2.dTo\n" +
+                    "WHEN DIAMOND_AP_1.dTo = AP_2.dTo THEN DIAMOND_AP_1.dTo\n" +
+                    "END AS dTo\n" +
+                    "FROM DIAMOND_AP_1, AP_2\n" +
+                    "WHERE\n" +
+                    "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
+                    "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
+
+//            sqlString = "WITH RECURSIVE temp (n, fact) AS \n" +
+//                    "(SELECT 0, 1 -- Initial Subquery\n" +
+//                    "  UNION ALL \n" +
+//                    " SELECT n+1, (n+1)*fact FROM temp -- Recursive Subquery \n" +
+//                    "        WHERE n < 9)\n" +
+//                    "SELECT * FROM temp";
 
             RelNode relNode = null;
             try {
@@ -770,6 +815,13 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
                 SqlNode validatedSqlNode = planner.validate(parsedNode);
                 relNode = planner.rel(validatedSqlNode).project();
+
+                RelToSqlConverter converter = new RelToSqlConverter(dialect);
+                SqlImplementor.Result result = converter.visit(relNode);
+                SqlNode sqlNode = result.asStatement();
+                System.out.println(sqlNode.toSqlString(dialect).getSql());
+
+
             } catch (ValidationException | RelConversionException | SqlParseException e) {
                 e.printStackTrace();
             }
@@ -783,7 +835,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             final String predicateName = projectionAtom.getPredicate().getName();
 
-            if (relBuilder.getOntopViews().containsKey(predicateName)){
+            if (relBuilder.getOntopViews().containsKey(predicateName)) {
                 String sqlString = ((ParserViewDefinition) relBuilder.getOntopViews().get(predicateName)).getStatement();
 
                 RelNode ontopViewRelNode = convertSqlNodeToRelNode(sqlString);
@@ -810,12 +862,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(EmptyNode emptyNode) {
-            throw new UnsupportedOperationException(emptyNode.getClass().getName() +" not implemented");
+            throw new UnsupportedOperationException(emptyNode.getClass().getName() + " not implemented");
         }
 
         @Override
         public void visit(TrueNode trueNode) {
-            throw new UnsupportedOperationException(trueNode.getClass().getName() +" not implemented");
+            throw new UnsupportedOperationException(trueNode.getClass().getName() + " not implemented");
         }
 
         @Override
@@ -827,7 +879,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         @Override
         public void visit(SliceNode sliceNode) {
             query.getChildrenStream(sliceNode).forEach(n -> n.acceptVisitor(this));
-            relBuilder.limit((int) sliceNode.getOffset(),  toIntExact(sliceNode.getLimit().get()));
+            relBuilder.limit((int) sliceNode.getOffset(), toIntExact(sliceNode.getLimit().get()));
         }
 
         @Override
@@ -836,7 +888,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             final ImmutableList<RexNode> orderByConditions = orderByNode.getComparators()
                     .stream()
                     .map(s -> {
-                        final RexInputRef field = relBuilder.field(((Variable)s.getTerm()).getName());
+                        final RexInputRef field = relBuilder.field(((Variable) s.getTerm()).getName());
                         return (!s.isAscending()) ?
                                 relBuilder.desc(field) : field;
                     })
@@ -997,7 +1049,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             //throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
         }
 
-        private SqlIntervalQualifier getSQLIQualifier(){
+        private SqlIntervalQualifier getSQLIQualifier() {
             return new SqlIntervalQualifier(TimeUnit.MILLISECOND,
                     TimeUnit.MILLISECOND, SqlParserPos.ZERO);
         }
