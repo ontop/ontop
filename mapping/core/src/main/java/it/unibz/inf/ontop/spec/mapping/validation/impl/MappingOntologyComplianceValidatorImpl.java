@@ -11,15 +11,17 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -79,12 +81,22 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         checkTripleObject(predicateIRI, tripleObjectType, provenance, ontology, datatypeMap);
     }
 
-    private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
-        AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
-        if (projectionAtomPredicate.equals(atomFactory.getTripleAtomPredicate()))
-            throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
-        else
-            return projectionAtomPredicate.getName();
+    private String extractPredicateIRI(IntermediateQuery mappingAssertion) throws MappingOntologyMismatchException {
+        Variable predicateVariable = extractTriplePredicateVariable(mappingAssertion);
+
+        ImmutableTerm predicateIRI = Optional.of(mappingAssertion.getRootNode())
+                    .filter(n -> n instanceof ConstructionNode)
+                    .map((n) -> (ConstructionNode) n)
+                    .map(ConstructionNode::getSubstitution)
+                    .flatMap(s -> Optional.ofNullable(s.get(predicateVariable)))
+                    .filter(s -> s instanceof ImmutableFunctionalTerm)
+                    .map(s -> ((ImmutableFunctionalTerm)s).getTerm(0))
+                    .orElseThrow(() -> new TriplePredicateTypeException( mappingAssertion , predicateVariable , "The variable is not defined in the root node (expected for a mapping assertion)"));
+
+        if (predicateIRI instanceof ValueConstant)
+            return ((ValueConstant) predicateIRI).getValue();
+        else throw new TriplePredicateTypeException(mappingAssertion , "Predicate is not defined as a constant (expected for a mapping assertion)");
+
     }
 
     /**
@@ -177,6 +189,20 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             default:
                 throw new TripleObjectTypeInferenceException(mappingAssertion, "Unexpected arity of the projection atom");
         }
+    }
+
+    private Variable extractTriplePredicateVariable(IntermediateQuery mappingAssertion)
+            throws TripleObjectTypeInferenceException {
+        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
+
+        Variable predicate = projectedVariables.get(1);
+        if(predicate.getName().equals(RDF.TYPE.getIRIString())){
+            return projectedVariables.get(2);
+        }
+        else{
+            return predicate;
+        }
+
     }
 
 
@@ -404,6 +430,20 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             super("Internal bug: cannot infer the type of the object term " + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
+    }
+
+    private static class TriplePredicateTypeException extends OntopInternalBugException {
+        TriplePredicateTypeException(IntermediateQuery mappingAssertion, Variable triplePredicateVariable,
+                                           String reason) {
+            super("Internal bug: cannot retrieve  " + triplePredicateVariable + " in: \n" + mappingAssertion
+                    + "\n Reason: " + reason);
+        }
+
+        TriplePredicateTypeException(IntermediateQuery mappingAssertion, String reason) {
+            super("Internal bug: cannot retrieve the predicate IRI in: \n" + mappingAssertion
+                    + "\n Reason: " + reason);
+        }
+
     }
 
     private static class UndeterminedTripleObjectType extends OntopInternalBugException {
