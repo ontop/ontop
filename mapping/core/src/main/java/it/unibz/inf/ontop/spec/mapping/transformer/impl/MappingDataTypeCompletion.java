@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,15 +82,32 @@ public class MappingDataTypeCompletion {
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
         Function atom = rule.getHead();
-        Predicate predicate = atom.getFunctionSymbol();
-        if (predicate.getArity() == 2) { // we check both for data and object property
-            Term term = atom.getTerm(1); // the second argument only
+
+        //case of data and object property
+        if(!isURIRDFType(atom.getTerm(1))){
+            Term object = atom.getTerm(2); // the object, third argument only
             Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
-            insertVariableDataTyping(term, atom, 1, termOccurenceIndex);
+            insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
             // Infer operation datatypes from variable datatypes
-            insertOperationDatatyping(term, atom, 1);
+            insertOperationDatatyping(object, atom, 2);
         }
+    }
+
+    /**
+     * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
+     */
+
+    private static boolean isURIRDFType(Term term) {
+        if (term instanceof Function) {
+            Function func = (Function) term;
+            if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
+                Term t0 = func.getTerm(0);
+                if (t0 instanceof ValueConstant)
+                    return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
+            }
+        }
+        return false;
     }
 
     /**
@@ -99,7 +117,7 @@ public class MappingDataTypeCompletion {
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
                                           Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
-        Predicate predicate = atom.getFunctionSymbol();
+        Term predicate = atom.getTerm(1);
 
         if (term instanceof Function) {
             Function function = (Function) term;
@@ -121,7 +139,7 @@ public class MappingDataTypeCompletion {
             Term newTerm;
             RDFDatatype type = getDataType(termOccurenceIndex, variable);
             newTerm = termFactory.getTypedTerm(variable, type);
-            log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
+            log.info("Datatype "+type+" for the value " + variable + " of the property " + ((Function) predicate).getTerm(0) + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
