@@ -109,63 +109,51 @@ public class OBDAMappingTransformer {
 		//process target query
 		for (Function func : tquery) {
 
-			Predicate pred = func.getFunctionSymbol();
-			String predName = pred.getName();
 			IRI predUri = null;
-			String predURIString ="";
+
 			Optional<Template> templp = Optional.empty();
 
-			if (pred.isTriplePredicate()) {
-				//triple
-				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
-					if (predf.getTerms().size() == 1) { //fixed string 
-						pred = termFactory.getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
-						predUri = rdfFactory.createIRI(pred.getName());
+			//triple
+			Function predf = (Function)func.getTerm(1);
+
+			if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
+					if (predf.getTerms().size() == 1) { //fixed string
+						predUri = rdfFactory.createIRI(((ValueConstant)(predf.getTerm(0))).getValue());
 					}
 					else {
 						//template
-						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
-						predUri = rdfFactory.createIRI(predURIString);
+						predUri = rdfFactory.createIRI(URITemplates.getUriTemplateString(predf, prefixmng));
                         templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
-				}	
-			} 
-			else {
-				predUri = rdfFactory.createIRI(predName);
-			}
-			predURIString = predUri.getIRIString();
+				}
 
-            org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
-			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
-			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
-            OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
-			
-			if (!predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE) && pred.getArity() == 1) {
-				// The term is actually a SubjectMap (class)
-				//add class declaration to subject Map node
-				sm.addClass(predUri);
-				
+			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
+			Function object = (Function)func.getTerm(2);
+
+			//if the class IRI is constant
+			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)
+					&& object.getFunctionSymbol() instanceof URITemplatePredicate && object.getTerms().size() == 1) {
+
+				IRI classIRI = rdfFactory.createIRI(((ValueConstant)(object.getTerm(0))).getValue());
+					// The term is actually a SubjectMap (class)
+					//add class declaration to subject Map node
+					sm.addClass(classIRI);
+
 			} else {
+
+				String predURIString = predUri.getIRIString();
+
 				PredicateMap predM = templp.isPresent()?
 				mfact.createPredicateMap(templp.get()):
-				mfact.createPredicateMap(rdfFactory.createIRI(predURIString));
+				mfact.createPredicateMap(predUri);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
-                Term object = null;
-				if (!pred.isTriplePredicate() && !predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)) {
-//					predM.setConstant(predURIString);
-                    //add object declaration to predObj node
-                    //term 0 is always the subject, we are interested in term 1
-                     object = func.getTerm(1);
-				}
-				else {
 
-                    //add object declaration to predObj node
-                    //term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
-                    object = func.getTerm(2);
-				}
+				org.semanticweb.owlapi.model.IRI propname = org.semanticweb.owlapi.model.IRI.create(predURIString);
+				OWLDataFactory factory =  OWLManager.getOWLDataFactory();
+				OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
+				OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 
-								
+				//add object declaration to predObj node
  				if (object instanceof Variable){
 					if(ontology!= null && objectProperties.contains(objectProperty)){
                         //we create an rr:column
@@ -250,12 +238,11 @@ public class OBDAMappingTransformer {
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
 								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
 								obm.setTermType(R2RMLVocabulary.literal);
-								
-								if(objectPred.getArity()==2){
-									Term langTerm = ((Function) object).getTerm(1);
-                                    if(langTerm instanceof Constant) {
-                                        obm.setLanguageTag(((Constant) langTerm).getValue());
-                                    }
+
+								RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
+								Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
+								if (optionalLangTag.isPresent()) {
+									obm.setLanguageTag(optionalLangTag.get().getFullString());
 								}
 							}
 						}

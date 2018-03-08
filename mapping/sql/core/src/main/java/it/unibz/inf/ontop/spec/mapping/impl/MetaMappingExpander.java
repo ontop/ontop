@@ -127,19 +127,6 @@ public class MetaMappingExpander {
 				builder2.addAll(toBeExpanded.stream()
 						.map(target -> new Expansion(mapping.getId(), mapping.getSourceQuery(), target))
 						.iterator());
-
-				ImmutableList<ImmutableFunctionalTerm> toBeLeft = mapping.getTargetAtoms().stream()
-						.filter(atom -> !atom.getFunctionSymbol().isTriplePredicate())
-						.collect(ImmutableCollectors.toList());
-
-				if (!toBeLeft.isEmpty()) {
-					// TODO: see how to keep the provenance
-					SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
-							IDGenerator.getNextUniqueID(mapping.getId() + "#"),
-							mapping.getSourceQuery(),
-							toBeLeft);
-					builder1.add(newMapping);
-				}
 			}
 		}
 		nonExpandableMappings = builder1.build();

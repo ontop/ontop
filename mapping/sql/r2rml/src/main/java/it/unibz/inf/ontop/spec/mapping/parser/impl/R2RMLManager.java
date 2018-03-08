@@ -27,16 +27,15 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import eu.optique.r2rml.api.model.Join;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
@@ -54,7 +53,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class R2RMLManager {
 
@@ -203,10 +205,9 @@ public class R2RMLManager {
 			
 			for(RefObjectMap robm : pobm.getRefObjectMaps()) {
 				sourceQuery = robm.getJointQuery();
-				
-				List <Join> conds = robm.getJoinConditions();
+
 				ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
-				List<ImmutableTerm> terms = new ArrayList<>();
+
 				ImmutableTerm joinSubject1 = r2rmlParser.getSubjectAtom(tm);
 				
 				TriplesMap parent = robm.getParentMap();
@@ -221,12 +222,11 @@ public class R2RMLManager {
 				}
 				
 				ImmutableTerm joinSubject2 = r2rmlParser.getSubjectAtom(parentTriple);
-				terms.add(joinSubject1);
-				terms.add(joinSubject2);
 				
-			List<Predicate> joinPredicates = r2rmlParser.getBodyPredicates(pobm);
-			for (Predicate pred : joinPredicates) {
-				bodyBuilder.add(termFactory.getImmutableFunctionalTerm(pred, ImmutableList.copyOf(terms)));
+			List<ImmutableFunctionalTerm> joinPredicates = r2rmlParser.getBodyURIPredicates(pobm);
+			for (ImmutableFunctionalTerm pred : joinPredicates) {
+				//TODO:joinPredicates
+				bodyBuilder.add(atomFactory.getImmutableTripleAtom(joinSubject1, pred, joinSubject2));   // objectAtom
 			}
 
 			//Function head = getHeadAtom(body);
@@ -247,22 +247,7 @@ public class R2RMLManager {
 		}
 		return joinMappings;
 	}
-	
-	/**
-	 * Get OBDA mapping head
-	 * @param body
-	 * @return
-	 */
-	private Function getHeadAtom(List<Function> body) {
-		Set<Variable> vars = new HashSet<>();
-		for (Function bodyAtom : body) {
-			TermUtils.addReferencedVariablesTo(vars, bodyAtom);
-		}
-		int arity = vars.size();
-		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = termFactory.getFunction(termFactory.getPredicate(Constants.QUERY_HEAD, arity), dvars);
-		return head;
-	}
+
 	
 	/**
 	 * Get OBDA mapping body terms from R2RML TriplesMap
@@ -278,16 +263,15 @@ public class R2RMLManager {
 		ImmutableTerm subjectAtom = r2rmlParser.getSubjectAtom(tm);
 		
 		//get any class predicates, construct atom Class(subject), add to body
-		List<Predicate> classPredicates = r2rmlParser.getClassPredicates();
-		for (Predicate classPred : classPredicates) {
-			bodyBuilder.add(termFactory.getImmutableFunctionalTerm(classPred, subjectAtom));
+		List<ImmutableFunctionalTerm> classPredicates = r2rmlParser.getClassPredicates();
+		for (ImmutableFunctionalTerm classPred : classPredicates) {
+			ImmutableTerm predFunction = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.toString())); ;
+			bodyBuilder.add(atomFactory.getImmutableTripleAtom(subjectAtom, predFunction, classPred));   // objectAtom
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
 			//for each predicate object map
-			
-			//get body predicate
-			List<Predicate> bodyPredicates = r2rmlParser.getBodyPredicates(pom);
+
 			//predicates that contain a variable are separately treated
 			List<ImmutableFunctionalTerm> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
 			
@@ -298,62 +282,11 @@ public class R2RMLManager {
 				// skip, object is a join
 				continue;
 			}
+
 			
-			// construct the atom, add it to the body
-			//List<Term> terms = new ArrayList<Term>();
-			//terms.add(subjectAtom);
-			
-			
-			for (Predicate bodyPred : bodyPredicates) {
-				//for each predicate if there are more in the same node
-				
-				//check if predicate = rdf:type
-				if (bodyPred.toString().equals(RDF.TYPE.toString())) {
-					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
-					// if object is a predicate
-					Set<Variable> vars = new HashSet<>();
-					TermUtils.addReferencedVariablesTo(vars, objectAtom);
-					if (vars.isEmpty()) { 	
-						ImmutableFunctionalTerm funcObjectAtom = (ImmutableFunctionalTerm) objectAtom;
-						ImmutableTerm term0 = funcObjectAtom.getTerm(0);
-						if (term0 instanceof ImmutableFunctionalTerm) {
-							ImmutableFunctionalTerm constPred = (ImmutableFunctionalTerm) term0;
-							Predicate newpred = constPred.getFunctionSymbol();
-							ImmutableFunctionalTerm bodyAtom = termFactory.getImmutableFunctionalTerm(newpred, subjectAtom);
-							bodyBuilder.add(bodyAtom);
-						}
-						else if (term0 instanceof ValueConstant) {
-							ValueConstant vconst = (ValueConstant) term0;
-							String predName = vconst.getValue();
-							Predicate newpred = termFactory.getPredicate(predName, 1);
-							bodyBuilder.add(termFactory.getImmutableFunctionalTerm(newpred, subjectAtom));
-						} 
-						else 
-							throw new IllegalStateException();
-					}
-					else { // if object is a variable
-						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
-						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						ImmutableFunctionalTerm rdftype = termFactory.getImmutableUriTemplate(
-								termFactory.getConstantLiteral(RDF.TYPE.toString()));
-						//terms.add(rdftype);
-						//terms.add(objectAtom);
-						ImmutableFunctionalTerm bodyAtom = atomFactory.getImmutableTripleAtom(subjectAtom, rdftype, objectAtom);
-						bodyBuilder.add(bodyAtom); // termFactory.getFunction(newpred, terms)
-					}
-				} 
-				else {
-					// create predicate(subject, object) and add it to the body
-					bodyBuilder.add(termFactory.getImmutableFunctionalTerm(bodyPred, subjectAtom, objectAtom));
-				}
-			}
-			
-			//treat predicates that contain a variable (column or template declarations)
+			//treat predicates
 			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
-				//create triple(subj, predURIFunction, objAtom) terms
-				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-				//terms.add(predFunction);
-				//terms.add(objectAtom);
+
 				bodyBuilder.add(atomFactory.getImmutableTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}
 		}

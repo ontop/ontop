@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -43,7 +42,7 @@ import java.util.*;
 
 public class R2RMLParser {
 
-	List<Predicate> classPredicates;
+	List<ImmutableFunctionalTerm> classPredicates;
 	List<Resource> joinPredObjNodes;
 
 
@@ -64,7 +63,7 @@ public class R2RMLParser {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		mapManager = RDF4JR2RMLMappingManager.getInstance();
-		classPredicates = new ArrayList<>();
+		classPredicates = new ArrayList<ImmutableFunctionalTerm>();
 		joinPredObjNodes = new ArrayList<>();
 	}
 
@@ -91,9 +90,9 @@ public class R2RMLParser {
      * They can be retrieved only once, after retrieving everything is cleared.
 	 * @return
 	 */
-	public List<Predicate> getClassPredicates() {
-		List<Predicate> classes = new ArrayList<Predicate>();
-		for (Predicate p : classPredicates)
+	public List<ImmutableFunctionalTerm> getClassPredicates() {
+		List<ImmutableFunctionalTerm> classes = new ArrayList<>();
+		for (ImmutableFunctionalTerm p : classPredicates)
 			classes.add(p);
 		classPredicates.clear();
 		return classes;
@@ -138,8 +137,6 @@ public class R2RMLParser {
 		// process template declaration
 		IRI termType = sMap.getTermType();
 
-		TermMap.TermMapType subjectTermType = sMap.getTermMapType();
-
 		// WORKAROUND for:
 		// SubjectMap.getTemplateString() throws NullPointerException when
 		// template == null
@@ -179,19 +176,11 @@ public class R2RMLParser {
 			subjectAtom = getURIFunction(subj, joinCond);
 		}
 
-		// process termType declaration
-		// subj = sMap.getTermMapType().toString();
-		// sMap.getType(Object.class);
-		// if (subj != null) {
-		//
-		//
-		// }
 
 		// process class declaration
 		List<IRI> classes = sMap.getClasses();
-		for (Object o : classes) {
-            // TODO(xiao): toString() is suspicious
-            classPredicates.add(atomFactory.getClassPredicate(o.toString()));
+		for (IRI o : classes) {
+            classPredicates.add( termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(o.getIRIString())));
 		}
 
 		if (subjectAtom == null)
@@ -200,27 +189,6 @@ public class R2RMLParser {
 
 		return subjectAtom;
 
-	}
-
-	/**
-	 * Get body predicates
-	 * @param pom
-	 * @return
-	 * @throws Exception
-	 */
-	public List<Predicate> getBodyPredicates(PredicateObjectMap pom) {
-		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
-
-		// process PREDICATEs
-		for (PredicateMap pm : pom.getPredicateMaps()) {
-		    //
-			String pmConstant = pm.getConstant().toString();
-			if (pmConstant != null) {
-				Predicate bodyPredicate = termFactory.getPredicate(pmConstant, 2);
-				bodyPredicates.add(bodyPredicate);
-			}
-		}
-		return bodyPredicates;
 	}
 
 	/**
@@ -234,6 +202,13 @@ public class R2RMLParser {
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
+
+			String pmConstant = pm.getConstant().toString();
+			if (pmConstant != null) {
+				ImmutableFunctionalTerm bodyPredicate = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(pmConstant));
+				predicateAtoms.add(bodyPredicate);
+			}
+
 			Template t = pm.getTemplate();
 			if (t != null) {
 				// create uri("...",var)
