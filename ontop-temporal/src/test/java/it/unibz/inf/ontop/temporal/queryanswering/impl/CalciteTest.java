@@ -13,6 +13,7 @@ import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.*;
 import org.apache.calcite.util.Util;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -119,44 +120,15 @@ public class CalciteTest {
 //                "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
 //                "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
 
-        String postgresql = "WITH C1_AP_1 AS (\n" +
-                "SELECT dFrom, dTo \n" +
-                "FROM (\n" +
-                "SELECT \"timestamp\" AS dFrom,\n" +
-                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
-                "FROM \"public\".\"tb_measurement\") F\n" +
-                "WHERE \"value\" > 1.5 AND dTo IS NOT NULL " +
-                "),\n" +
-                "C2_AP_1 (Start_ts, End_ts, ts) AS (\n" +
-                "SELECT 1, 0 , dFrom\n" +
-                "FROM C1_AP_1 \n" +
-                "UNION ALL\n" +
-                "SELECT 0, 1, dTo\n" +
-                "FROM C1_AP_1  \n" +
-                "),\n" +
-                "C3_AP_1 AS (\n" +
-                "SELECT \n" +
-                "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_1,\n" +
-                "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_2,\n" +
-                "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_1,\n" +
-                "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_2,\n" +
-                "ts\n" +
-                "FROM C2_AP_1\n" +
-                "),\n" +
-                "\n" +
-                "C4_AP_1 AS (\n" +
-                "SELECT (Crt_Total_ts_1 - Crt_Total_ts_2) AS Crt_Total_ts, (Prv_Total_ts_1 - Prv_Total_ts_2) AS Prv_Total_ts, ts\n" +
-                "FROM C3_AP_1\n" +
-                "WHERE (Crt_Total_ts_1 - Crt_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) IS NULL\n" +
-                ") \n" +
-                "SELECT prevTs  as dFrom, ts AS dTo FROM (\n" +
-                "SELECT LAG(ts,1) OVER (ORDER BY ts, crt_total_ts) As prevTs,\n" +
-                "ts,\n" +
-                "Crt_Total_ts\n" +
-                "FROM C4_AP_1) F \n" +
-                "WHERE Crt_Total_ts = 0  \n";
+
+        String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
+
+//        String postgresql = "SELECT \"timestamp\" FROM \"public\".\"tb_measurement\"";
 
         System.out.println(postgresql);
+//        b.getTypeFactory().getTypeSystem()
+//                .getMaxPrecision(SqlTypeName.TIMESTAMP) >= 9;
+        assert planner.getTypeFactory().getTypeSystem().getMaxPrecision(SqlTypeName.TIMESTAMP) >= 3;
         SqlNode sqlNode = this.planner.parse(postgresql);
         SqlNode validatedSqlNode = planner.validate(sqlNode);
         RelNode logicalPlan = planner.rel(validatedSqlNode).project();
