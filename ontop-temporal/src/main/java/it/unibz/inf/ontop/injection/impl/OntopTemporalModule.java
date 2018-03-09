@@ -26,10 +26,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.TemporalPPMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
-import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
-import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
-import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingTransformer;
+import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalog2QueryMappingConverter;
 import it.unibz.inf.ontop.temporal.datalog.TemporalDatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
@@ -72,6 +69,7 @@ public class OntopTemporalModule extends OntopAbstractModule {
         bindFromSettings(DatalogMTLNormalizer.class);
         bindFromSettings(DatalogMTLProgramExtractor.class);
         bindFromSettings(DBMetadataMerger.class);
+        bindFromSettings(RedundantTemporalCoalesceEliminator.class);
         //bindFromSettings(InputQueryTranslator.class);
 
         Module specFactoryModule = buildFactory(ImmutableList.of(

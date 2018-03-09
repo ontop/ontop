@@ -8,7 +8,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.TemporalNativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
@@ -16,7 +15,6 @@ import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTr
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
-import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -32,8 +30,6 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -45,6 +41,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.TemporalOBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
+import it.unibz.inf.ontop.spec.mapping.transformer.RedundantTemporalCoalesceEliminator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -87,6 +84,8 @@ public class TemporalQueryProcessor implements QueryReformulator {
     private final CQCUtilities cqcUtilities;
     private final ImmutabilityTools immutabilityTools;
     private final RuleUnfolder ruleUnfolder;
+    private final RedundantTemporalCoalesceEliminator tcEliminator;
+    private final TemporalMapping temporalSaturatedMapping;
 
     ImmutableMap<AtomPredicate, IntermediateQuery> mergedMappingMap;
 
@@ -106,7 +105,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
                                    CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools, RuleUnfolder ruleUnfolder,
                                    TemporalTranslationFactory temporalTranslationFactory,
-                                   DBMetadataMerger dbMetadataMerger) {
+                                   DBMetadataMerger dbMetadataMerger, RedundantTemporalCoalesceEliminator tcEliminator) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.settings = settings;
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -119,6 +118,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
         this.cqcUtilities = cqcUtilities;
         this.immutabilityTools = immutabilityTools;
         this.ruleUnfolder = ruleUnfolder;
+        this.tcEliminator = tcEliminator;
         ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
         this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -126,7 +126,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
         this.rewriter.setTBox(saturatedTBox, sigma);
 
         Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
-        TemporalMapping temporalSaturatedMapping = ((TemporalOBDASpecification)obdaSpecification).getTemporalSaturatedMapping();
+        temporalSaturatedMapping = ((TemporalOBDASpecification)obdaSpecification).getTemporalSaturatedMapping();
 
         mergedMappingMap = mergeMappings(saturatedMapping, temporalSaturatedMapping);
 
@@ -237,6 +237,9 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
+                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
+
+                log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
 
                 //lift bindings and union when it is possible
 //                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);

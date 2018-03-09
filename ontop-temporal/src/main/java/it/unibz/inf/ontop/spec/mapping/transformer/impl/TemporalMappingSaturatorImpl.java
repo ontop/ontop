@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.reformulation.RuleUnfolder;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
+import it.unibz.inf.ontop.spec.mapping.transformer.RedundantTemporalCoalesceEliminator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
@@ -51,11 +52,18 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final BindingLiftOptimizer bindingLiftOptimizer;
     private final TemporalSpecificationFactory specificationFactory;
     private final TermFactory termFactory;
+    private final RedundantTemporalCoalesceEliminator tcEliminator;
 
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
-                                         RuleUnfolder ruleUnfolder, ImmutabilityTools immutabilityTools,
-                                         JoinLikeOptimizer joinLikeOptimizer, TemporalIntermediateQueryFactory tiqFactory, BindingLiftOptimizer bindingLiftOptimizer, TemporalSpecificationFactory specificationFactory, TermFactory termFactory) {
+                                         RuleUnfolder ruleUnfolder,
+                                         ImmutabilityTools immutabilityTools,
+                                         JoinLikeOptimizer joinLikeOptimizer,
+                                         TemporalIntermediateQueryFactory tiqFactory,
+                                         BindingLiftOptimizer bindingLiftOptimizer,
+                                         TemporalSpecificationFactory specificationFactory,
+                                         TermFactory termFactory,
+                                         RedundantTemporalCoalesceEliminator tcEliminator) {
         this.dMTLConverter = dMTLConverter;
         this.ruleUnfolder = ruleUnfolder;
         this.immutabilityTools = immutabilityTools;
@@ -63,6 +71,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
+        this.tcEliminator = tcEliminator;
         this.pushUpBooleanExpressionOptimizer = new PushUpBooleanExpressionOptimizerImpl(false, this.immutabilityTools);
         projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
         this.joinLikeOptimizer = joinLikeOptimizer;
@@ -97,7 +106,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
                         //iq = projectionShrinkingOptimizer.optimize(iq);
                         //iq = joinLikeOptimizer.optimize(iq);
-                        iq = removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                        iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                         System.out.println(iq.toString());
                     } catch (EmptyQueryException e) {
@@ -173,53 +182,53 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private IntermediateQuery removeRedundantTemporalCoalesces(IntermediateQuery intermediateQuery, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry){
-
-        TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
-        TIQBuilder.init(intermediateQuery.getProjectionAtom(), intermediateQuery.getRootNode());
-        TIQBuilder = removeCoalesces(TIQBuilder, intermediateQuery, intermediateQuery.getRootNode());
-
-        return TIQBuilder.build();
-    }
-
-    private TemporalIntermediateQueryBuilder removeCoalesces(TemporalIntermediateQueryBuilder TIQBuilder, IntermediateQuery query,
-                                                             QueryNode currentNode){
-        if(currentNode instanceof TemporalCoalesceNode){
-            QueryNode child = query.getFirstChild(currentNode).get();
-            if(child instanceof FilterNode){
-                QueryNode childOfChild = query.getFirstChild(child).get();
-                if(childOfChild instanceof TemporalCoalesceNode){
-                    QueryNode childOfChildOfChild = query.getFirstChild(childOfChild).get();
-                    TIQBuilder.addChild(currentNode, child);
-                    TIQBuilder.addChild(child, childOfChildOfChild);
-                    removeCoalesces(TIQBuilder, query, childOfChildOfChild);
-                }else{
-                    TIQBuilder.addChild(currentNode, child);
-                    TIQBuilder.addChild(child, childOfChild);
-                    removeCoalesces(TIQBuilder, query, childOfChild);
-                }
-            }else{
-                TIQBuilder.addChild(currentNode, child);
-                removeCoalesces(TIQBuilder, query, child);
-            }
-        }else if (currentNode instanceof UnaryOperatorNode){
-            QueryNode child = query.getFirstChild(currentNode).get();
-            TIQBuilder.addChild(currentNode, child);
-            removeCoalesces(TIQBuilder, query,child);
-
-        }else if(currentNode instanceof BinaryNonCommutativeOperatorNode){
-            QueryNode leftChild = query.getChild(currentNode, LEFT).get();
-            QueryNode rightChild = query.getChild(currentNode, RIGHT).get();
-            TIQBuilder.addChild(currentNode,leftChild,LEFT);
-            TIQBuilder.addChild(currentNode,rightChild, RIGHT);
-            removeCoalesces(TIQBuilder, query, leftChild);
-            removeCoalesces(TIQBuilder, query, rightChild);
-        }else if(currentNode instanceof NaryOperatorNode){
-            query.getChildren(currentNode).forEach(c -> TIQBuilder.addChild(currentNode, c));
-            query.getChildren(currentNode).forEach(c -> removeCoalesces(TIQBuilder,query,c));
-        }
-        return TIQBuilder;
-    }
+//    private IntermediateQuery removeRedundantTemporalCoalesces(IntermediateQuery intermediateQuery, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry){
+//
+//        TemporalIntermediateQueryBuilder TIQBuilder = TIQFactory.createTemporalIQBuilder(temporalDBMetadata, executorRegistry);
+//        TIQBuilder.init(intermediateQuery.getProjectionAtom(), intermediateQuery.getRootNode());
+//        TIQBuilder = removeCoalesces(TIQBuilder, intermediateQuery, intermediateQuery.getRootNode());
+//
+//        return TIQBuilder.build();
+//    }
+//
+//    private TemporalIntermediateQueryBuilder removeCoalesces(TemporalIntermediateQueryBuilder TIQBuilder, IntermediateQuery query,
+//                                                             QueryNode currentNode){
+//        if(currentNode instanceof TemporalCoalesceNode){
+//            QueryNode child = query.getFirstChild(currentNode).get();
+//            if(child instanceof FilterNode){
+//                QueryNode childOfChild = query.getFirstChild(child).get();
+//                if(childOfChild instanceof TemporalCoalesceNode){
+//                    QueryNode childOfChildOfChild = query.getFirstChild(childOfChild).get();
+//                    TIQBuilder.addChild(currentNode, child);
+//                    TIQBuilder.addChild(child, childOfChildOfChild);
+//                    removeCoalesces(TIQBuilder, query, childOfChildOfChild);
+//                }else{
+//                    TIQBuilder.addChild(currentNode, child);
+//                    TIQBuilder.addChild(child, childOfChild);
+//                    removeCoalesces(TIQBuilder, query, childOfChild);
+//                }
+//            }else{
+//                TIQBuilder.addChild(currentNode, child);
+//                removeCoalesces(TIQBuilder, query, child);
+//            }
+//        }else if (currentNode instanceof UnaryOperatorNode){
+//            QueryNode child = query.getFirstChild(currentNode).get();
+//            TIQBuilder.addChild(currentNode, child);
+//            removeCoalesces(TIQBuilder, query,child);
+//
+//        }else if(currentNode instanceof BinaryNonCommutativeOperatorNode){
+//            QueryNode leftChild = query.getChild(currentNode, LEFT).get();
+//            QueryNode rightChild = query.getChild(currentNode, RIGHT).get();
+//            TIQBuilder.addChild(currentNode,leftChild,LEFT);
+//            TIQBuilder.addChild(currentNode,rightChild, RIGHT);
+//            removeCoalesces(TIQBuilder, query, leftChild);
+//            removeCoalesces(TIQBuilder, query, rightChild);
+//        }else if(currentNode instanceof NaryOperatorNode){
+//            query.getChildren(currentNode).forEach(c -> TIQBuilder.addChild(currentNode, c));
+//            query.getChildren(currentNode).forEach(c -> removeCoalesces(TIQBuilder,query,c));
+//        }
+//        return TIQBuilder;
+//    }
 
 //    @Override
 //    public TemporalMapping saturate(Mapping mapping, DBMetadata dbMetadata,

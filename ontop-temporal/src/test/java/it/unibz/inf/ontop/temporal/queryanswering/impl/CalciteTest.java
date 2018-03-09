@@ -69,7 +69,7 @@ public class CalciteTest {
 //                "SELECT \"timestamp\" AS dFrom,\n" +
 //                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
 //                "FROM \"public\".\"tb_measurement\") F\n" +
-//                "WHERE \"value\" > 1.5 AND dTo IS NOT NULL " +
+//                "WHERE \"value\" > 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
 //                "),\n" +
 //                "C2_AP_1 (Start_ts, End_ts, ts) AS (\n" +
 //                "SELECT 1, 0 , dFrom\n" +
@@ -119,7 +119,7 @@ public class CalciteTest {
 //                "WHERE\n" +
 //                "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
 //                "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
-
+//
 
         String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
 
@@ -128,7 +128,6 @@ public class CalciteTest {
         System.out.println(postgresql);
 //        b.getTypeFactory().getTypeSystem()
 //                .getMaxPrecision(SqlTypeName.TIMESTAMP) >= 9;
-        assert planner.getTypeFactory().getTypeSystem().getMaxPrecision(SqlTypeName.TIMESTAMP) >= 3;
         SqlNode sqlNode = this.planner.parse(postgresql);
         SqlNode validatedSqlNode = planner.validate(sqlNode);
         RelNode logicalPlan = planner.rel(validatedSqlNode).project();

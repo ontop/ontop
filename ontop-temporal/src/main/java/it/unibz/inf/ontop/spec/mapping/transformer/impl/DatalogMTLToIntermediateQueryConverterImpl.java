@@ -51,7 +51,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
         TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.postOrderTraversal(rule.getBody());
         Stack<DatalogMTLExpression> teStack = new Stack<>();
-        it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
+        it.iterator().forEachRemaining(teStack::push);
 
         if (rule.getHead() instanceof TemporalAtomicExpression) {
             if (!teStack.empty()) {
