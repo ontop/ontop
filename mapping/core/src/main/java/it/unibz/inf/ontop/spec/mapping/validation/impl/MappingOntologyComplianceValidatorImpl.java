@@ -180,27 +180,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
 
-    private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)
-            throws TripleObjectTypeInferenceException {
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
-
-        switch (projectedVariables.size()) {
-            // Class
-            case 1:
-                return Optional.empty();
-            // Property
-            case 2:
-                return Optional.of(projectedVariables.get(1));
-            // Triple predicate
-            case 3:
-                return Optional.of(projectedVariables.get(2));
-            default:
-                throw new TripleObjectTypeInferenceException(mappingAssertion, "Unexpected arity of the projection atom");
-        }
-    }
-
-
-
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(String predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,

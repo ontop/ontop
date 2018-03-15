@@ -117,9 +117,10 @@ public class MappingDataTypeCompletion {
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
                                           Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
-        Term predicate = atom.getTerm(1);
+
 
         if (term instanceof Function) {
+
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (function.isDataTypeFunction() ||
@@ -135,11 +136,12 @@ public class MappingDataTypeCompletion {
                 throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
             }
         } else if (term instanceof Variable) {
+
             Variable variable = (Variable) term;
             Term newTerm;
             RDFDatatype type = getDataType(termOccurenceIndex, variable);
             newTerm = termFactory.getTypedTerm(variable, type);
-            log.info("Datatype "+type+" for the value " + variable + " of the property " + ((Function) predicate).getTerm(0) + " has been " +
+            log.info("Datatype "+type+" for the value " + variable + " of the property " + atom + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
