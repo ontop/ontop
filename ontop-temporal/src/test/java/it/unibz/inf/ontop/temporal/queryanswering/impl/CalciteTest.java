@@ -3,7 +3,11 @@ package it.unibz.inf.ontop.temporal.queryanswering.impl;
 
 import org.apache.calcite.adapter.enumerable.EnumerableConvention;
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
+import org.apache.calcite.jdbc.CalciteSchema;
+import org.apache.calcite.materialize.MaterializationKey;
+import org.apache.calcite.materialize.MaterializationService;
 import org.apache.calcite.plan.*;
+import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
@@ -50,7 +54,7 @@ public class CalciteTest {
         return Frameworks.newConfigBuilder()
                 .parserConfig(SqlParser.Config.DEFAULT)
                 .defaultSchema(schema)
-                .traitDefs((List<RelTraitDef>) null);
+                .traitDefs(ConventionTraitDef.INSTANCE);
 
     }
 
@@ -119,11 +123,43 @@ public class CalciteTest {
 //                "WHERE\n" +
 //                "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
 //                "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
-//
 
-        String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
+        String postgresql = "WITH C1 AS (\n" +
+                "SELECT dFrom, (dTo + interval '2' MINUTE) AS dTo \n" +
+                "FROM (\n" +
+                "SELECT \"timestamp\" AS dFrom,\n" +
+                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+                "FROM \"public\".\"tb_measurement\") F\n" +
+                "WHERE \"value\" < 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+                "),\n" +
+                "C2 AS (\n" +
+                "SELECT dFrom, dTo \n" +
+                "FROM (\n" +
+                "SELECT \"timestamp\" AS dFrom,\n" +
+                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+                "FROM \"public\".\"tb_measurement\") F\n" +
+                "WHERE \"value\" > 5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+                ") \n" +
+                "SELECT C2.dFrom, C1.dTo \n" +
+                "FROM C1, C2\n" +
+                "WHERE\n" +
+                "C2.dFrom > C1.dFrom AND C1.dTo > C2.dFrom AND C1.dTo < C2.dTo AND C1.dTo > C2.dFrom";
+
+//        String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
 
 //        String postgresql = "SELECT \"timestamp\" FROM \"public\".\"tb_measurement\"";
+
+//        MaterializationService mService = MaterializationService.instance();
+//        CalciteSchema calciteSchema = CalciteSchema.from(config.getDefaultSchema());
+//        MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+//                postgresql, null, null, true, false);
+//        CalciteSchema.TableEntry entry = mService.checkValid(key);
+//        RelBuilder relBuilder = RelBuilder.create(config);
+//        relBuilder.scan(entry.name);
+//        final RelNode node = relBuilder.build();
+//        final RelToSqlConverter converter = new RelToSqlConverter(SqlDialect.DatabaseProduct.POSTGRESQL.getDialect());
+//        final SqlNode sqlNode1 = converter.visitChild(0, node).asStatement();
+//        System.out.println(sqlNode1.toSqlString(SqlDialect.DatabaseProduct.POSTGRESQL.getDialect()).getSql());
 
         System.out.println(postgresql);
 //        b.getTypeFactory().getTypeSystem()
