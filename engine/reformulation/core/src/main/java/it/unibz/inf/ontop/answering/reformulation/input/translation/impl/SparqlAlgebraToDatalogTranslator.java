@@ -41,7 +41,6 @@ import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.URI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -466,30 +465,25 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		else if (p instanceof IRI) {
 			if (p.equals(RDF.TYPE)) {
-				if (o == null) {
+                Term oTerm;
 					// term rdf:type variable .
-					Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
-                    Term oTerm = getTermForVariable(triple.getObjectVar(), variables);
-					atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
+                Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+                if (o == null) {
+                    oTerm = getTermForVariable(triple.getObjectVar(), variables);
+
 				}
 				else if (o instanceof IRI) {
-					// term rdf:type uri .
-                    atom = typeFactory.getOptionalDatatype(rdfFactory.createIRI(o.stringValue()))
-                            // datatype
-                            .map(rdfDatatype -> termFactory.getFunction(termFactory.getRequiredTypePredicate(rdfDatatype), sTerm))
-                            // class
-                            .orElseGet(() -> termFactory.getFunction(atomFactory.getClassPredicate(o.stringValue()), sTerm));
+                    oTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(o.stringValue()));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
+                atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 			}
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-				Predicate predicate = termFactory.getPredicate(p.stringValue(), ImmutableList.of(
-				        typeFactory.getAbstractObjectRDFType(),
-				        typeFactory.getAbstractRDFTermType()));
-				atom = termFactory.getFunction(predicate, sTerm, oTerm);
+                Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(p.stringValue()));
+                atom = atomFactory.getTripleAtom(sTerm, pTerm, oTerm);
 			}
 		}
 		else
@@ -509,8 +503,8 @@ public class SparqlAlgebraToDatalogTranslator {
 
         if (v instanceof Literal)
             return getTermForLiteral((Literal) v);
-        else if (v instanceof URI)
-            return getTermForIri((URI)v, false);
+        else if (v instanceof IRI)
+            return getTermForIri((IRI)v, false);
 
         throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
     }
@@ -563,7 +557,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return term (URI template)
      */
 
-    private Term getTermForIri(URI v, boolean unknownUrisToTemplates) {
+    private Term getTermForIri(IRI v, boolean unknownUrisToTemplates) {
 
         // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
         // string of an IRI might be a part of an IRI template, but not from database value.
@@ -613,8 +607,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			Value v = ((ValueConstant) expr).getValue();
             if (v instanceof Literal)
                 return getTermForLiteral((Literal) v);
-            else if (v instanceof URI)
-                return getTermForIri((URI)v, true);
+            else if (v instanceof IRI)
+                return getTermForIri((IRI)v, true);
 
             throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
         }
