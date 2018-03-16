@@ -10,12 +10,13 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.si.SemanticIndexException;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class SIRepository {
         }
     }
 
-    public SQLPPMapping getMappings() {
+    public SQLPPMapping createMappings() {
 
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .build();

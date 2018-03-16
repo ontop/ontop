@@ -903,7 +903,10 @@ public class RDBMSSIRepositoryManager {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm);
+		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString())); ;
+		ImmutableFunctionalTerm classTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(predicate.getName()));
+
+		ImmutableFunctionalTerm body = atomFactory.getImmutableTripleAtom(subjectTerm,predTerm ,classTerm);
 		return ImmutableList.of(body);
 	}
 	
@@ -920,7 +923,8 @@ public class RDBMSSIRepositoryManager {
 		else {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
-		
+
+		ImmutableFunctionalTerm predicateTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(predicate.getName()));
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
@@ -938,7 +942,8 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
+		ImmutableFunctionalTerm body = atomFactory.getImmutableTripleAtom(subjectTerm,predicateTerm,objectTerm);
+
 		return ImmutableList.of(body);
 	}
 
