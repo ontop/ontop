@@ -3,10 +3,13 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalAtomicExpression;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +42,11 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     @Override
     public String render() {
         return String.format("%s(%s)", predicate, terms.stream().map(Term::toString).collect(joining(",")));
+    }
+
+    @Override
+    public ImmutableList<NonGroundTerm> extractVariables() {
+        return terms.stream().filter(t -> t instanceof Variable).map(t -> (Variable)t).collect(ImmutableCollectors.toList());
     }
 
     @Override

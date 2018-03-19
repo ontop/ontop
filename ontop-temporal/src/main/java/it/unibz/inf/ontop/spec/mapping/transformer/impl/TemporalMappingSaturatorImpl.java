@@ -10,13 +10,8 @@ import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -26,8 +21,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.RedundantTemporalCoalesceEliminator;
 import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
-import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
-import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
 import it.unibz.inf.ontop.temporal.model.*;
@@ -35,9 +28,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 @Singleton
 public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
@@ -49,6 +39,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final TemporalIntermediateQueryFactory TIQFactory;
     private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
+    private final PullOutVariableOptimizer pullOutVariableOptimizer;
     private final BindingLiftOptimizer bindingLiftOptimizer;
     private final TemporalSpecificationFactory specificationFactory;
     private final TermFactory termFactory;
@@ -60,7 +51,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                                          ImmutabilityTools immutabilityTools,
                                          JoinLikeOptimizer joinLikeOptimizer,
                                          TemporalIntermediateQueryFactory tiqFactory,
-                                         BindingLiftOptimizer bindingLiftOptimizer,
+                                         PullOutVariableOptimizer pullOutVariableOptimizer, BindingLiftOptimizer bindingLiftOptimizer,
                                          TemporalSpecificationFactory specificationFactory,
                                          TermFactory termFactory,
                                          RedundantTemporalCoalesceEliminator tcEliminator) {
@@ -68,6 +59,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         this.ruleUnfolder = ruleUnfolder;
         this.immutabilityTools = immutabilityTools;
         TIQFactory = tiqFactory;
+        this.pullOutVariableOptimizer = pullOutVariableOptimizer;
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
@@ -101,12 +93,11 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
                         System.out.println(iq.toString());
-                        bindingLiftOptimizer.optimize(iq);
+                        iq = bindingLiftOptimizer.optimize(iq);
                         System.out.println(iq.toString());
-                        //iq = pushUpBooleanExpressionOptimizer.optimize(iq);
-                        //iq = projectionShrinkingOptimizer.optimize(iq);
-                        //iq = joinLikeOptimizer.optimize(iq);
-                        iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                        iq = new GroundTermRemovalFromDataNodeReshaper().optimize(iq);
+                        iq = pullOutVariableOptimizer.optimize(iq);
+                        //iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                         System.out.println(iq.toString());
                     } catch (EmptyQueryException e) {

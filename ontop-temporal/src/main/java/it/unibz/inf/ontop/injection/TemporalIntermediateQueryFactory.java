@@ -1,8 +1,12 @@
 package it.unibz.inf.ontop.injection;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
@@ -34,7 +38,7 @@ public interface TemporalIntermediateQueryFactory extends IntermediateQueryFacto
 
     UntilNode createUntilNode(TemporalRange temporalRange);
 
-    TemporalCoalesceNode createTemporalCoalesceNode();
+    TemporalCoalesceNode createTemporalCoalesceNode(ImmutableList<NonGroundTerm> projectedVariables);
 
     //TemporalRange createTemporalRange(Boolean beginInclusive, Boolean endInclusive, Duration begin, Duration end);
 }

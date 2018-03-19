@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.ComparisonExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
@@ -41,6 +43,11 @@ public class ComparisonExpressionImpl implements ComparisonExpression{
     @Override
     public ImmutableList<VariableOrGroundTerm> getVariableOrGroundTerms() {
         return ImmutableList.copyOf(Arrays.asList(leftTerm, rightTerm));
+    }
+
+    @Override
+    public ImmutableList<NonGroundTerm> extractVariables() {
+        return ImmutableList.of();
     }
 
     @Override

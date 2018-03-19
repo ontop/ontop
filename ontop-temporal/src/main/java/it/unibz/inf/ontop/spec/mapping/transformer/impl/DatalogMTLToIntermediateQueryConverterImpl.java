@@ -110,6 +110,18 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             return ImmutableList.copyOf(newArglist);
     }
 
+    private ImmutableList<NonGroundTerm> extractVariablesInTheSubTree(DatalogMTLExpression root){
+        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
+        Iterable<DatalogMTLExpression> it = treeTraverser.postOrderTraversal(root);
+        List<NonGroundTerm> varList = new ArrayList<>();
+        for (DatalogMTLExpression expression : it) {
+            if (expression instanceof AtomicExpression){
+                varList.addAll(((AtomicExpression) expression).extractVariables());
+            }
+        }
+        return ImmutableList.copyOf(varList);
+    }
+
     private TemporalIntermediateQueryBuilder getBuilder(DatalogMTLExpression currentExpression,
                                                         QueryNode parentNode, TemporalIntermediateQueryBuilder TIQBuilder){
         if (currentExpression instanceof AtomicExpression) {
@@ -121,7 +133,10 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                                 .getDataAtom(newPred,
                                         appendTemporalComponents(((AtomicExpression)currentExpression).getVariableOrGroundTerms())));
                 if (!(parentNode instanceof TemporalCoalesceNode)) {
-                    TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                    TemporalCoalesceNode coalesceNode = TIQFactory
+                            .createTemporalCoalesceNode(extractVariablesInTheSubTree(currentExpression));
+                           // .createTemporalCoalesceNode(intensionalDataNode.getVariables()
+                           //         .stream().map(v->(NonGroundTerm)v).collect(ImmutableCollectors.toList()));
                     TIQBuilder.addChild(parentNode, coalesceNode);
                     TIQBuilder.addChild(coalesceNode, intensionalDataNode);
                 } else {
@@ -174,9 +189,10 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             if(((UnaryTemporalExpression)currentExpression).getOperand() instanceof UnaryTemporalExpression){
                 getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),newNode,TIQBuilder);
             }else {
-                TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode();
+                DatalogMTLExpression childExpression = ((UnaryTemporalExpression) currentExpression).getOperand();
+                TemporalCoalesceNode coalesceNode = TIQFactory.createTemporalCoalesceNode(extractVariablesInTheSubTree(childExpression));
                 TIQBuilder.addChild(newNode, coalesceNode);
-                getBuilder(((UnaryTemporalExpression) currentExpression).getOperand(), coalesceNode, TIQBuilder);
+                getBuilder(childExpression, coalesceNode, TIQBuilder);
             }
 
         }else if (currentExpression instanceof BinaryTemporalExpression
@@ -190,11 +206,13 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             }
             TIQBuilder.addChild(parentNode, newNode);
 
-            TemporalCoalesceNode rightCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+            DatalogMTLExpression rightChildExpression = ((BinaryTemporalExpression)currentExpression).getRightOperand();
+            TemporalCoalesceNode rightCoalesceNode = TIQFactory.createTemporalCoalesceNode(extractVariablesInTheSubTree(rightChildExpression));
             TIQBuilder.addChild(newNode, rightCoalesceNode);
             getBuilder(((BinaryTemporalExpression)currentExpression).getRightOperand(), rightCoalesceNode, TIQBuilder);
 
-            TemporalCoalesceNode leftCoalesceNode = TIQFactory.createTemporalCoalesceNode();
+            DatalogMTLExpression leftChildExpression = ((BinaryTemporalExpression)currentExpression).getLeftOperand();
+            TemporalCoalesceNode leftCoalesceNode = TIQFactory.createTemporalCoalesceNode(extractVariablesInTheSubTree(leftChildExpression));
             TIQBuilder.addChild(newNode, leftCoalesceNode);
             getBuilder(((BinaryTemporalExpression)currentExpression).getLeftOperand(), leftCoalesceNode, TIQBuilder);
         }

@@ -237,9 +237,9 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
-                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
+                //intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
 
-                log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
+                //log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
 
                 //lift bindings and union when it is possible
 //                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
@@ -268,6 +268,10 @@ public class TemporalQueryProcessor implements QueryReformulator {
 //				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
 //				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
+
+                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
+
+                log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
 
                 //TODO: implement this part
                 ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,

@@ -36,6 +36,8 @@ import it.unibz.inf.ontop.temporal.iq.node.*;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 import org.apache.calcite.avatica.util.TimeUnit;
 import org.apache.calcite.jdbc.*;
+import org.apache.calcite.materialize.MaterializationKey;
+import org.apache.calcite.materialize.MaterializationService;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.prepare.PlannerImpl;
@@ -101,10 +103,16 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     private final SimpleRDF rdfFactory;
     private final TemporalTranslationFactory temporalTranslationFactory;
 
+    private RelToSqlConverter converter;
+    private MaterializationService mService;
+    private CalciteSchema calciteSchema;
     private SchemaPlus rootSchema = null;
     private FrameworkConfig calciteFrameworkConfig;
 
     private SqlDialect dialect;
+    private Stack<MaterializationKey> materializationStack = new Stack();
+
+    private Map<String, MaterializationKey> materializationKeyMap;
 
     @AssistedInject
     private TemporalCalciteBasedSQLGeneratorImpl(@Assisted DBMetadata metadata,
@@ -125,11 +133,14 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         this.rdfFactory = new SimpleRDF();
         this.rexBuilder = new RexBuilder(typeFactory);
         this.settings = coreSettings;
+        mService = MaterializationService.instance();
+        materializationKeyMap = new HashMap<>();
         try {
             this.rootSchema = configRootSchema(metadata);
             calciteFrameworkConfig = Frameworks.newConfigBuilder()
                     .defaultSchema(rootSchema)
                     .build();
+            calciteSchema = CalciteSchema.from(calciteFrameworkConfig.getDefaultSchema());
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
@@ -143,6 +154,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         Connection jdbcConnection = DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         dialect = new SqlDialectFactoryImpl().create(jdbcConnection.getMetaData());
+        converter = new RelToSqlConverter(dialect);
 
         final Set<String> schemaNames = metadata.getDatabaseRelations()
                 .stream()
@@ -180,11 +192,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
     @Override
     public ExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature) {
-        IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
-//        final FrameworkConfig calciteFrameworkConfig = Frameworks.newConfigBuilder()
-//                .defaultSchema(rootSchema)
-//                .build();
+        IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
         final TemporalRelBuilder relBuilder = TemporalRelBuilder.create(calciteFrameworkConfig);
 
@@ -446,6 +455,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             query.getChildrenStream(filterNode).forEach(n -> n.acceptVisitor(this));
             final ImmutableExpression filterCondition = filterNode.getFilterCondition();
             final RexNode rexNode = checkNotNull(expressionToRexNode(filterCondition, 1));
+
+            if (!materializationStack.empty()) {
+                MaterializationKey key = materializationStack.pop();
+                relBuilder.scan(mService.checkValid(key).name);
+            }
+
             relBuilder.filter(rexNode);
         }
 
@@ -752,10 +767,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 SqlNode validatedSqlNode = planner.validate(parsedNode);
                 relNode = planner.rel(validatedSqlNode).project();
 
-                RelToSqlConverter converter = new RelToSqlConverter(dialect);
-                SqlImplementor.Result result = converter.visit(relNode);
-                SqlNode sqlNode = result.asStatement();
-                System.out.println(sqlNode.toSqlString(dialect).getSql());
+//                RelToSqlConverter converter = new RelToSqlConverter(dialect);
+//                SqlNode sqlNode = converter.visitChild(0, relNode).asStatement();
 
 
             } catch (ValidationException | RelConversionException | SqlParseException e) {
@@ -772,16 +785,21 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             final String predicateName = projectionAtom.getPredicate().getName();
 
             if (relBuilder.getOntopViews().containsKey(predicateName)) {
-                String sqlString = ((ParserViewDefinition) relBuilder.getOntopViews().get(predicateName)).getStatement();
-
-                RelNode ontopViewRelNode = convertSqlNodeToRelNode(sqlString);
-                relBuilder.push(ontopViewRelNode);
-
+                if (!materializationKeyMap.containsKey(predicateName)) {
+                    String sqlString = ((ParserViewDefinition) relBuilder.getOntopViews().get(predicateName)).getStatement();
+                    MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                            sqlString, null, predicateName, true, false);
+                    materializationKeyMap.putIfAbsent(predicateName, key);
+                }
+                relBuilder.scan(predicateName);
+                projectExtensionalNode(arguments);
             } else {
-
                 relBuilder.scan(predicateName.split("\\."));
+                projectExtensionalNode(arguments);
             }
+        }
 
+        private void projectExtensionalNode(ImmutableList arguments){
             ImmutableList<RexNode> rexNodes = IntStream
                     .range(0, arguments.size())
                     .mapToObj(relBuilder::field)
@@ -794,6 +812,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             // "force: true" is important to workaround a bug of calcite, otherwise, the renaming might be ignored
             relBuilder.project(rexNodes, names, true);
+
         }
 
         @Override
@@ -946,7 +965,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             //SqlDialect dialect = SqlDialect.DatabaseProduct.H2.getDialect();
             final RelNode node = relBuilder.build();
-            final RelToSqlConverter converter = new RelToSqlConverter(dialect);
             final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
             return sqlNode.toSqlString(dialect).getSql();
         }
