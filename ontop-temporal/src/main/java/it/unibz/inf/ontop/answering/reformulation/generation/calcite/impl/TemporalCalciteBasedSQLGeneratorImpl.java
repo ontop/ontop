@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.calcite.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
@@ -34,18 +35,14 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.temporal.iq.node.*;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.calcite.avatica.util.TimeUnit;
 import org.apache.calcite.jdbc.*;
 import org.apache.calcite.materialize.MaterializationKey;
 import org.apache.calcite.materialize.MaterializationService;
-import org.apache.calcite.plan.RelOptCluster;
-import org.apache.calcite.plan.RelOptTable;
-import org.apache.calcite.prepare.PlannerImpl;
-import org.apache.calcite.prepare.Prepare;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
-import org.apache.calcite.rel.rel2sql.SqlImplementor;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -56,14 +53,11 @@ import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
-import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
-import org.apache.calcite.sql.validate.SqlValidatorImpl;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
-import org.apache.calcite.sql2rel.StandardConvertletTable;
 import org.apache.calcite.tools.*;
 import org.apache.calcite.util.DateString;
 import org.apache.calcite.util.TimeString;
@@ -72,12 +66,12 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Literal;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -108,11 +102,15 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     private CalciteSchema calciteSchema;
     private SchemaPlus rootSchema = null;
     private FrameworkConfig calciteFrameworkConfig;
+    private Planner planner;
 
     private SqlDialect dialect;
-    private Stack<MaterializationKey> materializationStack = new Stack();
+    private Stack<String> materializationStack = new Stack();
+    private List<VariableOrGroundTerm> lastProjectedArguments = new ArrayList<>();
 
     private Map<String, MaterializationKey> materializationKeyMap;
+    private int withClauseCounter = 0;
+    List<String> temporalAliases = new ArrayList<>();
 
     @AssistedInject
     private TemporalCalciteBasedSQLGeneratorImpl(@Assisted DBMetadata metadata,
@@ -134,13 +132,15 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         this.rexBuilder = new RexBuilder(typeFactory);
         this.settings = coreSettings;
         mService = MaterializationService.instance();
-        materializationKeyMap = new HashMap<>();
+        materializationKeyMap = new LinkedHashMap<>();
+        temporalAliases.addAll(Arrays.asList("bInc", "b", "e", "eInc"));
         try {
             this.rootSchema = configRootSchema(metadata);
             calciteFrameworkConfig = Frameworks.newConfigBuilder()
                     .defaultSchema(rootSchema)
                     .build();
             calciteSchema = CalciteSchema.from(calciteFrameworkConfig.getDefaultSchema());
+            planner = Frameworks.getPlanner(calciteFrameworkConfig);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
@@ -265,6 +265,11 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             boolean isRoot = constructionNode.equals(query.getRootNode());
             ImmutableSubstitution<ImmutableTerm> substitution = getCnSubstitution(isRoot, constructionNode);
+
+            if(!materializationStack.empty()){
+                String table = materializationStack.pop();
+                relBuilder.scan(table);
+            }
 
             if (constructionNode.getVariables().isEmpty()) {
                 // Only for ASK
@@ -457,7 +462,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             final RexNode rexNode = checkNotNull(expressionToRexNode(filterCondition, 1));
 
             if (!materializationStack.empty()) {
-                MaterializationKey key = materializationStack.pop();
+                String mName = materializationStack.pop();
+                MaterializationKey key = materializationKeyMap.get(mName);
                 relBuilder.scan(mService.checkValid(key).name);
             }
 
@@ -788,18 +794,18 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 if (!materializationKeyMap.containsKey(predicateName)) {
                     String sqlString = ((ParserViewDefinition) relBuilder.getOntopViews().get(predicateName)).getStatement();
                     MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
-                            sqlString, null, predicateName, true, false);
+                            sqlString, calciteSchema.path(null), predicateName, true, false);
                     materializationKeyMap.putIfAbsent(predicateName, key);
                 }
                 relBuilder.scan(predicateName);
-                projectExtensionalNode(arguments);
+                projectArguments(arguments);
             } else {
                 relBuilder.scan(predicateName.split("\\."));
-                projectExtensionalNode(arguments);
+                projectArguments(arguments);
             }
         }
 
-        private void projectExtensionalNode(ImmutableList arguments){
+        private void projectArguments(ImmutableList arguments){
             ImmutableList<RexNode> rexNodes = IntStream
                     .range(0, arguments.size())
                     .mapToObj(relBuilder::field)
@@ -812,7 +818,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             // "force: true" is important to workaround a bug of calcite, otherwise, the renaming might be ignored
             relBuilder.project(rexNodes, names, true);
-
+            lastProjectedArguments.clear();
+            lastProjectedArguments.addAll(arguments);
         }
 
         @Override
@@ -966,7 +973,27 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             //SqlDialect dialect = SqlDialect.DatabaseProduct.H2.getDialect();
             final RelNode node = relBuilder.build();
             final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
-            return sqlNode.toSqlString(dialect).getSql();
+            String sqlStr =  sqlNode.toSqlString(dialect).getSql();
+            String with = appendWithClauses();
+            sqlStr = with + "\n\n" + sqlStr;
+            return  sqlStr;
+        }
+
+        private String appendWithClauses(){
+            if (!materializationKeyMap.isEmpty()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("WITH ");
+                for (MaterializationKey key : materializationKeyMap.values()) {
+                    CalciteSchema.TableEntry tableEntry = mService.checkValid(key);
+                    stringBuilder.append(tableEntry.name);
+                    stringBuilder.append(" AS (\n");
+                    String sql = tableEntry.sqls.get(0);
+                    stringBuilder.append(sql);
+                    stringBuilder.append("),\n");
+                }
+                return stringBuilder.substring(0, stringBuilder.toString().length()-2);
+            }
+            return "";
         }
 
         @Override
@@ -986,41 +1013,176 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             });
         }
 
+        private ImmutableList<String> getKeys() {
+            return lastProjectedArguments.stream()
+                    .filter(t -> t instanceof Variable)
+                    .map(t-> (Variable)t)
+                    .filter(v -> !temporalAliases.contains(v.getName()))
+                    .map(Variable::getName)
+                    .collect(ImmutableCollectors.toList());
+        }
+
+        private void createBoxView(TemporalRange range, SqlBinaryOperator operator){
+            if (!materializationStack.empty()){
+                String viewName = materializationStack.pop();
+                relBuilder.scan(viewName);
+            }
+
+            long beginInMs = range.getBegin().toMillis();
+            long endInMs = range.getEnd().toMillis();
+
+            RexLiteral beginInterval;
+            RexNode begin = null;
+            if (beginInMs > 0){
+                beginInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(beginInMs), getSQLIQualifier());
+                if (lastProjectedArgumentsContains("b")){
+                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("b"), beginInterval);
+                    begin = relBuilder.alias(n, "b");
+                }
+            }
+
+            RexLiteral endInterval;
+            RexNode end = null;
+            if (endInMs > 0){
+                endInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs), getSQLIQualifier());
+                if (lastProjectedArgumentsContains("e")){
+                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("e"), endInterval);
+                    end = relBuilder.alias(n, "e");
+                }
+            }
+
+            RexLiteral diffInterval;
+            if (endInMs > 0 ){
+                if (endInMs - beginInMs >= 0) {
+                    diffInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs - beginInMs), getSQLIQualifier());
+                    RexNode n = rexBuilder.makeCall(SqlStdOperatorTable.MINUS, relBuilder.field("e"), diffInterval);
+                    RexNode x = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, n, relBuilder.field("b"));
+                    relBuilder.filter(x);
+                }else {
+                    throw new  IllegalArgumentException("start point of a time interval can not be bigger than the end point");
+                }
+            }
+
+            //bInc and eInc are missing (Coalesce does not project it for now)
+            if (begin == null)
+                begin = relBuilder.field("b");
+            if (end == null)
+                end = relBuilder.field("e");
+            //relBuilder.project(begin, end);
+            RexNode bInc = null;
+            if (lastProjectedArgumentsContains("bInc"))
+                bInc = relBuilder.field("bInc");
+            RexNode eInc = null;
+            if (lastProjectedArgumentsContains("eInc"))
+                eInc = relBuilder.field("eInc");
+
+            List <RexNode> nodesToProject = getKeys().stream().map(relBuilder::field).collect(Collectors.toList());
+            nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
+            relBuilder.project(nodesToProject);
+
+            RelNode node = relBuilder.build();
+            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
+            String sqlString = sqlNode.toSqlString(dialect).getSql();
+            String clauseName = getNewWithClauseName();
+            MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                    sqlString, calciteSchema.path(null), clauseName, true, true);
+            materializationKeyMap.putIfAbsent(clauseName, key);
+            materializationStack.push(clauseName);
+        }
+
+        private void createDiamondView(TemporalRange range, SqlBinaryOperator operator){
+            if (!materializationStack.empty()){
+                String viewName = materializationStack.pop();
+                relBuilder.scan(viewName);
+            }
+
+            long beginInMs = range.getBegin().toMillis();
+            long endInMs = range.getEnd().toMillis();
+
+            RexLiteral beginInterval;
+            RexNode begin = null;
+            if (endInMs > 0){
+                beginInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs), getSQLIQualifier());
+                if (lastProjectedArgumentsContains("b")){
+                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("b"), beginInterval);
+                    begin = relBuilder.alias(n, "b");
+                }
+            }
+
+            RexLiteral endInterval;
+            RexNode end = null;
+            if (beginInMs > 0){
+                endInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(beginInMs), getSQLIQualifier());
+                if (lastProjectedArgumentsContains("e")){
+                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("e"), endInterval);
+                    end = relBuilder.alias(n, "e");
+                }
+            }
+
+            if (endInMs - beginInMs < 0)
+                throw new  IllegalArgumentException("start point of a time interval can not be bigger than the end point");
+
+            //bInc and eInc are missing (Coalesce does not project it for now)
+            if (begin == null)
+                begin = relBuilder.field("b");
+            if (end == null)
+                end = relBuilder.field("e");
+            //relBuilder.project(begin, end);
+            RexNode bInc = null;
+            if (lastProjectedArgumentsContains("bInc"))
+                bInc = relBuilder.field("bInc");
+            RexNode eInc = null;
+            if (lastProjectedArgumentsContains("eInc"))
+                eInc = relBuilder.field("eInc");
+
+            List <RexNode> nodesToProject = getKeys().stream().map(relBuilder::field).collect(Collectors.toList());
+            nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
+            relBuilder.project(nodesToProject);
+
+            RelNode node = relBuilder.build();
+            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
+            String sqlString = sqlNode.toSqlString(dialect).getSql();
+            String clauseName = getNewWithClauseName();
+            MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                    sqlString, calciteSchema.path(null), clauseName, true, true);
+            materializationKeyMap.putIfAbsent(clauseName, key);
+            materializationStack.push(clauseName);
+        }
+
         @Override
         public void visit(BoxMinusNode boxMinusNode) {
-
             query.getChildrenStream(boxMinusNode).forEach(n -> n.acceptVisitor(this));
-
             TemporalRange range = boxMinusNode.getRange();
-            TemporalRangeRelNode temporalRangeRelNode =
-                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeLiteral(range.isEndInclusive()));
-
-            RelNode operand = relBuilder.build();
-            relBuilder.boxMinus(operand, temporalRangeRelNode);
-            //throw new UnsupportedOperationException(boxMinusNode.getClass().getName());
+            createBoxView(range, SqlStdOperatorTable.PLUS);
         }
 
         private SqlIntervalQualifier getSQLIQualifier() {
-            return new SqlIntervalQualifier(TimeUnit.MILLISECOND,
-                    TimeUnit.MILLISECOND, SqlParserPos.ZERO);
+            //Calcite does not support millisecond precision
+            return new SqlIntervalQualifier(TimeUnit.SECOND,
+                    TimeUnit.SECOND, SqlParserPos.ZERO);
+        }
+
+        private boolean lastProjectedArgumentsContains(String s){
+            return lastProjectedArguments.stream()
+                    .filter(arg -> arg instanceof Variable)
+                    .anyMatch(arg -> ((Variable)arg).getName().equals(s));
         }
 
         @Override
         public void visit(BoxPlusNode boxPlusNode) {
             query.getChildrenStream(boxPlusNode).forEach(n -> n.acceptVisitor(this));
-
             TemporalRange range = boxPlusNode.getRange();
-            TemporalRangeRelNode temporalRangeRelNode =
-                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeLiteral(range.isEndInclusive()));
+            createBoxView(range, SqlStdOperatorTable.MINUS);
 
-            RelNode operand = relBuilder.build();
-            relBuilder.boxPlus(operand, temporalRangeRelNode);
+//            TemporalRange range = boxPlusNode.getRange();
+//            TemporalRangeRelNode temporalRangeRelNode =
+//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeLiteral(range.isEndInclusive()));
+//
+//            RelNode operand = relBuilder.build();
+//            relBuilder.boxPlus(operand, temporalRangeRelNode);
         }
 
         @Override
@@ -1028,14 +1190,16 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             query.getChildrenStream(diamondMinusNode).forEach(n -> n.acceptVisitor(this));
 
             TemporalRange range = diamondMinusNode.getRange();
-            TemporalRangeRelNode temporalRangeRelNode =
-                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeLiteral(range.isEndInclusive()));
+            createDiamondView(range, SqlStdOperatorTable.PLUS);
 
-            RelNode operand = relBuilder.build();
-            relBuilder.diamondMinus(operand, temporalRangeRelNode);
+//            TemporalRangeRelNode temporalRangeRelNode =
+//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeLiteral(range.isEndInclusive()));
+//
+//            RelNode operand = relBuilder.build();
+//            relBuilder.diamondMinus(operand, temporalRangeRelNode);
         }
 
         @Override
@@ -1043,14 +1207,16 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             query.getChildrenStream(diamondPlusNode).forEach(n -> n.acceptVisitor(this));
 
             TemporalRange range = diamondPlusNode.getRange();
-            TemporalRangeRelNode temporalRangeRelNode =
-                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-                            rexBuilder.makeLiteral(range.isEndInclusive()));
+            createDiamondView(range, SqlStdOperatorTable.MINUS);
 
-            RelNode operand = relBuilder.build();
-            relBuilder.diamondPlus(operand, temporalRangeRelNode);
+//            TemporalRangeRelNode temporalRangeRelNode =
+//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
+//                            rexBuilder.makeLiteral(range.isEndInclusive()));
+//
+//            RelNode operand = relBuilder.build();
+//            relBuilder.diamondPlus(operand, temporalRangeRelNode);
         }
 
         @Override
@@ -1066,12 +1232,96 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         @Override
         public void visit(TemporalCoalesceNode temporalCoalesceNode) {
             query.getChildrenStream(temporalCoalesceNode).forEach(n -> n.acceptVisitor(this));
-            RelNode operand = relBuilder.build();
-            relBuilder.temporalCoalesce(operand);
-            //throw new UnsupportedOperationException(temporalCoalesceNode.getClass().getName());
+            //projectArguments(ImmutableList.copyOf(lastProjectedArguments));
+            RelNode node = relBuilder.build();
+
+            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
+            String sqlString = sqlNode.toSqlString(dialect).getSql();
+            String clauseName = getNewWithClauseName();
+            MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                    sqlString, calciteSchema.path(null), clauseName, true, true);
+            materializationKeyMap.putIfAbsent(clauseName, key);
+            updateProjectedArguments(temporalCoalesceNode.getTerms());
+            createCoalesceClauses(clauseName);
         }
     }
 
+    private void updateProjectedArguments(ImmutableSet<NonGroundTerm> coalesceTerms){
+        List <VariableOrGroundTerm> updatedList = new ArrayList();
+        for(VariableOrGroundTerm arg : lastProjectedArguments){
+            if (coalesceTerms.contains(arg) ||
+                    ((arg instanceof Variable) && temporalAliases.contains(((Variable)arg).getName()))){
+                updatedList.add(arg);
+            }
+        }
+        lastProjectedArguments.clear();
+        lastProjectedArguments.addAll(updatedList);
+    }
+
+    private  String getStrkeys(){
+        String strKeys = "";
+        for(VariableOrGroundTerm term : lastProjectedArguments){
+            if (term instanceof Variable){
+                if (!temporalAliases.contains(((Variable) term).getName())){
+                    strKeys += "\"" +((Variable) term).getName() + "\", ";
+                }
+            }else{
+                throw new IllegalArgumentException(term.toString() + " is not a variable. Constants are not allowed in Temporal Coalesce.");
+            }
+        }
+        return strKeys.substring(0, strKeys.length()-2);
+    }
+    private void createCoalesceClauses(String materializationName){
+
+        String strKeys = getStrkeys();
+
+        String sql1 = String.format("SELECT 1 AS \"Start_ts\", 0 AS \"End_ts\", \"b\" AS \"ts\", \"bInc\", \"eInc\", %s\n" +
+                " FROM %s \n" +
+                "UNION ALL\n" +
+                "SELECT 0 AS \"Start_ts\", 1 AS \"End_ts\", \"e\" AS \"ts\", \"bInc\", \"eInc\", %s\n" +
+                " FROM %s ", strKeys, materializationName, strKeys, materializationName);
+
+
+        String clauseName1 = createClause(sql1);
+
+        String sql2 = String.format("SELECT \n" +
+                "SUM(\"Start_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS UNBOUNDED PRECEDING) AS \"Crt_Total_ts_1\",\n" +
+                "SUM(\"End_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS UNBOUNDED PRECEDING) AS \"Crt_Total_ts_2\",\n" +
+                "SUM(\"Start_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS \"Prv_Total_ts_1\",\n" +
+                "SUM(\"End_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS \"Prv_Total_ts_2\",\n" +
+                "\"ts\", \"bInc\", \"eInc\", %s \n" +
+                " FROM %s", strKeys, strKeys, strKeys, strKeys, strKeys, clauseName1);
+        String clauseName2 = createClause(sql2);
+
+        String sql3 = String.format("SELECT (\"Crt_Total_ts_1\" - \"Crt_Total_ts_2\") AS \"Crt_Total_ts\", " +
+                "(\"Prv_Total_ts_1\" - \"Prv_Total_ts_2\") AS \"Prv_Total_ts\", \"ts\", \"bInc\", \"eInc\", %s \n" +
+                "FROM %s \n" +
+                "WHERE \"Crt_Total_ts_1\" = \"Crt_Total_ts_2\" OR \"Prv_Total_ts_1\" = \"Prv_Total_ts_2\" " +
+                "OR \"Prv_Total_ts_1\" IS NULL OR \"Prv_Total_ts_2\" IS NULL", strKeys, clauseName2);
+        String clauseName3 = createClause(sql3);
+
+        String sql4 = String.format("SELECT %s, \"bInc\", \"prevTs\" AS \"b\", \"ts\" AS \"e\", \"eInc\" FROM (\n" +
+                "SELECT %s, \"bInc\", LAG(\"ts\",1) OVER (PARTITION BY %s ORDER BY \"ts\", \"Crt_Total_ts\") As \"prevTs\",\n" +
+                "\"ts\", \"eInc\", \"Crt_Total_ts\" \n" +
+                "FROM %s) F \n" +
+                "WHERE \"Crt_Total_ts\" = 0", strKeys, strKeys, strKeys, clauseName3);
+        String clauseName4 = createClause(sql4);
+        materializationStack.push(clauseName4);
+    }
+
+    private String createClause(String sql){
+        String clauseName = getNewWithClauseName();
+        MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                sql, calciteSchema.path(null), clauseName, true, true);
+        materializationKeyMap.putIfAbsent(clauseName, key);
+
+        return clauseName;
+    }
+
+    private String getNewWithClauseName(){
+        withClauseCounter++;
+        return "C_" + (withClauseCounter - 1) ;
+    }
 
     private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 

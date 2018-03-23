@@ -8,6 +8,7 @@ import org.apache.calcite.plan.Context;
 import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptSchema;
+import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.Schema;
@@ -87,6 +88,9 @@ public class TemporalRelBuilder extends RelBuilder {
                     public Void apply(RelOptCluster cluster, RelOptSchema relOptSchema,
                                       SchemaPlus rootSchema, CalciteServerStatement statement) {
                         clusters[0] = cluster;
+//                        if (clusters[0].getPlanner() instanceof VolcanoPlanner){
+//                            ((VolcanoPlanner)clusters[0].getPlanner()).setLocked(true);
+//                        }
                         relOptSchemas[0] = relOptSchema;
                         return null;
                     }

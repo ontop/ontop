@@ -124,28 +124,28 @@ public class CalciteTest {
 //                "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
 //                "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
 
-        String postgresql = "WITH C1 AS (\n" +
-                "SELECT dFrom, (dTo + interval '2' MINUTE) AS dTo \n" +
-                "FROM (\n" +
-                "SELECT \"timestamp\" AS dFrom,\n" +
-                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
-                "FROM \"public\".\"tb_measurement\") F\n" +
-                "WHERE \"value\" < 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
-                "),\n" +
-                "C2 AS (\n" +
-                "SELECT dFrom, dTo \n" +
-                "FROM (\n" +
-                "SELECT \"timestamp\" AS dFrom,\n" +
-                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
-                "FROM \"public\".\"tb_measurement\") F\n" +
-                "WHERE \"value\" > 5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
-                ") \n" +
-                "SELECT C2.dFrom, C1.dTo \n" +
-                "FROM C1, C2\n" +
-                "WHERE\n" +
-                "C2.dFrom > C1.dFrom AND C1.dTo > C2.dFrom AND C1.dTo < C2.dTo AND C1.dTo > C2.dFrom";
+//        String postgresql = "WITH C1 AS (\n" +
+//                "SELECT dFrom, (dTo + interval '2' MINUTE) AS dTo \n" +
+//                "FROM (\n" +
+//                "SELECT \"timestamp\" AS dFrom,\n" +
+//                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+//                "FROM \"public\".\"tb_measurement\") F\n" +
+//                "WHERE \"value\" < 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+//                "),\n" +
+//                "C2 AS (\n" +
+//                "SELECT dFrom, dTo \n" +
+//                "FROM (\n" +
+//                "SELECT \"timestamp\" AS dFrom,\n" +
+//                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+//                "FROM \"public\".\"tb_measurement\") F\n" +
+//                "WHERE \"value\" > 5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+//                ") \n" +
+//                "SELECT C2.dFrom, C1.dTo \n" +
+//                "FROM C1, C2\n" +
+//                "WHERE\n" +
+//                "C2.dFrom > C1.dFrom AND C1.dTo > C2.dFrom AND C1.dTo < C2.dTo AND C1.dTo > C2.dFrom";
 
-//        String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
+       String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
 
 //        String postgresql = "SELECT \"timestamp\" FROM \"public\".\"tb_measurement\"";
 

@@ -220,8 +220,6 @@ public class QueryAnsweringTest {
             OWLStatement st = conn.createStatement();
             st.executeSelectQuery(query);
 
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
         } catch (OWLException e) {
             e.printStackTrace();
         }

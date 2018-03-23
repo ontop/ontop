@@ -38,7 +38,7 @@ public interface TemporalIntermediateQueryFactory extends IntermediateQueryFacto
 
     UntilNode createUntilNode(TemporalRange temporalRange);
 
-    TemporalCoalesceNode createTemporalCoalesceNode(ImmutableList<NonGroundTerm> projectedVariables);
+    TemporalCoalesceNode createTemporalCoalesceNode(ImmutableSet<NonGroundTerm> terms);
 
     //TemporalRange createTemporalRange(Boolean beginInclusive, Boolean endInclusive, Duration begin, Duration end);
 }

@@ -24,26 +24,35 @@ import it.unibz.inf.ontop.temporal.iq.node.TemporalQueryNodeVisitor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     private static final String COALESCE_NODE_STR = "TEMPORAL COALESCE";
 
-    private final ImmutableList<NonGroundTerm> terms;
+    private final ImmutableSet<NonGroundTerm> terms;
 
     private final TemporalIntermediateQueryFactory iqFactory;
 
     @AssistedInject
-    protected TemporalCoalesceNodeImpl(@Assisted ImmutableList<NonGroundTerm> terms, TemporalIntermediateQueryFactory iqFactory) {
+    protected TemporalCoalesceNodeImpl(@Assisted ImmutableSet<NonGroundTerm> terms, TemporalIntermediateQueryFactory iqFactory) {
         this.terms = terms;
         this.iqFactory = iqFactory;
     }
 
     @Override
+    public ImmutableSet<NonGroundTerm> getTerms() {
+        return terms;
+    }
+
+    @Override
     public String toString() {
-        return COALESCE_NODE_STR + "[" +terms.toString() + "]";
+        return COALESCE_NODE_STR  + terms.toString();
     }
 
     @Override
@@ -114,7 +123,8 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return queryNode instanceof TemporalCoalesceNode;
+        return queryNode instanceof TemporalCoalesceNode
+                && this.terms.equals(((TemporalCoalesceNode) queryNode).getTerms());
     }
 
 
@@ -168,13 +178,27 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
     }
 
     private TemporalCoalesceNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-        ImmutableList<NonGroundTerm> newVariables = terms.stream()
+        ImmutableSet<NonGroundTerm> newNonGroundTerms = terms.stream()
                 .flatMap(c -> Stream.of(substitution.apply(c)))
                         .filter(t -> t instanceof NonGroundTerm)
                         .map(t -> (NonGroundTerm) t)
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
-        return iqFactory.createTemporalCoalesceNode(newVariables);
+        Set<NonGroundTerm> newVariables = new HashSet<>();
+
+        for(NonGroundTerm ngTerm : newNonGroundTerms){
+            if (ngTerm instanceof NonGroundFunctionalTerm){
+                newVariables.addAll(((NonGroundFunctionalTerm) ngTerm)
+                        .getArguments().stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable)t)
+                        .collect(Collectors.toSet()));
+            } else if(ngTerm instanceof Variable){
+                newVariables.add(ngTerm);
+            }
+        }
+
+        return iqFactory.createTemporalCoalesceNode(ImmutableSet.copyOf(newVariables));
     }
 
     @Override

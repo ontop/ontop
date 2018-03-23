@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.TargetAtom;
@@ -110,7 +111,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             return ImmutableList.copyOf(newArglist);
     }
 
-    private ImmutableList<NonGroundTerm> extractVariablesInTheSubTree(DatalogMTLExpression root){
+    private ImmutableSet<NonGroundTerm> extractVariablesInTheSubTree(DatalogMTLExpression root){
         TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.postOrderTraversal(root);
         List<NonGroundTerm> varList = new ArrayList<>();
@@ -119,7 +120,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
                 varList.addAll(((AtomicExpression) expression).extractVariables());
             }
         }
-        return ImmutableList.copyOf(varList);
+        return ImmutableSet.copyOf(varList);
     }
 
     private TemporalIntermediateQueryBuilder getBuilder(DatalogMTLExpression currentExpression,
@@ -186,7 +187,8 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             TIQBuilder.addChild(parentNode, newNode);
 
             // to avoid redundant coalesce nodes
-            if(((UnaryTemporalExpression)currentExpression).getOperand() instanceof UnaryTemporalExpression){
+            if(((UnaryTemporalExpression)currentExpression).getOperand() instanceof UnaryTemporalExpression
+                    || ((UnaryTemporalExpression)currentExpression).getOperand() instanceof TemporalJoinExpression){
                 getBuilder(((UnaryTemporalExpression)currentExpression).getOperand(),newNode,TIQBuilder);
             }else {
                 DatalogMTLExpression childExpression = ((UnaryTemporalExpression) currentExpression).getOperand();

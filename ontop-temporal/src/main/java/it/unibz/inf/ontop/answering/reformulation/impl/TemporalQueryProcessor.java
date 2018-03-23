@@ -237,38 +237,6 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
-                //intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
-
-                //log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
-
-                //lift bindings and union when it is possible
-//                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
-//                log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
-//
-//                log.debug("New lifted query: \n" + intermediateQuery.toString());
-
-                /*
-                 * TODO: USE INJECTION!
-//                 */
-//                intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
-//                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
-//
-//                intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
-//
-//                log.debug("After projection shrinking: \n" + intermediateQuery.toString());
-//
-//
-//                intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
-//                log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
-
-//				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
-//				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
-//				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
-//
-//				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-//				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-//				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
-
                 intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
 
                 log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
