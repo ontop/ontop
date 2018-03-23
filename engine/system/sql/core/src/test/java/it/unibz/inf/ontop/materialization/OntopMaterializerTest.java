@@ -27,7 +27,10 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -44,17 +47,20 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.stream.Stream;
+
 import static org.junit.Assert.assertEquals;
 
 public class OntopMaterializerTest {
@@ -67,6 +73,7 @@ public class OntopMaterializerTest {
 	private static String password = "";
 
 	private final SQLMappingFactory mappingFactory;
+	private final RDF RDFFactory = new SimpleRDF();
 	private final RDFDatatype xsdStringDt;
 
 	private final Predicate person;
@@ -75,6 +82,13 @@ public class OntopMaterializerTest {
 	private final Predicate age;
 	private final Predicate hasschool;
 	private final Predicate school;
+
+	private final IRI personIRI;
+	private final IRI fnIRI;
+	private final IRI lnIRI;
+	private final IRI ageIRI;
+	private final IRI hasschoolIRI;
+	private final IRI schoolIRI;
 	
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
@@ -89,18 +103,25 @@ public class OntopMaterializerTest {
 
 		Injector injector = defaultConfiguration.getInjector();
 		termFactory = injector.getInstance(TermFactory.class);
-		AtomFactory atomFactory = injector.getInstance(AtomFactory.class);
 		typeFactory = injector.getInstance(TypeFactory.class);
-
+		AtomFactory atomFactory = injector.getInstance(AtomFactory.class);
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
-		xsdStringDt = typeFactory.getXsdStringDatatype();
 		
-		person = atomFactory.getClassPredicate(PREFIX + "Person");
-		fn = atomFactory.getDataPropertyPredicate(PREFIX + "fn", xsdStringDt);
-		ln = atomFactory.getDataPropertyPredicate(PREFIX + "ln", xsdStringDt);
-		age = atomFactory.getDataPropertyPredicate(PREFIX + "age", xsdStringDt);
-		hasschool = atomFactory.getObjectPropertyPredicate(PREFIX + "hasschool");
-		school = atomFactory.getClassPredicate(PREFIX + "School");
+		personIRI = RDFFactory.createIRI(PREFIX + "Person");
+		fnIRI = RDFFactory.createIRI(PREFIX + "fn");
+		lnIRI = RDFFactory.createIRI(PREFIX + "ln");
+		ageIRI = RDFFactory.createIRI(PREFIX + "age");
+		hasschoolIRI = RDFFactory.createIRI(PREFIX + "hasschool");
+		schoolIRI = RDFFactory.createIRI(PREFIX + "School");
+
+		xsdStringDt = typeFactory.getXsdStringDatatype();
+
+		person = atomFactory.getClassPredicate(personIRI);
+		fn = atomFactory.getDataPropertyPredicate(fnIRI.getIRIString(), xsdStringDt);
+		ln = atomFactory.getDataPropertyPredicate(lnIRI.getIRIString(), xsdStringDt);
+		age = atomFactory.getDataPropertyPredicate(ageIRI.getIRIString(), xsdStringDt);
+		hasschool = atomFactory.getObjectPropertyPredicate(hasschoolIRI);
+		school = atomFactory.getClassPredicate(schoolIRI);
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -143,8 +164,7 @@ public class OntopMaterializerTest {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
-		ImmutableSet<URI> vocabulary = Stream.of(fn, ln, age, hasschool, school)
-				.map(p -> URI.create(p.getName()))
+		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();

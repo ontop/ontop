@@ -29,16 +29,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
-import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -199,7 +199,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
 
         try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(materializationConfig,
-                ImmutableSet.of(URI.create(predicateIRI.toString())), materializationParams)) {
+                ImmutableSet.of(new SimpleRDF().createIRI(predicateIRI.toString())), materializationParams)) {
 
             while (graphResultSet.hasNext()) {
                 tripleCount += serializeTripleBatch(ontology, graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);

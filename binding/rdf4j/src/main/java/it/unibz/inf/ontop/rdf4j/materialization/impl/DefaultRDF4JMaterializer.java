@@ -23,27 +23,30 @@ package it.unibz.inf.ontop.rdf4j.materialization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
+import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
+import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.impl.IteratingGraphQueryResult;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 
 import javax.annotation.Nonnull;
-import java.net.URI;
 
 public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
@@ -69,7 +72,7 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
 	@Override
 	public MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-												 @Nonnull ImmutableSet<URI> selectedVocabulary,
+												 @Nonnull ImmutableSet<IRI> selectedVocabulary,
 												 @Nonnull MaterializationParams params)
 			throws RepositoryException {
 		try {
@@ -190,12 +193,12 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 		}
 
 		@Override
-		public ImmutableList<URI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
+		public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
 			return graphResultSet.getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
 		}
 
 		@Override
-		public ImmutableSet<URI> getSelectedVocabulary() {
+		public ImmutableSet<IRI> getSelectedVocabulary() {
 			return graphResultSet.getSelectedVocabulary();
 		}
 	}

@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.owlapi;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.impl.DefaultOntopOWLAPIMaterializer;
+import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
-import java.net.URI;
 
 public interface OntopOWLAPIMaterializer {
 
@@ -23,7 +23,7 @@ public interface OntopOWLAPIMaterializer {
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
     MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                              @Nonnull ImmutableSet<URI> selectedVocabulary,
+                                              @Nonnull ImmutableSet<IRI> selectedVocabulary,
                                               @Nonnull MaterializationParams params)
             throws OWLException;
 
@@ -40,7 +40,7 @@ public interface OntopOWLAPIMaterializer {
      * with the default options
      */
     default MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                      @Nonnull ImmutableSet<URI> selectedVocabulary)
+                                                      @Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws OWLException {
         return materialize(configuration, selectedVocabulary, MaterializationParams.defaultBuilder().build());
     }

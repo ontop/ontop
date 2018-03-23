@@ -5,9 +5,9 @@ import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
-import java.net.URI;
 
 public interface OntopRDFMaterializer {
 
@@ -22,7 +22,7 @@ public interface OntopRDFMaterializer {
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
     MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                           @Nonnull ImmutableSet<URI> selectedVocabulary,
+                                           @Nonnull ImmutableSet<IRI> selectedVocabulary,
                                            @Nonnull MaterializationParams params)
             throws OBDASpecificationException;
 
