@@ -9,17 +9,20 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 public class MappingImpl implements Mapping {
 
     private final MappingMetadata metadata;
-    private final ImmutableMap<AtomPredicate, IntermediateQuery> definitions;
+    private final ImmutableMap<IRI, IntermediateQuery> propertyDefinitions;
+    private final ImmutableMap<IRI, IntermediateQuery> classDefinitions;
     /**
      * TODO: remove it when the conversion to Datalog will not be needed anymore
      */
@@ -27,20 +30,28 @@ public class MappingImpl implements Mapping {
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap,
+                        @Assisted("propertyMap") ImmutableMap<IRI, IntermediateQuery> propertyMap,
+                        @Assisted("classMap") ImmutableMap<IRI, IntermediateQuery> classMap,
                         @Assisted ExecutorRegistry executorRegistry,
                         OntopModelSettings settings) {
         this.metadata = metadata;
-        this.definitions = mappingMap;
+        this.propertyDefinitions = propertyMap;
+        this.classDefinitions = classMap;
         this.executorRegistry = executorRegistry;
 
         if (settings.isTestModeEnabled()) {
-            for (IntermediateQuery query : mappingMap.values()) {
+            for (IntermediateQuery query : propertyDefinitions.values()) {
+                if (projectNullableVariable(query))
+                    throw new IllegalArgumentException(
+                            "A mapping assertion must not return a nullable variable. \n" + query);
+            }
+            for (IntermediateQuery query : classDefinitions.values()) {
                 if (projectNullableVariable(query))
                     throw new IllegalArgumentException(
                             "A mapping assertion must not return a nullable variable. \n" + query);
             }
         }
+
     }
 
     private static boolean projectNullableVariable(IntermediateQuery query) {
@@ -55,21 +66,37 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate) {
-        IntermediateQuery query = definitions.get(predicate);
-        return query != null && query.getProjectionAtom().getPredicate().getArity() == predicate.getArity()?
-            Optional.of(query):
-            Optional.empty();
+    public Optional<IntermediateQuery> getRDFPropertyDefinition(IRI propertyIRI) {
+        IntermediateQuery query = propertyDefinitions.get(propertyIRI);
+        return query != null ?
+                Optional.of(query):
+                Optional.empty();
     }
 
     @Override
-    public ImmutableSet<AtomPredicate> getPredicates() {
-        return definitions.keySet();
+    public Optional<IntermediateQuery> getRDFClassDefinition(IRI classIRI) {
+        IntermediateQuery query = classDefinitions.get(classIRI);
+        return query != null ?
+                Optional.of(query):
+                Optional.empty();
+    }
+
+
+
+    @Override
+    public ImmutableSet<IRI> getRDFProperties() {
+        return propertyDefinitions.keySet();
+    }
+
+    @Override
+    public ImmutableSet<IRI> getRDFClasses() {
+        return classDefinitions.keySet();
     }
 
     @Override
     public ImmutableCollection<IntermediateQuery> getQueries() {
-        return definitions.values();
+        return Stream.concat(classDefinitions.values().stream(), propertyDefinitions.values().stream())
+                .collect(ImmutableCollectors.toList());
     }
 
     @Override

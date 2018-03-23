@@ -221,10 +221,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
      * This methods construct an atom from a triple
      * <p>
      * For the input (subject, pred, object), the result is
-     * <ul>
-     * <li> object(subject), if pred == rdf:type and subject is grounded ; </li>
-     * <li> predicate(subject, object), if pred != rdf:type and predicate is grounded ; </li>
-     * <li> triple(subject, pred, object), otherwise (it is a higher order atom). </li>
+     * triple(subject, pred, object) </li>
      * </ul>
      */
     private Function makeAtom(Term subject, Term pred, Term object) {

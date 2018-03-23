@@ -29,14 +29,14 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,25 +50,23 @@ import java.util.stream.Stream;
 public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredicateExtractor{
 
     private final VariableDefinitionExtractor definitionExtractor;
-    private final AtomPredicate sameAsAtomPredicate;
-
     public class ResultImpl implements Result {
-        private final ImmutableSet<Predicate> subjectOnlySameAsRewritingTargets;
-        private final ImmutableSet<Predicate> twoArgumentsSameAsRewritingTargets;
+        private final ImmutableSet<IRI> subjectOnlySameAsRewritingTargets;
+        private final ImmutableSet<IRI> twoArgumentsSameAsRewritingTargets;
 
-        public ResultImpl(ImmutableSet<Predicate> subjectOnlySameAsRewritingTargets, ImmutableSet<Predicate>
+        public ResultImpl(ImmutableSet<IRI> subjectOnlySameAsRewritingTargets, ImmutableSet<IRI>
                 twoArgumentsSameAsRewritingTargets) {
             this.subjectOnlySameAsRewritingTargets = subjectOnlySameAsRewritingTargets;
             this.twoArgumentsSameAsRewritingTargets = twoArgumentsSameAsRewritingTargets;
         }
 
         @Override
-        public boolean isSubjectOnlySameAsRewritingTarget(Predicate pred) {
+        public boolean isSubjectOnlySameAsRewritingTarget(IRI pred) {
             return subjectOnlySameAsRewritingTargets.contains(pred);
         }
 
         @Override
-        public boolean isTwoArgumentsSameAsRewritingTarget(Predicate pred) {
+        public boolean isTwoArgumentsSameAsRewritingTarget(IRI pred) {
             return twoArgumentsSameAsRewritingTargets.contains(pred);
         }
     }
@@ -77,7 +75,6 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor,
                                                AtomFactory atomFactory) throws IllegalArgumentException {
         this.definitionExtractor = definitionExtractor;
-        this.sameAsAtomPredicate = atomFactory.getAtomPredicate(atomFactory.getOWLSameAsPredicate());
     }
 
     @Override
@@ -90,7 +87,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
 
     private ImmutableSet<ImmutableTerm> retrieveSameAsMappingsURIs(Mapping mapping) {
 
-        Optional<IntermediateQuery> definition = mapping.getDefinition(sameAsAtomPredicate);
+        Optional<IntermediateQuery> definition = mapping.getRDFPropertyDefinition(OWL.SAME_AS);
         return definition.isPresent() ?
                 getIRIs(definition.get()) :
                 ImmutableSet.of();
@@ -135,9 +132,8 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
 
     private Result extractPredicates(ImmutableSet<ImmutableTerm> sameAsMappingIRIs, Mapping mapping) {
 
-        ImmutableMultimap<Boolean, Predicate> category2TargetPred = mapping.getPredicates().stream()
-                .filter(p -> !(p.equals(sameAsAtomPredicate)))
-                .filter(p -> !p.isTriplePredicate())
+        ImmutableMultimap<Boolean, IRI> category2TargetPred = mapping.getRDFProperties().stream()
+                .filter(p -> !(p.equals(OWL.SAME_AS)))
                 .filter(p -> isRewritingTarget(p, mapping, sameAsMappingIRIs))
                 .collect(ImmutableCollectors.toMultimap(
                         p -> isSubjectOnlyRewritingTarget(mapping, p),
@@ -149,19 +145,33 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
         );
     }
 
-    private boolean isRewritingTarget(AtomPredicate pred, Mapping mapping, ImmutableSet<ImmutableTerm> sameAsMappingIRIs) {
-        IntermediateQuery definition = mapping.getDefinition(pred)
-                .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
-                        "(-> inconsistent)"));
+    private boolean isRewritingTarget(IRI pred, Mapping mapping, ImmutableSet<ImmutableTerm> sameAsMappingIRIs) {
+        IntermediateQuery definition;
+        Optional<IntermediateQuery> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(pred);
+
+        if(rdfPropertyDefinition.isPresent()){
+             definition = rdfPropertyDefinition.get();
+        }
+        else {
+             definition = mapping.getRDFClassDefinition(pred)
+                     .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)"));
+        }
+
         return getIRIs(definition).stream()
                 .anyMatch(i -> sameAsMappingIRIs.contains(i));
     }
 
-    private boolean isSubjectOnlyRewritingTarget(Mapping mapping, AtomPredicate pred) {
-        IntermediateQuery definition = mapping.getDefinition(pred)
-                .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition " +
-                        "(-> inconsistent)"));
+    private boolean isSubjectOnlyRewritingTarget(Mapping mapping, IRI pred) {
+        IntermediateQuery definition;
+        Optional<IntermediateQuery> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(pred);
 
+        if(rdfPropertyDefinition.isPresent()){
+            definition = rdfPropertyDefinition.get();
+        }
+        else {
+            definition = mapping.getRDFClassDefinition(pred)
+                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)"));
+        }
         ImmutableSet<Variable> projectedVariables = definition.getProjectionAtom().getVariables();
 
         /* If all projected variables may return URIs */

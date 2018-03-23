@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -10,12 +11,15 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -61,21 +65,53 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     @Override
     public Mapping toRegularMapping() {
-        ImmutableMultimap<AtomPredicate, IntermediateQuery> assertionMultimap = getMappingAssertions().stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        q -> q.getProjectionAtom().getPredicate(),
-                        q -> q));
 
-        ImmutableMap<AtomPredicate, IntermediateQuery> definitionMap = assertionMultimap.asMap().values().stream()
+        // return iri of class in multimap
+        ImmutableMultimap<IRI, IntermediateQuery> classMultimap = getMappingAssertions().stream()
+                .filter (assertion ->  {
+                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
+                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
+                        return (predicateIRI.equals(RDF.TYPE));})
+                .collect(ImmutableCollectors.toMultimap(
+                        a -> {
+                            ImmutableList<Variable> projectedVariables = a.getProjectionAtom().getArguments();
+                                return MappingTools.extractPredicateTerm(a, projectedVariables.get(2));
+                            },
+                        a -> a));
+
+        // return iri of object and data properties in multimap
+        ImmutableMultimap<IRI, IntermediateQuery> propertyMultimap = getMappingAssertions().stream()
+                .filter (assertion ->  {
+                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
+                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
+                    return (!predicateIRI.equals(RDF.TYPE));})
+                .collect(ImmutableCollectors.toMultimap(
+                        a -> {
+                            ImmutableList<Variable> projectedVariables = a.getProjectionAtom().getArguments();
+                            return MappingTools.extractPredicateTerm(a, projectedVariables.get(1));
+                        },
+                        a -> a));
+
+
+        ImmutableMap<IRI, IntermediateQuery> classDefinitionMap = classMultimap.asMap().values().stream()
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toMap(
-                        q -> q.getProjectionAtom().getPredicate(),
-                        q -> q));
+                        a -> MappingTools.extractClassIRI(a),
+                        a -> a));
 
-        return specFactory.createMapping(mappingMetadata, definitionMap, executorRegistry);
+        ImmutableMap<IRI, IntermediateQuery> propertyDefinitionMap = propertyMultimap.asMap().values().stream()
+                .map(queryMerger::mergeDefinitions)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(mappingIQNormalizer::normalize)
+                .collect(ImmutableCollectors.toMap(
+                        a -> MappingTools.extractPropertiesIRI(a),
+                        a -> a));
+
+        return specFactory.createMapping(mappingMetadata, propertyDefinitionMap, classDefinitionMap, executorRegistry);
 
     }
 

@@ -4,11 +4,11 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -93,8 +93,8 @@ public class DatatypeInferenceTest {
     }
 
     private void checkDatatype(Mapping mapping, IRI expectedType) {
-        Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
-                .map(mapping::getDefinition)
+        Optional<Predicate> optionalDatatype = mapping.getRDFProperties().stream()
+                .map(mapping::getRDFPropertyDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .flatMap(query -> Optional.of(query.getRootNode())

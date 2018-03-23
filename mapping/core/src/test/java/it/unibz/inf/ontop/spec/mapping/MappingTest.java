@@ -4,21 +4,23 @@ package it.unibz.inf.ontop.spec.mapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
@@ -31,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 public class MappingTest {
 
@@ -144,7 +146,7 @@ public class MappingTest {
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
 
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata, mappingMap, EXECUTOR_REGISTRY);
+        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableMap.of(), ImmutableMap.of(), EXECUTOR_REGISTRY);
         Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /**
@@ -152,21 +154,24 @@ public class MappingTest {
          */
         System.out.println("After renaming:");
         Set<Variable> variableUnion = new HashSet<Variable>();
-        for (DistinctVariableOnlyDataAtom projectionAtom : projectionAtoms){
 
-            IntermediateQuery mappingAssertion = normalizedMapping.getDefinition(projectionAtom.getPredicate())
-                    .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
-
-            System.out.println(mappingAssertion);
-            ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-            if(Stream.of(mappingAssertionVariables)
-                    .anyMatch(variableUnion::contains)){
-                fail();
-                break;
-            }
-            variableUnion.addAll(mappingAssertionVariables);
-            System.out.println("All variables thus far: "+variableUnion+"\n");
-        }
+        //FIXME get definition from  properties and class map
+//        for (DistinctVariableOnlyDataAtom projectionAtom : projectionAtoms){
+//
+//            IntermediateQuery mappingAssertion = normalizedMapping.getDefinition(projectionAtom.getPredicate())
+//                    .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+//
+//            System.out.println(mappingAssertion);
+//            ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
+//            if(Stream.of(mappingAssertionVariables)
+//                    .anyMatch(variableUnion::contains)){
+//                fail();
+//                break;
+//            }
+//            variableUnion.addAll(mappingAssertionVariables);
+//            System.out.println("All variables thus far: "+variableUnion+"\n");
+//        }
+        assertTrue(false);
     }
 
     @Test
@@ -196,8 +201,9 @@ public class MappingTest {
                 .collect(ImmutableCollectors.toMap(
                         q -> q.getProjectionAtom().getPredicate(),
                         q -> q));
-
-        MAPPING_FACTORY.createMapping(mappingMetadata, mappingMap, EXECUTOR_REGISTRY);
+        //FIXME use properties and class map
+        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableMap.of(), ImmutableMap.of(), EXECUTOR_REGISTRY);
+        assertTrue(false);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

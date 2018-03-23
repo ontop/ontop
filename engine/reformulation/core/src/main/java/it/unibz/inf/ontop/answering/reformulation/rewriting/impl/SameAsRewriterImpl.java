@@ -2,14 +2,19 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +25,8 @@ import java.util.Set;
  * Extracted by Roman Kontchakov on 30/06/2016.
  *
  * Only applies to unary and binary atoms (no support yet for atoms of the form triple(s, p, o))
+ *
+ * //TODO: refactor to work with triple (s,p,o)
  */
 public class SameAsRewriterImpl implements SameAsRewriter{
 
@@ -30,6 +37,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
+    private final RDF rdfFactory = new SimpleRDF();
 
     @AssistedInject
     private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor,
@@ -63,7 +71,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName, MappingSameAsPredicateExtractor.Result targetPredicates) {
 
         //case of class and data properties need as join only on the left
-        if (targetPredicates.isSubjectOnlySameAsRewritingTarget(atom.getFunctionSymbol()) ){
+        if (targetPredicates.isSubjectOnlySameAsRewritingTarget(rdfFactory.createIRI(atom.getFunctionSymbol().getName())) ){
             Function rightAtomUnion = createJoinWithSameAsOnLeft(atom, pr, newHeadName + "1");
             //create union between the first statement and join
             //between hasProperty(x,y) and owl:sameAs(x, anon-x) hasProperty (anon-x, y)
@@ -71,7 +79,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         }
 
         //case of object properties need as join only on the left and on the right
-        if (targetPredicates.isTwoArgumentsSameAsRewritingTarget(atom.getFunctionSymbol())){
+        if (targetPredicates.isTwoArgumentsSameAsRewritingTarget(rdfFactory.createIRI(atom.getFunctionSymbol().getName()))){
             //create union between the first join on the left and join on the right
             Function union2 = createUnionObject(atom, pr, newHeadName + "1");
             //create union between the first statement  and the union

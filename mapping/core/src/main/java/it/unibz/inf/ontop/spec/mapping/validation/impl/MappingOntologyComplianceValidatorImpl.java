@@ -10,7 +10,10 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -20,9 +23,11 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,40 +82,26 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
 
-        String predicateIRI = extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
+        IRI predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
 
         Optional<RDFTermType> tripleObjectType;
+
+
         /*
          * Class property
          */
-        if(predicateIRI.equals(RDF.TYPE.getIRIString())){
-            predicateIRI = extractPredicateTerm(mappingAssertion, projectedVariables.get(2));
+        if(predicateIRI.equals(RDF.TYPE)){
+            predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(2));
             tripleObjectType= Optional.empty();
         }
         else{
             tripleObjectType = extractTripleObjectType(mappingAssertion);
         }
 
-        checkTripleObject(predicateIRI, tripleObjectType, provenance, ontology, datatypeMap);
+        checkTripleObject(predicateIRI.getIRIString(), tripleObjectType, provenance, ontology, datatypeMap);
     }
 
-    private String extractPredicateTerm(IntermediateQuery mappingAssertion, Variable predicateVariable)  {
 
-        ImmutableTerm predicateTerm = Optional.of(mappingAssertion.getRootNode())
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map((n) -> (ConstructionNode) n)
-                    .map(ConstructionNode::getSubstitution)
-                    .flatMap(s -> Optional.ofNullable(s.get(predicateVariable)))
-                    .filter(s -> s instanceof ImmutableFunctionalTerm)
-                    .map(s -> ((ImmutableFunctionalTerm)s).getTerm(0))
-                    .orElseThrow(() -> new TriplePredicateTypeException( mappingAssertion , predicateVariable , "The variable is not defined in the root node (expected for a mapping assertion)"));
-
-
-        if (predicateTerm instanceof ValueConstant) {
-            return ((ValueConstant) predicateTerm).getValue();
-        }
-        else throw new TriplePredicateTypeException(mappingAssertion , "Predicate is not defined as a constant (expected for a mapping assertion)");
-    }
 
     /**
      * For a mapping assertion using an RDF property (not rdf:type) the building expression of the triple object
@@ -166,18 +157,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     }
 
-
-    private RDFDatatype extractLangTermType(ImmutableFunctionalTerm constructionFunctionalTerm) {
-        ImmutableList<? extends ImmutableTerm> arguments = constructionFunctionalTerm.getArguments();
-        ImmutableTerm langTerm = arguments.get(1);
-
-        if (!(langTerm instanceof Constant)) {
-            // TODO: throw a proper exception
-            throw new IllegalStateException("A langString must have a constant language tag: "
-                    + constructionFunctionalTerm);
-        }
-        return typeFactory.getLangTermType(((Constant) langTerm).getValue());
-    }
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -405,19 +384,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private static class TriplePredicateTypeException extends OntopInternalBugException {
-        TriplePredicateTypeException(IntermediateQuery mappingAssertion, Variable triplePredicateVariable,
-                                           String reason) {
-            super("Internal bug: cannot retrieve  " + triplePredicateVariable + " in: \n" + mappingAssertion
-                    + "\n Reason: " + reason);
-        }
 
-        TriplePredicateTypeException(IntermediateQuery mappingAssertion, String reason) {
-            super("Internal bug: cannot retrieve the predicate IRI in: \n" + mappingAssertion
-                    + "\n Reason: " + reason);
-        }
-
-    }
 
     private static class UndeterminedTripleObjectType extends OntopInternalBugException {
         UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {

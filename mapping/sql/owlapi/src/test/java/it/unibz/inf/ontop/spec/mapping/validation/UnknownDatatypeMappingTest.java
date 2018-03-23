@@ -89,8 +89,8 @@ public class UnknownDatatypeMappingTest {
     }
 
     private void checkDatatype(Mapping mapping, IRI expectedType) {
-        Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
-                .map(mapping::getDefinition)
+        Optional<Predicate> optionalDatatype = mapping.getRDFProperties().stream()
+                .map(mapping::getRDFPropertyDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .flatMap(query -> Optional.of(query.getRootNode())

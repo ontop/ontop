@@ -16,13 +16,17 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -59,11 +63,13 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, DBMetadata dbMetadata,
                                        ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata) {
 
-        ImmutableMultimap<Predicate, CQIE> ruleIndex = mappingRules.stream()
+
+        ImmutableMultimap<Term, CQIE> ruleIndex = mappingRules.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        r -> r.getHead().getFunctionSymbol(),
+                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))? r.getHead().getTerm(2) : r.getHead().getTerm(1),
                         r -> r
                 ));
+
 
         ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
                 .flatMap(r -> r.getBody().stream())
@@ -71,11 +77,10 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = ruleIndex.keySet().stream()
+        ImmutableList<IntermediateQuery> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
                         dbMetadata,
-                        predicate,
-                        ruleIndex,
+                        ruleIndex.get(predicate),
                         extensionalPredicates,
                         Optional.empty(),
                         executorRegistry
@@ -83,13 +88,28 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(mappingIQNormalizer::normalize)
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableMap<IRI, IntermediateQuery> mappingClassMap = intermediateQueryList.stream()
+                .filter (assertion ->  {
+                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
+                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
+                    return (predicateIRI.equals(RDF.TYPE));})
                 .collect(ImmutableCollectors.toMap(
-                        q -> q.getProjectionAtom().getPredicate(),
-                        q -> q
-                ));
+                        a -> MappingTools.extractClassIRI(a),
+                        a -> a));
+
+        ImmutableMap<IRI, IntermediateQuery> mappingPropertiesMap = intermediateQueryList.stream()
+                .filter (assertion ->  {
+                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
+                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
+                    return (!predicateIRI.equals(RDF.TYPE));})
+                .collect(ImmutableCollectors.toMap(
+                        a -> MappingTools.extractPropertiesIRI(a),
+                        a -> a));
 
 
-        return specificationFactory.createMapping(mappingMetadata, mappingMap, executorRegistry);
+        return specificationFactory.createMapping(mappingMetadata, mappingPropertiesMap, mappingClassMap, executorRegistry);
     }
 
     @Override

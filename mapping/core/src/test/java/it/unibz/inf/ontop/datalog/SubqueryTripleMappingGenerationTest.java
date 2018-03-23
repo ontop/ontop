@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.datalog;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -11,20 +13,16 @@ import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
@@ -92,25 +90,28 @@ public class SubqueryTripleMappingGenerationTest {
         );
         ClassifiedTBox tBoxReasoner = OntologyBuilderImpl.builder().build().tbox();
         Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, METADATA, tBoxReasoner);
-        String debug = saturatedMapping.getPredicates().stream()
-                .map(p -> saturatedMapping.getDefinition(p).get().toString())
+
+        String debug = saturatedMapping.getRDFProperties().stream()
+                .map(p -> saturatedMapping.getRDFPropertyDefinition(p).get().toString())
                 .collect(Collectors.joining(""));
-        log.debug("Saturated mapping:\n" + debug);
+        log.debug("Saturated property mapping:\n" + debug);
 
-        IntermediateQuery iq = saturatedMapping.getDefinition(ATOM_FACTORY.getTripleAtomPredicate()).get();
-        Optional<Constant> predConstant = iq.getNodesInTopDownOrder().stream()
-            .filter(n -> n instanceof ConstructionNode)
-            .flatMap(n -> ((ConstructionNode)n).getSubstitution().getImmutableMap().values().stream())
-            .filter(v -> v instanceof Function)
-            .map(v -> (Function)v)
-            .filter(v -> v.getFunctionSymbol().getName().equals("URI1") && v.getArity() == 1)
-            .map(v -> (Constant)v.getTerm(0))
-            .filter(c -> c.getValue().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
-            .findFirst();
+        //FIXME check saturation test
+        assertTrue(false);
+//        IntermediateQuery iq = saturatedMapping.getDefinition(ATOM_FACTORY.getTripleAtomPredicate()).get();
+//        Optional<Constant> predConstant = iq.getNodesInTopDownOrder().stream()
+//            .filter(n -> n instanceof ConstructionNode)
+//            .flatMap(n -> ((ConstructionNode)n).getSubstitution().getImmutableMap().values().stream())
+//            .filter(v -> v instanceof Function)
+//            .map(v -> (Function)v)
+//            .filter(v -> v.getFunctionSymbol().getName().equals("URI1") && v.getArity() == 1)
+//            .map(v -> (Constant)v.getTerm(0))
+//            .filter(c -> c.getValue().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
+//            .findFirst();
 
-        if(predConstant.isPresent()){
-            System.out.println("Test failure: predicate "+ predConstant.get() +" used to generate triple predicates");
-            assertTrue(false);
-        }
+//        if(predConstant.isPresent()){
+//            System.out.println("Test failure: predicate "+ predConstant.get() +" used to generate triple predicates");
+//            assertTrue(false);
+//        }
     }
 }

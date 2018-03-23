@@ -4,24 +4,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.datalog.DatalogDependencyGraphGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -146,7 +141,16 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                                                  Optional<ImmutableQueryModifiers> optionalModifiers,
                                                                  ExecutorRegistry executorRegistry)
             throws InvalidDatalogProgramException {
+
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
+
+        return convertDatalogDefinitions(dbMetadata,atomDefinitions,tablePredicates,optionalModifiers,executorRegistry);
+
+    }
+
+    @Override
+    public Optional<IntermediateQuery> convertDatalogDefinitions(DBMetadata dbMetadata, Collection<CQIE> atomDefinitions, Collection<Predicate> tablePredicates, Optional<ImmutableQueryModifiers> optionalModifiers, ExecutorRegistry executorRegistry) throws InvalidDatalogProgramException {
+
         switch(atomDefinitions.size()) {
             case 0:
                 return Optional.empty();
