@@ -974,6 +974,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             final RelNode node = relBuilder.build();
             final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
             String sqlStr =  sqlNode.toSqlString(dialect).getSql();
+            //sqlStr = sqlStr.replaceAll("FROM\t\".*\"", "FROM\t.*");
             String with = appendWithClauses();
             sqlStr = with + "\n\n" + sqlStr;
             return  sqlStr;
@@ -985,7 +986,9 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 stringBuilder.append("WITH ");
                 for (MaterializationKey key : materializationKeyMap.values()) {
                     CalciteSchema.TableEntry tableEntry = mService.checkValid(key);
+                    stringBuilder.append("\"");
                     stringBuilder.append(tableEntry.name);
+                    stringBuilder.append("\"");
                     stringBuilder.append(" AS (\n");
                     String sql = tableEntry.sqls.get(0);
                     stringBuilder.append(sql);
@@ -1275,11 +1278,11 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         String strKeys = getStrkeys();
 
-        String sql1 = String.format("SELECT 1 AS \"Start_ts\", 0 AS \"End_ts\", \"b\" AS \"ts\", \"bInc\", \"eInc\", %s\n" +
-                " FROM %s \n" +
+        String sql1 = String.format("SELECT 1 AS \"Start_ts\", 0 AS \"End_ts\", \"b\" AS \"ts\", \"bInc\", \"eInc\", %s\t\n" +
+                "FROM \"%s\" \n" +
                 "UNION ALL\n" +
-                "SELECT 0 AS \"Start_ts\", 1 AS \"End_ts\", \"e\" AS \"ts\", \"bInc\", \"eInc\", %s\n" +
-                " FROM %s ", strKeys, materializationName, strKeys, materializationName);
+                "SELECT 0 AS \"Start_ts\", 1 AS \"End_ts\", \"e\" AS \"ts\", \"bInc\", \"eInc\", %s\t\n" +
+                "FROM \"%s\" ", strKeys, materializationName, strKeys, materializationName);
 
 
         String clauseName1 = createClause(sql1);
@@ -1290,12 +1293,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 "SUM(\"Start_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS \"Prv_Total_ts_1\",\n" +
                 "SUM(\"End_ts\") OVER (PARTITION BY %s ORDER BY \"ts\", \"End_ts\" ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS \"Prv_Total_ts_2\",\n" +
                 "\"ts\", \"bInc\", \"eInc\", %s \n" +
-                " FROM %s", strKeys, strKeys, strKeys, strKeys, strKeys, clauseName1);
+                " FROM \"%s\"", strKeys, strKeys, strKeys, strKeys, strKeys, clauseName1);
         String clauseName2 = createClause(sql2);
 
         String sql3 = String.format("SELECT (\"Crt_Total_ts_1\" - \"Crt_Total_ts_2\") AS \"Crt_Total_ts\", " +
                 "(\"Prv_Total_ts_1\" - \"Prv_Total_ts_2\") AS \"Prv_Total_ts\", \"ts\", \"bInc\", \"eInc\", %s \n" +
-                "FROM %s \n" +
+                "FROM \"%s\" \n" +
                 "WHERE \"Crt_Total_ts_1\" = \"Crt_Total_ts_2\" OR \"Prv_Total_ts_1\" = \"Prv_Total_ts_2\" " +
                 "OR \"Prv_Total_ts_1\" IS NULL OR \"Prv_Total_ts_2\" IS NULL", strKeys, clauseName2);
         String clauseName3 = createClause(sql3);
@@ -1303,7 +1306,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         String sql4 = String.format("SELECT %s, \"bInc\", \"prevTs\" AS \"b\", \"ts\" AS \"e\", \"eInc\" FROM (\n" +
                 "SELECT %s, \"bInc\", LAG(\"ts\",1) OVER (PARTITION BY %s ORDER BY \"ts\", \"Crt_Total_ts\") As \"prevTs\",\n" +
                 "\"ts\", \"eInc\", \"Crt_Total_ts\" \n" +
-                "FROM %s) F \n" +
+                "FROM \"%s\") F \n" +
                 "WHERE \"Crt_Total_ts\" = 0", strKeys, strKeys, strKeys, clauseName3);
         String clauseName4 = createClause(sql4);
         materializationStack.push(clauseName4);
