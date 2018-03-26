@@ -42,6 +42,16 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
+    public InnerJoinExpression createInnerJoinExpression(DatalogMTLExpression... expressions) {
+        return new InnerJoinExpressionImpl(expressions);
+    }
+
+    @Override
+    public InnerJoinExpression createInnerJoinExpression(List<DatalogMTLExpression> expressions) {
+        return new InnerJoinExpressionImpl(expressions);
+    }
+
+    @Override
     public BoxPlusExpression createBoxPlusExpression(TemporalRange range, DatalogMTLExpression expression) {
         return new BoxPlusExpressionImpl(range, expression);
     }

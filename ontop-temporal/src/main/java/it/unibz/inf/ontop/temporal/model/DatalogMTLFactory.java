@@ -20,6 +20,10 @@ public interface DatalogMTLFactory {
 
     TemporalJoinExpression createTemporalJoinExpression(List<DatalogMTLExpression> expressions);
 
+    InnerJoinExpression createInnerJoinExpression(DatalogMTLExpression... expressions);
+
+    InnerJoinExpression createInnerJoinExpression(List<DatalogMTLExpression> expressions);
+
     BoxPlusExpression createBoxPlusExpression(TemporalRange range, DatalogMTLExpression expression);
 
     BoxMinusExpression createBoxMinusExpression(TemporalRange range, DatalogMTLExpression expression);

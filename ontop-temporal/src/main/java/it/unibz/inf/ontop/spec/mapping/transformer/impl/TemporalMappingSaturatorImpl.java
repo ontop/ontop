@@ -25,6 +25,8 @@ import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,6 +46,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final TemporalSpecificationFactory specificationFactory;
     private final TermFactory termFactory;
     private final RedundantTemporalCoalesceEliminator tcEliminator;
+
+    private static final Logger log = LoggerFactory.getLogger(TemporalMappingSaturatorImpl.class);
 
     @Inject
     private TemporalMappingSaturatorImpl(DatalogMTLToIntermediateQueryConverter dMTLConverter,
@@ -92,14 +96,15 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                 if (areAllMappingsExist(mergedMap, atomicExpressionsList)) {
                     try {
                         IntermediateQuery iq = ruleUnfolder.unfold(intermediateQuery, ImmutableMap.copyOf(mergedMap));
-                        System.out.println(iq.toString());
+                        log.debug("Unfolded temporal rule : \n" + iq.toString());
                         iq = bindingLiftOptimizer.optimize(iq);
-                        System.out.println(iq.toString());
+                        log.debug("Binding lift optimizer (temporal rule) : \n" + iq.toString());
                         iq = new GroundTermRemovalFromDataNodeReshaper().optimize(iq);
                         iq = pullOutVariableOptimizer.optimize(iq);
-                        //iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                        log.debug("Pull out variable optimizer (temporal rule) : \n" + iq.toString());
+                        iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                        log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
-                        System.out.println(iq.toString());
                     } catch (EmptyQueryException e) {
                         e.printStackTrace();
                     }

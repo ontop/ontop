@@ -117,112 +117,6 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
         return specificationFactory.createMapping(mapping.getMetadata(), ImmutableMap.copyOf(mappingMap), mapping.getExecutorRegistry());
     }
 
-//    @Override
-//    public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, DatalogMTLProgram datalogMTLProgram) {
-//        Queue<DatalogMTLRule> queue = new LinkedList<>();
-//        queue.addAll(datalogMTLProgram.getRules());
-//        IQ iq;
-//        Map<AtomPredicate, IntermediateQuery> mappingMap = new HashMap<>();
-//        mapping.getPredicates().forEach(atomPredicate -> mappingMap.put(atomPredicate, mapping.getDefinition(atomPredicate).get()));
-//
-//        while(!queue.isEmpty()){
-//            DatalogMTLRule rule = queue.poll();
-//            if ((rule.getBody() instanceof StaticExpression) ||
-//                    ((rule.getBody() instanceof FilterExpression) &&
-//                            (((FilterExpression) rule.getBody()).getExpression() instanceof StaticExpression))) {
-//                ImmutableList<StaticAtomicExpression> staticAtomicExpressionsList = getAtomicExpressions(rule);
-//                if (areAllMappingsExist(mapping, staticAtomicExpressionsList)) {
-//                    iq = saturateRule(rule, mapping, dbMetadata);
-//                    try {
-//                        IntermediateQuery intermediateQuery = iqConverter.convert(iq, dbMetadata, mapping.getExecutorRegistry());
-//                        mappingMap.put(iq.getProjectionAtom().getPredicate(), intermediateQuery);
-//                        System.out.println(iq.toString());
-//                    } catch (EmptyQueryException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                } else {
-//                    if (!queue.isEmpty()){
-//                        //TODO:Override compareTo for rule.getHead()
-//                        if (queue.stream().anyMatch(qe -> qe.getHead().equals(rule.getHead())))
-//                            queue.add(rule);
-//                    }
-//                }
-//            }
-//        }
-//        return specificationFactory.createMapping(mapping.getMetadata(), ImmutableMap.copyOf(mappingMap), mapping.getExecutorRegistry());
-//    }
-
-//    private IQ saturateRule(DatalogMTLRule rule, Mapping mapping, DBMetadata dbMetadata){
-//
-//        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
-//        Iterable<DatalogMTLExpression> it = treeTraverser.preOrderTraversal(rule.getBody());
-//        Stack<DatalogMTLExpression> teStack = new Stack<>();
-//        it.iterator().forEachRemaining(dMTLexp -> teStack.push(dMTLexp));
-//        Stack<IQTree> iqTreeStack = new Stack<>();
-//
-//        if(!teStack.empty()) {
-//            ImmutableMap<Variable, Term> varMap = retrieveMapForVariablesOccuringInTheHead(rule, mapping);
-//            AtomicExpression atomicExpression;
-//
-//            if (rule.getHead() instanceof StaticAtomicExpression) {
-//                atomicExpression = new StaticAtomicExpressionImpl(rule.getHead().getPredicate(), varMap.values().asList());
-//
-//
-//                TargetAtom targetAtom = datalogConversionTools
-//                        .convertFromDatalogDataAtom(termFactory.getFunction(atomicExpression.getPredicate(),  atomicExpression.getTerms()));
-//                DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
-//                ConstructionNode constructionNode = IQFactory.createConstructionNode(projectionAtom.getVariables(),
-//                        targetAtom.getSubstitution(), Optional.empty());
-//
-//                IQTree newTree;
-//                while (!teStack.isEmpty()) {
-//                    DatalogMTLExpression currentExpression = teStack.pop();
-//
-//                    if (currentExpression instanceof StaticExpression || currentExpression instanceof ComparisonExpression) {
-//                        //TODO: Coalesce Node is missing, implement it.
-//                        if (currentExpression instanceof AtomicExpression) {
-//
-//                            IntermediateQuery intermediateQuery;
-//                            if (currentExpression instanceof ComparisonExpression) {
-//                                continue;
-//                            } else { //StaticAtomicExpression
-//                                intermediateQuery = mapping.getDefinition(((StaticAtomicExpression) currentExpression).getPredicate()).get();
-//                                newTree = ((UnaryIQTree) iqConverter.convert(intermediateQuery).getTree());
-//                            }
-//                        } else if (currentExpression instanceof StaticJoinExpression) {
-//                            List<IQTree> iqtList = new ArrayList<>();
-//                            for (int i = 0; i < ((StaticJoinExpression) currentExpression).getArity(); i++) {
-//                                IQTree iqTree = iqTreeStack.pop();
-//                                //if (!iqtList.contains(iqTree))
-//                                    iqtList.add(iqTree);
-//                            }
-//                            InnerJoinNode innerJoinNode = IQFactory.createInnerJoinNode();
-//                            newTree = IQFactory.createNaryIQTree(innerJoinNode, ImmutableList.copyOf(iqtList));
-//
-//                        } else { //FilterExpression)
-//                            FilterNode filterNode = IQFactory
-//                                    .createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression).getComparisonExpression()));
-//                            IQTree iqTree = iqTreeStack.pop();
-//                            newTree = IQFactory.createUnaryIQTree(filterNode, iqTree);
-//                        }
-//
-//                        if (newTree != null)
-//                            iqTreeStack.push(newTree);
-//                    } else {
-//                        iqTreeStack.empty();
-//                        break;
-//                    }
-//                }
-//                if (!iqTreeStack.isEmpty())
-//                    return IQFactory.createIQ(projectionAtom, IQFactory.createUnaryIQTree(constructionNode, iqTreeStack.pop()));
-//            }
-//        }else{
-//            //TODO:????
-//        }
-//        return null;
-//    }
-
     private boolean isContainedInTheTree(IQTree newTree, IQTree iqTree){
 
         boolean flag = false;
@@ -232,7 +126,7 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
             }
         }else return true;
 
-        return false || flag;
+        return flag;
     }
 
     private ImmutableList<StaticAtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
@@ -288,7 +182,7 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
                                                 }
                                             }
                                             else {
-                                                varMap.put((Variable) t, (NonGroundFunctionalTerm) subTerm);
+                                                varMap.put((Variable) t, subTerm);
                                             }
                                         }
                                         varIdxInSub++;

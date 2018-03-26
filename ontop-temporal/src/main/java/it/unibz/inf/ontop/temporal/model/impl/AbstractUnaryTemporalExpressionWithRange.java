@@ -1,10 +1,14 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
 import it.unibz.inf.ontop.temporal.model.UnaryTemporalExpression;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractUnaryTemporalExpressionWithRange extends AbstractTemporalExpressionWithRange implements UnaryTemporalExpression  {
 
@@ -23,5 +27,10 @@ public abstract class AbstractUnaryTemporalExpressionWithRange extends AbstractT
     @Override
     public DatalogMTLExpression getOperand() {
         return operand;
+    }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms(){
+        return ImmutableList.copyOf(operand.getAllVariableOrGroundTerms());
     }
 }

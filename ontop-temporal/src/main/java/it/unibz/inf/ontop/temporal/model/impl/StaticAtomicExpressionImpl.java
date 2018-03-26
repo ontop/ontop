@@ -72,4 +72,9 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
     public Iterable<DatalogMTLExpression> getChildNodes() {
         return Collections.<DatalogMTLExpression>emptyList();
     }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms() {
+        return ImmutableList.copyOf(terms);
+    }
 }

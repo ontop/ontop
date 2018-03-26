@@ -55,6 +55,11 @@ public class TemporalAtomicExpressionImpl implements TemporalAtomicExpression {
     }
 
     @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms() {
+        return ImmutableList.copyOf(terms);
+    }
+
+    @Override
     public AtomPredicate getPredicate() {
         return predicate;
     }

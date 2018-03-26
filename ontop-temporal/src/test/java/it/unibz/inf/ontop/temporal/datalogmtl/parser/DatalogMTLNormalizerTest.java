@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLNormalizerImpl;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
@@ -27,6 +28,7 @@ import static it.unibz.inf.ontop.spec.impl.TestingTools.TERM_FACTORY;
 public class DatalogMTLNormalizerTest {
     private final static Logger log = LoggerFactory.getLogger(DatalogMTLParserTest.class);
     private final SpecificationFactory specificationFactory;
+    private final AtomFactory atomFactory;
 
     public DatalogMTLNormalizerTest() {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -34,6 +36,7 @@ public class DatalogMTLNormalizerTest {
                 .build();
         Injector injector = defaultConfiguration.getInjector();
         this.specificationFactory = injector.getInstance(SpecificationFactory.class);
+        this.atomFactory = injector.getInstance(AtomFactory.class);
     }
 
     @Test
@@ -47,7 +50,7 @@ public class DatalogMTLNormalizerTest {
         DatalogMTLSyntaxParser parser = new DatalogMTLSyntaxParserImpl(ATOM_FACTORY,
                 TERM_FACTORY);
 
-        DatalogMTLNormalizerImpl normalizer = new DatalogMTLNormalizerImpl(datalogMTLFactory);
+        DatalogMTLNormalizerImpl normalizer = new DatalogMTLNormalizerImpl(datalogMTLFactory, atomFactory);
         DatalogMTLProgram program;
         try {
             program = parser.parse(input);

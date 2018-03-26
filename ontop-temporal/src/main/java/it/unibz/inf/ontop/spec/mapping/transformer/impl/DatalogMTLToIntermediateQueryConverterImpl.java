@@ -162,6 +162,12 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
             ((StaticJoinExpression)currentExpression).getChildNodes().forEach(exp ->{
                 getBuilder(exp, innerJoinNode, TIQBuilder);
             });
+        }else if (currentExpression instanceof InnerJoinExpression){
+            InnerJoinNode innerJoinNode = TIQFactory.createInnerJoinNode();
+            TIQBuilder.addChild(parentNode,innerJoinNode);
+            ((InnerJoinExpression)currentExpression).getChildNodes().forEach(exp ->{
+                getBuilder(exp, innerJoinNode, TIQBuilder);
+            });
         }else if (currentExpression instanceof FilterExpression){
             FilterNode filterNode = TIQFactory
                     .createFilterNode(comparisonExpToFilterCondition(((FilterExpression) currentExpression)

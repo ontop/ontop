@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.ComparisonExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
@@ -32,6 +34,11 @@ public class FilterExpressionImpl implements FilterExpression {
     @Override
     public Iterable<DatalogMTLExpression> getChildNodes() {
         return Arrays.asList(datalogMTLExpression, comparisonExpression) ;
+    }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms() {
+        return datalogMTLExpression.getAllVariableOrGroundTerms();
     }
 
     @Override

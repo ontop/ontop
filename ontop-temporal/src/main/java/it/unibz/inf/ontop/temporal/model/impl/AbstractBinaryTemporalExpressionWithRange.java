@@ -1,10 +1,15 @@
 package it.unibz.inf.ontop.temporal.model.impl;
 
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.BinaryTemporalExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalRange;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractBinaryTemporalExpressionWithRange extends AbstractTemporalExpressionWithRange implements BinaryTemporalExpression {
 
@@ -29,5 +34,13 @@ public abstract class AbstractBinaryTemporalExpressionWithRange extends Abstract
     @Override
     public DatalogMTLExpression getRightOperand() {
         return rightOperand;
+    }
+
+    @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms(){
+        List<VariableOrGroundTerm> newList = new ArrayList<>();
+        newList.addAll(leftOperand.getAllVariableOrGroundTerms());
+        newList.addAll(rightOperand.getAllVariableOrGroundTerms());
+        return ImmutableList.copyOf(newList);
     }
 }

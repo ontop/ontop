@@ -61,6 +61,11 @@ public class ComparisonExpressionImpl implements ComparisonExpression{
     }
 
     @Override
+    public ImmutableList<VariableOrGroundTerm> getAllVariableOrGroundTerms() {
+        return ImmutableList.of(leftTerm, rightTerm);
+    }
+
+    @Override
     public VariableOrGroundTerm getLeftOperand() {
         return this.leftTerm;
     }
