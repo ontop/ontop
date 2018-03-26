@@ -4,13 +4,11 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 public class LinearInclusionDependencyTools {
 
@@ -26,7 +24,7 @@ public class LinearInclusionDependencyTools {
         this.datalogFactory = datalogFactory;
     }
 
-    public LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
+    public LinearInclusionDependencies  getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
         LinearInclusionDependencies dependencies = new LinearInclusionDependencies(datalogFactory);
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectPropertiesDAG()) {
@@ -101,41 +99,44 @@ public class LinearInclusionDependencyTools {
         final Variable varX = termFactory.getVariable(variableXname);
         final Variable varY = termFactory.getVariable(variableYname);
 
-        AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
-
+        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
         if (property.isInverse())
-            return termFactory.getFunction(propertyPredicate, varY, varX);
+            return atomFactory.getTripleAtom(varY, propertyFunction, varX);
         else
-            return termFactory.getFunction(propertyPredicate, varX, varY);
+            return atomFactory.getTripleAtom(varX, propertyFunction, varY);
     }
 
     private Function translate(DataPropertyExpression property) {
         final Variable varX = termFactory.getVariable(variableXname);
         final Variable varY = termFactory.getVariable(variableYname);
 
-        return termFactory.getFunction(atomFactory.getDataPropertyPredicate(property.getIRI()), varX, varY);
+        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+        return atomFactory.getTripleAtom(varX, propertyFunction, varY);
     }
 
     private Function translate(ClassExpression description, String existentialVariableName) {
         final Variable varX = termFactory.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
-            return termFactory.getFunction(atomFactory.getClassPredicate(klass.getIRI()), varX);
+            Function classFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(klass.getIRI().getIRIString()));
+            Function rdfTypeFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.getIRIString()));
+            return atomFactory.getTripleAtom(varX, rdfTypeFunction, classFunction);
         }
         else if (description instanceof ObjectSomeValuesFrom) {
             final Variable varY = termFactory.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
-            AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(property.getIRI());
+            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
             if (property.isInverse())
-                return termFactory.getFunction(propertyPredicate, varY, varX);
+                return atomFactory.getTripleAtom(varY, propertyFunction, varX);
             else
-                return termFactory.getFunction(propertyPredicate, varX, varY);
+                return atomFactory.getTripleAtom(varX, propertyFunction, varY);
         }
         else {
             assert (description instanceof DataSomeValuesFrom);
             final Variable varY = termFactory.getVariable(existentialVariableName);
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            return termFactory.getFunction(atomFactory.getDataPropertyPredicate(property.getIRI()), varX, varY);
+            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+            return atomFactory.getTripleAtom(varX, propertyFunction, varY);
         }
     }
 }
