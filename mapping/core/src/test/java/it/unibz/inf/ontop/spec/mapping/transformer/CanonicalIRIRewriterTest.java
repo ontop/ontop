@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,30 +103,29 @@ public class CanonicalIRIRewriterTest {
     }
 
     private Function getCanonIRIFunction(Term term1, Term term2) {
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getOBDACanonicalIRI(), list);
+        Function canonIRIProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(ATOM_FACTORY.getOBDACanonicalIRI().getName()));
+        return ATOM_FACTORY.getTripleAtom(term1, canonIRIProperty, term2);
+
     }
 
     private Function getClassPropertyFunction(String name, Term term1) {
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate(name), term1);
+
+        Function classProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        Function rdfType =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF.TYPE.getIRIString()));
+        return ATOM_FACTORY.getTripleAtom(term1, rdfType, classProperty);
 
     }
     private Function getDataPropertyFunction(String name, Term term1, Term term2) {
 
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getDataPropertyPredicate(name, TYPE_FACTORY.getAbstractRDFSLiteral()), list);
+        Function dataProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        return ATOM_FACTORY.getTripleAtom(term1, dataProperty, term2);
 
     }
 
     private Function getObjectPropertyFunction(String name, Term term1, Term term2) {
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate(name), list);
+
+        Function objectProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        return ATOM_FACTORY.getTripleAtom(term1, objectProperty, term2);
 
     }
 
@@ -478,7 +478,7 @@ public class CanonicalIRIRewriterTest {
 
 
     @Test
-    public void testCanonicalIRIObjectPropertyDoubleURI() throws Exception {
+    public void testCanonicalIRIObjectPropertyDoubleURI() {
 
         addClassPropertiesMappings();
         addDataPropertiesMappings();
