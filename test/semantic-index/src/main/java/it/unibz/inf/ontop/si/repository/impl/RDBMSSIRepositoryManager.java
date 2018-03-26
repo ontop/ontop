@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -777,7 +776,7 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(atomFactory.getObjectPropertyPredicate(ope.getIRI()),
+				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ope.getIRI().getIRIString())),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
@@ -817,7 +816,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
-						atomFactory.getDataPropertyPredicate(dpe.getIRI()),
+						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(dpe.getIRI().getIRIString())) ,
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
@@ -851,7 +850,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
-						atomFactory.getClassPredicate(classNode.getIRI()), view.getId().getType1());
+						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(classNode.getIRI().getIRIString())), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
@@ -892,7 +891,7 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type) {
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(ImmutableFunctionalTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
@@ -903,15 +902,14 @@ public class RDBMSSIRepositoryManager {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString())); ;
-		ImmutableFunctionalTerm classTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(predicate.getName()));
+		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString()));
 
 		ImmutableFunctionalTerm body = atomFactory.getImmutableTripleAtom(subjectTerm,predTerm ,classTerm);
 		return ImmutableList.of(body);
 	}
 	
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type1,
+	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(ImmutableFunctionalTerm iriTerm, ObjectRDFType type1,
 																		RDFTermType type2) {
 
 		Variable X = termFactory.getVariable("X");
@@ -924,7 +922,6 @@ public class RDBMSSIRepositoryManager {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableFunctionalTerm predicateTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(predicate.getName()));
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
@@ -942,7 +939,7 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		ImmutableFunctionalTerm body = atomFactory.getImmutableTripleAtom(subjectTerm,predicateTerm,objectTerm);
+		ImmutableFunctionalTerm body = atomFactory.getImmutableTripleAtom(subjectTerm,iriTerm,objectTerm);
 
 		return ImmutableList.of(body);
 	}
