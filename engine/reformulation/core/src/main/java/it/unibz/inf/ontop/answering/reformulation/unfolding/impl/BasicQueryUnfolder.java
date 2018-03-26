@@ -37,7 +37,7 @@ public class BasicQueryUnfolder implements QueryUnfolder {
 
         while (optionalCurrentIntensionalNode.isPresent()) {
 
-            //FIXME :check if it is correct. It shoudld get the iri from the intensional node in triple form in second position (for a property) or in  third position  (for a class)
+            //FIXME :check if it is correct. It should get the iri from the intensional node in triple form in second position (for a property) or in  third position  (for a class)
             IntensionalDataNode intensionalNode = optionalCurrentIntensionalNode.get();
             ImmutableList<? extends VariableOrGroundTerm> projectedVariables = intensionalNode.getProjectionAtom().getArguments();
             VariableOrGroundTerm variableOrGroundTerm = projectedVariables.get(1);

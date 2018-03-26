@@ -33,8 +33,8 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -76,12 +76,13 @@ public class OntopMaterializerTest {
 	private final RDF RDFFactory = new SimpleRDF();
 	private final RDFDatatype xsdStringDt;
 
-	private final Predicate person;
-	private final Predicate fn;
-	private final Predicate ln;
-	private final Predicate age;
-	private final Predicate hasschool;
-	private final Predicate school;
+	private final ImmutableTerm type;
+	private final ImmutableTerm person;
+	private final ImmutableTerm fn;
+	private final ImmutableTerm ln;
+	private final ImmutableTerm age;
+	private final ImmutableTerm hasschool;
+	private final ImmutableTerm school;
 
 	private final IRI personIRI;
 	private final IRI fnIRI;
@@ -94,7 +95,7 @@ public class OntopMaterializerTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-
+	AtomFactory atomFactory;
 	public OntopMaterializerTest() {
 
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
@@ -104,7 +105,8 @@ public class OntopMaterializerTest {
 		Injector injector = defaultConfiguration.getInjector();
 		termFactory = injector.getInstance(TermFactory.class);
 		typeFactory = injector.getInstance(TypeFactory.class);
-		AtomFactory atomFactory = injector.getInstance(AtomFactory.class);
+		atomFactory = injector.getInstance(AtomFactory.class);
+
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
 		
 		personIRI = RDFFactory.createIRI(PREFIX + "Person");
@@ -116,12 +118,13 @@ public class OntopMaterializerTest {
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 
-		person = atomFactory.getClassPredicate(personIRI);
-		fn = atomFactory.getDataPropertyPredicate(fnIRI.getIRIString(), xsdStringDt);
-		ln = atomFactory.getDataPropertyPredicate(lnIRI.getIRIString(), xsdStringDt);
-		age = atomFactory.getDataPropertyPredicate(ageIRI.getIRIString(), xsdStringDt);
-		hasschool = atomFactory.getObjectPropertyPredicate(hasschoolIRI);
-		school = atomFactory.getClassPredicate(schoolIRI);
+		type = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+		person = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(personIRI.getIRIString()));
+		fn = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(fnIRI.getIRIString()));
+		ln = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(lnIRI.getIRIString()));
+		age =termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ageIRI.getIRIString()));
+		hasschool = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(hasschoolIRI.getIRIString()));
+		school = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(schoolIRI.getIRIString()));
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -133,7 +136,7 @@ public class OntopMaterializerTest {
 	}
 
 	@Test(expected = InvalidOntopConfigurationException.class)
-	public void testNoSource() throws Exception {
+	public void testNoSource()  {
 		OntopStandaloneSQLConfiguration.defaultBuilder().build();
 	}
 
@@ -223,15 +226,13 @@ public class OntopMaterializerTest {
 		RDFDatatype stringDatatype = xsdStringDt;
 
 		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(person, personTemplate));
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(fn, personTemplate,
-				termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(ln, personTemplate,
-				termFactory.getImmutableTypedTerm( termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(age, personTemplate,
-				termFactory.getImmutableTypedTerm( termFactory.getVariable("age"), stringDatatype)));
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(hasschool, personTemplate, schoolTemplate));
-		bodyBuilder.add(termFactory.getImmutableFunctionalTerm(school, schoolTemplate));
+
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, type, person));
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, hasschool, schoolTemplate));
+		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, school, schoolTemplate));
 
 		ImmutableList<ImmutableFunctionalTerm> body = bodyBuilder.build();
 
