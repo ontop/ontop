@@ -1176,16 +1176,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             query.getChildrenStream(boxPlusNode).forEach(n -> n.acceptVisitor(this));
             TemporalRange range = boxPlusNode.getRange();
             createBoxView(range, SqlStdOperatorTable.MINUS);
-
-//            TemporalRange range = boxPlusNode.getRange();
-//            TemporalRangeRelNode temporalRangeRelNode =
-//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeLiteral(range.isEndInclusive()));
-//
-//            RelNode operand = relBuilder.build();
-//            relBuilder.boxPlus(operand, temporalRangeRelNode);
         }
 
         @Override
@@ -1194,15 +1184,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             TemporalRange range = diamondMinusNode.getRange();
             createDiamondView(range, SqlStdOperatorTable.PLUS);
-
-//            TemporalRangeRelNode temporalRangeRelNode =
-//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeLiteral(range.isEndInclusive()));
-//
-//            RelNode operand = relBuilder.build();
-//            relBuilder.diamondMinus(operand, temporalRangeRelNode);
         }
 
         @Override
@@ -1211,15 +1192,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             TemporalRange range = diamondPlusNode.getRange();
             createDiamondView(range, SqlStdOperatorTable.MINUS);
-
-//            TemporalRangeRelNode temporalRangeRelNode =
-//                    relBuilder.temporalRange(rexBuilder.makeLiteral(range.isBeginInclusive()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getBegin().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeIntervalLiteral(new BigDecimal(range.getEnd().toMillis()), getSQLIQualifier()),
-//                            rexBuilder.makeLiteral(range.isEndInclusive()));
-//
-//            RelNode operand = relBuilder.build();
-//            relBuilder.diamondPlus(operand, temporalRangeRelNode);
         }
 
         @Override
