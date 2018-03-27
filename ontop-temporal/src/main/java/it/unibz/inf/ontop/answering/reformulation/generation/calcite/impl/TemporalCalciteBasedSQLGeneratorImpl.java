@@ -1005,6 +1005,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             for (QueryNode queryNode : query.getChildren(temporalJoinNode)) {
                 queryNode.acceptVisitor(this);
+                List<VariableOrGroundTerm> argumentsToProject = new ArrayList<>(lastProjectedArguments);
+
                 if (!first) {
                     relBuilder.temporalJoin();
                 }
@@ -1016,8 +1018,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             });
         }
 
-        private ImmutableList<String> getKeys() {
-            return lastProjectedArguments.stream()
+        private ImmutableList<String> getKeys(List<VariableOrGroundTerm> projectedArguments) {
+            return projectedArguments.stream()
                     .filter(t -> t instanceof Variable)
                     .map(t-> (Variable)t)
                     .filter(v -> !temporalAliases.contains(v.getName()))
@@ -1079,7 +1081,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             if (lastProjectedArgumentsContains("eInc"))
                 eInc = relBuilder.field("eInc");
 
-            List <RexNode> nodesToProject = getKeys().stream().map(relBuilder::field).collect(Collectors.toList());
+            List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
             nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
             relBuilder.project(nodesToProject);
 
@@ -1138,7 +1140,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             if (lastProjectedArgumentsContains("eInc"))
                 eInc = relBuilder.field("eInc");
 
-            List <RexNode> nodesToProject = getKeys().stream().map(relBuilder::field).collect(Collectors.toList());
+            List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
             nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
             relBuilder.project(nodesToProject);
 
