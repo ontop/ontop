@@ -6,6 +6,7 @@ import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MissingTemporalIntermediateQueryNodeException;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -106,6 +107,8 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                     } catch (EmptyQueryException e) {
+                        e.printStackTrace();
+                    } catch (MissingTemporalIntermediateQueryNodeException e) {
                         e.printStackTrace();
                     }
                 } else {
