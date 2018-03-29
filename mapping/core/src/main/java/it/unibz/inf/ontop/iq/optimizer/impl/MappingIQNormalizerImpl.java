@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
@@ -35,15 +34,15 @@ public class MappingIQNormalizerImpl implements MappingIQNormalizer {
      */
     @Override
     public IntermediateQuery normalize(IntermediateQuery query) {
-        IntermediateQuery queryAfterUnionNormalization;
+        IntermediateQuery queryAfterBindingLift;
         try {
-            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-            IQ normalizedIQ = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
-            queryAfterUnionNormalization = iqConverter.convert(normalizedIQ, queryAfterBindingLift.getDBMetadata(),
-                    queryAfterBindingLift.getExecutorRegistry());
+             queryAfterBindingLift = bindingLifter.optimize(query);
+//            IQ normalizedIQ = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
+//            queryAfterUnionNormalization = iqConverter.convert(normalizedIQ, queryAfterBindingLift.getDBMetadata(),
+//                    queryAfterBindingLift.getExecutorRegistry());
         } catch (EmptyQueryException e) {
             throw new DatalogConversionException("The query should not become empty");
         }
-        return noNullValueEnforcer.transform(queryAfterUnionNormalization);
+        return noNullValueEnforcer.transform(queryAfterBindingLift);
     }
 }

@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -42,22 +44,41 @@ public class BasicQueryUnfolder implements QueryUnfolder {
             ImmutableList<? extends VariableOrGroundTerm> projectedVariables = intensionalNode.getProjectionAtom().getArguments();
             VariableOrGroundTerm variableOrGroundTerm = projectedVariables.get(1);
             IRI predicateIRI;
-            if (variableOrGroundTerm instanceof ValueConstant) {
-                predicateIRI = new SimpleRDF().createIRI( ((ValueConstant) variableOrGroundTerm).getValue());
-            }
-            else {
-                throw new IllegalStateException("Problem retrieving the predicate IRI");
-            }
-            if (predicateIRI.equals(RDF.TYPE)) {
-                VariableOrGroundTerm className = projectedVariables.get(2);
+            Optional<IntermediateQuery> optionalMappingAssertion;
+            if (variableOrGroundTerm.isGround()){
+                ImmutableTerm groundTerm = ((GroundFunctionalTerm) variableOrGroundTerm).getTerm(0);
+                if ( groundTerm instanceof ValueConstant) {
+                    predicateIRI = new SimpleRDF().createIRI( ((ValueConstant) groundTerm).getValue());
+                }
 
-                if (variableOrGroundTerm instanceof ValueConstant) {
-                    predicateIRI = new SimpleRDF().createIRI(((ValueConstant) className).getValue());
-                } else {
+                else {
                     throw new IllegalStateException("Problem retrieving the predicate IRI");
                 }
+
+                if (predicateIRI.equals(RDF.TYPE)) {
+                    VariableOrGroundTerm className = projectedVariables.get(2);
+
+                    if (variableOrGroundTerm.isGround()) {
+                        ImmutableTerm groundTerm2 = ((GroundFunctionalTerm) className).getTerm(0);
+
+                        if (groundTerm2 instanceof ValueConstant) {
+                            predicateIRI = new SimpleRDF().createIRI(((ValueConstant) groundTerm2).getValue());
+                            optionalMappingAssertion = mapping.getRDFClassDefinition(predicateIRI);
+
+                        } else {
+                            throw new IllegalStateException("Problem retrieving the predicate IRI");
+                        }
+                    }else {
+                        throw new IllegalStateException("Variables are not supported ");
+                    }
+                }
+                else {
+                    optionalMappingAssertion = mapping.getRDFPropertyDefinition(predicateIRI);
+                }
             }
-            Optional<IntermediateQuery> optionalMappingAssertion = mapping.getRDFPropertyDefinition(predicateIRI);
+            else {
+                throw new IllegalStateException("Variables are not supported ");
+            }
 
             //old code
 //            Optional<IntermediateQuery> optionalMappingAssertion = mapping.getDefinition(
