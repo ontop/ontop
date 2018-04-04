@@ -34,3 +34,10 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         }
     }
 }
+
+?rs rdf:type st:HighAndLowRotorSpeed  :- {
+ALWAYS IN PAST (0,30S] { ?rs a st:HighRotorSpeed .}
+            SOMETIME IN PAST (0,20S] {
+                ALWAYS IN PAST (0,10S] { ?rs a st:LowRotorSpeed . }
+            }
+}

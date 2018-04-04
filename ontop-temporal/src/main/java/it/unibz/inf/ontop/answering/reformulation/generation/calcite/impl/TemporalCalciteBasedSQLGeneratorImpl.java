@@ -82,6 +82,7 @@ import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TY
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toSet;
+import static java.lang.Math.incrementExact;
 import static java.lang.Math.toIntExact;
 import static org.apache.calcite.rel.type.RelDataType.PRECISION_NOT_SPECIFIED;
 
@@ -1001,21 +1002,55 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
         @Override
         public void visit(TemporalJoinNode temporalJoinNode) {
-            boolean first = true;
 
-            for (QueryNode queryNode : query.getChildren(temporalJoinNode)) {
-                queryNode.acceptVisitor(this);
-                List<VariableOrGroundTerm> argumentsToProject = new ArrayList<>(lastProjectedArguments);
+            // temporal joins must be normalized before the SQL generation step.
+            // a normalized temporal join node can only have two nodes.
+            QueryNode queryNode1 = query.getChildren(temporalJoinNode).get(0);
+            queryNode1.acceptVisitor(this);
+            List<VariableOrGroundTerm> argumentsToProject1 = new ArrayList<>(lastProjectedArguments);
+            if (materializationStack.empty()){
+                materialize();
+            }
+            String viewName1 = materializationStack.pop();
 
-                if (!first) {
-                    relBuilder.temporalJoin();
-                }
-                first = false;
+            QueryNode queryNode2 = query.getChildren(temporalJoinNode).get(1);
+            queryNode2.acceptVisitor(this);
+            List<VariableOrGroundTerm> argumentsToProject2 = new ArrayList<>(lastProjectedArguments);
+            if (materializationStack.empty()){
+                materialize();
+            }
+            String viewName2 = materializationStack.pop();
+
+            String sql1 = "SELECT \n" +
+                    "CASE \n" +
+                    "WHEN T1.begin > T2.begin AND T2.end > T1.begin THEN T1.begin\n" +
+                    "WHEN T2.begin > T1.begin AND T1.end > T2.begin THEN T2.begin\n" +
+                    "WHEN T1.begin = T2.begin THEN T1.begin\n" +
+                    "END AS x_from_1,\n" +
+                    "CASE \n" +
+                    "WHEN T1.end < T2.end AND T1.end > T2.begin THEN T1.end\n" +
+                    "WHEN T2.end < T1.end AND T2.end > T1.begin THEN T2.end\n" +
+                    "WHEN T1.end = T2.end THEN T1.end\n" +
+                    "END AS x_to_1\n" +
+                    "FROM T1, T2\n";
+            sql1 = sql1.replace("T1", viewName1);
+            sql1 = sql1.replace("T2", viewName2);
+
+            RexNode joinRexNode = null;
+            if (temporalJoinNode.getOptionalFilterCondition().isPresent()){
+                joinRexNode = expressionToRexNode(temporalJoinNode.getOptionalFilterCondition().get(), 1);
             }
 
-            temporalJoinNode.getOptionalFilterCondition().ifPresent(filter -> {
-                relBuilder.filter(expressionToRexNode(filter, 1));
-            });
+            String sql2 = String.format("WHERE %s AND \n" +
+                    "((T1.begin > T2.begin AND T2.end > T1.begin) OR (T2.begin > T1.begin AND T1.end > T2.begin) OR (T1.begin = T2.begin)) AND\n" +
+                    "((T1.end < T2.end AND T1.end > T2.begin) OR (T2.end < T1.end AND T2.end > T1.begin) OR (T1.end = T2.end));\n", joinRexNode.toString());
+
+            sql2 = sql2.replace("T1", viewName1);
+            sql2 = sql2.replace("T2", viewName2);
+
+            sql1 = sql1 + sql2;
+            String clauseName = createClause(sql1);
+            materializationStack.push(clauseName);
         }
 
         private ImmutableList<String> getKeys(List<VariableOrGroundTerm> projectedArguments) {
@@ -1084,7 +1119,10 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
             nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
             relBuilder.project(nodesToProject);
+            materialize();
+        }
 
+        private void materialize(){
             RelNode node = relBuilder.build();
             final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
             String sqlString = sqlNode.toSqlString(dialect).getSql();
@@ -1143,15 +1181,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
             nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
             relBuilder.project(nodesToProject);
-
-            RelNode node = relBuilder.build();
-            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
-            String sqlString = sqlNode.toSqlString(dialect).getSql();
-            String clauseName = getNewWithClauseName();
-            MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
-                    sqlString, calciteSchema.path(null), clauseName, true, true);
-            materializationKeyMap.putIfAbsent(clauseName, key);
-            materializationStack.push(clauseName);
+            materialize();
         }
 
         @Override
@@ -1218,45 +1248,76 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
                     sqlString, calciteSchema.path(null), clauseName, true, true);
             materializationKeyMap.putIfAbsent(clauseName, key);
-            updateProjectedArguments(temporalCoalesceNode.getTerms());
+            updateProjectedArguments(temporalCoalesceNode.getTerms(),
+                    lastProjectedArguments.subList(lastProjectedArguments.size()- 4, lastProjectedArguments.size()));
             createCoalesceClauses(clauseName);
         }
     }
 
-    private void updateProjectedArguments(ImmutableSet<NonGroundTerm> coalesceTerms){
+    private void updateProjectedArguments(ImmutableSet<NonGroundTerm> keyTerms, List<VariableOrGroundTerm> temporalTerms){
         List <VariableOrGroundTerm> updatedList = new ArrayList();
         for(VariableOrGroundTerm arg : lastProjectedArguments){
-            if (coalesceTerms.contains(arg) ||
-                    ((arg instanceof Variable) && temporalAliases.contains(((Variable)arg).getName()))){
+            if (keyTerms.contains(arg)){
                 updatedList.add(arg);
             }
         }
+        //TODO: this is very ugly. Find a better way to do it.
+        for (VariableOrGroundTerm term : temporalTerms) {
+            if (!updatedList.contains(term)) {
+                updatedList.add(term);
+            }
+        }
+
         lastProjectedArguments.clear();
         lastProjectedArguments.addAll(updatedList);
     }
 
     private  String getStrkeys(){
         String strKeys = "";
-        for(VariableOrGroundTerm term : lastProjectedArguments){
-            if (term instanceof Variable){
-                if (!temporalAliases.contains(((Variable) term).getName())){
-                    strKeys += "\"" +((Variable) term).getName() + "\", ";
+        //TODO: this is very ugly. Find a better way to do it
+        if (lastProjectedArguments.size() > 4) {
+            for (int i = 0; i < lastProjectedArguments.size() - 4; i ++) {
+                Term term = lastProjectedArguments.get(i);
+                if (term instanceof Variable) {
+                    strKeys += "\"" + ((Variable) term).getName() + "\", ";
+                } else {
+                    throw new IllegalArgumentException(term.toString() + " is not a variable. Constants are not allowed in Temporal Coalesce.");
                 }
-            }else{
-                throw new IllegalArgumentException(term.toString() + " is not a variable. Constants are not allowed in Temporal Coalesce.");
             }
         }
         return strKeys.substring(0, strKeys.length()-2);
     }
+
+    private ImmutableSet<NonGroundTerm> getKeySet(){
+        Set <NonGroundTerm> keySet = new LinkedHashSet<>();
+        //TODO: this is very ugly. Find a better way to do it
+        if (lastProjectedArguments.size() > 4) {
+            for (int i = 0; i < lastProjectedArguments.size() - 4; i ++) {
+                VariableOrGroundTerm term = lastProjectedArguments.get(i);
+                if (term instanceof Variable) {
+                    keySet.add (((Variable) term));
+                } else {
+                    throw new IllegalArgumentException(term.toString() + " is not a variable. Constants are not allowed in Temporal Coalesce.");
+                }
+            }
+        }
+        return ImmutableSet.copyOf(keySet);
+    }
+
     private void createCoalesceClauses(String materializationName){
 
         String strKeys = getStrkeys();
+        int size = lastProjectedArguments.size();
+        String bInc = lastProjectedArguments.get(size - 4).toString();
+        String b = lastProjectedArguments.get(size - 3).toString();
+        String e = lastProjectedArguments.get(size - 2).toString();
+        String eInc = lastProjectedArguments.get(size - 1).toString();
 
-        String sql1 = String.format("SELECT 1 AS \"Start_ts\", 0 AS \"End_ts\", \"b\" AS \"ts\", \"bInc\", \"eInc\", %s\t\n" +
+        String sql1 = String.format("SELECT 1 AS \"Start_ts\", 0 AS \"End_ts\", \"%s\" AS \"ts\", \"%s\" AS \"bInc\", \"%s\" AS \"eInc\", %s\t\n" +
                 "FROM \"%s\" \n" +
                 "UNION ALL\n" +
-                "SELECT 0 AS \"Start_ts\", 1 AS \"End_ts\", \"e\" AS \"ts\", \"bInc\", \"eInc\", %s\t\n" +
-                "FROM \"%s\" ", strKeys, materializationName, strKeys, materializationName);
+                "SELECT 0 AS \"Start_ts\", 1 AS \"End_ts\", \"%s\" AS \"ts\", \"%s\" AS \"bInc\", \"%s\" AS \"eInc\", %s\t\n" +
+                "FROM \"%s\" ", b, bInc, eInc, strKeys, materializationName, e, bInc, eInc, strKeys, materializationName);
 
 
         String clauseName1 = createClause(sql1);
@@ -1284,6 +1345,9 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 "WHERE \"Crt_Total_ts\" = 0", strKeys, strKeys, strKeys, clauseName3);
         String clauseName4 = createClause(sql4);
         materializationStack.push(clauseName4);
+
+        updateProjectedArguments(getKeySet(), temporalAliases.stream().map(termFactory::getVariable).collect(Collectors.toList()));
+
     }
 
     private String createClause(String sql){
