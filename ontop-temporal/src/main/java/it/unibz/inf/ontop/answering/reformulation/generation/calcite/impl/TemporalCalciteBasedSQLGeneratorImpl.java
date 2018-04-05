@@ -43,6 +43,7 @@ import org.apache.calcite.materialize.MaterializationService;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -51,9 +52,11 @@ import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.*;
+import org.apache.calcite.sql.fun.SqlCaseOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
@@ -1008,6 +1011,11 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             QueryNode queryNode1 = query.getChildren(temporalJoinNode).get(0);
             queryNode1.acceptVisitor(this);
             List<VariableOrGroundTerm> argumentsToProject1 = new ArrayList<>(lastProjectedArguments);
+            int size = lastProjectedArguments.size();
+            String bInc1 = lastProjectedArguments.get(size - 4).toString();
+            String b1 = lastProjectedArguments.get(size - 3).toString();
+            String e1 = lastProjectedArguments.get(size - 2).toString();
+            String eInc1 = lastProjectedArguments.get(size - 1).toString();
             if (materializationStack.empty()){
                 materialize();
             }
@@ -1016,41 +1024,117 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             QueryNode queryNode2 = query.getChildren(temporalJoinNode).get(1);
             queryNode2.acceptVisitor(this);
             List<VariableOrGroundTerm> argumentsToProject2 = new ArrayList<>(lastProjectedArguments);
+            size = lastProjectedArguments.size();
+            String bInc2 = lastProjectedArguments.get(size - 4).toString();
+            String b2 = lastProjectedArguments.get(size - 3).toString();
+            String e2 = lastProjectedArguments.get(size - 2).toString();
+            String eInc2 = lastProjectedArguments.get(size - 1).toString();
             if (materializationStack.empty()){
                 materialize();
             }
             String viewName2 = materializationStack.pop();
 
-            String sql1 = "SELECT \n" +
-                    "CASE \n" +
-                    "WHEN T1.begin > T2.begin AND T2.end > T1.begin THEN T1.begin\n" +
-                    "WHEN T2.begin > T1.begin AND T1.end > T2.begin THEN T2.begin\n" +
-                    "WHEN T1.begin = T2.begin THEN T1.begin\n" +
-                    "END AS x_from_1,\n" +
-                    "CASE \n" +
-                    "WHEN T1.end < T2.end AND T1.end > T2.begin THEN T1.end\n" +
-                    "WHEN T2.end < T1.end AND T2.end > T1.begin THEN T2.end\n" +
-                    "WHEN T1.end = T2.end THEN T1.end\n" +
-                    "END AS x_to_1\n" +
-                    "FROM T1, T2\n";
-            sql1 = sql1.replace("T1", viewName1);
-            sql1 = sql1.replace("T2", viewName2);
+//            String sql1 = "SELECT \n" +
+//                    "CASE \n" +
+//                    "WHEN T1.begin > T2.begin AND T2.end > T1.begin THEN T1.begin\n" +
+//                    "WHEN T2.begin > T1.begin AND T1.end > T2.begin THEN T2.begin\n" +
+//                    "WHEN T1.begin = T2.begin THEN T1.begin\n" +
+//                    "END AS x_from_1,\n" +
+//                    "CASE \n" +
+//                    "WHEN T1.end < T2.end AND T1.end > T2.begin THEN T1.end\n" +
+//                    "WHEN T2.end < T1.end AND T2.end > T1.begin THEN T2.end\n" +
+//                    "WHEN T1.end = T2.end THEN T1.end\n" +
+//                    "END AS x_to_1\n" +
+//                    "FROM T1, T2\n";
+//            sql1 = sql1.replace("T1", viewName1);
+//            sql1 = sql1.replace("T2", viewName2);
+
+            relBuilder.scan(viewName1);
+            relBuilder.scan(viewName2);
+            relBuilder.join(JoinRelType.INNER);
+
+            RexNode bInc1F = relBuilder.field(bInc1);
+            RexNode b1F = relBuilder.field(b1);
+            RexNode e1F = relBuilder.field(e1);
+            RexNode eInc1F = relBuilder.field(eInc1);
+
+            RexNode bInc2F = relBuilder.field(bInc2);
+            RexNode b2F = relBuilder.field(b2);
+            RexNode e2F = relBuilder.field(e2);
+            RexNode eInc2F = relBuilder.field(eInc2);
+
+            //begin
+            RexNode c1_1 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, b1F, b2F);
+            RexNode c1_2 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, e2F, b1F);
+            RexNode w1_1 = rexBuilder.makeCall(SqlStdOperatorTable.AND, c1_1, c1_2);
+            RexNode t1_1 = b1F;
+
+            RexNode c1_3 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, b2F, b1F);
+            RexNode c1_4 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, e1F, b2F);
+            RexNode w1_2 = rexBuilder.makeCall(SqlStdOperatorTable.AND, c1_3, c1_4);
+            RexNode t1_2 = b2F;
+
+            RexNode w1_3 = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, b1F, b2F);
+            RexNode t1_3 = b1F;
+            RexNode case1 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t1_1, w1_2, t1_2, w1_3, t1_3, t1_3);
+
+            //begin Inc
+            RexNode t3_1 = bInc1F;
+            RexNode t3_2 = bInc2F;
+            RexNode t3_3 = rexBuilder.makeCall(SqlStdOperatorTable.AND, bInc1F, bInc2F);
+            RexNode case3 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t3_1, w1_2, t3_2, w1_3, t3_3, t3_3);
+
+            //end
+            RexNode c2_1 = rexBuilder.makeCall(SqlStdOperatorTable.LESS_THAN, e1F, e2F);
+            RexNode c2_2 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, e1F, b2F);
+            RexNode w2_1 = rexBuilder.makeCall(SqlStdOperatorTable.AND, c2_1, c2_2);
+            RexNode t2_1 = e1F;
+
+            RexNode c2_3 = rexBuilder.makeCall(SqlStdOperatorTable.LESS_THAN, e2F, e1F);
+            RexNode c2_4 = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN, e2F, b1F);
+            RexNode w2_2 = rexBuilder.makeCall(SqlStdOperatorTable.AND, c2_3, c2_4);
+            RexNode t2_2 = e2F;
+
+            RexNode w2_3 = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, e1F, e2F);
+            RexNode t2_3 = e1F;
+            RexNode case2 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t2_1, w2_2, t2_2, w2_3, t2_3, t2_3);
+
+            //begin Inc
+            RexNode t4_1 = eInc1F;
+            RexNode t4_2 = eInc2F;
+            RexNode t4_3 = rexBuilder.makeCall(SqlStdOperatorTable.AND, eInc1F, eInc2F);
+            RexNode case4 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t4_1, w2_2, t4_2, w2_3, t4_3, t4_3);
 
             RexNode joinRexNode = null;
             if (temporalJoinNode.getOptionalFilterCondition().isPresent()){
                 joinRexNode = expressionToRexNode(temporalJoinNode.getOptionalFilterCondition().get(), 1);
             }
 
-            String sql2 = String.format("WHERE %s AND \n" +
-                    "((T1.begin > T2.begin AND T2.end > T1.begin) OR (T2.begin > T1.begin AND T1.end > T2.begin) OR (T1.begin = T2.begin)) AND\n" +
-                    "((T1.end < T2.end AND T1.end > T2.begin) OR (T2.end < T1.end AND T2.end > T1.begin) OR (T1.end = T2.end));\n", joinRexNode.toString());
+            RexNode or1 = rexBuilder.makeCall(SqlStdOperatorTable.OR, rexBuilder.makeCall(SqlStdOperatorTable.OR, w1_1, w1_2), w1_3);
+            RexNode or2 = rexBuilder.makeCall(SqlStdOperatorTable.OR, rexBuilder.makeCall(SqlStdOperatorTable.OR, w2_1, w2_2), w2_3);
+            RexNode and1 = rexBuilder.makeCall(SqlStdOperatorTable.AND, or1, or2);
 
-            sql2 = sql2.replace("T1", viewName1);
-            sql2 = sql2.replace("T2", viewName2);
+            if (joinRexNode != null)
+                relBuilder.filter(joinRexNode, and1);
+            else
+                relBuilder.filter(and1);
 
-            sql1 = sql1 + sql2;
-            String clauseName = createClause(sql1);
-            materializationStack.push(clauseName);
+            relBuilder.project(case3, case1, case2, case4);
+
+            materialize();
+
+
+
+//            String sql2 = String.format("WHERE %s AND \n" +
+//                    "((T1.begin > T2.begin AND T2.end > T1.begin) OR (T2.begin > T1.begin AND T1.end > T2.begin) OR (T1.begin = T2.begin)) AND\n" +
+//                    "((T1.end < T2.end AND T1.end > T2.begin) OR (T2.end < T1.end AND T2.end > T1.begin) OR (T1.end = T2.end));\n", joinRexNode.toString());
+//
+//            sql2 = sql2.replace("T1", viewName1);
+//            sql2 = sql2.replace("T2", viewName2);
+//
+//            sql1 = sql1 + sql2;
+//            String clauseName = createClause(sql1);
+//            materializationStack.push(clauseName);
         }
 
         private ImmutableList<String> getKeys(List<VariableOrGroundTerm> projectedArguments) {
@@ -1063,6 +1147,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         }
 
         private void createBoxView(TemporalRange range, SqlBinaryOperator operator){
+            int size = lastProjectedArguments.size();
+            String bInc = lastProjectedArguments.get(size - 4).toString();
+            String b = lastProjectedArguments.get(size - 3).toString();
+            String e = lastProjectedArguments.get(size - 2).toString();
+            String eInc = lastProjectedArguments.get(size - 1).toString();
+
             if (!materializationStack.empty()){
                 String viewName = materializationStack.pop();
                 relBuilder.scan(viewName);
@@ -1075,49 +1165,42 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             RexNode begin = null;
             if (beginInMs > 0){
                 beginInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(beginInMs), getSQLIQualifier());
-                if (lastProjectedArgumentsContains("b")){
-                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("b"), beginInterval);
-                    begin = relBuilder.alias(n, "b");
-                }
+                RexNode n = rexBuilder.makeCall(operator, relBuilder.field(b), beginInterval);
+                begin = relBuilder.alias(n, b);
+
             }
 
             RexLiteral endInterval;
             RexNode end = null;
             if (endInMs > 0){
                 endInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs), getSQLIQualifier());
-                if (lastProjectedArgumentsContains("e")){
-                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("e"), endInterval);
-                    end = relBuilder.alias(n, "e");
-                }
+                RexNode n = rexBuilder.makeCall(operator, relBuilder.field(e), endInterval);
+                end = relBuilder.alias(n, e);
+
             }
 
             RexLiteral diffInterval;
             if (endInMs > 0 ){
                 if (endInMs - beginInMs >= 0) {
                     diffInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs - beginInMs), getSQLIQualifier());
-                    RexNode n = rexBuilder.makeCall(SqlStdOperatorTable.MINUS, relBuilder.field("e"), diffInterval);
-                    RexNode x = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, n, relBuilder.field("b"));
+                    RexNode n = rexBuilder.makeCall(SqlStdOperatorTable.MINUS, relBuilder.field(e), diffInterval);
+                    RexNode x = rexBuilder.makeCall(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, n, relBuilder.field(b));
                     relBuilder.filter(x);
                 }else {
                     throw new  IllegalArgumentException("start point of a time interval can not be bigger than the end point");
                 }
             }
 
-            //bInc and eInc are missing (Coalesce does not project it for now)
             if (begin == null)
-                begin = relBuilder.field("b");
+                begin = relBuilder.field(b);
             if (end == null)
-                end = relBuilder.field("e");
+                end = relBuilder.field(e);
             //relBuilder.project(begin, end);
-            RexNode bInc = null;
-            if (lastProjectedArgumentsContains("bInc"))
-                bInc = relBuilder.field("bInc");
-            RexNode eInc = null;
-            if (lastProjectedArgumentsContains("eInc"))
-                eInc = relBuilder.field("eInc");
+            RexNode bIncRex = relBuilder.field(bInc);
+            RexNode eIncRex = relBuilder.field(eInc);
 
             List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
-            nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
+            nodesToProject.addAll(Arrays.asList(bIncRex, begin, end, eIncRex));
             relBuilder.project(nodesToProject);
             materialize();
         }
@@ -1134,6 +1217,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         }
 
         private void createDiamondView(TemporalRange range, SqlBinaryOperator operator){
+            int size = lastProjectedArguments.size();
+            String bInc = lastProjectedArguments.get(size - 4).toString();
+            String b = lastProjectedArguments.get(size - 3).toString();
+            String e = lastProjectedArguments.get(size - 2).toString();
+            String eInc = lastProjectedArguments.get(size - 1).toString();
+
             if (!materializationStack.empty()){
                 String viewName = materializationStack.pop();
                 relBuilder.scan(viewName);
@@ -1146,40 +1235,31 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             RexNode begin = null;
             if (endInMs > 0){
                 beginInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(endInMs), getSQLIQualifier());
-                if (lastProjectedArgumentsContains("b")){
-                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("b"), beginInterval);
-                    begin = relBuilder.alias(n, "b");
-                }
+                RexNode n = rexBuilder.makeCall(operator, relBuilder.field(b), beginInterval);
+                begin = relBuilder.alias(n, b);
             }
 
             RexLiteral endInterval;
             RexNode end = null;
             if (beginInMs > 0){
                 endInterval = rexBuilder.makeIntervalLiteral(new BigDecimal(beginInMs), getSQLIQualifier());
-                if (lastProjectedArgumentsContains("e")){
-                    RexNode n = rexBuilder.makeCall(operator, relBuilder.field("e"), endInterval);
-                    end = relBuilder.alias(n, "e");
-                }
+                RexNode n = rexBuilder.makeCall(operator, relBuilder.field(e), endInterval);
+                end = relBuilder.alias(n, e);
             }
 
             if (endInMs - beginInMs < 0)
                 throw new  IllegalArgumentException("start point of a time interval can not be bigger than the end point");
 
-            //bInc and eInc are missing (Coalesce does not project it for now)
             if (begin == null)
-                begin = relBuilder.field("b");
+                begin = relBuilder.field(b);
             if (end == null)
-                end = relBuilder.field("e");
+                end = relBuilder.field(e);
             //relBuilder.project(begin, end);
-            RexNode bInc = null;
-            if (lastProjectedArgumentsContains("bInc"))
-                bInc = relBuilder.field("bInc");
-            RexNode eInc = null;
-            if (lastProjectedArgumentsContains("eInc"))
-                eInc = relBuilder.field("eInc");
+            RexNode bIncRex = relBuilder.field(bInc);
+            RexNode eIncRex = relBuilder.field(eInc);
 
             List <RexNode> nodesToProject = getKeys(lastProjectedArguments).stream().map(relBuilder::field).collect(Collectors.toList());
-            nodesToProject.addAll(Arrays.asList(bInc, begin, end, eInc));
+            nodesToProject.addAll(Arrays.asList(bIncRex, begin, end, eIncRex));
             relBuilder.project(nodesToProject);
             materialize();
         }
@@ -1338,15 +1418,15 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 "OR \"Prv_Total_ts_1\" IS NULL OR \"Prv_Total_ts_2\" IS NULL", strKeys, clauseName2);
         String clauseName3 = createClause(sql3);
 
-        String sql4 = String.format("SELECT %s, \"bInc\", \"prevTs\" AS \"b\", \"ts\" AS \"e\", \"eInc\" FROM (\n" +
+        String sql4 = String.format("SELECT %s, \"bInc\" AS \"%s\", \"prevTs\" AS \"%s\", \"ts\" AS \"%s\", \"eInc\" AS \"%s\" FROM (\n" +
                 "SELECT %s, \"bInc\", LAG(\"ts\",1) OVER (PARTITION BY %s ORDER BY \"ts\", \"Crt_Total_ts\") As \"prevTs\",\n" +
                 "\"ts\", \"eInc\", \"Crt_Total_ts\" \n" +
                 "FROM \"%s\") F \n" +
-                "WHERE \"Crt_Total_ts\" = 0", strKeys, strKeys, strKeys, clauseName3);
+                "WHERE \"Crt_Total_ts\" = 0", strKeys, bInc, b, e, eInc, strKeys, strKeys, clauseName3);
         String clauseName4 = createClause(sql4);
         materializationStack.push(clauseName4);
 
-        updateProjectedArguments(getKeySet(), temporalAliases.stream().map(termFactory::getVariable).collect(Collectors.toList()));
+        //updateProjectedArguments(getKeySet(), temporalAliases.stream().map(termFactory::getVariable).collect(Collectors.toList()));
 
     }
 

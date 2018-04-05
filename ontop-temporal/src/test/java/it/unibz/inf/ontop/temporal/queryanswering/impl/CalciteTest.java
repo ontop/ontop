@@ -67,62 +67,33 @@ public class CalciteTest {
         final FrameworkConfig config = config().build();
         this.planner = Frameworks.getPlanner(config);
 
-//        String postgresql = "WITH C1_AP_1 AS (\n" +
-//                "SELECT dFrom, dTo \n" +
-//                "FROM (\n" +
-//                "SELECT \"timestamp\" AS dFrom,\n" +
-//                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
-//                "FROM \"public\".\"tb_measurement\") F\n" +
-//                "WHERE \"value\" > 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
-//                "),\n" +
-//                "C2_AP_1 (Start_ts, End_ts, ts) AS (\n" +
-//                "SELECT 1, 0 , dFrom\n" +
-//                "FROM C1_AP_1 \n" +
-//                "UNION ALL\n" +
-//                "SELECT 0, 1, dTo\n" +
-//                "FROM C1_AP_1  \n" +
-//                "),\n" +
-//                "C3_AP_1 AS (\n" +
-//                "SELECT \n" +
-//                "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_1,\n" +
-//                "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS UNBOUNDED PRECEDING) AS Crt_Total_ts_2,\n" +
-//                "SUM(Start_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_1,\n" +
-//                "SUM(End_ts) OVER (ORDER BY ts, End_ts ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS Prv_Total_ts_2,\n" +
-//                "ts\n" +
-//                "FROM C2_AP_1\n" +
-//                "),\n" +
-//                "\n" +
-//                "C4_AP_1 AS (\n" +
-//                "SELECT (Crt_Total_ts_1 - Crt_Total_ts_2) AS Crt_Total_ts, (Prv_Total_ts_1 - Prv_Total_ts_2) AS Prv_Total_ts, ts\n" +
-//                "FROM C3_AP_1\n" +
-//                "WHERE (Crt_Total_ts_1 - Crt_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) = 0 OR (Prv_Total_ts_1 - Prv_Total_ts_2) IS NULL\n" +
-//                "),\n" +
-//                "DIAMOND_AP_1 AS ( \n" +
-//                "SELECT prevTs  as dFrom, ts AS dTo FROM (\n" +
-//                "SELECT LAG(ts,1) OVER (ORDER BY ts, crt_total_ts) As prevTs,\n" +
-//                "ts,\n" +
-//                "Crt_Total_ts\n" +
-//                "FROM C4_AP_1) F \n" +
-//                "WHERE Crt_Total_ts = 0 ), \n" +
-//                "AP_2 AS (\n" +
-//                "SELECT dFrom, dTo \n" +
-//                "FROM C1_AP_1 \n" +
-//                ") \n" +
-//                "SELECT\n" +
-//                "CASE \n" +
-//                "WHEN DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom THEN DIAMOND_AP_1.dFrom\n" +
-//                "WHEN AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom THEN AP_2.dFrom\n" +
-//                "WHEN DIAMOND_AP_1.dFrom = AP_2.dFrom THEN DIAMOND_AP_1.dFrom\n" +
-//                "END AS dFrom,\n" +
-//                "CASE \n" +
-//                "WHEN DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom THEN DIAMOND_AP_1.dTo\n" +
-//                "WHEN AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom THEN AP_2.dTo\n" +
-//                "WHEN DIAMOND_AP_1.dTo = AP_2.dTo THEN DIAMOND_AP_1.dTo\n" +
-//                "END AS dTo\n" +
-//                "FROM DIAMOND_AP_1, AP_2\n" +
-//                "WHERE\n" +
-//                "((DIAMOND_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (AP_2.dFrom > DIAMOND_AP_1.dFrom AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (DIAMOND_AP_1.dFrom = AP_2.dFrom)) AND\n" +
-//                "((DIAMOND_AP_1.dTo < AP_2.dTo AND DIAMOND_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < DIAMOND_AP_1.dTo AND AP_2.dTo > DIAMOND_AP_1.dFrom) OR (DIAMOND_AP_1.dTo = AP_2.dTo))";
+        String postgresql = "WITH C1_AP_1 AS (\n" +
+                "SELECT dFrom, dTo \n" +
+                "FROM (\n" +
+                "SELECT \"timestamp\" AS dFrom,\n" +
+                "LEAD(\"timestamp\", 1) OVER (ORDER BY  \"timestamp\") AS dTo, \"value\" \n" +
+                "FROM \"public\".\"tb_measurement\") F\n" +
+                "WHERE \"value\" > 1.5 AND dTo IS NOT NULL AND (dTo - interval \'1 \' DAY) >= dFrom " +
+                "),\n" +
+                "AP_2 AS (\n" +
+                "SELECT dFrom, dTo \n" +
+                "FROM C1_AP_1 \n" +
+                ") \n" +
+                "SELECT\n" +
+                "CASE \n" +
+                "WHEN C1_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > C1_AP_1.dFrom THEN C1_AP_1.dFrom\n" +
+                "WHEN AP_2.dFrom > C1_AP_1.dFrom AND C1_AP_1.dTo > AP_2.dFrom THEN AP_2.dFrom\n" +
+                "WHEN C1_AP_1.dFrom = AP_2.dFrom THEN C1_AP_1.dFrom\n" +
+                "END AS dFrom,\n" +
+                "CASE \n" +
+                "WHEN C1_AP_1.dTo < AP_2.dTo AND C1_AP_1.dTo > AP_2.dFrom THEN C1_AP_1.dTo\n" +
+                "WHEN AP_2.dTo < C1_AP_1.dTo AND AP_2.dTo > C1_AP_1.dFrom THEN AP_2.dTo\n" +
+                "WHEN C1_AP_1.dTo = AP_2.dTo THEN C1_AP_1.dTo\n" +
+                "END AS dTo\n" +
+                "FROM C1_AP_1, AP_2\n" +
+                "WHERE\n" +
+                "((C1_AP_1.dFrom > AP_2.dFrom AND AP_2.dTo > C1_AP_1.dFrom) OR (AP_2.dFrom > C1_AP_1.dFrom AND C1_AP_1.dTo > AP_2.dFrom) OR (C1_AP_1.dFrom = AP_2.dFrom)) AND\n" +
+                "((C1_AP_1.dTo < AP_2.dTo AND C1_AP_1.dTo > AP_2.dFrom) OR (AP_2.dTo < C1_AP_1.dTo AND AP_2.dTo > C1_AP_1.dFrom) OR (C1_AP_1.dTo = AP_2.dTo))";
 
 //        String postgresql = "WITH C1 AS (\n" +
 //                "SELECT dFrom, (dTo + interval '2' MINUTE) AS dTo \n" +
@@ -145,7 +116,7 @@ public class CalciteTest {
 //                "WHERE\n" +
 //                "C2.dFrom > C1.dFrom AND C1.dTo > C2.dFrom AND C1.dTo < C2.dTo AND C1.dTo > C2.dFrom";
 
-       String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
+//       String postgresql = "SELECT \"timestamp\" + interval '1' DAY AS dFrom FROM \"public\".\"tb_measurement_1\"";
 
 //        String postgresql = "SELECT \"timestamp\" FROM \"public\".\"tb_measurement\"";
 
