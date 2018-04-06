@@ -82,6 +82,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.BNODE;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.OBJECT;
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.UNSUPPORTED;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toList;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toMap;
 import static it.unibz.inf.ontop.utils.ImmutableCollectors.toSet;
@@ -482,142 +484,198 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                     .collect(toList());
 
             if (functionSymbol instanceof ExpressionOperation) {
-                switch ((ExpressionOperation) functionSymbol) {
-                    case MINUS:
-                        return relBuilder.call(SqlStdOperatorTable.MINUS, args);
-                    case ADD:
-                        return relBuilder.call(SqlStdOperatorTable.PLUS, args);
-                    case SUBTRACT:
-                        return relBuilder.call(SqlStdOperatorTable.MINUS, args);
-                    case MULTIPLY:
-                        return relBuilder.call(SqlStdOperatorTable.MULTIPLY, args);
-                    case DIVIDE:
-                        return relBuilder.call(SqlStdOperatorTable.DIVIDE, args);
-                    case ABS:
-                        return relBuilder.call(SqlStdOperatorTable.ABS, args);
-                    case ROUND:
-                        return relBuilder.call(SqlStdOperatorTable.ROUND, args);
-                    case CEIL:
-                        return relBuilder.call(SqlStdOperatorTable.CEIL, args);
-                    case FLOOR:
-                        return relBuilder.call(SqlStdOperatorTable.FLOOR, args);
-                    case RAND:
-                        return relBuilder.call(SqlStdOperatorTable.RAND, args);
-                    case AND:
-                        return relBuilder.call(SqlStdOperatorTable.AND, args);
-                    case OR:
-                        return relBuilder.call(SqlStdOperatorTable.OR, args);
-                    case NOT:
-                        return relBuilder.call(SqlStdOperatorTable.NOT, args);
-                    case EQ:
-                        return relBuilder.call(SqlStdOperatorTable.EQUALS, args);
-                    case NEQ:
-                        return relBuilder.call(SqlStdOperatorTable.NOT_EQUALS, args);
-                    case GTE:
-                        return relBuilder.call(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, args);
-                    case GT:
-                        return relBuilder.call(SqlStdOperatorTable.GREATER_THAN, args);
-                    case LTE:
-                        return relBuilder.call(SqlStdOperatorTable.LESS_THAN_OR_EQUAL, args);
-                    case LT:
-                        return relBuilder.call(SqlStdOperatorTable.LESS_THAN, args);
-                    case IS_NULL:
-                        return relBuilder.call(SqlStdOperatorTable.IS_NULL, args);
-                    case IS_NOT_NULL:
-                        return relBuilder.call(SqlStdOperatorTable.IS_NOT_NULL, args);
-                    case IS_TRUE:
-                        notImplemented(filterCondition);
-                    case STR_STARTS:
-                        notImplemented(filterCondition);
-                    case STR_ENDS:
-                        notImplemented(filterCondition);
-                    case CONTAINS:
-                        notImplemented(filterCondition);
-                    case STRLEN:
-                        return relBuilder.call(SqlStdOperatorTable.CHAR_LENGTH, args);
-                    case UCASE:
-                        return relBuilder.call(SqlStdOperatorTable.UPPER, args);
-                    case LCASE:
-                        return relBuilder.call(SqlStdOperatorTable.LOWER, args);
-                    case SUBSTR2:
-                        notImplemented(filterCondition);
-                    case SUBSTR3:
-                        notImplemented(filterCondition);
-                    case STRBEFORE:
-                        notImplemented(filterCondition);
-                    case STRAFTER:
-                        notImplemented(filterCondition);
-                    case REPLACE:
-                        return relBuilder.call(SqlStdOperatorTable.REPLACE, args);
-                    case CONCAT:
-                        return relBuilder.call(SqlStdOperatorTable.CONCAT, args);
-                    case ENCODE_FOR_URI:
-                        break;
-                    case MD5:
-                        notImplemented(filterCondition);
-                    case SHA1:
-                        notImplemented(filterCondition);
-                    case SHA512:
-                        notImplemented(filterCondition);
-                    case SHA256:
-                        notImplemented(filterCondition);
-                    case NOW:
-                        notImplemented(filterCondition);
-                    case YEAR:
-                        notImplemented(filterCondition);
-                    case DAY:
-                        notImplemented(filterCondition);
-                    case MONTH:
-                        notImplemented(filterCondition);
-                    case HOURS:
-                        notImplemented(filterCondition);
-                    case MINUTES:
-                        notImplemented(filterCondition);
-                    case SECONDS:
-                        notImplemented(filterCondition);
-                    case TZ:
-                        notImplemented(filterCondition);
-                    case SPARQL_STR:
-                        notImplemented(filterCondition);
-                    case SPARQL_DATATYPE:
-                        notImplemented(filterCondition);
-                    case SPARQL_LANG:
-                        notImplemented(filterCondition);
-                    case UUID:
-                        notImplemented(filterCondition);
-                    case STRUUID:
-                        notImplemented(filterCondition);
-                    case IS_LITERAL:
-                        notImplemented(filterCondition);
-                    case IS_IRI:
-                        notImplemented(filterCondition);
-                    case IS_BLANK:
-                        notImplemented(filterCondition);
-                    case LANGMATCHES:
-                        notImplemented(filterCondition);
-                    case REGEX:
-                        notImplemented(filterCondition);
-                    case SQL_LIKE:
-                        notImplemented(filterCondition);
-                    case QUEST_CAST:
-                        assert args.size() == 2;
-                        // TODO use the right type for casting
-                        return relBuilder.cast(args.get(0), SqlTypeName.CHAR);
-                    case AVG:
-                        return relBuilder.call(SqlStdOperatorTable.AVG, args);
-                    case SUM:
-                        return relBuilder.call(SqlStdOperatorTable.SUM, args);
-                    case MAX:
-                        return relBuilder.call(SqlStdOperatorTable.MAX, args);
-                    case MIN:
-                        return relBuilder.call(SqlStdOperatorTable.MIN, args);
-                    case COUNT:
-                        return relBuilder.call(SqlStdOperatorTable.COUNT, args);
-                }
-
+                return getRexNode(filterCondition, (ExpressionOperation)functionSymbol, args);
             }
             notImplemented(filterCondition);
             // not reachable
+            return null;
+        }
+
+
+        private ImmutableTerm filterOutTemporals(ImmutableExpression filterCondition, List<String> temporalArgs1, List<String> temporalArgs2){
+            final OperationPredicate functionSymbol = filterCondition.getFunctionSymbol();
+
+            if (functionSymbol.equals(AND)){
+                ImmutableTerm arg1 = filterCondition.getArguments().get(0);
+                arg1 = filterOut(arg1, temporalArgs1, temporalArgs2);
+
+                ImmutableTerm arg2 = filterCondition.getArguments().get(1);
+                arg2 = filterOut(arg2, temporalArgs1, temporalArgs2);
+
+                if (arg1 == null){
+                    if (arg2 == null)
+                        return null;
+                    else
+                        return arg2;
+                } else {
+                    if (arg2 == null)
+                        return arg1;
+                    else return  filterCondition;
+                }
+            }
+
+
+//            final ImmutableList<ImmutableTerm> args = filterCondition.getArguments()
+//                    .stream()
+//                    .map(t -> filterOut(t, temporalArgs1, temporalArgs2))
+//                    .collect(toList());
+
+            return filterCondition;
+        }
+
+        private ImmutableTerm filterOut(ImmutableTerm term, List<String> temporalArgs1, List<String> temporalArgs2){
+            if (term instanceof Expression){
+                if (((Expression) term).getFunctionSymbol().equals(EQ)){
+                    Term arg1 = ((Expression) term).getTerms().get(0);
+                    Term arg2 = ((Expression) term).getTerms().get(1);
+                    if (arg1 instanceof Variable && arg2 instanceof Variable){
+                        if ((temporalArgs1.contains(((Variable) arg1).getName()) || temporalArgs2.contains(((Variable) arg1).getName())) &&
+                                (temporalArgs1.contains(((Variable) arg2).getName()) || temporalArgs2.contains(((Variable) arg2).getName()))){
+                            return null;
+                        }
+                    }
+                    return filterOutTemporals((ImmutableExpression) term, temporalArgs1, temporalArgs2);
+
+                }
+                return filterOutTemporals((ImmutableExpression)term, temporalArgs1, temporalArgs2);
+            }
+            return term;
+        }
+
+        private RexNode getRexNode(ImmutableExpression filterCondition,
+                                   ExpressionOperation functionSymbol, ImmutableList<RexNode> args){
+            switch (functionSymbol) {
+                case MINUS:
+                    return relBuilder.call(SqlStdOperatorTable.MINUS, args);
+                case ADD:
+                    return relBuilder.call(SqlStdOperatorTable.PLUS, args);
+                case SUBTRACT:
+                    return relBuilder.call(SqlStdOperatorTable.MINUS, args);
+                case MULTIPLY:
+                    return relBuilder.call(SqlStdOperatorTable.MULTIPLY, args);
+                case DIVIDE:
+                    return relBuilder.call(SqlStdOperatorTable.DIVIDE, args);
+                case ABS:
+                    return relBuilder.call(SqlStdOperatorTable.ABS, args);
+                case ROUND:
+                    return relBuilder.call(SqlStdOperatorTable.ROUND, args);
+                case CEIL:
+                    return relBuilder.call(SqlStdOperatorTable.CEIL, args);
+                case FLOOR:
+                    return relBuilder.call(SqlStdOperatorTable.FLOOR, args);
+                case RAND:
+                    return relBuilder.call(SqlStdOperatorTable.RAND, args);
+                case AND:
+                    return relBuilder.call(SqlStdOperatorTable.AND, args);
+                case OR:
+                    return relBuilder.call(SqlStdOperatorTable.OR, args);
+                case NOT:
+                    return relBuilder.call(SqlStdOperatorTable.NOT, args);
+                case EQ:
+                    return relBuilder.call(SqlStdOperatorTable.EQUALS, args);
+                case NEQ:
+                    return relBuilder.call(SqlStdOperatorTable.NOT_EQUALS, args);
+                case GTE:
+                    return relBuilder.call(SqlStdOperatorTable.GREATER_THAN_OR_EQUAL, args);
+                case GT:
+                    return relBuilder.call(SqlStdOperatorTable.GREATER_THAN, args);
+                case LTE:
+                    return relBuilder.call(SqlStdOperatorTable.LESS_THAN_OR_EQUAL, args);
+                case LT:
+                    return relBuilder.call(SqlStdOperatorTable.LESS_THAN, args);
+                case IS_NULL:
+                    return relBuilder.call(SqlStdOperatorTable.IS_NULL, args);
+                case IS_NOT_NULL:
+                    return relBuilder.call(SqlStdOperatorTable.IS_NOT_NULL, args);
+                case IS_TRUE:
+                    notImplemented(filterCondition);
+                case STR_STARTS:
+                    notImplemented(filterCondition);
+                case STR_ENDS:
+                    notImplemented(filterCondition);
+                case CONTAINS:
+                    notImplemented(filterCondition);
+                case STRLEN:
+                    return relBuilder.call(SqlStdOperatorTable.CHAR_LENGTH, args);
+                case UCASE:
+                    return relBuilder.call(SqlStdOperatorTable.UPPER, args);
+                case LCASE:
+                    return relBuilder.call(SqlStdOperatorTable.LOWER, args);
+                case SUBSTR2:
+                    notImplemented(filterCondition);
+                case SUBSTR3:
+                    notImplemented(filterCondition);
+                case STRBEFORE:
+                    notImplemented(filterCondition);
+                case STRAFTER:
+                    notImplemented(filterCondition);
+                case REPLACE:
+                    return relBuilder.call(SqlStdOperatorTable.REPLACE, args);
+                case CONCAT:
+                    return relBuilder.call(SqlStdOperatorTable.CONCAT, args);
+                case ENCODE_FOR_URI:
+                    break;
+                case MD5:
+                    notImplemented(filterCondition);
+                case SHA1:
+                    notImplemented(filterCondition);
+                case SHA512:
+                    notImplemented(filterCondition);
+                case SHA256:
+                    notImplemented(filterCondition);
+                case NOW:
+                    notImplemented(filterCondition);
+                case YEAR:
+                    notImplemented(filterCondition);
+                case DAY:
+                    notImplemented(filterCondition);
+                case MONTH:
+                    notImplemented(filterCondition);
+                case HOURS:
+                    notImplemented(filterCondition);
+                case MINUTES:
+                    notImplemented(filterCondition);
+                case SECONDS:
+                    notImplemented(filterCondition);
+                case TZ:
+                    notImplemented(filterCondition);
+                case SPARQL_STR:
+                    notImplemented(filterCondition);
+                case SPARQL_DATATYPE:
+                    notImplemented(filterCondition);
+                case SPARQL_LANG:
+                    notImplemented(filterCondition);
+                case UUID:
+                    notImplemented(filterCondition);
+                case STRUUID:
+                    notImplemented(filterCondition);
+                case IS_LITERAL:
+                    notImplemented(filterCondition);
+                case IS_IRI:
+                    notImplemented(filterCondition);
+                case IS_BLANK:
+                    notImplemented(filterCondition);
+                case LANGMATCHES:
+                    notImplemented(filterCondition);
+                case REGEX:
+                    notImplemented(filterCondition);
+                case SQL_LIKE:
+                    notImplemented(filterCondition);
+                case QUEST_CAST:
+                    assert args.size() == 2;
+                    // TODO use the right type for casting
+                    return relBuilder.cast(args.get(0), SqlTypeName.CHAR);
+                case AVG:
+                    return relBuilder.call(SqlStdOperatorTable.AVG, args);
+                case SUM:
+                    return relBuilder.call(SqlStdOperatorTable.SUM, args);
+                case MAX:
+                    return relBuilder.call(SqlStdOperatorTable.MAX, args);
+                case MIN:
+                    return relBuilder.call(SqlStdOperatorTable.MIN, args);
+                case COUNT:
+                    return relBuilder.call(SqlStdOperatorTable.COUNT, args);
+            }
             return null;
         }
 
@@ -656,26 +714,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 return getField((Variable) a, inputCount);
             } else if (a instanceof Constant) {
                 final Constant constant = (Constant) a;
-                TermType termType = constant.getType();
-
-//                if (termType.isA(XSD.DECIMAL))
-//                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
-
-//                if(termType.equals(XSD_INTEGER_DT)) {
-//                    return rexBuilder.makeExactLiteral(new BigDecimal(constant.getValue()));
-//                } else if (termType.equals(XSD_DATETIME_DT)){
-//                    return rexBuilder.makeLiteral(constant.getValue());
-//                } else if (termType.equals(XSD_STRING_DT)){
-//                    return rexBuilder.makeLiteral(constant.getValue());
-//                } else if (termType.equals(XSD_DATETIMESTAMP_DT)){
-//                    return rexBuilder.makeLiteral(constant.getValue());
-//                } else if (termType.equals(XSD_BOOLEAN_DT)){
-//                    return rexBuilder.makeLiteral(Boolean.valueOf(constant.getValue()));
-//                } else {
-//                    notImplemented(a);
-//                }
-
-
                 COL_TYPE colType = extractColType(constant.getType()).orElse(UNSUPPORTED);
                 switch (colType) {
                     case UNSUPPORTED:
@@ -1010,12 +1048,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             // a normalized temporal join node can only have two nodes.
             QueryNode queryNode1 = query.getChildren(temporalJoinNode).get(0);
             queryNode1.acceptVisitor(this);
-            List<VariableOrGroundTerm> argumentsToProject1 = new ArrayList<>(lastProjectedArguments);
             int size = lastProjectedArguments.size();
             String bInc1 = lastProjectedArguments.get(size - 4).toString();
             String b1 = lastProjectedArguments.get(size - 3).toString();
             String e1 = lastProjectedArguments.get(size - 2).toString();
             String eInc1 = lastProjectedArguments.get(size - 1).toString();
+            List <String> temporalArgs1 = Arrays.asList(bInc1, b1, e1, eInc1);
             if (materializationStack.empty()){
                 materialize();
             }
@@ -1023,31 +1061,16 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             QueryNode queryNode2 = query.getChildren(temporalJoinNode).get(1);
             queryNode2.acceptVisitor(this);
-            List<VariableOrGroundTerm> argumentsToProject2 = new ArrayList<>(lastProjectedArguments);
             size = lastProjectedArguments.size();
             String bInc2 = lastProjectedArguments.get(size - 4).toString();
             String b2 = lastProjectedArguments.get(size - 3).toString();
             String e2 = lastProjectedArguments.get(size - 2).toString();
             String eInc2 = lastProjectedArguments.get(size - 1).toString();
+            List <String> temporalArgs2 = Arrays.asList(bInc2, b2, e2, eInc2);
             if (materializationStack.empty()){
                 materialize();
             }
             String viewName2 = materializationStack.pop();
-
-//            String sql1 = "SELECT \n" +
-//                    "CASE \n" +
-//                    "WHEN T1.begin > T2.begin AND T2.end > T1.begin THEN T1.begin\n" +
-//                    "WHEN T2.begin > T1.begin AND T1.end > T2.begin THEN T2.begin\n" +
-//                    "WHEN T1.begin = T2.begin THEN T1.begin\n" +
-//                    "END AS x_from_1,\n" +
-//                    "CASE \n" +
-//                    "WHEN T1.end < T2.end AND T1.end > T2.begin THEN T1.end\n" +
-//                    "WHEN T2.end < T1.end AND T2.end > T1.begin THEN T2.end\n" +
-//                    "WHEN T1.end = T2.end THEN T1.end\n" +
-//                    "END AS x_to_1\n" +
-//                    "FROM T1, T2\n";
-//            sql1 = sql1.replace("T1", viewName1);
-//            sql1 = sql1.replace("T2", viewName2);
 
             relBuilder.scan(viewName1);
             relBuilder.scan(viewName2);
@@ -1107,7 +1130,9 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             RexNode joinRexNode = null;
             if (temporalJoinNode.getOptionalFilterCondition().isPresent()){
-                joinRexNode = expressionToRexNode(temporalJoinNode.getOptionalFilterCondition().get(), 1);
+                ImmutableTerm filterCond = filterOutTemporals(temporalJoinNode.getOptionalFilterCondition().get(), temporalArgs1, temporalArgs2);
+                if (filterCond != null)
+                    joinRexNode = expressionToRexNode((ImmutableExpression)filterCond, 1);
             }
 
             RexNode or1 = rexBuilder.makeCall(SqlStdOperatorTable.OR, rexBuilder.makeCall(SqlStdOperatorTable.OR, w1_1, w1_2), w1_3);
@@ -1122,19 +1147,6 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             relBuilder.project(case3, case1, case2, case4);
 
             materialize();
-
-
-
-//            String sql2 = String.format("WHERE %s AND \n" +
-//                    "((T1.begin > T2.begin AND T2.end > T1.begin) OR (T2.begin > T1.begin AND T1.end > T2.begin) OR (T1.begin = T2.begin)) AND\n" +
-//                    "((T1.end < T2.end AND T1.end > T2.begin) OR (T2.end < T1.end AND T2.end > T1.begin) OR (T1.end = T2.end));\n", joinRexNode.toString());
-//
-//            sql2 = sql2.replace("T1", viewName1);
-//            sql2 = sql2.replace("T2", viewName2);
-//
-//            sql1 = sql1 + sql2;
-//            String clauseName = createClause(sql1);
-//            materializationStack.push(clauseName);
         }
 
         private ImmutableList<String> getKeys(List<VariableOrGroundTerm> projectedArguments) {
@@ -1384,6 +1396,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         return ImmutableSet.copyOf(keySet);
     }
 
+    //TODO: replace string sqls with relNodes when you find a better implementation.
     private void createCoalesceClauses(String materializationName){
 
         String strKeys = getStrkeys();
