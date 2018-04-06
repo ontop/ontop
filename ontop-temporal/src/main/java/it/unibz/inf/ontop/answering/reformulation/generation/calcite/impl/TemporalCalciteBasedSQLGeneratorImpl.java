@@ -1048,6 +1048,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             // a normalized temporal join node can only have two nodes.
             QueryNode queryNode1 = query.getChildren(temporalJoinNode).get(0);
             queryNode1.acceptVisitor(this);
+            Set <NonGroundTerm>keySet1 = getKeySet();
             int size = lastProjectedArguments.size();
             String bInc1 = lastProjectedArguments.get(size - 4).toString();
             String b1 = lastProjectedArguments.get(size - 3).toString();
@@ -1099,13 +1100,13 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             RexNode w1_3 = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, b1F, b2F);
             RexNode t1_3 = b1F;
-            RexNode case1 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t1_1, w1_2, t1_2, w1_3, t1_3, t1_3);
+            RexNode case1 = relBuilder.alias(rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t1_1, w1_2, t1_2, w1_3, t1_3, t1_3), b1);
 
             //begin Inc
             RexNode t3_1 = bInc1F;
             RexNode t3_2 = bInc2F;
             RexNode t3_3 = rexBuilder.makeCall(SqlStdOperatorTable.AND, bInc1F, bInc2F);
-            RexNode case3 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t3_1, w1_2, t3_2, w1_3, t3_3, t3_3);
+            RexNode case3 = relBuilder.alias(rexBuilder.makeCall(SqlStdOperatorTable.CASE, w1_1, t3_1, w1_2, t3_2, w1_3, t3_3, t3_3), bInc1);
 
             //end
             RexNode c2_1 = rexBuilder.makeCall(SqlStdOperatorTable.LESS_THAN, e1F, e2F);
@@ -1120,13 +1121,13 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             RexNode w2_3 = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, e1F, e2F);
             RexNode t2_3 = e1F;
-            RexNode case2 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t2_1, w2_2, t2_2, w2_3, t2_3, t2_3);
+            RexNode case2 = relBuilder.alias(rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t2_1, w2_2, t2_2, w2_3, t2_3, t2_3), e1);
 
             //begin Inc
             RexNode t4_1 = eInc1F;
             RexNode t4_2 = eInc2F;
             RexNode t4_3 = rexBuilder.makeCall(SqlStdOperatorTable.AND, eInc1F, eInc2F);
-            RexNode case4 = rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t4_1, w2_2, t4_2, w2_3, t4_3, t4_3);
+            RexNode case4 = relBuilder.alias(rexBuilder.makeCall(SqlStdOperatorTable.CASE, w2_1, t4_1, w2_2, t4_2, w2_3, t4_3, t4_3), eInc1);
 
             RexNode joinRexNode = null;
             if (temporalJoinNode.getOptionalFilterCondition().isPresent()){
@@ -1144,7 +1145,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             else
                 relBuilder.filter(and1);
 
-            relBuilder.project(case3, case1, case2, case4);
+            List<RexNode> rexToProject = new ArrayList<>();
+            rexToProject.addAll(keySet1.stream()
+                    .map(k -> termToRexNode(k, 1))
+                    .collect(toList()));
+            rexToProject.addAll(Arrays.asList(case3, case1, case2, case4));
+            relBuilder.project(rexToProject);
 
             materialize();
         }
