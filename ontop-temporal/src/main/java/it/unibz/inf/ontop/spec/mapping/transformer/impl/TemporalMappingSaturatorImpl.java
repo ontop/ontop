@@ -100,15 +100,10 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         log.debug("Unfolded temporal rule : \n" + iq.toString());
                         iq = bindingLiftOptimizer.optimize(iq);
                         log.debug("Binding lift optimizer (temporal rule) : \n" + iq.toString());
-                        iq = new GroundTermRemovalFromDataNodeReshaper().optimize(iq);
-                        iq = pullOutVariableOptimizer.optimize(iq);
-                        log.debug("Pull out variable optimizer (temporal rule) : \n" + iq.toString());
                         iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
-                    } catch (EmptyQueryException e) {
-                        e.printStackTrace();
-                    } catch (MissingTemporalIntermediateQueryNodeException e) {
+                    } catch (EmptyQueryException | MissingTemporalIntermediateQueryNodeException e) {
                         e.printStackTrace();
                     }
                 } else {

@@ -9,30 +9,30 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-Turbine
 target		:Turbine/{turbine_id} a :Turbine .
-source		SELECT turbine_id FROM tb_components
+source		SELECT "turbine_id" FROM "tb_components"
 
 mappingId	urn:Map-TempSensor
 target		:TemperatureSensor/{sensor_id} a :TemperatureSensor ;  :measures {sensor_id}^^xsd:integer .
-source		SELECT sensor_id FROM tb_sensors WHERE sensor_type = 1
+source		SELECT "sensor_id" FROM "tb_sensors" WHERE "sensor_type" = 1
 
 mappingId	urn:Map-Burner
 target		:Burner/{turbine_id}/{component_id} a :Burner ; :isPartOf :Turbine/{turbine_id} .
-source		SELECT component_id, turbine_id FROM tb_components WHERE component_type = 1
+source		SELECT "component_id", "turbine_id" FROM "tb_components" WHERE "component_type" = 1
 
 mappingId	urn:Map-isMonitoredBy-1
 target		:Burner/{turbine_id}/{component_id} :isMonitoredBy :TemperatureSensor/{sensor_id} .
-source		SELECT turbine_id, component_id, sensor_id FROM tb_sensors, tb_components WHERE sensor_type = 1 AND mnted_part = component_id AND component_type = 1
+source		SELECT "turbine_id", "component_id", "sensor_id" FROM "tb_sensors", "tb_components" WHERE "sensor_type" = 1 AND "mnted_part" = "component_id" AND "component_type" = 1
 
 mappingId	urn:Map-isMonitoredBy-2
 target		:PowerTurbine/{turbine_id}/{component_id} :isMonitoredBy :RotationSpeedSensor/{sensor_id} .
-source		SELECT turbine_id, component_id, sensor_id FROM tb_sensors, tb_components WHERE sensor_type = 0 AND mnted_part = component_id AND component_type = 0
+source		SELECT "turbine_id", "component_id", "sensor_id" FROM "tb_sensors", "tb_components" WHERE "sensor_type" = 0 AND "mnted_part" = "component_id" AND "component_type" = 0
 
 mappingId	urn:Map-RotSpeedSensor
 target		:RotationSpeedSensor/{sensor_id} a :RotationSpeedSensor ;  :measures {sensor_id}^^xsd:integer .
-source		SELECT "sensor_id" FROM (SELECT "sensor_id", LAG("sensor_id") OVER() AS lag_sensor_id  FROM "public"."tb_sensors" WHERE "sensor_type" = 0) SUBQUERY
+source		SELECT "sensor_id" FROM "public"."tb_sensors" WHERE "sensor_type" = 0
 
 mappingId	urn:Map-PowerTurbine
 target		:PowerTurbine/{turbine_id}/{component_id} a :PowerTurbine ; :isPartOf :Turbine/{turbine_id} .
-source		SELECT turbine_id, component_id FROM tb_components WHERE component_type = 0
+source		SELECT "turbine_id", "component_id" FROM "tb_components" WHERE "component_type" = 0
 ]]
 

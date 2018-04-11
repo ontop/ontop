@@ -427,6 +427,10 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
             for (QueryNode queryNode : query.getChildren(innerJoinNode)) {
                 queryNode.acceptVisitor(this);
+                if (queryNode instanceof TemporalOperatorNode && !materializationStack.isEmpty()){
+                    String clauseName = materializationStack.pop();
+                    relBuilder.scan(clauseName);
+                }
                 if (!first) {
                     relBuilder.join(JoinRelType.INNER);
                 }
@@ -1049,6 +1053,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             QueryNode queryNode1 = query.getChildren(temporalJoinNode).get(0);
             queryNode1.acceptVisitor(this);
             Set <NonGroundTerm>keySet1 = getKeySet();
+            List<VariableOrGroundTerm> argumentsToProject = new ArrayList<>(lastProjectedArguments);
             int size = lastProjectedArguments.size();
             String bInc1 = lastProjectedArguments.get(size - 4).toString();
             String b1 = lastProjectedArguments.get(size - 3).toString();
@@ -1152,6 +1157,8 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             rexToProject.addAll(Arrays.asList(case3, case1, case2, case4));
             relBuilder.project(rexToProject);
 
+            lastProjectedArguments.clear();
+            lastProjectedArguments.addAll(argumentsToProject);
             materialize();
         }
 
@@ -1338,6 +1345,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         public void visit(TemporalCoalesceNode temporalCoalesceNode) {
             query.getChildrenStream(temporalCoalesceNode).forEach(n -> n.acceptVisitor(this));
             //projectArguments(ImmutableList.copyOf(lastProjectedArguments));
+            //TODO: what if node is not a project node
             RelNode node = relBuilder.build();
 
             final SqlNode sqlNode = converter.visitChild(0, node).asStatement();

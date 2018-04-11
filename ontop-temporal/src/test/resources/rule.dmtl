@@ -25,17 +25,22 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 ?ts rdf:type st:MainFlameOn  :-
     { ?ts st:mainFlame ?v. (?v >= 1) }
 
-?tb rdf:type st:PurgingIsOver :- {
-    { ?tb st:monitoredByTemperatureSensor ?ts . ?tb st:monitoredBySpeedSensor ?rs . }
-    {
-        ALWAYS IN PAST (0,10S] { ?ts a st:MainFlameOn . }
-        SOMETIME IN PAST (0,10M] {
-            ALWAYS IN PAST (0,30S] { ?rs a st:HighRotorSpeed .}
-            SOMETIME IN PAST (0,2M] {
-                ALWAYS IN PAST (0,1M] { ?rs a st:LowRotorSpeed . }
-            }
-        }
+?tb rdf:type st:MainFlameOnOfTurbine :- {
+    ?tb st:monitoredByTemperatureSensor ?ts . ALWAYS IN PAST (0,10S] { ?ts a st:MainFlameOn . }
+}
+
+?tb rdf:type st:IncreasingRotorSpeed :- {
+    ?tb st:monitoredBySpeedSensor ?rs .
+    SOMETIME IN PAST (0,10S] {
+                ALWAYS IN PAST (0,30S] { ?rs a st:HighRotorSpeed .}
+                SOMETIME IN PAST (0,2S] {
+                    ALWAYS IN PAST (0,1S] { ?rs a st:LowRotorSpeed . }
+                }
     }
+}
+?tb rdf:type st:PurgingIsOver :- {
+    ?tb rdf:type st:MainFlameOnOfTurbine .
+    ?tb rdf:type st:IncreasingRotorSpeed .
 }
 
 ?rs rdf:type st:HighAndLowRotorSpeed  :- {

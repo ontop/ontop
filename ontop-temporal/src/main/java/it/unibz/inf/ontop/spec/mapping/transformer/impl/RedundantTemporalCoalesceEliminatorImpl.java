@@ -58,6 +58,9 @@ public class RedundantTemporalCoalesceEliminatorImpl implements RedundantTempora
                     TIQBuilder.addChild(child, childOfChild);
                     removeCoalesces(TIQBuilder, query, childOfChild, child);
                 }
+            } else if (child instanceof InnerJoinNode){
+                TIQBuilder.addChild(parentNode, child);
+                removeCoalesces(TIQBuilder, query, child, parentNode);
             } else if(child instanceof TemporalJoinNode){
                 TIQBuilder.addChild(parentNode, child);
                 removeCoalesces(TIQBuilder, query, child, parentNode);
