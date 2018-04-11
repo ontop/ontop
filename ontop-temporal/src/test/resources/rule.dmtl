@@ -23,7 +23,7 @@ PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     { ALWAYS IN PAST (0,10S] { ?rs a st:LowRotorSpeed . }}
 
 ?ts rdf:type st:MainFlameOn  :-
-    { ?rs st:mainFlame ?v. (?v >= 1) }
+    { ?ts st:mainFlame ?v. (?v >= 1) }
 
 ?tb rdf:type st:PurgingIsOver :- {
     { ?tb st:monitoredByTemperatureSensor ?ts . ?tb st:monitoredBySpeedSensor ?rs . }

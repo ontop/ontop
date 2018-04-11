@@ -242,7 +242,6 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
 
-                //TODO: implement this part
                 ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
                         ImmutableList.copyOf(translation.getSignature()));
                 queryCache.put(inputQuery, executableQuery);
