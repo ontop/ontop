@@ -1402,7 +1402,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         return ImmutableSet.copyOf(keySet);
     }
 
-    //TODO: replace string sqls with relNodes when you find a better implementation.
+    //TODO: replace string sqls with relNodes when you find a better implementation of temporal coalesce.
     private void createCoalesceClauses(String materializationName){
 
         String strKeys = getStrkeys();

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLBaseVisitor;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLParser;
@@ -237,15 +238,17 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     private AtomPredicate getComparator(DatalogMTLParser.ComparisonExpressionContext ctx){
 
         if (ctx.COMPARATOR().getText().equals(">"))
-            return  atomFactory.getAtomPredicate("GT", 2);
+            return  atomFactory.getAtomPredicate(ExpressionOperation.GT.getName(), 2);
         else if (ctx.COMPARATOR().getText().equals(">="))
-            return  atomFactory.getAtomPredicate("GE", 2);
+            return  atomFactory.getAtomPredicate(ExpressionOperation.GTE.getName(), 2);
         else if (ctx.COMPARATOR().getText().equals("<"))
-            return  atomFactory.getAtomPredicate("LT", 2);
+            return  atomFactory.getAtomPredicate(ExpressionOperation.LT.getName(), 2);
         else if (ctx.COMPARATOR().getText().equals("<="))
-            return  atomFactory.getAtomPredicate("LE", 2);
+            return  atomFactory.getAtomPredicate(ExpressionOperation.LTE.getName(), 2);
         else if (ctx.COMPARATOR().getText().equals("="))
-            return  atomFactory.getAtomPredicate("EQ", 2);
+            return  atomFactory.getAtomPredicate(ExpressionOperation.EQ.getName(), 2);
+        else if (ctx.COMPARATOR().getText().equals("<>"))
+            return  atomFactory.getAtomPredicate(ExpressionOperation.NEQ.getName(), 2);
         else
             throw new IllegalArgumentException("Invalid comparator for the comparison expression " + ctx.getText());
     }

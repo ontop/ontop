@@ -79,8 +79,12 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
         ExpressionOperation expressionOperation = null;
         if (operator == ExpressionOperation.LT.getName())
             expressionOperation = ExpressionOperation.LT;
+        else if (operator == ExpressionOperation.LTE.getName())
+            expressionOperation = ExpressionOperation.LTE;
         else if (operator == ExpressionOperation.GT.getName())
             expressionOperation = ExpressionOperation.GT;
+        else if (operator == ExpressionOperation.GTE.getName())
+            expressionOperation = ExpressionOperation.GTE;
         else if (operator == ExpressionOperation.EQ.getName())
             expressionOperation = ExpressionOperation.EQ;
         else if (operator == ExpressionOperation.NEQ.getName())

@@ -61,6 +61,13 @@ public class RedundantTemporalCoalesceEliminatorImpl implements RedundantTempora
             } else if(child instanceof TemporalJoinNode){
                 TIQBuilder.addChild(parentNode, child);
                 removeCoalesces(TIQBuilder, query, child, parentNode);
+            } else if (child instanceof TemporalCoalesceNode){
+                QueryNode childOfChild = query.getFirstChild(child).orElseThrow(() ->
+                        new MissingTemporalIntermediateQueryNodeException("child of temporal coalesce node is missing"));
+                TIQBuilder.addChild(parentNode, currentNode);
+                TIQBuilder.addChild(currentNode, childOfChild);
+                removeCoalesces(TIQBuilder, query, childOfChild, currentNode);
+
             } else{
                 TIQBuilder.addChild(parentNode, currentNode);
                 TIQBuilder.addChild(currentNode, child);
