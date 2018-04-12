@@ -54,7 +54,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public Mapping convert(OntologyABox ontology, ExecutorRegistry executorRegistry, boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(OntologyABox ontology, ExecutorRegistry executorRegistry,
+                           boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
