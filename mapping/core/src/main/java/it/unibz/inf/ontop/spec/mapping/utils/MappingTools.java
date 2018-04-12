@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -34,8 +31,11 @@ public class MappingTools {
                 .map(s -> ((ImmutableFunctionalTerm)s).getTerm(0))
                 .orElseThrow(() -> new TriplePredicateTypeException( mappingAssertion , predicateVariable , "The variable is not defined in the root node (expected for a mapping assertion)"));
 
-
-        if (predicateTerm instanceof ValueConstant) {
+        if (predicateTerm instanceof IRIConstant) {
+            return ((IRIConstant) predicateTerm).getIRI();
+        }
+        // TODO: remove this
+        else if (predicateTerm instanceof ValueConstant) {
             return rdfFactory.createIRI( ((ValueConstant) predicateTerm).getValue());
         }
         else throw new MappingTools.TriplePredicateTypeException(mappingAssertion , "Predicate is not defined as a constant (expected for a mapping assertion)");
