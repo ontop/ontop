@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.datalog;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -18,9 +19,10 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Types;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static junit.framework.TestCase.assertTrue;
@@ -90,18 +93,16 @@ public class SubqueryTripleMappingGenerationTest {
         queryBuilder1.addChild(constructionNode2, dataNode2);
 
 
-        IntermediateQuery query1 = queryBuilder1.build();
+        IntermediateQuery mappingAssertion = queryBuilder1.build();
+        log.debug("\nQuery: \n" + mappingAssertion);
 
-        log.debug("\nQuery: \n" + query1);
+        MappingMetadata mappingMetadata = SPECIFICATION_FACTORY.createMetadata(
+                SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of()),
+                UriTemplateMatcher.create(Stream.empty(), TERM_FACTORY));
 
-        DatalogProgram pg = INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR.translate(query1);
-
-        Mapping mapping = DATALOG_2_QUERY_MAPPING_CONVERTER.convertMappingRules(
-                pg.getRules().stream().collect(ImmutableCollectors.toList()),
-                METADATA,
-                EXECUTOR_REGISTRY,
-                EMPTY_MAPPING_METADATA
-        );
+        Mapping mapping = MAPPING_FACTORY.createMapping(mappingMetadata,
+                ImmutableMap.of(),  ImmutableMap.of(CLASS_1, mappingAssertion),
+                EXECUTOR_REGISTRY);
         ClassifiedTBox tBoxReasoner = OntologyBuilderImpl.builder().build().tbox();
         Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, METADATA, tBoxReasoner);
 

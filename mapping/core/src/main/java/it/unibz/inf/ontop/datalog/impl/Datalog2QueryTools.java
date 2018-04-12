@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -37,8 +38,8 @@ public class Datalog2QueryTools {
             Function func = (Function) term;
             if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
                 Term t0 = func.getTerm(0);
-                if (t0 instanceof ValueConstant)
-                    return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
+                if (t0 instanceof IRIConstant)
+                    return ((IRIConstant) t0).getIRI().equals(RDF.TYPE);
             }
         }
         return false;

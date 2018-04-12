@@ -57,6 +57,7 @@ public class MappingTestingTools {
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
     public static final MappingUnionNormalizer MAPPING_UNION_NORMALIZER;
+    public static final SpecificationFactory SPECIFICATION_FACTORY;
 
 
     public static final RelationPredicate TABLE1_AR2;
@@ -89,6 +90,7 @@ public class MappingTestingTools {
         INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IntermediateQuery2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         MAPPING_UNION_NORMALIZER = injector.getInstance(MappingUnionNormalizer.class);
+        SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
