@@ -301,7 +301,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .filter(e -> e.getValue().size() == 1)
                 .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
                 .map(Map.Entry::getKey)
-                .filter(this::isFilteringNullValue)
+                .filter(v -> !isFilteringNullValue(v))
                 .collect(ImmutableCollectors.toSet());
     }
 

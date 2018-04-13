@@ -237,6 +237,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .filter(e -> isNullable(e.getValue(), nullableChildVariables))
                     .map(Map.Entry::getKey),
                 nullableChildVariables.stream()
+                    .filter(projectedVariables::contains)
         ).collect(ImmutableCollectors.toSet());
     }
 
