@@ -99,15 +99,15 @@ public abstract class DefaultRecursiveIQTransformer implements IQTransformer{
         return transformNaryCommutativeNode(rootNode, children);
     }
 
-    private IQTree transformLeaf(LeafIQTree leaf){
+    protected IQTree transformLeaf(LeafIQTree leaf){
         return leaf;
     }
 
-    private IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+    protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
         return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(this));
     }
 
-    private IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    protected IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return iqFactory.createNaryIQTree(
                 rootNode,
                 children.stream()
@@ -116,7 +116,7 @@ public abstract class DefaultRecursiveIQTransformer implements IQTransformer{
         );
     }
 
-    private IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return iqFactory.createBinaryNonCommutativeIQTree(
                 rootNode,
                 leftChild.acceptTransformer(this),
