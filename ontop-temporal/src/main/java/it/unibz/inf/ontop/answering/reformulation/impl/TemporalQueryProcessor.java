@@ -241,9 +241,9 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
 
-                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
-
-                log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
+                //intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
+                //
+                //log.debug("Redundant temporal coalesces Eliminated: \n" + intermediateQuery.toString());
 
                 ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
                         ImmutableList.copyOf(translation.getSignature()));

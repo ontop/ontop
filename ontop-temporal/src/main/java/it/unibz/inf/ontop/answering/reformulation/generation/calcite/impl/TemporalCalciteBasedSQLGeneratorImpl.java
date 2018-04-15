@@ -9,13 +9,13 @@ import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.OntopJDBCSchema;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalCalciteBasedSQLGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.calcite.TemporalRelBuilder;
-import it.unibz.inf.ontop.answering.reformulation.generation.calcite.algebra.TemporalRangeRelNode;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.ParserViewDefinition;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.exception.MissingTemporalIntermediateQueryNodeException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.TemporalTranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.spec.mapping.transformer.RedundantTemporalCoalesceEliminator;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.temporal.iq.node.*;
@@ -42,8 +43,8 @@ import org.apache.calcite.materialize.MaterializationKey;
 import org.apache.calcite.materialize.MaterializationService;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
+import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.rel2sql.RelToSqlConverter;
-import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rex.RexBuilder;
@@ -52,15 +53,12 @@ import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.*;
-import org.apache.calcite.sql.fun.SqlCaseOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
-import org.apache.calcite.sql.type.BasicSqlType;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeFamily;
 import org.apache.calcite.sql.type.SqlTypeName;
-import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.*;
 import org.apache.calcite.util.DateString;
 import org.apache.calcite.util.TimeString;
@@ -102,6 +100,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     private final SubstitutionFactory substitutionFactory;
     private final SimpleRDF rdfFactory;
     private final TemporalTranslationFactory temporalTranslationFactory;
+    private final RedundantTemporalCoalesceEliminator tcEliminator;
 
     private RelToSqlConverter converter;
     private MaterializationService mService;
@@ -126,12 +125,13 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                                                  PullOutVariableOptimizer pullOutVariableOptimizer,
                                                  TermFactory termFactory,
                                                  SubstitutionFactory substitutionFactory,
-                                                 TemporalTranslationFactory temporalTranslationFactory) {
+                                                 TemporalTranslationFactory temporalTranslationFactory, RedundantTemporalCoalesceEliminator tcEliminator) {
 
         this.pullOutVariableOptimizer = pullOutVariableOptimizer;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.temporalTranslationFactory = temporalTranslationFactory;
+        this.tcEliminator = tcEliminator;
         //this.rootSchema = new OntopSchemaPlus(metadata);
         this.typeFactory = new SqlTypeFactoryImpl(RelDataTypeSystem.DEFAULT);
         this.rdfFactory = new SimpleRDF();
@@ -868,6 +868,23 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
             lastProjectedArguments.addAll(arguments);
         }
 
+        private void projectArguments2(ImmutableList <VariableOrGroundTerm> arguments){
+
+            ImmutableList<RexNode> rexNodes = arguments.stream()
+                    .map(arg -> relBuilder.field(arg.toString()))
+                    .collect(toList());
+
+            final ImmutableList<String> names = IntStream
+                    .range(0, arguments.size())
+                    .mapToObj(i -> arguments.get(i).toString())
+                    .collect(toList());
+
+            // "force: true" is important to workaround a bug of calcite, otherwise, the renaming might be ignored
+            relBuilder.project(rexNodes, names, true);
+            lastProjectedArguments.clear();
+            lastProjectedArguments.addAll(arguments);
+        }
+
         @Override
         public void visit(EmptyNode emptyNode) {
             throw new UnsupportedOperationException(emptyNode.getClass().getName() + " not implemented");
@@ -1345,18 +1362,42 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         public void visit(TemporalCoalesceNode temporalCoalesceNode) {
             query.getChildrenStream(temporalCoalesceNode).forEach(n -> n.acceptVisitor(this));
             //projectArguments(ImmutableList.copyOf(lastProjectedArguments));
-            //TODO: what if node is not a project node
-            RelNode node = relBuilder.build();
 
-            final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
-            String sqlString = sqlNode.toSqlString(dialect).getSql();
-            String clauseName = getNewWithClauseName();
-            MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
-                    sqlString, calciteSchema.path(null), clauseName, true, true);
-            materializationKeyMap.putIfAbsent(clauseName, key);
-            updateProjectedArguments(temporalCoalesceNode.getTerms(),
-                    lastProjectedArguments.subList(lastProjectedArguments.size()- 4, lastProjectedArguments.size()));
-            createCoalesceClauses(clauseName);
+            try {
+                if (!(tcEliminator.isRedundantCoalesce(query, temporalCoalesceNode, query.getRootNode()))) {
+                    // BUG: CALCITE-2057 causes the following if condition.
+                    // In case of current node instance of TemporalCoalesceNode child node instance of ExtensionalDataNode,
+                    // Calcite throws this exception.
+                    QueryNode child = query.getFirstChild(temporalCoalesceNode).orElseThrow(() ->
+                            new MissingTemporalIntermediateQueryNodeException("child of filter node is missing"));
+                    if (!(child instanceof ExtensionalDataNode)) {
+                        updateProjectedArguments(temporalCoalesceNode.getTerms(),
+                                ImmutableList.copyOf(lastProjectedArguments.subList(lastProjectedArguments.size() - 4, lastProjectedArguments.size())));
+
+                        RelNode node = relBuilder.peek();
+                        if (!(node instanceof LogicalProject)) {
+                            projectArguments2(ImmutableList.copyOf(lastProjectedArguments));
+                        }
+
+                        node = relBuilder.build();
+
+                        final SqlNode sqlNode = converter.visitChild(0, node).asStatement();
+                        String sqlString = sqlNode.toSqlString(dialect).getSql();
+                        String clauseName = getNewWithClauseName();
+                        MaterializationKey key = mService.defineMaterialization(calciteSchema, null,
+                                sqlString, calciteSchema.path(null), clauseName, true, true);
+                        materializationKeyMap.putIfAbsent(clauseName, key);
+
+
+                        createCoalesceClauses(clauseName);
+                    }
+                }
+                else {
+                    System.out.println();
+                }
+            } catch (MissingTemporalIntermediateQueryNodeException e) {
+                e.printStackTrace();
+            }
         }
     }
 

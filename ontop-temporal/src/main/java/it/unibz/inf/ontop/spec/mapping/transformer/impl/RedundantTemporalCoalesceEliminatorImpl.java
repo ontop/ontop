@@ -91,4 +91,110 @@ public class RedundantTemporalCoalesceEliminatorImpl implements RedundantTempora
         return TIQBuilder;
     }
 
+    public boolean isRedundantCoalesce(IntermediateQuery query,
+                                                             QueryNode coalesceNode,  QueryNode currentNode)
+            throws MissingTemporalIntermediateQueryNodeException {
+
+        if(currentNode instanceof TemporalCoalesceNode){
+            QueryNode child = query.getFirstChild(currentNode).orElseThrow(() ->
+                    new MissingTemporalIntermediateQueryNodeException("child of temporal coalesce node is missing"));
+            if(child instanceof FilterNode){
+                QueryNode childOfChild = query.getFirstChild(child).orElseThrow(() ->
+                        new MissingTemporalIntermediateQueryNodeException("child of filter node is missing"));
+                if(childOfChild instanceof TemporalCoalesceNode){
+                    if (childOfChild.equals(coalesceNode))
+                        return true;
+                    else
+                        return isRedundantCoalesce(query, coalesceNode, childOfChild);
+                }else{
+                    return isRedundantCoalesce(query, coalesceNode, childOfChild);
+                }
+            } else if (child instanceof InnerJoinNode){
+                if (currentNode.equals(coalesceNode))
+                    return false;
+                else {
+                    boolean flag = false;
+                    for (QueryNode c : query.getChildren(child)){
+                        try {
+                            flag = isRedundantCoalesce(query, coalesceNode, c) || flag;
+                        } catch (MissingTemporalIntermediateQueryNodeException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return flag;
+                }
+            } else if(child instanceof TemporalJoinNode){
+                if (currentNode.equals(coalesceNode))
+                    return true;
+                else {
+                    boolean flag = false;
+                    for (QueryNode c : query.getChildren(child)){
+                        try {
+                            flag = isRedundantCoalesce(query, coalesceNode, c) || flag;
+                        } catch (MissingTemporalIntermediateQueryNodeException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return flag;
+                }
+            } else if (child instanceof TemporalCoalesceNode){
+                if(child.equals(coalesceNode)){
+                    return true;
+                } else {
+                    QueryNode childOfChild = query.getFirstChild(child).orElseThrow(() ->
+                            new MissingTemporalIntermediateQueryNodeException("child of coalesce node is missing"));
+                    return isRedundantCoalesce(query, coalesceNode, childOfChild);
+                }
+            } else{
+                boolean flag = false;
+                for (QueryNode c : query.getChildren(child)){
+                    try {
+                        flag = isRedundantCoalesce(query, coalesceNode, c) || flag;
+                    } catch (MissingTemporalIntermediateQueryNodeException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return flag;
+            }
+        }else if (currentNode instanceof DataNode){
+            return false;
+        } else {
+            if (currentNode instanceof UnaryOperatorNode) {
+                QueryNode child = query.getFirstChild(currentNode).orElseThrow(() ->
+                        new MissingTemporalIntermediateQueryNodeException("child of filter node is missing"));
+                return isRedundantCoalesce(query, coalesceNode, child);
+            } else {
+                boolean flag = false;
+                for (QueryNode c : query.getChildren(currentNode)){
+                    try {
+                        flag = isRedundantCoalesce(query, coalesceNode, c) || flag;
+                    } catch (MissingTemporalIntermediateQueryNodeException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return flag;
+            }
+        }
+    }
+
+//    private Boolean isRedundantCoalesce(IntermediateQuery query, QueryNode currentNode, QueryNode parentNode)
+//            throws MissingTemporalIntermediateQueryNodeException {
+//
+//        if(currentNode instanceof TemporalCoalesceNode){
+//            QueryNode child = query.getFirstChild(currentNode).orElseThrow(() ->
+//                    new MissingTemporalIntermediateQueryNodeException("child of temporal coalesce node is missing"));
+//            if(child instanceof FilterNode){
+//                QueryNode childOfChild = query.getFirstChild(child).orElseThrow(() ->
+//                        new MissingTemporalIntermediateQueryNodeException("child of filter node is missing"));
+//                return childOfChild instanceof TemporalCoalesceNode;
+//            } else if (child instanceof InnerJoinNode) {
+//                //NOT SURE!!!!
+//                return false;
+//            } else
+//                return child instanceof TemporalJoinNode || child instanceof TemporalCoalesceNode;
+//        }
+//
+//        return false;
+//    }
+
 }
