@@ -8,10 +8,12 @@ import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -109,7 +111,7 @@ public class MappingTest {
         DataAtom<RelationPredicate> binaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B));
         DataAtom<RelationPredicate> unaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P3_PREDICATE, ImmutableList.of(A));
 
-        ImmutableMap.Builder<IRI, IntermediateQuery> propertyMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<IRI, IQ> propertyMapBuilder = ImmutableMap.builder();
 
         // Properties
         for (IRI propertyIri : propertyIris){
@@ -123,7 +125,7 @@ public class MappingTest {
                     ATOM_FACTORY.getTripleAtomPredicate(), S, P, O), mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(binaryExtensionalAtom);
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-            IntermediateQuery mappingAssertion = mappingBuilder.build();
+            IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
             propertyMapBuilder.put(propertyIri, mappingAssertion);
             LOGGER.info("Mapping assertion:\n" +mappingAssertion);
         }
@@ -139,8 +141,8 @@ public class MappingTest {
                 ATOM_FACTORY.getTripleAtomPredicate(), S, P, O), mappingRootNode);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(unaryExtensionalAtom);
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
-        IntermediateQuery classMappingAssertion = mappingBuilder.build();
-        ImmutableMap<IRI, IntermediateQuery> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
+        IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
+        ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
         LOGGER.info("Mapping assertion:\n" + classMappingAssertion);
 
 
@@ -162,7 +164,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IntermediateQuery mappingAssertion = normalizedMapping.getRDFPropertyDefinition(propertyIri)
+            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(propertyIri)
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             LOGGER.info(mappingAssertion.toString());
@@ -177,7 +179,7 @@ public class MappingTest {
         }
 
         // Class
-        IntermediateQuery mappingAssertion = normalizedMapping.getRDFClassDefinition(CLASS_1)
+        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(CLASS_1)
                 .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
         System.out.println(mappingAssertion);
@@ -208,7 +210,7 @@ public class MappingTest {
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
 
-        IntermediateQuery mappingAssertion = queryBuilder.build();
+        IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),

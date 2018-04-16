@@ -4,13 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -50,7 +51,7 @@ public class MappingTestingTools {
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingMerger MAPPING_MERGER;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
-    public static final IntermediateQuery2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
+    public static final IQ2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSaturator MAPPING_SATURATOR;
 
     public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER;
@@ -58,6 +59,7 @@ public class MappingTestingTools {
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
     public static final MappingUnionNormalizer MAPPING_UNION_NORMALIZER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
+    public static final IQConverter IQ_CONVERTER;
 
 
     public static final RelationPredicate TABLE1_AR2;
@@ -87,10 +89,11 @@ public class MappingTestingTools {
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
-        INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IntermediateQuery2DatalogTranslator.class);
+        INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IQ2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         MAPPING_UNION_NORMALIZER = injector.getInstance(MappingUnionNormalizer.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
+        IQ_CONVERTER = injector.getInstance(IQConverter.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());

@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -70,12 +70,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
-        for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
+        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
         }
     }
 
-    private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
+    private void validateAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance,
                                    Ontology ontology,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -114,13 +114,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * TODO: refactor it!
      *
      */
-    private Optional<RDFTermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
+    private Optional<RDFTermType> extractTripleObjectType(IQ mappingAssertion)
             throws TripleObjectTypeInferenceException {
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
         Variable objectVariable = projectedVariables.get(2);
 
-        ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getRootNode())
+        ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getTree().getRootNode())
                 .filter(n -> n instanceof ConstructionNode)
                 .map((n) -> (ConstructionNode) n)
                 .map(ConstructionNode::getSubstitution)
@@ -372,13 +372,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     }
 
     private static class TripleObjectTypeInferenceException extends OntopInternalBugException {
-        TripleObjectTypeInferenceException(IntermediateQuery mappingAssertion, Variable tripleObjectVariable,
+        TripleObjectTypeInferenceException(IQ mappingAssertion, Variable tripleObjectVariable,
                                            String reason) {
             super("Internal bug: cannot infer the type of " + tripleObjectVariable + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
 
-        TripleObjectTypeInferenceException(IntermediateQuery mappingAssertion, String reason) {
+        TripleObjectTypeInferenceException(IQ mappingAssertion, String reason) {
             super("Internal bug: cannot infer the type of the object term " + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -51,8 +52,8 @@ public class MappingMergerImpl implements MappingMerger {
         }
 
         MappingMetadata metadata = mergeMetadata(mappings);
-        ImmutableMap<IRI, IntermediateQuery> propertyMap = mergeMappingPropertyMaps(mappings);
-        ImmutableMap<IRI, IntermediateQuery> classMap = mergeMappingClassMaps(mappings);
+        ImmutableMap<IRI, IQ> propertyMap = mergeMappingPropertyMaps(mappings);
+        ImmutableMap<IRI, IQ> classMap = mergeMappingClassMaps(mappings);
 
         // TODO: check that the ExecutorRegistry is identical for all mappings ?
         return specificationFactory.createMapping(
@@ -98,9 +99,9 @@ public class MappingMergerImpl implements MappingMerger {
         );
     }
 
-    private ImmutableMap<IRI, IntermediateQuery> mergeMappingPropertyMaps(ImmutableSet<Mapping> mappings) {
+    private ImmutableMap<IRI, IQ> mergeMappingPropertyMaps(ImmutableSet<Mapping> mappings) {
 
-        ImmutableMap<IRI, Collection<IntermediateQuery>> atomPredicate2IQs = mappings.stream()
+        ImmutableMap<IRI, Collection<IQ>> atomPredicate2IQs = mappings.stream()
                 .flatMap(m -> getMappingPropertyMap(m).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
@@ -112,9 +113,9 @@ public class MappingMergerImpl implements MappingMerger {
                 ));
     }
 
-    private ImmutableMap<IRI, IntermediateQuery> mergeMappingClassMaps(ImmutableSet<Mapping> mappings) {
+    private ImmutableMap<IRI, IQ> mergeMappingClassMaps(ImmutableSet<Mapping> mappings) {
 
-        ImmutableMap<IRI, Collection<IntermediateQuery>> atomPredicate2IQs = mappings.stream()
+        ImmutableMap<IRI, Collection<IQ>> atomPredicate2IQs = mappings.stream()
                 .flatMap(m -> getMappingClassMap(m).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
@@ -130,13 +131,13 @@ public class MappingMergerImpl implements MappingMerger {
     /**
      * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
      */
-    private IntermediateQuery mergeDefinitions(Collection<IntermediateQuery> queries) {
+    private IQ mergeDefinitions(Collection<IQ> queries) {
         return queryMerger.mergeDefinitions(queries)
                 .map(mappingIQNormalizer::normalize)
                 .orElseThrow(() -> new MappingMergingException("The query should be present"));
     }
 
-    private ImmutableMap<IRI, IntermediateQuery> getMappingPropertyMap(Mapping mapping) {
+    private ImmutableMap<IRI, IQ> getMappingPropertyMap(Mapping mapping) {
         return mapping.getRDFProperties().stream()
                 .collect(ImmutableCollectors.toMap(
                         p -> p,
@@ -144,7 +145,7 @@ public class MappingMergerImpl implements MappingMerger {
                 ));
     }
 
-    private ImmutableMap<IRI, IntermediateQuery> getMappingClassMap(Mapping mapping) {
+    private ImmutableMap<IRI, IQ> getMappingClassMap(Mapping mapping) {
         return mapping.getRDFClasses().stream()
                 .collect(ImmutableCollectors.toMap(
                         p -> p,
@@ -155,8 +156,8 @@ public class MappingMergerImpl implements MappingMerger {
     /**
      * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
      */
-    private static IntermediateQuery getDefinition(Mapping mapping, IRI predicate) {
-        Optional<IntermediateQuery> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(predicate);
+    private static IQ getDefinition(Mapping mapping, IRI predicate) {
+        Optional<IQ> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(predicate);
         if(rdfPropertyDefinition.isPresent()){
             return rdfPropertyDefinition.get();
         }

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 
 public interface MappingIQNormalizer {
-    IntermediateQuery normalize(IntermediateQuery query);
+    IQ normalize(IQ query);
 }

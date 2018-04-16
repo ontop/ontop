@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.Term;
@@ -77,7 +77,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IntermediateQuery> intermediateQueryList = ruleIndex.keySet().stream()
+        ImmutableList<IQ> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
                         dbMetadata,
                         ruleIndex.get(predicate),
@@ -90,22 +90,22 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<IRI, IntermediateQuery> mappingClassMap = intermediateQueryList.stream()
+        ImmutableMap<IRI, IQ> mappingClassMap = intermediateQueryList.stream()
                 .filter (assertion ->  {
                     ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
                     IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
                     return (predicateIRI.equals(RDF.TYPE));})
                 .collect(ImmutableCollectors.toMap(
-                        a -> MappingTools.extractClassIRI(a),
+                        MappingTools::extractClassIRI,
                         a -> a));
 
-        ImmutableMap<IRI, IntermediateQuery> mappingPropertiesMap = intermediateQueryList.stream()
+        ImmutableMap<IRI, IQ> mappingPropertiesMap = intermediateQueryList.stream()
                 .filter (assertion ->  {
                     ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
                     IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
                     return (!predicateIRI.equals(RDF.TYPE));})
                 .collect(ImmutableCollectors.toMap(
-                        a -> MappingTools.extractPropertiesIRI(a),
+                        MappingTools::extractPropertiesIRI,
                         a -> a));
 
 
@@ -123,7 +123,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toSet());
 
 
-        ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
+        ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> Optional.of(
                                 datalogRule2QueryConverter.convertDatalogRule(

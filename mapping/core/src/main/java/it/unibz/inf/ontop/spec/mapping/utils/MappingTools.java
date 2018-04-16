@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
@@ -20,9 +20,9 @@ public class MappingTools {
 
     private final static RDF rdfFactory = new SimpleRDF();
 
-    public static IRI extractPredicateTerm(IntermediateQuery mappingAssertion, Variable predicateVariable)  {
+    public static IRI extractPredicateTerm(IQ mappingAssertion, Variable predicateVariable)  {
 
-        ImmutableTerm predicateTerm = Optional.of(mappingAssertion.getRootNode())
+        ImmutableTerm predicateTerm = Optional.of(mappingAssertion.getTree().getRootNode())
                 .filter(n -> n instanceof ConstructionNode)
                 .map((n) -> (ConstructionNode) n)
                 .map(ConstructionNode::getSubstitution)
@@ -42,13 +42,13 @@ public class MappingTools {
     }
 
     private static class TriplePredicateTypeException extends OntopInternalBugException {
-        TriplePredicateTypeException(IntermediateQuery mappingAssertion, Variable triplePredicateVariable,
+        TriplePredicateTypeException(IQ mappingAssertion, Variable triplePredicateVariable,
                                      String reason) {
             super("Internal bug: cannot retrieve  " + triplePredicateVariable + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
 
-        TriplePredicateTypeException(IntermediateQuery mappingAssertion, String reason) {
+        TriplePredicateTypeException(IQ mappingAssertion, String reason) {
             super("Internal bug: cannot retrieve the predicate IRI in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
@@ -57,7 +57,7 @@ public class MappingTools {
 
 
     //method to retrieve the class IRI from the mapping assertion.
-    public static IRI extractClassIRI(IntermediateQuery mappingAssertion) {
+    public static IRI extractClassIRI(IQ mappingAssertion) {
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
         if(projectedVariables.size()!=3){
@@ -73,7 +73,7 @@ public class MappingTools {
     }
 
     //method to retrieve the object or data properties IRI from the mapping assertion.
-    public static IRI extractPropertiesIRI(IntermediateQuery mappingAssertion)  {
+    public static IRI extractPropertiesIRI(IQ mappingAssertion)  {
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
         if(projectedVariables.size()!=3){

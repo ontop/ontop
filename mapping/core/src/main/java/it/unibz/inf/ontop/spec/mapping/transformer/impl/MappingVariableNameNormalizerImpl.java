@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -44,23 +45,23 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
 
     @Override
     public Mapping normalize(Mapping mapping) {
-        Stream<IntermediateQuery> queryPropertiesStream = mapping.getRDFProperties().stream()
+        Stream<IQ> queryPropertiesStream = mapping.getRDFProperties().stream()
                 .map(mapping::getRDFPropertyDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        Stream<IntermediateQuery> queryClassesStream = mapping.getRDFClasses().stream()
+        Stream<IQ> queryClassesStream = mapping.getRDFClasses().stream()
                 .map(mapping::getRDFClassDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        ImmutableMap<IRI, IntermediateQuery> normalizedMappingPropertyMap = renameQueries(queryPropertiesStream)
+        ImmutableMap<IRI, IQ> normalizedMappingPropertyMap = renameQueries(queryPropertiesStream)
                 .collect(ImmutableCollectors.toMap(
                         q -> MappingTools.extractPropertiesIRI(q),
                         q -> q
                 ));
 
-        ImmutableMap<IRI, IntermediateQuery> normalizedMappingClassyMap = renameQueries(queryClassesStream)
+        ImmutableMap<IRI, IQ> normalizedMappingClassyMap = renameQueries(queryClassesStream)
                 .collect(ImmutableCollectors.toMap(
                         q -> MappingTools.extractClassIRI(q),
                         q -> q
@@ -73,16 +74,16 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
     /**
      * Appends a different suffix to each query
      */
-    private Stream<IntermediateQuery> renameQueries(Stream<IntermediateQuery> queryStream) {
+    private Stream<IQ> renameQueries(Stream<IQ> queryStream) {
         AtomicInteger i = new AtomicInteger(0);
         return queryStream
                 .map(m -> appendSuffixToVariableNames(transformerFactory, m, i.incrementAndGet()));
     }
 
-    private IntermediateQuery appendSuffixToVariableNames(QueryTransformerFactory transformerFactory,
-                                                                 IntermediateQuery query, int suffix) {
+    private IQ appendSuffixToVariableNames(QueryTransformerFactory transformerFactory,
+                                           IQ query, int suffix) {
         Map<Variable, Variable> substitutionMap =
-                query.getKnownVariables().stream()
+                query.getTree().getKnownVariables().stream()
                         .collect(Collectors.toMap(
                                 v -> v,
                                 v -> termFactory.getVariable(v.getName()+"m"+suffix)));

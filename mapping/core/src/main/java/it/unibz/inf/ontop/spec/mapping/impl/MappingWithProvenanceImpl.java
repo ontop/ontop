@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -25,7 +25,7 @@ import java.util.Optional;
 
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
-    private final ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap;
+    private final ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap;
     private final MappingMetadata mappingMetadata;
     private final ExecutorRegistry executorRegistry;
     private final SpecificationFactory specFactory;
@@ -33,7 +33,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     private final MappingIQNormalizer mappingIQNormalizer;
 
     @AssistedInject
-    private MappingWithProvenanceImpl(@Assisted ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> provenanceMap,
+    private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
                                       @Assisted ExecutorRegistry executorRegistry,
                                       SpecificationFactory specFactory,
@@ -48,17 +48,17 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     @Override
-    public ImmutableSet<IntermediateQuery> getMappingAssertions() {
+    public ImmutableSet<IQ> getMappingAssertions() {
         return provenanceMap.keySet();
     }
 
     @Override
-    public ImmutableMap<IntermediateQuery, PPMappingAssertionProvenance> getProvenanceMap() {
+    public ImmutableMap<IQ, PPMappingAssertionProvenance> getProvenanceMap() {
         return provenanceMap;
     }
 
     @Override
-    public PPMappingAssertionProvenance getProvenance(IntermediateQuery mappingAssertion) {
+    public PPMappingAssertionProvenance getProvenance(IQ mappingAssertion) {
         return Optional.ofNullable(provenanceMap.get(mappingAssertion))
                 .orElseThrow(() -> new IllegalArgumentException("This assertion is not part of the mapping"));
     }
@@ -67,7 +67,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     public Mapping toRegularMapping() {
 
         // return iri of class in multimap
-        ImmutableMultimap<IRI, IntermediateQuery> classMultimap = getMappingAssertions().stream()
+        ImmutableMultimap<IRI, IQ> classMultimap = getMappingAssertions().stream()
                 .filter (assertion ->  {
                     ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
                     IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
@@ -80,7 +80,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                         a -> a));
 
         // return iri of object and data properties in multimap
-        ImmutableMultimap<IRI, IntermediateQuery> propertyMultimap = getMappingAssertions().stream()
+        ImmutableMultimap<IRI, IQ> propertyMultimap = getMappingAssertions().stream()
                 .filter (assertion ->  {
                     ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
                     IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
@@ -93,22 +93,22 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                         a -> a));
 
 
-        ImmutableMap<IRI, IntermediateQuery> classDefinitionMap = classMultimap.asMap().values().stream()
+        ImmutableMap<IRI, IQ> classDefinitionMap = classMultimap.asMap().values().stream()
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toMap(
-                        a -> MappingTools.extractClassIRI(a),
+                        MappingTools::extractClassIRI,
                         a -> a));
 
-        ImmutableMap<IRI, IntermediateQuery> propertyDefinitionMap = propertyMultimap.asMap().values().stream()
+        ImmutableMap<IRI, IQ> propertyDefinitionMap = propertyMultimap.asMap().values().stream()
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(mappingIQNormalizer::normalize)
                 .collect(ImmutableCollectors.toMap(
-                        a -> MappingTools.extractPropertiesIRI(a),
+                        MappingTools::extractPropertiesIRI,
                         a -> a));
 
         return specFactory.createMapping(mappingMetadata, propertyDefinitionMap, classDefinitionMap, executorRegistry);
