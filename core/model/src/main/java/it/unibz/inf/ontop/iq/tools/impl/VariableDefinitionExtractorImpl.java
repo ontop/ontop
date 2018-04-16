@@ -4,7 +4,8 @@ package it.unibz.inf.ontop.iq.tools.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
@@ -43,28 +44,25 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
      * then [x/+(x1,x2)] is returned.
      */
     @Override
-    public ImmutableSet<ImmutableTerm> extract(Variable variable, QueryNode node, IntermediateQuery query) {
-        if (query.contains(node)) {
-            if (query.getVariables(node).contains(variable)) {
-                return getDefinitions(variable, variable, node, query)
-                        .collect(ImmutableCollectors.toSet());
-            }
-            throw new IllegalArgumentException("The node should project the variable");
+    public ImmutableSet<ImmutableTerm> extract(Variable variable, IQTree tree) {
+        if (tree.getVariables().contains(variable)) {
+            return getDefinitions(variable, variable, tree)
+                    .collect(ImmutableCollectors.toSet());
         }
-        throw new IllegalArgumentException("The node should be in the query");
+            throw new IllegalArgumentException("The node should project the variable");
     }
 
     @Override
-    public ImmutableSet<ImmutableTerm> extract(Variable variable, IntermediateQuery query) {
-        return extract(variable, query.getRootNode(), query);
+    public ImmutableSet<ImmutableTerm> extract(Variable variable, IQ query) {
+        return extract(variable, query.getTree());
     }
 
     /**
      * Recursive
      */
-    private Stream<ImmutableTerm> getDefinitions(Variable initialVariable, Variable currentVariable,
-                                                        QueryNode currentNode, IntermediateQuery query) {
-        if (currentNode instanceof ConstructionNode) {
+    private Stream<ImmutableTerm> getDefinitions(Variable initialVariable, Variable currentVariable, IQTree tree) {
+        QueryNode currentNode = tree.getRootNode();
+        if (tree.getRootNode() instanceof ConstructionNode) {
             ImmutableTerm def = ((ConstructionNode) currentNode).getSubstitution().get(currentVariable);
             if (def == null) {
                 def = currentVariable;
@@ -82,17 +80,16 @@ public class VariableDefinitionExtractorImpl implements VariableDefinitionExtrac
             currentVariable = (Variable) def;
         }
         /* Leaf node: return a simple variable substitution */
-        if (!query.getFirstChild(currentNode).isPresent()) {
+        if (tree.isLeaf()) {
             return Stream.of(currentVariable);
         }
         /* recursive call */
         Variable fakeClone = (Variable) currentVariable.clone();
-        return query.getChildren(currentNode).stream()
-                .flatMap(n -> getDefinitions(
+        return tree.getChildren().stream()
+                .flatMap(c -> getDefinitions(
                         initialVariable,
                         fakeClone,
-                        n,
-                        query
+                        c
                 ));
     }
 
