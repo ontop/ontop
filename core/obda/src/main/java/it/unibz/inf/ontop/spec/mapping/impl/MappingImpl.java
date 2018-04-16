@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 public class MappingImpl implements Mapping {
 
     private final MappingMetadata metadata;
-    private final ImmutableMap<IRI, IntermediateQuery> propertyDefinitions;
-    private final ImmutableMap<IRI, IntermediateQuery> classDefinitions;
+    private final ImmutableMap<IRI, IQ> propertyDefinitions;
+    private final ImmutableMap<IRI, IQ> classDefinitions;
     /**
      * TODO: remove it when the conversion to Datalog will not be needed anymore
      */
@@ -30,8 +30,8 @@ public class MappingImpl implements Mapping {
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted("propertyMap") ImmutableMap<IRI, IntermediateQuery> propertyMap,
-                        @Assisted("classMap") ImmutableMap<IRI, IntermediateQuery> classMap,
+                        @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                        @Assisted("classMap") ImmutableMap<IRI, IQ> classMap,
                         @Assisted ExecutorRegistry executorRegistry,
                         OntopModelSettings settings) {
         this.metadata = metadata;
@@ -40,12 +40,12 @@ public class MappingImpl implements Mapping {
         this.executorRegistry = executorRegistry;
 
         if (settings.isTestModeEnabled()) {
-            for (IntermediateQuery query : propertyDefinitions.values()) {
+            for (IQ query : propertyDefinitions.values()) {
                 if (projectNullableVariable(query))
                     throw new IllegalArgumentException(
                             "A mapping assertion must not return a nullable variable. \n" + query);
             }
-            for (IntermediateQuery query : classDefinitions.values()) {
+            for (IQ query : classDefinitions.values()) {
                 if (projectNullableVariable(query))
                     throw new IllegalArgumentException(
                             "A mapping assertion must not return a nullable variable. \n" + query);
@@ -54,10 +54,11 @@ public class MappingImpl implements Mapping {
 
     }
 
-    private static boolean projectNullableVariable(IntermediateQuery query) {
-        QueryNode rootNode = query.getRootNode();
+    private static boolean projectNullableVariable(IQ query) {
+        IQTree tree = query.getTree();
+
         return query.getProjectionAtom().getVariableStream()
-                .anyMatch(v -> rootNode.isVariableNullable(query, v));
+                .anyMatch(tree::containsNullableVariable);
     }
 
     @Override
@@ -66,19 +67,13 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IntermediateQuery> getRDFPropertyDefinition(IRI propertyIRI) {
-        IntermediateQuery query = propertyDefinitions.get(propertyIRI);
-        return query != null ?
-                Optional.of(query):
-                Optional.empty();
+    public Optional<IQ> getRDFPropertyDefinition(IRI propertyIRI) {
+        return Optional.ofNullable(propertyDefinitions.get(propertyIRI));
     }
 
     @Override
-    public Optional<IntermediateQuery> getRDFClassDefinition(IRI classIRI) {
-        IntermediateQuery query = classDefinitions.get(classIRI);
-        return query != null ?
-                Optional.of(query):
-                Optional.empty();
+    public Optional<IQ> getRDFClassDefinition(IRI classIRI) {
+        return Optional.ofNullable(classDefinitions.get(classIRI));
     }
 
 
@@ -94,7 +89,7 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public ImmutableCollection<IntermediateQuery> getQueries() {
+    public ImmutableCollection<IQ> getQueries() {
         return Stream.concat(classDefinitions.values().stream(), propertyDefinitions.values().stream())
                 .collect(ImmutableCollectors.toList());
     }

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -22,8 +22,8 @@ public interface SpecificationFactory {
 
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
-    Mapping createMapping(MappingMetadata metadata, @Assisted("propertyMap") ImmutableMap<IRI, IntermediateQuery> propertyMap,
-                          @Assisted("classMap") ImmutableMap<IRI, IntermediateQuery> classMap, ExecutorRegistry executorRegistry);
+    Mapping createMapping(MappingMetadata metadata, @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap, ExecutorRegistry executorRegistry);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }
