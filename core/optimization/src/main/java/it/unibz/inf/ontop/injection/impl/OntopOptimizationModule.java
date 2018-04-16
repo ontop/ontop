@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.iq.tools.QueryUnionSplitter;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
@@ -52,7 +51,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(FlattenUnionExecutor.class);
         bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(DatalogProgram2QueryConverter.class);
-        bindFromSettings(QueryUnionSplitter.class);
         bindFromSettings(InnerJoinOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(LeftJoinOptimizer.class);
