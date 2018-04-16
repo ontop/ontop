@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.executor.groundterm.GroundTermRemovalFromDataNodeEx
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinRightChildNormalizationAnalyzer;
-import it.unibz.inf.ontop.iq.executor.merging.QueryMergingExecutor;
 import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
 import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfDataNodeExecutor;
 import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfSubTreeExecutor;
@@ -47,7 +46,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PullVariableOutOfDataNodeExecutor.class);
         bindFromSettings(PullVariableOutOfSubTreeExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
-        bindFromSettings(QueryMergingExecutor.class);
         bindFromSettings(UnionLiftExecutor.class);
         bindFromSettings(LeftJoinExecutor.class);
         bindFromSettings(ProjectionShrinkingExecutor.class);
