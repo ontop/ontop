@@ -88,19 +88,18 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(variableGenerator,
                 subQuery.getKnownVariables());
 
-        IntermediateQuery renamedSubQuery;
+        IQ renamedIQ;
         if(renamingSubstitution.isEmpty()){
-            renamedSubQuery = subQuery;
+            renamedIQ = iqConverter.convert(subQuery);
         } else {
             QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
-            renamedSubQuery = queryRenamer.transform(subQuery);
+            renamedIQ = queryRenamer.transform(iqConverter.convert(subQuery));
         }
 
         ImmutableSubstitution<VariableOrGroundTerm> descendingSubstitution = extractSubstitution(
-                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedSubQuery.getProjectionAtom()),
+                renamingSubstitution.applyToDistinctVariableOnlyDataAtom(renamedIQ.getProjectionAtom()),
                 intensionalDataNode.getProjectionAtom());
 
-        IQ renamedIQ = iqConverter.convert(renamedSubQuery);
         IQTree unifiedSubTree = renamedIQ.getTree()
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
                 .liftBinding(renamedIQ.getVariableGenerator());

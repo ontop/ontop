@@ -6,14 +6,17 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -32,14 +35,16 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
+    private final IQConverter iqConverter;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
                                               UnionBasedQueryMerger queryMerger,
-                                              DatalogRule2QueryConverter datalogRuleConverter) {
+                                              DatalogRule2QueryConverter datalogRuleConverter, IQConverter iqConverter) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
+        this.iqConverter = iqConverter;
     }
 
 
@@ -149,7 +154,10 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     }
 
     @Override
-    public Optional<IntermediateQuery> convertDatalogDefinitions(DBMetadata dbMetadata, Collection<CQIE> atomDefinitions, Collection<Predicate> tablePredicates, Optional<ImmutableQueryModifiers> optionalModifiers, ExecutorRegistry executorRegistry) throws InvalidDatalogProgramException {
+    public Optional<IntermediateQuery> convertDatalogDefinitions(DBMetadata dbMetadata, Collection<CQIE> atomDefinitions,
+                                                                 Collection<Predicate> tablePredicates,
+                                                                 Optional<ImmutableQueryModifiers> optionalModifiers,
+                                                                 ExecutorRegistry executorRegistry) throws InvalidDatalogProgramException {
 
         switch(atomDefinitions.size()) {
             case 0:
@@ -159,15 +167,26 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 return Optional.of(datalogRuleConverter.convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
                         iqFactory, executorRegistry));
             default:
-                List<IntermediateQuery> convertedDefinitions = new ArrayList<>();
+                List<IQ> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
+
                     convertedDefinitions.add(
+                            iqConverter.convert(
                             datalogRuleConverter.convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.<ImmutableQueryModifiers>empty(), iqFactory, executorRegistry));
+                                    Optional.empty(), iqFactory, executorRegistry)));
                 }
-                return optionalModifiers.isPresent()
+                Optional<IQ> iq = optionalModifiers.isPresent()
                         ? queryMerger.mergeDefinitions(convertedDefinitions, optionalModifiers.get())
                         : queryMerger.mergeDefinitions(convertedDefinitions);
+
+                // TODO: refactor
+                return iq.map(q -> {
+                    try {
+                        return iqConverter.convert(q, dbMetadata, executorRegistry);
+                    } catch (EmptyQueryException e) {
+                        throw new MinorOntopInternalBugException("No EmptyQueryException expected here");
+                    }
+                });
         }
     }
 
