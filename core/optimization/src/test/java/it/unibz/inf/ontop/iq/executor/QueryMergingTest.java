@@ -6,23 +6,21 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.proposal.QueryMergingProposal;
-import it.unibz.inf.ontop.iq.proposal.impl.QueryMergingProposalImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
-import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static junit.framework.TestCase.assertEquals;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class QueryMergingTest {
@@ -598,7 +596,7 @@ public class QueryMergingTest {
     @Test
     public void testEx10() throws EmptyQueryException {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -614,7 +612,7 @@ public class QueryMergingTest {
 
         IntermediateQuery mainQuery = queryBuilder.build();
 
-        /**
+        /*
          * Sub-query
          */
         DistinctVariableOnlyDataAtom p1Atom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -629,7 +627,7 @@ public class QueryMergingTest {
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
         subQueryBuilder.addChild(subQueryConstruction2, dataNodeSubquery);
 
-        /**
+        /*
          * Expected
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
@@ -648,7 +646,7 @@ public class QueryMergingTest {
     @Test
     public void testEx11() throws EmptyQueryException {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -665,7 +663,7 @@ public class QueryMergingTest {
         IntermediateQuery mainQuery = queryBuilder.build();
 
 
-        /**
+        /*
          * Sub-query
          */
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, A));
@@ -675,7 +673,7 @@ public class QueryMergingTest {
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         subQueryBuilder.addChild(subQueryRoot, dataNodeSubquery);
 
-        /**
+        /*
          * Expected
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
@@ -695,7 +693,7 @@ public class QueryMergingTest {
     @Test
     public void testEx12() throws EmptyQueryException {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -711,7 +709,7 @@ public class QueryMergingTest {
 
         IntermediateQuery mainQuery = queryBuilder.build();
 
-        /**
+        /*
          * Sub-query
          */
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, INT_OF_ONE));
@@ -721,7 +719,7 @@ public class QueryMergingTest {
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         subQueryBuilder.addChild(subQueryRoot, dataNodeSubquery);
 
-        /**
+        /*
          * Expected
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
@@ -741,7 +739,7 @@ public class QueryMergingTest {
     @Test
     public void testEx13() throws EmptyQueryException {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -757,7 +755,7 @@ public class QueryMergingTest {
 
         IntermediateQuery mainQuery = queryBuilder.build();
 
-        /**
+        /*
          * Sub-query
          */
         ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, INT_OF_ONE, B));
@@ -767,7 +765,7 @@ public class QueryMergingTest {
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         subQueryBuilder.addChild(subQueryRoot, dataNodeSubquery);
 
-        /**
+        /*
          * Expected
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
@@ -786,7 +784,7 @@ public class QueryMergingTest {
     @Test
     public void testEx14() throws EmptyQueryException {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -805,7 +803,7 @@ public class QueryMergingTest {
         queryBuilder.addChild(rootNode, dataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
-        /**
+        /*
          * Sub-query
          */
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -816,7 +814,7 @@ public class QueryMergingTest {
                 TERM_FACTORY.getConstantLiteral("2")));
         subQueryBuilder.addChild(subQueryRoot, tableNode);
 
-        /**
+        /*
          * Expected
          */
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
@@ -828,9 +826,9 @@ public class QueryMergingTest {
     }
 
     @Test
-    public void testConflictingVariables() throws EmptyQueryException {
+    public void testConflictingVariables() {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -857,7 +855,7 @@ public class QueryMergingTest {
         System.out.println("Initial query: \n" + query);
 
 
-        /**
+        /*
          * First name mapping
          */
         IntermediateQueryBuilder firstMappingBuilder = createQueryBuilder(DB_METADATA);
@@ -874,7 +872,7 @@ public class QueryMergingTest {
         IntermediateQuery firstMapping = firstMappingBuilder.build();
         System.out.println("First name mapping: \n" + firstMapping);
 
-        /**
+        /*
          * Last name mapping
          */
         IntermediateQueryBuilder lastMappingBuilder = createQueryBuilder(DB_METADATA);
@@ -892,13 +890,10 @@ public class QueryMergingTest {
         IntermediateQuery lastMapping = lastMappingBuilder.build();
         System.out.println("Last name mapping: \n" + lastMapping);
 
-        query.applyProposal(new QueryMergingProposalImpl(firstIntentional, Optional.of(firstMapping)));
-        System.out.println("\n After merging the first mapping: \n" + query);
+        IQ newQuery = merge(query, firstMapping, firstIntentional);
+        System.out.println("\n After merging the first mapping: \n" + newQuery);
 
-        query.applyProposal(new QueryMergingProposalImpl(lastIntentional, Optional.of(lastMapping)));
-        System.out.println("\n After merging the last mapping: \n" + query);
-
-        /**
+        /*
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -920,15 +915,14 @@ public class QueryMergingTest {
         expectedQueryBuilder.addChild(rightConstructionNode, expectedlastNameDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("Expected query: \n" + expectedQuery);
 
-        assertTrue(areEquivalent(query, expectedQuery));
+        optimizeAndCompare(newQuery, IQ_CONVERTER.convert(lastMapping), IQ_CONVERTER.convert(expectedQuery), lastIntentional);
     }
 
     @Test
     public void testUnionSameVariable() {
 
-        /**
+        /*
          * Original query
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -944,10 +938,7 @@ public class QueryMergingTest {
 
         IntermediateQuery mainQuery = queryBuilder.build();
 
-        System.out.println("main query:\n" + mainQuery.getProjectionAtom() + ":-\n" +
-                mainQuery);
-
-        /**
+        /*
          * Mapping
          */
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
@@ -968,20 +959,8 @@ public class QueryMergingTest {
         mappingBuilder.addChild(unionNode, extensionalDataNode2);
 
         IntermediateQuery mapping = mappingBuilder.build();
-        System.out.println("query to be merged:\n" + mapping.getProjectionAtom() + ":-\n" +
-                mapping);
 
-        QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
-        try {
-            mainQuery.applyProposal(queryMerging);
-        } catch (EmptyQueryException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("merged query:\n" + mainQuery.getProjectionAtom() + ":-\n" +
-                mainQuery);
-
-        /**
+        /*
          * Expected query
          */
 
@@ -993,12 +972,10 @@ public class QueryMergingTest {
         expectedQueryBuilder.addChild(unionNode, extensionalDataNode1);
         expectedQueryBuilder.addChild(unionNode, extensionalDataNode2);
 
-        IntermediateQuery expectedQuery = queryBuilder.build();
-        System.out.println("expected query:\n" + expectedQuery.getProjectionAtom() + ":-\n" +
-                expectedQuery);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
 
-        assertTrue(areEquivalent(mainQuery, expectedQuery));
+        optimizeAndCompare(mainQuery, mapping, expectedQuery, intensionalDataNode);
     }
 
 
@@ -1044,26 +1021,15 @@ public class QueryMergingTest {
         IntermediateQuery mapping = mappingBuilder.build();
         System.out.println("query to be merged:\n" +mapping);
 
-        /**
-         * Merging
-         */
-        QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
-        try {
-            mainQuery.applyProposal(queryMerging);
-        }catch (IllegalArgumentException|EmptyQueryException e){
-            e.printStackTrace();
-            fail();
-        }
-
-        System.out.println("merged query:\n" + mainQuery.getProjectionAtom() + ":-\n" +
-                mainQuery);
+        IQ mergedQuery = merge(mainQuery, mapping, intensionalDataNode);
+        System.out.println("\n Optimized query: \n" + mergedQuery);
     }
 
 
     @Test
-    public void testTrueNodeCreation() throws EmptyQueryException {
+    public void testTrueNodeCreation() {
 
-        /**
+        /*
          *  Main  query.
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
@@ -1078,8 +1044,8 @@ public class QueryMergingTest {
 
         System.out.println("main query:\n"+mainQuery);
 
-        /**
-         * Mapping
+        /*
+         * Mapping assertion
          */
         IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -1090,7 +1056,7 @@ public class QueryMergingTest {
         IntermediateQuery mapping = mappingBuilder.build();
         System.out.println("query to be merged:\n" +mapping);
 
-        /**
+        /*
          * Expected query
          */
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
@@ -1099,22 +1065,7 @@ public class QueryMergingTest {
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
         System.out.println("expected query:\n"+expectedQuery);
 
-        /**
-         * Merging
-         */
-        QueryMergingProposal queryMerging = new QueryMergingProposalImpl(intensionalDataNode, Optional.ofNullable(mapping));
-        try {
-            mainQuery.applyProposal(queryMerging);
-        }catch (IllegalArgumentException|EmptyQueryException e){
-            e.printStackTrace();
-            fail();
-        }
-        System.out.println("merged query:\n"+ mainQuery);
-
-        /**
-        * Test
-         */
-        assertTrue(areEquivalent(mainQuery, expectedQuery));
+        optimizeAndCompare(mainQuery, mapping, expectedQuery, intensionalDataNode);
     }
 
 
@@ -1136,20 +1087,34 @@ public class QueryMergingTest {
     }
 
     private static void optimizeAndCompare(IntermediateQuery mainQuery, IntermediateQuery subQuery,
-                                           IntermediateQuery expectedQuery, IntensionalDataNode intensionalNode)
-            throws EmptyQueryException {
+                                           IntermediateQuery expectedQuery, IntensionalDataNode intensionalNode) {
+        optimizeAndCompare(IQ_CONVERTER.convert(mainQuery), IQ_CONVERTER.convert(subQuery),
+                IQ_CONVERTER.convert(expectedQuery), intensionalNode);
+    }
+
+    private static void optimizeAndCompare(IQ mainQuery, IQ subQuery, IQ expectedQuery, IntensionalDataNode intensionalNode) {
 
         System.out.println("\n Original query: \n" + mainQuery);
         System.out.println("\n Sub-query: \n" + subQuery);
         System.out.println("\n Expected query: \n" + expectedQuery);
 
-        // Updates the query (in-place optimization)
-        mainQuery.applyProposal(new QueryMergingProposalImpl(intensionalNode, Optional.of(subQuery)));
-        System.out.println("\n Optimized query: \n" + mainQuery);
+        IQ mergedQuery = merge(mainQuery, subQuery, intensionalNode);
+        System.out.println("\n Optimized query: \n" + mergedQuery);
 
-        assertTrue(areEquivalent(mainQuery, expectedQuery));
-
+        assertEquals(expectedQuery, mergedQuery);
     }
+
+    private static IQ merge(IntermediateQuery mainQuery, IntermediateQuery subQuery, IntensionalDataNode intensionalNode) {
+        return merge(IQ_CONVERTER.convert(mainQuery), IQ_CONVERTER.convert(subQuery), intensionalNode);
+    }
+
+    private static IQ merge(IQ mainQuery, IQ subQuery, IntensionalDataNode intensionalNode) {
+        BasicIntensionalQueryMerger queryMerger = new BasicIntensionalQueryMerger(
+                ImmutableMap.of(intensionalNode.getProjectionAtom().getPredicate(), subQuery));
+
+        return queryMerger.optimize(mainQuery);
+    }
+
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_1, argument);
@@ -1167,6 +1132,45 @@ public class QueryMergingTest {
         return TERM_FACTORY.getImmutableFunctionalTerm(
                 TERM_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
     }
+
+
+    /**
+     * Basic implementation
+     */
+    private static class BasicIntensionalQueryMerger extends AbstractIntensionalQueryMerger {
+
+        private final ImmutableMap<AtomPredicate, IQ> map;
+
+        protected BasicIntensionalQueryMerger(ImmutableMap<AtomPredicate, IQ> map) {
+            super(IQ_FACTORY);
+            this.map = map;
+        }
+
+        @Override
+        protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
+            VariableGenerator variableGenerator = new VariableGenerator(knownVariables, TERM_FACTORY);
+            return new BasicQueryMergingTransformer(variableGenerator);
+        }
+
+        private class BasicQueryMergingTransformer extends QueryMergingTransformer {
+
+            protected BasicQueryMergingTransformer(VariableGenerator variableGenerator) {
+                super(variableGenerator, IQ_FACTORY, SUBSTITUTION_FACTORY, TRANSFORMER_FACTORY);
+            }
+
+            @Override
+            protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
+                return Optional.ofNullable(map.get(dataNode.getProjectionAtom().getPredicate()));
+            }
+
+            @Override
+            protected IQTree handleIntensionalWithoutDefinition(IntensionalDataNode dataNode) {
+                return dataNode;
+            }
+        }
+
+    }
+
 }
 
 

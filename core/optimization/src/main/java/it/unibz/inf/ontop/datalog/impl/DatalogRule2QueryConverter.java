@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -32,7 +33,6 @@ import java.util.HashSet;
  */
 public class DatalogRule2QueryConverter {
 
-
     /**
      * TODO: explain
      */
@@ -41,12 +41,10 @@ public class DatalogRule2QueryConverter {
         private final List<Function> booleanAtoms;
         private final Optional<Function> optionalGroupAtom;
         private final DatalogFactory datalogFactory;
-        private final DatalogTools datalogTools;
 
         protected AtomClassification(List<Function> atoms, DatalogFactory datalogFactory, DatalogTools datalogTools)
                 throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
             this.datalogFactory = datalogFactory;
-            this.datalogTools = datalogTools;
             dataAndCompositeAtoms = datalogTools.filterDataAndCompositeAtoms(atoms);
             List<Function> otherAtoms = datalogTools.filterNonDataAndCompositeAtoms(atoms);
             booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
@@ -111,23 +109,26 @@ public class DatalogRule2QueryConverter {
     private final DatalogConversionTools datalogConversionTools;
     private final DatalogTools datalogTools;
     private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
+    private final IQConverter iqConverter;
 
     @Inject
     private DatalogRule2QueryConverter(TermFactory termFactory, DatalogFactory datalogFactory,
                                        DatalogConversionTools datalogConversionTools,
                                        DatalogTools datalogTools,
-                                       PullOutEqualityNormalizerImpl pullOutEqualityNormalizer) {
+                                       PullOutEqualityNormalizerImpl pullOutEqualityNormalizer,
+                                       IQConverter iqConverter) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         this.datalogConversionTools = datalogConversionTools;
         this.datalogTools = datalogTools;
         this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
+        this.iqConverter = iqConverter;
     }
 
     /**
      * TODO: describe
      */
-    public IntermediateQuery convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
+    public IQ convertDatalogRule(DBMetadata dbMetadata, CQIE datalogRule,
                                                        Collection<Predicate> tablePredicates,
                                                        Optional<ImmutableQueryModifiers> optionalModifiers,
                                                        IntermediateQueryFactory iqFactory,
@@ -143,7 +144,7 @@ public class DatalogRule2QueryConverter {
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(dbMetadata, topConstructionNode, optionalModifiers, projectionAtom, executorRegistry, iqFactory);
+            return createFact(topConstructionNode, optionalModifiers, projectionAtom, iqFactory);
         }
         else {
             AtomClassification atomClassification = new AtomClassification(bodyAtoms, datalogFactory, datalogTools);
@@ -154,26 +155,21 @@ public class DatalogRule2QueryConverter {
         }
     }
 
-    private static IntermediateQuery createFact(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
-                                                Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                DistinctVariableOnlyDataAtom projectionAtom, ExecutorRegistry executorRegistry,
-                                                IntermediateQueryFactory iqFactory) {
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
-        if (optionalModifiers.isPresent()) {
-            optionalModifiers.get().initBuilder(iqFactory, queryBuilder, projectionAtom, topConstructionNode);
-        }
-        else {
-            queryBuilder.init(projectionAtom, topConstructionNode);
-        }
-        queryBuilder.addChild(topConstructionNode, iqFactory.createTrueNode());
-        return queryBuilder.build();
+    private static IQ createFact(ConstructionNode topConstructionNode,
+                                 Optional<ImmutableQueryModifiers> optionalModifiers,
+                                 DistinctVariableOnlyDataAtom projectionAtom, IntermediateQueryFactory iqFactory) {
+        IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
+        IQTree tree = optionalModifiers
+                .map(m -> m.insertAbove(constructionTree, iqFactory))
+                .orElse(constructionTree);
+        return iqFactory.createIQ(projectionAtom, tree);
     }
 
 
     /**
-     * TODO: explain
+     * TODO: use IQ instead of IntermediateQuery
      */
-    private IntermediateQuery createDefinition(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
+    private IQ createDefinition(DBMetadata dbMetadata, ConstructionNode topConstructionNode,
                                                Optional<ImmutableQueryModifiers> optionalModifiers,
                                                       DistinctVariableOnlyDataAtom projectionAtom,
                                                       Collection<Predicate> tablePredicates,
@@ -227,7 +223,7 @@ public class DatalogRule2QueryConverter {
              */
             queryBuilder = convertDataOrCompositeAtoms(dataAndCompositeAtoms, queryBuilder, bottomNode, NO_POSITION,
                     tablePredicates);
-            return queryBuilder.build();
+            return iqConverter.convert(queryBuilder.build());
         }
         catch (IntermediateQueryBuilderException e) {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException(e.getMessage());
