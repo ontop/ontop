@@ -5,10 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -41,24 +42,18 @@ public class MappingImpl implements Mapping {
 
         if (settings.isTestModeEnabled()) {
             for (IQ query : propertyDefinitions.values()) {
-                if (projectNullableVariable(query))
-                    throw new IllegalArgumentException(
-                            "A mapping assertion must not return a nullable variable. \n" + query);
+                checkNullableVariables(query);
             }
             for (IQ query : classDefinitions.values()) {
-                if (projectNullableVariable(query))
-                    throw new IllegalArgumentException(
-                            "A mapping assertion must not return a nullable variable. \n" + query);
+                checkNullableVariables(query);
             }
         }
-
     }
 
-    private static boolean projectNullableVariable(IQ query) {
-        IQTree tree = query.getTree();
-
-        return query.getProjectionAtom().getVariableStream()
-                .anyMatch(tree::containsNullableVariable);
+    private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
+        ImmutableSet<Variable> nullableVariables = query.getTree().getNullableVariables();
+        if (!nullableVariables.isEmpty())
+            throw new NullableVariableInMappingException(query, nullableVariables);
     }
 
     @Override
@@ -97,5 +92,13 @@ public class MappingImpl implements Mapping {
     @Override
     public ExecutorRegistry getExecutorRegistry() {
         return executorRegistry;
+    }
+
+
+    private static class NullableVariableInMappingException extends OntopInternalBugException {
+        private NullableVariableInMappingException(IQ definition, ImmutableSet<Variable> nullableVariables) {
+            super("The following definition projects nullable variables: " + nullableVariables
+                    + ".\n Definition:\n" + definition);
+        }
     }
 }

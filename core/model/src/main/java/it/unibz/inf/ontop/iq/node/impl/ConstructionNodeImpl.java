@@ -315,7 +315,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             return term.equals(termFactory.getNullConstant());
         // TODO: improve this
         else if (term.isGround())
-            return true;
+            return false;
         // TODO: improve this
         return term.getVariableStream()
                 .anyMatch(nullableChildVariables::contains);
