@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
-import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
@@ -55,7 +55,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(LeftJoinOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
-        bindFromSettings(IntermediateQuery2DatalogTranslator.class);
+        bindFromSettings(IQ2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
 

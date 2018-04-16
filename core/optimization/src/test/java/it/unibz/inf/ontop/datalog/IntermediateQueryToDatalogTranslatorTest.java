@@ -50,9 +50,9 @@ public class IntermediateQueryToDatalogTranslatorTest {
     @Test
     public void testUnionNodeChild() {
 
-        IntermediateQuery2DatalogTranslator translator = OntopOptimizationConfiguration.defaultBuilder().enableTestMode().build()
+        IQ2DatalogTranslator translator = OntopOptimizationConfiguration.defaultBuilder().enableTestMode().build()
                 .getInjector()
-                .getInstance(IntermediateQuery2DatalogTranslator.class);
+                .getInstance(IQ2DatalogTranslator.class);
 
         Exception thrownException = null;
         /**
@@ -81,7 +81,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
         DatalogProgram dp = null;
         try {
-            dp = translator.translate(inputQuery);
+            dp = translator.translate(IQ_CONVERTER.convert(inputQuery));
         } catch (ClassCastException e) {
             thrownException = e;
         }

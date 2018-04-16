@@ -27,12 +27,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -57,7 +53,7 @@ import java.util.stream.Stream;
  * 
  * @author mrezk
  */
-public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuery2DatalogTranslator {
+public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 
 	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
@@ -65,14 +61,13 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	private final DatalogFactory datalogFactory;
 	private final ImmutabilityTools immutabilityTools;;
 	private final OrderByLifter orderByLifter;
-	private final IQConverter iqConverter;
 
 	private static class RuleHead {
 		public final ImmutableSubstitution<ImmutableTerm> substitution;
 		public final DataAtom atom;
-		public final Optional<QueryNode> optionalChildNode;
+		public final Optional<IQTree> optionalChildNode;
 
-		private RuleHead(ImmutableSubstitution<ImmutableTerm> substitution, DataAtom atom, Optional<QueryNode> optionalChildNode) {
+		private RuleHead(ImmutableSubstitution<ImmutableTerm> substitution, DataAtom atom, Optional<IQTree> optionalChildNode) {
 			this.atom = atom;
             this.substitution = substitution;
             this.optionalChildNode = optionalChildNode;
@@ -80,24 +75,22 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	}
 
 
-	private static final Logger LOG = LoggerFactory.getLogger(IntermediateQuery2DatalogTranslatorImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IQ2DatalogTranslatorImpl.class);
 
 	// Incremented
 	private int subQueryCounter;
 	private int dummyPredCounter;
 
 	@Inject
-	private IntermediateQuery2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-													SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-													ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter,
-													IQConverter iqConverter) {
+	private IQ2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+									 SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
+									 ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.datalogFactory = datalogFactory;
 		this.immutabilityTools = immutabilityTools;
 		this.orderByLifter = orderByLifter;
-		this.iqConverter = iqConverter;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
@@ -110,9 +103,9 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * with y > subqueryCounter.
 	 */
 	@Override
-	public DatalogProgram translate(IntermediateQuery initialQuery) {
+	public DatalogProgram translate(IQ initialQuery) {
 
-		IntermediateQuery orderLiftedQuery = liftOrderBy(initialQuery);
+		IQ orderLiftedQuery = liftOrderBy(initialQuery);
 		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(orderLiftedQuery);
 
 		// Mutable
@@ -135,26 +128,29 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * Assumes that ORDER BY is ABOVE the first construction node
 	 * and the order between these operators is respected and they appear ONE time maximum
 	 */
-	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IntermediateQuery query) {
-		QueryNode rootNode = query.getRootNode();
+	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IQ query) {
+		IQTree tree = query.getTree();
+		QueryNode rootNode = tree.getRootNode();
 		if (rootNode instanceof QueryModifierNode) {
 			Optional<SliceNode> sliceNode = Optional.of(rootNode)
 					.filter(n -> n instanceof SliceNode)
 					.map(n -> (SliceNode)n);
 
-			QueryNode firstNonSliceNode = sliceNode
-					.flatMap(query::getFirstChild)
-					.orElse(rootNode);
+			IQTree firstNonSliceTree = sliceNode
+					.map(n -> ((UnaryIQTree) tree).getChild())
+					.orElse(tree);
 
-			Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceNode)
+			Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
+					.map(IQTree::getRootNode)
 					.filter(n -> n instanceof DistinctNode)
 					.map(n -> (DistinctNode) n);
 
-			QueryNode firstNonSliceDistinctNode = distinctNode
-					.flatMap(query::getFirstChild)
-					.orElse(firstNonSliceNode);
+			IQTree firstNonSliceDistinctTree = distinctNode
+					.map(n -> ((UnaryIQTree) tree).getChild())
+					.orElse(firstNonSliceTree);
 
-			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctNode)
+			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctTree)
+					.map(IQTree::getRootNode)
 					.filter(n -> n instanceof OrderByNode)
 					.map(n -> (OrderByNode) n);
 
@@ -195,13 +191,13 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	/**
 	 * Assumes that ORDER BY is ABOVE the first construction node
 	 */
-	private QueryNode getFirstNonQueryModifierNode(IntermediateQuery query) {
+	private IQTree getFirstNonQueryModifierTree(IQ query) {
 		// Non-final
-		QueryNode queryNode = query.getRootNode();
-		while (queryNode instanceof QueryModifierNode) {
-			queryNode = query.getFirstChild(queryNode).get();
+		IQTree iqTree = query.getTree();
+		while (iqTree.getRootNode() instanceof QueryModifierNode) {
+			iqTree = ((UnaryIQTree) iqTree).getChild();
 		}
-		return queryNode;
+		return iqTree;
 	}
 	
 	/**
@@ -213,11 +209,13 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private void translate(IntermediateQuery query, DatalogProgram pr) {
-		QueryNode root = query.getRootNode();
+	private void translate(IQ query, DatalogProgram pr) {
+		QueryNode root = query.getTree().getRootNode();
 		if(!(root instanceof ConstructionNode)){
 			throw new DatalogConversionException("the root is expected to be a Construction Node");
 		}
+
+		UnaryIQTree tree = (UnaryIQTree) query.getTree();
 
 		ConstructionNode rootCn = (ConstructionNode) root;
 		Queue<RuleHead> heads = new LinkedList<>();
@@ -226,7 +224,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			.map(ConstructionNode::getSubstitution)
 			.orElseGet(substitutionFactory::getSubstitution);
 
-		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(),query.getFirstChild(root)));
+		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(), Optional.of(tree.getChild())));
 
 		// Mutable (append-only)
 		Map<QueryNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
@@ -248,8 +246,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 			pr.appendRule(newrule);
 
-            head.optionalChildNode.ifPresent(node -> {
-                List<Function> uAtoms = getAtomFrom(query, node, heads, subQueryProjectionAtoms, false);
+            head.optionalChildNode.ifPresent(t -> {
+                List<Function> uAtoms = getAtomFrom(t, heads, subQueryProjectionAtoms, false);
                 newrule.getBody().addAll(uAtoms);
             });
 
@@ -263,15 +261,16 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	 * Takes a node and return the list of functions (atoms) that it represents.
 	 * Usually it will be a single atom, but it is different for the filter case.
 	 */
-	private List<Function> getAtomFrom(IntermediateQuery te, QueryNode node, Queue<RuleHead> heads,
+	private List<Function> getAtomFrom(IQTree tree, Queue<RuleHead> heads,
 									   Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 									   boolean isNested) {
 		
 		List<Function> body = new ArrayList<>();
 		
-		/**
+		/*
 		 * Basic Atoms
 		 */
+		final QueryNode node = tree.getRootNode();
 		
 		if (node instanceof ConstructionNode) {
 			ConstructionNode constructionNode = (ConstructionNode) node;
@@ -279,7 +278,7 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 					subQueryProjectionAtoms.get(constructionNode))
 					.orElseGet(() -> generateProjectionAtom(constructionNode.getVariables()));
 
-			heads.add(new RuleHead(constructionNode.getSubstitution(), projectionAtom,te.getFirstChild(constructionNode)));
+			heads.add(new RuleHead(constructionNode.getSubstitution(), projectionAtom, Optional.of(((UnaryIQTree)tree).getChild())));
 			subQueryProjectionAtoms.put(constructionNode, projectionAtom);
 			Function mutAt = immutabilityTools.convertToMutableFunction(projectionAtom);
 			body.add(mutAt);
@@ -287,8 +286,8 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 			
 		} else if (node instanceof FilterNode) {
 			ImmutableExpression filter = ((FilterNode) node).getFilterCondition();
-			List<QueryNode> listnode =  te.getChildren(node);
-			body.addAll(getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true));
+			List<IQTree> children =  tree.getChildren();
+			body.addAll(getAtomFrom(children.get(0), heads, subQueryProjectionAtoms, true));
 
 			filter.flattenAND().stream()
 					.map(immutabilityTools::convertToMutableBooleanExpression)
@@ -309,14 +308,14 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 		 * Nested Atoms	
 		 */
 		} else  if (node instanceof InnerJoinNode) {
-			return getAtomsFromJoinNode((InnerJoinNode)node, te, heads, subQueryProjectionAtoms, isNested);
+			return getAtomsFromJoinNode((InnerJoinNode)node, tree, heads, subQueryProjectionAtoms, isNested);
 			
 		} else if (node instanceof LeftJoinNode) {
 			Optional<ImmutableExpression> filter = ((LeftJoinNode)node).getOptionalFilterCondition();
-			List<QueryNode> listnode =  te.getChildren(node);
+			BinaryNonCommutativeIQTree ljTree = (BinaryNonCommutativeIQTree) tree;
 
-			List<Function> atomsListLeft = getAtomFrom(te, listnode.get(0), heads, subQueryProjectionAtoms, true);
-			List<Function> atomsListRight = getAtomFrom(te, listnode.get(1), heads, subQueryProjectionAtoms, true);
+			List<Function> atomsListLeft = getAtomFrom(ljTree.getLeftChild(), heads, subQueryProjectionAtoms, true);
+			List<Function> atomsListRight = getAtomFrom(ljTree.getRightChild(), heads, subQueryProjectionAtoms, true);
 				
 			if (filter.isPresent()){
 				ImmutableExpression filter2 = filter.get();
@@ -332,30 +331,32 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 		} else if (node instanceof UnionNode) {
 
-			Optional<ConstructionNode> parentNode = te.getParent(node)
-					.filter(p -> p instanceof ConstructionNode)
-					.map(p -> (ConstructionNode) p);
+//			Optional<ConstructionNode> parentNode = te.getParent(node)
+//					.filter(p -> p instanceof ConstructionNode)
+//					.map(p -> (ConstructionNode) p);
+//
+//			DistinctVariableOnlyDataAtom freshHeadAtom;
+//			if(parentNode.isPresent()) {
+//				freshHeadAtom = generateProjectionAtom(parentNode.get().getChildVariables());
+//			}
+//			else{
+//				freshHeadAtom = generateProjectionAtom(((UnionNode) node).getVariables());
+//			}
+			DistinctVariableOnlyDataAtom freshHeadAtom = generateProjectionAtom(((UnionNode) node).getVariables());
 
-			DistinctVariableOnlyDataAtom freshHeadAtom;
-			if(parentNode.isPresent()) {
-				freshHeadAtom = generateProjectionAtom(parentNode.get().getChildVariables());
-			}
-			else{
-				freshHeadAtom = generateProjectionAtom(((UnionNode) node).getVariables());
-			}
+            for (IQTree child : tree.getChildren()) {
 
+				QueryNode childRoot = child.getRootNode();
 
-            for (QueryNode child : te.getChildren(node)) {
-
-                if (child instanceof ConstructionNode) {
-                    ConstructionNode cn = (ConstructionNode) child;
-                    Optional<QueryNode> grandChild = te.getFirstChild(cn);
+                if (childRoot instanceof ConstructionNode) {
+                    ConstructionNode cn = (ConstructionNode) childRoot;
+                    Optional<IQTree> grandChild = Optional.of(((UnaryIQTree)child).getChild());
                     subQueryProjectionAtoms.put(cn, freshHeadAtom);
                     heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, grandChild));
                 } else {
                     ConstructionNode cn = iqFactory.createConstructionNode(((UnionNode) node).getVariables());
                     subQueryProjectionAtoms.put(cn, freshHeadAtom);
-                    heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, Optional.ofNullable(child)));
+                    heads.add(new RuleHead(cn.getSubstitution(), freshHeadAtom, Optional.of(child)));
                 }
 
 
@@ -394,15 +395,15 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 
 	}
 
-	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IntermediateQuery te, Queue<RuleHead> heads,
+	private List<Function> getAtomsFromJoinNode(InnerJoinNode node, IQTree tree, Queue<RuleHead> heads,
 												Map<QueryNode, DataAtom> subQueryProjectionAtoms,
 												boolean isNested) {
 		List<Function> body = new ArrayList<>();
 		Optional<ImmutableExpression> filter = node.getOptionalFilterCondition();
 		List<Function> atoms = new ArrayList<>();
-		List<QueryNode> listnode =  te.getChildren(node);
-		for (QueryNode childnode: listnode) {
-			List<Function> atomsList = getAtomFrom(te, childnode, heads, subQueryProjectionAtoms, true);
+		List<IQTree> listnode =  tree.getChildren();
+		for (IQTree child: listnode) {
+			List<Function> atomsList = getAtomFrom(child, heads, subQueryProjectionAtoms, true);
 			atoms.addAll(atomsList);
 		}
 
@@ -459,14 +460,14 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 				: datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
-	private ImmutableList<IntermediateQuery> normalizeIQ(IntermediateQuery query) {
-		IQTree tree = iqConverter.convert(query).getTree();
+	private ImmutableList<IQ> normalizeIQ(IQ query) {
+		IQTree tree = query.getTree();
 		while(tree.getRootNode() instanceof QueryModifierNode){
 			tree = ((UnaryIQTree)tree).getChild();
 		}
 		return splitRootUnion(tree)
-				.map(t -> enforceRootCn(t))
-				.map(t -> convertAndCopyMetadata(t, query))
+				.map(this::enforceRootCn)
+				.map(t -> iqFactory.createIQ(query.getProjectionAtom(), t))
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -488,28 +489,12 @@ public class IntermediateQuery2DatalogTranslatorImpl implements IntermediateQuer
 	/**
 	 * Move ORDER BY above the highest construction node (required by Datalog)
 	 */
-	private IntermediateQuery liftOrderBy(IntermediateQuery iq) {
-		QueryNode topNonQueryModifierNode = getFirstNonQueryModifierNode(iq);
-		if (iq.getFirstChild(topNonQueryModifierNode)
-				.filter(c -> c instanceof OrderByNode)
-				.isPresent()) {
+	private IQ liftOrderBy(IQ iq) {
+		IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(iq);
+		if ((topNonQueryModifierTree instanceof UnaryIQTree)
+				&& (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByLifter)) {
 			return orderByLifter.liftOrderBy(iq);
 		}
 		return iq;
-	}
-
-	private IntermediateQuery convertAndCopyMetadata(IQTree tree, IntermediateQuery query) {
-		try {
-			return iqConverter.convert(
-					iqFactory.createIQ(
-							query.getProjectionAtom(),
-							tree
-					),
-					query.getDBMetadata(),
-					query.getExecutorRegistry()
-			);
-		} catch (EmptyQueryException e) {
-			throw new DatalogConversionException("The query should not become empty");
-		}
 	}
 }
