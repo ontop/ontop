@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogNormalizer;
-import it.unibz.inf.ontop.datalog.IntermediateQuery2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -38,7 +38,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     private LegacySQLGenerator(@Assisted DBMetadata metadata,
                                @Nullable IRIDictionary iriDictionary,
                                OntopReformulationSQLSettings settings,
-                               IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+                               IQ2DatalogTranslator iq2DatalogTranslator,
                                JdbcTypeMapper jdbcTypeMapper,
                                PullOutVariableOptimizer pullOutVariableOptimizer,
                                TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,

@@ -94,7 +94,7 @@ public class OneShotSQLGeneratorEngine {
 	private final RDBMetadata metadata;
 	private final QuotedIDFactory idFactory;
 	private final SQLDialectAdapter sqladapter;
-	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
+	private final IQ2DatalogTranslator iq2DatalogTranslator;
 	private final TypeExtractor typeExtractor;
 
 	private final boolean distinctResultSet;
@@ -124,7 +124,7 @@ public class OneShotSQLGeneratorEngine {
 							  IRIDictionary iriDictionary,
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
-							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+							  IQ2DatalogTranslator iq2DatalogTranslator,
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
@@ -170,7 +170,7 @@ public class OneShotSQLGeneratorEngine {
                                       boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<ExpressionOperation, String> operations,
-									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+									  IQ2DatalogTranslator iq2DatalogTranslator,
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory, TermFactory termFactory) {

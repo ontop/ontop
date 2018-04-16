@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
@@ -31,6 +32,7 @@ import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -77,6 +79,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
+	private final IQConverter iqConverter;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -93,7 +96,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, IQConverter iqConverter) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -106,6 +109,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
+		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -207,17 +211,20 @@ public class QuestQueryProcessor implements QueryReformulator {
 			//final long startTime = System.currentTimeMillis();
 
 			try {
-				IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
+				IQ convertedIQ =  datalogConverter.convertDatalogProgram(
 						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
 
-				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
+				log.debug("Directly translated (SPARQL) IQ: \n" + convertedIQ.toString());
 
 				log.debug("Start the unfolding...");
 
-				intermediateQuery = queryUnfolder.optimize(intermediateQuery);
+				IQ unfoldedIQ = queryUnfolder.optimize(convertedIQ);
+				if (unfoldedIQ.getTree().isDeclaredAsEmpty())
+					throw new EmptyQueryException();
+				log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
-				log.debug("Unfolded query: \n" + intermediateQuery.toString());
-
+				// Non-final
+				IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, dbMetadata, executorRegistry);
 
 				//lift bindings and union when it is possible
 				intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);

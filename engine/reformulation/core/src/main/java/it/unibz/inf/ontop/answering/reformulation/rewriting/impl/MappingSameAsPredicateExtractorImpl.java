@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
@@ -87,29 +89,25 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
 
     private ImmutableSet<ImmutableTerm> retrieveSameAsMappingsURIs(Mapping mapping) {
 
-        Optional<IntermediateQuery> definition = mapping.getRDFPropertyDefinition(OWL.SAME_AS);
-        return definition.isPresent() ?
-                getIRIs(definition.get()) :
-                ImmutableSet.of();
+        Optional<IQ> definition = mapping.getRDFPropertyDefinition(OWL.SAME_AS);
+        return definition
+                    .map(this::getIRIs)
+                    .orElseGet(ImmutableSet::of);
     }
 
-    private ImmutableSet<ImmutableTerm> getIRIs(IntermediateQuery definition) {
-        return getIRIs(definition.getRootNode(), definition)
+    private ImmutableSet<ImmutableTerm> getIRIs(IQ definition) {
+        return getIRIs(definition.getTree())
                 .collect(ImmutableCollectors.toSet());
     }
 
     /**
      * Recursive
      */
-    private Stream<ImmutableTerm> getIRIs(QueryNode currentNode, IntermediateQuery query) {
+    private Stream<ImmutableTerm> getIRIs(IQTree tree) {
         return Stream.concat(
-                query.getChildren(currentNode).stream()
-                        .flatMap(n -> getIRIs(
-                                n,
-                                query
-                        )),
-                extractIRIs(currentNode)
-        );
+                tree.getChildren().stream()
+                        .flatMap(this::getIRIs),
+                extractIRIs(tree.getRootNode()));
     }
 
     /**
@@ -146,32 +144,18 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     private boolean isRewritingTarget(IRI pred, Mapping mapping, ImmutableSet<ImmutableTerm> sameAsMappingIRIs) {
-        IntermediateQuery definition;
-        Optional<IntermediateQuery> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(pred);
-
-        if(rdfPropertyDefinition.isPresent()){
-             definition = rdfPropertyDefinition.get();
-        }
-        else {
-             definition = mapping.getRDFClassDefinition(pred)
-                     .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)"));
-        }
+        IQ definition = mapping.getRDFPropertyDefinition(pred)
+                .orElseGet(() -> mapping.getRDFClassDefinition(pred)
+                        .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)")));
 
         return getIRIs(definition).stream()
-                .anyMatch(i -> sameAsMappingIRIs.contains(i));
+                .anyMatch(sameAsMappingIRIs::contains);
     }
 
     private boolean isSubjectOnlyRewritingTarget(Mapping mapping, IRI pred) {
-        IntermediateQuery definition;
-        Optional<IntermediateQuery> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(pred);
-
-        if(rdfPropertyDefinition.isPresent()){
-            definition = rdfPropertyDefinition.get();
-        }
-        else {
-            definition = mapping.getRDFClassDefinition(pred)
-                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)"));
-        }
+        IQ definition = mapping.getRDFPropertyDefinition(pred)
+                .orElseGet(() -> mapping.getRDFClassDefinition(pred)
+                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)")));
         ImmutableSet<Variable> projectedVariables = definition.getProjectionAtom().getVariables();
 
         /* If all projected variables may return URIs */
@@ -184,7 +168,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
         return true;
     }
 
-    private boolean isURIValued(Variable variable, IntermediateQuery definition) {
+    private boolean isURIValued(Variable variable, IQ definition) {
         return definitionExtractor.extract(variable, definition).stream()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .anyMatch(t -> ((ImmutableFunctionalTerm) t).isDataFunction());
