@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -15,7 +14,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -81,10 +79,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
      *
      */
     @Override
-    public IQ convertDatalogProgram(DBMetadata dbMetadata,
-                                                   DatalogProgram queryProgram,
-                                                   Collection<Predicate> tablePredicates,
-                                                   ExecutorRegistry executorRegistry)
+    public IQ convertDatalogProgram(DatalogProgram queryProgram, Collection<Predicate> tablePredicates)
             throws InvalidDatalogProgramException, EmptyQueryException {
         List<CQIE> rules = queryProgram.getRules();
 
@@ -107,16 +102,16 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
          * TODO: explain
          */
         // Non-final
-        IQ iq = convertDatalogDefinitions(dbMetadata, rootPredicate, ruleIndex, tablePredicates,
-                topQueryModifiers, executorRegistry).get();
+        IQ iq = convertDatalogDefinitions(rootPredicate, ruleIndex, tablePredicates,
+                topQueryModifiers).get();
 
         /*
          * Rules (sub-queries)
          */
         for (int i=1; i < topDownPredicates.size() ; i++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(i);
-            Optional<IQ> optionalSubQuery = convertDatalogDefinitions(dbMetadata, datalogAtomPredicate,
-                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER, executorRegistry);
+            Optional<IQ> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate,
+                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
 
                 IntensionalQueryMerger intensionalQueryMerger = new IntensionalQueryMerger(
@@ -133,40 +128,37 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
      * TODO: explain and comment
      */
     @Override
-    public Optional<IQ> convertDatalogDefinitions(DBMetadata dbMetadata,
-                                                                 Predicate datalogAtomPredicate,
-                                                                 Multimap<Predicate, CQIE> datalogRuleIndex,
-                                                                 Collection<Predicate> tablePredicates,
-                                                                 Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                                 ExecutorRegistry executorRegistry)
+    public Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
+                                                  Multimap<Predicate, CQIE> datalogRuleIndex,
+                                                  Collection<Predicate> tablePredicates,
+                                                  Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
 
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
-        return convertDatalogDefinitions(dbMetadata,atomDefinitions,tablePredicates,optionalModifiers,executorRegistry);
+        return convertDatalogDefinitions(atomDefinitions,tablePredicates,optionalModifiers);
 
     }
 
     @Override
-    public Optional<IQ> convertDatalogDefinitions(DBMetadata dbMetadata, Collection<CQIE> atomDefinitions,
-                                                                 Collection<Predicate> tablePredicates,
-                                                                 Optional<ImmutableQueryModifiers> optionalModifiers,
-                                                                 ExecutorRegistry executorRegistry) throws InvalidDatalogProgramException {
+    public Optional<IQ> convertDatalogDefinitions(Collection<CQIE> atomDefinitions,
+                                                  Collection<Predicate> tablePredicates,
+                                                  Optional<ImmutableQueryModifiers> optionalModifiers) throws InvalidDatalogProgramException {
 
         switch(atomDefinitions.size()) {
             case 0:
                 return Optional.empty();
             case 1:
                 CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(datalogRuleConverter.convertDatalogRule(dbMetadata, definition, tablePredicates, optionalModifiers,
-                        iqFactory, executorRegistry));
+                return Optional.of(datalogRuleConverter.convertDatalogRule(definition, tablePredicates, optionalModifiers,
+                        iqFactory));
             default:
                 List<IQ> convertedDefinitions = new ArrayList<>();
                 for (CQIE datalogAtomDefinition : atomDefinitions) {
 
                     convertedDefinitions.add(
-                            datalogRuleConverter.convertDatalogRule(dbMetadata, datalogAtomDefinition, tablePredicates,
-                                    Optional.empty(), iqFactory, executorRegistry));
+                            datalogRuleConverter.convertDatalogRule(datalogAtomDefinition, tablePredicates,
+                                    Optional.empty(), iqFactory));
                 }
                 return optionalModifiers.isPresent()
                         ? queryMerger.mergeDefinitions(convertedDefinitions, optionalModifiers.get())
