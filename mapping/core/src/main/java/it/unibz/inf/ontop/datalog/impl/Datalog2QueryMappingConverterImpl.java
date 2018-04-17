@@ -79,11 +79,9 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableList<IQ> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
-                        dbMetadata,
                         ruleIndex.get(predicate),
                         extensionalPredicates,
-                        Optional.empty(),
-                        executorRegistry
+                        Optional.empty()
                 ))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -125,15 +123,13 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> Optional.of(
+                        e -> mappingIQNormalizer.normalize(
                                 datalogRule2QueryConverter.convertDatalogRule(
-                                        dbMetadata,
                                         e.getKey(),
                                         extensionalPredicates,
                                         Optional.empty(),
-                                        iqFactory,
-                                        executorRegistry
-                                )).map(mappingIQNormalizer::normalize).get(),
+                                        iqFactory
+                                )),
                         Map.Entry::getValue
                 ));
         return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);

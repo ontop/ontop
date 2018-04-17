@@ -38,7 +38,7 @@ public class MappingIQNormalizerImpl implements MappingIQNormalizer {
     public IQ normalize(IQ query) {
         IQ queryWithoutNull = noNullValueEnforcer.transform(query);
 
-        IQ  queryAfterBindingLift = bindingLifter.optimize(query);
+        IQ  queryAfterBindingLift = bindingLifter.optimize(queryWithoutNull);
 //            IQ normalizedIQ = mappingUnionNormalizer.optimize(iqConverter.convert(queryAfterBindingLift));
 //            queryAfterUnionNormalization = iqConverter.convert(normalizedIQ, queryAfterBindingLift.getDBMetadata(),
 //                    queryAfterBindingLift.getExecutorRegistry());

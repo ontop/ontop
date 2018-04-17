@@ -92,7 +92,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
 								LinearInclusionDependencyTools inclusionDependencyTools,
-								AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+								DatalogFactory datalogFactory,
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
@@ -211,8 +211,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			//final long startTime = System.currentTimeMillis();
 
 			try {
-				IQ convertedIQ =  datalogConverter.convertDatalogProgram(
-						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
+				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
 
 				log.debug("Directly translated (SPARQL) IQ: \n" + convertedIQ.toString());
 

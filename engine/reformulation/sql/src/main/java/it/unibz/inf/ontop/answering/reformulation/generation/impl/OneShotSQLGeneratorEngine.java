@@ -42,6 +42,7 @@ import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
@@ -113,6 +114,7 @@ public class OneShotSQLGeneratorEngine {
 	private final DatalogFactory datalogFactory;
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
+	private final IQConverter iqConverter;
 
 
 	// the only two mutable (query-dependent) fields
@@ -128,7 +130,7 @@ public class OneShotSQLGeneratorEngine {
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-							  TypeFactory typeFactory, TermFactory termFactory) {
+							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -136,6 +138,7 @@ public class OneShotSQLGeneratorEngine {
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
+		this.iqConverter = iqConverter;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -167,13 +170,14 @@ public class OneShotSQLGeneratorEngine {
 	 * For clone purposes only
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
-                                      boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
+									  boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<ExpressionOperation, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator,
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
-									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory, TermFactory termFactory) {
+									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
+									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -190,6 +194,7 @@ public class OneShotSQLGeneratorEngine {
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
+		this.iqConverter = iqConverter;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -247,7 +252,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory);
+                typeFactory, termFactory, iqConverter);
 	}
 
 	/**
@@ -264,7 +269,7 @@ public class OneShotSQLGeneratorEngine {
 
 		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(iqConverter.convert(normalizedQuery));
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.foldJoinTrees(cq);

@@ -93,7 +93,7 @@ public class UnknownDatatypeMappingTest {
                 .map(mapping::getRDFPropertyDefinition)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .flatMap(query -> Optional.of(query.getRootNode())
+                .flatMap(query -> Optional.of(query.getTree().getRootNode())
                         .filter(r -> r instanceof ConstructionNode)
                         .map(r -> (ConstructionNode)r)
                         .map(r -> r.getSubstitution().getImmutableMap().values().stream())
