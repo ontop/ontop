@@ -11,5 +11,5 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 public interface ProvenanceMappingFactory {
 
     MappingWithProvenance create(ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
-                                 MappingMetadata mappingMetadata, ExecutorRegistry executorRegistry);
+                                 MappingMetadata mappingMetadata);
 }

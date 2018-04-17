@@ -23,7 +23,7 @@ public interface SpecificationFactory {
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
     Mapping createMapping(MappingMetadata metadata, @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
-                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap, ExecutorRegistry executorRegistry);
+                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }

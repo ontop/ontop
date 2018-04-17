@@ -8,7 +8,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -24,21 +23,15 @@ public class MappingImpl implements Mapping {
     private final MappingMetadata metadata;
     private final ImmutableMap<IRI, IQ> propertyDefinitions;
     private final ImmutableMap<IRI, IQ> classDefinitions;
-    /**
-     * TODO: remove it when the conversion to Datalog will not be needed anymore
-     */
-    private final ExecutorRegistry executorRegistry;
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
                         @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
                         @Assisted("classMap") ImmutableMap<IRI, IQ> classMap,
-                        @Assisted ExecutorRegistry executorRegistry,
                         OntopModelSettings settings) {
         this.metadata = metadata;
         this.propertyDefinitions = propertyMap;
         this.classDefinitions = classMap;
-        this.executorRegistry = executorRegistry;
 
         if (settings.isTestModeEnabled()) {
             for (IQ query : propertyDefinitions.values()) {
@@ -88,12 +81,6 @@ public class MappingImpl implements Mapping {
         return Stream.concat(classDefinitions.values().stream(), propertyDefinitions.values().stream())
                 .collect(ImmutableCollectors.toList());
     }
-
-    @Override
-    public ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
-    }
-
 
     private static class NullableVariableInMappingException extends OntopInternalBugException {
         private NullableVariableInMappingException(IQ definition, ImmutableSet<Variable> nullableVariables) {

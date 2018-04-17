@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 
 /**
@@ -26,8 +25,6 @@ public interface MappingWithProvenance {
      * Conversion -> Provenance info is lost in this new data structure
      */
     Mapping toRegularMapping();
-
-    ExecutorRegistry getExecutorRegistry();
 
     MappingMetadata getMetadata();
 }

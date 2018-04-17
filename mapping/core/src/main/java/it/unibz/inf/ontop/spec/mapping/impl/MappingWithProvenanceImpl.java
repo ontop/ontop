@@ -9,7 +9,6 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -27,7 +26,6 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     private final ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap;
     private final MappingMetadata mappingMetadata;
-    private final ExecutorRegistry executorRegistry;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final MappingIQNormalizer mappingIQNormalizer;
@@ -35,13 +33,11 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
-                                      @Assisted ExecutorRegistry executorRegistry,
                                       SpecificationFactory specFactory,
                                       UnionBasedQueryMerger queryMerger,
                                       MappingIQNormalizer mappingIQNormalizer) {
         this.provenanceMap = provenanceMap;
         this.mappingMetadata = mappingMetadata;
-        this.executorRegistry = executorRegistry;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
         this.mappingIQNormalizer = mappingIQNormalizer;
@@ -111,13 +107,8 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                         MappingTools::extractPropertiesIRI,
                         a -> a));
 
-        return specFactory.createMapping(mappingMetadata, propertyDefinitionMap, classDefinitionMap, executorRegistry);
+        return specFactory.createMapping(mappingMetadata, propertyDefinitionMap, classDefinitionMap);
 
-    }
-
-    @Override
-    public ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
     }
 
     @Override

@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -58,8 +57,7 @@ public class MappingMergerImpl implements MappingMerger {
         // TODO: check that the ExecutorRegistry is identical for all mappings ?
         return specificationFactory.createMapping(
                 metadata,
-                propertyMap, classMap,
-                mappings.iterator().next().getExecutorRegistry()
+                propertyMap, classMap
         );
     }
 
@@ -157,12 +155,9 @@ public class MappingMergerImpl implements MappingMerger {
      * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
      */
     private static IQ getDefinition(Mapping mapping, IRI predicate) {
-        Optional<IQ> rdfPropertyDefinition = mapping.getRDFPropertyDefinition(predicate);
-        if(rdfPropertyDefinition.isPresent()){
-            return rdfPropertyDefinition.get();
-        }
-        return mapping.getRDFClassDefinition(predicate)
-                        .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition"));
+        return mapping.getRDFPropertyDefinition(predicate)
+                .orElseGet(() -> mapping.getRDFClassDefinition(predicate)
+                        .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition")));
 
     }
 }

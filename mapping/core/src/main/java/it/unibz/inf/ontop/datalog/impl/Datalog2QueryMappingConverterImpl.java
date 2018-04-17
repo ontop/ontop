@@ -9,13 +9,11 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -60,8 +58,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     }
 
     @Override
-    public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, DBMetadata dbMetadata,
-                                       ExecutorRegistry executorRegistry, MappingMetadata mappingMetadata) {
+    public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, MappingMetadata mappingMetadata) {
 
 
         ImmutableMultimap<Term, CQIE> ruleIndex = mappingRules.stream()
@@ -107,12 +104,11 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                         a -> a));
 
 
-        return specificationFactory.createMapping(mappingMetadata, mappingPropertiesMap, mappingClassMap, executorRegistry);
+        return specificationFactory.createMapping(mappingMetadata, mappingPropertiesMap, mappingClassMap);
     }
 
     @Override
     public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap,
-                                                     DBMetadata dbMetadata, ExecutorRegistry executorRegistry,
                                                      MappingMetadata mappingMetadata) {
 
         ImmutableSet<Predicate> extensionalPredicates = datalogMap.keySet().stream()
@@ -132,6 +128,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                 )),
                         Map.Entry::getValue
                 ));
-        return provMappingFactory.create(iqMap, mappingMetadata, executorRegistry);
+        return provMappingFactory.create(iqMap, mappingMetadata);
     }
 }

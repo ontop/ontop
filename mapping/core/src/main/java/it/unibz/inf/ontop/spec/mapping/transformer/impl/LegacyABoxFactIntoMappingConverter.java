@@ -6,10 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -38,30 +35,25 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
-    private final DummyBasicDBMetadata defaultDummyDBMetadata;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              TermFactory termFactory, DatalogFactory datalogFactory,
-                                              DummyBasicDBMetadata defaultDummyDBMetadata) {
+                                              TermFactory termFactory, DatalogFactory datalogFactory) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
-        this.defaultDummyDBMetadata = defaultDummyDBMetadata;
     }
 
     @Override
-    public Mapping convert(OntologyABox ontology, ExecutorRegistry executorRegistry,
-                           boolean isOntologyAnnotationQueryingEnabled, UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
+                           UriTemplateMatcher uriTemplateMatcher) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
                 Collections.emptyList();
-
-        DBMetadata dummyDBMetadata = defaultDummyDBMetadata.clone();
 
         // Mutable !!
 //        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
@@ -76,8 +68,6 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
         return datalog2QueryMappingConverter.convertMappingRules(
                 rules,
-                dummyDBMetadata,
-                executorRegistry,
                 mappingFactory.createMetadata(
                         //TODO: parse the ontology prefixes ??
                         mappingFactory.createPrefixManager(ImmutableMap.of()),

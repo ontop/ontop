@@ -49,7 +49,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
         ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
-        return mappingConverter.convertMappingRules(datalogMap, dbMetadata, executorRegistry, ppMapping.getMetadata());
+        return mappingConverter.convertMappingRules(datalogMap, ppMapping.getMetadata());
     }
 
     /**

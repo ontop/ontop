@@ -43,8 +43,7 @@ public class LegacyMappingSameAsInverseRewriter implements MappingSameAsInverseR
             ImmutableList<CQIE> rules = mapping2DatalogConverter.convert(mapping)
                     .collect(ImmutableCollectors.toList());
             ImmutableList<CQIE> updatedRules = addSameAsInverse(rules);
-            return datalog2MappingConverter.convertMappingRules(updatedRules, dbMetadata, mapping.getExecutorRegistry(),
-                    mapping.getMetadata());
+            return datalog2MappingConverter.convertMappingRules(updatedRules, mapping.getMetadata());
         }
         return mapping;
     }

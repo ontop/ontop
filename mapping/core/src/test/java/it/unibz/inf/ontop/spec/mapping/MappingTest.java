@@ -9,11 +9,9 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -152,7 +150,7 @@ public class MappingTest {
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
 
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  propertyMapBuilder.build(), classMap, EXECUTOR_REGISTRY);
+        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  propertyMapBuilder.build(), classMap);
         Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /*
@@ -215,8 +213,7 @@ public class MappingTest {
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
-        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableMap.of(), ImmutableMap.of(CLASS_1, mappingAssertion),
-                EXECUTOR_REGISTRY);
+        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableMap.of(), ImmutableMap.of(CLASS_1, mappingAssertion));
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

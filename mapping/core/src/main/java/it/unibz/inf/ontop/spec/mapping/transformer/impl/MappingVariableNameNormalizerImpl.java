@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -67,8 +66,8 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
                         q -> q
                 ));
 
-        return specificationFactory.createMapping(mapping.getMetadata(),  normalizedMappingPropertyMap, normalizedMappingClassyMap,
-                mapping.getExecutorRegistry());
+        return specificationFactory.createMapping(mapping.getMetadata(),  normalizedMappingPropertyMap,
+                normalizedMappingClassyMap);
     }
 
     /**

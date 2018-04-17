@@ -46,7 +46,6 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
         List<CQIE> canonicalRules = new CanonicalIRIRewriter(substitutionUtilities, termFactory, unifierUtilities)
                 .buildCanonicalIRIMappings(inputMappingRules);
 
-        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(canonicalRules),
-                dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
+        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(canonicalRules), mapping.getMetadata());
     }
 }

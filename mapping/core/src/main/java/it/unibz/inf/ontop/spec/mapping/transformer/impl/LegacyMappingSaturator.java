@@ -73,8 +73,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
         List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
         allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));
 
-        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules),
-                dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
+        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules), mapping.getMetadata());
     }
 
     /***
