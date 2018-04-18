@@ -32,6 +32,7 @@ public class TMappingRule {
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
 	private final EQNormalizer eqNormalizer;
+	private final boolean isClass;
 
 
 	/***
@@ -54,11 +55,12 @@ public class TMappingRule {
 	 */
 	
 	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc, DatalogFactory datalogFactory,
-						TermFactory termFactory, EQNormalizer eqNormalizer) {
+						TermFactory termFactory, EQNormalizer eqNormalizer, boolean isClass) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
 		this.eqNormalizer = eqNormalizer;
+		this.isClass = isClass;
 
 		List<Function> filters = new ArrayList<>(body.size());
 		
@@ -118,6 +120,7 @@ public class TMappingRule {
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
 		this.eqNormalizer = eqNormalizer;
+		this.isClass = baseRule.isClass();
 
 		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
@@ -125,11 +128,12 @@ public class TMappingRule {
 	
 	
 	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory,
-				 EQNormalizer eqNormalizer) {
+				 EQNormalizer eqNormalizer, boolean isClass) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
 		this.eqNormalizer = eqNormalizer;
+		this.isClass = isClass;
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));
 		
@@ -246,5 +250,9 @@ public class TMappingRule {
 	@Override 
 	public String toString() {
 		return head + " <- " + databaseAtoms + " AND " + filterAtoms;
+	}
+
+	public boolean isClass() {
+		return isClass;
 	}
 }

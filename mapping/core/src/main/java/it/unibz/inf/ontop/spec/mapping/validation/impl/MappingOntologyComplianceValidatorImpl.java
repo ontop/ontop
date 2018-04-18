@@ -306,28 +306,28 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> e.getKey().getName(),
+                        e -> e.getKey().getIRIString(),
                         Map.Entry::getValue));
     }
 
 
-    private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
+    private ImmutableMap<IRI, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
                                                                                ClassifiedTBox reasoner) {
         DataRangeExpression node = nodeSet.getRepresentative();
 
-        return ImmutableMap.<Predicate, Datatype>builder()
+        return ImmutableMap.<IRI, Datatype>builder()
                 .putAll(getDescendentNodesPartialMap(reasoner, node, nodeSet))
                 .putAll(getEquivalentNodesPartialMap(node, nodeSet))
                 .build();
     }
 
-    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
+    private ImmutableMap<IRI, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
             return reasoner.dataRangesDAG().getSub(nodeSet).stream()
                     .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
-                    .map(this::getPredicate)
+                    .map(this::getPredicateIRI)
                     .filter(Optional::isPresent)
                     .collect(ImmutableCollectors.toMap(
                             Optional::get,
@@ -337,17 +337,17 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return ImmutableMap.of();
     }
 
-    private ImmutableMap<Predicate, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node,
+    private ImmutableMap<IRI, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
-        ImmutableMap.Builder<Predicate, Datatype> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<IRI, Datatype> builder = ImmutableMap.builder();
         for (DataRangeExpression equivalent : nodeSet) {
             if (equivalent != node) {
                 if (equivalent instanceof Datatype) {
-                    getPredicate(node)
+                    getPredicateIRI(node)
                             .ifPresent(p -> builder.put(p, (Datatype) equivalent));
                 }
                 if (node instanceof Datatype) {
-                    getPredicate(equivalent)
+                    getPredicateIRI(equivalent)
                             .ifPresent(p -> builder.put(p, (Datatype) node));
                 }
             }
@@ -358,15 +358,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     //TODO: check whether the DataRange expression can be neither a Datatype nor a DataPropertyRangeExpression:
     // if the answer is no, drop the Optional and throw an exception instead
-    private Optional<Predicate> getPredicate(DataRangeExpression expression) {
+    private Optional<IRI> getPredicateIRI(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
-            return typeFactory.getOptionalDatatype(((Datatype) expression).getIRI())
-                    .flatMap(termFactory::getOptionalTypePredicate)
-                    .map(p -> (Predicate) p);
+            return Optional.of(((Datatype) expression).getIRI());
         }
         if (expression instanceof DataPropertyRangeExpression) {
-            return Optional.of(atomFactory.getDataPropertyPredicate(
-                    ((DataPropertyRangeExpression) expression).getProperty().getIRI()));
+            return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getIRI());
         }
         return Optional.empty();
     }

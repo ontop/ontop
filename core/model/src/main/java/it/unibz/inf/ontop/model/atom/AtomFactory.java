@@ -16,32 +16,6 @@ public interface AtomFactory {
 
     AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 
-    @Deprecated
-    AtomPredicate getObjectPropertyPredicate(String name);
-
-    AtomPredicate getObjectPropertyPredicate(IRI iri);
-
-    AtomPredicate getDataPropertyPredicate(String name, TermType type);
-
-    @Deprecated
-    AtomPredicate getAnnotationPropertyPredicate(String name);
-
-    AtomPredicate getAnnotationPropertyPredicate(IRI iri);
-
-    @Deprecated
-    AtomPredicate getDataPropertyPredicate(String name);
-
-    AtomPredicate getDataPropertyPredicate(IRI iri);
-
-    @Deprecated
-    AtomPredicate getClassPredicate(String name);
-
-    AtomPredicate getClassPredicate(IRI iri);
-
-    AtomPredicate getOWLSameAsPredicate();
-
-    AtomPredicate getOBDACanonicalIRI();
-
     /**
      * Beware: a DataAtom is immutable
      */
@@ -66,13 +40,15 @@ public interface AtomFactory {
 
     VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
 
-    Function getTripleAtom(Term subject, Term predicate, Term object);
+    Function getMutableTripleAtom(Term subject, Term predicate, Term object);
 
-    AtomPredicate getTripleAtomPredicate();
+    Function getMutableTripleAtom(Term subject, IRI propertyIRI, Term object);
 
-    /**
-     * TODO: create an abstraction of DataAtom (Atom) that accepts arbitrary ImmutableTerms as arguments
-     * (not only Variable or ground terms)
-     */
-    ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
+    Function getMutableTripleAtom(Term subject, IRI classIRI);
+
+    TriplePredicate getTripleAtomPredicate();
+
+    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property, VariableOrGroundTerm object);
+    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI, VariableOrGroundTerm object);
+    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI classIRI);
 }

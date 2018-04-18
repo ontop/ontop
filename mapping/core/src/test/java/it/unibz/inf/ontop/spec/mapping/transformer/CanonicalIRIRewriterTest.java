@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
 import org.junit.Before;
@@ -103,8 +104,7 @@ public class CanonicalIRIRewriterTest {
     }
 
     private Function getCanonIRIFunction(Term term1, Term term2) {
-        Function canonIRIProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(ATOM_FACTORY.getOBDACanonicalIRI().getName()));
-        return ATOM_FACTORY.getTripleAtom(term1, canonIRIProperty, term2);
+        return ATOM_FACTORY.getMutableTripleAtom(term1, Ontop.CANONICAL_IRI, term2);
 
     }
 
@@ -112,20 +112,20 @@ public class CanonicalIRIRewriterTest {
 
         Function classProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
         Function rdfType =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF.TYPE.getIRIString()));
-        return ATOM_FACTORY.getTripleAtom(term1, rdfType, classProperty);
+        return ATOM_FACTORY.getMutableTripleAtom(term1, rdfType, classProperty);
 
     }
     private Function getDataPropertyFunction(String name, Term term1, Term term2) {
 
         Function dataProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
-        return ATOM_FACTORY.getTripleAtom(term1, dataProperty, term2);
+        return ATOM_FACTORY.getMutableTripleAtom(term1, dataProperty, term2);
 
     }
 
     private Function getObjectPropertyFunction(String name, Term term1, Term term2) {
 
         Function objectProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
-        return ATOM_FACTORY.getTripleAtom(term1, objectProperty, term2);
+        return ATOM_FACTORY.getMutableTripleAtom(term1, objectProperty, term2);
 
     }
 

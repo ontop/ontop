@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,13 @@ public class CQCUtilitiesTest {
 	Term y = TERM_FACTORY.getVariable("y");
 	Term c1 = TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI("URI1"));
 	Term c2 = TERM_FACTORY.getConstantLiteral("m");
+
+	IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
+	IRI propertyR = RDF_FACTORY.createIRI("http://example.com/R");
+	IRI propertyS = RDF_FACTORY.createIRI("http://example.com/S");
+	IRI propertyT = RDF_FACTORY.createIRI("http://example.com/T");
+	IRI classA = RDF_FACTORY.createIRI("http://example.com/A");
+	IRI classC = RDF_FACTORY.createIRI("http://example.com/C");
 
 	private Function getFunction(String name, List<Term> terms) {
 		return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(name, terms.size()), terms);
@@ -142,11 +150,11 @@ public class CQCUtilitiesTest {
 
 		Function head = getFunction("q", x, y);
 
-		List<Function> body = new LinkedList<Function>();
+		List<Function> body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("z")));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -156,7 +164,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<Function>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -165,7 +173,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("m"), propertyR, TERM_FACTORY.getVariable("n")));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -175,9 +183,9 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("m"), propertyS, TERM_FACTORY.getVariable("n")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("m"), propertyR, TERM_FACTORY.getVariable("n")));
 
 		CQIE q4 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -185,7 +193,7 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyS, TERM_FACTORY.getVariable("y")));
 
 		CQIE q5 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -193,7 +201,7 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("w1"), TERM_FACTORY.getVariable("w2")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("w1"), propertyS, TERM_FACTORY.getVariable("w2")));
 
 		CQIE q6 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -201,10 +209,10 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("P"),
-				TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("w1")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(
+				TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(
+				TERM_FACTORY.getVariable("y"), propertyP, TERM_FACTORY.getVariable("w1")));
 
 		CQIE q7 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -212,10 +220,10 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("P"),
-				TERM_FACTORY.getVariable("w1"), TERM_FACTORY.getVariable("w2")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(
+				TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(
+				TERM_FACTORY.getVariable("w1"), propertyP, TERM_FACTORY.getVariable("w2")));
 
 		CQIE q8 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -223,12 +231,12 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("m")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("m"), TERM_FACTORY.getVariable("n")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("n"), TERM_FACTORY.getVariable("o")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("x")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("m")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("m"), propertyS, TERM_FACTORY.getVariable("n")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), propertyS, TERM_FACTORY.getVariable("z")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("n"), propertyT, TERM_FACTORY.getVariable("o")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("z"), propertyT, TERM_FACTORY.getVariable("x")));
 
 		CQIE q9 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -236,9 +244,9 @@ public class CQCUtilitiesTest {
 
 		head = getFunction("q", new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("i"), TERM_FACTORY.getVariable("j")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("S"), TERM_FACTORY.getVariable("j"), TERM_FACTORY.getVariable("k")));
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("T"), TERM_FACTORY.getVariable("k"), TERM_FACTORY.getVariable("i")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("i"), propertyR, TERM_FACTORY.getVariable("j")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("j"), propertyS, TERM_FACTORY.getVariable("k")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("k"), propertyT, TERM_FACTORY.getVariable("i")));
 
 		CQIE q10 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -293,11 +301,11 @@ public class CQCUtilitiesTest {
 
 		List<Function> body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -307,7 +315,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -317,7 +325,7 @@ public class CQCUtilitiesTest {
 
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -345,11 +353,11 @@ public class CQCUtilitiesTest {
 
 		List<Function> body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("z")));
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA));
 
 		CQIE q1 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -358,7 +366,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("x"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"), TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
 		CQIE q2 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -367,7 +375,7 @@ public class CQCUtilitiesTest {
 		head = getFunction("q", TERM_FACTORY.getVariable("x"));
 		body = new LinkedList<>();
 
-		body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+		body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA));
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
@@ -422,11 +430,11 @@ public class CQCUtilitiesTest {
 			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("x")));
-			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA);
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", Collections.<Term>singletonList(TERM_FACTORY.getVariable("y")));
-			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("C"), TERM_FACTORY.getVariable("y"));
+			Function body2 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("y"), classC);
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			
@@ -451,12 +459,12 @@ public class CQCUtilitiesTest {
 			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA);
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-					TERM_FACTORY.getVariable("y"), TERM_FACTORY.getVariable("z"));
+			Function body2 = ATOM_FACTORY.getMutableTripleAtom(
+					TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
@@ -480,12 +488,12 @@ public class CQCUtilitiesTest {
 			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x"));
+			Function body1 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA);
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-					TERM_FACTORY.getVariable("z"), TERM_FACTORY.getVariable("y"));
+			Function body2 = ATOM_FACTORY.getMutableTripleAtom(
+					TERM_FACTORY.getVariable("z"), propertyR, TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
@@ -509,12 +517,12 @@ public class CQCUtilitiesTest {
 			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("x"));
-			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-					TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
+			Function body1 = ATOM_FACTORY.getMutableTripleAtom(
+					TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("z"), classA);
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
@@ -539,12 +547,12 @@ public class CQCUtilitiesTest {
 			ClassifiedTBox sigma = builder.build().tbox();
 
 			Function head1 = getFunction("q", TERM_FACTORY.getVariable("y"));
-			Function body1 = TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-					TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y"));
+			Function body1 = ATOM_FACTORY.getMutableTripleAtom(
+					TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y"));
 			CQIE query1 = DATALOG_FACTORY.getCQIE(head1, body1);
 
 			Function head2 = getFunction("q", TERM_FACTORY.getVariable("z"));
-			Function body2 = TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("z"));
+			Function body2 = ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("z"), classA);
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
@@ -593,10 +601,10 @@ public class CQCUtilitiesTest {
 
         List<Function> body = new LinkedList<>();
 
-        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate("R"),
-				TERM_FACTORY.getVariable("x"), TERM_FACTORY.getVariable("y")));
+        body.add(ATOM_FACTORY.getMutableTripleAtom(
+				TERM_FACTORY.getVariable("x"), propertyR, TERM_FACTORY.getVariable("y")));
 
-        body.add(TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate("A"), TERM_FACTORY.getVariable("x")));
+        body.add(ATOM_FACTORY.getMutableTripleAtom(TERM_FACTORY.getVariable("x"), classA));
 
         CQIE query1 = DATALOG_FACTORY.getCQIE(head, body);
 

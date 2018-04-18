@@ -53,6 +53,8 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,12 +199,13 @@ public class MetaMappingExpander {
 						// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
 						// to
 						// <pre>http://example.org/cls(t1)</pre>, if X is t1
-						String predicateName = getPredicateName(templateAtom.getTerm(0), values);
+						IRI iri = new SimpleRDF().createIRI(getPredicateName(templateAtom.getTerm(0), values));
 						ImmutableFunctionalTerm newTarget = isClass
-								? termFactory.getImmutableFunctionalTerm(atomFactory.getClassPredicate(predicateName),
-								m.target.getTerm(0))
-								: termFactory.getImmutableFunctionalTerm(atomFactory.getObjectPropertyPredicate(predicateName),
-								m.target.getTerm(0), m.target.getTerm(2));
+								? atomFactory.getTripleAtom((VariableOrGroundTerm) m.target.getTerm(0), iri)
+								: atomFactory.getTripleAtom(
+										(VariableOrGroundTerm) m.target.getTerm(0),
+										iri,
+										(VariableOrGroundTerm) m.target.getTerm(2));
 
 						// TODO: see how to keep the provenance
 						SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(

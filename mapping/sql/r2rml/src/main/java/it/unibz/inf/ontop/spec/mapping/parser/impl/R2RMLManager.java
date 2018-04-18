@@ -226,7 +226,7 @@ public class R2RMLManager {
 			List<ImmutableFunctionalTerm> joinPredicates = r2rmlParser.getBodyURIPredicates(pobm);
 			for (ImmutableFunctionalTerm pred : joinPredicates) {
 				//TODO:joinPredicates
-				bodyBuilder.add(atomFactory.getImmutableTripleAtom(joinSubject1, pred, joinSubject2));   // objectAtom
+				bodyBuilder.add(getTripleAtom(joinSubject1, pred, joinSubject2));   // objectAtom
 			}
 
 			//Function head = getHeadAtom(body);
@@ -266,7 +266,7 @@ public class R2RMLManager {
 		List<ImmutableFunctionalTerm> classPredicates = r2rmlParser.getClassPredicates();
 		for (ImmutableFunctionalTerm classPred : classPredicates) {
 			ImmutableTerm predFunction = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.toString())); ;
-			bodyBuilder.add(atomFactory.getImmutableTripleAtom(subjectAtom, predFunction, classPred));   // objectAtom
+			bodyBuilder.add(getTripleAtom(subjectAtom, predFunction, classPred));   // objectAtom
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -287,9 +287,18 @@ public class R2RMLManager {
 			//treat predicates
 			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
 
-				bodyBuilder.add(atomFactory.getImmutableTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
+				bodyBuilder.add(getTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}
 		}
 		return bodyBuilder.build();
+	}
+
+	/**
+	 * TODO: check if it can be a DataAtom (i.e. if all its arguments are VariableOrGroundTerm)
+	 */
+	private ImmutableFunctionalTerm getTripleAtom(ImmutableTerm subjectAtom, ImmutableTerm predFunction,
+												  ImmutableTerm classPred) {
+		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(),
+				subjectAtom, predFunction, classPred);
 	}
 }

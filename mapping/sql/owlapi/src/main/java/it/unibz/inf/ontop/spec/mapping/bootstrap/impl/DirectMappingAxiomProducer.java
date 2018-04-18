@@ -29,9 +29,12 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.*;
 
@@ -43,6 +46,7 @@ public class DirectMappingAxiomProducer {
 	private final TermFactory termFactory;
 	private final JdbcTypeMapper typeMapper;
 	private final AtomFactory atomFactory;
+	private final SimpleRDF rdfFactory;
 
 	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, JdbcTypeMapper typeMapper,
 									  AtomFactory atomFactory) {
@@ -50,6 +54,7 @@ public class DirectMappingAxiomProducer {
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		this.typeMapper = typeMapper;
 		this.atomFactory = atomFactory;
+		this.rdfFactory = new SimpleRDF();
 	}
 
 
@@ -129,7 +134,7 @@ public class DirectMappingAxiomProducer {
 
 		//Class Atom
 		ImmutableTerm sub = generateSubject(table, false);
-		atoms.add(termFactory.getImmutableFunctionalTerm(atomFactory.getClassPredicate(getTableIRI(table.getID())), sub));
+		atoms.add(getAtom(getTableIRI(table.getID()), sub));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
@@ -138,7 +143,7 @@ public class DirectMappingAxiomProducer {
 			Variable objV = termFactory.getVariable(att.getID().getName());
 			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
 			
-			atoms.add(termFactory.getImmutableFunctionalTerm(atomFactory.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
+			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
 		}
 
 		return atoms.build();
@@ -154,8 +159,7 @@ public class DirectMappingAxiomProducer {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
 
-		ImmutableFunctionalTerm atom = termFactory.getImmutableFunctionalTerm(
-				atomFactory.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
+		ImmutableFunctionalTerm atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
 	}
 
@@ -167,8 +171,8 @@ public class DirectMappingAxiomProducer {
      *
      * @return table IRI
      */
-	private String getTableIRI(RelationID tableId) {
-		return baseIRI + R2RMLIRISafeEncoder.encode(tableId.getTableName());
+	private IRI getTableIRI(RelationID tableId) {
+		return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(tableId.getTableName()));
 	}
 
     /**
@@ -183,9 +187,9 @@ public class DirectMappingAxiomProducer {
      *   - the hash character '#',
      *   - the percent-encoded form of the column name.
      */
-    private String getLiteralPropertyIRI(Attribute attr) {
-        return baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
-                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName());
+    private IRI getLiteralPropertyIRI(Attribute attr) {
+        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
+                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
     }
 
     /*
@@ -200,13 +204,13 @@ public class DirectMappingAxiomProducer {
      *     - the percent-encoded form of the column name,
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
-    private String getReferencePropertyIRI(ForeignKeyConstraint fk) {
+    private IRI getReferencePropertyIRI(ForeignKeyConstraint fk) {
         List<String> attributes = new ArrayList<>(fk.getComponents().size());
  		for (Component component : fk.getComponents())
             attributes.add(R2RMLIRISafeEncoder.encode(component.getAttribute().getID().getName()));
         
-        return baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
-                + "#ref-" + Joiner.on(";").join(attributes);
+        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
+                + "#ref-" + Joiner.on(";").join(attributes));
     }
 
     /**
@@ -252,6 +256,24 @@ public class DirectMappingAxiomProducer {
 
 			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
 		}
+	}
+
+	/**
+	 * TODO: refactor
+	 */
+	private ImmutableFunctionalTerm getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
+		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s,
+				termFactory.getConstantIRI(iri),
+				o);
+	}
+
+	/**
+	 * TODO: refactor
+	 */
+	private ImmutableFunctionalTerm getAtom(IRI iri, ImmutableTerm s) {
+    	return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s,
+				termFactory.getConstantIRI(RDF.TYPE),
+				termFactory.getConstantIRI(iri));
 	}
 
 

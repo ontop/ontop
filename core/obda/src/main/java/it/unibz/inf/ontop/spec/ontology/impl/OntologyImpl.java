@@ -118,12 +118,22 @@ public class OntologyImpl implements Ontology {
             return oc;
         }
 
-        @Override
+		@Override
+		public T get(IRI iri) {
+			return get(iri.getIRIString());
+		}
+
+		@Override
         public boolean contains(String uri) {
             return map.containsKey(uri);
         }
 
-        @Override
+		@Override
+		public boolean contains(IRI iri) {
+			return contains(iri.getIRIString());
+		}
+
+		@Override
         public Iterator<T> iterator() {
             return map.values().iterator();
         }

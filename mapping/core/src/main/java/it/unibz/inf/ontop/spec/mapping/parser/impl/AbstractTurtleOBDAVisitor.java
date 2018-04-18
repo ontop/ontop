@@ -226,7 +226,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
      */
     private Function makeAtom(Term subject, Term pred, Term object) {
 
-        return  atomFactory.getTripleAtom(subject, pred, object);
+        return  atomFactory.getMutableTripleAtom(subject, pred, object);
     }
 
 

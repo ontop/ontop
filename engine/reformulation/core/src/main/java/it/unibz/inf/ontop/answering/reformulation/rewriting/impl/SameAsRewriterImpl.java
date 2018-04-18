@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -143,10 +144,9 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
         //it will be the right atom of the join
-        Predicate sameAs = atomFactory.getOWLSameAsPredicate();
         Term sTerm2 = unboundleftAtom.getTerm(1);
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = termFactory.getFunction(sameAs, sTerm2, oTerm2);
+        Function rightAtomJoin2 = atomFactory.getMutableTripleAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(unboundleftAtom), getVariables(rightAtomJoin2));
@@ -162,7 +162,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = unboundleftAtom.getTerm(0);
-        Function leftAtomJoin = termFactory.getFunction(sameAs, sTerm, oTerm);
+        Function leftAtomJoin = atomFactory.getMutableTripleAtom(sTerm, OWL.SAME_AS, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(joinRight));
@@ -209,10 +209,9 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //given a data property ex hasProperty (x, y)
         //create statement pattern for same as create owl:sameAs( anon-x, y)
         //it will be the right atom of the join
-        Predicate predicate = atomFactory.getOWLSameAsPredicate();
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
-        Function rightAtomJoin = termFactory.getFunction(predicate, sTerm, oTerm);
+        Function rightAtomJoin = atomFactory.getMutableTripleAtom(sTerm, OWL.SAME_AS, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(rightAtomJoin));
@@ -235,10 +234,9 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
-        Predicate predicate = atomFactory.getOWLSameAsPredicate();
         Term sTerm2 = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = termFactory.getFunction(predicate, sTerm2, oTerm2);
+        Function rightAtomJoin2 = atomFactory.getMutableTripleAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(leftAtomJoin2), getVariables(rightAtomJoin2));

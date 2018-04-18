@@ -227,12 +227,12 @@ public class OntopMaterializerTest {
 
 		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
 
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, type, person));
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, hasschool, schoolTemplate));
-		bodyBuilder.add(atomFactory.getImmutableTripleAtom(personTemplate, school, schoolTemplate));
+		bodyBuilder.add(getTripleAtom(personTemplate, type, person));
+		bodyBuilder.add(getTripleAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
+		bodyBuilder.add(getTripleAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
+		bodyBuilder.add(getTripleAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
+		bodyBuilder.add(getTripleAtom(personTemplate, hasschool, schoolTemplate));
+		bodyBuilder.add(getTripleAtom(personTemplate, school, schoolTemplate));
 
 		ImmutableList<ImmutableFunctionalTerm> body = bodyBuilder.build();
 
@@ -248,6 +248,15 @@ public class OntopMaterializerTest {
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
+	}
+
+	/**
+	 * TODO: refactor as to use atomFactory.getTripleAtom
+	 *
+	 */
+	private ImmutableFunctionalTerm getTripleAtom(ImmutableTerm s, ImmutableTerm p,
+												  ImmutableTerm o) {
+		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s, p, o);
 	}
 
 //	public void testTwoSources() throws Exception {

@@ -123,7 +123,7 @@ public class BootstrapGenerator {
 
     private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory);
+        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, jdbcTypeMapper, atomFactory, rdfFactory);
 
         List<SQLPPTriplesMap> axioms = new ArrayList<>();
         axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
