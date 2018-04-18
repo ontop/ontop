@@ -1402,12 +1402,12 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
     }
 
     private void updateProjectedArguments(ImmutableSet<NonGroundTerm> keyTerms, List<VariableOrGroundTerm> temporalTerms){
-        List <VariableOrGroundTerm> updatedList = new ArrayList();
-        for(VariableOrGroundTerm arg : lastProjectedArguments){
-            if (keyTerms.contains(arg)){
-                updatedList.add(arg);
-            }
-        }
+        List <VariableOrGroundTerm> updatedList = new ArrayList(keyTerms.asList());
+//        for(VariableOrGroundTerm arg : lastProjectedArguments){
+//            if (keyTerms.contains(arg)){
+//                updatedList.add(arg);
+//            }
+//        }
         //TODO: this is very ugly. Find a better way to do it.
         for (VariableOrGroundTerm term : temporalTerms) {
             if (!updatedList.contains(term)) {
