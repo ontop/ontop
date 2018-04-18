@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -123,6 +124,18 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         return getRootNode().propagateDownConstraint(constraint, getChildren());
+    }
+
+    @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        ImmutableList<IQTree> newChildren = getChildren().stream()
+                .map(c -> c.replaceSubTree(subTreeToReplace, newSubTree))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createNaryIQTree(getRootNode(), newChildren);
     }
 
     @Override

@@ -19,10 +19,6 @@ import java.util.stream.Stream;
 /**
  * Only splits according to the first splittable union found (breadth-first search)
  *
- * HACKY!!! Supposes that the projection atom fits with the UNION
- *
- * TODO: remove it after getting rid of Datalog in the mapping process
- *
  */
 @Singleton
 public class QueryUnionSplitterImpl implements QueryUnionSplitter {
@@ -36,28 +32,27 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
 
     @Override
     public Stream<IQ> splitUnion(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
         DistinctVariableOnlyDataAtom projectionAtom = query.getProjectionAtom();
+        VariableGenerator variableGenerator = query.getVariableGenerator();
+        IQTree tree = query.getTree();
 
-        return findFirstSplittableUnion(query, projectionAtom)
+        return findFirstSplittableUnion(query)
                 .map(unionTree -> unionTree.getChildren().stream()
-                        .map(c -> c.liftBinding(variableGenerator))
-                        .map(t -> iqFactory.createIQ(projectionAtom, unionTree))
-                )
+                        .map(c -> tree.replaceSubTree(unionTree, c))
+                        .map(t -> t.liftBinding(variableGenerator))
+                        .map(t -> iqFactory.createIQ(projectionAtom, t))
+                        .map(IQ::liftBinding))
                 .orElseGet(() -> Stream.of(query));
     }
 
-    private Optional<NaryIQTree> findFirstSplittableUnion(IQ query, DistinctVariableOnlyDataAtom projectionAtom) {
+    private Optional<NaryIQTree> findFirstSplittableUnion(IQ query) {
         Queue<IQTree> nodesToVisit = new LinkedList<>();
         nodesToVisit.add(query.getTree());
 
         while(!nodesToVisit.isEmpty()) {
             IQTree childTree = nodesToVisit.poll();
             if (childTree.getRootNode() instanceof UnionNode) {
-                if (!((UnionNode) childTree.getRootNode()).getVariables().equals(projectionAtom.getVariables()))
-                    throw new UnionWithDifferentSignatureException(childTree, projectionAtom);
-                else
-                    return Optional.of((NaryIQTree) childTree);
+                return Optional.of((NaryIQTree) childTree);
             }
             else {
                 nodesToVisit.addAll(extractChildrenToVisit(childTree));
@@ -82,13 +77,6 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
         }
         else {
             return tree.getChildren();
-        }
-    }
-
-    private static class UnionWithDifferentSignatureException extends OntopInternalBugException {
-
-        protected UnionWithDifferentSignatureException(IQTree childTree, DistinctVariableOnlyDataAtom projectionAtom) {
-            super("The following union tree does fit " + projectionAtom + ":\n" + childTree);
         }
     }
 

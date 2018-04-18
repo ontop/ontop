@@ -91,4 +91,9 @@ public interface IQTree {
     IQTree propagateDownConstraint(ImmutableExpression constraint);
 
     void validate() throws InvalidIntermediateQueryException;
+
+    /**
+     * If subTreeToReplace is not found, has no effect (besides creating a novel copy).
+     */
+    IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree);
 }

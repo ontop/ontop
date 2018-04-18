@@ -134,6 +134,16 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        return iqFactory.createBinaryNonCommutativeIQTree(getRootNode(),
+                leftChild.replaceSubTree(subTreeToReplace, newSubTree),
+                rightChild.replaceSubTree(subTreeToReplace, newSubTree));
+    }
+
+    @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(leftChild, rightChild);
     }

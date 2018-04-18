@@ -74,6 +74,13 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        return equals(subTreeToReplace)
+                ? newSubTree
+                : this;
+    }
+
+    @Override
     public IQTree liftIncompatibleDefinitions(Variable variable) {
         return this;
     }

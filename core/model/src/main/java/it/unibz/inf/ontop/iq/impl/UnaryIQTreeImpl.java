@@ -105,6 +105,15 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        return iqFactory.createUnaryIQTree(getRootNode(),
+                getChild().replaceSubTree(subTreeToReplace, newSubTree));
+    }
+
+    @Override
     public ImmutableSet<Variable> getVariables() {
         UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)
