@@ -40,6 +40,9 @@ public class Datalog2QueryTools {
                 Term t0 = func.getTerm(0);
                 if (t0 instanceof IRIConstant)
                     return ((IRIConstant) t0).getIRI().equals(RDF.TYPE);
+                // UGLY!! TODO: remove it
+                else if (t0 instanceof ValueConstant)
+                    return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
             }
         }
         return false;
