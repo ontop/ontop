@@ -17,7 +17,7 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     private final ImmutableMap<String, Integer> columnMap;
 
     public DelegatedIriSQLBindingSet(List<MainTypeLangValues> row, ImmutableList<String> signature, ImmutableMap<String, Integer> columnMap,
-                                     JDBC2ConstantConverter constantRetriever, ImmutableMap<String, Integer> columnMap1) {
+                                     JDBC2ConstantConverter constantRetriever) {
         super(signature);
         this.row = row;
         this.constantRetriever = constantRetriever;

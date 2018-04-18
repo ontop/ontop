@@ -55,7 +55,7 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
         SQLRowReader rowReader = new SQLRowReader();
         try {
             final List<MainTypeLangValues> cells = rowReader.read(rs, getColumnCount());
-            return new DelegatedIriSQLBindingSet(cells, signature, columnMap, ontopConstantRetriever, columnMap);
+            return new DelegatedIriSQLBindingSet(cells, signature, columnMap, ontopConstantRetriever);
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
