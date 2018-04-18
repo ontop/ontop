@@ -153,7 +153,7 @@
         <commons-rdf.version>0.3.0-incubating</commons-rdf.version>
         <guava.version>18.0</guava.version>
         <jsqlparser.version>1.0</jsqlparser.version>
-        <calcite.version>1.16.0-SNAPSHOT</calcite.version>
+        <calcite.version>1.17.0-SNAPSHOT</calcite.version>
     </properties>
 
     <build>
