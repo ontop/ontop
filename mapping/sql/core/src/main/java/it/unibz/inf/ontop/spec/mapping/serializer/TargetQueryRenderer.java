@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -41,14 +42,14 @@ public class TargetQueryRenderer {
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
 	 */
-	public static String encode(ImmutableList<ImmutableFunctionalTerm> body, PrefixManager prefixManager) {
+	public static String encode(ImmutableList<TargetAtom> body, PrefixManager prefixManager) {
 
 		TurtleWriter turtleWriter = new TurtleWriter();
-		for (Function atom : body) {
+		for (TargetAtom atom : body) {
 			String subject, predicate, object = "";
-			String originalString = atom.getFunctionSymbol().toString();
-			if (isUnary(atom)) {
-				Term subjectTerm = atom.getTerm(0);
+			String originalString = atom.getProjectionAtom().getFunctionSymbol().toString();
+			if (isUnary(atom.getProjectionAtom())) {
+				Term subjectTerm = atom.getSubstitutedTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = "a";
 				object = getAbbreviatedName(originalString, prefixManager, false);
@@ -57,21 +58,21 @@ public class TargetQueryRenderer {
 				}
 			}
 			else if (originalString.equals("triple")) {
-					Term subjectTerm = atom.getTerm(0);
+					Term subjectTerm = atom.getSubstitutedTerm(0);
 					subject = getDisplayName(subjectTerm, prefixManager);
-					Term predicateTerm = atom.getTerm(1);
+					Term predicateTerm = atom.getSubstitutedTerm(1);
 					predicate = getDisplayName(predicateTerm, prefixManager);
-					Term objectTerm = atom.getTerm(2);
+					Term objectTerm = atom.getSubstitutedTerm(2);
 					object = getDisplayName(objectTerm, prefixManager);
 			}			
 			else {
-				Term subjectTerm = atom.getTerm(0);
+				Term subjectTerm = atom.getSubstitutedTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
 				predicate = getAbbreviatedName(originalString, prefixManager, false);
 				if (originalString.equals(predicate)) {
 					predicate = "<" + predicate + ">";
 				}
-				Term objectTerm = atom.getTerm(1);
+				Term objectTerm = atom.getSubstitutedTerm(1);
 				object = getDisplayName(objectTerm, prefixManager);
 			}
 			turtleWriter.put(subject, predicate, object);

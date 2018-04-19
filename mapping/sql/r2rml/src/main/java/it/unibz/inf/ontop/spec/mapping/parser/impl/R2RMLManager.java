@@ -32,7 +32,9 @@ import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -63,34 +65,36 @@ public class R2RMLManager {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private R2RMLParser r2rmlParser;
 	private Graph myModel;
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final TargetAtomFactory targetAtomFactory;
 
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
-	 * @param atomFactory
 	 * @param termFactory
 	 * @param typeFactory
+	 * @param targetAtomFactory
 	 */
-	public R2RMLManager(String file, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory)
+	public R2RMLManager(String file, TermFactory termFactory, TypeFactory typeFactory,
+						TargetAtomFactory targetAtomFactory)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file), atomFactory, termFactory, typeFactory);
+		this(new File(file), termFactory, typeFactory, targetAtomFactory);
 	}
 	
 	/**
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
-	 * @param atomFactory
 	 * @param termFactory
 	 * @param typeFactory
+	 * @param targetAtomFactory
 	 */
-	public R2RMLManager(File file, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory)
+	public R2RMLManager(File file,TermFactory termFactory, TypeFactory typeFactory,
+						TargetAtomFactory targetAtomFactory)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
-		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
+		this.targetAtomFactory = targetAtomFactory;
 
 		try {
             LinkedHashModel model = new LinkedHashModel();
@@ -101,7 +105,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			this.myModel = new RDF4J().asGraph(model);
-			r2rmlParser = new R2RMLParser(atomFactory, termFactory, this.typeFactory);
+			r2rmlParser = new R2RMLParser(termFactory, this.typeFactory);
 		} catch (IOException e) {
 			throw new MappingIOException(e);
 		}
@@ -111,16 +115,17 @@ public class R2RMLManager {
 	/**
 	 * Constructor to start the parser from an RDF Model
 	 * @param model - the sesame Model containing mappings
-	 * @param atomFactory
 	 * @param termFactory
 	 * @param typeFactory
+	 * @param targetAtomFactory
 	 */
-	public R2RMLManager(Graph model, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory){
+	public R2RMLManager(Graph model, TermFactory termFactory, TypeFactory typeFactory,
+						TargetAtomFactory targetAtomFactory){
 		myModel = model;
-		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
-		r2rmlParser = new R2RMLParser(atomFactory, termFactory, this.typeFactory);
+		this.targetAtomFactory = targetAtomFactory;
+		r2rmlParser = new R2RMLParser(termFactory, this.typeFactory);
 	}
 	
 	/**
@@ -177,7 +182,7 @@ public class R2RMLManager {
 	 */
 	private SQLPPTriplesMap getMapping(TriplesMap tm) throws Exception {
 		String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
-		ImmutableList<ImmutableFunctionalTerm> body = getMappingTripleAtoms(tm);
+		ImmutableList<TargetAtom> body = getMappingTripleAtoms(tm);
 		//Function head = getHeadAtom(body);
 		//CQIE targetQuery = DATALOG_FACTORY.getCQIE(head, body);
 		// TODO: consider a R2RML-specific type of triples map
@@ -206,7 +211,7 @@ public class R2RMLManager {
 			for(RefObjectMap robm : pobm.getRefObjectMaps()) {
 				sourceQuery = robm.getJointQuery();
 
-				ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+				ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
 				ImmutableTerm joinSubject1 = r2rmlParser.getSubjectAtom(tm);
 				
@@ -226,7 +231,7 @@ public class R2RMLManager {
 			List<ImmutableFunctionalTerm> joinPredicates = r2rmlParser.getBodyURIPredicates(pobm);
 			for (ImmutableFunctionalTerm pred : joinPredicates) {
 				//TODO:joinPredicates
-				bodyBuilder.add(getTripleAtom(joinSubject1, pred, joinSubject2));   // objectAtom
+				bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(joinSubject1, pred, joinSubject2));   // objectAtom
 			}
 
 			//Function head = getHeadAtom(body);
@@ -255,9 +260,9 @@ public class R2RMLManager {
 	 * @return
 	 * @throws Exception
 	 */
-	private ImmutableList<ImmutableFunctionalTerm> getMappingTripleAtoms(TriplesMap tm) throws Exception {
+	private ImmutableList<TargetAtom> getMappingTripleAtoms(TriplesMap tm) throws Exception {
 		//the body to return
-		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 		
 		//get subject
 		ImmutableTerm subjectAtom = r2rmlParser.getSubjectAtom(tm);
@@ -266,7 +271,7 @@ public class R2RMLManager {
 		List<ImmutableFunctionalTerm> classPredicates = r2rmlParser.getClassPredicates();
 		for (ImmutableFunctionalTerm classPred : classPredicates) {
 			ImmutableTerm predFunction = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.toString())); ;
-			bodyBuilder.add(getTripleAtom(subjectAtom, predFunction, classPred));   // objectAtom
+			bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(subjectAtom, predFunction, classPred));   // objectAtom
 		}		
 
 		for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -287,18 +292,9 @@ public class R2RMLManager {
 			//treat predicates
 			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
 
-				bodyBuilder.add(getTripleAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
+				bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}
 		}
 		return bodyBuilder.build();
-	}
-
-	/**
-	 * TODO: check if it can be a DataAtom (i.e. if all its arguments are VariableOrGroundTerm)
-	 */
-	private ImmutableFunctionalTerm getTripleAtom(ImmutableTerm subjectAtom, ImmutableTerm predFunction,
-												  ImmutableTerm classPred) {
-		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(),
-				subjectAtom, predFunction, classPred);
 	}
 }

@@ -24,9 +24,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -86,6 +87,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final SpecificationFactory specificationFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final TargetAtomFactory targetAtomFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
@@ -93,11 +95,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory,
-                                     TermFactory termFactory) {
+                                     TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.targetAtomFactory = targetAtomFactory;
     }
 
     /**
@@ -214,7 +217,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getArguments().stream())
+                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
                         .map(t -> (ImmutableFunctionalTerm) t),
                 termFactory);
@@ -254,7 +257,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
-        ImmutableList<ImmutableFunctionalTerm> targetQuery = null;
+        ImmutableList<TargetAtom> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
         
@@ -359,12 +362,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         return currentSourceMappings;
     }
 
-	private static ImmutableList<ImmutableFunctionalTerm> loadTargetQuery(String targetString,
+	private static ImmutableList<TargetAtom> loadTargetQuery(String targetString,
                                         List<TargetQueryParser> parsers) throws UnparsableTargetQueryException {
         Map<TargetQueryParser, TargetQueryParserException> exceptions = new HashMap<>();
 		for (TargetQueryParser parser : parsers) {
             try {
-                ImmutableList<ImmutableFunctionalTerm> parse = parser.parse(targetString);
+                ImmutableList<TargetAtom> parse = parser.parse(targetString);
 				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
@@ -385,7 +388,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	}
 
     private static List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
-                                                       ImmutableList<ImmutableFunctionalTerm> targetQuery,
+                                                       ImmutableList<TargetAtom> targetQuery,
                                                        List<SQLPPTriplesMap> currentSourceMappings) {
         SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
                 mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
@@ -406,7 +409,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, atomFactory, termFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, atomFactory, termFactory, targetAtomFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

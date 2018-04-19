@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
@@ -104,11 +105,13 @@ public class SQLPPMapping2DatalogConverter {
                     body.add(termFactory.getFunction(view.getAtomPredicate(), arguments));
                 }
 
-                for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
+                for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
 
-                        Function head = renameVariables(atom, lookupTable, idfac);
+                        ImmutableFunctionalTerm mergedAtom = atom.getSubstitution().applyToFunctionalTerm(atom.getProjectionAtom());
+
+                        Function head = renameVariables(mergedAtom, lookupTable, idfac);
                         CQIE rule = datalogFactory.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);

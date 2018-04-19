@@ -24,10 +24,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
@@ -44,16 +43,13 @@ public class DirectMappingAxiomProducer {
 	private final String baseIRI;
 
 	private final TermFactory termFactory;
-	private final JdbcTypeMapper typeMapper;
-	private final AtomFactory atomFactory;
 	private final SimpleRDF rdfFactory;
+	private final TargetAtomFactory targetAtomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, JdbcTypeMapper typeMapper,
-									  AtomFactory atomFactory) {
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
 		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
-		this.typeMapper = typeMapper;
-		this.atomFactory = atomFactory;
+		this.targetAtomFactory = targetAtomFactory;
 		this.rdfFactory = new SimpleRDF();
 	}
 
@@ -62,8 +58,8 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, ImmutableList<ImmutableFunctionalTerm>> getRefAxioms(DatabaseRelationDefinition table) {
-		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = new HashMap<>();
+	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table) {
+		Map<String, ImmutableList<TargetAtom>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys())
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		
@@ -128,9 +124,9 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<ImmutableFunctionalTerm> getCQ(DatabaseRelationDefinition table) {
+    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table) {
 
-		ImmutableList.Builder<ImmutableFunctionalTerm> atoms = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
 		//Class Atom
 		ImmutableTerm sub = generateSubject(table, false);
@@ -155,11 +151,11 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	private ImmutableList<ImmutableFunctionalTerm> getRefCQ(ForeignKeyConstraint fk) {
+	private ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk) {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
 
-		ImmutableFunctionalTerm atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
+		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
 	}
 
@@ -258,22 +254,20 @@ public class DirectMappingAxiomProducer {
 		}
 	}
 
-	/**
-	 * TODO: refactor
-	 */
-	private ImmutableFunctionalTerm getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
-		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s,
-				termFactory.getConstantIRI(iri),
+	private TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
+		return targetAtomFactory.getTripleTargetAtom(s,
+				convertIRIIntoGroundFunctionalTerm(iri),
 				o);
 	}
 
-	/**
-	 * TODO: refactor
-	 */
-	private ImmutableFunctionalTerm getAtom(IRI iri, ImmutableTerm s) {
-    	return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s,
-				termFactory.getConstantIRI(RDF.TYPE),
-				termFactory.getConstantIRI(iri));
+	private TargetAtom getAtom(IRI iri, ImmutableTerm s) {
+    	return targetAtomFactory.getTripleTargetAtom(s,
+				convertIRIIntoGroundFunctionalTerm(RDF.TYPE),
+				convertIRIIntoGroundFunctionalTerm(iri));
+	}
+
+	private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
+    	return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
 	}
 
 

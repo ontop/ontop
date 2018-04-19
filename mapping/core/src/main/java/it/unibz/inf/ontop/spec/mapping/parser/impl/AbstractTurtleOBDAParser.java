@@ -23,19 +23,16 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
@@ -80,7 +77,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * @return A CQIE object.
 	 */
 	@Override
-	public ImmutableList<ImmutableFunctionalTerm> parse(String input) throws TargetQueryParserException {
+	public ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException {
 		StringBuffer bf = new StringBuffer(input.trim());
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
@@ -103,9 +100,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			parser.removeErrorListeners();
 			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
-			return ((List<Function>)visitor.visitParse(parser.parse())).stream()
-					.map(termFactory::getImmutableFunctionalTerm)
-					.collect(ImmutableCollectors.toList());
+			return (ImmutableList<TargetAtom>)visitor.visitParse(parser.parse());
 		} catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}

@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
@@ -40,6 +41,8 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryEx
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor2;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.URITemplates;
@@ -53,8 +56,6 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,23 +84,26 @@ public class MetaMappingExpander {
 	private final TermFactory termFactory;
 	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
 	private final ImmutableList<Expansion> mappingsToBeExpanded;
+	private final SubstitutionFactory substitutionFactory;
 
 
 	private static final class Expansion {
 		private final String id;
 		private final OBDASQLQuery source;
-		private final ImmutableFunctionalTerm target;
+		private final TargetAtom target;
 
-		Expansion(String id, OBDASQLQuery source, ImmutableFunctionalTerm target) {
+		Expansion(String id, OBDASQLQuery source, TargetAtom target) {
 			this.id = id;
 			this.source = source;
 			this.target = target;
 		}
 	}
 
-	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, AtomFactory atomFactory, TermFactory termFactory) {
+	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, AtomFactory atomFactory, TermFactory termFactory,
+							   SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
+		this.substitutionFactory = substitutionFactory;
 
 		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
@@ -107,16 +111,17 @@ public class MetaMappingExpander {
 		for (SQLPPTriplesMap mapping : mappings) {
 
 			//serach for not grounded elements in the predicate of each mapping (position 2 or 3)
-			ImmutableList<ImmutableFunctionalTerm> toBeExpanded = mapping.getTargetAtoms().stream()
-					.filter(atom -> {
-						ImmutableList<? extends ImmutableTerm> arguments = atom.getArguments();
-						ImmutableTerm immutableTerm = arguments.get(1);
-							if(isURIRDFType(immutableTerm)){
+			ImmutableList<TargetAtom> toBeExpanded = mapping.getTargetAtoms().stream()
+					.filter(targetAtom -> {
+
+						ImmutableTerm propertyTerm = targetAtom.getSubstitutedTerm(1);
+
+							if(isURIRDFType(propertyTerm)){
 								//check if the class is grounded
-								return  !arguments.get(2).isGround();
+								return  !targetAtom.getSubstitutedTerm(2).isGround();
 							}
 							else{
-								return !immutableTerm.isGround();
+								return !propertyTerm.isGround();
 							}
 
 						})
@@ -155,10 +160,10 @@ public class MetaMappingExpander {
 
 		for (Expansion m : mappingsToBeExpanded) {
 			try {
-				boolean isClass = isURIRDFType(m.target.getTerm(1));
+				boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1));
 				// if isClass, then the template is the object;
 				// otherwise, it's a property and the template is the predicate
-				Function templateAtom = (Function)m.target.getTerm(isClass ? 2 : 1);
+				Function templateAtom = (Function)m.target.getSubstitutedTerm(isClass ? 2 : 1);
 
 				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
 
@@ -195,17 +200,17 @@ public class MetaMappingExpander {
 
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
 
-						// construct new target by expanding the higher-order atom of the form
-						// <pre>triple(t1, 'rdf:type', URI("http://example.org/{}", X))</pre>
-						// to
-						// <pre>http://example.org/cls(t1)</pre>, if X is t1
-						IRI iri = new SimpleRDF().createIRI(getPredicateName(templateAtom.getTerm(0), values));
-						ImmutableFunctionalTerm newTarget = isClass
-								? atomFactory.getTripleAtom((VariableOrGroundTerm) m.target.getTerm(0), iri)
-								: atomFactory.getTripleAtom(
-										(VariableOrGroundTerm) m.target.getTerm(0),
-										iri,
-										(VariableOrGroundTerm) m.target.getTerm(2));
+
+						// In a mapping assertion, we create ground terms instead of constants for IRIs
+						// (so as to guarantee that RDF functions can ALWAYS be lifted after unfolding)
+						GroundFunctionalTerm predicateTerm = (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(
+								termFactory.getConstantLiteral(getPredicateName(templateAtom.getTerm(0), values)));
+
+						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
+						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
+								.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+
+						TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
 
 						// TODO: see how to keep the provenance
 						SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
@@ -315,8 +320,9 @@ public class MetaMappingExpander {
 
 	/**
 	 * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
+	 *
+	 * TODO: refactor so as to use RDFPredicate.getClassIRI() instead
 	 */
-
 	private static boolean isURIRDFType(Term term) {
 		if (term instanceof Function) {
 			Function func = (Function) term;

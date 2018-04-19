@@ -48,18 +48,15 @@ public class R2RMLParser {
 
     RDF4JR2RMLMappingManager mapManager;
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 
 	/**
 	 * empty constructor
-	 * @param atomFactory
 	 * @param termFactory
 	 * @param typeFactory
 	 */
-	public R2RMLParser(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory) {
-		this.atomFactory = atomFactory;
+	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		mapManager = RDF4JR2RMLMappingManager.getInstance();

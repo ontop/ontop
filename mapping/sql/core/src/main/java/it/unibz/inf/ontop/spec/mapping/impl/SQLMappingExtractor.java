@@ -22,8 +22,8 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +45,13 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
-                                AtomFactory atomFactory, TermFactory termFactory) {
+                                AtomFactory atomFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
@@ -59,6 +60,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.settings = settings;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     /**
@@ -97,7 +99,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
-        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory);
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory,
+                substitutionFactory);
         final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
         if (expander.hasMappingsToBeExpanded()) {
             try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {

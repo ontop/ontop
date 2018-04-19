@@ -142,25 +142,7 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public TriplePredicate getTripleAtomPredicate() {
-        return triplePredicate;
-    }
-
-
-    @Override
-    public DataAtom<TriplePredicate> getTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
-                                                   VariableOrGroundTerm object) {
-        return getDataAtom(triplePredicate, subject, property, object);
-    }
-
-    @Override
-    public ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
-                                                 VariableOrGroundTerm object) {
-        return getTripleAtom(subject, termFactory.getConstantIRI(propertyIRI), object);
-    }
-
-    @Override
-    public ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
-        return getTripleAtom(subject, rdfTypeConstant, termFactory.getConstantIRI(classIRI));
+    public DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object) {
+        return getDistinctVariableOnlyDataAtom(triplePredicate, subject, property, object);
     }
 }

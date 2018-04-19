@@ -7,11 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.DataNode;
-import it.unibz.inf.ontop.datalog.TargetAtom;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -31,14 +27,17 @@ public class DatalogConversionTools {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
     private final TermFactory termFactory;
+    private final TargetAtomFactory targetAtomFactory;
 
     @Inject
     private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
-                                   ImmutabilityTools immutabilityTools, TermFactory termFactory) {
+                                   ImmutabilityTools immutabilityTools, TermFactory termFactory,
+                                   TargetAtomFactory targetAtomFactory) {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.immutabilityTools = immutabilityTools;
         this.termFactory = termFactory;
+        this.targetAtomFactory = targetAtomFactory;
     }
 
     /**
@@ -117,6 +116,6 @@ public class DatalogConversionTools {
         ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
 
 
-        return new TargetAtomImpl(dataAtom, substitution);
+        return targetAtomFactory.getTargetAtom(dataAtom, substitution);
     }
 }

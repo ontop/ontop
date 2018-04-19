@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.R2RMLMappingManager;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -81,7 +82,7 @@ public class OBDAMappingTransformer {
                                     PrefixManager prefixmng) {
 
 		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		ImmutableList<ImmutableFunctionalTerm> tquery = axiom.getTargetAtoms();
+		ImmutableList<TargetAtom> tquery = axiom.getTargetAtoms();
 
 		//triplesMap node
 		String mapping_id = axiom.getId();
@@ -99,7 +100,7 @@ public class OBDAMappingTransformer {
 		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
 		
 		//SubjectMap
-		Function uriTemplate = (Function) tquery.get(0).getTerm(0); //URI("..{}..", , )
+		Function uriTemplate = (Function) tquery.get(0).getSubstitutedTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
@@ -107,14 +108,14 @@ public class OBDAMappingTransformer {
 		TriplesMap tm = mfact.createTriplesMap(lt, sm, mainNode);
 		
 		//process target query
-		for (Function func : tquery) {
+		for (TargetAtom func : tquery) {
 
 			IRI predUri = null;
 
 			Optional<Template> templp = Optional.empty();
 
 			//triple
-			Function predf = (Function)func.getTerm(1);
+			Function predf = (Function)func.getSubstitutedTerm(1);
 
 			if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string
@@ -128,7 +129,7 @@ public class OBDAMappingTransformer {
 				}
 
 			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
-			Function object = (Function)func.getTerm(2);
+			Function object = (Function)func.getSubstitutedTerm(2);
 
 			//if the class IRI is constant
 			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)

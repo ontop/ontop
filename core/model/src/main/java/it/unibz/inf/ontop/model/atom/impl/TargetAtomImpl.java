@@ -1,16 +1,18 @@
-package it.unibz.inf.ontop.datalog.impl;
+package it.unibz.inf.ontop.model.atom.impl;
 
-import it.unibz.inf.ontop.datalog.TargetAtom;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class TargetAtomImpl implements TargetAtom {
     protected final DistinctVariableOnlyDataAtom atom;
     protected final ImmutableSubstitution<ImmutableTerm> substitution;
 
-    public TargetAtomImpl(DistinctVariableOnlyDataAtom atom, ImmutableSubstitution<ImmutableTerm> substitution) {
+    protected TargetAtomImpl(DistinctVariableOnlyDataAtom atom, ImmutableSubstitution<ImmutableTerm> substitution) {
         this.atom = atom;
         this.substitution = substitution;
     }
@@ -26,9 +28,31 @@ public class TargetAtomImpl implements TargetAtom {
     }
 
     @Override
+    public ImmutableTerm getSubstitutedTerm(int index) {
+        return substitution.apply(atom.getTerm(index));
+    }
+
+    @Override
+    public ImmutableList<ImmutableTerm> getSubstitutedTerms() {
+        return atom.getArguments().stream()
+                .map(substitution::apply)
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
     public TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution) {
         return new TargetAtomImpl(renamingSubstitution.applyToDistinctVariableOnlyDataAtom(atom),
                 renamingSubstitution.applyRenaming(substitution));
+    }
+
+    @Override
+    public TargetAtom changeSubstitution(ImmutableSubstitution<ImmutableTerm> newSubstitution) {
+        return new TargetAtomImpl(atom, newSubstitution);
+    }
+
+    @Override
+    public String toString() {
+        return atom.toString() + " with " + substitution.toString();
     }
 
 }

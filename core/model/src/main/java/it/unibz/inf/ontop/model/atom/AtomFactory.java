@@ -62,10 +62,5 @@ public interface AtomFactory {
      */
     Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
 
-
-    TriplePredicate getTripleAtomPredicate();
-
-    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property, VariableOrGroundTerm object);
-    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI, VariableOrGroundTerm object);
-    ImmutableFunctionalTerm getTripleAtom(VariableOrGroundTerm subject, IRI classIRI);
+    DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
 }

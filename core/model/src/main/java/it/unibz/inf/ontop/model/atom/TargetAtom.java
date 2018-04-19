@@ -1,19 +1,29 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.model.atom;
 
 
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 /**
  * Immutable
+ *
+ * TODO: move it to ontop-mapping-core after getting rid of Datalog
  */
 public interface TargetAtom {
 
     DistinctVariableOnlyDataAtom getProjectionAtom();
     ImmutableSubstitution<ImmutableTerm> getSubstitution();
 
+    ImmutableTerm getSubstitutedTerm(int index);
+
+    ImmutableList<ImmutableTerm> getSubstitutedTerms();
+
     TargetAtom rename(InjectiveVar2VarSubstitution renamingSubstitution);
 
+    /**
+     * Returns a new (immutable) TargetAtom
+     */
+    TargetAtom changeSubstitution(ImmutableSubstitution<ImmutableTerm> newSubstitution);
 }

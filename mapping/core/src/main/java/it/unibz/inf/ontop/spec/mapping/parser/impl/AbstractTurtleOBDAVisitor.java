@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -17,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
@@ -30,17 +33,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     /**
      * The current subject term
      */
-    private Term currentSubject;
+    private ImmutableTerm currentSubject;
 
     protected String error = "";
     private final TermFactory termFactory;
-    private final AtomFactory atomFactory;
     private final RDF rdfFactory;
+    private final TargetAtomFactory targetAtomFactory;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, AtomFactory atomFactory) {
+    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
+        this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = new SimpleRDF();
         this.termFactory = termFactory;
-        this.atomFactory = atomFactory;
     }
 
     public String getError() {
@@ -51,26 +54,26 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return text.substring(1, text.length() - 1);
     }
 
-    private Term typeTerm(String text, IRI datatype) {
+    private ImmutableTerm typeTerm(String text, IRI datatype) {
         ValueConstant integerConstant = termFactory.getConstantLiteral(text, datatype);
-        return termFactory.getTypedTerm(integerConstant, datatype);
+        return termFactory.getImmutableTypedTerm(integerConstant, datatype);
     }
 
-    protected Term construct(String text) {
-        Term toReturn = null;
+    protected ImmutableTerm construct(String text) {
+        ImmutableTerm toReturn = null;
         final String PLACEHOLDER = "{}";
-        List<Term> terms = new LinkedList<>();
+        List<ImmutableTerm> terms = new LinkedList<>();
         List<FormatString> tokens = parse(text);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
                 ValueConstant uriTemplate = termFactory.getConstantLiteral(token.toString()); // a single URI template
-                toReturn = termFactory.getUriTemplate(uriTemplate);
+                toReturn = termFactory.getImmutableUriTemplate(uriTemplate);
             } else if (token instanceof ColumnString) {
                 // a single URI template
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getUriTemplate(column);
+                toReturn = termFactory.getImmutableUriTemplate(column);
             }
         } else {
             StringBuilder sb = new StringBuilder();
@@ -85,7 +88,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             }
             ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
             terms.add(0, uriTemplate);
-            toReturn = termFactory.getUriTemplate(terms);
+            toReturn = termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
         }
         return toReturn;
     }
@@ -174,8 +177,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     //in case of concat this function parses the literal
     //and adds parsed constant literals and template literal to terms list
-    private ArrayList<Term> addToTermsList(String str) {
-        ArrayList<Term> terms = new ArrayList<>();
+    private List<ImmutableTerm> addToTermsList(String str) {
+        ArrayList<ImmutableTerm> terms = new ArrayList<>();
         int i, j;
         String st;
         str = str.substring(1, str.length() - 1);
@@ -203,30 +206,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     //this function returns nested concats
     //in case of more than two terms need to be concatted
-    private Term getNestedConcat(String str) {
-        ArrayList<Term> terms;
+    private ImmutableTerm getNestedConcat(String str) {
+        List<ImmutableTerm> terms;
         terms = addToTermsList(str);
         if (terms.size() == 1) {
             return terms.get(0);
         }
 
-        Function f = termFactory.getFunction(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
+        ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
         for (int j = 2; j < terms.size(); j++) {
-            f = termFactory.getFunction(ExpressionOperation.CONCAT, f, terms.get(j));
+            f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
         }
         return f;
-    }
-
-    /**
-     * This methods construct an atom from a triple
-     * <p>
-     * For the input (subject, pred, object), the result is
-     * triple(subject, pred, object) </li>
-     * </ul>
-     */
-    private Function makeAtom(Term subject, Term pred, Term object) {
-
-        return  atomFactory.getMutableTripleAtom(subject, pred, object);
     }
 
 
@@ -237,10 +228,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public List<Function> visitParse(ParseContext ctx) {
+    public ImmutableList<TargetAtom> visitParse(ParseContext ctx) {
         ctx.directiveStatement().forEach(this::visit);
         return ctx.triplesStatement().stream()
-                .flatMap(c -> visitTriplesStatement(c).stream())
+                .flatMap(this::visitTriplesStatement)
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -257,7 +248,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public List<Function> visitTriplesStatement(TriplesStatementContext ctx) {
+    public Stream<TargetAtom> visitTriplesStatement(TriplesStatementContext ctx) {
         return visitTriples(ctx.triples());
     }
 
@@ -277,43 +268,40 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public List<Function> visitTriples(TriplesContext ctx) {
+    public Stream<TargetAtom> visitTriples(TriplesContext ctx) {
         currentSubject = visitSubject(ctx.subject());
         return visitPredicateObjectList(ctx.predicateObjectList());
     }
 
     @Override
-    public List<Function> visitPredicateObjectList(PredicateObjectListContext ctx) {
+    public Stream<TargetAtom> visitPredicateObjectList(PredicateObjectListContext ctx) {
         return ctx.predicateObject().stream()
-                .flatMap(c -> visitPredicateObject(c).stream())
-                .collect(ImmutableCollectors.toList());
+                .flatMap(this::visitPredicateObject);
     }
 
     @Override
-    public List<Function> visitPredicateObject(PredicateObjectContext ctx) {
-        return visitObjectList(ctx.objectList()).stream()
-                .map(t -> makeAtom(currentSubject, visitVerb(ctx.verb()), t))
-                .collect(ImmutableCollectors.toList());
+    public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
+        return visitObjectList(ctx.objectList())
+                .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
     }
 
     @Override
-    public Term visitVerb(VerbContext ctx) {
+    public ImmutableTerm visitVerb(VerbContext ctx) {
         ResourceContext rc = ctx.resource();
         if (rc != null) {
             return visitResource(rc);
         }
-        return termFactory.getUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
     }
 
     @Override
-    public List<Term> visitObjectList(ObjectListContext ctx) {
+    public Stream<ImmutableTerm> visitObjectList(ObjectListContext ctx) {
         return ctx.object().stream()
-                .map(this::visitObject)
-                .collect(ImmutableCollectors.toList());
+                .map(this::visitObject);
     }
 
     @Override
-    public Term visitSubject(SubjectContext ctx) {
+    public ImmutableTerm visitSubject(SubjectContext ctx) {
         ResourceContext rc = ctx.resource();
         if (rc != null) {
             return visitResource(rc);
@@ -326,19 +314,19 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitObject(ObjectContext ctx) {
-        return (Term) visit(ctx.children.iterator().next());
+    public ImmutableTerm visitObject(ObjectContext ctx) {
+        return (ImmutableTerm) visit(ctx.children.iterator().next());
     }
 
     @Override
-    public Term visitResource(ResourceContext ctx) {
+    public ImmutableTerm visitResource(ResourceContext ctx) {
         if (ctx.iriExt() != null) {
             return visitIriExt(ctx.iriExt());
         }
         return construct(this.visitIri(ctx.iri()).getIRIString());
     }
 
-    public Term visitIriExt(IriExtContext ctx) {
+    public ImmutableTerm visitIriExt(IriExtContext ctx) {
         if (ctx.IRIREF_EXT() != null) {
             return construct(removeBrackets(ctx.IRIREF_EXT().getText()));
         }
@@ -346,15 +334,15 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Function visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        return termFactory.getTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
+    public ImmutableTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+        return termFactory.getImmutableTypedTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public Function visitVariableLiteral_2(VariableLiteral_2Context ctx) {
+    public ImmutableTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
         Variable var = visitVariable(ctx.variable());
         IRI iri = visitIri(ctx.iri());
-        return termFactory.getTypedTerm(var, iri);
+        return termFactory.getImmutableTypedTerm(var, iri);
     }
 
     @Override
@@ -379,25 +367,25 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitLiteral(LiteralContext ctx) {
+    public ImmutableTerm visitLiteral(LiteralContext ctx) {
         StringLiteralContext slc = ctx.stringLiteral();
         if (slc != null) {
-            Term literal = visitStringLiteral(slc);
+            ImmutableTerm literal = visitStringLiteral(slc);
             LanguageTagContext lc = ctx.languageTag();
             //if variable we cannot assign a datatype yet
             if (literal instanceof Variable) {
-                return termFactory.getTypedTerm(literal, XSD.STRING);
+                return termFactory.getImmutableTypedTerm(literal, XSD.STRING);
             }
             if (lc != null) {
-                return termFactory.getTypedTerm(literal, visitLanguageTag(lc));
+                return termFactory.getImmutableTypedTerm(literal, visitLanguageTag(lc));
             }
-            return termFactory.getTypedTerm(literal, XSD.STRING);
+            return termFactory.getImmutableTypedTerm(literal, XSD.STRING);
         }
-        return (Term) visitChildren(ctx);
+        return (ImmutableTerm) visitChildren(ctx);
     }
 
     @Override
-    public Term visitStringLiteral(StringLiteralContext ctx) {
+    public ImmutableTerm visitStringLiteral(StringLiteralContext ctx) {
         String str = ctx.STRING_LITERAL_QUOTE().getText();
         if (str.contains("{")) {
             return getNestedConcat(str);
@@ -406,24 +394,24 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitTypedLiteral(TypedLiteralContext ctx) {
-        Term stringValue = visitStringLiteral(ctx.stringLiteral());
+    public ImmutableTerm visitTypedLiteral(TypedLiteralContext ctx) {
+        ImmutableTerm stringValue = visitStringLiteral(ctx.stringLiteral());
         IRI iriRef = visitIri(ctx.iri());
-        return termFactory.getTypedTerm(stringValue, iriRef);
+        return termFactory.getImmutableTypedTerm(stringValue, iriRef);
     }
 
     @Override
-    public Term visitNumericLiteral(NumericLiteralContext ctx) {
-        return (Term) visitChildren(ctx);
+    public ImmutableTerm visitNumericLiteral(NumericLiteralContext ctx) {
+        return (ImmutableTerm) visitChildren(ctx);
     }
 
     @Override
-    public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
+    public ImmutableTerm visitBooleanLiteral(BooleanLiteralContext ctx) {
         return typeTerm(ctx.BOOLEAN_LITERAL().getText(), XSD.BOOLEAN);
     }
 
     @Override
-    public Term visitNumericUnsigned(NumericUnsignedContext ctx) {
+    public ImmutableTerm visitNumericUnsigned(NumericUnsignedContext ctx) {
 
         TerminalNode token = ctx.INTEGER();
         if (token != null) {
@@ -437,7 +425,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitNumericPositive(NumericPositiveContext ctx) {
+    public ImmutableTerm visitNumericPositive(NumericPositiveContext ctx) {
         TerminalNode token = ctx.INTEGER_POSITIVE();
         if (token != null) {
             return typeTerm(token.getText(), XSD.INTEGER);
@@ -450,7 +438,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitNumericNegative(NumericNegativeContext ctx) {
+    public ImmutableTerm visitNumericNegative(NumericNegativeContext ctx) {
         TerminalNode token = ctx.INTEGER_NEGATIVE();
         if (token != null) {
             return typeTerm(token.getText(), XSD.INTEGER);

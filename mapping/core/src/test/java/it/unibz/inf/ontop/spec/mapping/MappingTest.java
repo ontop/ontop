@@ -119,8 +119,7 @@ public class MappingTest {
                             P, getConstantIRI(propertyIri),
                             O, generateURI1(B)));
 
-            mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                    ATOM_FACTORY.getTripleAtomPredicate(), S, P, O), mappingRootNode);
+            mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(binaryExtensionalAtom);
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
             IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
@@ -135,8 +134,7 @@ public class MappingTest {
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
-        mappingBuilder.init(ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getTripleAtomPredicate(), S, P, O), mappingRootNode);
+        mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(unaryExtensionalAtom);
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
         IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
@@ -201,8 +199,7 @@ public class MappingTest {
         DataAtom<RelationPredicate> dataAtom = ATOM_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
         ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(dataAtom);
 
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getTripleAtomPredicate(), S, P, O);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, constructionNode);

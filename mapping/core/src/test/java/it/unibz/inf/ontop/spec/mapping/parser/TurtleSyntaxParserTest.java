@@ -26,7 +26,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import junit.framework.TestCase;
@@ -34,8 +34,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.utils.MappingTestingTools.ATOM_FACTORY;
-import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
 
 /**
@@ -317,8 +316,8 @@ public class TurtleSyntaxParserTest {
 
 	private boolean compareCQIE(String input, int countBody) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY,
-                TERM_FACTORY);
-		ImmutableList<ImmutableFunctionalTerm> mapping;
+                TERM_FACTORY, TARGET_ATOM_FACTORY);
+		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
 		} catch (TargetQueryParserException e) {
@@ -334,9 +333,9 @@ public class TurtleSyntaxParserTest {
 
 	private boolean parse(String input) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(), ATOM_FACTORY,
-                TERM_FACTORY);
+                TERM_FACTORY, TARGET_ATOM_FACTORY);
 
-		ImmutableList<ImmutableFunctionalTerm> mapping;
+		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
 			log.debug("mapping " + mapping);

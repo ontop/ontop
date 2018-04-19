@@ -32,6 +32,8 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -95,6 +97,7 @@ public class OntopMaterializerTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final TargetAtomFactory targetAtomFactory;
 	AtomFactory atomFactory;
 	public OntopMaterializerTest() {
 
@@ -106,6 +109,7 @@ public class OntopMaterializerTest {
 		termFactory = injector.getInstance(TermFactory.class);
 		typeFactory = injector.getInstance(TypeFactory.class);
 		atomFactory = injector.getInstance(AtomFactory.class);
+		targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
 
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
 		
@@ -225,22 +229,22 @@ public class OntopMaterializerTest {
 
 		RDFDatatype stringDatatype = xsdStringDt;
 
-		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
-		bodyBuilder.add(getTripleAtom(personTemplate, type, person));
-		bodyBuilder.add(getTripleAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(getTripleAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(getTripleAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
-		bodyBuilder.add(getTripleAtom(personTemplate, hasschool, schoolTemplate));
-		bodyBuilder.add(getTripleAtom(personTemplate, school, schoolTemplate));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, type, person));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, hasschool, schoolTemplate));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
-		ImmutableList<ImmutableFunctionalTerm> body = bodyBuilder.build();
+		ImmutableList<TargetAtom> body = bodyBuilder.build();
 
 		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
 
 		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
 				body.stream()
-						.flatMap(atom -> atom.getArguments().stream())
+						.flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
 						.filter(t -> t instanceof ImmutableFunctionalTerm)
 						.map(t -> (ImmutableFunctionalTerm) t),
 				termFactory);
@@ -250,13 +254,8 @@ public class OntopMaterializerTest {
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
 	}
 
-	/**
-	 * TODO: refactor as to use atomFactory.getTripleAtom
-	 *
-	 */
-	private ImmutableFunctionalTerm getTripleAtom(ImmutableTerm s, ImmutableTerm p,
-												  ImmutableTerm o) {
-		return termFactory.getImmutableFunctionalTerm(atomFactory.getTripleAtomPredicate(), s, p, o);
+	private TargetAtom getTripleTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o) {
+		return targetAtomFactory.getTripleTargetAtom(s, p, o);
 	}
 
 //	public void testTwoSources() throws Exception {

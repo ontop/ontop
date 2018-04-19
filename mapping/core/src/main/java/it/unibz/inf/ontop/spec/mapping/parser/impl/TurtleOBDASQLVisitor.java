@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 public class TurtleOBDASQLVisitor extends AbstractTurtleOBDAVisitor implements TurtleOBDAVisitor{
 
-    public TurtleOBDASQLVisitor(TermFactory termFactory, AtomFactory atomFactory) {
-        super(termFactory, atomFactory);
+    public TurtleOBDASQLVisitor(TermFactory termFactory,TargetAtomFactory targetAtomFactory) {
+        super(termFactory, targetAtomFactory);
     }
 
     @Override
