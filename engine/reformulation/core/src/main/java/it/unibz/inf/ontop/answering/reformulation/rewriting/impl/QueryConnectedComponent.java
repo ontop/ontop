@@ -482,13 +482,13 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function atom,
+	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
 											 AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
-		Predicate p = atom.getFunctionSymbol();
+		Predicate p = bodyAtom.getFunctionSymbol();
 		if (p instanceof TriplePredicate) {
 			TriplePredicate triplePredicate = (TriplePredicate) p;
 
-			ImmutableList<ImmutableTerm> arguments = atom.getTerms().stream()
+			ImmutableList<ImmutableTerm> arguments = bodyAtom.getTerms().stream()
 					.map(immutabilityTools::convertIntoImmutableTerm)
 					.collect(ImmutableCollectors.toList());
 
@@ -502,7 +502,7 @@ public class QueryConnectedComponent {
 				OClass c = reasoner.classes().get(classIRI.get());
 				OClass equivalent = (OClass)reasoner.classesDAG().getCanonicalForm(c);
 				if (equivalent != null && !equivalent.equals(c)) {
-					return atomFactory.getMutableTripleAtom(atom.getTerm(0), equivalent.getIRI());
+					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI());
 				}
 			}
 			else if (propertyIRI.isPresent() && reasoner.objectProperties().contains(propertyIRI.get())) {
@@ -510,20 +510,20 @@ public class QueryConnectedComponent {
 				ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
 				if (equivalent != null && !equivalent.equals(ope)) {
 					if (!equivalent.isInverse())
-						return atomFactory.getMutableTripleAtom(atom.getTerm(0), equivalent.getIRI(), atom.getTerm(2));
+						return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
 					else
-						return atomFactory.getMutableTripleAtom(atom.getTerm(2), equivalent.getIRI(), atom.getTerm(0));
+						return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(2), equivalent.getIRI(), bodyAtom.getTerm(0));
 				}
 			}
 			else if (propertyIRI.isPresent()  && reasoner.dataProperties().contains(propertyIRI.get())) {
 				DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
 				DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
 				if (equivalent != null && !equivalent.equals(dpe)) {
-					return atomFactory.getMutableTripleAtom(atom.getTerm(0), equivalent.getIRI(), atom.getTerm(2));
+					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
 				}
 			}
 		}
-		return atom;
+		return bodyAtom;
 	}
 
 }

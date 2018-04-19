@@ -144,17 +144,17 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = atomFactory.getMutableTripleAtom(r0, ((OClass) con).getIRI());
+				atom = atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
 			}
 			else if (con instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
 				atom = (!some.isInverse())
-						? atomFactory.getMutableTripleAtom(r0, some.getIRI(), getFreshVariable())
-						: atomFactory.getMutableTripleAtom(getFreshVariable(), some.getIRI(), r0);
+						? atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable())
+						: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), some.getIRI(), r0);
 			}
 			else {
 				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = atomFactory.getMutableTripleAtom(r0, some.getIRI(), getFreshVariable());
+				atom = atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable());
 			}
 			genAtoms.add(atom);
 		}

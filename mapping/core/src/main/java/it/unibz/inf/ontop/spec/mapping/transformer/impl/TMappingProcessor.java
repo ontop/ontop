@@ -65,8 +65,8 @@ public class TMappingProcessor {
 			for (TMappingRule rule : rules) {
 				List<Term> headTerms = rule.getHeadTerms();
 				Function newHead = rule.isClass()
-						? atomFactory.getMutableTripleAtom(headTerms.get(0), newPredicate)
-						: atomFactory.getMutableTripleAtom(headTerms.get(0), newPredicate, headTerms.get(2));
+						? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
+						: atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
 				TMappingRule newRule = new TMappingRule(newHead, rule, datalogFactory, termFactory, eqNormalizer,
 						rule.isClass());
 				copy.rules.add(newRule);
@@ -309,8 +309,8 @@ public class TMappingProcessor {
 					for (TMappingRule childmapping : childmappings) {
 						List<Term> terms = childmapping.getHeadTerms();
 						Function newMappingHead = !childproperty.isInverse()
-								? atomFactory.getMutableTripleAtom(terms.get(0), currentPredicate, terms.get(2))
-								: atomFactory.getMutableTripleAtom(terms.get(2), currentPredicate, terms.get(0));
+								? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
+								: atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
 
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
 								termFactory, eqNormalizer, false);
@@ -365,7 +365,7 @@ public class TMappingProcessor {
 					for (TMappingRule childmapping : childmappings) {
 						List<Term> terms = childmapping.getHeadTerms();
 
-						Function newMappingHead = atomFactory.getMutableTripleAtom(terms.get(0), currentPredicate,
+						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate,
 								terms.get(2));
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
 								termFactory, eqNormalizer, false);
@@ -513,7 +513,7 @@ public class TMappingProcessor {
 					
 					for (TMappingRule childmapping : childmappings) {
 						List<Term> terms = childmapping.getHeadTerms();
-						Function newMappingHead = atomFactory.getMutableTripleAtom(terms.get(arg), currentPredicate);
+						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(arg), currentPredicate);
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
 								termFactory, eqNormalizer, true);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);

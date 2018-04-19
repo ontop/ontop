@@ -173,8 +173,9 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			argument.accept(this);
 			
 		}
-		
-		function = atomFactory.getMutableTripleAtom(terms.get(0), classIRI);
+
+		//TODO: check if it a head or a body
+		function = atomFactory.getMutableTripleBodyAtom(terms.get(0), classIRI);
 		}
 		else{
 			notSupported=false;
@@ -207,7 +208,9 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 				argument.accept(this);
 	
 			}
-			function = atomFactory.getMutableTripleAtom(terms.get(0), propertyIRI, terms.get(1));
+
+			//TODO: check if it a head or a body
+			function = atomFactory.getMutableTripleBodyAtom(terms.get(0), propertyIRI, terms.get(1));
 		}
 		else{
 			notSupported=false;
@@ -231,7 +234,8 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 						argument.accept(this);
 			
 					}
-			function = atomFactory.getMutableTripleAtom(terms.get(0), propertyIRI, terms.get(1));
+			//TODO: check if it a head or a body
+			function = atomFactory.getMutableTripleBodyAtom(terms.get(0), propertyIRI, terms.get(1));
 		}
 		else{
 			notSupported=false;

@@ -146,7 +146,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //it will be the right atom of the join
         Term sTerm2 = unboundleftAtom.getTerm(1);
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = atomFactory.getMutableTripleAtom(sTerm2, OWL.SAME_AS, oTerm2);
+        Function rightAtomJoin2 = atomFactory.getMutableTripleBodyAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(unboundleftAtom), getVariables(rightAtomJoin2));
@@ -162,7 +162,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = unboundleftAtom.getTerm(0);
-        Function leftAtomJoin = atomFactory.getMutableTripleAtom(sTerm, OWL.SAME_AS, oTerm);
+        Function leftAtomJoin = atomFactory.getMutableTripleBodyAtom(sTerm, OWL.SAME_AS, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(joinRight));
@@ -211,7 +211,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         //it will be the right atom of the join
         Term sTerm = leftAtom.getTerm(0);
         Term oTerm = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
-        Function rightAtomJoin = atomFactory.getMutableTripleAtom(sTerm, OWL.SAME_AS, oTerm);
+        Function rightAtomJoin = atomFactory.getMutableTripleBodyAtom(sTerm, OWL.SAME_AS, oTerm);
 
         //create join rule
         List<Term> varListJoin = getUnion(getVariables(leftAtomJoin), getVariables(rightAtomJoin));
@@ -236,7 +236,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         Term sTerm2 = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
-        Function rightAtomJoin2 = atomFactory.getMutableTripleAtom(sTerm2, OWL.SAME_AS, oTerm2);
+        Function rightAtomJoin2 = atomFactory.getMutableTripleBodyAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
         List<Term> varListJoin2 = getUnion(getVariables(leftAtomJoin2), getVariables(rightAtomJoin2));

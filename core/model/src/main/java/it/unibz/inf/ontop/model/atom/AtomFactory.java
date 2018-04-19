@@ -42,9 +42,26 @@ public interface AtomFactory {
 
     Function getMutableTripleAtom(Term subject, Term predicate, Term object);
 
-    Function getMutableTripleAtom(Term subject, IRI propertyIRI, Term object);
+    /**
+     * In the body, constant IRIs are NOT wrapped into a URI function
+     */
+    Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object);
+    
+    /**
+     * In the body, constant IRIs are NOT wrapped into a URI function
+     */
+    Function getMutableTripleBodyAtom(Term subject, IRI classIRI);
 
-    Function getMutableTripleAtom(Term subject, IRI classIRI);
+    /**
+     * In the head, constant IRIs are wrapped into a URI function
+     */
+    Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object);
+
+    /**
+     * In the head, constant IRIs are wrapped into a URI function
+     */
+    Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
+
 
     TriplePredicate getTripleAtomPredicate();
 

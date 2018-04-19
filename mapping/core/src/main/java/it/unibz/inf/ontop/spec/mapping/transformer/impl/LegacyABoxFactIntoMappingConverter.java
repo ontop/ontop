@@ -90,7 +90,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             IRIConstant c = (IRIConstant) ca.getIndividual();
             IRI classIRI = ca.getConcept().getIRI();
-            Function head = atomFactory.getMutableTripleAtom(
+            Function head = atomFactory.getMutableTripleHeadAtom(
                     uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString()), classIRI);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
@@ -105,7 +105,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRIConstant s = (IRIConstant) pa.getSubject();
             IRIConstant o = (IRIConstant) pa.getObject();
             IRI propertyIRI = pa.getProperty().getIRI();
-            Function head = atomFactory.getMutableTripleAtom(
+            Function head = atomFactory.getMutableTripleHeadAtom(
                     uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString()),
                     propertyIRI,
                     uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString()));
@@ -126,11 +126,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
 
             Function head = o.getType().getLanguageTag()
-                    .map(lang -> atomFactory.getMutableTripleAtom(termFactory.getUriTemplate(
+                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
                             termFactory.getConstantLiteral(s.getIRI().getIRIString())),
                             propertyIRI,
                             termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                    .orElseGet(() -> atomFactory.getMutableTripleAtom(termFactory.getUriTemplate(
+                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
                             termFactory.getConstantLiteral(s.getIRI().getIRIString())),
                             propertyIRI,
                             termFactory.getTypedTerm(o, o.getType())));
@@ -155,18 +155,18 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 ValueConstant o = (ValueConstant) aa.getValue();
 
                 head = o.getType().getLanguageTag()
-                        .map(lang -> atomFactory.getMutableTripleAtom(termFactory.getUriTemplate(
+                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
                                     termFactory.getConstantLiteral(s.getIRI().getIRIString())),
                                     propertyIRI,
                                     termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                        .orElseGet(() -> atomFactory.getMutableTripleAtom(termFactory.getUriTemplate(
+                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
                                 termFactory.getConstantLiteral(s.getIRI().getIRIString())),
                                 propertyIRI,
                                 termFactory.getTypedTerm(o, o.getType())));
             } else {
 
                 IRIConstant o = (IRIConstant) aa.getValue();
-                head = atomFactory.getMutableTripleAtom(
+                head = atomFactory.getMutableTripleHeadAtom(
                         termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRI().getIRIString())),
                         propertyIRI,
                         termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getIRI().getIRIString())));

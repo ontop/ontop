@@ -104,7 +104,7 @@ public class CanonicalIRIRewriterTest {
     }
 
     private Function getCanonIRIFunction(Term term1, Term term2) {
-        return ATOM_FACTORY.getMutableTripleAtom(term1, Ontop.CANONICAL_IRI, term2);
+        return ATOM_FACTORY.getMutableTripleHeadAtom(term1, Ontop.CANONICAL_IRI, term2);
 
     }
 

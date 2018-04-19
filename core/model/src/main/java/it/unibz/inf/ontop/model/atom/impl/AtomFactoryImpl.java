@@ -116,13 +116,29 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public Function getMutableTripleAtom(Term subject, IRI propertyIRI, Term object) {
+    public Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object) {
         return getMutableTripleAtom(subject, termFactory.getConstantIRI(propertyIRI), object);
     }
 
     @Override
-    public Function getMutableTripleAtom(Term subject, IRI classIRI) {
+    public Function getMutableTripleBodyAtom(Term subject, IRI classIRI) {
         return getMutableTripleAtom(subject, rdfTypeConstant, termFactory.getConstantIRI(classIRI));
+    }
+
+    @Override
+    public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
+        return getMutableTripleAtom(
+                subject,
+                termFactory.getUriTemplate(termFactory.getConstantIRI(propertyIRI)),
+                object);
+    }
+
+    @Override
+    public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
+        return getMutableTripleAtom(
+                subject,
+                termFactory.getUriTemplate(rdfTypeConstant),
+                termFactory.getUriTemplate(termFactory.getConstantIRI(classIRI)));
     }
 
     @Override
