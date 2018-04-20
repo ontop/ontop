@@ -492,7 +492,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	private IQ liftOrderBy(IQ iq) {
 		IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(iq);
 		if ((topNonQueryModifierTree instanceof UnaryIQTree)
-				&& (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByLifter)) {
+				&& (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByNode)) {
 			return orderByLifter.liftOrderBy(iq);
 		}
 		return iq;
