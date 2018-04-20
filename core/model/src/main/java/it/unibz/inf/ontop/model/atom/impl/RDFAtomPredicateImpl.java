@@ -50,11 +50,10 @@ public class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPr
         }
         // TODO: look for the RDF building function (and check the type is an IRI)
         else if (term instanceof ImmutableFunctionalTerm) {
-            return ((ImmutableFunctionalTerm) term).getArity() > 0
+            return ((ImmutableFunctionalTerm) term).getArity() == 1
                     ? extractIRI(((ImmutableFunctionalTerm) term).getArguments().get(0))
                     : Optional.empty();
         }
-        // TODO: remove this
         else if (term instanceof ValueConstant) {
             return Optional.of(new SimpleRDF().createIRI( ((ValueConstant) term).getValue()));
         }
