@@ -43,12 +43,12 @@ public interface AtomFactory {
     Function getMutableTripleAtom(Term subject, Term predicate, Term object);
 
     /**
-     * In the body, constant IRIs are NOT wrapped into a URI function
+     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
      */
     Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object);
     
     /**
-     * In the body, constant IRIs are NOT wrapped into a URI function
+     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
      */
     Function getMutableTripleBodyAtom(Term subject, IRI classIRI);
 

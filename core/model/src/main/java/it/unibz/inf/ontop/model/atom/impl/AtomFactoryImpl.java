@@ -22,7 +22,6 @@ public class AtomFactoryImpl implements AtomFactory {
     private final TriplePredicate triplePredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final IRIConstant rdfTypeConstant;
 
     @Inject
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
@@ -33,7 +32,6 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType()
         ));
-        rdfTypeConstant = termFactory.getConstantIRI(RDF.TYPE);
     }
 
     @Override
@@ -117,19 +115,21 @@ public class AtomFactoryImpl implements AtomFactory {
 
     @Override
     public Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object) {
-        return getMutableTripleAtom(subject, termFactory.getConstantIRI(propertyIRI), object);
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, propertyIRI, object);
     }
 
     @Override
     public Function getMutableTripleBodyAtom(Term subject, IRI classIRI) {
-        return getMutableTripleAtom(subject, rdfTypeConstant, termFactory.getConstantIRI(classIRI));
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, classIRI);
     }
 
     @Override
     public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
         return getMutableTripleAtom(
                 subject,
-                termFactory.getUriTemplate(termFactory.getConstantIRI(propertyIRI)),
+                convertIRIIntoFunctionalGroundTerm(propertyIRI),
                 object);
     }
 
@@ -137,8 +137,12 @@ public class AtomFactoryImpl implements AtomFactory {
     public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
         return getMutableTripleAtom(
                 subject,
-                termFactory.getUriTemplate(rdfTypeConstant),
-                termFactory.getUriTemplate(termFactory.getConstantIRI(classIRI)));
+                convertIRIIntoFunctionalGroundTerm(RDF.TYPE),
+                convertIRIIntoFunctionalGroundTerm(classIRI));
+    }
+
+    private Function convertIRIIntoFunctionalGroundTerm(IRI iri) {
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 
     @Override
