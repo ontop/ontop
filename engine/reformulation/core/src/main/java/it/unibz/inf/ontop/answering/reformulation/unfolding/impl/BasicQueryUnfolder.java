@@ -12,15 +12,19 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
 
@@ -29,17 +33,19 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
     private final TermFactory termFactory;
+    private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
     private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               TermFactory termFactory) {
+                               TermFactory termFactory, UnionBasedQueryMerger queryMerger) {
         super(iqFactory);
         this.mapping = mapping;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
         this.termFactory = termFactory;
+        this.queryMerger = queryMerger;
     }
 
     @Override
@@ -53,50 +59,42 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
             super(variableGenerator, iqFactory, substitutionFactory, transformerFactory);
         }
 
-        /**
-         * TODO: clean it
-         */
         @Override
         protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-            ImmutableList<? extends VariableOrGroundTerm> projectedVariables = dataNode.getProjectionAtom().getArguments();
-            VariableOrGroundTerm variableOrGroundTerm = projectedVariables.get(1);
-            IRI predicateIRI;
-            Optional<IQ> optionalMappingAssertion;
-            if (variableOrGroundTerm.isGround()){
-                ImmutableTerm groundTerm = ((GroundFunctionalTerm) variableOrGroundTerm).getTerm(0);
-                if ( groundTerm instanceof ValueConstant) {
-                    predicateIRI = new SimpleRDF().createIRI( ((ValueConstant) groundTerm).getValue());
-                }
+            DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
+            return Optional.of(atom)
+                    .map(DataAtom::getPredicate)
+                    .filter(p -> p instanceof RDFAtomPredicate)
+                    .map(p -> (RDFAtomPredicate) p)
+                    .flatMap(p -> getDefinition(p, atom.getArguments()));
+        }
 
-                else {
-                    throw new IllegalStateException("Problem retrieving the predicate IRI");
-                }
+        private Optional<IQ> getDefinition(RDFAtomPredicate predicate,
+                                           ImmutableList<? extends VariableOrGroundTerm> arguments) {
+            return predicate.getPropertyIRI(arguments)
+                    .map(i -> i.equals(RDF.TYPE)
+                            ? getRDFClassDefinition(predicate, arguments)
+                            : mapping.getRDFPropertyDefinition(predicate, i))
+                    .orElseGet(() -> getStarDefinition(predicate));
+        }
 
-                if (predicateIRI.equals(RDF.TYPE)) {
-                    VariableOrGroundTerm className = projectedVariables.get(2);
+        private Optional<IQ> getRDFClassDefinition(RDFAtomPredicate predicate,
+                                                   ImmutableList<? extends VariableOrGroundTerm> arguments) {
+            return predicate.getClassIRI(arguments)
+                    .map(i -> mapping.getRDFClassDefinition(predicate, i))
+                    .orElseGet(() -> getStarClassDefinition(predicate));
+        }
 
-                    if (variableOrGroundTerm.isGround()) {
-                        ImmutableTerm groundTerm2 = ((GroundFunctionalTerm) className).getTerm(0);
+        private Optional<IQ> getStarClassDefinition(RDFAtomPredicate predicate) {
+            return queryMerger.mergeDefinitions(mapping.getRDFClasses(predicate).stream()
+                    .flatMap(i -> mapping.getRDFClassDefinition(predicate, i)
+                            .map(Stream::of)
+                            .orElseGet(Stream::empty))
+                    .collect(ImmutableCollectors.toList()));
+        }
 
-                        if (groundTerm2 instanceof ValueConstant) {
-                            predicateIRI = new SimpleRDF().createIRI(((ValueConstant) groundTerm2).getValue());
-                            optionalMappingAssertion = mapping.getRDFClassDefinition(predicateIRI);
-
-                        } else {
-                            throw new IllegalStateException("Problem retrieving the predicate IRI");
-                        }
-                    }else {
-                        throw new IllegalStateException("Variables are not supported ");
-                    }
-                }
-                else {
-                    optionalMappingAssertion = mapping.getRDFPropertyDefinition(predicateIRI);
-                }
-            }
-            else {
-                throw new IllegalStateException("Variables are not supported ");
-            }
-            return optionalMappingAssertion;
+        private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
+            return queryMerger.mergeDefinitions(mapping.getQueries(predicate));
         }
 
         @Override

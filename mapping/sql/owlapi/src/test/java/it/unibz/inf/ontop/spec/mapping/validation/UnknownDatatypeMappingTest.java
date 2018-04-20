@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -89,8 +90,11 @@ public class UnknownDatatypeMappingTest {
     }
 
     private void checkDatatype(Mapping mapping, IRI expectedType) {
-        Optional<Predicate> optionalDatatype = mapping.getRDFProperties().stream()
-                .map(mapping::getRDFPropertyDefinition)
+        RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
+                .findFirst().get();
+
+        Optional<Predicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+                .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .flatMap(query -> Optional.of(query.getTree().getRootNode())

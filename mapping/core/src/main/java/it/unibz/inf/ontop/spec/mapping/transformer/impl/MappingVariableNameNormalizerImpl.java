@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -44,31 +46,46 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
 
     @Override
     public Mapping normalize(Mapping mapping) {
-        Stream<IQ> queryPropertiesStream = mapping.getRDFProperties().stream()
-                .map(mapping::getRDFPropertyDefinition)
+        // TODO: generalize
+        Optional<RDFAtomPredicate> triplePredicate = mapping.getRDFAtomPredicates().stream()
+                .filter(p -> p instanceof TriplePredicate)
+                .findAny();
+
+        return triplePredicate
+                .map(p -> normalize(mapping, p))
+                .orElseGet(() -> specificationFactory.createMapping(mapping.getMetadata(),
+                        ImmutableMap.of(),
+                        ImmutableMap.of()));
+    }
+
+    private Mapping normalize(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+
+        Stream<IQ> queryPropertiesStream = mapping.getRDFProperties(rdfAtomPredicate).stream()
+                .map(i -> mapping.getRDFPropertyDefinition(rdfAtomPredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
-        Stream<IQ> queryClassesStream = mapping.getRDFClasses().stream()
-                .map(mapping::getRDFClassDefinition)
+        Stream<IQ> queryClassesStream = mapping.getRDFClasses(rdfAtomPredicate).stream()
+                .map(i -> mapping.getRDFClassDefinition(rdfAtomPredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
 
         ImmutableMap<IRI, IQ> normalizedMappingPropertyMap = renameQueries(queryPropertiesStream)
                 .collect(ImmutableCollectors.toMap(
-                        q -> MappingTools.extractPropertiesIRI(q),
+                        MappingTools::extractPropertiesIRI,
                         q -> q
                 ));
 
         ImmutableMap<IRI, IQ> normalizedMappingClassyMap = renameQueries(queryClassesStream)
                 .collect(ImmutableCollectors.toMap(
-                        q -> MappingTools.extractClassIRI(q),
+                        MappingTools::extractClassIRI,
                         q -> q
                 ));
 
         return specificationFactory.createMapping(mapping.getMetadata(),  normalizedMappingPropertyMap,
                 normalizedMappingClassyMap);
     }
+
 
     /**
      * Appends a different suffix to each query

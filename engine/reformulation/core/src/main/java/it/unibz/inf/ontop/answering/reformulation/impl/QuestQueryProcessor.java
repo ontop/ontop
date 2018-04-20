@@ -33,8 +33,6 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -119,7 +117,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
 		if(log.isDebugEnabled()){
-			log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
+			log.debug("Mapping: \n{}", Joiner.on("\n").join(
+					saturatedMapping.getRDFAtomPredicates().stream()
+						.flatMap(p -> saturatedMapping.getQueries(p).stream())
+						.iterator()));
 		}
 
 		this.queryUnfolder = translationFactory.create(saturatedMapping);

@@ -37,6 +37,8 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
@@ -115,17 +117,28 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
+	/**
+	 * TODO: refactor so as to work with quads
+	 */
 	private static ImmutableMap<IRI, VocabularyEntry> extractVocabulary(@Nonnull Mapping mapping) {
+		return mapping.getRDFAtomPredicates().stream()
+				.filter(p -> p instanceof TriplePredicate)
+				.map(p -> (TriplePredicate) p)
+				.findFirst()
+				.map(p -> extractTripleVocabulary(mapping, p)
+						.collect(ImmutableCollectors.toMap(e -> e.name, e -> e)))
+				.orElseGet(ImmutableMap::of);
+    }
 
-		Stream<VocabularyEntry> vocabularyPropertyStream = mapping.getRDFProperties().stream()
+    private static Stream<VocabularyEntry> extractTripleVocabulary(Mapping mapping, TriplePredicate triplePredicate) {
+		Stream<VocabularyEntry> vocabularyPropertyStream = mapping.getRDFProperties(triplePredicate).stream()
 				.map(p -> new VocabularyEntry(p, 2));
 
-		Stream<VocabularyEntry> vocabularyClassStream = mapping.getRDFClasses().stream()
+		Stream<VocabularyEntry> vocabularyClassStream = mapping.getRDFClasses(triplePredicate).stream()
 				.map(p -> new VocabularyEntry(p, 1));
 
-		return Stream.concat(vocabularyClassStream,vocabularyPropertyStream).collect(ImmutableCollectors.toMap(e -> e.name, e -> e));
-
-    }
+		return Stream.concat(vocabularyClassStream,vocabularyPropertyStream);
+	}
 
 
 	private static class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {

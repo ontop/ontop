@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -51,14 +53,26 @@ public class MappingMergerImpl implements MappingMerger {
         }
 
         MappingMetadata metadata = mergeMetadata(mappings);
-        ImmutableMap<IRI, IQ> propertyMap = mergeMappingPropertyMaps(mappings);
-        ImmutableMap<IRI, IQ> classMap = mergeMappingClassMaps(mappings);
 
-        // TODO: check that the ExecutorRegistry is identical for all mappings ?
-        return specificationFactory.createMapping(
-                metadata,
-                propertyMap, classMap
-        );
+        // TODO: generalize
+        Optional<RDFAtomPredicate> triplePredicate = mappings.stream()
+                .flatMap(m -> m.getRDFAtomPredicates().stream())
+                .filter(p -> p instanceof TriplePredicate)
+                .findAny();
+
+        return triplePredicate
+                .map(p -> {
+                    ImmutableMap<IRI, IQ> propertyMap = mergeMappingPropertyMaps(mappings, p);
+                    ImmutableMap<IRI, IQ> classMap = mergeMappingClassMaps(mappings, p);
+
+                    // TODO: check that the ExecutorRegistry is identical for all mappings ?
+                    return specificationFactory.createMapping(
+                            metadata,
+                            propertyMap, classMap
+                    );
+                })
+                .orElseGet(() -> specificationFactory.createMapping(metadata,
+                        ImmutableMap.of(), ImmutableMap.of()));
     }
 
     private MappingMetadata mergeMetadata(ImmutableSet<Mapping> mappings) {
@@ -97,10 +111,11 @@ public class MappingMergerImpl implements MappingMerger {
         );
     }
 
-    private ImmutableMap<IRI, IQ> mergeMappingPropertyMaps(ImmutableSet<Mapping> mappings) {
+    private ImmutableMap<IRI, IQ> mergeMappingPropertyMaps(ImmutableSet<Mapping> mappings,
+                                                           RDFAtomPredicate rdfAtomPredicate) {
 
         ImmutableMap<IRI, Collection<IQ>> atomPredicate2IQs = mappings.stream()
-                .flatMap(m -> getMappingPropertyMap(m).entrySet().stream())
+                .flatMap(m -> getMappingPropertyMap(m, rdfAtomPredicate).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
@@ -111,10 +126,11 @@ public class MappingMergerImpl implements MappingMerger {
                 ));
     }
 
-    private ImmutableMap<IRI, IQ> mergeMappingClassMaps(ImmutableSet<Mapping> mappings) {
+    private ImmutableMap<IRI, IQ> mergeMappingClassMaps(ImmutableSet<Mapping> mappings,
+                                                        RDFAtomPredicate rdfAtomPredicate) {
 
         ImmutableMap<IRI, Collection<IQ>> atomPredicate2IQs = mappings.stream()
-                .flatMap(m -> getMappingClassMap(m).entrySet().stream())
+                .flatMap(m -> getMappingClassMap(m, rdfAtomPredicate).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
@@ -135,28 +151,28 @@ public class MappingMergerImpl implements MappingMerger {
                 .orElseThrow(() -> new MappingMergingException("The query should be present"));
     }
 
-    private ImmutableMap<IRI, IQ> getMappingPropertyMap(Mapping mapping) {
-        return mapping.getRDFProperties().stream()
+    private ImmutableMap<IRI, IQ> getMappingPropertyMap(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+        return mapping.getRDFProperties(rdfAtomPredicate).stream()
                 .collect(ImmutableCollectors.toMap(
                         p -> p,
-                        p -> getDefinition(mapping, p)
+                        p -> getDefinition(mapping, p, rdfAtomPredicate)
                 ));
     }
 
-    private ImmutableMap<IRI, IQ> getMappingClassMap(Mapping mapping) {
-        return mapping.getRDFClasses().stream()
+    private ImmutableMap<IRI, IQ> getMappingClassMap(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+        return mapping.getRDFClasses(rdfAtomPredicate).stream()
                 .collect(ImmutableCollectors.toMap(
                         p -> p,
-                        p -> getDefinition(mapping, p)
+                        p -> getDefinition(mapping, p, rdfAtomPredicate)
                 ));
     }
 
     /**
      * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
      */
-    private static IQ getDefinition(Mapping mapping, IRI predicate) {
-        return mapping.getRDFPropertyDefinition(predicate)
-                .orElseGet(() -> mapping.getRDFClassDefinition(predicate)
+    private static IQ getDefinition(Mapping mapping, IRI iri, RDFAtomPredicate rdfAtomPredicate) {
+        return mapping.getRDFPropertyDefinition(rdfAtomPredicate, iri)
+                .orElseGet(() -> mapping.getRDFClassDefinition(rdfAtomPredicate, iri)
                         .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition")));
 
     }

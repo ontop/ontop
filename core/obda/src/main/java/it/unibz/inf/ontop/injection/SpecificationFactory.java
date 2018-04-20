@@ -22,8 +22,8 @@ public interface SpecificationFactory {
 
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
-    Mapping createMapping(MappingMetadata metadata, @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
-                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap);
+    Mapping createMapping(MappingMetadata metadata, @Assisted("triplePropertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                          @Assisted("tripleClassMap") ImmutableMap<IRI, IQ> classMap);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }

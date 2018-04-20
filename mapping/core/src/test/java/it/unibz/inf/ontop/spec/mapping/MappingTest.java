@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -110,6 +111,7 @@ public class MappingTest {
         DataAtom<RelationPredicate> unaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P3_PREDICATE, ImmutableList.of(A));
 
         ImmutableMap.Builder<IRI, IQ> propertyMapBuilder = ImmutableMap.builder();
+        RDFAtomPredicate rdfAtomPredicate = null;
 
         // Properties
         for (IRI propertyIri : propertyIris){
@@ -119,7 +121,10 @@ public class MappingTest {
                             P, getConstantIRI(propertyIri),
                             O, generateURI1(B)));
 
-            mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
+            DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
+            rdfAtomPredicate = (RDFAtomPredicate) mappingProjectionAtom.getPredicate();
+
+            mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(binaryExtensionalAtom);
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
             IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
@@ -160,7 +165,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(propertyIri)
+            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(rdfAtomPredicate, propertyIri)
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             LOGGER.info(mappingAssertion.toString());
@@ -175,7 +180,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(CLASS_1)
+        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(rdfAtomPredicate, CLASS_1)
                 .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
         System.out.println(mappingAssertion);

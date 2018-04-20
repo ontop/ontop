@@ -7,6 +7,9 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
+/**
+ * Abstraction for triples, quads and so on.
+ */
 public interface RDFAtomPredicate extends AtomPredicate {
 
     Optional<IRI> getClassIRI(ImmutableList<? extends ImmutableTerm> atomArguments);

@@ -35,7 +35,8 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
 
     @Override
     public Stream<CQIE> convert(Mapping mapping) {
-        return mapping.getQueries().stream()
+        return mapping.getRDFAtomPredicates().stream()
+                .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(this::convertMappingQuery);
     }
 
