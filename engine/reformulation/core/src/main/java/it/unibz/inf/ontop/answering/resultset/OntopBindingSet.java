@@ -29,16 +29,17 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
     @Nullable
     Constant getConstant(String name) throws OntopResultConversionException;
 
-    /** Inefficient if all bindings are needed: prefer getBindings() or the iterator*/
+    /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable
     OntopBinding getBinding(int column);
 
-    /** Inefficient if all bindings are needed: prefer getBindings() or the iterator*/
+    /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable
     OntopBinding getBinding(String name);
 
     /**
      * Checks whether this BindingSet has a binding with the specified name.
+     * If the binding value is needed, getBinding() is more efficient
      *
      * @param bindingName
      *        The name of the binding.

@@ -4,9 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Optional;
@@ -53,6 +58,7 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
         return variableName2BindingMap.get();
     }
 
+    @Nullable
     protected abstract OntopBinding computeBinding(String variableName);
 
     @Override
@@ -65,5 +71,25 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
         return getVariableName2BindingMap().values().stream()
                 .map(OntopBinding::toString)
                 .collect(joining(",", "[", "]"));
+    }
+
+    @Override
+    @Nullable
+    public OntopBinding getBinding(String name) {
+        return variableName2BindingMap.isPresent()?
+                variableName2BindingMap.get().get(name):
+                computeBinding(name);
+    }
+
+    public static class UnexpectedTargeTermTypeException extends OntopInternalBugException {
+        public UnexpectedTargeTermTypeException(Term term) {
+            super("Unexpected type "+ term.getClass()+" for term "+term);
+        }
+    }
+
+    public static class UnexpectedTargetPredicateTypeException extends OntopInternalBugException {
+        public UnexpectedTargetPredicateTypeException(Predicate predicate) {
+            super("Unexpected type "+ predicate.getClass()+" for predicate "+predicate);
+        }
     }
 }

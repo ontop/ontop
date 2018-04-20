@@ -65,16 +65,8 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     }
 
     @Override
-    @Nullable
-    public OntopBinding getBinding(String name) {
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get().get(name):
-                computeBinding(name);
-    }
-
-    @Override
     protected OntopBinding computeBinding(String variableName) {
-        return getBinding(columnMap.get(variableName));
+        return computeBinding(columnMap.get(variableName));
     }
 
     private OntopBinding computeBinding(int column) {
