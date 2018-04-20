@@ -30,18 +30,17 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Override
     @Nullable
     public OntopBinding getBinding(int column) {
-        final MainTypeLangValues cell = row.get(column - 1);
-        if (cell.getMainValue() == null) {
-            return null;
-        } else {
-            return new SQLOntopBinding(signature.get(column - 1), cell, constantRetriever);
-        }
+        return variableName2BindingMap.isPresent() ?
+                variableName2BindingMap.get().get(signature.get(column - 1)) :
+                computeBinding(column);
     }
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return signature.contains(bindingName) &&
-                row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
+        return variableName2BindingMap.isPresent()?
+                variableName2BindingMap.get().containsKey(bindingName):
+                signature.contains(bindingName) &&
+                        row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
     }
 
     /***
@@ -68,6 +67,22 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Override
     @Nullable
     public OntopBinding getBinding(String name) {
-        return getBinding(columnMap.get(name));
+        return variableName2BindingMap.isPresent()?
+                variableName2BindingMap.get().get(name):
+                computeBinding(name);
+    }
+
+    @Override
+    protected OntopBinding computeBinding(String variableName) {
+        return getBinding(columnMap.get(variableName));
+    }
+
+    private OntopBinding computeBinding(int column) {
+        final MainTypeLangValues cell = row.get(column - 1);
+        if (cell.getMainValue() == null) {
+            return null;
+        } else {
+            return new SQLOntopBinding(signature.get(column - 1), cell, constantRetriever);
+        }
     }
 }
