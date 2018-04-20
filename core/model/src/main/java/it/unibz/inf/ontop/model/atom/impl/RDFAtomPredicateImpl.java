@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
@@ -31,7 +32,9 @@ public class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPr
     public Optional<IRI> getClassIRI(ImmutableList<? extends ImmutableTerm> atomArguments) {
         if (atomArguments.size() != getArity())
             throw new IllegalArgumentException("The given arguments do not match with the expected arity");
-        return extractIRI(atomArguments.get(classIndex));
+        return getPropertyIRI(atomArguments)
+                .filter(i -> i.equals(RDF.TYPE))
+                .flatMap(i -> extractIRI(atomArguments.get(classIndex)));
     }
 
     @Override
