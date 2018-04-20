@@ -31,7 +31,7 @@ public class OntopOWLBinding implements OWLBinding {
     @Override
     public OWLObject getValue() throws OWLException {
         try {
-            return translate(ontopBinding.getConstant());
+            return translate(ontopBinding.getValue());
         } catch (OntopResultConversionException e) {
             throw new OntopOWLException(e);
         }
