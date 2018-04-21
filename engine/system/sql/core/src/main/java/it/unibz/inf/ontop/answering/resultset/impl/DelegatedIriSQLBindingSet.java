@@ -61,7 +61,9 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Nullable
     public Constant getConstant(String name) throws OntopResultConversionException {
         Integer columnIndex = columnMap.get(name);
-        return getConstant(columnIndex);
+        return columnIndex == null?
+                null:
+                getConstant(columnIndex);
     }
 
     @Override
