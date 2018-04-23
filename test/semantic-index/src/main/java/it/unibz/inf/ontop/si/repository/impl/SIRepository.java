@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -39,16 +39,13 @@ public class SIRepository {
 
     private final RDBMSSIRepositoryManager dataRepository;
     private final String jdbcUrl;
-    private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
 
-    public SIRepository(ClassifiedTBox tbox, AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory) {
+    public SIRepository(ClassifiedTBox tbox, TermFactory termFactory, TypeFactory typeFactory,
+                        TargetAtomFactory targetAtomFactory) {
 
-        this.dataRepository = new RDBMSSIRepositoryManager(tbox, atomFactory, termFactory, typeFactory);
-        this.atomFactory = atomFactory;
+        this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory, targetAtomFactory);
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
 
@@ -92,7 +89,7 @@ public class SIRepository {
         UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                 mappingAxioms.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getArguments().stream())
+                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
                         .map(t -> (ImmutableFunctionalTerm) t), termFactory);
 

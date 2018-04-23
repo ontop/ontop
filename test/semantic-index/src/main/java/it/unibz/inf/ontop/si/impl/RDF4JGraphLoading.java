@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.si.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
@@ -47,8 +48,9 @@ public class RDF4JGraphLoading {
 
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
-        SIRepository repo = new SIRepository(vocabulary.tbox(), defaultConfiguration.getAtomFactory(),
-                defaultConfiguration.getTermFactory(), defaultConfiguration.getTypeFactory());
+        SIRepository repo = new SIRepository(vocabulary.tbox(), defaultConfiguration.getTermFactory(),
+                defaultConfiguration.getTypeFactory(),
+                defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class));
         Connection connection = repo.createConnection();
 
         //  Load the data

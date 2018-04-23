@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.si.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -39,8 +40,10 @@ public class OWLAPIABoxLoading {
 
         Ontology ontology = translatorOWL2QL.translateAndClassify(owlOntology);
 
-        SIRepository repo = new SIRepository(ontology.tbox(), defaultConfiguration.getAtomFactory(),
-                defaultConfiguration.getTermFactory(), defaultConfiguration.getTypeFactory());
+        SIRepository repo = new SIRepository(ontology.tbox(), defaultConfiguration.getTermFactory(),
+                defaultConfiguration.getTypeFactory(),
+                defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class)
+                );
 
         try {
             Connection connection = repo.createConnection();
