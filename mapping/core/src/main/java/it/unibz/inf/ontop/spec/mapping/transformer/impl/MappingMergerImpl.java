@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
@@ -28,15 +27,13 @@ public class MappingMergerImpl implements MappingMerger {
 
     private final SpecificationFactory specificationFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final MappingIQNormalizer mappingIQNormalizer;
     private final TermFactory termFactory;
 
     @Inject
     private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                              MappingIQNormalizer mappingIQNormalizer, TermFactory termFactory) {
+                              TermFactory termFactory) {
         this.specificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
-        this.mappingIQNormalizer = mappingIQNormalizer;
         this.termFactory = termFactory;
     }
 
@@ -90,7 +87,7 @@ public class MappingMergerImpl implements MappingMerger {
 
         ImmutableMap<String, String> prefixToUri = prefixToUris.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey(),
+                        Map.Entry::getKey,
                         e -> flattenURIList(e.getKey(), e.getValue())
                 ));
         return new SimplePrefixManager(prefixToUri);
@@ -147,7 +144,6 @@ public class MappingMergerImpl implements MappingMerger {
      */
     private IQ mergeDefinitions(Collection<IQ> queries) {
         return queryMerger.mergeDefinitions(queries)
-                .map(mappingIQNormalizer::normalize)
                 .orElseThrow(() -> new MappingMergingException("The query should be present"));
     }
 

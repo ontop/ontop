@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -28,19 +28,29 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     private final MappingMetadata mappingMetadata;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final MappingIQNormalizer mappingIQNormalizer;
 
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
                                       @Assisted MappingMetadata mappingMetadata,
                                       SpecificationFactory specFactory,
                                       UnionBasedQueryMerger queryMerger,
-                                      MappingIQNormalizer mappingIQNormalizer) {
+                                      OntopModelSettings settings) {
         this.provenanceMap = provenanceMap;
         this.mappingMetadata = mappingMetadata;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
-        this.mappingIQNormalizer = mappingIQNormalizer;
+
+        if (settings.isTestModeEnabled()) {
+            for (IQ query : provenanceMap.keySet()) {
+                checkNullableVariables(query);
+            }
+        }
+    }
+
+    private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
+        ImmutableSet<Variable> nullableVariables = query.getTree().getNullableVariables();
+        if (!nullableVariables.isEmpty())
+            throw new NullableVariableInMappingException(query, nullableVariables);
     }
 
     @Override
@@ -93,7 +103,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(mappingIQNormalizer::normalize)
+                .map(IQ::liftBinding)
                 .collect(ImmutableCollectors.toMap(
                         MappingTools::extractClassIRI,
                         a -> a));
@@ -102,7 +112,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                 .map(queryMerger::mergeDefinitions)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(mappingIQNormalizer::normalize)
+                .map(IQ::liftBinding)
                 .collect(ImmutableCollectors.toMap(
                         MappingTools::extractPropertiesIRI,
                         a -> a));

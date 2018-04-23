@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -39,7 +39,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
-    private final MappingIQNormalizer mappingIQNormalizer;
+    private final NoNullValueEnforcer noNullValueEnforcer;
     private final DatalogRule2QueryConverter datalogRule2QueryConverter;
 
     @Inject
@@ -47,13 +47,13 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                               SpecificationFactory specificationFactory,
                                               IntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory,
-                                              MappingIQNormalizer mappingIQNormalizer,
+                                              NoNullValueEnforcer noNullValueEnforcer,
                                               DatalogRule2QueryConverter datalogRule2QueryConverter){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
-        this.mappingIQNormalizer = mappingIQNormalizer;
+        this.noNullValueEnforcer = noNullValueEnforcer;
         this.datalogRule2QueryConverter = datalogRule2QueryConverter;
     }
 
@@ -63,7 +63,9 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMultimap<Term, CQIE> ruleIndex = mappingRules.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))? r.getHead().getTerm(2) : r.getHead().getTerm(1),
+                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))
+                                ? r.getHead().getTerm(2)
+                                : r.getHead().getTerm(1),
                         r -> r
                 ));
 
@@ -82,7 +84,9 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 ))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(mappingIQNormalizer::normalize)
+                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                .map(noNullValueEnforcer::transform)
+                .map(IQ::liftBinding)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableMap<IRI, IQ> mappingClassMap = intermediateQueryList.stream()
@@ -119,15 +123,22 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> mappingIQNormalizer.normalize(
-                                datalogRule2QueryConverter.convertDatalogRule(
-                                        e.getKey(),
-                                        extensionalPredicates,
-                                        Optional.empty(),
-                                        iqFactory
-                                )),
-                        Map.Entry::getValue
-                ));
+                        e -> convertDatalogRule(e.getKey(), extensionalPredicates),
+                        Map.Entry::getValue));
+
         return provMappingFactory.create(iqMap, mappingMetadata);
     }
+
+    private IQ convertDatalogRule(CQIE datalogRule, ImmutableSet<Predicate> extensionalPredicates) {
+        IQ directlyConvertedIQ = datalogRule2QueryConverter.convertDatalogRule(
+                datalogRule,
+                extensionalPredicates,
+                Optional.empty(),
+                iqFactory);
+
+        return noNullValueEnforcer.transform(directlyConvertedIQ)
+                .liftBinding();
+    }
+
+
 }

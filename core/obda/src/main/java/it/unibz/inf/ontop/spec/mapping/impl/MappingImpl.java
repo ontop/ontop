@@ -119,11 +119,4 @@ public class MappingImpl implements Mapping {
     public ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates() {
         return rdfAtomPredicates;
     }
-
-    private static class NullableVariableInMappingException extends OntopInternalBugException {
-        private NullableVariableInMappingException(IQ definition, ImmutableSet<Variable> nullableVariables) {
-            super("The following definition projects nullable variables: " + nullableVariables
-                    + ".\n Definition:\n" + definition);
-        }
-    }
 }
