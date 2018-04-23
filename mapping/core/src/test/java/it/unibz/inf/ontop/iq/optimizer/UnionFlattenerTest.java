@@ -17,7 +17,7 @@ import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
 import static junit.framework.TestCase.assertTrue;
 
-public class MappingUnionNormalizerTest {
+public class UnionFlattenerTest {
 
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans", 2);
     private final static Variable W = TERM_FACTORY.getVariable("W");
@@ -66,7 +66,7 @@ public class MappingUnionNormalizerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM1, union1);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = MAPPING_UNION_NORMALIZER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
@@ -103,7 +103,7 @@ public class MappingUnionNormalizerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = MAPPING_UNION_NORMALIZER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 
@@ -157,7 +157,7 @@ public class MappingUnionNormalizerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c1);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = MAPPING_UNION_NORMALIZER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 
@@ -219,7 +219,7 @@ public class MappingUnionNormalizerTest {
         IQ iq = IQ_FACTORY.createIQ(PROJECTION_ATOM2, c3);
         System.out.println("\nBefore optimization: \n" + iq);
 
-        IQ optimizedIQ = MAPPING_UNION_NORMALIZER.optimize(iq);
+        IQ optimizedIQ = UNION_FLATTENER.optimize(iq);
         System.out.println("\nAfter optimization: \n" + optimizedIQ);
 
 

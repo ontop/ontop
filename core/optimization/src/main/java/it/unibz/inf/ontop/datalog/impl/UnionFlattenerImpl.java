@@ -1,14 +1,14 @@
-package it.unibz.inf.ontop.iq.optimizer.impl;
+package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * <p>
  * This normalization may be needed for datalog-based mapping optimizers.
  */
-public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
+public class UnionFlattenerImpl implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
 
@@ -85,7 +85,7 @@ public class MappingUnionNormalizerImpl implements MappingUnionNormalizer {
     }
 
     @Inject
-    private MappingUnionNormalizerImpl(IntermediateQueryFactory iqFactory) {
+    private UnionFlattenerImpl(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 

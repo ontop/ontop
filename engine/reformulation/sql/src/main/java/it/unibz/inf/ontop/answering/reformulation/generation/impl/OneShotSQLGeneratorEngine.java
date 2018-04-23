@@ -39,6 +39,7 @@ import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
@@ -115,6 +116,7 @@ public class OneShotSQLGeneratorEngine {
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
 	private final IQConverter iqConverter;
+	private final UnionFlattener unionFlattener;
 
 
 	// the only two mutable (query-dependent) fields
@@ -130,7 +132,7 @@ public class OneShotSQLGeneratorEngine {
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter) {
+							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter, UnionFlattener unionFlattener) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -139,6 +141,7 @@ public class OneShotSQLGeneratorEngine {
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
+		this.unionFlattener = unionFlattener;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -177,7 +180,8 @@ public class OneShotSQLGeneratorEngine {
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter) {
+									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
+									  UnionFlattener unionFlattener) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -195,6 +199,7 @@ public class OneShotSQLGeneratorEngine {
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
+		this.unionFlattener = unionFlattener;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -252,7 +257,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter);
+                typeFactory, termFactory, iqConverter, unionFlattener);
 	}
 
 	/**
@@ -267,9 +272,9 @@ public class OneShotSQLGeneratorEngine {
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
 
-		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
+		IQ normalizedQuery = normalizeIQ(intermediateQuery);
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(iqConverter.convert(normalizedQuery));
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.foldJoinTrees(cq);
@@ -322,7 +327,7 @@ public class OneShotSQLGeneratorEngine {
 		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
-	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
+	private IQ normalizeIQ(IntermediateQuery intermediateQuery) {
 
 		IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
 				.optimize(intermediateQuery);
@@ -331,7 +336,10 @@ public class OneShotSQLGeneratorEngine {
 		IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
 		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-		return queryAfterPullOut;
+		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(queryAfterPullOut));
+		log.debug("New query after flattening the union: \n" + flattenIQ);
+
+		return flattenIQ;
 	}
 
 

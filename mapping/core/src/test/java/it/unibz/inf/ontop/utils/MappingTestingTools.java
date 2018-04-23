@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -61,7 +61,7 @@ public class MappingTestingTools {
     public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER;
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
-    public static final MappingUnionNormalizer MAPPING_UNION_NORMALIZER;
+    public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
     public static final IQConverter IQ_CONVERTER;
 
@@ -96,7 +96,7 @@ public class MappingTestingTools {
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
         INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IQ2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
-        MAPPING_UNION_NORMALIZER = injector.getInstance(MappingUnionNormalizer.class);
+        UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
 

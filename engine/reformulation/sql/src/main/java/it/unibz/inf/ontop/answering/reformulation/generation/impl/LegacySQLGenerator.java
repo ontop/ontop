@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogNormalizer;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -45,10 +46,10 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
-                               IQConverter iqConverter) {
+                               IQConverter iqConverter, UnionFlattener unionFlattener) {
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate,
-                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter);
+                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, unionFlattener);
     }
 
     @Override

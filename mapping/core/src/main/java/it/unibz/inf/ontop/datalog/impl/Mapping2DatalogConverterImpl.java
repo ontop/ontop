@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
+import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -22,7 +22,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     private final QueryUnionSplitter unionSplitter;
     private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final DatalogNormalizer datalogNormalizer;
-    private final MappingUnionNormalizer unionNormalizer;
+    private final UnionFlattener unionNormalizer;
 
     // For the translation of subqueries: prevents conflicts in generated predicate names
 
@@ -30,7 +30,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     private Mapping2DatalogConverterImpl(QueryUnionSplitter unionSplitter,
                                          IQ2DatalogTranslator iq2DatalogTranslator,
                                          DatalogNormalizer datalogNormalizer,
-                                         MappingUnionNormalizer unionNormalizer) {
+                                         UnionFlattener unionNormalizer) {
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.datalogNormalizer = datalogNormalizer;

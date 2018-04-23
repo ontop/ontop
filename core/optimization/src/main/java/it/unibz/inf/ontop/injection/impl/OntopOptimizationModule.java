@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
@@ -58,6 +59,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(IQ2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
+        bindFromSettings(UnionFlattener.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;
