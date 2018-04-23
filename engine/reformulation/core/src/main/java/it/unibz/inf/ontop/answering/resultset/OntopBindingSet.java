@@ -1,18 +1,21 @@
 package it.unibz.inf.ontop.answering.resultset;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface OntopBindingSet extends Iterable<OntopBinding> {
-    
+
     @Override
     Iterator<OntopBinding> iterator();
 
-    List<String> getBindingNames();
+    Stream<OntopBinding> getBindings();
+
+    ImmutableList<String> getBindingNames();
 
     /***
      * Returns the constant at column "column" recall that columns start at index 1.
@@ -26,14 +29,17 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
     @Nullable
     Constant getConstant(String name) throws OntopResultConversionException;
 
+    /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable
     OntopBinding getBinding(int column);
 
+    /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable
     OntopBinding getBinding(String name);
 
     /**
      * Checks whether this BindingSet has a binding with the specified name.
+     * If the binding value is needed, getBinding() is more efficient
      *
      * @param bindingName
      *        The name of the binding.
