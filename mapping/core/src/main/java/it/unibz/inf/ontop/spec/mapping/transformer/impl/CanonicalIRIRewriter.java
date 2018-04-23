@@ -1,13 +1,18 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +31,7 @@ public class CanonicalIRIRewriter {
     private enum Position {
 
         SUBJECT (0),
-        OBJECT (1);
+        OBJECT (2);
 
         private final int code;
 
@@ -54,11 +59,14 @@ public class CanonicalIRIRewriter {
     private final SubstitutionUtilities substitutionUtilities;
     private final TermFactory termFactory;
     private final UnifierUtilities unifierUtilities;
+    private final ImmutabilityTools immutabilityTools;
 
-    public CanonicalIRIRewriter(SubstitutionUtilities substitutionUtilities, TermFactory termFactory, UnifierUtilities unifierUtilities) {
+    public CanonicalIRIRewriter(SubstitutionUtilities substitutionUtilities, TermFactory termFactory,
+                                UnifierUtilities unifierUtilities, ImmutabilityTools immutabilityTools) {
         this.substitutionUtilities = substitutionUtilities;
         this.termFactory = termFactory;
         this.unifierUtilities = unifierUtilities;
+        this.immutabilityTools = immutabilityTools;
     }
 
 
@@ -83,9 +91,7 @@ public class CanonicalIRIRewriter {
 
             Function head = mapping.getHead();
 
-            Predicate predicate = head.getFunctionSymbol();
-
-            if (isCanonicalIRI(predicate)) {
+            if (isCanonicalProperty(head)) {
                 // we throw away this mapping
                 continue;
             }
@@ -104,12 +110,12 @@ public class CanonicalIRIRewriter {
                 }
             }
 
-            if (head.getArity()==2) {
+            if (head.getArity() == 3) {
 
                 CQIE mapping2 = newMapping.orElse(mapping);
 
                 Function headNewMapping = mapping2.getHead();
-                Term objectURI = headNewMapping.getTerm(1);
+                Term objectURI = headNewMapping.getTerm(2);
 
                 //if objectURI is an IRI get canonicalIRI
                 if (objectURI instanceof Function) {
@@ -136,8 +142,24 @@ public class CanonicalIRIRewriter {
 
     }
 
-    private static boolean isCanonicalIRI(Predicate predicate) {
-        return predicate.getName().equals(Ontop.CANONICAL_IRI.getIRIString());
+    private boolean isCanonicalProperty(Function headAtom) {
+        Predicate predicate = headAtom.getFunctionSymbol();
+
+        if (predicate instanceof RDFAtomPredicate) {
+            VariableGenerator variableGenerator = new VariableGenerator(headAtom.getVariables(), termFactory);
+            ImmutableList<VariableOrGroundTerm> arguments = headAtom.getTerms().stream()
+                    .map(immutabilityTools::convertIntoImmutableTerm)
+                    .map(t -> t instanceof NonGroundFunctionalTerm ? variableGenerator.generateNewVariable() : t)
+                    .map(t -> (VariableOrGroundTerm) t)
+                    .collect(ImmutableCollectors.toList());
+
+            return ((RDFAtomPredicate) predicate)
+                    .getPropertyIRI(arguments)
+                    .filter(Ontop.CANONICAL_IRI::equals)
+                    .isPresent();
+        }
+        else
+            return false;
     }
 
 
@@ -148,9 +170,7 @@ public class CanonicalIRIRewriter {
 
             Function head = rule.getHead();
 
-            Predicate predicate = head.getFunctionSymbol();
-
-            if (isCanonicalIRI(predicate)) { // we check for ontop:is_canonical_iri
+            if (isCanonicalProperty(head)) { // we check for ontop:is_canonical_iri
 
                 //rename all the variables to avoid conflicts while merging the mappings
                 Set<Variable> variables = rule.getReferencedVariables();
@@ -158,7 +178,7 @@ public class CanonicalIRIRewriter {
                 Function headURI = (Function) head.getTerm(0);
                 ValueConstant canonicalIRIName = (ValueConstant) headURI.getTerm(0);
 
-                Function objectTerm = (Function) head.getTerm(1);
+                Function objectTerm = (Function) head.getTerm(2);
                 ValueConstant objectURIName = (ValueConstant) objectTerm.getTerm(0);
 
                 //get or assign a suffix for each canonicalIRI
@@ -207,7 +227,7 @@ public class CanonicalIRIRewriter {
             final Function templateCanURI = (Function) canonHead.getTerm(0);
 
             //get templateuri
-            Function target = (Function) canonHead.getTerm(1);
+            Function target = (Function) canonHead.getTerm(2);
 
             //get substitution
             Substitution subs = unifierUtilities.getMGU(uriTerm, target);

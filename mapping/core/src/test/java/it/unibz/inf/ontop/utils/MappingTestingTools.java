@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -47,6 +48,7 @@ public class MappingTestingTools {
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
+    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
     public static final Datalog2QueryMappingConverter DATALOG_2_QUERY_MAPPING_CONVERTER;
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
@@ -105,6 +107,7 @@ public class MappingTestingTools {
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
+        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();

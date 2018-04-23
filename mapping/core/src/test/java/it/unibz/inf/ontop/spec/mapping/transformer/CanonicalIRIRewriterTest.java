@@ -322,7 +322,8 @@ public class CanonicalIRIRewriterTest {
 
         addClassPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY, UNIFIER_UTILITIES)
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY, UNIFIER_UTILITIES,
+                IMMUTABILITY_TOOLS)
                 .buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
@@ -362,7 +363,7 @@ public class CanonicalIRIRewriterTest {
         addDataPropertiesMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -402,7 +403,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -443,7 +444,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesOnlyObjectURIMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -486,7 +487,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesDoubleURIMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print( Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -523,8 +524,9 @@ public class CanonicalIRIRewriterTest {
 
         Function tableT2 = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
         body.add(tableT2);
+        CQIE testRule = DATALOG_FACTORY.getCQIE(head, body);
 
-        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(testRule));
 
     }
 

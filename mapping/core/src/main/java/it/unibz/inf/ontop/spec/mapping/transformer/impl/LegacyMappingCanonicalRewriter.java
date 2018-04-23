@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
@@ -25,17 +26,19 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
     private final SubstitutionUtilities substitutionUtilities;
     private final TermFactory termFactory;
     private final UnifierUtilities unifierUtilities;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private LegacyMappingCanonicalRewriter(Mapping2DatalogConverter mapping2DatalogConverter,
                                            Datalog2QueryMappingConverter datalog2MappingConverter,
                                            SubstitutionUtilities substitutionUtilities, TermFactory termFactory,
-                                           UnifierUtilities unifierUtilities) {
+                                           UnifierUtilities unifierUtilities, ImmutabilityTools immutabilityTools) {
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.substitutionUtilities = substitutionUtilities;
         this.termFactory = termFactory;
         this.unifierUtilities = unifierUtilities;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -43,7 +46,7 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
         ImmutableList<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 
         // MUTABLE rewriter!!
-        List<CQIE> canonicalRules = new CanonicalIRIRewriter(substitutionUtilities, termFactory, unifierUtilities)
+        List<CQIE> canonicalRules = new CanonicalIRIRewriter(substitutionUtilities, termFactory, unifierUtilities, immutabilityTools)
                 .buildCanonicalIRIMappings(inputMappingRules);
 
         return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(canonicalRules), mapping.getMetadata());
