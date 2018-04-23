@@ -59,7 +59,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	private final AtomFactory atomFactory;
 	private final SubstitutionFactory substitutionFactory;
 	private final DatalogFactory datalogFactory;
-	private final ImmutabilityTools immutabilityTools;;
+	private final ImmutabilityTools immutabilityTools;
 	private final OrderByLifter orderByLifter;
 
 	private static class RuleHead {

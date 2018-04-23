@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.optimizer.MappingUnionNormalizer;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -21,16 +22,19 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     private final QueryUnionSplitter unionSplitter;
     private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final DatalogNormalizer datalogNormalizer;
+    private final MappingUnionNormalizer unionNormalizer;
 
     // For the translation of subqueries: prevents conflicts in generated predicate names
 
     @Inject
     private Mapping2DatalogConverterImpl(QueryUnionSplitter unionSplitter,
                                          IQ2DatalogTranslator iq2DatalogTranslator,
-                                         DatalogNormalizer datalogNormalizer) {
+                                         DatalogNormalizer datalogNormalizer,
+                                         MappingUnionNormalizer unionNormalizer) {
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.datalogNormalizer = datalogNormalizer;
+        this.unionNormalizer = unionNormalizer;
     }
 
     @Override
@@ -49,9 +53,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
     }
 
     private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
-
-
-        ImmutableSet<CQIE> rules = unionSplitter.splitUnion(mappingQuery)
+        ImmutableSet<CQIE> rules = unionSplitter.splitUnion(unionNormalizer.optimize(mappingQuery))
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toSet());
         //CQIEs are mutable
