@@ -1,4 +1,4 @@
-// Generated from /home/jcorman/workspace/ontop/mongo/ontop/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
+// Generated from /home/jcorman/workspace/ontop/v3/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -105,6 +105,12 @@ public interface TurtleOBDAVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBlank(TurtleOBDAParser.BlankContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#skolem}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSkolem(TurtleOBDAParser.SkolemContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#variable}.
 	 * @param ctx the parse tree
