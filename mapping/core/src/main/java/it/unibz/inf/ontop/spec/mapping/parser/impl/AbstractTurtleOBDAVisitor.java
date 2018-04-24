@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -17,6 +18,10 @@ import static it.unibz.inf.ontop.model.IriConstants.RDF_TYPE;
 import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
+
+    // Column placeholder pattern
+    private static final Pattern varPattern = Pattern.compile("\\{([^\\}]+)\\}");
+    private static final Pattern constantBnodePattern = Pattern.compile("^_:(.*)");
 
     protected abstract boolean validateAttributeName(String value);
 
@@ -45,11 +50,11 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return TERM_FACTORY.getTypedTerm(integerConstant, col_type);
     }
 
-    protected Term construct(String text) {
+    protected Term constructIRI(String text) {
         Term toReturn = null;
         final String PLACEHOLDER = "{}";
         List<Term> terms = new LinkedList<>();
-        List<FormatString> tokens = parse(text);
+        List<FormatString> tokens = parseIRI(text);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
@@ -79,13 +84,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return toReturn;
     }
 
-    // Column placeholder pattern
-    private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
-    private static Pattern chPattern = Pattern.compile(formatSpecifier);
 
-    private List<FormatString> parse(String text) {
+    private List<FormatString> parseIRI(String text) {
         List<FormatString> toReturn = new ArrayList<>();
-        Matcher m = chPattern.matcher(text);
+        Matcher m = varPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
             if (m.find(i)) {
@@ -103,6 +105,20 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             }
         }
         return toReturn;
+    }
+
+    private Term constructConstantBNode(String text) {
+        Matcher m = constantBnodePattern.matcher(text);
+        return TERM_FACTORY.getConstantBNode(m.group(1));
+    }
+
+    private Term constructBnodeFunction(String text) {
+        ImmutableList.Builder<ImmutableTerm> args = ImmutableList.builder();
+        Matcher m = varPattern.matcher(text);
+        while (m.find()) {
+            args.add(TERM_FACTORY.getVariable(m.group(1)));
+        }
+        return TERM_FACTORY.getImmutableBNodeTemplate(args.build());
     }
 
     private interface FormatString {
@@ -364,6 +380,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (vc != null) {
             return visitVariable(vc);
         }
+        BlankContext bc = ctx.blank();
+        if (bc != null) {
+            return visitBlank(bc);
+        }
         return null;
     }
 
@@ -377,14 +397,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (ctx.iriExt() != null) {
             return visitIriExt(ctx.iriExt());
         }
-        return construct(this.visitIri(ctx.iri()));
+        return constructIRI(this.visitIri(ctx.iri()));
     }
 
     public Term visitIriExt(IriExtContext ctx) {
         if (ctx.IRIREF_EXT() != null) {
-            return construct(removeBrackets(ctx.IRIREF_EXT().getText()));
+            return constructIRI(removeBrackets(ctx.IRIREF_EXT().getText()));
         }
-        return construct(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
+        return constructIRI(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
     }
 
     @Override
@@ -417,6 +437,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
         validateAttributeName(variableName);
         return TERM_FACTORY.getVariable(variableName);
+    }
+
+    @Override
+    public Term visitBlank(BlankContext ctx) {
+        if (ctx.BLANK_NODE_FUNCTION() != null){
+            return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
+        }
+        if (ctx.BLANK_NODE_LABEL() != null){
+            return constructConstantBNode (ctx.BLANK_NODE_LABEL().getText());
+        }
+        throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
 
     @Override

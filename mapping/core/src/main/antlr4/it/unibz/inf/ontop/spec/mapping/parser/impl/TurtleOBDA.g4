@@ -134,7 +134,8 @@ iriExt
   ;
 
 blank
-  : BLANK_NODE_LABEL
+  : BLANK_NODE_FUNCTION
+  | BLANK_NODE_LABEL
   | ANON
   ;
 
@@ -206,7 +207,7 @@ WS
  *------------------------------------------------------------------*/
 
 STRING_WITH_CURLY_BRACKET
-  : '{' VARIABLE_CHAR*? '}'
+  : '{' VARIABLE_CHAR+ '}'
   ;
 
 BOOLEAN_LITERAL
@@ -237,6 +238,11 @@ PREFIXED_NAME
 // extends PREFIXED_NAME to allow right-hand side curly brackets, and force one right-hand side opening curly bracket
 PREFIXED_NAME_EXT
   : PNAME_NS PN_LOCAL_EXT
+  ;
+
+// specific syntax for blank nodes with variables
+BLANK_NODE_FUNCTION
+  : '_:' STRING_WITH_CURLY_BRACKET ('_' STRING_WITH_CURLY_BRACKET )*
   ;
 
 BLANK_NODE_LABEL
