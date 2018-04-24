@@ -134,13 +134,9 @@ iriExt
   ;
 
 blank
-  : blankFunction
+  : BLANK_NODE_FUNCTION
   | BLANK_NODE_LABEL
   | ANON
-  ;
-
-blankFunction
-  : BLANK_NODE_FUNCTION
   ;
 
 variable

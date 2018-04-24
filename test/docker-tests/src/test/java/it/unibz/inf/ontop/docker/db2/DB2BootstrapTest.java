@@ -42,15 +42,13 @@ public class DB2BootstrapTest {
                 .propertyFile(propertyFile)
                 .enableTestMode()
                 .build();
-
-
-//        try {
-//            OntopOWLReasoner reasoner = factory.createReasoner(config);
-//            OWLConnection conn = reasoner.getConnection();
-//            OWLStatement st = conn.createStatement();
-//        } catch (OWLException e) {
-//            throw new RuntimeException("Error occurred while loading bootstrapped files: " + e);
-//        }
+        try {
+            OntopOWLReasoner reasoner = factory.createReasoner(config);
+            OWLConnection conn = reasoner.getConnection();
+            OWLStatement st = conn.createStatement();
+        } catch (OWLException e) {
+            throw new RuntimeException("Error occurred while loading bootstrapped files: " + e);
+        }
     }
 
     private void bootstrap() {
