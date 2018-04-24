@@ -106,11 +106,11 @@ public interface TurtleOBDAVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlank(TurtleOBDAParser.BlankContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TurtleOBDAParser#skolem}.
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#blankFunction}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSkolem(TurtleOBDAParser.SkolemContext ctx);
+	T visitBlankFunction(TurtleOBDAParser.BlankFunctionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#variable}.
 	 * @param ctx the parse tree

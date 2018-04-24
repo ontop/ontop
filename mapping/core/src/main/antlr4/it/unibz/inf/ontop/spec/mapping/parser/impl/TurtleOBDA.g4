@@ -134,12 +134,13 @@ iriExt
   ;
 
 blank
-  : BLANK_NODE_LABEL
+  : blankFunction
+  | BLANK_NODE_LABEL
   | ANON
   ;
 
-skolem
-  : BLANK_NODE_LABEL_SKOM
+blankFunction
+  : BLANK_NODE_FUNCTION
   ;
 
 variable
@@ -243,8 +244,8 @@ PREFIXED_NAME_EXT
   : PNAME_NS PN_LOCAL_EXT
   ;
 
-// specific syntax for skolemizing blank nodes
-BLANK_NODE_LABEL_SKOM
+// specific syntax for blank nodes with variables
+BLANK_NODE_FUNCTION
   : '_:' STRING_WITH_CURLY_BRACKET ('_' STRING_WITH_CURLY_BRACKET )*
   ;
 
