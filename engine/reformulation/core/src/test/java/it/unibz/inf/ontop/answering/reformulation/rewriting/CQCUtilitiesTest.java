@@ -423,8 +423,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
             OntologyBuilder builder = OntologyBuilderImpl.builder();
-            OClass left = builder.declareClass("A");
-            OClass right = builder.declareClass("C");
+            OClass left = builder.declareClass(classA.getIRIString());
+            OClass right = builder.declareClass(classC.getIRIString());
             builder.addSubClassOfAxiom(left, right);
 
 			ClassifiedTBox sigma = builder.build().tbox();
@@ -451,8 +451,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
             OntologyBuilder builder = OntologyBuilderImpl.builder();
-            OClass left = builder.declareClass("A");
-            ObjectPropertyExpression pright = builder.declareObjectProperty("R");
+            OClass left = builder.declareClass(classA.getIRIString());
+            ObjectPropertyExpression pright = builder.declareObjectProperty(propertyR.getIRIString());
 
 			ObjectSomeValuesFrom right = pright.getDomain();
 			builder.addSubClassOfAxiom(left, right);
@@ -480,8 +480,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
             OntologyBuilder builder = OntologyBuilderImpl.builder();
-            OClass left = builder.declareClass("A");
-            ObjectPropertyExpression pright = builder.declareObjectProperty("R").getInverse();
+            OClass left = builder.declareClass(classA.getIRIString());
+            ObjectPropertyExpression pright = builder.declareObjectProperty(propertyR.getIRIString()).getInverse();
 
 			ObjectSomeValuesFrom right = pright.getDomain();
 			builder.addSubClassOfAxiom(left, right);
@@ -509,8 +509,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
             OntologyBuilder builder = OntologyBuilderImpl.builder();
-            OClass right = builder.declareClass("A");
-            ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
+            OClass right = builder.declareClass(classA.getIRIString());
+            ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString());
 
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			builder.addSubClassOfAxiom(left, right);
@@ -539,8 +539,8 @@ public class CQCUtilitiesTest {
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 
             OntologyBuilder builder = OntologyBuilderImpl.builder();
-            OClass right = builder.declareClass("A");
-            ObjectPropertyExpression pleft = builder.declareObjectProperty("R").getInverse();
+            OClass right = builder.declareClass(classA.getIRIString());
+            ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString()).getInverse();
 
 			ObjectSomeValuesFrom left = pleft.getDomain();
 			builder.addSubClassOfAxiom(left, right);
@@ -589,8 +589,8 @@ public class CQCUtilitiesTest {
         // q(x) :- , q(x) :- R(x,y), A(x)
 
         OntologyBuilder builder = OntologyBuilderImpl.builder();
-        OClass left = builder.declareClass("A");
-        ObjectPropertyExpression pleft = builder.declareObjectProperty("R");
+        OClass left = builder.declareClass(classA.getIRIString());
+        ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString());
 
         ObjectSomeValuesFrom right = pleft.getDomain();
         builder.addSubClassOfAxiom(left, right);
