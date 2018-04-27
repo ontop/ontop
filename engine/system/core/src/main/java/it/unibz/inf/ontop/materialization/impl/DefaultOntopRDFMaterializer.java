@@ -79,7 +79,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         private static final String CLASS_QUERY = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
         String getQuery() {
-            return String.format((arity == 1) ? CLASS_QUERY : PROPERTY_QUERY, name.toString(), name.toString());
+            return String.format((arity == 1) ? CLASS_QUERY : PROPERTY_QUERY, name.getIRIString(), name.getIRIString());
         }
     }
 
