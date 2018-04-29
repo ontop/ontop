@@ -11,6 +11,10 @@ import java.util.Optional;
 
 /**
  * TODO: explain
+ *
+ * For more complex indexing schemes (and a richer set of methods), feel free to create your own interface/class
+ * for your specific needs (e.g. advanced query unfolding)
+ *
  */
 public interface Mapping {
 

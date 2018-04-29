@@ -20,21 +20,16 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -45,19 +40,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * 19/07/2017: partially refactored, in order to support some (unconventional) mapping assertions.
- * <p>
- * TODO: Make it more robust: support ternary predicates
  * TODO: Merge it with the SameAsRewriter ?
  */
 public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredicateExtractor {
 
     private final VariableDefinitionExtractor definitionExtractor;
-    public class ResultImpl implements Result {
+    public class SameAsTargetsImpl implements SameAsTargets {
         private final ImmutableSet<IRI> subjectOnlySameAsRewritingTargets;
         private final ImmutableSet<IRI> twoArgumentsSameAsRewritingTargets;
 
-        public ResultImpl(ImmutableSet<IRI> subjectOnlySameAsRewritingTargets, ImmutableSet<IRI>
+        public SameAsTargetsImpl(ImmutableSet<IRI> subjectOnlySameAsRewritingTargets, ImmutableSet<IRI>
                 twoArgumentsSameAsRewritingTargets) {
             this.subjectOnlySameAsRewritingTargets = subjectOnlySameAsRewritingTargets;
             this.twoArgumentsSameAsRewritingTargets = twoArgumentsSameAsRewritingTargets;
@@ -75,8 +67,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     @Inject
-    public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor,
-                                               AtomFactory atomFactory) throws IllegalArgumentException {
+    public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor) throws IllegalArgumentException {
         this.definitionExtractor = definitionExtractor;
     }
 
@@ -84,107 +75,120 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
      * TODO: Generalise it to quads and so on
      */
     @Override
-    public Result extract(Mapping mapping) {
+    public SameAsTargets extract(Mapping mapping) {
         Optional<RDFAtomPredicate> triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .filter(p -> p instanceof TriplePredicate)
                 .findFirst();
 
         return triplePredicate
                 .map(p -> {
-                    ImmutableSet<ImmutableTerm> sameAsMappingIRIs = retrieveSameAsMappingsURIs(mapping, p);
-                    return extractPredicates(sameAsMappingIRIs, mapping, p);
+                    ImmutableSet<Constant> iriTemplates = extractSameAsIRITemplates(mapping, p);
+                    return extractSameAsTargets(iriTemplates, mapping, p);
                 })
-                .orElseGet(() -> new ResultImpl(ImmutableSet.of(), ImmutableSet.of()));
+                .orElseGet(() -> new SameAsTargetsImpl(ImmutableSet.of(), ImmutableSet.of()));
     }
 
 
-    private ImmutableSet<ImmutableTerm> retrieveSameAsMappingsURIs(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+    private ImmutableSet<Constant> extractSameAsIRITemplates(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
 
         Optional<IQ> definition = mapping.getRDFPropertyDefinition(rdfAtomPredicate, OWL.SAME_AS);
         return definition
-                    .map(this::getIRIs)
+                    .map(this::extractIRITemplates)
                     .orElseGet(ImmutableSet::of);
     }
 
-    private ImmutableSet<ImmutableTerm> getIRIs(IQ definition) {
-        return getIRIs(definition.getTree())
+    private ImmutableSet<Constant> extractIRITemplates(IQ definition) {
+        return Optional.of(definition.getProjectionAtom().getPredicate())
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .map(p -> extractIRITemplates(p, definition.getProjectionAtom().getArguments(), definition.getTree()))
+                .orElseGet(ImmutableSet::of);
+    }
+
+    private ImmutableSet<Constant> extractIRITemplates(RDFAtomPredicate predicate, ImmutableList<Variable> projectedVariables,
+                                                       IQTree tree) {
+        return Stream.of(predicate.getSubject(projectedVariables), predicate.getObject(projectedVariables))
+                .flatMap(v -> extractIRITemplates(v, tree))
                 .collect(ImmutableCollectors.toSet());
     }
 
+
+    private Stream<Constant> extractIRITemplates(Variable variable, IQTree tree) {
+        return definitionExtractor.extract(variable, tree).stream()
+                .map(this::tryToExtractIRITemplateString)
+                .filter(t -> t instanceof Constant)
+                .map(t -> (Constant) t);
+    }
+
+
     /**
-     * Recursive
+     * TODO: refactor this weak code!!!
      */
-    private Stream<ImmutableTerm> getIRIs(IQTree tree) {
-        return Stream.concat(
-                tree.getChildren().stream()
-                        .flatMap(this::getIRIs),
-                extractIRIs(tree.getRootNode()));
-    }
-
-    /**
-     * Extract the IRIs from a construction node, searching through its bindings and getting only the IRI
-     */
-    private Stream<ImmutableTerm> extractIRIs(QueryNode currentNode) {
-
-        if (currentNode instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) currentNode;
-            ImmutableCollection<ImmutableTerm> localBindings = constructionNode.getSubstitution()
-                    .getImmutableMap().values();
-
-            return localBindings.stream().map(v -> ((ImmutableFunctionalTerm) v).getTerm(0))
-                    //filter out the variables
-                    .filter(v -> v instanceof ValueConstant);
+    private ImmutableTerm tryToExtractIRITemplateString(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            return functionalTerm.getArity() > 0
+                    ? tryToExtractIRITemplateString(functionalTerm.getTerm(0))
+                    : term;
         }
-        return Stream.of();
+        return term;
     }
 
+    private SameAsTargets extractSameAsTargets(ImmutableSet<Constant> sameAsIriTemplates, Mapping mapping,
+                                               RDFAtomPredicate rdfAtomPredicate) {
+        if (sameAsIriTemplates.isEmpty())
+            return new SameAsTargetsImpl(ImmutableSet.of(), ImmutableSet.of());
 
-    private Result extractPredicates(ImmutableSet<ImmutableTerm> sameAsMappingIRIs, Mapping mapping,
-                                     RDFAtomPredicate rdfAtomPredicate) {
+        Stream<IRI> classIris = mapping.getRDFClasses(rdfAtomPredicate).stream()
+                .filter(classIri -> classify(sameAsIriTemplates,
+                                mapping.getRDFClassDefinition(rdfAtomPredicate, classIri).get(),
+                                rdfAtomPredicate, true)
+                        == PredicateClassification.SUBJECT_ONLY);
 
-        ImmutableMultimap<Boolean, IRI> category2TargetPred = mapping.getRDFProperties(rdfAtomPredicate).stream()
-                .filter(p -> !(p.equals(OWL.SAME_AS)))
-                .filter(p -> isRewritingTarget(p, mapping, sameAsMappingIRIs, rdfAtomPredicate))
-                .collect(ImmutableCollectors.toMultimap(
-                        p -> isSubjectOnlyRewritingTarget(mapping, p, rdfAtomPredicate),
-                        p -> p
-                ));
-        return new ResultImpl(
-                ImmutableSet.copyOf(category2TargetPred.get(true)),
-                ImmutableSet.copyOf(category2TargetPred.get(false))
-        );
+        ImmutableMultimap<PredicateClassification, IRI> propertyIris = mapping.getRDFProperties(rdfAtomPredicate).stream()
+                .map(iri -> Maps.immutableEntry(
+                        classify(sameAsIriTemplates,
+                                mapping.getRDFPropertyDefinition(rdfAtomPredicate, iri).get(),
+                                rdfAtomPredicate, false),
+                            iri
+                        ))
+                .collect(ImmutableCollectors.toMultimap());
+
+        return new SameAsTargetsImpl(
+                Stream.concat(
+                        classIris,
+                        propertyIris.get(PredicateClassification.SUBJECT_ONLY).stream())
+                .collect(ImmutableCollectors.toSet()),
+                ImmutableSet.copyOf(propertyIris.get(PredicateClassification.AT_LEAST_OBJECT)));
     }
 
-    private boolean isRewritingTarget(IRI pred, Mapping mapping, ImmutableSet<ImmutableTerm> sameAsMappingIRIs,
-                                      RDFAtomPredicate rdfAtomPredicate) {
-        IQ definition = mapping.getRDFPropertyDefinition(rdfAtomPredicate, pred)
-                .orElseGet(() -> mapping.getRDFClassDefinition(rdfAtomPredicate, pred)
-                        .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)")));
+    private PredicateClassification classify(ImmutableSet<Constant> sameAsIriTemplates, IQ definition,
+                                             RDFAtomPredicate rdfAtomPredicate, boolean isClass) {
+        ImmutableList<Variable> variables = definition.getProjectionAtom().getArguments();
 
-        return getIRIs(definition).stream()
-                .anyMatch(sameAsMappingIRIs::contains);
-    }
-
-    private boolean isSubjectOnlyRewritingTarget(Mapping mapping, IRI pred, RDFAtomPredicate rdfAtomPredicate) {
-        IQ definition = mapping.getRDFPropertyDefinition(rdfAtomPredicate, pred)
-                .orElseGet(() -> mapping.getRDFClassDefinition(rdfAtomPredicate, pred)
-                    .orElseThrow(() -> new IllegalStateException("The mapping contains a predicate without a definition (-> inconsistent)")));
-        ImmutableSet<Variable> projectedVariables = definition.getProjectionAtom().getVariables();
-
-        /* If all projected variables may return URIs */
-        if (projectedVariables.size() == 2 &&
-                projectedVariables.stream()
-                        .allMatch(v -> isURIValued(v, definition))) {
-            return false;
+        /*
+         * Current limitation: is the object is concerned about SameAs rewriting, the subject is supposed also
+         * concerned.
+         * TODO: enrich the classification
+         */
+        if (!isClass &&
+            extractIRITemplates(rdfAtomPredicate.getObject(variables), definition.getTree())
+                    .anyMatch(sameAsIriTemplates::contains)) {
+            return PredicateClassification.AT_LEAST_OBJECT;
         }
-        /* Otherwise, the subject only may return a URI */
-        return true;
+
+        return extractIRITemplates(rdfAtomPredicate.getSubject(variables), definition.getTree())
+                .filter(sameAsIriTemplates::contains)
+                .findAny()
+                .map(t -> PredicateClassification.SUBJECT_ONLY)
+                .orElse(PredicateClassification.NONE);
     }
 
-    private boolean isURIValued(Variable variable, IQ definition) {
-        return definitionExtractor.extract(variable, definition).stream()
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .anyMatch(t -> ((ImmutableFunctionalTerm) t).isDataFunction());
+    private enum  PredicateClassification {
+        NONE,
+        SUBJECT_ONLY,
+        AT_LEAST_OBJECT
     }
+
 }
 

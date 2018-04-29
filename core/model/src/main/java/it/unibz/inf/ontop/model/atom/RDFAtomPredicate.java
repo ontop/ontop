@@ -14,4 +14,7 @@ public interface RDFAtomPredicate extends AtomPredicate {
 
     Optional<IRI> getClassIRI(ImmutableList<? extends ImmutableTerm> atomArguments);
     Optional<IRI> getPropertyIRI(ImmutableList<? extends ImmutableTerm> atomArguments);
+
+    <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments);
+    <T extends ImmutableTerm> T getObject(ImmutableList<T> atomArguments);
 }

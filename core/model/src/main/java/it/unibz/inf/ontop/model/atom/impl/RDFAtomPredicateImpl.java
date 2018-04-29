@@ -44,6 +44,16 @@ public class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPr
         return extractIRI(atomArguments.get(propertyIndex));
     }
 
+    @Override
+    public <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments) {
+        return atomArguments.get(0);
+    }
+
+    @Override
+    public <T extends ImmutableTerm> T getObject(ImmutableList<T> atomArguments) {
+        return atomArguments.get(2);
+    }
+
     /**
      * TODO: make it more robust
      */

@@ -55,7 +55,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     @Override
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
 
-        MappingSameAsPredicateExtractor.Result targetPredicates = predicateExtractor.extract(saturatedMapping);
+        MappingSameAsPredicateExtractor.SameAsTargets targetPredicates = predicateExtractor.extract(saturatedMapping);
         DatalogProgram result = datalogFactory.getDatalogProgram(pr.getQueryModifiers());
 
         for (CQIE q: pr.getRules()) {
@@ -69,7 +69,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         return result;
     }
 
-    private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName, MappingSameAsPredicateExtractor.Result targetPredicates) {
+    private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName, MappingSameAsPredicateExtractor.SameAsTargets targetPredicates) {
 
         //case of class and data properties need as join only on the left
         if (targetPredicates.isSubjectOnlySameAsRewritingTarget(rdfFactory.createIRI(atom.getFunctionSymbol().getName())) ){
