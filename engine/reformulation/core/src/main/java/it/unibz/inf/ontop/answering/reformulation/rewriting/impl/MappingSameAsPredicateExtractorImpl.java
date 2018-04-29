@@ -146,6 +146,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
                         == PredicateClassification.SUBJECT_ONLY);
 
         ImmutableMultimap<PredicateClassification, IRI> propertyIris = mapping.getRDFProperties(rdfAtomPredicate).stream()
+                .filter(iri -> !iri.equals(OWL.SAME_AS))
                 .map(iri -> Maps.immutableEntry(
                         classify(sameAsIriTemplates,
                                 mapping.getRDFPropertyDefinition(rdfAtomPredicate, iri).get(),

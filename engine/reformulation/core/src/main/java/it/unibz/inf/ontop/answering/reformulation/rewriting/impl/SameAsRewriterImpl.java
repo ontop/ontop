@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
@@ -7,27 +8,23 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 
 /**
  * Extracted by Roman Kontchakov on 30/06/2016.
  *
- * Only applies to unary and binary atoms (no support yet for atoms of the form triple(s, p, o))
+ * TODO: make it work with quads and so on.
  *
- * //TODO: refactor to work with triple (s,p,o)
  */
 public class SameAsRewriterImpl implements SameAsRewriter{
 
@@ -38,30 +35,40 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
-    private final RDF rdfFactory = new SimpleRDF();
+    private final ImmutabilityTools immutabilityTools;
+
+    @Nullable
+    private MappingSameAsPredicateExtractor.SameAsTargets targetPredicates;
 
     @AssistedInject
     private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor,
-                               AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory) {
+                               AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+                               ImmutabilityTools immutabilityTools) {
         this.predicateExtractor = predicateExtractor;
         this.saturatedMapping = saturatedMapping;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
+        this.immutabilityTools = immutabilityTools;
         bnode = 0;
         rules = 0;
+
+        // Created on demand
+        targetPredicates = null;
     }
 
     @Override
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
 
-        MappingSameAsPredicateExtractor.SameAsTargets targetPredicates = predicateExtractor.extract(saturatedMapping);
+        if (targetPredicates == null)
+            targetPredicates = predicateExtractor.extract(saturatedMapping);
+
         DatalogProgram result = datalogFactory.getDatalogProgram(pr.getQueryModifiers());
 
         for (CQIE q: pr.getRules()) {
             List<Function> body = new ArrayList<>(q.getBody().size());
             for (Function a : q.getBody()) {
-                Function ap = addSameAs(a, result, "sameAs" + (rules++), targetPredicates);
+                Function ap = addSameAs(a, result, "sameAs" + (rules++));
                 body.add(ap);
             }
             result.appendRule(datalogFactory.getCQIE(q.getHead(), body));
@@ -69,10 +76,29 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         return result;
     }
 
-    private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName, MappingSameAsPredicateExtractor.SameAsTargets targetPredicates) {
+    private Optional<IRI> extractIRI(Function atom) {
+        return Optional.of(atom.getFunctionSymbol())
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .flatMap(p -> {
+                    ImmutableList<ImmutableTerm> arguments = atom.getTerms().stream()
+                            .map(immutabilityTools::convertIntoImmutableTerm)
+                            .collect(ImmutableCollectors.toList());
+                    return p.getClassIRI(arguments)
+                            .map(Optional::of)
+                            .orElseGet(() -> p.getPropertyIRI(arguments));
+                });
+    }
+
+    private Function addSameAs(Function atom, DatalogProgram pr, String newHeadName) {
+        Optional<IRI> optionalIRI = extractIRI(atom);
+        if (!optionalIRI.isPresent())
+            return atom;
+
+        IRI iri = optionalIRI.get();
 
         //case of class and data properties need as join only on the left
-        if (targetPredicates.isSubjectOnlySameAsRewritingTarget(rdfFactory.createIRI(atom.getFunctionSymbol().getName())) ){
+        if (targetPredicates.isSubjectOnlySameAsRewritingTarget(iri) ){
             Function rightAtomUnion = createJoinWithSameAsOnLeft(atom, pr, newHeadName + "1");
             //create union between the first statement and join
             //between hasProperty(x,y) and owl:sameAs(x, anon-x) hasProperty (anon-x, y)
@@ -80,7 +106,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         }
 
         //case of object properties need as join only on the left and on the right
-        if (targetPredicates.isTwoArgumentsSameAsRewritingTarget(rdfFactory.createIRI(atom.getFunctionSymbol().getName()))){
+        if (targetPredicates.isTwoArgumentsSameAsRewritingTarget(iri)){
             //create union between the first join on the left and join on the right
             Function union2 = createUnionObject(atom, pr, newHeadName + "1");
             //create union between the first statement  and the union
