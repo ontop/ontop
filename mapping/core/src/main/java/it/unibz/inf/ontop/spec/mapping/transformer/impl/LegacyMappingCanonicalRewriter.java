@@ -42,7 +42,7 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
     }
 
     @Override
-    public Mapping rewrite(Mapping mapping, DBMetadata dbMetadata) {
+    public Mapping rewrite(Mapping mapping) {
         ImmutableList<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 
         // MUTABLE rewriter!!

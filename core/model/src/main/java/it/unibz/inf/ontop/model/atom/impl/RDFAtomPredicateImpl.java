@@ -10,7 +10,7 @@ import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Optional;
 
-public class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPredicate {
+public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPredicate {
 
     private final int propertyIndex;
     private final int classIndex;
@@ -47,6 +47,11 @@ public class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPr
     @Override
     public <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments) {
         return atomArguments.get(0);
+    }
+
+    @Override
+    public <T extends ImmutableTerm> T getProperty(ImmutableList<T> atomArguments) {
+        return atomArguments.get(1);
     }
 
     @Override

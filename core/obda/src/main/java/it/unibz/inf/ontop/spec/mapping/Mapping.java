@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -14,6 +15,8 @@ import java.util.Optional;
  *
  * For more complex indexing schemes (and a richer set of methods), feel free to create your own interface/class
  * for your specific needs (e.g. advanced query unfolding)
+ *
+ * Immutable
  *
  */
 public interface Mapping {
@@ -44,4 +47,12 @@ public interface Mapping {
      * TriplePredicate, QuadPredicate, etc.
      */
     ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
+
+    /**
+     * Inserts (and overwrite if necessary) a mapping definition for a pair (IRI, RDFAtomPredicate)
+     *
+     * Returns a new (immutable) Mapping
+     */
+    Mapping update(ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> propertyUpdateMap,
+                   ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> classUpdateMap);
 }

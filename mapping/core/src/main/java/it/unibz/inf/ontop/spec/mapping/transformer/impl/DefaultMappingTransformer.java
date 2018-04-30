@@ -58,8 +58,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     OBDASpecification createSpecification(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping, dbMetadata);
-        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping, dbMetadata);
+        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
+        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping);
         Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tbox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 

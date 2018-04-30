@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 
@@ -25,6 +26,7 @@ public class MappingImpl implements Mapping {
     private final MappingMetadata metadata;
     private final ImmutableMap<IRI, IQ> triplePropertyDefinitions;
     private final ImmutableMap<IRI, IQ> tripleClassDefinitions;
+    private final SpecificationFactory specificationFactory;
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
 
     /**
@@ -34,10 +36,12 @@ public class MappingImpl implements Mapping {
     private MappingImpl(@Assisted MappingMetadata metadata,
                         @Assisted("triplePropertyMap") ImmutableMap<IRI, IQ> triplePropertyMap,
                         @Assisted("tripleClassMap") ImmutableMap<IRI, IQ> tripleClassMap,
-                        OntopModelSettings settings) {
+                        OntopModelSettings settings,
+                        SpecificationFactory specificationFactory) {
         this.metadata = metadata;
         this.triplePropertyDefinitions = triplePropertyMap;
         this.tripleClassDefinitions = tripleClassMap;
+        this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
             for (IQ query : triplePropertyDefinitions.values()) {
@@ -118,5 +122,46 @@ public class MappingImpl implements Mapping {
     @Override
     public ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates() {
         return rdfAtomPredicates;
+    }
+
+    /**
+     * TODO: refactor it so as to work with quads and so on
+     */
+    @Override
+    public Mapping update(ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> propertyUpdateMap,
+                          ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> classUpdateMap) {
+        ImmutableMap<IRI, IQ> newTriplePropertyDefs = updateTriplePropertyOrClassMap(
+                propertyUpdateMap, m -> updateTripleDefinitions(triplePropertyDefinitions, m))
+                .orElse(triplePropertyDefinitions);
+
+        ImmutableMap<IRI, IQ> newTripleClassDefs = updateTriplePropertyOrClassMap(
+                propertyUpdateMap, m -> updateTripleDefinitions(tripleClassDefinitions, m))
+                .orElse(tripleClassDefinitions);
+
+        return specificationFactory.createMapping(metadata, newTriplePropertyDefs, newTripleClassDefs);
+    }
+
+    private Optional<ImmutableMap<IRI, IQ>> updateTriplePropertyOrClassMap(
+            ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> updateMap,
+            Function<ImmutableMap<IRI, IQ>, ImmutableMap<IRI, IQ>> transformationFct) {
+        if (updateMap.keySet().stream()
+                .anyMatch(p -> !(p instanceof TriplePredicate)))
+            throw new UnsupportedOperationException("Only triples are currently supported");
+
+        return updateMap.keySet().stream()
+                .findFirst()
+                .map(updateMap::get)
+                .map(transformationFct);
+    }
+
+    private ImmutableMap<IRI, IQ> updateTripleDefinitions(ImmutableMap<IRI, IQ> currentMap,
+                                                          ImmutableMap<IRI, IQ> tripleUpdateMap) {
+        ImmutableSet<IRI> updatedIris = tripleUpdateMap.keySet();
+
+        return Stream.concat(
+                tripleUpdateMap.entrySet().stream(),
+                currentMap.entrySet().stream()
+                    .filter(e -> !updatedIris.contains(e.getKey())))
+                .collect(ImmutableCollectors.toMap());
     }
 }
