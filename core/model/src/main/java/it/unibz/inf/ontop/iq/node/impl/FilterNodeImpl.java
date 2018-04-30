@@ -132,6 +132,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        return child.getPossibleVariableDefinitions();
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }

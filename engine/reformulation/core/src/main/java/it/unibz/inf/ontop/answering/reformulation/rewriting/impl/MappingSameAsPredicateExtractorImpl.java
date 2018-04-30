@@ -24,7 +24,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.tools.VariableDefinitionExtractor;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -44,7 +43,6 @@ import java.util.stream.Stream;
  */
 public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredicateExtractor {
 
-    private final VariableDefinitionExtractor definitionExtractor;
     public class SameAsTargetsImpl implements SameAsTargets {
         private final ImmutableSet<IRI> subjectOnlySameAsRewritingTargets;
         private final ImmutableSet<IRI> twoArgumentsSameAsRewritingTargets;
@@ -67,8 +65,7 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
     }
 
     @Inject
-    public MappingSameAsPredicateExtractorImpl(VariableDefinitionExtractor definitionExtractor) throws IllegalArgumentException {
-        this.definitionExtractor = definitionExtractor;
+    public MappingSameAsPredicateExtractorImpl() throws IllegalArgumentException {
     }
 
     /**
@@ -114,7 +111,9 @@ public class MappingSameAsPredicateExtractorImpl implements MappingSameAsPredica
 
 
     private Stream<Constant> extractIRITemplates(Variable variable, IQTree tree) {
-        return definitionExtractor.extract(variable, tree).stream()
+        return tree.getPossibleVariableDefinitions().stream()
+                .map(s -> s.get(variable))
+                .filter(t -> !t.equals(variable))
                 .map(this::tryToExtractIRITemplateString)
                 .filter(t -> t instanceof Constant)
                 .map(t -> (Constant) t);

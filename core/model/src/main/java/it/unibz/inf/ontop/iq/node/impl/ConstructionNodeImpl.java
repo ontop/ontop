@@ -307,6 +307,24 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         }
     }
 
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
+
+        if (childDefs.isEmpty()) {
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            return def.isEmpty()
+                    ? ImmutableSet.of()
+                    : ImmutableSet.of(def);
+        }
+
+        return childDefs.stream()
+                .map(childDef -> childDef.composeWith(substitution))
+                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .collect(ImmutableCollectors.toSet());
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */

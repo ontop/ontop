@@ -12,9 +12,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -27,6 +25,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     // Lazy
     @Nullable
     private ImmutableSet<Variable> nullableVariables;
+    @Nullable
+    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -36,6 +36,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
         nullableVariables = null;
+        variableDefinition = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -136,6 +137,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createNaryIQTree(getRootNode(), newChildren);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (variableDefinition == null)
+            variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
+        return variableDefinition;
     }
 
     @Override
