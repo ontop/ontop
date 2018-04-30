@@ -166,12 +166,12 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         Function unboundleftAtom = termFactory.getFunction(leftAtom.getFunctionSymbol());
         unboundleftAtom.updateTerms(leftAtom.getTerms());
         unboundleftAtom.setTerm(0, termFactory.getVariable("anon-"+bnode+ leftAtom.getTerm(0)));
-        unboundleftAtom.setTerm(1, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
+        unboundleftAtom.setTerm(2, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(2)));
 
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
         //it will be the right atom of the join
-        Term sTerm2 = unboundleftAtom.getTerm(1);
-        Term oTerm2 = leftAtom.getTerm(1);
+        Term sTerm2 = unboundleftAtom.getTerm(2);
+        Term oTerm2 = leftAtom.getTerm(2);
         Function rightAtomJoin2 = atomFactory.getMutableTripleBodyAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
@@ -255,13 +255,13 @@ public class SameAsRewriterImpl implements SameAsRewriter{
 
         Function leftAtomJoin2 =  termFactory.getFunction(leftAtom.getFunctionSymbol());
         leftAtomJoin2.updateTerms(leftAtom.getTerms());
-        leftAtomJoin2.setTerm(1, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
+        leftAtomJoin2.setTerm(2, termFactory.getVariable("anon-"+bnode +leftAtom.getTerm(2)));
 
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
-        Term sTerm2 = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
-        Term oTerm2 = leftAtom.getTerm(1);
+        Term sTerm2 = termFactory.getVariable("anon-"+ bnode +leftAtom.getTerm(2));
+        Term oTerm2 = leftAtom.getTerm(2);
         Function rightAtomJoin2 = atomFactory.getMutableTripleBodyAtom(sTerm2, OWL.SAME_AS, oTerm2);
 
         //create join rule
