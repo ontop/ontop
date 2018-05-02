@@ -98,7 +98,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), ATOM_FACTORY, TERM_FACTORY,
+		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), TERM_FACTORY,
 				TARGET_ATOM_FACTORY);
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 

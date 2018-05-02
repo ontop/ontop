@@ -85,7 +85,6 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
-    private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
 
@@ -94,11 +93,10 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      */
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
-                                     SQLPPMappingFactory ppMappingFactory, AtomFactory atomFactory,
-                                     TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
+                                     SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
+                                     TargetAtomFactory targetAtomFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
-        this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.targetAtomFactory = targetAtomFactory;
     }
@@ -409,7 +407,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, atomFactory, termFactory, targetAtomFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

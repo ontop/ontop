@@ -45,6 +45,14 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
     }
 
     @Override
+    public Optional<IRI> getPredicateIRI(ImmutableList<? extends ImmutableTerm> atomArguments) {
+        return getPropertyIRI(atomArguments)
+                .flatMap(i -> i.equals(RDF.TYPE)
+                        ? extractIRI(atomArguments.get(classIndex))
+                        : Optional.of(i));
+    }
+
+    @Override
     public <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments) {
         return atomArguments.get(0);
     }

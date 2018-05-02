@@ -7,12 +7,15 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.IntStream;
 
@@ -53,7 +56,22 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     @Override
+    public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI classIRI) {
+        return getTripleTargetAtom(subjectTerm, createGroundFunctionalTerm(RDF.TYPE),
+                createGroundFunctionalTerm(classIRI));
+    }
+
+    @Override
+    public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI propertyIRI, ImmutableTerm objectTerm) {
+        return getTripleTargetAtom(subjectTerm, createGroundFunctionalTerm(propertyIRI), objectTerm);
+    }
+
+    @Override
     public TargetAtom getTargetAtom(DistinctVariableOnlyDataAtom projectionAtom, ImmutableSubstitution<ImmutableTerm> substitution) {
         return new TargetAtomImpl(projectionAtom, substitution);
+    }
+
+    private ImmutableFunctionalTerm createGroundFunctionalTerm(IRI iri) {
+        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 }

@@ -40,17 +40,12 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	private final TurtleOBDAVisitor visitor;
 
 	private final Map<String, String> prefixes;
-	private final AtomFactory atomFactory;
-	private final TermFactory termFactory;
 
 	/**
 	 * Default constructor;
 	 */
-	public AbstractTurtleOBDAParser(TurtleOBDAVisitor visitor,
-									AtomFactory atomFactory, TermFactory termFactory) {
+	public AbstractTurtleOBDAParser(TurtleOBDAVisitor visitor) {
 		this.visitor = visitor;
-        this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
 		this.prefixes = ImmutableMap.of();
 	}
 
@@ -60,12 +55,9 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(Map<String, String> prefixes, TurtleOBDAVisitor visitor,
-                                    AtomFactory atomFactory, TermFactory termFactory) {
+	public AbstractTurtleOBDAParser(Map<String, String> prefixes, TurtleOBDAVisitor visitor) {
 		this.prefixes = prefixes;
 		this.visitor = visitor;
-		this.atomFactory = atomFactory;
-		this.termFactory = termFactory;
 	}
 
 	/**
