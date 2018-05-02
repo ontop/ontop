@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.Context;
 import it.unibz.inf.ontop.model.atom.QuadPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.TermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -17,13 +17,18 @@ public class QuadPredicateImpl extends RDFAtomPredicateImpl implements QuadPredi
     }
 
     @Override
-    public Optional<Context> getContext(ImmutableList<? extends ImmutableTerm> atomArguments) {
-        return extractIRI(atomArguments.get(NAMED_GRAPH_INDEX))
-                .map(SimpleNamedGraph::new);
+    public Optional<IRI> getGraphIRI(ImmutableList<? extends ImmutableTerm> atomArguments) {
+        return extractIRI(atomArguments.get(NAMED_GRAPH_INDEX));
     }
 
     @Override
-    public <T extends ImmutableTerm> ImmutableList<T> updateSPO(ImmutableList<T> originalArguments, T newSubject, T newProperty, T newObject) {
+    public <T extends ImmutableTerm> Optional<T> getGraph(ImmutableList<T> atomArguments) {
+        return Optional.of(atomArguments.get(NAMED_GRAPH_INDEX));
+    }
+
+    @Override
+    public <T extends ImmutableTerm> ImmutableList<T> updateSPO(ImmutableList<T> originalArguments, T newSubject,
+                                                                T newProperty, T newObject) {
         return ImmutableList.of(newSubject, newProperty, newObject, originalArguments.get(NAMED_GRAPH_INDEX));
     }
 }

@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.Context;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -16,7 +15,12 @@ public class TriplePredicateImpl extends RDFAtomPredicateImpl implements TripleP
     }
 
     @Override
-    public Optional<Context> getContext(ImmutableList<? extends ImmutableTerm> atomArguments) {
+    public Optional<IRI> getGraphIRI(ImmutableList<? extends ImmutableTerm> atomArguments) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <T extends ImmutableTerm> Optional<T> getGraph(ImmutableList<T> atomArguments) {
         return Optional.empty();
     }
 

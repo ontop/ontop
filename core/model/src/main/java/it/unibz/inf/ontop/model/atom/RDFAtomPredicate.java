@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.atom;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -20,11 +19,12 @@ public interface RDFAtomPredicate extends AtomPredicate {
      */
     Optional<IRI> getPredicateIRI(ImmutableList<? extends ImmutableTerm> atomArguments);
 
-    Optional<Context> getContext(ImmutableList<? extends ImmutableTerm> atomArguments);
+    Optional<IRI> getGraphIRI(ImmutableList<? extends ImmutableTerm> atomArguments);
 
     <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments);
     <T extends ImmutableTerm> T getProperty(ImmutableList<T> atomArguments);
     <T extends ImmutableTerm> T getObject(ImmutableList<T> atomArguments);
+    <T extends ImmutableTerm> Optional<T> getGraph(ImmutableList<T> atomArguments);
 
     <T extends ImmutableTerm> ImmutableList<T> updateSPO(ImmutableList<T> originalArguments, T newSubject,
                                                          T newProperty, T newObject);
