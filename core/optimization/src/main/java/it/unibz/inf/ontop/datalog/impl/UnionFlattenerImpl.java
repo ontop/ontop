@@ -89,6 +89,9 @@ public class UnionFlattenerImpl implements UnionFlattener {
         this.iqFactory = iqFactory;
     }
 
+    /**
+     * TODO: why a fix point?
+     */
     @Override
     public IQ optimize(IQ query) {
         TreeTransformer treeTransformer = new TreeTransformer(query.getVariableGenerator());
