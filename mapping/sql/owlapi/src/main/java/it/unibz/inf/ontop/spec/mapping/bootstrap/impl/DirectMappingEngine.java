@@ -31,8 +31,12 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -183,15 +187,23 @@ public class DirectMappingEngine {
             }
             else if (propertyIRI.isPresent()) {
             	IRI iri = IRI.create(propertyIRI.get().getIRIString());
-            	throw new RuntimeException("TODO: distinguish object and data properties");
-				//TermType secondArgType = targetAtom.getFunctionSymbol().getExpectedBaseType(1);
-//				if (secondArgType.isA(typeFactory.getAbstractObjectRDFType()))
-//				{
-//					entity = dataFactory.getOWLObjectProperty(iri);
-//				}
-//				else {
-//					entity = dataFactory.getOWLDataProperty(iri);
-//				}
+
+            	ImmutableTerm objectTerm = predicate.getObject(terms);
+            	if (objectTerm instanceof ImmutableFunctionalTerm) {
+					/*
+					 * Temporary (later we will use the type of the RDF function)
+					 */
+					Predicate objectFunctionSymbol = ((ImmutableFunctionalTerm) objectTerm).getFunctionSymbol();
+					if (objectFunctionSymbol instanceof DatatypePredicate)
+					{
+						entity = dataFactory.getOWLDataProperty(iri);
+					}
+					else {
+						entity = dataFactory.getOWLObjectProperty(iri);
+					}
+				}
+				else
+					throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);
 			}
             else {
 				throw new MinorOntopInternalBugException("No IRI could extracted from " + targetAtom);
