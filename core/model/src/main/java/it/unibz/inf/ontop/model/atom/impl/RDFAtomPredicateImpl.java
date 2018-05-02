@@ -12,19 +12,21 @@ import java.util.Optional;
 
 public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements RDFAtomPredicate {
 
+    private final int subjectIndex;
     private final int propertyIndex;
-    private final int classIndex;
+    private final int objectIndex;
 
     protected RDFAtomPredicateImpl(String name, int arity, ImmutableList<TermType> expectedBaseTypes,
-                                   int propertyIndex, int classIndex) {
+                                   int subjectIndex, int propertyIndex, int objectIndex) {
         super(name, arity, expectedBaseTypes);
+        this.subjectIndex = subjectIndex;
         this.propertyIndex = propertyIndex;
-        this.classIndex = classIndex;
+        this.objectIndex = objectIndex;
 
         if (propertyIndex >= arity)
             throw new IllegalArgumentException("propertyIndex must be inferior to arity");
-        if (classIndex >= arity)
-            throw new IllegalArgumentException("classIndex must be inferior to arity");
+        if (objectIndex >= arity)
+            throw new IllegalArgumentException("objectIndex must be inferior to arity");
 
     }
 
@@ -34,7 +36,7 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
             throw new IllegalArgumentException("The given arguments do not match with the expected arity");
         return getPropertyIRI(atomArguments)
                 .filter(i -> i.equals(RDF.TYPE))
-                .flatMap(i -> extractIRI(atomArguments.get(classIndex)));
+                .flatMap(i -> extractIRI(atomArguments.get(objectIndex)));
     }
 
     @Override
@@ -48,29 +50,29 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
     public Optional<IRI> getPredicateIRI(ImmutableList<? extends ImmutableTerm> atomArguments) {
         return getPropertyIRI(atomArguments)
                 .flatMap(i -> i.equals(RDF.TYPE)
-                        ? extractIRI(atomArguments.get(classIndex))
+                        ? extractIRI(atomArguments.get(objectIndex))
                         : Optional.of(i));
     }
 
     @Override
     public <T extends ImmutableTerm> T getSubject(ImmutableList<T> atomArguments) {
-        return atomArguments.get(0);
+        return atomArguments.get(subjectIndex);
     }
 
     @Override
     public <T extends ImmutableTerm> T getProperty(ImmutableList<T> atomArguments) {
-        return atomArguments.get(1);
+        return atomArguments.get(propertyIndex);
     }
 
     @Override
     public <T extends ImmutableTerm> T getObject(ImmutableList<T> atomArguments) {
-        return atomArguments.get(2);
+        return atomArguments.get(objectIndex);
     }
 
     /**
      * TODO: make it more robust
      */
-    private Optional<IRI> extractIRI(ImmutableTerm term) {
+    protected Optional<IRI> extractIRI(ImmutableTerm term) {
         if (term instanceof IRIConstant) {
             return Optional.of(((IRIConstant) term).getIRI());
         }

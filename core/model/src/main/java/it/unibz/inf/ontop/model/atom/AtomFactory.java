@@ -63,4 +63,7 @@ public interface AtomFactory {
     Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
 
     DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
+
+    DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
+                                                     Variable namedGraph);
 }

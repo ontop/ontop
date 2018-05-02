@@ -20,6 +20,7 @@ import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 public class AtomFactoryImpl implements AtomFactory {
 
     private final TriplePredicate triplePredicate;
+    private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
 
@@ -31,6 +32,12 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType()
+        ));
+        quadPredicate = new QuadPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getIRITermType()
         ));
     }
 
@@ -148,5 +155,10 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object) {
         return getDistinctVariableOnlyDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object, Variable namedGraph) {
+        return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
     }
 }
