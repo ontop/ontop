@@ -30,28 +30,26 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	private static final long serialVersionUID = 5723075311798541659L;
 
 	private final String name;
-	private final int identifier;
 
 	protected VariableImpl(String name) {
 		if (name == null) {
 			throw new RuntimeException("Variable name cannot be null");
 		}
 		this.name = name;
-		this.identifier = name.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof VariableImpl)) {
+		if (obj == null || !(obj instanceof Variable)) {
 			return false;
 		}
-		VariableImpl name2 = (VariableImpl) obj;
-		return this.identifier == name2.identifier;
+		Variable name2 = (Variable) obj;
+		return name.equals(name2.getName());
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		return name.hashCode();
 	}
 
 	@Override
