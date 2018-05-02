@@ -685,8 +685,10 @@ public class ExpressionEvaluator {
                 return valueFalse;
             }
             if (!function1.isDataTypeFunction()){
-                return evalRegexSingleExpression( eval(expr));
-
+				Term evaluatedExpression = eval(expr);
+				return expr.equals(evaluatedExpression)
+						? expr
+						: evalRegexSingleExpression(evaluatedExpression);
             }
         }
         return expr;
