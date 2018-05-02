@@ -21,10 +21,10 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
 
@@ -139,7 +139,7 @@ public class VirtualABoxStatistics {
 				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 				int tuples = getTuplesCount(sourceQuery, source);
 
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
+				ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
 				int atoms = targetQuery.size();
 
 				triplesCount = tuples * atoms;

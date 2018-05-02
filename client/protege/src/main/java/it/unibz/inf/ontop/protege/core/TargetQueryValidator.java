@@ -20,34 +20,44 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.List;
+import org.apache.commons.rdf.api.IRI;
 
 // TODO: move to a more appropriate package
 
 public class TargetQueryValidator  {
 	
-	public static List<String> validate(List<? extends Function> targetQuery, MutableOntologyVocabulary vocabulary) {
-
+	public static ImmutableList<IRI> validate(ImmutableList<TargetAtom> targetQuery, MutableOntologyVocabulary vocabulary) {
 	    return targetQuery.stream()
-                .filter(atom -> !isValid(atom.getFunctionSymbol(), vocabulary))
-                .map(atom -> atom.getFunctionSymbol().getName())
+				.map(TargetQueryValidator::extractIRI)
+                .filter(iri -> !isValid(iri, vocabulary))
                 .collect(ImmutableCollectors.toList());
 	}
 
-	public static boolean isValid(Predicate p, MutableOntologyVocabulary vocabulary) {
+	private static IRI extractIRI(TargetAtom targetAtom) {
+		return targetAtom.getPredicateIRI()
+				.orElseThrow(() -> new NoPredicateIRIInTargetAtomException(targetAtom));
+	}
 
-        return vocabulary.classes().contains(p.getName())
-                || vocabulary.objectProperties().contains(p.getName())
-                || vocabulary.dataProperties().contains(p.getName())
-                || vocabulary.annotationProperties().contains(p.getName())
-                || p.isTriplePredicate()
-                || p.getName().equals(OWL.SAME_AS.getIRIString())
-                || p.getName().equals(Ontop.CANONICAL_IRI.getIRIString());
+	public static boolean isValid(IRI iri, MutableOntologyVocabulary vocabulary) {
+
+        return vocabulary.classes().contains(iri)
+                || vocabulary.objectProperties().contains(iri)
+                || vocabulary.dataProperties().contains(iri)
+                || vocabulary.annotationProperties().contains(iri)
+                || iri.equals(OWL.SAME_AS)
+                || iri.equals(Ontop.CANONICAL_IRI);
     }
+
+    private static class NoPredicateIRIInTargetAtomException extends OntopInternalBugException {
+		private NoPredicateIRIInTargetAtomException(TargetAtom targetAtom) {
+			super("No IRI could be found the predicate in the target atom " + targetAtom
+					+ "\nShould have detected before");
+		}
+	}
 }

@@ -21,9 +21,9 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
@@ -366,11 +366,11 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = value.getTargetAtoms();
+		ImmutableList<TargetAtom> targetQuery = value.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
  		trgQueryTextPane.setText(trgQuery);
 
- 		OBDASQLQuery sourceQuery = (OBDASQLQuery) value.getSourceQuery();
+ 		OBDASQLQuery sourceQuery = value.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		srcQueryTextPane.setText(srcQuery);
 		

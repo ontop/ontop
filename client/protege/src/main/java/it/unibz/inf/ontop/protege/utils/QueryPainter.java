@@ -22,9 +22,11 @@ package it.unibz.inf.ontop.protege.utils;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.MutableOntologyVocabulary;
@@ -33,6 +35,7 @@ import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -47,6 +50,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 
 public class QueryPainter {
@@ -172,18 +176,19 @@ public class QueryPainter {
 
 		TargetQueryParser textParser = new TurtleOBDASQLParser(
 		        apic.getMutablePrefixManager().getPrefixMap(),
-                apic.getAtomFactory(), apic.getTermFactory());
-		ImmutableList<ImmutableFunctionalTerm> query = textParser.parse(text);
+                apic.getTermFactory(),
+				apic.getTargetAtomFactory());
+		ImmutableList<TargetAtom> query = textParser.parse(text);
 
 		if (query == null) {
 			invalid = true;
 			throw parsingException;
 		}
-		List<String> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
+		List<IRI> invalidPredicates = TargetQueryValidator.validate(query, apic.getCurrentVocabulary());
 		if (!invalidPredicates.isEmpty()) {
 			String invalidList = "";
-			for (String predicate : invalidPredicates) {
-				invalidList += "- " + predicate + "\n";
+			for (IRI predicateIri : invalidPredicates) {
+				invalidList += "- " + predicateIri + "\n";
 			}
 			String msg = String.format("ERROR: The below list of predicates is unknown by the ontology: \n %s Note: null indicates an unknown prefix.", invalidList);
 			invalid = true;
@@ -356,7 +361,7 @@ public class QueryPainter {
 		PrefixManager man = apic.getMutablePrefixManager();
 
 		String input = doc.getText(0, doc.getLength());
-		ImmutableList<ImmutableFunctionalTerm> current_query = parse(input, man);
+		ImmutableList<TargetAtom> current_query = parse(input, man);
 
 		if (current_query == null) {
             JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
@@ -392,32 +397,33 @@ public class QueryPainter {
 			pos = input.indexOf(":", pos + 1);
 		}
 		MutableOntologyVocabulary vocabulary = apic.getCurrentVocabulary();
-		for (Function atom : current_query) {
-			Predicate predicate = atom.getFunctionSymbol();
-			String predicateName = man.getShortForm(atom.getFunctionSymbol().toString());
-			if (vocabulary.classes().contains(predicate.getName())) {
-				ColorTask task = new ColorTask(predicateName, clazz);
-				tasks.add(task);
-			}
-			else if (vocabulary.objectProperties().contains(predicate.getName())) {
-				ColorTask task = new ColorTask(predicateName, objectProp);
-				tasks.add(task);
-			}
-			else if (vocabulary.dataProperties().contains(predicate.getName())) {
-				ColorTask task = new ColorTask(predicateName, dataProp);
-				tasks.add(task);
-			}
-			else if (vocabulary.annotationProperties().contains(predicate.getName())) {
-				ColorTask task = new ColorTask(predicateName, annotProp);
-				tasks.add(task);
+		for (TargetAtom atom : current_query) {
+			Optional<IRI> optionalPredicateIri = atom.getPredicateIRI();
+
+			if (optionalPredicateIri.isPresent()) {
+				IRI predicateIri = optionalPredicateIri.get();
+
+				if (vocabulary.classes().contains(predicateIri)) {
+					ColorTask task = new ColorTask(predicateIri.getIRIString(), clazz);
+					tasks.add(task);
+				} else if (vocabulary.objectProperties().contains(predicateIri)) {
+					ColorTask task = new ColorTask(predicateIri.getIRIString(), objectProp);
+					tasks.add(task);
+				} else if (vocabulary.dataProperties().contains(predicateIri)) {
+					ColorTask task = new ColorTask(predicateIri.getIRIString(), dataProp);
+					tasks.add(task);
+				} else if (vocabulary.annotationProperties().contains(predicateIri)) {
+					ColorTask task = new ColorTask(predicateIri.getIRIString(), annotProp);
+					tasks.add(task);
+				}
 			}
 
-			Term term1 = null;
-			Term term2 = null;
-			term1 = atom.getTerm(0);
-			if (atom.getArity() == 2) {
-				term2 = atom.getTerm(1);
-			}
+			ImmutableList<ImmutableTerm> substitutedTerms = atom.getSubstitutedTerms();
+			RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
+
+			Term term1 = atomPredicate.getSubject(substitutedTerms);
+			Term term2 = atomPredicate.getObject(substitutedTerms);
+
 			if (term1 instanceof IRIConstant) {
 				String rendered = man.getShortForm(((IRIConstant) term1).getIRI().toString());
 				ColorTask task = new ColorTask(rendered, individual);
@@ -443,10 +449,10 @@ public class QueryPainter {
 		tasks.clear();
 	}
 
-	private ImmutableList<ImmutableFunctionalTerm> parse(String query, PrefixManager man) {
+	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
             TargetQueryParser textParser = new TurtleOBDASQLParser(man.getPrefixMap(),
-					apic.getAtomFactory(), apic.getTermFactory());
+					apic.getTermFactory(), apic.getTargetAtomFactory());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;
