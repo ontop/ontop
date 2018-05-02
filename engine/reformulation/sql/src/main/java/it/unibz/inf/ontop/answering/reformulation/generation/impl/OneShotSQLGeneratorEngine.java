@@ -36,11 +36,13 @@ import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -329,17 +331,22 @@ public class OneShotSQLGeneratorEngine {
 
 	private IQ normalizeIQ(IntermediateQuery intermediateQuery) {
 
-		IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
-				.optimize(intermediateQuery);
-		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
-
-		IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
-		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
-
-		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(queryAfterPullOut));
+		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(intermediateQuery));
 		log.debug("New query after flattening the union: \n" + flattenIQ);
 
-		return flattenIQ;
+		try {
+			IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+					.optimize(iqConverter.convert(flattenIQ, intermediateQuery.getDBMetadata(),
+							intermediateQuery.getExecutorRegistry()));
+			log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+
+			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
+			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+
+			return iqConverter.convert(queryAfterPullOut);
+		} catch (EmptyQueryException e) {
+			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
+		}
 	}
 
 
