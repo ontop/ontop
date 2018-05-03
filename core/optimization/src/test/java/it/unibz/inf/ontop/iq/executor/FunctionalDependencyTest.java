@@ -18,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Types;
-import java.util.Optional;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
@@ -36,9 +35,9 @@ public class FunctionalDependencyTest {
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE4_PREDICATE;
 
-    private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getRDFAnswerPredicate(3);
     private final static Variable A = TERM_FACTORY.getVariable("a");
     private final static Variable B = TERM_FACTORY.getVariable("b");
     private final static Variable C = TERM_FACTORY.getVariable("c");

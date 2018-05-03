@@ -19,7 +19,7 @@ import static junit.framework.TestCase.assertTrue;
 
 public class UnionFlattenerTest {
 
-    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans", 2);
+    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static Variable W = TERM_FACTORY.getVariable("W");
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");

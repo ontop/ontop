@@ -23,11 +23,6 @@ package it.unibz.inf.ontop.spec.mapping;
 import java.util.*;
 
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
@@ -35,29 +30,9 @@ import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
 public class PrefixRendererTest extends TestCase {
 
-	private DatalogProgram query;
-	private CQIE rule1;
-
-	public void setUp() throws Exception {
-		query = DATALOG_FACTORY.getDatalogProgram();
-
-		LinkedList<Term> innerterms = new LinkedList<Term>();
-		innerterms.add(TERM_FACTORY.getVariable("id"));
-		
-//		IRIFactory fact = new IRIFactory();
-
-		List<Term> terms = new LinkedList<Term>();
-		terms.add(TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
-
-		Function body = TERM_FACTORY.getFunction(ATOM_FACTORY.getAtomPredicate("http://obda.org/onto.owl#Person", 1), terms);
-
-		terms = new LinkedList<Term>();
-		terms.add(TERM_FACTORY.getVariable("id"));
-		Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://obda.org/predicates#q", 1), terms);
-
-		rule1 = DATALOG_FACTORY.getCQIE(head, Collections.singletonList(body));
-		query.appendRule(rule1);
-	}
+	private static final String Q_IRI_STR = "http://obda.org/predicates#q";
+	private static final String PERSON_IRI_STR = "http://obda.org/onto.owl#Person";
+	private static final String INDIVIDUAL_IRI_STR = "http://obda.org/onto.owl#person-individual";
 
 	/**
 	 * Checking that the atoms that use the default namespace are renderered in
@@ -68,26 +43,24 @@ public class PrefixRendererTest extends TestCase {
         Map<String, String> prefixes = new HashMap<>();
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
+		String name = pm.getShortForm(Q_IRI_STR, true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
-		name = pm.getShortForm(((Function) query.getRules().get(0).getBody().get(0)).getFunctionSymbol().toString(), true);
+		name = pm.getShortForm(PERSON_IRI_STR, true);
 		assertTrue(name, name.equals("&:;Person"));
 
-		Function atom0 = (Function) query.getRules().get(0).getBody().get(0);
-		name = pm.getShortForm(((FunctionalTermImpl)atom0.getTerms().get(0)).getFunctionSymbol().toString(), true);
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
 		assertTrue(name, name.equals("&:;person-individual"));
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
+		name = pm.getShortForm(Q_IRI_STR, true);
 		assertTrue(name, name.equals("&:;q"));
 
-		name = pm.getShortForm(((Function) query.getRules().get(0).getBody().get(0)).getFunctionSymbol().toString(), true);
+		name = pm.getShortForm(PERSON_IRI_STR, true);
 		assertTrue(name, name.equals("http://obda.org/onto.owl#Person"));
 
-		atom0 = (Function) query.getRules().get(0).getBody().get(0);
-		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), true);
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR, true);
 		assertTrue(name, name.equals("http://obda.org/onto.owl#person-individual"));
 	}
 
@@ -101,27 +74,25 @@ public class PrefixRendererTest extends TestCase {
 		prefixes.put("obdap:", "http://obda.org/predicates#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
 
-		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
+		String name = pm.getShortForm(Q_IRI_STR, false);
 		assertTrue(name, name.equals("obdap:q"));
 
-		name = pm.getShortForm(((Function) query.getRules().get(0).getBody().get(0)).getFunctionSymbol().toString(), false);
+		name = pm.getShortForm(PERSON_IRI_STR, false);
 		assertTrue(name, name.equals(":Person"));
 
-		Function atom0 = (Function) query.getRules().get(0).getBody().get(0);
-		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR, false);
 		assertTrue(name, name.equals(":person-individual"));
 
 		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
 		prefixes.put("onto:", "http://obda.org/onto.owl#");
         pm = MAPPING_FACTORY.createPrefixManager(ImmutableMap.copyOf(prefixes));
-		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
+		name = pm.getShortForm(Q_IRI_STR, false);
 		assertTrue(name, name.equals(":q"));
 
-		name = pm.getShortForm(((Function) query.getRules().get(0).getBody().get(0)).getFunctionSymbol().toString(), false);
+		name = pm.getShortForm(PERSON_IRI_STR, false);
 		assertTrue(name, name.equals("onto:Person"));
 
-		atom0 = (Function) query.getRules().get(0).getBody().get(0);
-		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
+		name = pm.getShortForm(INDIVIDUAL_IRI_STR, false);
 		assertTrue(name, name.equals("onto:person-individual"));
 
 	}

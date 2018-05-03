@@ -28,9 +28,9 @@ public class NoNullValuesEnforcerTest {
 
 
     private final static RelationPredicate TABLE2_PREDICATE;
-    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans3", 3);
-    private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans4", 4);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
+    private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");

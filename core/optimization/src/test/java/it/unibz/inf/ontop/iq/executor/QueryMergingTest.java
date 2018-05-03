@@ -25,10 +25,10 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class QueryMergingTest {
 
-    private static AtomPredicate ANS0_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 0);
-    private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private static AtomPredicate ANS0_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 0);
+    private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 2);
     private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getAtomPredicate("p2", 3);
     private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p3", 1);
@@ -789,7 +789,7 @@ public class QueryMergingTest {
          */
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
 
-        AtomPredicate emptyAns1 = ATOM_FACTORY.getAtomPredicate("ans1", 0);
+        AtomPredicate emptyAns1 = ATOM_FACTORY.getRDFAnswerPredicate( 0);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 emptyAns1, ImmutableList.of());
 

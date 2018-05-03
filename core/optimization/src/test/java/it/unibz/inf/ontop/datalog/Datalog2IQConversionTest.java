@@ -32,7 +32,7 @@ public class Datalog2IQConversionTest {
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        AtomPredicate predicate = ATOM_FACTORY.getAtomPredicate("ans", 5);
+        AtomPredicate predicate = ATOM_FACTORY.getRDFAnswerPredicate(5);
 
         Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 

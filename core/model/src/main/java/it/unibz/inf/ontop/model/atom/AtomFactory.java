@@ -16,6 +16,8 @@ public interface AtomFactory {
 
     AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 
+    AtomPredicate getRDFAnswerPredicate(int arity);
+
     /**
      * Beware: a DataAtom is immutable
      */

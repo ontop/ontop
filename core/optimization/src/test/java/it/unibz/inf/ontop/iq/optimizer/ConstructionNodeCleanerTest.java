@@ -26,9 +26,9 @@ public class ConstructionNodeCleanerTest {
     private final static AtomPredicate R3_PREDICATE = ATOM_FACTORY.getAtomPredicate("r3", 2);
     private final static AtomPredicate R4_PREDICATE = ATOM_FACTORY.getAtomPredicate("r4", 3);
     private final static AtomPredicate R5_PREDICATE = ATOM_FACTORY.getAtomPredicate("r5", 3);
-    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans2", 2);
-    private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans3", 3);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable X1 = TERM_FACTORY.getVariable("X1");
     private final static Variable X2 = TERM_FACTORY.getVariable("X2");

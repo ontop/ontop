@@ -25,7 +25,7 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
 
     private static Variable X = TERM_FACTORY.getVariable("x");
-    private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private static AtomPredicate ANS1_IQ_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private static DistinctVariableOnlyDataAtom ANS1_X_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_IQ_PREDICATE, ImmutableList.of(X));
     private static AtomPredicate P1_IQ_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 1);

@@ -46,9 +46,9 @@ public class RedundantSelfJoinTest {
     private final static RelationPredicate TABLE4_PREDICATE;
     private final static RelationPredicate TABLE5_PREDICATE;
     private final static RelationPredicate TABLE6_PREDICATE;
-    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
@@ -1370,7 +1370,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
 
         DistinctVariableOnlyDataAtom ans1Atom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 1), Y);
+                ATOM_FACTORY.getRDFAnswerPredicate(1), Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ans1Atom.getVariables());
         queryBuilder.init(ans1Atom, rootNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();

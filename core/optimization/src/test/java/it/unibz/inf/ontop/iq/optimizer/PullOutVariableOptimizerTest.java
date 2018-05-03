@@ -21,9 +21,9 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class PullOutVariableOptimizerTest {
 
-    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 4);
-    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate( 4);
+    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
 
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");

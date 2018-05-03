@@ -24,10 +24,10 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class PushDownBooleanExpressionOptimizerTest {
     
-    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 4);
-    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 5);
-    private final static AtomPredicate ANS2_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans2", 2);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate( 4);
+    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getRDFAnswerPredicate( 5);
+    private final static AtomPredicate ANS2_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");

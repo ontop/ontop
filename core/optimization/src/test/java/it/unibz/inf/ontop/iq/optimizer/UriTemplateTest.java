@@ -43,7 +43,7 @@ public class UriTemplateTest {
     private final static Variable E = TERM_FACTORY.getVariable("e");
     private final static Variable F = TERM_FACTORY.getVariable("f");
 
-    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
 
     public UriTemplateTest() {
     }
