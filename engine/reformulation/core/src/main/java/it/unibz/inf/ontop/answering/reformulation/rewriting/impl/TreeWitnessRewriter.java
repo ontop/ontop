@@ -120,7 +120,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 */
 	
 	private Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = termFactory.getPredicate(base + suffix, arguments.size());
+		Predicate predicate = datalogFactory.getSubqueryPredicate(base + suffix, arguments.size());
 		return termFactory.getFunction(predicate, arguments);
 	}
 	

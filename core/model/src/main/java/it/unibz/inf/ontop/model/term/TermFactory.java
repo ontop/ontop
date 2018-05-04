@@ -34,9 +34,6 @@ import java.util.Optional;
 
 public interface TermFactory {
 
-	@Deprecated
-	public Predicate getPredicate(String name, int arity);
-
 	/*
 	 * Built-in function predicates
 	 */

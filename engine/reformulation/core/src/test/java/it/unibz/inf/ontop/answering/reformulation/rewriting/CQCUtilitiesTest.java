@@ -20,22 +20,28 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 import static org.junit.Assert.assertFalse;
@@ -58,7 +64,7 @@ public class CQCUtilitiesTest {
 	IRI classC = RDF_FACTORY.createIRI("http://example.com/C");
 
 	private Function getFunction(String name, List<Term> terms) {
-		return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(name, terms.size()), terms);
+		return TERM_FACTORY.getFunction(new FakeTestPredicate(name, terms.size()), terms);
 	}
 	
 	private Function getFunction(String name, Term term) {
@@ -626,4 +632,19 @@ public class CQCUtilitiesTest {
         
         assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query2, query1));
     }
+
+	private static class FakeTestPredicate extends PredicateImpl {
+		protected FakeTestPredicate(@Nonnull String name, int arity) {
+			super(name, arity, createExpectedBaseTermTypeList(arity));
+		}
+
+		private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {
+			TermType rootTermType = TYPE_FACTORY.getAbstractAtomicTermType();
+
+			return IntStream.range(0, arity)
+					.boxed()
+					.map(i -> rootTermType)
+					.collect(ImmutableCollectors.toList());
+		}
+	}
 }

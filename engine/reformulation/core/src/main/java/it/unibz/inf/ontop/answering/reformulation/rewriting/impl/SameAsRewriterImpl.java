@@ -135,7 +135,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     }
 
     private CQIE createRule(DatalogProgram pr, String headName, List<Term> headParameters, Function... body) {
-        Predicate pred = termFactory.getPredicate(headName, headParameters.size());
+        Predicate pred = datalogFactory.getSubqueryPredicate(headName, headParameters.size());
         Function head = termFactory.getFunction(pred, headParameters);
         CQIE rule = datalogFactory.getCQIE(head, body);
         pr.appendRule(rule);

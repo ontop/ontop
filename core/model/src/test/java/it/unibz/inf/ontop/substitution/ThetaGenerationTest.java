@@ -294,7 +294,7 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getVariable("y");
 			List<Term> vars = new Vector<Term>();
 			vars.add(t2);
-			Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+			Predicate fs = new OntopModelTestPredicate("p", vars.size());
 			FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -320,7 +320,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
@@ -344,7 +344,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
@@ -378,12 +378,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		Function ot1 = TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -406,12 +406,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -434,12 +434,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -469,14 +469,14 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -499,20 +499,20 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getPredicate("A", 1);
+		Predicate pred1 = new OntopModelTestPredicate("A", 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getPredicate("A", 1);
+		Predicate pred2 = new OntopModelTestPredicate("A", 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
@@ -534,14 +534,14 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -564,12 +564,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -595,12 +595,12 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		vars1.add(t3);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -624,7 +624,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
@@ -648,7 +648,7 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
@@ -678,12 +678,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -706,12 +706,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -741,14 +741,14 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -771,12 +771,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -806,14 +806,14 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -836,12 +836,12 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");
@@ -867,12 +867,12 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		vars1.add(t3);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
 		Predicate pred1 = createClassLikePredicate("A");

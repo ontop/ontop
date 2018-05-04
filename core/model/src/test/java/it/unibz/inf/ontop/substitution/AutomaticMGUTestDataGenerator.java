@@ -145,7 +145,7 @@ public class AutomaticMGUTestDataGenerator {
 		for (int i = 0; i < termstra.length; i++) {
 			terms.add(getTerm(termstra[i].trim()));
 		}
-		Function atom = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(atomstr.substring(0, 1), terms.size()), terms);
+		Function atom = TERM_FACTORY.getFunction(new OntopModelTestPredicate(atomstr.substring(0, 1), terms.size()), terms);
 		return atom;
 	}
 
@@ -162,7 +162,7 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			Predicate fs = TERM_FACTORY.getPredicate(termstr.substring(0, 1), fuctTerms.size());
+			Predicate fs = new OntopModelTestPredicate(termstr.substring(0, 1), fuctTerms.size());
 			return TERM_FACTORY.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
 			return TERM_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
