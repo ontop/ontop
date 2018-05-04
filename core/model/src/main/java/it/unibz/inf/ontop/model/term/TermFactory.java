@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -35,19 +34,8 @@ import java.util.Optional;
 
 public interface TermFactory {
 
-	/**
-	 * Construct a {@link Predicate} object.
-	 *
-	 * @param uri
-	 *            the name of the predicate (defined as a URI).
-	 * @param arity
-	 *            the number of elements inside the predicate.
-	 * @return a predicate object.
-	 */
 	@Deprecated
-	public Predicate getPredicate(String uri, int arity);
-
-	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
+	public Predicate getPredicate(String name, int arity);
 
 	/*
 	 * Built-in function predicates

@@ -76,11 +76,6 @@ public class TermFactoryImpl implements TermFactory {
 
 			return new PredicateImpl(name, arity, expectedArgumentTypes);
 	}
-	
-	@Override
-	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
-		return new PredicateImpl(uri, types.size(), types);
-	}
 
 	@Override
 	@Deprecated
