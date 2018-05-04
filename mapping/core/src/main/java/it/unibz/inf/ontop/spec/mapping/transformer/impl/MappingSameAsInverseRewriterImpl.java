@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -52,15 +50,15 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
         if (!enabled)
             return mapping;
 
-        ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> mappingUpdate = mapping.getRDFAtomPredicates().stream()
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> mappingUpdate = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getRDFPropertyDefinition(p, OWL.SAME_AS)
                         .map(sameAsDef -> completeSameAsDefinition(sameAsDef, p))
-                        .map(sameAsDef -> Maps.immutableEntry(p, ImmutableMap.of(OWL.SAME_AS, sameAsDef)))
+                        .map(sameAsDef -> Tables.immutableCell(p, OWL.SAME_AS, sameAsDef))
                         .map(Stream::of)
                         .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap());
+                .collect(ImmutableCollectors.toTable());
 
-        return mapping.update(mappingUpdate, ImmutableMap.of());
+        return mapping.update(mappingUpdate, ImmutableTable.of());
     }
 
     private IQ completeSameAsDefinition(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {

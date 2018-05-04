@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -58,8 +59,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 
 /***
@@ -140,7 +139,7 @@ public class SparqlAlgebraToDatalogTranslator {
             answerVariables = Collections.emptyList();
         }
 
-        Predicate pred = termFactory.getPredicate(ONTOP_QUERY, answerVariables.size());
+        AtomPredicate pred = atomFactory.getRDFAnswerPredicate(answerVariables.size());
         Function head = termFactory.getFunction(pred, answerVariables);
         appendRule(head, body.atoms);
 
@@ -221,7 +220,7 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private Function getFreshHead(List<Term> terms) {
-        Predicate pred = termFactory.getPredicate(ONTOP_QUERY + predicateIdx, terms.size());
+        Predicate pred = datalogFactory.getSubqueryPredicate("" + predicateIdx, terms.size());
         predicateIdx++;
         return termFactory.getFunction(pred, terms);
     }

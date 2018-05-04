@@ -58,19 +58,19 @@ public interface AtomFactory {
     DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
 
     /**
-     * TODO: change the generic-type to TriplePredicate
+     * TODO: change the generic-type to RDFAtomPredicate?
      */
     DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
                                                      VariableOrGroundTerm object);
 
     /**
-     * TODO: change the generic-type to TriplePredicate
+     * TODO: change the generic-type to RDFAtomPredicate?
      */
     DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
                                                      VariableOrGroundTerm object);
 
     /**
-     * TODO: change the generic-type to TriplePredicate
+     * TODO: change the generic-type to RDFAtomPredicate?
      */
     DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI);
 

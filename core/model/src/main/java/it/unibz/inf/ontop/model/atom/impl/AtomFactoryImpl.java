@@ -22,7 +22,6 @@ public class AtomFactoryImpl implements AtomFactory {
     private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private static final String RDF_ANS_STR = "ans1";
 
     @Inject
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
@@ -46,7 +45,7 @@ public class AtomFactoryImpl implements AtomFactory {
         ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
                 .map(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
-        return new AtomPredicateImpl(RDF_ANS_STR, arity, defaultBaseTypes);
+        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, arity, defaultBaseTypes);
     }
 
     @Override

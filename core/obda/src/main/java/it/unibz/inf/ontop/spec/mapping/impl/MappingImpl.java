@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -17,49 +14,57 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 
 public class MappingImpl implements Mapping {
 
     private final MappingMetadata metadata;
-    private final ImmutableMap<IRI, IQ> triplePropertyDefinitions;
-    private final ImmutableMap<IRI, IQ> tripleClassDefinitions;
+    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
+    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
     private final SpecificationFactory specificationFactory;
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
 
-    /**
-     * TODO: consider Map of Map instead (to work with triple, quads and maybe something else)
-     */
+    @Deprecated
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted("triplePropertyMap") ImmutableMap<IRI, IQ> triplePropertyMap,
-                        @Assisted("tripleClassMap") ImmutableMap<IRI, IQ> tripleClassMap,
+                        @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                        @Assisted("classMap") ImmutableMap<IRI, IQ> classMap,
+                        OntopModelSettings settings,
+                        SpecificationFactory specificationFactory) {
+        this(metadata, transformIntoTable(propertyMap), transformIntoTable(classMap), settings, specificationFactory);
+    }
+
+    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
+        return map.entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
+                        e.getKey(), e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+    }
+
+    @AssistedInject
+    private MappingImpl(@Assisted MappingMetadata metadata,
+                        @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
+                        @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
                         OntopModelSettings settings,
                         SpecificationFactory specificationFactory) {
         this.metadata = metadata;
-        this.triplePropertyDefinitions = triplePropertyMap;
-        this.tripleClassDefinitions = tripleClassMap;
+        this.propertyDefinitions = propertyTable;
+        this.classDefinitions = classTable;
         this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
-            for (IQ query : triplePropertyDefinitions.values()) {
+            for (IQ query : propertyDefinitions.values()) {
                 checkNullableVariables(query);
             }
-            for (IQ query : tripleClassDefinitions.values()) {
+            for (IQ query : classDefinitions.values()) {
                 checkNullableVariables(query);
             }
         }
 
-        rdfAtomPredicates = Stream.concat(tripleClassDefinitions.values().stream(),
-                triplePropertyMap.values().stream())
-                .map(iq -> iq.getProjectionAtom().getPredicate())
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate)p)
-                .findFirst()
-                .map(ImmutableSet::of)
-                .orElseGet(ImmutableSet::of);
+        rdfAtomPredicates = Sets.union(propertyTable.rowKeySet(), classTable.rowKeySet())
+                .immutableCopy();
     }
 
     private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
@@ -75,48 +80,43 @@ public class MappingImpl implements Mapping {
 
     @Override
     public Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI) {
-        if (rdfAtomPredicate instanceof TriplePredicate)
-            return Optional.ofNullable(triplePropertyDefinitions.get(propertyIRI));
-        // TODO: consider quads
-        else
-            return Optional.empty();
+        return Optional.ofNullable(propertyDefinitions.get(rdfAtomPredicate, propertyIRI));
     }
 
     @Override
     public Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI) {
-        if (rdfAtomPredicate instanceof TriplePredicate)
-            return Optional.ofNullable(tripleClassDefinitions.get(classIRI));
-        // TODO: consider quads
-        else
-            return Optional.empty();
+        return Optional.ofNullable(classDefinitions.get(rdfAtomPredicate, classIRI));
     }
 
     @Override
     public ImmutableSet<IRI> getRDFProperties(RDFAtomPredicate rdfAtomPredicate) {
-        if (rdfAtomPredicate instanceof TriplePredicate)
-            return triplePropertyDefinitions.keySet();
-            // TODO: consider quads
-        else
-            return ImmutableSet.of();
+        return Optional.ofNullable(propertyDefinitions.rowMap().get(rdfAtomPredicate))
+                .map(m -> ImmutableSet.copyOf(m.keySet()))
+                .orElseGet(ImmutableSet::of);
     }
 
     @Override
     public ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate) {
-        if (rdfAtomPredicate instanceof TriplePredicate)
-            return tripleClassDefinitions.keySet();
-            // TODO: consider quads
-        else
-            return ImmutableSet.of();
+        return Optional.ofNullable(classDefinitions.rowMap().get(rdfAtomPredicate))
+                .map(m -> ImmutableSet.copyOf(m.keySet()))
+                .orElseGet(ImmutableSet::of);
     }
 
     @Override
     public ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate) {
-        if (rdfAtomPredicate instanceof TriplePredicate)
-            return Stream.concat(tripleClassDefinitions.values().stream(), triplePropertyDefinitions.values().stream())
+        return Stream.concat(classDefinitions.row(rdfAtomPredicate).values().stream(),
+                    propertyDefinitions.row(rdfAtomPredicate).values().stream())
                 .collect(ImmutableCollectors.toList());
-            // TODO: consider quads
-        else
-            return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries() {
+        return propertyDefinitions.cellSet();
+    }
+
+    @Override
+    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries() {
+        return classDefinitions.cellSet();
     }
 
     @Override
@@ -124,44 +124,28 @@ public class MappingImpl implements Mapping {
         return rdfAtomPredicates;
     }
 
-    /**
-     * TODO: refactor it so as to work with quads and so on
-     */
     @Override
-    public Mapping update(ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> propertyUpdateMap,
-                          ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> classUpdateMap) {
-        ImmutableMap<IRI, IQ> newTriplePropertyDefs = updateTriplePropertyOrClassMap(
-                propertyUpdateMap, m -> updateTripleDefinitions(triplePropertyDefinitions, m))
-                .orElse(triplePropertyDefinitions);
+    public Mapping update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateTable,
+                          ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateTable) {
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> newPropertyDefs =
+                propertyUpdateTable.isEmpty()
+                        ? propertyDefinitions
+                        : updateDefinitions(propertyDefinitions, propertyUpdateTable);
 
-        ImmutableMap<IRI, IQ> newTripleClassDefs = updateTriplePropertyOrClassMap(
-                propertyUpdateMap, m -> updateTripleDefinitions(tripleClassDefinitions, m))
-                .orElse(tripleClassDefinitions);
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> newTripleClassDefs =
+                classUpdateTable.isEmpty()
+                        ? classDefinitions
+                        : updateDefinitions(classDefinitions, classUpdateTable);
 
-        return specificationFactory.createMapping(metadata, newTriplePropertyDefs, newTripleClassDefs);
+        return specificationFactory.createMapping(metadata, newPropertyDefs, newTripleClassDefs);
     }
 
-    private Optional<ImmutableMap<IRI, IQ>> updateTriplePropertyOrClassMap(
-            ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> updateMap,
-            Function<ImmutableMap<IRI, IQ>, ImmutableMap<IRI, IQ>> transformationFct) {
-        if (updateMap.keySet().stream()
-                .anyMatch(p -> !(p instanceof TriplePredicate)))
-            throw new UnsupportedOperationException("Only triples are currently supported");
-
-        return updateMap.keySet().stream()
-                .findFirst()
-                .map(updateMap::get)
-                .map(transformationFct);
-    }
-
-    private ImmutableMap<IRI, IQ> updateTripleDefinitions(ImmutableMap<IRI, IQ> currentMap,
-                                                          ImmutableMap<IRI, IQ> tripleUpdateMap) {
-        ImmutableSet<IRI> updatedIris = tripleUpdateMap.keySet();
-
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> updateDefinitions(ImmutableTable<RDFAtomPredicate, IRI, IQ> currentTable,
+                                                    ImmutableTable<RDFAtomPredicate, IRI, IQ> updateTable) {
         return Stream.concat(
-                tripleUpdateMap.entrySet().stream(),
-                currentMap.entrySet().stream()
-                    .filter(e -> !updatedIris.contains(e.getKey())))
-                .collect(ImmutableCollectors.toMap());
+                updateTable.cellSet().stream(),
+                currentTable.cellSet().stream()
+                    .filter(c -> !updateTable.contains(c.getRowKey(), c.getColumnKey())))
+                .collect(ImmutableCollectors.toTable());
     }
 }

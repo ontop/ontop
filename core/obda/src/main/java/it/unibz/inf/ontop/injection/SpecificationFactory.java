@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
@@ -22,8 +23,14 @@ public interface SpecificationFactory {
 
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
-    Mapping createMapping(MappingMetadata metadata, @Assisted("triplePropertyMap") ImmutableMap<IRI, IQ> propertyMap,
-                          @Assisted("tripleClassMap") ImmutableMap<IRI, IQ> classMap);
+    @Deprecated
+    Mapping createMapping(MappingMetadata metadata,
+                          @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap);
+
+    Mapping createMapping(MappingMetadata metadata,
+                          @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
+                          @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }

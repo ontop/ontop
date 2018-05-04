@@ -2,8 +2,9 @@ package it.unibz.inf.ontop.spec.mapping;
 
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import org.apache.commons.rdf.api.IRI;
@@ -43,6 +44,9 @@ public interface Mapping {
 
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
 
+    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
+    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
+
     /**
      * TriplePredicate, QuadPredicate, etc.
      */
@@ -53,6 +57,6 @@ public interface Mapping {
      *
      * Returns a new (immutable) Mapping
      */
-    Mapping update(ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> propertyUpdateMap,
-                   ImmutableMap<RDFAtomPredicate, ImmutableMap<IRI, IQ>> classUpdateMap);
+    Mapping update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateMap,
+                   ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateMap);
 }
