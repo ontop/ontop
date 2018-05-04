@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -43,31 +42,11 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public AtomPredicate getAtomPredicate(String name, int arity) {
-        ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
-                .map(i -> typeFactory.getAbstractRDFTermType())
-                .collect(ImmutableCollectors.toList());
-        return getAtomPredicate(name, defaultBaseTypes);
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes) {
-        return new AtomPredicateImpl(name, expectedBaseTypes.size(), expectedBaseTypes);
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
-        if (datalogPredicate instanceof AtomPredicate)
-            return (AtomPredicate) datalogPredicate;
-        return new AtomPredicateImpl(datalogPredicate);
-    }
-
-    @Override
     public AtomPredicate getRDFAnswerPredicate(int arity) {
         ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
                 .map(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
-        return getAtomPredicate(RDF_ANS_STR, defaultBaseTypes);
+        return new AtomPredicateImpl(RDF_ANS_STR, arity, defaultBaseTypes);
     }
 
     @Override
@@ -161,13 +140,37 @@ public class AtomFactoryImpl implements AtomFactory {
         return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 
+    private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
+        return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    }
+
     @Override
     public DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object) {
         return getDistinctVariableOnlyDataAtom(triplePredicate, subject, property, object);
     }
 
     @Override
-    public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object, Variable namedGraph) {
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                            VariableOrGroundTerm object) {
+        return getDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
+                                                            VariableOrGroundTerm object) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, convertIRIIntoGroundFunctionalTerm(propertyIRI), object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoGroundFunctionalTerm(classIRI));
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
+                                                            Variable namedGraph) {
         return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
     }
 }

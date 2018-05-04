@@ -379,10 +379,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			//return body;
 			if (isNested) {
 				body.add(atomFactory.getDistinctVariableOnlyDataAtom(
-						atomFactory.getAtomPredicate(
-								"dummy" + (++dummyPredCounter),
-								0
-						),
+						datalogFactory.getDummyPredicate(++dummyPredCounter),
 						ImmutableList.of()
 				));
 			}
@@ -434,8 +431,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
-		AtomPredicate newPredicate = atomFactory.getAtomPredicate(datalogFactory.getSubqueryPredicatePrefix()+ ++subQueryCounter,
-				projectedVariables.size());
+		AtomPredicate newPredicate = datalogFactory.getSubqueryPredicate("" + ++subQueryCounter, projectedVariables.size());
 		return atomFactory.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
 

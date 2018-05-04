@@ -62,9 +62,11 @@ public class DatalogConversionTools {
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
-        AtomPredicate atomPredicate = (datalogAtomPredicate instanceof AtomPredicate)
-                ? (AtomPredicate) datalogAtomPredicate
-                : atomFactory.getAtomPredicate(datalogAtomPredicate);
+        if (!(datalogAtomPredicate instanceof AtomPredicate))
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("The datalog predicate "
+                    + datalogAtomPredicate + " is not an AtomPredicate!");
+
+        AtomPredicate atomPredicate = (AtomPredicate) datalogAtomPredicate;
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();

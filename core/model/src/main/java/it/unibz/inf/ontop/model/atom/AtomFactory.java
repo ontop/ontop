@@ -3,18 +3,9 @@ package it.unibz.inf.ontop.model.atom;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
 public interface AtomFactory {
-
-    @Deprecated
-    AtomPredicate getAtomPredicate(String name, int arity);
-
-    AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes);
-
-    AtomPredicate getAtomPredicate(Predicate datalogPredicate);
 
     AtomPredicate getRDFAnswerPredicate(int arity);
 
@@ -65,6 +56,24 @@ public interface AtomFactory {
     Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
 
     DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
+
+    /**
+     * TODO: change the generic-type to TriplePredicate
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                     VariableOrGroundTerm object);
+
+    /**
+     * TODO: change the generic-type to TriplePredicate
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
+                                                     VariableOrGroundTerm object);
+
+    /**
+     * TODO: change the generic-type to TriplePredicate
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI);
+
 
     DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                      Variable namedGraph);

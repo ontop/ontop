@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -113,7 +112,7 @@ public class ThetaGenerationTest extends TestCase {
 	}
 
 	private static AtomPredicate createClassLikePredicate(String name) {
-		return ATOM_FACTORY.getAtomPredicate(name, ImmutableList.of(TYPE_FACTORY.getIRITermType()));
+		return DATALOG_FACTORY.getSubqueryPredicate(name, 1);
 	}
 
 	//A(x),A('y')

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,12 +21,9 @@ import static junit.framework.TestCase.assertTrue;
 @Ignore("TODO: support it (and update it)")
 public class ConstructionNodeCleanerTest {
 
-
-    private final static AtomPredicate R1_PREDICATE = ATOM_FACTORY.getAtomPredicate("r1", 2);
-    private final static AtomPredicate R2_PREDICATE = ATOM_FACTORY.getAtomPredicate("r2", 2);
-    private final static AtomPredicate R3_PREDICATE = ATOM_FACTORY.getAtomPredicate("r3", 2);
-    private final static AtomPredicate R4_PREDICATE = ATOM_FACTORY.getAtomPredicate("r4", 3);
-    private final static AtomPredicate R5_PREDICATE = ATOM_FACTORY.getAtomPredicate("r5", 3);
+    private final static IRI R1_IRI = RDF_FACTORY.createIRI("http://example.com/voc#r1");
+    private final static IRI R2_IRI = RDF_FACTORY.createIRI("http://example.com/voc#r2");
+    private final static IRI R3_IRI = RDF_FACTORY.createIRI("http://example.com/voc#r3");
     private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
@@ -71,7 +69,7 @@ public class ConstructionNodeCleanerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y));
         queryBuilder1.addChild(constructionNode1, constructionNode2);
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(R1_PREDICATE, X, Y));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X, R1_IRI, Y));
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
@@ -113,7 +111,7 @@ public class ConstructionNodeCleanerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y));
         queryBuilder1.addChild(distinctNode, constructionNode2);
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(R1_PREDICATE, X, Y));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X, R1_IRI, Y));
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
@@ -152,7 +150,7 @@ public class ConstructionNodeCleanerTest {
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y));
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom(R1_PREDICATE, X, Y));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X, R1_IRI, Y));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, constructionNode2);
@@ -203,8 +201,7 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(Z)));
         queryBuilder1.addChild(limitNode2, constructionNode2);
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R1_PREDICATE, Z, Z2));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(Z, R1_IRI, Z2));
 
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
@@ -258,8 +255,7 @@ public class ConstructionNodeCleanerTest {
 
         queryBuilder1.addChild(limitNode2, constructionNode2);
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R1_PREDICATE, Z, Z2));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(Z, R1_IRI, Z2));
 
         queryBuilder1.addChild(constructionNode2, dataNode1);
 
@@ -321,8 +317,8 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
         queryBuilder1.addChild(limitNode, constructionNode3);
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R4_PREDICATE, X1, Y1, Z1));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(
+                ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
         queryBuilder1.addChild(constructionNode3, dataNode1);
 
         IntermediateQuery query1 = queryBuilder1.build();
@@ -376,8 +372,7 @@ public class ConstructionNodeCleanerTest {
                 ImmutableSet.of(X1, Y1, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R4_PREDICATE, X1, Y1, Z1));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
         queryBuilder1.init(projectionAtom1, limit50);
         queryBuilder1.addChild(limit50, constructionNode1);
@@ -442,8 +437,8 @@ public class ConstructionNodeCleanerTest {
                 ImmutableSet.of(X1, Y1, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R4_PREDICATE, X1, Y1, Z1));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(
+                ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
         queryBuilder1.init(projectionAtom1, limit50);
         queryBuilder1.addChild(limit50, constructionNode1);
@@ -514,10 +509,8 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(Z, generateURI1(Z1)));
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1, Y, Z));
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R4_PREDICATE, X1, Y, Z));
-        IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R5_PREDICATE, X1, Y1, Z1));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y, Z));
+        IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, Y1, Z1));
 
         queryBuilder1.init(projectionAtom1, limit130);
         queryBuilder1.addChild(limit130, constructionNode1);
@@ -579,8 +572,7 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution()
         );
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R1_PREDICATE, Y, Z));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(Y, R1_IRI, Z));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, constructionNode2);
@@ -621,8 +613,7 @@ public class ConstructionNodeCleanerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(X1), Y, generateURI1(Y1))
         );
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R1_PREDICATE, X1, Y1));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, R1_IRI, Y1));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, constructionNode2);
@@ -663,12 +654,11 @@ public class ConstructionNodeCleanerTest {
         );
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X1));
 
-        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R1_PREDICATE, X1, X2));
-        IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R2_PREDICATE, X1, X2));
-        IntensionalDataNode dataNode3 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getDataAtom
-                (R3_PREDICATE, X1, X2));
+        IntensionalDataNode dataNode1 = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(X1, R1_IRI, X2));
+        IntensionalDataNode dataNode2 = IQ_FACTORY.createIntensionalDataNode(
+                ATOM_FACTORY.getIntensionalTripleAtom(X1, R2_IRI, X2));
+        IntensionalDataNode dataNode3 = IQ_FACTORY.createIntensionalDataNode(
+                ATOM_FACTORY.getIntensionalTripleAtom(X1, R3_IRI, X2));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, unionNode1);

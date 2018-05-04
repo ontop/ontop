@@ -1,13 +1,19 @@
 package it.unibz.inf.ontop.datalog.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 
 @Singleton
@@ -19,6 +25,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
     private final AlgebraOperatorPredicate sparqlGroupPredicate;
     private final AlgebraOperatorPredicate sparqlHavingPredicate;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
     private DatalogFactoryImpl(TypeFactory typeFactory, TermFactory termFactory) {
@@ -27,6 +34,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
         sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group", typeFactory);
         sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having", typeFactory);
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
 
@@ -117,8 +125,13 @@ public class DatalogFactoryImpl implements DatalogFactory {
     }
 
     @Override
-    public String getSubqueryPredicatePrefix() {
-        return SUBQUERY_PRED_PREFIX;
+    public AtomPredicate getSubqueryPredicate(String suffix, int arity) {
+        return new DatalogAtomPredicate(SUBQUERY_PRED_PREFIX + suffix, arity, typeFactory);
+    }
+
+    @Override
+    public AtomPredicate getDummyPredicate(int suffix) {
+        return new DatalogAtomPredicate("dummy" + suffix, 0, typeFactory);
     }
 
 
@@ -198,5 +211,23 @@ public class DatalogFactoryImpl implements DatalogFactory {
             throw new RuntimeException("Unsupported term: " + term);
         }
         return newTerm;
+    }
+
+    /**
+     * Used for intermediate datalog rules
+     */
+    private static class DatalogAtomPredicate extends AtomPredicateImpl {
+
+        private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
+            super(name, arity, createExpectedBaseTypes(arity, typeFactory));
+        }
+
+        private static ImmutableList<TermType> createExpectedBaseTypes( int arity, TypeFactory typeFactory) {
+            TermType rootType = typeFactory.getAbstractAtomicTermType();
+            return IntStream.range(0, arity)
+                    .boxed()
+                    .map(i -> rootType)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
 }
