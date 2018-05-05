@@ -24,6 +24,7 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     private final AtomFactory atomFactory;
     private final DatalogMTLFactory datalogMTLFactory;
     ImmutableMap<String, String> prefixes;
+    String base;
     ImmutableList<String> headsOfStaticRules;
     private static String RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
@@ -54,11 +55,12 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     @Override
     public DatalogMTLProgram visitParse(DatalogMTLParser.ParseContext ctx) {
 
-        prefixes = ctx.directiveStatement().prefixID().stream()
+        prefixes = ctx.prefixes().prefixID().stream()
                 .collect(ImmutableCollectors.toMap(
                         pid -> pid.PNAME_NS().getText(),
                         pid -> pid.IRIREF().getText().substring(1, pid.IRIREF().getText().length()-1)));
 
+        base = ctx.base().getText();
         //headsOfStaticRules = collectStaticHeads(ctx);
         ImmutableList<DatalogMTLRule> rules = visitDMTLProgram(ctx.dMTLProgram());
 

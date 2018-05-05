@@ -14,10 +14,10 @@ grammar DatalogMTL;
  *------------------------------------------------------------------*/
 
 parse
-  : directiveStatement dMTLProgram EOF
+  : prefixes base dMTLProgram EOF
   ;
 
-directiveStatement
+prefixes
   : prefixID*
   ;
 
@@ -34,9 +34,9 @@ prefixID
   : ('prefix' | 'PREFIX') PNAME_NS IRIREF
   ;
 
-//base
-//  : ('base' | 'BASE') IRIREF
-//  ;
+base
+  : ('base' | 'BASE') IRIREF
+  ;
 
 dMTLRule
   :  annotation? head ':-' body

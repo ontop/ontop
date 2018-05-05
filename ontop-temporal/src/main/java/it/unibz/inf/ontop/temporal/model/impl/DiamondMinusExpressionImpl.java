@@ -9,10 +9,11 @@ public class DiamondMinusExpressionImpl extends AbstractUnaryTemporalExpressionW
 
     @Override
     public String render() {
-        if (getOperand() instanceof BinaryTemporalExpression || getOperand() instanceof TemporalJoinExpression)
-            return String.format("<-> %s (%s)", getRange(), getOperand().render());
-
-        return String.format("<-> %s %s", getRange(), getOperand().render());
+        return String.format("SOMETIME IN PAST %s {%s}", getRange(), getOperand().render());
+//        if (getOperand() instanceof BinaryTemporalExpression || getOperand() instanceof TemporalJoinExpression)
+//            return String.format("<-> %s (%s)", getRange(), getOperand().render());
+//
+//        return String.format("<-> %s %s", getRange(), getOperand().render());
     }
 
     @Override
