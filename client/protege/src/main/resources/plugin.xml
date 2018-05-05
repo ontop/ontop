@@ -23,7 +23,7 @@
 		<category value="ontop"/>
 		<navigates value="@org.protege.classcategory"/>
 	</extension>
-	
+
 	<extension id="MappingAssistantViewComponent"
 		point="org.protege.editor.core.application.ViewComponent">
 		<label value="Mapping assistant"/>
@@ -33,7 +33,29 @@
 		<headerColor value="8C1717"/>
 		<category value="ontop"/>
 	</extension>
-	
+
+	<extension id="TemporalMappingsManagerViewComponent"
+			   point="org.protege.editor.core.application.ViewComponent">
+		<label value="Temporal Mapping Editor"/>
+		<class
+				value="it.unibz.inf.ontop.protege.views.TemporalMappingsManagerView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ontop"/>
+		<navigates value="@org.protege.classcategory"/>
+	</extension>
+
+	<extension id="TemporalRuleEditorViewComponent"
+			   point="org.protege.editor.core.application.ViewComponent">
+		<label value="Temporal Rule Editor"/>
+		<class
+				value="it.unibz.inf.ontop.protege.views.TemporalRuleEditorView">
+		</class>
+		<headerColor value="8C1717"/>
+		<category value="ontop"/>
+		<navigates value="@org.protege.classcategory"/>
+	</extension>
+
 	<!-- Individuals queries views -->
 	
 	<extension id="QueryManagerViewComponent"
@@ -67,6 +89,18 @@
 		<index value="X"/>
 		<editorKitId value="OWLEditorKit"/>
 		<defaultViewConfigFileName value="viewconfig-mappings-tab.xml">
+		</defaultViewConfigFileName>
+	</extension>
+
+	<extension id="OntopTemporalTab"
+			   point="org.protege.editor.core.application.WorkspaceTab">
+		<label value="Ontop Temporal"/>
+		<class
+				value="it.unibz.inf.ontop.protege.gui.tab.OntopTemporalTab">
+		</class>
+		<index value="X"/>
+		<editorKitId value="OWLEditorKit"/>
+		<defaultViewConfigFileName value="viewconfig-temporal-tab.xml">
 		</defaultViewConfigFileName>
 	</extension>
 	

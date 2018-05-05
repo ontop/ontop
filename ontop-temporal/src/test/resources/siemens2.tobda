@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://siemens.com/ns#
+temp:		http://siemens.com/temporal/ns#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	urn:Map-rotorSpeed
+target		:RotationSpeedSensor/{sensor_id} temp:rotorSpeed {value}.
+interval    {rs_begin_inc} {rs_begin}^^xsd:dateTimeStamp, {rs_end}^^xsd:dateTimeStamp {rs_end_inc}
+source		SELECT tb_measurement.sensor_id, value, 'TRUE' AS rs_begin_inc, timestamp AS rs_begin, timestamp AS rs_end, 'FALSE' AS rs_end_inc FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 0
+
+mappingId	urn:Map-mainFlameOn
+target		:TemperatureSensor/{sensor_id} a temp:MainFlameOn.
+interval    {ts_begin_inc} {ts_begin}^^xsd:dateTimeStamp, {ts_end}^^xsd:dateTimeStamp {ts_end_inc}
+source		SELECT tb_measurement.sensor_id, value, 'TRUE' AS ts_begin_inc, timestamp AS ts_begin, timestamp AS ts_end, 'FALSE' AS ts_end_inc FROM tb_measurement, tb_sensors WHERE tb_measurement.sensor_id = tb_sensors.sensor_id AND sensor_type = 1 AND value > 1
+]]

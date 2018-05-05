@@ -134,7 +134,7 @@ public class SiemensUseCaseTest extends TestCase {
 //
 //        QuestOWLFactory factory = new QuestOWLFactory();
 //        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-//                .nativeOntopMappingFile("src/test/resources/siemens.obda")
+//                .nativeOntopMappingFile("src/test/resources/siemens2.obda")
 //                .ontologyFile("src/test/resources/siemens.owl")
 //                .properties(pref)
 //                .jdbcUrl(url)

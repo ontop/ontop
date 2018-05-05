@@ -12,4 +12,8 @@ public interface DatalogMTLProgram {
 
     Map<String, String> getPrefixes();
 
+    void addRule(DatalogMTLRule rule);
+
+    void removeRule(DatalogMTLRule rule);
+
 }

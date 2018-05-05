@@ -19,6 +19,8 @@ public interface OntopTemporalMappingSQLAllConfiguration extends OntopMappingSQL
         B nativeOntopTemporalMappingFile(@Nonnull String mappingFilename);
 
         B nativeOntopTemporalMappingReader(@Nonnull Reader mappingReader);
+
+        B enableTemporalMode();
     }
 
     interface Builder<B extends Builder<B>> extends OntopMappingSQLAllConfiguration.Builder<B>,

@@ -22,13 +22,13 @@ import static it.unibz.inf.ontop.injection.OntopSQLCredentialSettings.*;
  */
 public class OntopConfigurationManager {
 
-    private final OBDAModel obdaModel;
+    final OBDAModel obdaModel;
     private final DisposableProperties settings;
     private final DisposableProperties userSettings;
 
     // Nullable
     @Nullable
-    private File implicitDBConstraintFile;
+    File implicitDBConstraintFile;
 
     OntopConfigurationManager(@Nonnull OBDAModel obdaModel, @Nonnull DisposableProperties internalSettings) {
         this.obdaModel = obdaModel;

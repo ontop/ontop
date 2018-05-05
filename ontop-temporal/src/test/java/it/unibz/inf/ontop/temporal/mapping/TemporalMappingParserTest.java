@@ -16,9 +16,9 @@ public class TemporalMappingParserTest extends TestCase {
 
         OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
+                .nativeOntopTemporalMappingFile("src/test/resources/siemens2.tobda")
+                .nativeOntopMappingFile("src/test/resources/siemens2.obda")
+                .nativeOntopTemporalRuleFile("src/test/resources/siemens.dmtl")
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)

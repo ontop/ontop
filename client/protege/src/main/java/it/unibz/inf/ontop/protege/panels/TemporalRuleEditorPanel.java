@@ -1,0 +1,445 @@
+package it.unibz.inf.ontop.protege.panels;
+
+/*
+ * #%L
+ * ontop-protege
+ * %%
+ * Copyright (C) 2009 - 2018 KRDB Research Centre. Free University of Bozen Bolzano.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
+import it.unibz.inf.ontop.protege.gui.IconLoader;
+import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
+import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
+import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelectorListener, EditorPanel {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private TemporalOBDAModel apic;
+    private OBDADataSource selectedSource;
+    private JCheckBox chkFilter;
+    private JTextField txtRules;
+
+    private JList<DatalogMTLRule> lstRules;
+    private JTextField txtFilter;
+    public TemporalRuleEditorPanel(TemporalOBDAModel apic) {
+        initComponents();
+        lstRules.setFixedCellWidth(-1);
+        lstRules.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        lstRules.addMouseListener(new PopupListener(createPopupMenu()));
+        lstRules.addKeyListener(new EditorKeyListener(this));
+        lstRules.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    edit();
+                }
+            }
+        });
+
+        setOBDAModel(apic); // TODO Bad code! Change this later!
+    }
+
+    public OBDADataSource getSelectedSource() {
+        return selectedSource;
+    }
+
+    private void setOBDAModel(TemporalOBDAModel omodel) {
+
+        this.apic = omodel;
+
+        //TODO rule painter
+        DefaultListModel<DatalogMTLRule> model = new DefaultListModel<>();
+
+        if (apic.getDatalogMTLProgram() != null && !apic.getDatalogMTLProgram().getRules().isEmpty()) {
+            for(DatalogMTLRule datalogMTLRule:apic.getDatalogMTLProgram().getRules()){
+                model.addElement(datalogMTLRule);
+            }
+        }
+
+        model.addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                txtRules.setText(String.valueOf(lstRules.getModel().getSize()));
+            }
+
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                txtRules.setText(String.valueOf(lstRules.getModel().getSize()));
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                txtRules.setText(String.valueOf(lstRules.getModel().getSize()));
+            }
+        });
+        lstRules.setModel(model);
+    }
+
+    private JPopupMenu createPopupMenu() {
+        JPopupMenu menuMappings = new JPopupMenu();
+        JMenuItem add = new JMenuItem();
+        add.setText("Create rule...");
+        add.addActionListener(e -> add());
+        menuMappings.add(add);
+
+        JMenuItem delete = new JMenuItem();
+        delete.setText("Remove rule(s)...");
+        delete.addActionListener(e -> remove());
+        menuMappings.add(delete);
+
+        JMenuItem editMapping = new JMenuItem();
+        editMapping.setText("Edit rule...");
+        editMapping.addActionListener(e -> edit());
+        menuMappings.add(editMapping);
+
+        return menuMappings;
+    }
+
+    @Override
+    public void edit() {
+        if(!lstRules.isSelectionEmpty()) {
+            JDialog dialog = new JDialog();
+            dialog.setContentPane(new TemporalRuleDialogPanel(apic, dialog, selectedSource, lstRules.getSelectedValue()));
+            dialog.setTitle("Edit Rule");
+            dialog.setModal(true);
+            dialog.setSize(600, 500);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+        }
+    }
+
+    private void initComponents() {
+        JPanel pnlExtraButtons = new JPanel();
+        JLabel lblRules = new JLabel("Rule count:");
+        txtRules = new JTextField();
+        JLabel lblInsertFilter = new JLabel();
+        txtFilter = new JTextField();
+        chkFilter = new JCheckBox();
+        JScrollPane mappingScrollPane = new JScrollPane();
+        lstRules = new JList<>();
+
+        setLayout(new GridBagLayout());
+
+        JPanel pnlMappingManager = new JPanel();
+        pnlMappingManager.setAutoscrolls(true);
+        pnlMappingManager.setPreferredSize(new Dimension(400, 300));
+        pnlMappingManager.setLayout(new BorderLayout());
+
+        JPanel pnlMappingButtons = new JPanel();
+        pnlMappingButtons.setEnabled(false);
+        pnlMappingButtons.setLayout(new GridBagLayout());
+
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.insets = new Insets(2, 2, 2, 2);
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        JButton btnAdd = new JButton("Create");
+        btnAdd.setIcon(IconLoader.getImageIcon("images/plus.png"));
+        btnAdd.setToolTipText("Create a new Rule");
+        btnAdd.setBorder(BorderFactory.createEtchedBorder());
+        btnAdd.setContentAreaFilled(false);
+        btnAdd.setIconTextGap(5);
+        btnAdd.setPreferredSize(new Dimension(75, 25));
+        btnAdd.addActionListener(e -> cmdAddMappingActionPerformed());
+        pnlMappingButtons.add(btnAdd, gridBagConstraints);
+
+        JButton btnRemove = new JButton("Remove");
+        btnRemove.setToolTipText("Remove selected rules");
+        btnRemove.setIcon(IconLoader.getImageIcon("images/minus.png"));
+        btnRemove.setBorder(BorderFactory.createEtchedBorder());
+        btnRemove.setContentAreaFilled(false);
+        btnRemove.setIconTextGap(5);
+        btnRemove.setPreferredSize(new Dimension(75, 25));
+        btnRemove.addActionListener(e -> remove());
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        pnlMappingButtons.add(btnRemove, gridBagConstraints);
+
+        JButton btnDuplicate = new JButton("Copy");
+        btnDuplicate.setToolTipText("Copy selected rules");
+        btnDuplicate.setIcon(IconLoader.getImageIcon("images/copy.png"));
+        btnDuplicate.setToolTipText("Make a duplicate of the selected rule");
+        btnDuplicate.setBorder(BorderFactory.createEtchedBorder());
+        btnDuplicate.setContentAreaFilled(false);
+        btnDuplicate.setIconTextGap(5);
+        btnDuplicate.setPreferredSize(new Dimension(70, 25));
+        btnDuplicate.addActionListener(e -> cmdDuplicateMappingActionPerformed());
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        pnlMappingButtons.add(btnDuplicate, gridBagConstraints);
+
+        JButton btnSelectAll = new JButton("Select all");
+        btnSelectAll.setIcon(IconLoader.getImageIcon("images/select-all.png"));
+        btnSelectAll.setToolTipText("Select all");
+        btnSelectAll.setBorder(BorderFactory.createEtchedBorder());
+        btnSelectAll.setContentAreaFilled(false);
+        btnSelectAll.setIconTextGap(5);
+        btnSelectAll.setPreferredSize(new Dimension(83, 25));
+        btnSelectAll.addActionListener(e -> lstRules.setSelectionInterval(0, lstRules.getModel().getSize()));
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.anchor = GridBagConstraints.EAST;
+        pnlMappingButtons.add(btnSelectAll, gridBagConstraints);
+
+        JButton btnDeselectAll = new JButton("Select none");
+        btnDeselectAll.setIcon(IconLoader.getImageIcon("images/select-none.png"));
+        btnDeselectAll.setToolTipText("Select none");
+        btnDeselectAll.setBorder(BorderFactory.createEtchedBorder());
+        btnDeselectAll.setContentAreaFilled(false);
+        btnDeselectAll.setIconTextGap(5);
+        btnDeselectAll.setPreferredSize(new Dimension(92, 25));
+        btnDeselectAll.addActionListener(e -> lstRules.clearSelection());
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.anchor = GridBagConstraints.EAST;
+        pnlMappingButtons.add(btnDeselectAll, gridBagConstraints);
+
+        JLabel lblNamespace = new JLabel("Namespace:");
+        gridBagConstraints.gridx = 3;
+        pnlMappingButtons.add(lblNamespace, gridBagConstraints);
+
+        JTextField txtNamespace = new JTextField();
+        txtNamespace.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                apic.updateNamespace(txtNamespace.getText());
+            }
+        });
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        txtNamespace.setPreferredSize(new Dimension(250, 25));
+        pnlMappingButtons.add(txtNamespace, gridBagConstraints);
+
+        pnlMappingManager.add(pnlMappingButtons, BorderLayout.NORTH);
+
+        pnlExtraButtons.setPreferredSize(new Dimension(532, 25));
+        pnlExtraButtons.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 2));
+
+        pnlExtraButtons.add(lblRules);
+
+        txtRules.setEditable(false);
+        txtRules.setText("0");
+        txtRules.setPreferredSize(new Dimension(50, 28));
+        pnlExtraButtons.add(txtRules);
+
+        lblInsertFilter.setFont(new Font("Dialog", Font.BOLD, 12)); // NOI18N
+        lblInsertFilter.setForeground(new Color(53, 113, 163));
+        lblInsertFilter.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblInsertFilter.setText("Search:");
+        lblInsertFilter.setPreferredSize(new Dimension(75, 20));
+        pnlExtraButtons.add(lblInsertFilter);
+
+        txtFilter.setPreferredSize(new Dimension(250, 20));
+        txtFilter.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
+                sendFilters(evt);
+            }
+        });
+        pnlExtraButtons.add(txtFilter);
+
+        chkFilter.setText("Enable filter");
+        chkFilter.addItemListener(evt -> processFilterAction());
+        pnlExtraButtons.add(chkFilter);
+
+        pnlMappingManager.add(pnlExtraButtons, BorderLayout.SOUTH);
+
+        mappingScrollPane.setViewportView(lstRules);
+
+        pnlMappingManager.add(mappingScrollPane, BorderLayout.CENTER);
+
+        gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(pnlMappingManager, gridBagConstraints);
+    }
+
+    private void processFilterAction() {
+        if (!(chkFilter.isSelected())) {
+            applyFilters(new ArrayList<>());
+        }
+        if (chkFilter.isSelected()) {
+            if (txtFilter.getText().isEmpty()) {
+                chkFilter.setSelected(false);
+                applyFilters(new ArrayList<>());
+                return;
+            }
+            try {
+                List<TreeModelFilter<DatalogMTLRule>> filters = parseSearchString(txtFilter.getText());
+                if (filters == null) {
+                    throw new Exception("Impossible to parse search string");
+                }
+                applyFilters(filters);
+            } catch (Exception e) {
+                LoggerFactory.getLogger(this.getClass()).debug(e.getMessage(), e);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }
+        }
+    }
+
+    /***
+     * Action for key's entered in the search text box.
+     */
+    private void sendFilters(KeyEvent evt) {
+        int key = evt.getKeyCode();
+        if (key == KeyEvent.VK_ENTER) {
+            if (!chkFilter.isSelected()) {
+                chkFilter.setSelected(true);
+            } else {
+                processFilterAction();
+            }
+        }
+
+    }
+
+    private void cmdDuplicateMappingActionPerformed() {
+        List<DatalogMTLRule> currentSelection = lstRules.getSelectedValuesList();
+        if (currentSelection == null) {
+            JOptionPane.showMessageDialog(this, "No rules have been selected", "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "This will create copies of the selected rules. \nNumber of rules selected = "
+                        + currentSelection.size() + "\nContinue? ",
+                "Copy confirmation",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+            return;
+        }
+
+        for (DatalogMTLRule datalogMTLRule : currentSelection) {
+
+                //TODO create a duplication of rules
+                // OR remove copy button
+        }
+
+    }
+
+    @Override
+    public void remove() {
+        if (lstRules.isSelectionEmpty()) {
+            return;
+        }
+        List<DatalogMTLRule> values = lstRules.getSelectedValuesList();
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Proceed deleting " + values.size() + " rules?", "Delete Confirmation",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
+            return;
+        }
+        for (DatalogMTLRule rule : values) {
+            if (rule != null) {
+                apic.removeRule(rule);
+            }
+        }
+        lstRules.clearSelection();
+    }
+
+    private void cmdAddMappingActionPerformed() {
+        if (selectedSource != null) {
+            add();
+        } else {
+            JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    @Override
+    public void add() {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("New Rule");
+        dialog.setModal(true);
+        dialog.setContentPane(new TemporalRuleDialogPanel(apic, dialog, selectedSource));
+        dialog.setSize(600, 500);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    public void setFilter(String filter) {
+        txtFilter.setText(filter);
+        processFilterAction();
+    }
+
+    /**
+     * Parses the string in the search field.
+     *
+     * @param textToParse The target text
+     * @return A list of filter objects or null if the string was empty or
+     * erroneous
+     */
+    private List<TreeModelFilter<DatalogMTLRule>> parseSearchString(String textToParse) throws Exception {
+
+        List<TreeModelFilter<DatalogMTLRule>> listOfFilters = null;
+
+        if (textToParse != null) {
+            ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
+            MappingFilterLexer lexer = new MappingFilterLexer(inputStream);
+            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+            MappingFilterParser parser = new MappingFilterParser(tokenStream);
+
+            //TODO find filters using rules
+            //listOfFilters = parser.parse();
+
+            if (parser.getNumberOfSyntaxErrors() != 0) {
+                throw new Exception("Syntax Error: The filter string invalid");
+            }
+        }
+        return listOfFilters;
+    }
+
+    private void applyFilters(List<TreeModelFilter<DatalogMTLRule>> filters) {
+        FilteredModel model = (FilteredModel) lstRules.getModel();
+        model.removeAllFilters();
+        //TODO add filters
+        //model.addFilters(filters);
+    }
+
+    @Override
+    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
+
+        if (newSource == null) {
+            return;
+        }
+        this.selectedSource = newSource;
+
+        DefaultListModel<DatalogMTLRule> model = (DefaultListModel<DatalogMTLRule>)lstRules.getModel();
+        if (apic.getDatalogMTLProgram() != null && !apic.getDatalogMTLProgram().getRules().isEmpty()) {
+            for(DatalogMTLRule datalogMTLRule:apic.getDatalogMTLProgram().getRules()){
+                model.addElement(datalogMTLRule);
+            }
+        }
+
+        lstRules.revalidate();
+    }
+}

@@ -272,6 +272,12 @@
         </dependency>
 
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-temporal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.javabits.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
         </dependency>
@@ -565,6 +571,53 @@
             <artifactId>commons-rdf-simple</artifactId>
             <version>${commons-rdf.version}</version>
         </dependency>
+
+        <!-- calcite dependencies -->
+
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-linq4j</artifactId>
+            <version>1.16.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.calcite.avatica</groupId>
+            <artifactId>avatica-core</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.calcite.avatica</groupId>
+            <artifactId>avatica-metrics</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.7.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>commons-compiler</artifactId>
+            <version>2.7.6</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -625,7 +678,10 @@
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,*</Import-Package>
+                        <Import-Package>
+                            !org.pentaho.aggdes.*,!org.apache.tools.ant.*,!net.hydromatic,!com.yahoo.sketches.hll,!com.esri.core.geometry,
+                            !org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,*
+                        </Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->

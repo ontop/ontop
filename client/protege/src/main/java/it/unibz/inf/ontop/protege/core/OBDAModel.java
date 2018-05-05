@@ -60,13 +60,13 @@ import java.util.stream.Collectors;
  */
 public class OBDAModel {
 
-    private final SQLPPMappingFactory ppMappingFactory;
-    private final SpecificationFactory specificationFactory;
-    private Map<String, SQLPPTriplesMap> triplesMapMap;
+    final SQLPPMappingFactory ppMappingFactory;
+    final SpecificationFactory specificationFactory;
+    Map<String, SQLPPTriplesMap> triplesMapMap;
     // Mutable
     private final OBDADataSource source;
     // Mutable and replaced after reset
-    private MutablePrefixManager prefixManager;
+    MutablePrefixManager prefixManager;
     private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
@@ -77,7 +77,7 @@ public class OBDAModel {
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
     private final AtomFactory atomFactory;
-    private final TermFactory termFactory;
+    final TermFactory termFactory;
     private final Relation2Predicate relation2Predicate;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
@@ -299,7 +299,7 @@ public class OBDAModel {
             return formerTriplesMap;
     }
 
-    private URI getSourceId() {
+    URI getSourceId() {
         return source.getSourceID();
     }
 
@@ -436,7 +436,7 @@ public class OBDAModel {
 
     public MutableOntologyVocabulary getCurrentVocabulary() { return currentMutableVocabulary; }
 
-    private static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
+    static <I> Collector<I, ?, LinkedHashMap<String, SQLPPTriplesMap>> collectTriplesMaps(
             java.util.function.Function<I, String> keyFunction,
             java.util.function.Function<I, SQLPPTriplesMap> mapFunction) {
         return Collectors.toMap(

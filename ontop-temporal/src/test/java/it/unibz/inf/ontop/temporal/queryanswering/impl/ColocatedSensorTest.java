@@ -36,7 +36,7 @@ public class ColocatedSensorTest extends TestCase {
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
                 .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopMappingFile("src/test/resources/siemens.obda")
+                .nativeOntopMappingFile("src/test/resources/siemens2.obda")
                 .jdbcUrl(url)
                 .jdbcUser(username)
                 .jdbcPassword(password)
@@ -49,8 +49,6 @@ public class ColocatedSensorTest extends TestCase {
             OWLStatement st = conn.createStatement();
             st.executeSelectQuery(query);
 
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
         } catch (OWLException e) {
             e.printStackTrace();
         }

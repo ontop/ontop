@@ -38,7 +38,7 @@ public class DatalogMTLParserTest {
 
     @Test
     public void test() {
-        final boolean result = parse(readFile("src/test/resources/rule.dmtl"));
+        final boolean result = parse(readFile("src/test/resources/siemens.dmtl"));
         TestCase.assertTrue(result);
     }
 

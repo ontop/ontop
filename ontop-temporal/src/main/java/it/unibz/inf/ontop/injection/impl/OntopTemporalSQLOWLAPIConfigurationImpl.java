@@ -135,6 +135,11 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         }
 
         @Override
+        public B enableTemporalMode(){
+            return temporalMappingBuilderFragment.enableTemporalMode();
+        }
+
+        @Override
         public B nativeOntopTemporalRuleFile(@Nonnull File ruleFile) {
             return localFragmentBuilder.nativeOntopTemporalRuleFile(ruleFile);
         }

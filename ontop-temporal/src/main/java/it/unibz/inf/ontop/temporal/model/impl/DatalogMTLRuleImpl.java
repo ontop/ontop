@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.temporal.model.AtomicExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
+import it.unibz.inf.ontop.temporal.model.StaticAtomicExpression;
 
 public class DatalogMTLRuleImpl implements DatalogMTLRule {
     DatalogMTLRuleImpl(AtomicExpression head, DatalogMTLExpression body) {
@@ -26,7 +27,7 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
 
     @Override
     public String render() {
-        return String.format("%s :- %s .", head.render(), body.render());
+        return String.format("%s :- \n{ %s . }\n", head.render(), body.render());
     }
 
     @Override
@@ -36,6 +37,9 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
 
     @Override
     public String toString(){
+        if(head instanceof StaticAtomicExpression) {
+            return "[static]\n" + render();
+        }
         return render();
     }
 }

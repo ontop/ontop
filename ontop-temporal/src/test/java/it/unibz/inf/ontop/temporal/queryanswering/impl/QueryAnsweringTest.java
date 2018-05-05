@@ -2,24 +2,14 @@ package it.unibz.inf.ontop.temporal.queryanswering.impl;
 
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 public class QueryAnsweringTest {
 
-    protected OntopOWLReasoner reasoner;
-    protected OntopOWLConnection conn;
-
     @Test
     public void test1(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -41,41 +31,15 @@ public class QueryAnsweringTest {
                             "_:inv time:isEndInclusive ?eInc . " +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
 
+
+
     @Test
     public void test2(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -96,41 +60,13 @@ public class QueryAnsweringTest {
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
 
     @Test
     public void test3(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -157,38 +93,11 @@ public class QueryAnsweringTest {
                         "_:endInst2 time:inXSDDateTime ?e2 ." +
                         "}";
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
     }
 
     @Test
     public void test4(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -200,37 +109,11 @@ public class QueryAnsweringTest {
                         "?tb st:monitoredBySpeedSensor ?rs ." +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
     }
 
     @Test
     public void test5(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -251,41 +134,13 @@ public class QueryAnsweringTest {
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
 
     @Test
     public void test6(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -297,39 +152,11 @@ public class QueryAnsweringTest {
                         "?rs a :RotationSpeedSensor ." +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
     }
 
     @Test
     public void test7(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -350,40 +177,12 @@ public class QueryAnsweringTest {
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
     }
 
     @Test
     public void test8(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -404,41 +203,13 @@ public class QueryAnsweringTest {
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
 
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
 
     @Test
     public void test9(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -458,42 +229,13 @@ public class QueryAnsweringTest {
                         "_:endInst time:inXSDDateTime ?e ." +
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
-
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
 
     @Test
     public void test10(){
-
-        String url = "jdbc:postgresql://obdalin.inf.unibz.it:5433/siemens_exp";
-        String username = "postgres";
-        String password = "postgres";
 
         String query =
                 "PREFIX : <http://siemens.com/ns#>\n" +
@@ -513,33 +255,28 @@ public class QueryAnsweringTest {
                         "_:endInst time:inXSDDateTime ?e ." +
                         "_:inv time:isEndInclusive ?eInc . " +
                         "}";
-
-
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
-        OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .ontologyFile("src/test/resources/siemens.owl")
-                .nativeOntopTemporalMappingFile("src/test/resources/siemens1.tobda")
-                .nativeOntopMappingFile("src/test/resources/siemens1.obda")
-                .nativeOntopTemporalRuleFile("src/test/resources/rule.dmtl")
-                .jdbcUrl(url)
-                .jdbcUser(username)
-                .jdbcPassword(password)
-                .build();
-
-        try {
-            reasoner = factory.createReasoner(configuration);
-            // Now we are ready for querying
-            conn = reasoner.getConnection();
-            OWLStatement st = conn.createStatement();
-            st.executeSelectQuery(query);
-
-        } catch (OWLOntologyCreationException e) {
-            e.printStackTrace();
-        } catch (OWLException e) {
-            e.printStackTrace();
-        }
+        executeQuery(query);
 
 
     }
+
+    private void executeQuery(String query) {
+        try {
+            OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+
+            OntopTemporalSQLOWLAPIConfiguration configuration = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
+                    .ontologyFile("src/test/resources/siemens.owl")
+                    .nativeOntopTemporalMappingFile("src/test/resources/siemens.tobda")
+                    .nativeOntopMappingFile("src/test/resources/siemens.obda")
+                    .nativeOntopTemporalRuleFile("src/test/resources/siemens.dmtl")
+                    .propertyFile("src/test/resources/siemens.properties")
+                    .build();
+
+            factory.createReasoner(configuration).getConnection().createStatement().executeSelectQuery(query);
+
+        } catch (OWLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

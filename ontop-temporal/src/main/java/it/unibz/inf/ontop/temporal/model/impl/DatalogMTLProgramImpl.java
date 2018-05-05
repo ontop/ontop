@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.temporal.model.impl;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.joining;
 
@@ -27,6 +24,21 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
     }
 
     @Override
+    public Map<String, String> getPrefixes() {
+        return prefixes;
+    }
+
+    @Override
+    public void addRule(DatalogMTLRule rule){
+        rules.add(rule);
+    }
+
+    @Override
+    public void removeRule(DatalogMTLRule rule){
+        rules.remove(rule);
+    }
+
+    @Override
     public List<DatalogMTLRule> getRules() {
         return rules;
     }
@@ -37,8 +49,10 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
     }
 
     @Override
-    public Map<String, String> getPrefixes() {
-        return prefixes;
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        prefixes.forEach((key, value) -> stringBuilder.append("PREFIX ").append(key).append(":\t").append(value));
+        stringBuilder.append("\n\n").append(render());
+        return stringBuilder.toString();
     }
-
 }

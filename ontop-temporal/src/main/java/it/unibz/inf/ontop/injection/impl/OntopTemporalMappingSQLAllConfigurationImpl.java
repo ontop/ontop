@@ -222,6 +222,12 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
         }
 
         @Override
+        public B enableTemporalMode(){
+            useTemporal = true;
+            return builder;
+        }
+
+        @Override
         public B nativeOntopTemporalMappingFile(@Nonnull File mappingFile) {
             this.temporalMappingFile = Optional.of(mappingFile);
             useTemporal = true;
@@ -411,6 +417,11 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
             B builder = (B) this;
             this.localFragmentBuilder = new StandardTemporalMappingSQLBuilderFragment<>(builder,
                     this::declareMappingDefined, this::declareImplicitConstraintSetDefined);
+        }
+
+        @Override
+        public B enableTemporalMode(){
+            return localFragmentBuilder.enableTemporalMode();
         }
 
         @Override

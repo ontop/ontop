@@ -28,6 +28,8 @@ import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -47,12 +49,13 @@ import static it.unibz.inf.ontop.protege.core.impl.DeprecatedConstants.CLASSIC;
  * 
  */
 public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
+	private static final Logger log = LoggerFactory.getLogger(OBDAEditorKitSynchronizerPlugin.class);
 
-	OBDAModelManager instance = null;
-	OWLEditorKit kit = null;
-//	OWLModelManager mmgr = null;
-	DisposableOBDAPreferences obdaPref = null;
-	DisposableProperties reasonerPref = null;
+	// OBDAModelManager instance = null;
+	// private OWLEditorKit kit = null;
+	// OWLModelManager mmgr = null;
+	private DisposableOBDAPreferences obdaPref = null;
+	private DisposableProperties reasonerPref = null;
 
 	
 	@Override
@@ -64,38 +67,35 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	public void initialise() throws Exception {
 
 
-        /***
-         * Preferences for the OBDA plugin (gui, etc)
-         */
+         // Preferences for the OBDA plugin (gui, etc)
         obdaPref = new DisposableOBDAPreferences();
         getEditorKit().put(DisposableOBDAPreferences.class.getName(), obdaPref);
 
-        /***
-         * Preferences for Quest
-         */
+        // Preferences for Quest
         reasonerPref = new DisposableProperties();
         getEditorKit().put(DisposableProperties.class.getName(), reasonerPref);
         loadPreferences();
-		
-		/***
+
+		/*
 		 * Each editor kit has its own instance of the ProtegePluginController.
-		 * Note, the OBDA model is inside this object (do
-		 * .getOBDAModelManager())
+		 * Note, the OBDA model is inside this object (do getOBDAModelManager())
 		 */
-		instance = new OBDAModelManager(this.getEditorKit());
+		OBDAModelManager instance = new OBDAModelManager(this.getEditorKit());
 		getEditorKit().put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
-		kit = (OWLEditorKit)getEditorKit();
-//		mmgr = (OWLModelManager)kit.getModelManager();
-//		mmgr.addListener(instance.getModelManagerListener());
+		// kit = (OWLEditorKit)getEditorKit();
+		// mmgr = (OWLModelManager)kit.getModelManager();
+		// mmgr.addListener(instance.getModelManagerListener());
 
 		getEditorKit().put(OBDAModelManager.class.getName(), instance);
-		/**
+		/*
 		 * TODO: Not sound!! remove it!!!
 		 */
 		getEditorKit().put(SQLPPMappingImpl.class.getName(), instance);
 
-		// getEditorKit().getModelManager().put(APIController.class.getName(),
-		// instance);
+		// getEditorKit().getModelManager().put(APIController.class.getName(), instance);
+
+		// Temporal OBDA model manager
+		getEditorKit().put(TemporalOBDAModelManager.class.getName(), new TemporalOBDAModelManager((OWLEditorKit) getEditorKit()));
 
 		loadPreferences();
 	}
@@ -104,7 +104,12 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	public void dispose() throws Exception {
 //		mmgr.removeListener(instance.getModelManagerListener());
 		storePreferences();
-		instance.dispose();
+		try {
+			getEditorKit().get(OBDAModelManager.class.getName()).dispose();
+			getEditorKit().get(TemporalOBDAModelManager.class.getName()).dispose();
+		} catch (NullPointerException e) {
+			log.error("Managers are null: " + e.getMessage());
+		}
 	}
 	
 	private void loadPreferences(){

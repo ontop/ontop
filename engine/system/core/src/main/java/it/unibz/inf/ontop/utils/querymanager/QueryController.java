@@ -38,6 +38,11 @@ public class QueryController implements Serializable {
 	
 	private boolean eventDisabled;
 
+	public QueryController(QueryControllerListener listener){
+		this();
+		addListener(listener);
+	}
+
 	public QueryController() {
 		entities = new ArrayList<QueryControllerEntity>();
 		listeners = new ArrayList<QueryControllerListener>();
