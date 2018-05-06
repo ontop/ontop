@@ -37,11 +37,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
-    /**
-     * Please use applyToFunctionalTerm() instead if you can.
-     */
-    Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm);
-
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
     /**

@@ -111,9 +111,9 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRIConstant o = (IRIConstant) pa.getObject();
             IRI propertyIRI = pa.getProperty().getIRI();
             Function head = atomFactory.getMutableTripleHeadAtom(
-                    uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString()),
+                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString())),
                     propertyIRI,
-                    uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString()));
+                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString())));
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);

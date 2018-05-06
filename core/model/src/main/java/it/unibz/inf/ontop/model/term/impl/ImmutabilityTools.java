@@ -62,6 +62,16 @@ public class ImmutabilityTools {
         }
     }
 
+    public static VariableOrGroundTerm convertIntoVariableOrGroundTerm(ImmutableTerm term) {
+        if (term instanceof Variable) {
+            return (Variable) term;
+        } else if (term.isGround()) {
+            return (GroundTerm) term;
+        } else {
+            throw new IllegalArgumentException("Not a variable nor a ground term: " + term);
+        }
+    }
+
     /**
      * This method takes a immutable term and convert it into an old mutable function.
      */
@@ -84,13 +94,14 @@ public class ImmutabilityTools {
         Iterator<? extends ImmutableTerm> iterator = terms.iterator();
         while (iterator.hasNext()) {
 
-            Term nextTerm = iterator.next();
+            ImmutableTerm nextTerm = iterator.next();
             if (nextTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
                 Function newTerm = convertToMutableFunction(term2Change);
                 mutableList.add(newTerm);
             } else {
-                mutableList.add(nextTerm);
+                // Variables and constants are Term-instances
+                mutableList.add((Term)nextTerm);
             }
 
         }
@@ -99,9 +110,9 @@ public class ImmutabilityTools {
 
     public Term convertToMutableTerm(ImmutableTerm term) {
         if (term instanceof Variable)
-            return (Variable) term;
+            return (Term) term;
         else if (term instanceof Constant)
-            return (Constant) term;
+            return (Term) term;
         else {
             return convertToMutableFunction((ImmutableFunctionalTerm) term);
         }

@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-
 /**
  * Tools for the new generation of (immutable) substitutions
  */
@@ -114,7 +112,7 @@ public class ImmutableSubstitutionTools {
         /*
          * Source is ground term
          */
-        if (isGroundTerm(sourceFunctionalTerm)) {
+        if (sourceFunctionalTerm.isGround()) {
             if (sourceFunctionalTerm.equals(targetFunctionalTerm)) {
                 return Optional.of(substitutionFactory.getSubstitution());
             }
