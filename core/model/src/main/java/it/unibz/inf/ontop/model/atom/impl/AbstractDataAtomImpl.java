@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.AbstractFunctionalTermImpl;
 
 
@@ -95,5 +92,23 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
         Set<VariableOrGroundTerm> termSet = new HashSet<>(termList);
 
         return termSet.size() < termList.size();
+    }
+
+    /**
+     * TODO: improve
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof DataAtom) {
+            return toString().equals(other.toString());
+        }
+        else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }
