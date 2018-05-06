@@ -68,7 +68,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     public void validate(MappingWithProvenance mapping, Ontology ontology)
             throws MappingOntologyMismatchException {
 
-        ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
+        ImmutableMultimap<IRI, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
         for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
@@ -77,28 +77,18 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     private void validateAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance,
                                    Ontology ontology,
-                                   ImmutableMultimap<String, Datatype> datatypeMap)
+                                   ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
 
-        IRI predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
+        MappingTools.RDFPredicateInfo predicateClassification = MappingTools.extractRDFPredicate(mappingAssertion);
 
-        Optional<RDFTermType> tripleObjectType;
+        Optional<RDFTermType> tripleObjectType = predicateClassification.isClass()
+                ? Optional.empty()
+                : extractTripleObjectType(mappingAssertion);
 
-
-        /*
-         * Class property
-         */
-        if(predicateIRI.equals(RDF.TYPE)){
-            predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(2));
-            tripleObjectType= Optional.empty();
-        }
-        else{
-            tripleObjectType = extractTripleObjectType(mappingAssertion);
-        }
-
-        checkTripleObject(predicateIRI.getIRIString(), tripleObjectType, provenance, ontology, datatypeMap);
+        checkTripleObject(predicateClassification.getIri(), tripleObjectType, provenance, ontology, datatypeMap);
     }
 
 
@@ -160,17 +150,17 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void checkTripleObject(String predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
+    private void checkTripleObject(IRI predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
                                    PPMappingAssertionProvenance provenance,
                                    Ontology ontology,
-                                   ImmutableMultimap<String, Datatype> datatypeMap)
+                                   ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
         if (optionalTripleObjectType.isPresent()) {
             RDFTermType tripleObjectType = optionalTripleObjectType.get();
 
             if (tripleObjectType.isAbstract())
-                throw new AbstractTripleObjectType(predicateIRI, tripleObjectType);
+                throw new AbstractTripleObjectTypeException(predicateIRI, tripleObjectType);
 
             /*
              * TODO: avoid instanceof tests!
@@ -185,7 +175,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             }
             else {
                 // E.g. Unbound
-                throw new UndeterminedTripleObjectType(predicateIRI, tripleObjectType);
+                throw new UndeterminedTripleObjectTypeException(predicateIRI, tripleObjectType);
             }
         }
         else {
@@ -193,7 +183,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private void checkObjectOrAnnotationProperty(String predicateIRI, PPMappingAssertionProvenance provenance,
+    private void checkObjectOrAnnotationProperty(IRI predicateIRI, PPMappingAssertionProvenance provenance,
                                                  Ontology ontology)
             throws MappingOntologyMismatchException {
         /*
@@ -210,10 +200,10 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     CLASS_STR, OBJECT_PROPERTY_STR));
     }
 
-    private void checkDataOrAnnotationProperty(RDFDatatype tripleObjectType, String predicateIRI,
+    private void checkDataOrAnnotationProperty(RDFDatatype tripleObjectType, IRI predicateIRI,
                                                PPMappingAssertionProvenance provenance,
                                                Ontology ontology,
-                                               ImmutableMultimap<String, Datatype> datatypeMap)
+                                               ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
@@ -258,7 +248,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         }
     }
 
-    private void checkClass(String predicateIRI, PPMappingAssertionProvenance provenance,
+    private void checkClass(IRI predicateIRI, PPMappingAssertionProvenance provenance,
                             Ontology ontology) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
@@ -281,7 +271,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
     }
 
-    private static String generatePropertyOrClassConflictMessage(String predicateIRI, PPMappingAssertionProvenance provenance,
+    private static String generatePropertyOrClassConflictMessage(IRI predicateIRI, PPMappingAssertionProvenance provenance,
                                                                  String declaredTypeString, String usedTypeString) {
 
         return predicateIRI +
@@ -301,12 +291,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
      * from Ontop v 1.18.1
      */
-    private ImmutableMultimap<String, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
+    private ImmutableMultimap<IRI, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
         return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> e.getKey().getIRIString(),
+                        e -> e.getKey(),
                         Map.Entry::getValue));
     }
 
@@ -383,15 +373,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
 
 
-    private static class UndeterminedTripleObjectType extends OntopInternalBugException {
-        UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {
-            super("Internal bug: undetermined type (" + tripleObjectType + ") for " + predicateName);
+    private static class UndeterminedTripleObjectTypeException extends OntopInternalBugException {
+        UndeterminedTripleObjectTypeException(IRI iri, TermType tripleObjectType) {
+            super("Internal bug: undetermined type (" + tripleObjectType + ") for " + iri);
         }
     }
 
-    private static class AbstractTripleObjectType extends OntopInternalBugException {
-        AbstractTripleObjectType(String predicateName, TermType tripleObjectType) {
-            super("Internal bug: abstract type (" + tripleObjectType + ") for " + predicateName
+    private static class AbstractTripleObjectTypeException extends OntopInternalBugException {
+        AbstractTripleObjectTypeException(IRI iri, TermType tripleObjectType) {
+            super("Internal bug: abstract type (" + tripleObjectType + ") for " + iri
                     + ". Should have been detected earlier.");
         }
     }

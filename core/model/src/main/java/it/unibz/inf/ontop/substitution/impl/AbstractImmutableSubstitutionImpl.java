@@ -121,6 +121,13 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
+    public ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
+        return terms.stream()
+                .map(this::apply)
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
     public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
             throws ConversionException {
         DataAtom newDataAtom = applyToDataAtom(dataAtom);

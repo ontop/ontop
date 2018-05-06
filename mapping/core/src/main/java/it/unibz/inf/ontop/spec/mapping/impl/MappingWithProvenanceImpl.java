@@ -1,17 +1,15 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -20,6 +18,8 @@ import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
@@ -72,54 +72,41 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     @Override
     public Mapping toRegularMapping() {
 
-        // return iri of class in multimap
-        ImmutableMultimap<IRI, IQ> classMultimap = getMappingAssertions().stream()
-                .filter (assertion ->  {
-                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
-                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
-                        return (predicateIRI.equals(RDF.TYPE));})
-                .collect(ImmutableCollectors.toMultimap(
-                        a -> {
-                            ImmutableList<Variable> projectedVariables = a.getProjectionAtom().getArguments();
-                                return MappingTools.extractPredicateTerm(a, projectedVariables.get(2));
-                            },
-                        a -> a));
-
-        // return iri of object and data properties in multimap
-        ImmutableMultimap<IRI, IQ> propertyMultimap = getMappingAssertions().stream()
-                .filter (assertion ->  {
-                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
-                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
-                    return (!predicateIRI.equals(RDF.TYPE));})
-                .collect(ImmutableCollectors.toMultimap(
-                        a -> {
-                            ImmutableList<Variable> projectedVariables = a.getProjectionAtom().getArguments();
-                            return MappingTools.extractPredicateTerm(a, projectedVariables.get(1));
-                        },
-                        a -> a));
-
-
-        ImmutableMap<IRI, IQ> classDefinitionMap = classMultimap.asMap().values().stream()
-                .map(queryMerger::mergeDefinitions)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(IQ::liftBinding)
+        ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = getMappingAssertions().stream()
                 .collect(ImmutableCollectors.toMap(
-                        MappingTools::extractClassIRI,
-                        a -> a));
+                        iq -> iq,
+                        MappingTools::extractRDFPredicate
+                ));
 
-        ImmutableMap<IRI, IQ> propertyDefinitionMap = propertyMultimap.asMap().values().stream()
-                .map(queryMerger::mergeDefinitions)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(IQ::liftBinding)
-                .collect(ImmutableCollectors.toMap(
-                        MappingTools::extractPropertiesIRI,
-                        a -> a));
-
-        return specFactory.createMapping(mappingMetadata, propertyDefinitionMap, classDefinitionMap);
-
+        return specFactory.createMapping(mappingMetadata,
+                    extractTable(iqClassificationMap, false),
+                    extractTable(iqClassificationMap, true));
     }
+
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
+            ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap, boolean isClass) {
+
+        ImmutableMultimap<Map.Entry<RDFAtomPredicate, IRI>, IQ> multimap = iqClassificationMap.entrySet().stream()
+                .filter(e -> e.getValue().isClass() == isClass)
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> Maps.immutableEntry(
+                                (RDFAtomPredicate) e.getKey().getProjectionAtom().getPredicate(),
+                                e.getValue().getIri()),
+                        Map.Entry::getKey));
+
+        return multimap.asMap().entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getKey(),
+                        e.getKey().getValue(),
+                        mergeDefinitions(e.getValue())))
+                .collect(ImmutableCollectors.toTable());
+    }
+
+    private IQ mergeDefinitions(Collection<IQ> assertions) {
+        return queryMerger.mergeDefinitions(assertions)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
+    }
+
 
     @Override
     public MappingMetadata getMetadata() {

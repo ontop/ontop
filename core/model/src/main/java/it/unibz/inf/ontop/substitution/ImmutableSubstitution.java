@@ -52,6 +52,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
+    ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
+
     DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
             throws ConversionException;
 
