@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -22,6 +20,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
@@ -153,7 +152,8 @@ public class MappingTest {
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
 
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  propertyMapBuilder.build(), classMap);
+        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
+                propertyMapBuilder.build()), transformIntoTable(classMap));
         Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /*
@@ -215,7 +215,9 @@ public class MappingTest {
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
-        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableMap.of(), ImmutableMap.of(CLASS_1, mappingAssertion));
+        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
+                transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
+        );
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
@@ -229,5 +231,13 @@ public class MappingTest {
      */
     private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
         return TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantIRI(iri));
+    }
+
+    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
+        return map.entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
+                        e.getKey(), e.getValue()))
+                .collect(ImmutableCollectors.toTable());
     }
 }

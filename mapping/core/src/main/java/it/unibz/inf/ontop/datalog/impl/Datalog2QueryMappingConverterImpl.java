@@ -107,10 +107,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .collect(ImmutableCollectors.toTable());
     }
 
-
-
-
-
     @Override
     public MappingWithProvenance convertMappingRules(ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap,
                                                      MappingMetadata mappingMetadata) {
