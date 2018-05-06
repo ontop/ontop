@@ -38,9 +38,9 @@ public interface DatalogMTLFactory {
 
     DatalogMTLRule createRule(AtomicExpression head, DatalogMTLExpression body);
 
-    DatalogMTLProgram createProgram(Map<String, String> prefixes, List<DatalogMTLRule> rules);
+    DatalogMTLProgram createProgram(Map<String, String> prefixes, String base, List<DatalogMTLRule> rules);
 
-    DatalogMTLProgram createProgram(Map<String, String> prefixes, DatalogMTLRule... rules);
+    DatalogMTLProgram createProgram(Map<String, String> prefixes, String base, DatalogMTLRule... rules);
 
     TemporalRange createTemporalRange(boolean beginInclusive, Duration begin, Duration end, boolean endInclusive);
 

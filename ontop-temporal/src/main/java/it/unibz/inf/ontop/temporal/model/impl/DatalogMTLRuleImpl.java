@@ -27,7 +27,15 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
 
     @Override
     public String render() {
-        return String.format("%s :- \n{ %s . }\n", head.render(), body.render());
+        if(isStatic()) {
+            return "[static]\n" + toString();
+        }
+        return toString();
+    }
+
+    @Override
+    public boolean isStatic(){
+        return head instanceof StaticAtomicExpression;
     }
 
     @Override
@@ -37,9 +45,6 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
 
     @Override
     public String toString(){
-        if(head instanceof StaticAtomicExpression) {
-            return "[static]\n" + render();
-        }
-        return render();
+        return String.format("%s :- \n{ %s . }\n", head.toString(), body.toString());
     }
 }

@@ -27,11 +27,6 @@ public class FilterExpressionImpl implements FilterExpression {
     }
 
     @Override
-    public String render() {
-        return toString();
-    }
-
-    @Override
     public Iterable<DatalogMTLExpression> getChildNodes() {
         return Arrays.asList(datalogMTLExpression, comparisonExpression) ;
     }

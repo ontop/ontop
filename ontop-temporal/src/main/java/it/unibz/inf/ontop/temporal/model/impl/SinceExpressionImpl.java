@@ -14,9 +14,4 @@ public class SinceExpressionImpl extends AbstractBinaryTemporalExpressionWithRan
         return String.format("SinceExpressionImpl{range = %s, leftOperand = %s, rightOperand = %s",
                 getRange(), getLeftOperand(), getRightOperand());
     }
-
-    @Override
-    public String render() {
-        return String.format("(%s Since %s %s)", getLeftOperand().render(), getRange(), getRightOperand().render());
-    }
 }

@@ -33,12 +33,13 @@ public class DatalogMTLNormalizerImpl implements DatalogMTLNormalizer{
         auxCounter++;
         return atomFactory.getAtomPredicate("aux_" + (auxCounter-1), arity);
     }
+
     public DatalogMTLProgram normalize(DatalogMTLProgram program, Mapping staticMapping){
         List<DatalogMTLRule> staticRules = getStaticRules(program);
         List<DatalogMTLRule> rules = correctStaticExpressionsInRules(program.getRules(), staticMapping, staticRules);
         rules = pullOutStaticSubRules(rules);
         rules = convertNaryTemporalJoinsToBinary(rules);
-        return datalogMTLFactory.createProgram(program.getPrefixes(), rules);
+        return datalogMTLFactory.createProgram(program.getPrefixes(), program.getBase(), rules);
     }
 
     private List<DatalogMTLRule> convertNaryTemporalJoinsToBinary(List<DatalogMTLRule> rules){

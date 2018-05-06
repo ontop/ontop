@@ -20,121 +20,90 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.utils.DatasourceSelectorListener;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
-import it.unibz.inf.ontop.protege.utils.QueryPainter;
 import it.unibz.inf.ontop.protege.utils.TabKeyListener;
-import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
-import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-public class TemporalRuleDialogPanel extends JPanel implements DatasourceSelectorListener {
+public class TemporalRuleDialogPanel extends JDialog {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final TemporalOBDAModel obdaModel;
-    private final JDialog parent;
-    private OBDADataSource dataSource;
     private JButton btnInsertRule;
     private JCheckBox chkStatic;
     private JTextPane txtRule;
-    private DatalogMTLRule datalogMTLRule;
+    private TemporalRuleEditorPanel editorPanel;
 
-    TemporalRuleDialogPanel(TemporalOBDAModel obdaModel, JDialog parent, OBDADataSource dataSource) {
-        this(obdaModel, parent, dataSource, null);
+    TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel) {
+        this(editorPanel, null);
     }
 
-    TemporalRuleDialogPanel(TemporalOBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, DatalogMTLRule datalogMTLRule) {
+    TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel, DatalogMTLRule datalogMTLRule) {
 
-        DialogUtils.installEscapeCloseOperation(parent);
-        this.obdaModel = obdaModel;
-        this.parent = parent;
-        this.dataSource = dataSource;
-        this.datalogMTLRule = datalogMTLRule;
-
-        PrefixManager prefixManager = obdaModel.getMutablePrefixManager();
+        DialogUtils.installEscapeCloseOperation(this);
+        this.editorPanel = editorPanel;
 
         initComponents();
 
-        btnInsertRule.setEnabled(false);
         // TODO painter for rules
         //QueryPainter painter = new QueryPainter(obdaModel, txtRule);
-        //painter.addValidatorListener(result -> btnInsertRule.setEnabled(result));
 
-        btnInsertRule.addActionListener(e -> cmdInsertMappingActionPerformed());
+        btnInsertRule.addActionListener(e -> insertRule());
         txtRule.addKeyListener(new TabKeyListener());
-        txtRule.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                // NO-OP
-            }
-
+        txtRule.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (btnInsertRule.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-                    cmdInsertMappingActionPerformed();
+                    insertRule();
                 }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
             }
         });
 
-        if (this.datalogMTLRule != null) {
+        if (datalogMTLRule != null) {
             btnInsertRule.setText("Update");
-            txtRule.setText(this.datalogMTLRule.render());
+            txtRule.setText(datalogMTLRule.toString());
+            chkStatic.setSelected(datalogMTLRule.isStatic());
+            setTitle("Edit Rule");
+        }else {
+            setTitle("New Rule");
+        }
+        setModal(true);
+        setSize(600, 500);
+        setLocationRelativeTo(this);
+        setVisible(true);
+    }
+
+    private void insertRule() {
+        final String ruleString = txtRule.getText();
+        if (ruleString.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "ERROR: The rule cannot be empty", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
+            if (chkStatic.isSelected()) {
+                insertRule("[static]\n" + ruleString);
+            } else {
+                insertRule(ruleString);
+            }
         }
     }
 
     private void insertRule(String rule) {
-        DatalogMTLRule parsedRule = parse(rule);
-        if (rule != null) {
-            //TODO do we need to validate rule?
-            //List<String> invalidPredicates = TargetQueryValidator.validate(targetRule, obdaModel.getCurrentVocabulary());
-            //if (invalidPredicates.isEmpty()) {
-            try {
-                TemporalOBDAModel mapcon = obdaModel;
-                LOGGER.info("Insert rule: \n" + rule);
-                if (datalogMTLRule == null) {
-                    mapcon.addRule(parsedRule);
-                } else {
-                    mapcon.updateRule(datalogMTLRule, parsedRule);
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this,
-                        "Error while inserting rule: " + e.getMessage() + " is already taken");
-                return;
-            }
-            parent.setVisible(false);
-            parent.dispose();
-            /*} else {
-                StringBuilder invalidList = new StringBuilder();
-                for (String predicate : invalidPredicates) {
-                    invalidList.append("- ").append(predicate).append("\n");
-                }
-                JOptionPane.showMessageDialog(this,
-                        "This list of predicates is unknown by the ontology: \n" + invalidList,
-                        "New Rule", JOptionPane.WARNING_MESSAGE);
-            }*/
+        if (editorPanel.addRule(rule)) {
+            setVisible(false);
+            dispose();
         }
     }
 
     private void initComponents() {
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
 
-
         setFocusable(false);
-        setMinimumSize(new Dimension(600, 500));
         setPreferredSize(new Dimension(600, 500));
         setLayout(new GridBagLayout());
 
@@ -168,8 +137,8 @@ public class TemporalRuleDialogPanel extends JPanel implements DatasourceSelecto
         cmdCancel.setIconTextGap(5);
         cmdCancel.setPreferredSize(new Dimension(90, 25));
         cmdCancel.addActionListener(e -> {
-            parent.setVisible(false);
-            parent.dispose();
+            setVisible(false);
+            dispose();
         });
         pnlCommandButton.add(cmdCancel);
 
@@ -200,29 +169,5 @@ public class TemporalRuleDialogPanel extends JPanel implements DatasourceSelecto
         add(scrTargetQuery, gridBagConstraints);
 
         getAccessibleContext().setAccessibleName("Rule editor");
-    }
-
-    private void cmdInsertMappingActionPerformed() {
-        final String ruleString = txtRule.getText();
-        if (ruleString.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "ERROR: The rule cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (chkStatic.isSelected()) {
-            insertRule("[static]\n" + ruleString);
-        } else {
-            insertRule(ruleString);
-        }
-    }
-
-    private DatalogMTLRule parse(String query) {
-        DatalogMTLSyntaxParser datalogMTLSyntaxParser = new DatalogMTLSyntaxParserImpl(obdaModel.getAtomFactory(), obdaModel.getTermFactory());
-        return datalogMTLSyntaxParser.parse(query).getRules().get(0);
-    }
-
-    @Override
-    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-        dataSource = newSource;
     }
 }

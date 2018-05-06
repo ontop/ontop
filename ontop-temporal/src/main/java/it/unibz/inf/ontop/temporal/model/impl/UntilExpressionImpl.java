@@ -14,9 +14,4 @@ public class UntilExpressionImpl extends AbstractBinaryTemporalExpressionWithRan
         return String.format("UntilExpressionImpl{range = %s, leftOperand = %s, rightOperand = %s",
                 getRange(), getLeftOperand(), getRightOperand());
     }
-
-    @Override
-    public String render() {
-        return String.format("(%s Until %s %s)", getLeftOperand().render(), getRange(), getRightOperand().render());
-    }
 }

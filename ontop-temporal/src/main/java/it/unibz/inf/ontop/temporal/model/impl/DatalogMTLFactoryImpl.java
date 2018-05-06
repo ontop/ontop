@@ -87,14 +87,14 @@ public class DatalogMTLFactoryImpl implements DatalogMTLFactory {
     }
 
     @Override
-    public DatalogMTLProgram createProgram(Map<String, String> prefixes, List<DatalogMTLRule> rules) {
-        return new DatalogMTLProgramImpl(prefixes, rules);
+    public DatalogMTLProgram createProgram(Map<String, String> prefixes, String base, List<DatalogMTLRule> rules) {
+        return new DatalogMTLProgramImpl(prefixes, base, rules);
     }
 
 
     @Override
-    public DatalogMTLProgram createProgram(Map<String, String> prefixes, DatalogMTLRule... rules) {
-        return new DatalogMTLProgramImpl(prefixes, Arrays.asList(rules));
+    public DatalogMTLProgram createProgram(Map<String, String> prefixes, String base, DatalogMTLRule... rules) {
+        return new DatalogMTLProgramImpl(prefixes, base, Arrays.asList(rules));
     }
 
     @Override

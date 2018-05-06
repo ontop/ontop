@@ -31,7 +31,6 @@ import java.awt.*;
 
 public class TemporalRuleEditorView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 	private TemporalOBDAModelManager controller = null;
-	private TemporalOBDAModel obdaModel;
 	private TemporalRuleEditorPanel ruleEditorPanel = null;
 
 	@Override
@@ -47,11 +46,9 @@ public class TemporalRuleEditorView extends AbstractOWLViewComponent implements 
 
 		controller = (TemporalOBDAModelManager) editor.get(TemporalOBDAModelManager.class.getName());
 		controller.addListener(this);
-
-		obdaModel = controller.getActiveOBDAModel();
 		
 		// Init the Mapping Manager panel.
-		ruleEditorPanel = new TemporalRuleEditorPanel(obdaModel);
+		ruleEditorPanel = new TemporalRuleEditorPanel(controller.getActiveOBDAModel());
 
 		editor.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
 			OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
@@ -68,9 +65,6 @@ public class TemporalRuleEditorView extends AbstractOWLViewComponent implements 
 				ruleEditorPanel.setFilter("");
 			}
 		});
-		if (obdaModel.getSources().size() > 0) {
-			ruleEditorPanel.datasourceChanged(ruleEditorPanel.getSelectedSource(), obdaModel.getSources().get(0));
-		}
 
 		ruleEditorPanel.setBorder(new TitledBorder("Temporal Rule Editor"));
 
@@ -81,7 +75,6 @@ public class TemporalRuleEditorView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		obdaModel = controller.getActiveOBDAModel();
-		ruleEditorPanel.datasourceChanged(ruleEditorPanel.getSelectedSource(), obdaModel.getSources().get(0));
+		ruleEditorPanel.ontologyChanged(controller.getActiveOBDAModel());
 	}
 }

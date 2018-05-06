@@ -56,7 +56,7 @@ public class DatalogMTLFactoryImplTest {
         prefixes.put("st", "http://siemens.com/temporal/ns#");
         prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
 
-        final DatalogMTLProgram program = f.createProgram(prefixes, rule);
+        final DatalogMTLProgram program = f.createProgram(prefixes, "http://siemens.com/temporal/ns#", rule);
 
         System.out.println(program.render());
 
@@ -100,7 +100,7 @@ public class DatalogMTLFactoryImplTest {
         prefixes.put("st", "http://siemens.com/temporal/ns#");
         prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
 
-        final DatalogMTLProgram program = f.createProgram(prefixes, rule);
+        final DatalogMTLProgram program = f.createProgram(prefixes, "http://siemens.com/temporal/ns#", rule);
 
         System.out.println(program.render());
 

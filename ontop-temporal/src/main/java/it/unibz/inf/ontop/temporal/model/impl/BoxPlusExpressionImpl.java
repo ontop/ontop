@@ -8,15 +8,7 @@ public class BoxPlusExpressionImpl extends AbstractUnaryTemporalExpressionWithRa
     }
 
     @Override
-    public String render() {
-        return String.format("ALWAYS IN FUTURE %s {%s}", getRange(), getOperand().render());
-//        if (getOperand() instanceof BinaryTemporalExpression || getOperand() instanceof TemporalJoinExpression)
-//            return String.format("⊞ %s (%s)", getRange(), getOperand().render());
-//        return String.format("⊞ %s %s", getRange(), getOperand().render());
-    }
-
-    @Override
     public String toString() {
-        return String.format("BoxPlusExpressionImpl{range = %s, operand = %s}", getRange(), getOperand());
+        return String.format("ALWAYS IN FUTURE %s {%s}", getRange(), getOperand());
     }
 }

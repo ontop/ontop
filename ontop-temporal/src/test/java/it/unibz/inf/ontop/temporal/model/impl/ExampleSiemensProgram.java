@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.impl;
+package it.unibz.inf.ontop.temporal.model.impl;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.impl.TestingTools;
 import it.unibz.inf.ontop.temporal.model.*;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 
@@ -92,6 +93,6 @@ public class ExampleSiemensProgram {
         DatalogMTLRule PIOrule = f.createRule(pio, bodyPIO);
 
 
-        return f.createProgram(prefixes, LRSrule, HRSrule, CLTRSrule, PIOrule);
+        return f.createProgram(prefixes, "http://siemens.com/temporal/ns#", LRSrule, HRSrule, CLTRSrule, PIOrule);
     }
 }

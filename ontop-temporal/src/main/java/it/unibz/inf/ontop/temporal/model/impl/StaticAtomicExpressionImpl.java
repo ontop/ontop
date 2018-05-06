@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.StaticAtomicExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -64,7 +62,22 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
     }
 
     @Override
-    public String render() {
+    public String toString() {
+        String subject = "";
+        if(terms.get(0) instanceof Variable){
+            subject = "?"+terms.get(0);
+        } else {
+            subject = terms.get(0).toString();
+        }
+        if(terms.size()==2) {
+            if (terms.get(1) instanceof Variable) {
+                return String.format("%s %s ?%s .", subject, predicate, terms.get(1));
+            } else {
+                return String.format("%s %s %s .", subject, predicate, terms.get(1));
+            }
+        } else if(terms.size()==1){
+            return String.format("%s %s %s .", subject, RDF.TYPE, predicate);
+        }
         return String.format("%s(%s)", predicate, terms.stream().map(Term::toString).collect(joining(",")));
     }
 

@@ -10,32 +10,35 @@ import static java.util.stream.Collectors.joining;
 public class DatalogMTLProgramImpl implements DatalogMTLProgram {
 
     private final List<DatalogMTLRule> rules;
+    private String base;
 
     Map<String, String> prefixes;
 
-    public DatalogMTLProgramImpl(Map<String, String> prefixes, List<DatalogMTLRule> rules) {
+    public DatalogMTLProgramImpl(Map<String, String> prefixes, String base, List<DatalogMTLRule> rules) {
         this.prefixes = prefixes;
+        this.base = base;
         this.rules = rules;
     }
 
-    public DatalogMTLProgramImpl(Map<String, String> prefixes, DatalogMTLRule... rules) {
+    public DatalogMTLProgramImpl(Map<String, String> prefixes, String base, DatalogMTLRule... rules) {
         this.prefixes = prefixes;
+        this.base = base;
         this.rules = Arrays.asList(rules);
+    }
+
+    @Override
+    public void setBase(String base){
+        this.base = base;
+    }
+
+    @Override
+    public String getBase(){
+        return base;
     }
 
     @Override
     public Map<String, String> getPrefixes() {
         return prefixes;
-    }
-
-    @Override
-    public void addRule(DatalogMTLRule rule){
-        rules.add(rule);
-    }
-
-    @Override
-    public void removeRule(DatalogMTLRule rule){
-        rules.remove(rule);
     }
 
     @Override
@@ -51,8 +54,9 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
     @Override
     public String toString(){
         StringBuilder stringBuilder = new StringBuilder();
-        prefixes.forEach((key, value) -> stringBuilder.append("PREFIX ").append(key).append(":\t").append(value));
-        stringBuilder.append("\n\n").append(render());
+        prefixes.forEach((key, value) -> stringBuilder.append("PREFIX ").append(key).append("\t<").append(value).append(">\n"));
+        stringBuilder.append("BASE <").append(base).append(">\n\n");
+        stringBuilder.append(render());
         return stringBuilder.toString();
     }
 }

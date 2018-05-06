@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.temporal.model.ComparisonExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
@@ -13,7 +14,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class ComparisonExpressionImpl implements ComparisonExpression{
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+
+public class ComparisonExpressionImpl implements ComparisonExpression {
 
     AtomPredicate predicate;
     VariableOrGroundTerm leftTerm;
@@ -51,8 +54,17 @@ public class ComparisonExpressionImpl implements ComparisonExpression{
     }
 
     @Override
-    public String render() {
-        return String.format("(%s %s %s)", leftTerm, predicate, rightTerm);
+    public String toString() {
+        return String.format("(%s %s %s)", leftTerm, getPredicateString(), rightTerm);
+    }
+
+    private String getPredicateString(){
+        if(predicate.getName().equalsIgnoreCase(GT.name())) return ">";
+        if(predicate.getName().equalsIgnoreCase(GTE.name())) return ">=";
+        if(predicate.getName().equalsIgnoreCase(LT.name())) return "<";
+        if(predicate.getName().equalsIgnoreCase(LTE.name())) return "<=";
+        if(predicate.getName().equalsIgnoreCase(NEQ.name())) return "<>";
+        return "=";
     }
 
     @Override

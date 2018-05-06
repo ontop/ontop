@@ -25,11 +25,6 @@ public class StaticJoinExpressionImpl implements StaticJoinExpression {
     }
 
     @Override
-    public String render() {
-        return operands.stream().map(StaticExpression::render).collect(joining(", "));
-    }
-
-    @Override
     public Iterable<StaticExpression> getChildNodes() {
         return operands;
     }
@@ -41,6 +36,14 @@ public class StaticJoinExpressionImpl implements StaticJoinExpression {
             newList.addAll(operand.getAllVariableOrGroundTerms());
         }
         return  ImmutableList.copyOf(newList);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s= new StringBuilder();
+        for (DatalogMTLExpression expression : getOperands())
+            s.append(expression).append(",");
+        return s.toString();
     }
 
     @Override

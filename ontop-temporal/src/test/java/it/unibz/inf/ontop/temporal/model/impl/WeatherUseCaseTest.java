@@ -56,7 +56,7 @@ public class WeatherUseCaseTest {
         prefixes.put("mt", "http://mesowest.com/temporal/ns#");
         prefixes.put("obda:", "https://w3id.org/obda/vocabulary#");
 
-        final DatalogMTLProgram program = f.createProgram(prefixes, rule1, rule2);
+        final DatalogMTLProgram program = f.createProgram(prefixes,"http://mesowest.com/temporal/ns#", rule1, rule2);
 
         System.out.println(program.render());
 

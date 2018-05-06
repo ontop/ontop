@@ -60,11 +60,11 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
                         pid -> pid.PNAME_NS().getText(),
                         pid -> pid.IRIREF().getText().substring(1, pid.IRIREF().getText().length()-1)));
 
-        base = ctx.base().getText();
+        base = ctx.base().IRIREF().getText().substring(1, ctx.base().IRIREF().getText().length()-1);
         //headsOfStaticRules = collectStaticHeads(ctx);
         ImmutableList<DatalogMTLRule> rules = visitDMTLProgram(ctx.dMTLProgram());
 
-        return datalogMTLFactory.createProgram(prefixes, rules);
+        return datalogMTLFactory.createProgram(prefixes, base, rules);
     }
 
     @Override
@@ -309,10 +309,10 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     }
 
     private boolean isRDFType(String prefixName, String predicateName){
-        if (prefixes.get(prefixName).equals(RDF) &&
-                (predicateName.equals("type") || predicateName.equals("TYPE")))
-            return true;
-
+        if(prefixes!=null && prefixes.containsKey(prefixName)) {
+            return prefixes.get(prefixName).equals(RDF) &&
+                    (predicateName.equals("type") || predicateName.equals("TYPE"));
+        }
         return false;
     }
 

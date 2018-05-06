@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.core;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -11,21 +12,26 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.Reader;
-import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -52,8 +58,10 @@ import java.util.Properties;
  * <p>
  */
 public class TemporalOBDAModel extends OBDAModel {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private DatalogMTLProgram datalogMTLProgram;
+    private List<DatalogMTLRule> ruleList = new ArrayList<>();
+    private String base;
 
     public TemporalOBDAModel(SpecificationFactory specificationFactory,
                              SQLPPMappingFactory ppMappingFactory,
@@ -65,33 +73,53 @@ public class TemporalOBDAModel extends OBDAModel {
     }
 
     public void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram){
-        this.datalogMTLProgram = datalogMTLProgram;
+        prefixManager.addPrefixes(ImmutableMap.copyOf(datalogMTLProgram.getPrefixes()));
+        this.ruleList = new ArrayList<>();
+        this.ruleList.addAll(datalogMTLProgram.getRules());
+        this.base = datalogMTLProgram.getBase();
+    }
+
+    public List<DatalogMTLRule> getRules() {
+        return ruleList;
+    }
+
+    public void addRule(DatalogMTLRule parsedRule) {
+        ruleList.add(parsedRule);
+    }
+
+    public void removeRule(DatalogMTLRule rule){
+        ruleList.remove(rule);
     }
 
     public DatalogMTLProgram getDatalogMTLProgram(){
-        return datalogMTLProgram;
+        Map<String, String> prefixMap = Maps.newHashMap();
+        prefixManager.getPrefixMap().forEach(prefixMap::put);
+        return DatalogMTLFactoryImpl.getInstance().createProgram(prefixMap, base, ruleList);
     }
 
-    public void addRule(DatalogMTLRule rule){
-        datalogMTLProgram.addRule(rule);
-    }
-
-    public void updateRule(DatalogMTLRule oldRule, DatalogMTLRule newRule){
-        datalogMTLProgram.removeRule(oldRule);
-        datalogMTLProgram.addRule(newRule);
-    }
-
-    public void removeRule(DatalogMTLRule rule) {
-        datalogMTLProgram.removeRule(rule);
+    public DatalogMTLRule parse(String rule) {
+        //TODO prefixes and base are added, must think about if one rule parsing is needed
+        StringBuilder header = new StringBuilder();
+        PrefixManager prefixManager = getMutablePrefixManager();
+        prefixManager.getPrefixMap().forEach((key,value)->{
+            header.append("PREFIX ").append(key).append("\t<").append(value).append(">\n");
+        });
+        header.append("BASE <").append(getNamespace()).append(">");
+        DatalogMTLSyntaxParser datalogMTLSyntaxParser = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
+        LOGGER.info("Parsing rule:\n"+header+"\n"+rule+"\n");
+        return datalogMTLSyntaxParser.parse(header+"\n"+rule).getRules().get(0);
     }
 
     public void updateNamespace(String namespace) {
-        //TODO update namespace of the datalog MTL program
+        base = namespace;
+    }
+
+    public String getNamespace() {
+        return base;
     }
 
     public void parseMapping(File mappingFile, Properties properties) throws DuplicateMappingException,
             InvalidMappingException, MappingIOException {
-
 
         OntopTemporalMappingSQLAllConfiguration configuration = OntopTemporalMappingSQLAllConfiguration.defaultBuilder()
                 .nativeOntopTemporalMappingFile(mappingFile)
@@ -102,11 +130,9 @@ public class TemporalOBDAModel extends OBDAModel {
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingFile);
         prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
-        // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,
                         m -> m));
     }
-
 }

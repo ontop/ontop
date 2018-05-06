@@ -12,4 +12,6 @@ public interface DatalogMTLRule {
     String render();
 
     ImmutableList<AtomicExpression> getLeaves();
+
+    boolean isStatic();
 }

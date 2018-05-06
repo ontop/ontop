@@ -20,16 +20,14 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
-import it.unibz.inf.ontop.protege.utils.*;
+import it.unibz.inf.ontop.protege.utils.EditorKeyListener;
+import it.unibz.inf.ontop.protege.utils.EditorPanel;
+import it.unibz.inf.ontop.protege.utils.PopupListener;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,16 +39,17 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelectorListener, EditorPanel {
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private TemporalOBDAModel apic;
-    private OBDADataSource selectedSource;
+public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private TemporalOBDAModel tobdaModel;
     private JCheckBox chkFilter;
     private JTextField txtRules;
 
     private JList<DatalogMTLRule> lstRules;
     private JTextField txtFilter;
-    public TemporalRuleEditorPanel(TemporalOBDAModel apic) {
+
+    public TemporalRuleEditorPanel(TemporalOBDAModel tobdaModel) {
+        this.tobdaModel = tobdaModel;
         initComponents();
         lstRules.setFixedCellWidth(-1);
         lstRules.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -65,22 +64,11 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
             }
         });
 
-        setOBDAModel(apic); // TODO Bad code! Change this later!
-    }
-
-    public OBDADataSource getSelectedSource() {
-        return selectedSource;
-    }
-
-    private void setOBDAModel(TemporalOBDAModel omodel) {
-
-        this.apic = omodel;
-
         //TODO rule painter
         DefaultListModel<DatalogMTLRule> model = new DefaultListModel<>();
 
-        if (apic.getDatalogMTLProgram() != null && !apic.getDatalogMTLProgram().getRules().isEmpty()) {
-            for(DatalogMTLRule datalogMTLRule:apic.getDatalogMTLProgram().getRules()){
+        if (!tobdaModel.getRules().isEmpty()) {
+            for (DatalogMTLRule datalogMTLRule : tobdaModel.getRules()) {
                 model.addElement(datalogMTLRule);
             }
         }
@@ -127,13 +115,7 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
     @Override
     public void edit() {
         if(!lstRules.isSelectionEmpty()) {
-            JDialog dialog = new JDialog();
-            dialog.setContentPane(new TemporalRuleDialogPanel(apic, dialog, selectedSource, lstRules.getSelectedValue()));
-            dialog.setTitle("Edit Rule");
-            dialog.setModal(true);
-            dialog.setSize(600, 500);
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
+            new TemporalRuleDialogPanel(this, lstRules.getSelectedValue());
         }
     }
 
@@ -170,7 +152,7 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         btnAdd.setContentAreaFilled(false);
         btnAdd.setIconTextGap(5);
         btnAdd.setPreferredSize(new Dimension(75, 25));
-        btnAdd.addActionListener(e -> cmdAddMappingActionPerformed());
+        btnAdd.addActionListener(e -> add());
         pnlMappingButtons.add(btnAdd, gridBagConstraints);
 
         JButton btnRemove = new JButton("Remove");
@@ -185,7 +167,7 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         gridBagConstraints.gridy = 0;
         pnlMappingButtons.add(btnRemove, gridBagConstraints);
 
-        JButton btnDuplicate = new JButton("Copy");
+        /*JButton btnDuplicate = new JButton("Copy");
         btnDuplicate.setToolTipText("Copy selected rules");
         btnDuplicate.setIcon(IconLoader.getImageIcon("images/copy.png"));
         btnDuplicate.setToolTipText("Make a duplicate of the selected rule");
@@ -196,7 +178,7 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         btnDuplicate.addActionListener(e -> cmdDuplicateMappingActionPerformed());
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
-        pnlMappingButtons.add(btnDuplicate, gridBagConstraints);
+        pnlMappingButtons.add(btnDuplicate, gridBagConstraints);*/
 
         JButton btnSelectAll = new JButton("Select all");
         btnSelectAll.setIcon(IconLoader.getImageIcon("images/select-all.png"));
@@ -226,11 +208,11 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         gridBagConstraints.gridx = 3;
         pnlMappingButtons.add(lblNamespace, gridBagConstraints);
 
-        JTextField txtNamespace = new JTextField();
+        JTextField txtNamespace = new JTextField(tobdaModel.getNamespace());
         txtNamespace.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                apic.updateNamespace(txtNamespace.getText());
+                tobdaModel.updateNamespace(txtNamespace.getText());
             }
         });
         gridBagConstraints.gridx = 4;
@@ -309,8 +291,8 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
     /***
      * Action for key's entered in the search text box.
      */
-    private void sendFilters(KeyEvent evt) {
-        int key = evt.getKeyCode();
+    private void sendFilters(KeyEvent e) {
+        int key = e.getKeyCode();
         if (key == KeyEvent.VK_ENTER) {
             if (!chkFilter.isSelected()) {
                 chkFilter.setSelected(true);
@@ -361,29 +343,16 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         }
         for (DatalogMTLRule rule : values) {
             if (rule != null) {
-                apic.removeRule(rule);
+                tobdaModel.removeRule(rule);
+                ((DefaultListModel<DatalogMTLRule>) lstRules.getModel()).removeElement(rule);
             }
         }
         lstRules.clearSelection();
     }
 
-    private void cmdAddMappingActionPerformed() {
-        if (selectedSource != null) {
-            add();
-        } else {
-            JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
     @Override
     public void add() {
-        JDialog dialog = new JDialog();
-        dialog.setTitle("New Rule");
-        dialog.setModal(true);
-        dialog.setContentPane(new TemporalRuleDialogPanel(apic, dialog, selectedSource));
-        dialog.setSize(600, 500);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
+        new TemporalRuleDialogPanel(this);
     }
 
     public void setFilter(String filter) {
@@ -399,21 +368,8 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
      * erroneous
      */
     private List<TreeModelFilter<DatalogMTLRule>> parseSearchString(String textToParse) throws Exception {
-
         List<TreeModelFilter<DatalogMTLRule>> listOfFilters = null;
-
         if (textToParse != null) {
-            ANTLRStringStream inputStream = new ANTLRStringStream(textToParse);
-            MappingFilterLexer lexer = new MappingFilterLexer(inputStream);
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            MappingFilterParser parser = new MappingFilterParser(tokenStream);
-
-            //TODO find filters using rules
-            //listOfFilters = parser.parse();
-
-            if (parser.getNumberOfSyntaxErrors() != 0) {
-                throw new Exception("Syntax Error: The filter string invalid");
-            }
         }
         return listOfFilters;
     }
@@ -425,21 +381,30 @@ public class TemporalRuleEditorPanel extends JPanel implements DatasourceSelecto
         //model.addFilters(filters);
     }
 
-    @Override
-    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-
-        if (newSource == null) {
-            return;
+    boolean addRule(String rule) {
+        try {
+            DatalogMTLRule parsedRule = tobdaModel.parse(rule);
+            if (parsedRule != null) {
+                tobdaModel.addRule(parsedRule);
+                ((DefaultListModel<DatalogMTLRule>) lstRules.getModel()).addElement(parsedRule);
+                return true;
         }
-        this.selectedSource = newSource;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error while inserting rule: " + e.getMessage() + " is already taken");
+            LOGGER.error(e.getMessage(), e);
+        }
+        return false;
+    }
 
-        DefaultListModel<DatalogMTLRule> model = (DefaultListModel<DatalogMTLRule>)lstRules.getModel();
-        if (apic.getDatalogMTLProgram() != null && !apic.getDatalogMTLProgram().getRules().isEmpty()) {
-            for(DatalogMTLRule datalogMTLRule:apic.getDatalogMTLProgram().getRules()){
+    public void ontologyChanged(TemporalOBDAModel tobdaModel) {
+        this.tobdaModel = tobdaModel;
+        DefaultListModel<DatalogMTLRule> model = (DefaultListModel) lstRules.getModel();
+        model.removeAllElements();
+        if (!tobdaModel.getRules().isEmpty()) {
+            for (DatalogMTLRule datalogMTLRule : tobdaModel.getRules()) {
                 model.addElement(datalogMTLRule);
             }
         }
-
-        lstRules.revalidate();
     }
 }
