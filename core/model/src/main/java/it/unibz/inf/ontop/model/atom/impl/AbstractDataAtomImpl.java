@@ -5,25 +5,30 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.AbstractFunctionalTermImpl;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
-        extends AbstractFunctionalTermImpl
         implements DataAtom<P> {
 
     private final P predicate;
     private final ImmutableList<? extends VariableOrGroundTerm> arguments;
 
+    // Lazy (cache)
+    @Nullable
+    private String string;
+
     protected AbstractDataAtomImpl(P predicate, ImmutableList<? extends VariableOrGroundTerm> variableOrGroundTerms) {
-        super(predicate);
         this.predicate = predicate;
         this.arguments = variableOrGroundTerms;
+        this.string = null;
 
         if (predicate.getArity() != arguments.size()) {
             throw new IllegalArgumentException("Arity violation: " + predicate + " was expecting " + predicate.getArity()
@@ -32,7 +37,6 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     protected AbstractDataAtomImpl(P predicate, VariableOrGroundTerm... variableOrGroundTerms) {
-        super(predicate);
         this.predicate = predicate;
         this.arguments = ImmutableList.copyOf(variableOrGroundTerms);
     }
@@ -43,8 +47,13 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     @Override
+    public int getArity() {
+        return predicate.getArity();
+    }
+
+    @Override
     public int getEffectiveArity() {
-        return getTerms().size();
+        return arguments.size();
     }
 
     @Override
@@ -68,23 +77,10 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     }
 
     @Override
-    public ImmutableList<Term> getTerms() {
-        return ImmutableList.copyOf(arguments);
-    }
-
-    @Override
-    public void setTerm(int index, Term term) {
-        throw new UnsupportedOperationException("A DataAtom is immutable.");
-    }
-
-    @Override
-    public void updateTerms(List<Term> literals) {
-        throw new UnsupportedOperationException("A DataAtom is immutable.");
-    }
-
-    @Override
     public ImmutableSet<Variable> getVariables() {
-        return ImmutableSet.copyOf(super.getVariables());
+        return arguments.stream()
+                .flatMap(ImmutableTerm::getVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     protected static boolean hasDuplicates(DataAtom atom) {
@@ -110,5 +106,25 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    /**
+     * Cached toString()
+     */
+    @Override
+    public String toString() {
+        if (string == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(predicate.toString());
+            sb.append("(");
+
+            List<String> argumentStrings = arguments.stream()
+                    .map(VariableOrGroundTerm::toString)
+                    .collect(Collectors.toList());
+
+            sb.append(String.join(",", argumentStrings));
+            string = sb.toString();
+        }
+        return string;
     }
 }

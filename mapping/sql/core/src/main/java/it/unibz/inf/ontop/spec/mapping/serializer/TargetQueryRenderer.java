@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
@@ -49,7 +50,7 @@ public class TargetQueryRenderer {
 		TurtleWriter turtleWriter = new TurtleWriter();
 		for (TargetAtom atom : body) {
 			String subject, predicate, object = "";
-			String originalString = atom.getProjectionAtom().getFunctionSymbol().toString();
+			String originalString = atom.getProjectionAtom().getPredicate().toString();
 			if (isUnary(atom.getProjectionAtom())) {
 				Term subjectTerm = atom.getSubstitutedTerm(0);
 				subject = getDisplayName(subjectTerm, prefixManager);
@@ -85,8 +86,8 @@ public class TargetQueryRenderer {
     /**
      * Checks if the atom is unary or not.
      */
-    private static boolean isUnary(Function atom) {
-        return atom.getArity() == 1 ? true : false;
+    private static boolean isUnary(DataAtom atom) {
+        return atom.getArity() == 1;
     }
 
     /**
