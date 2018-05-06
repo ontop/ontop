@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
+public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         implements ImmutableSubstitution<T> {
 
     final AtomFactory atomFactory;
@@ -218,7 +218,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
         if (otherSubstitution.isEmpty())
-            return Optional.of((ImmutableSubstitution<T>)this);
+            return Optional.of(this);
         else if(isEmpty())
             return Optional.of(otherSubstitution);
 

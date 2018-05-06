@@ -61,11 +61,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public final ImmutableMap<Variable, Term> getMap() {
-        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) map;
-    }
-
-    @Override
     public ImmutableTerm applyToVariable(Variable variable) {
         if (map.containsKey(variable))
             return map.get(variable);
