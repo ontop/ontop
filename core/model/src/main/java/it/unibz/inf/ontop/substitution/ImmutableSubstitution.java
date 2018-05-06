@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -53,9 +52,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
     ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
-
-    DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
-            throws ConversionException;
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;

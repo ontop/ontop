@@ -59,25 +59,6 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-                                                                ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        if (isVariableOnly(arguments)) {
-            return new DistinctVariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-        }
-        else if (GroundTermTools.areGroundTerms(arguments)) {
-            return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)arguments);
-        }
-        else {
-            return new NonGroundDistinctVariableDataAtomImpl(predicate, arguments);
-        }
-    }
-
-    @Override
-    public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
-        return getDistinctVariableDataAtom(predicate, ImmutableList.copyOf(arguments));
-    }
-
-    @Override
     public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
         return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
     }
@@ -85,21 +66,6 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
         return getDistinctVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
-    }
-
-    @Override
-    public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
-        return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
-    }
-
-    @Override
-    public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
-        if (areVariablesDistinct(arguments)) {
-            return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
-        }
-        else {
-            return new VariableOnlyDataAtomImpl(predicate, arguments);
-        }
     }
 
     @Override

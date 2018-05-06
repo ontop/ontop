@@ -118,38 +118,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
-            throws ConversionException {
-        DataAtom newDataAtom = applyToDataAtom(dataAtom);
-
-        if (newDataAtom instanceof DistinctVariableDataAtom) {
-            return (DistinctVariableDataAtom) newDataAtom;
-        }
-
-        /**
-         * Checks if new data atom can be converted into a DistinctVariableDataAtom
-         */
-        if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
-            return atomFactory.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
-                    (ImmutableList<Variable>)newDataAtom.getArguments());
-        }
-        else {
-            throw new ConversionException("The substitution has transformed a DistinctVariableDataAtom into" +
-                    "a non-DistinctVariableDataAtom: " + newDataAtom);
-        }
-    }
-
-    @Override
     public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
             throws ConversionException {
-        DistinctVariableDataAtom newDataAtom = applyToDistinctVariableDataAtom(dataAtom);
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
 
-        if (newDataAtom instanceof DistinctVariableOnlyDataAtom) {
-            return (DistinctVariableOnlyDataAtom) newDataAtom;
+        if (!newArguments.stream().allMatch(t -> t instanceof Variable)) {
+            throw new ConversionException("The substitution applied to a DistinctVariableOnlyDataAtom has " +
+                    " produced some non-Variable arguments " + newArguments);
         }
+        ImmutableList<Variable> variableArguments =  (ImmutableList<Variable>) newArguments;
+
+        if (variableArguments.size() == ImmutableSet.copyOf(variableArguments).size())
+            return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(), variableArguments);
         else {
-            throw new ConversionException("The substitution has transformed a DistinctVariableOnlyDataAtom into" +
-                    "a DistinctVariableDataAtom containing GroundTerm-s: " + newDataAtom);
+            throw new ConversionException("The substitution applied a DistinctVariableOnlyDataAtom has introduced" +
+                    " redundant variables: " + newArguments);
         }
     }
 
