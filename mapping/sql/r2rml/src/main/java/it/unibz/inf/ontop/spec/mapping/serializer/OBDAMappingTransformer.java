@@ -100,7 +100,7 @@ public class OBDAMappingTransformer {
 		LogicalTable lt = mfact.createR2RMLView(squery.getSQLQuery());
 		
 		//SubjectMap
-		Function uriTemplate = (Function) tquery.get(0).getSubstitutedTerm(0); //URI("..{}..", , )
+		ImmutableFunctionalTerm uriTemplate = (ImmutableFunctionalTerm) tquery.get(0).getSubstitutedTerm(0); //URI("..{}..", , )
 		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
@@ -115,7 +115,7 @@ public class OBDAMappingTransformer {
 			Optional<Template> templp = Optional.empty();
 
 			//triple
-			Function predf = (Function)func.getSubstitutedTerm(1);
+			ImmutableFunctionalTerm predf = (ImmutableFunctionalTerm)func.getSubstitutedTerm(1);
 
 			if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) { //fixed string
@@ -129,7 +129,7 @@ public class OBDAMappingTransformer {
 				}
 
 			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
-			Function object = (Function)func.getSubstitutedTerm(2);
+			ImmutableFunctionalTerm object = (ImmutableFunctionalTerm) func.getSubstitutedTerm(2);
 
 			//if the class IRI is constant
 			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)
@@ -184,13 +184,13 @@ public class OBDAMappingTransformer {
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
 				} 
- 				else if (object instanceof Function) { //we create a template
+ 				else if (object instanceof ImmutableFunctionalTerm) { //we create a template
 					//check if uritemplate we create a template, in case of datatype with single variable we create a column
- 					Function o = (Function) object;
+ 					ImmutableFunctionalTerm o = (ImmutableFunctionalTerm) object;
  					Predicate objectPred = o.getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 
-						Term objectTerm = ((Function) object).getTerm(0);
+						ImmutableTerm objectTerm = o.getTerm(0);
 
 						if(objectTerm instanceof Variable)
 						{
@@ -199,15 +199,15 @@ public class OBDAMappingTransformer {
 						}
 						else {
 
-							String objectURI = URITemplates.getUriTemplateString((Function) object, prefixmng);
+							String objectURI = URITemplates.getUriTemplateString(o, prefixmng);
 							//add template object
 							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.template, rdfFactory.createLiteral(objectURI)));
 							//obm.setTemplate(mfact.createTemplate(objectURI));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
 						}
 					}
-					else if (o.isDataTypeFunction()) {
-						Term objectTerm = ((Function) object).getTerm(0);
+					else if (objectPred instanceof DatatypePredicate) {
+						ImmutableTerm objectTerm = object.getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
 
@@ -229,13 +229,14 @@ public class OBDAMappingTransformer {
 							//obm.setConstant(rdfFactory.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(rdfFactory.createLiteral(((Constant) objectTerm).getValue(), rdfFactory.createIRI(objectPred.getName())));
 							
-						} else if(objectTerm instanceof Function){
+						} else if(objectTerm instanceof ImmutableFunctionalTerm){
+							ImmutableFunctionalTerm functionalObjectTerm = (ImmutableFunctionalTerm) objectTerm;
 							
 							StringBuilder sb = new StringBuilder();
-							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
+							Predicate functionSymbol = functionalObjectTerm.getFunctionSymbol();
 							
 							if (functionSymbol == ExpressionOperation.CONCAT) { //concat
-								List<Term> terms = ((Function)objectTerm).getTerms();
+								ImmutableList<? extends ImmutableTerm> terms = functionalObjectTerm.getTerms();
 								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
 								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
 								obm.setTermType(R2RMLVocabulary.literal);

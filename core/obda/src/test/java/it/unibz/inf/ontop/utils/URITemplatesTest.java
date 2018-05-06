@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.utils;
 import java.util.Arrays;
 
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.term.Function;
 
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import org.junit.Test;
 
@@ -50,14 +50,14 @@ public class URITemplatesTest {
 
     @Test
     public void testGetUriTemplateString1(){
-        Function f1 = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}"), //
                 TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"));
         assertEquals("http://example.org/{X}/{Y}", URITemplates.getUriTemplateString(f1));
     }
 
     @Test
     public void testGetUriTemplateString2(){
-        Function f1 = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("{}"), //
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("{}"), //
                 TERM_FACTORY.getVariable("X"));
         assertEquals("{X}", URITemplates.getUriTemplateString(f1));
     }
@@ -65,7 +65,7 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString3(){
 
-        Function f1 = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("{}/"), //
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("{}/"), //
                 TERM_FACTORY.getVariable("X"));
         assertEquals("{X}/", URITemplates.getUriTemplateString(f1));
     }
@@ -73,7 +73,7 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString4(){
 
-        Function f1 = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/"), //
                 TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"));
         assertEquals("http://example.org/{X}/{Y}/", URITemplates.getUriTemplateString(f1));
     }
@@ -81,7 +81,7 @@ public class URITemplatesTest {
     @Test
     public void testGetUriTemplateString5(){
 
-        Function f1 = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral("http://example.org/{}/{}/{}"), //
                 TERM_FACTORY.getVariable("X"), TERM_FACTORY.getVariable("Y"), TERM_FACTORY.getVariable("X"));
         assertEquals("http://example.org/{X}/{Y}/{X}", URITemplates.getUriTemplateString(f1));
     }
