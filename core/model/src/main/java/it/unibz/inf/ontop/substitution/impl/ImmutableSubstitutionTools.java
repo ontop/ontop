@@ -123,8 +123,8 @@ public class ImmutableSubstitutionTools {
             }
         }
 
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getArguments();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getArguments();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getTerms();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getTerms();
 
         /*
          * Arity equality

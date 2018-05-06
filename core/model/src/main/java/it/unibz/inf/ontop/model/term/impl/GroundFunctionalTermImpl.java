@@ -28,8 +28,8 @@ public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implem
 
 
     @Override
-    public ImmutableList<? extends GroundTerm> getArguments() {
-        return (ImmutableList<? extends GroundTerm>)super.getArguments();
+    public ImmutableList<? extends GroundTerm> getTerms() {
+        return (ImmutableList<? extends GroundTerm>)super.getTerms();
     }
 
     @Override

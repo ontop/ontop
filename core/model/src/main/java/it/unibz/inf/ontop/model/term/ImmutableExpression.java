@@ -6,11 +6,14 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Optional;
 
-public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm {
+public interface ImmutableExpression extends ImmutableFunctionalTerm {
+
+    @Override
+    OperationPredicate getFunctionSymbol();
+
     @Override
     ImmutableExpression clone();
 
@@ -40,7 +43,7 @@ public interface ImmutableExpression extends Expression, ImmutableFunctionalTerm
     default Optional<TermType> getOptionalTermType() throws IncompatibleTermException {
         try {
             OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferType(getArguments());
+            return predicate.inferType(getTerms());
         } catch (IncompatibleTermException e) {
             throw new IncompatibleTermException(this, e);
         }

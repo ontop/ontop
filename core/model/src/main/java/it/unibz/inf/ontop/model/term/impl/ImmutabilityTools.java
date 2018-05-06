@@ -67,7 +67,7 @@ public class ImmutabilityTools {
      */
     public Function convertToMutableFunction(ImmutableFunctionalTerm functionalTerm) {
         return convertToMutableFunction(functionalTerm.getFunctionSymbol(),
-                functionalTerm.getArguments());
+                functionalTerm.getTerms());
     }
 
     public Function convertToMutableFunction(DataAtom dataAtom) {
@@ -75,9 +75,13 @@ public class ImmutabilityTools {
     }
 
     public Function convertToMutableFunction(Predicate predicateOrFunctionSymbol,
-                                             ImmutableList<? extends ImmutableTerm> otherTerms) {
+                                             ImmutableList<? extends ImmutableTerm> terms) {
+        return termFactory.getFunction(predicateOrFunctionSymbol, convertToMutableTerms(terms));
+    }
+
+    private List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
         List<Term> mutableList = new ArrayList<>();
-        Iterator<? extends ImmutableTerm> iterator = otherTerms.iterator();
+        Iterator<? extends ImmutableTerm> iterator = terms.iterator();
         while (iterator.hasNext()) {
 
             Term nextTerm = iterator.next();
@@ -90,8 +94,7 @@ public class ImmutabilityTools {
             }
 
         }
-        Function mutFunc = termFactory.getFunction(predicateOrFunctionSymbol, mutableList);
-        return mutFunc;
+        return mutableList;
     }
 
 
@@ -99,27 +102,8 @@ public class ImmutabilityTools {
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.
      */
     public Expression convertToMutableBooleanExpression(ImmutableExpression booleanExpression) {
-
-        OperationPredicate pred = (OperationPredicate) booleanExpression.getFunctionSymbol();
-        ImmutableList<Term> otherTerms = booleanExpression.getTerms();
-        List<Term> mutableList = new ArrayList<>();
-
-        Iterator<Term> iterator = otherTerms.iterator();
-        while (iterator.hasNext()) {
-
-            Term nextTerm = iterator.next();
-            if (nextTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-                Function newTerm = convertToMutableFunction(term2Change);
-                mutableList.add(newTerm);
-            } else {
-                mutableList.add(nextTerm);
-            }
-
-        }
-        Expression mutFunc = termFactory.getExpression(pred, mutableList);
-        return mutFunc;
-
+        OperationPredicate pred = booleanExpression.getFunctionSymbol();
+        return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
     }
 
     public Optional<ImmutableExpression> foldBooleanExpressions(

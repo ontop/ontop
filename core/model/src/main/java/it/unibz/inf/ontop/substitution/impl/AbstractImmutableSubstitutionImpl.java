@@ -59,7 +59,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
 
-        for (ImmutableTerm subTerm : functionalTerm.getArguments()) {
+        for (ImmutableTerm subTerm : functionalTerm.getTerms()) {
             subTermsBuilder.add(apply(subTerm));
         }
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
@@ -402,7 +402,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return functionalTerm;
         }
 
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getArguments().stream()
+        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getTerms().stream()
                 .map(arg -> (arg instanceof ImmutableFunctionalTerm)
                         ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
                         : arg)

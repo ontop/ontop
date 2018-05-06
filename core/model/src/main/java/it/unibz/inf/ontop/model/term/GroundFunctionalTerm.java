@@ -8,6 +8,6 @@ import com.google.common.collect.ImmutableList;
 public interface GroundFunctionalTerm extends ImmutableFunctionalTerm, GroundTerm {
 
     @Override
-    ImmutableList<? extends GroundTerm> getArguments();
+    ImmutableList<? extends GroundTerm> getTerms();
 
 }

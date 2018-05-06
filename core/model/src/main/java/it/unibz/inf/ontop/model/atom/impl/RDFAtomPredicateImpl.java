@@ -79,7 +79,7 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
         // TODO: look for the RDF building function (and check the type is an IRI)
         else if (term instanceof ImmutableFunctionalTerm) {
             return ((ImmutableFunctionalTerm) term).getArity() == 1
-                    ? extractIRI(((ImmutableFunctionalTerm) term).getArguments().get(0))
+                    ? extractIRI(((ImmutableFunctionalTerm) term).getTerms().get(0))
                     : Optional.empty();
         }
         else if (term instanceof ValueConstant) {

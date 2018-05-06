@@ -153,13 +153,13 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {
-                    ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
+                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
                     return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm);
                 })
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSubstitution<NonFunctionalTerm> normalizedUnifier = unify(functionFreeEqualities.stream()
-                        .map(ImmutableFunctionalTerm::getArguments)
+                        .map(ImmutableFunctionalTerm::getTerms)
                         .map(args -> Maps.immutableEntry(
                                 (NonFunctionalTerm) args.get(0),
                                 (NonFunctionalTerm)args.get(1))),

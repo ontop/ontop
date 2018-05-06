@@ -33,9 +33,9 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
                 //case OR:
                 case EQ:
                 case NEQ:
-                    return normalizeCommutative(functionSymbol, expression.getArguments());
+                    return normalizeCommutative(functionSymbol, expression.getTerms());
                 default:
-                    return normalizeArguments(functionSymbol, expression.getArguments());
+                    return normalizeArguments(functionSymbol, expression.getTerms());
             }
         }
         else {
@@ -131,8 +131,8 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
             if (functionSymbolComparison != 0)
                 return functionSymbolComparison;
 
-            ImmutableList<? extends ImmutableTerm> arguments1 = f1.getArguments();
-            ImmutableList<? extends ImmutableTerm> arguments2 = f2.getArguments();
+            ImmutableList<? extends ImmutableTerm> arguments1 = f1.getTerms();
+            ImmutableList<? extends ImmutableTerm> arguments2 = f2.getTerms();
 
             int arityDifference = arguments2.size() - arguments1.size();
             if (arityDifference != 0)

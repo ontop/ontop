@@ -104,7 +104,7 @@ public class UnknownDatatypeMappingTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(Function::getFunctionSymbol)
+                .map(ImmutableFunctionalTerm::getFunctionSymbol)
                 .filter(p -> p instanceof DatatypePredicate)
                 .findFirst();
 

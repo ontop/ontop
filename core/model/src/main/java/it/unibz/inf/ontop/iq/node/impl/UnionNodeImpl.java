@@ -358,8 +358,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         : Optional.of(variableGenerator.generateNewVariable());
             }
             else {
-                ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getArguments();
-                ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getArguments();
+                ImmutableList<? extends ImmutableTerm> arguments1 = functionalTerm1.getTerms();
+                ImmutableList<? extends ImmutableTerm> arguments2 = functionalTerm2.getTerms();
                 if (arguments1.size() != arguments2.size()) {
                     throw new IllegalStateException("Functions have different arities, they cannot be combined");
                 }
@@ -387,7 +387,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         NonGroundFunctionalTerm functionalTerm = (NonGroundFunctionalTerm) term;
 
         return termFactory.getNonGroundFunctionalTerm(functionalTerm.getFunctionSymbol(),
-                    functionalTerm.getArguments().stream()
+                    functionalTerm.getTerms().stream()
                         .map(a -> a.isGround()
                                 ? a
                                 // RECURSIVE

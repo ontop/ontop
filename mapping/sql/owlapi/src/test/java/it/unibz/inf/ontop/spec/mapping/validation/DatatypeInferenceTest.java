@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
@@ -108,7 +107,7 @@ public class DatatypeInferenceTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(Function::getFunctionSymbol)
+                .map(ImmutableFunctionalTerm::getFunctionSymbol)
                 .filter(p -> p instanceof DatatypePredicate)
                 .findFirst();
 
