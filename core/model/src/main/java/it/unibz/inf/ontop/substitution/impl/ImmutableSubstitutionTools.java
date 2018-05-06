@@ -168,7 +168,7 @@ public class ImmutableSubstitutionTools {
     ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
             ImmutableSubstitution<ImmutableTerm> substitution) {
         ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
+        for (Map.Entry<Variable, ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
             VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
 
             substitutionMapBuilder.put(entry.getKey(), value);

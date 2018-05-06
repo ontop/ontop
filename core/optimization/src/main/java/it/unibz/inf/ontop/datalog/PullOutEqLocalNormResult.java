@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog;
 
 import fj.data.List;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 
 /**
@@ -12,10 +13,10 @@ import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 public class PullOutEqLocalNormResult {
     private final List<Function> nonPushableAtoms;
     private final List<Function> pushableBoolAtoms;
-    private final Var2VarSubstitution substitution;
+    private final Substitution substitution;
 
     public PullOutEqLocalNormResult(List<Function> nonPushableAtoms, List<Function> pushableBoolAtoms,
-                                    Var2VarSubstitution var2VarSubstitution) {
+                                    Substitution var2VarSubstitution) {
         this.nonPushableAtoms = nonPushableAtoms;
         this.pushableBoolAtoms = pushableBoolAtoms;
         this.substitution = var2VarSubstitution;
@@ -33,7 +34,7 @@ public class PullOutEqLocalNormResult {
         return nonPushableAtoms.append(pushableBoolAtoms);
     }
 
-    public Var2VarSubstitution getVar2VarSubstitution() {
+    public Substitution getVar2VarSubstitution() {
         return substitution;
     }
 }

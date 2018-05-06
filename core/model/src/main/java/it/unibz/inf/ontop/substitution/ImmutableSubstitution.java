@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.*;
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
+public interface ImmutableSubstitution<T extends ImmutableTerm> {
 
     ImmutableMap<Variable, T> getImmutableMap();
 
@@ -21,8 +21,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableSet<Variable> getDomain();
 
-    @Override
     T get(Variable variable);
+
+    boolean isEmpty();
 
     /**
      * Applies the substitution to an immutable term.
