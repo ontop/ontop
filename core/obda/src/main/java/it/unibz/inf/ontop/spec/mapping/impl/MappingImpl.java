@@ -1,52 +1,76 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 public class MappingImpl implements Mapping {
 
     private final MappingMetadata metadata;
-    private final ImmutableMap<AtomPredicate, IntermediateQuery> definitions;
-    /**
-     * TODO: remove it when the conversion to Datalog will not be needed anymore
-     */
-    private final ExecutorRegistry executorRegistry;
+    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
+    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
+    private final SpecificationFactory specificationFactory;
+    private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
+
+    @Deprecated
+    @AssistedInject
+    private MappingImpl(@Assisted MappingMetadata metadata,
+                        @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
+                        @Assisted("classMap") ImmutableMap<IRI, IQ> classMap,
+                        OntopModelSettings settings,
+                        SpecificationFactory specificationFactory) {
+        this(metadata, transformIntoTable(propertyMap), transformIntoTable(classMap), settings, specificationFactory);
+    }
+
+    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
+        return map.entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
+                        e.getKey(), e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+    }
 
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap,
-                        @Assisted ExecutorRegistry executorRegistry,
-                        OntopModelSettings settings) {
+                        @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
+                        @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
+                        OntopModelSettings settings,
+                        SpecificationFactory specificationFactory) {
         this.metadata = metadata;
-        this.definitions = mappingMap;
-        this.executorRegistry = executorRegistry;
+        this.propertyDefinitions = propertyTable;
+        this.classDefinitions = classTable;
+        this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
-            for (IntermediateQuery query : mappingMap.values()) {
-                if (projectNullableVariable(query))
-                    throw new IllegalArgumentException(
-                            "A mapping assertion must not return a nullable variable. \n" + query);
+            for (IQ query : propertyDefinitions.values()) {
+                checkNullableVariables(query);
+            }
+            for (IQ query : classDefinitions.values()) {
+                checkNullableVariables(query);
             }
         }
+
+        rdfAtomPredicates = Sets.union(propertyTable.rowKeySet(), classTable.rowKeySet())
+                .immutableCopy();
     }
 
-    private static boolean projectNullableVariable(IntermediateQuery query) {
-        QueryNode rootNode = query.getRootNode();
-        return query.getProjectionAtom().getVariableStream()
-                .anyMatch(v -> rootNode.isVariableNullable(query, v));
+    private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
+        ImmutableSet<Variable> nullableVariables = query.getTree().getNullableVariables();
+        if (!nullableVariables.isEmpty())
+            throw new NullableVariableInMappingException(query, nullableVariables);
     }
 
     @Override
@@ -55,25 +79,73 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public Optional<IntermediateQuery> getDefinition(AtomPredicate predicate) {
-        IntermediateQuery query = definitions.get(predicate);
-        return query != null && query.getProjectionAtom().getPredicate().getArity() == predicate.getArity()?
-            Optional.of(query):
-            Optional.empty();
+    public Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI) {
+        return Optional.ofNullable(propertyDefinitions.get(rdfAtomPredicate, propertyIRI));
     }
 
     @Override
-    public ImmutableSet<AtomPredicate> getPredicates() {
-        return definitions.keySet();
+    public Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI) {
+        return Optional.ofNullable(classDefinitions.get(rdfAtomPredicate, classIRI));
     }
 
     @Override
-    public ImmutableCollection<IntermediateQuery> getQueries() {
-        return definitions.values();
+    public ImmutableSet<IRI> getRDFProperties(RDFAtomPredicate rdfAtomPredicate) {
+        return Optional.ofNullable(propertyDefinitions.rowMap().get(rdfAtomPredicate))
+                .map(m -> ImmutableSet.copyOf(m.keySet()))
+                .orElseGet(ImmutableSet::of);
     }
 
     @Override
-    public ExecutorRegistry getExecutorRegistry() {
-        return executorRegistry;
+    public ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate) {
+        return Optional.ofNullable(classDefinitions.rowMap().get(rdfAtomPredicate))
+                .map(m -> ImmutableSet.copyOf(m.keySet()))
+                .orElseGet(ImmutableSet::of);
+    }
+
+    @Override
+    public ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate) {
+        return Stream.concat(classDefinitions.row(rdfAtomPredicate).values().stream(),
+                    propertyDefinitions.row(rdfAtomPredicate).values().stream())
+                .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries() {
+        return propertyDefinitions.cellSet();
+    }
+
+    @Override
+    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries() {
+        return classDefinitions.cellSet();
+    }
+
+    @Override
+    public ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates() {
+        return rdfAtomPredicates;
+    }
+
+    @Override
+    public Mapping update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateTable,
+                          ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateTable) {
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> newPropertyDefs =
+                propertyUpdateTable.isEmpty()
+                        ? propertyDefinitions
+                        : updateDefinitions(propertyDefinitions, propertyUpdateTable);
+
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> newTripleClassDefs =
+                classUpdateTable.isEmpty()
+                        ? classDefinitions
+                        : updateDefinitions(classDefinitions, classUpdateTable);
+
+        return specificationFactory.createMapping(metadata, newPropertyDefs, newTripleClassDefs);
+    }
+
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> updateDefinitions(ImmutableTable<RDFAtomPredicate, IRI, IQ> currentTable,
+                                                    ImmutableTable<RDFAtomPredicate, IRI, IQ> updateTable) {
+        return Stream.concat(
+                updateTable.cellSet().stream(),
+                currentTable.cellSet().stream()
+                    .filter(c -> !updateTable.contains(c.getRowKey(), c.getColumnKey())))
+                .collect(ImmutableCollectors.toTable());
     }
 }

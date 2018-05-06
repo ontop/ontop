@@ -9,7 +9,6 @@ release.properties
 
 # gradle generated files
 .gradle
-build
 
 # Eclipse generated files
 .classpath

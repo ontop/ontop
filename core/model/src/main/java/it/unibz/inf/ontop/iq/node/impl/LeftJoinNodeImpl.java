@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -161,6 +162,39 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                     .filter(v -> !leftVariables.contains(v)))
                 .collect(ImmutableCollectors.toSet());
     }
+
+    /**
+     * Returns possible definitions for left and right-specific variables.
+     */
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
+
+        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
+                .immutableCopy();
+
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = leftChild.getPossibleVariableDefinitions().stream()
+                .map(s -> s.reduceDomainToIntersectionWith(rightSpecificVariables))
+                .collect(ImmutableCollectors.toSet());
+
+        if (leftDefs.isEmpty())
+            return rightDefs;
+        else if (rightDefs.isEmpty())
+            return leftDefs;
+        else
+            return leftDefs.stream()
+                    .flatMap(l -> rightDefs.stream()
+                            .map(r -> combine(l, r)))
+                    .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSubstitution<NonVariableTerm> combine(ImmutableSubstitution<NonVariableTerm> l,
+                                                           ImmutableSubstitution<NonVariableTerm> r) {
+        return l.union(r)
+                .orElseThrow(() -> new MinorOntopInternalBugException(
+                        "Unexpected conflict between " + l + " and " + r));
+    }
+
 
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild) {

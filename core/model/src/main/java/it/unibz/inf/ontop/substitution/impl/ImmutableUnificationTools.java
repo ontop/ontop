@@ -6,16 +6,19 @@ import com.google.common.collect.ImmutableMap;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
@@ -24,22 +27,22 @@ import java.util.*;
 public class ImmutableUnificationTools {
 
     private final TermFactory termFactory;
-    private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
     private final ImmutabilityTools immutabilityTools;
+    private final TypeFactory typeFactory;
 
     @Inject
-    private ImmutableUnificationTools(TermFactory termFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
+    private ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                       ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
-                                      ImmutabilityTools immutabilityTools) {
+                                      ImmutabilityTools immutabilityTools, TypeFactory typeFactory) {
         this.termFactory = termFactory;
-        this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
         this.immutabilityTools = immutabilityTools;
+        this.typeFactory = typeFactory;
     }
 
     /**
@@ -135,8 +138,6 @@ public class ImmutableUnificationTools {
 
     }
 
-    private static String PREDICATE_STR = "pred";
-
     /**
      * TODO: explain
      *
@@ -156,7 +157,7 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        Predicate functionSymbol = atomFactory.getAtomPredicate(PREDICATE_STR, args1.size());
+        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size(), typeFactory);
 
         return computeMGU(termFactory.getImmutableFunctionalTerm(functionSymbol, args1),
                 termFactory.getImmutableFunctionalTerm(functionSymbol, args2))
@@ -216,10 +217,10 @@ public class ImmutableUnificationTools {
         ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
         ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
 
-        Predicate predicate = atomFactory.getAtomPredicate(PREDICATE_STR, firstArgList.size());
+        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(firstArgList.size(), typeFactory);
 
-        ImmutableFunctionalTerm functionalTerm1 = termFactory.getImmutableFunctionalTerm(predicate, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = termFactory.getImmutableFunctionalTerm(predicate, secondArgList);
+        ImmutableFunctionalTerm functionalTerm1 = termFactory.getImmutableFunctionalTerm(functionSymbol, firstArgList);
+        ImmutableFunctionalTerm functionalTerm2 = termFactory.getImmutableFunctionalTerm(functionSymbol, secondArgList);
 
         return computeMGU(functionalTerm1, functionalTerm2);
     }
@@ -429,6 +430,25 @@ public class ImmutableUnificationTools {
             }
         }
         return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
+    }
+
+    /**
+     * TODO: get rid of it about refactoring the unification tools
+     */
+    private static class TemporaryFunctionSymbol extends PredicateImpl {
+
+        private TemporaryFunctionSymbol(int arity, TypeFactory typeFactory) {
+            super("pred", arity, createExpectedBaseTermTypeList(arity, typeFactory), false);
+        }
+
+        private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity, TypeFactory typeFactory) {
+            TermType rootTermType = typeFactory.getAbstractAtomicTermType();
+
+            return IntStream.range(0, arity)
+                    .boxed()
+                    .map(i -> rootTermType)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
 
 }

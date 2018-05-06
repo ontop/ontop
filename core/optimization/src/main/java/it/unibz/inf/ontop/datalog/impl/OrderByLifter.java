@@ -7,13 +7,10 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.QueryModifierNode;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -35,17 +32,14 @@ import java.util.Optional;
  */
 public class OrderByLifter {
 
-    private final IQConverter iqConverter;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private OrderByLifter(IQConverter iqConverter, IntermediateQueryFactory iqFactory) {
-        this.iqConverter = iqConverter;
+    private OrderByLifter(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 
-    public IntermediateQuery liftOrderBy(IntermediateQuery initialQuery) {
-        IQ iq = iqConverter.convert(initialQuery);
+    public IQ liftOrderBy(IQ iq) {
 
         List<QueryModifierNode> ancestors = new ArrayList<>();
 
@@ -75,14 +69,7 @@ public class OrderByLifter {
                 for (QueryModifierNode modifierNode : ancestors) {
                     newTree = iqFactory.createUnaryIQTree(modifierNode, newTree);
                 }
-                try {
-                    return iqConverter.convert(
-                            iqFactory.createIQ(iq.getProjectionAtom(), newTree),
-                            initialQuery.getDBMetadata(), initialQuery.getExecutorRegistry());
-                } catch (EmptyQueryException e) {
-                    throw new MinorOntopInternalBugException("Lifting the ORDER BY was not expected " +
-                            "to make the query empty");
-                }
+                return iqFactory.createIQ(iq.getProjectionAtom(), newTree);
             }
             else
                 throw new IllegalArgumentException(

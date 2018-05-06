@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.resultset;
 
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
+import org.eclipse.rdf4j.query.Binding;
 
 public interface OntopBinding {
     /**

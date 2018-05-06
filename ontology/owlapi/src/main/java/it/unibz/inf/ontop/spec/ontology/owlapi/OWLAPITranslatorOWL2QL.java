@@ -2,14 +2,19 @@ package it.unibz.inf.ontop.spec.ontology.owlapi;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.*;
+import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
+import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -37,11 +42,13 @@ public class OWLAPITranslatorOWL2QL {
 
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
 
     @Inject
     private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.rdfFactory = new SimpleRDF();
     }
 
     public static class TranslationException extends Exception {
@@ -203,7 +210,7 @@ public class OWLAPITranslatorOWL2QL {
                     throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 
                 OClass concept = getOClass((OWLClass) classExpression, builder.classes());
-                URIConstant c = getIndividual(ax.getIndividual());
+                IRIConstant c = getIndividual(ax.getIndividual());
 
                 builder.addClassAssertion(concept, c);
             }
@@ -453,8 +460,8 @@ public class OWLAPITranslatorOWL2QL {
         @Override
         public void visit(OWLObjectPropertyAssertionAxiom ax) {
             try {
-                URIConstant c1 = getIndividual(ax.getSubject());
-                URIConstant c2 = getIndividual(ax.getObject());
+                IRIConstant c1 = getIndividual(ax.getSubject());
+                IRIConstant c2 = getIndividual(ax.getObject());
                 ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), builder.objectProperties());
 
                 builder.addObjectPropertyAssertion(ope, c1, c2);
@@ -615,7 +622,7 @@ public class OWLAPITranslatorOWL2QL {
         @Override
         public void visit(OWLDataPropertyAssertionAxiom ax) {
             try {
-                URIConstant c1 = getIndividual(ax.getSubject());
+                IRIConstant c1 = getIndividual(ax.getSubject());
                 ValueConstant c2 = getValueOfLiteral(ax.getObject());
                 DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), builder.dataProperties());
 
@@ -956,7 +963,7 @@ public class OWLAPITranslatorOWL2QL {
         @Override
         public void visit(OWLAnnotationAssertionAxiom ax) {
             try {
-                URIConstant c1 = getIndividual(ax.getSubject());
+                IRIConstant c1 = getIndividual(ax.getSubject());
                 Constant c2 = getValue(ax.getValue());
                 AnnotationProperty ap = getPropertyExpression(ax.getProperty(), builder.annotationProperties());
 
@@ -1000,21 +1007,21 @@ public class OWLAPITranslatorOWL2QL {
             throw new OWLAPITranslatorOWL2QL.TranslationException("complex class expressions are not supported");
 
         OClass concept = getOClass((OWLClass) classExpression, classes);
-        URIConstant c = getIndividual(ax.getIndividual());
+        IRIConstant c = getIndividual(ax.getIndividual());
 
         return OntologyBuilderImpl.createClassAssertion(concept, c);
     }
 
     public ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax, OntologyVocabularyCategory<ObjectPropertyExpression> objectProperties) throws TranslationException, InconsistentOntologyException {
-        URIConstant c1 = getIndividual(ax.getSubject());
-        URIConstant c2 = getIndividual(ax.getObject());
+        IRIConstant c1 = getIndividual(ax.getSubject());
+        IRIConstant c2 = getIndividual(ax.getObject());
 
         ObjectPropertyExpression ope = getPropertyExpression(ax.getProperty(), objectProperties);
         return OntologyBuilderImpl.createObjectPropertyAssertion(ope, c1, c2);
     }
 
     public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
-        URIConstant c1 = getIndividual(ax.getSubject());
+        IRIConstant c1 = getIndividual(ax.getSubject());
         ValueConstant c2 = getValueOfLiteral(ax.getObject());
 
         DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
@@ -1024,7 +1031,7 @@ public class OWLAPITranslatorOWL2QL {
 
     public AnnotationAssertion translate(OWLAnnotationAssertionAxiom ax, OntologyVocabularyCategory<AnnotationProperty> annotationProperties) throws TranslationException, InconsistentOntologyException {
 
-        URIConstant c1 = getIndividual(ax.getSubject());
+        IRIConstant c1 = getIndividual(ax.getSubject());
         Constant c2 = getValue(ax.getValue());
         AnnotationProperty ap = getPropertyExpression(ax.getProperty(), annotationProperties);
 
@@ -1070,11 +1077,12 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
-    private URIConstant getIndividual(OWLIndividual ind) throws TranslationException {
+    private IRIConstant getIndividual(OWLIndividual ind) throws TranslationException {
         if (ind.isAnonymous())
             throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + ind);
 
-        return termFactory.getConstantURI(ind.asOWLNamedIndividual().getIRI().toString());
+
+        return termFactory.getConstantIRI(rdfFactory.createIRI(ind.asOWLNamedIndividual().getIRI().toString()));
     }
 
     private ValueConstant getValueOfLiteral(OWLLiteral object) {
@@ -1089,9 +1097,9 @@ public class OWLAPITranslatorOWL2QL {
         }
     }
 
-    private URIConstant getIndividual(OWLAnnotationSubject subject) throws TranslationException {
+    private IRIConstant getIndividual(OWLAnnotationSubject subject) throws TranslationException {
         if (subject instanceof IRI) {
-            return termFactory.getConstantURI(((IRI)subject).asIRI().get().toString());
+            return termFactory.getConstantIRI(rdfFactory.createIRI(((IRI)subject).asIRI().get().toString()));
         }
         else
             throw new OWLAPITranslatorOWL2QL.TranslationException("Found anonymous individual, this feature is not supported:" + subject);
@@ -1100,7 +1108,7 @@ public class OWLAPITranslatorOWL2QL {
     private Constant getValue(OWLAnnotationValue value)  throws TranslationException {
         try {
             if (value instanceof IRI) {
-                return termFactory.getConstantURI(value.asIRI().get().toString());
+                return termFactory.getConstantIRI(rdfFactory.createIRI(value.asIRI().get().toString()));
             }
             else if (value instanceof OWLLiteral) {
                 return getValueOfLiteral(value.asLiteral().get());

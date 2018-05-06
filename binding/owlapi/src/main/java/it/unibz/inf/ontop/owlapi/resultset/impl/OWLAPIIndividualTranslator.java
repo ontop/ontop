@@ -86,8 +86,8 @@ public class OWLAPIIndividualTranslator {
 	 * @return
 	 */
 	public OWLIndividual translate(ObjectConstant constant) {
-		if (constant instanceof URIConstant)
-			return dataFactory.getOWLNamedIndividual(IRI.create(((URIConstant)constant).getURI()));		
+		if (constant instanceof IRIConstant)
+			return dataFactory.getOWLNamedIndividual(IRI.create(((IRIConstant)constant).getIRI().getIRIString()));
 
 		else /*if (constant instanceof BNode)*/ 
 			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
@@ -121,8 +121,8 @@ public class OWLAPIIndividualTranslator {
 	}
 
 	public OWLAnnotationSubject translateAnnotationSubject(ObjectConstant subject) {
-		if (subject instanceof URIConstant)
-			return IRI.create(((URIConstant) subject).getURI());
+		if (subject instanceof IRIConstant)
+			return IRI.create(((IRIConstant) subject).getIRI().getIRIString());
 		else if (subject instanceof BNode)
 			return dataFactory.getOWLAnonymousIndividual(((BNode) subject).getName());
 		else
@@ -133,8 +133,8 @@ public class OWLAPIIndividualTranslator {
 	public OWLAnnotationValue translateAnnotationValue(Constant constant) {
 		if (constant instanceof ValueConstant)
 			return translate((ValueConstant) constant);
-		else if (constant instanceof URIConstant)
-			return IRI.create(((URIConstant) constant).getURI());
+		else if (constant instanceof IRIConstant)
+			return IRI.create(((IRIConstant) constant).getIRI().getIRIString());
 		else if (constant instanceof BNode)
 			return dataFactory.getOWLAnonymousIndividual(((BNode) constant).getName());
 		else

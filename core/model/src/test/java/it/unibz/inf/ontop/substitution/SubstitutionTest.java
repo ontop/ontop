@@ -3,13 +3,13 @@ package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 import static org.junit.Assert.assertEquals;
 
 public class SubstitutionTest {
@@ -19,7 +19,6 @@ public class SubstitutionTest {
     private static final Variable Y = TERM_FACTORY.getVariable("y");
     private static final Variable Z = TERM_FACTORY.getVariable("z");
     private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static final Predicate F_ARITY_1 = ATOM_FACTORY.getAtomPredicate("f", 1);
 
     @Test
     public void testOrientate1() {
@@ -140,7 +139,7 @@ public class SubstitutionTest {
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
                 ImmutableMap.of(
-                        X, TERM_FACTORY.getImmutableFunctionalTerm(F_ARITY_1, Y),
+                        X, TERM_FACTORY.getImmutableFunctionalTerm(IS_NOT_NULL, Y),
                         Y, ONE
                 ));
 

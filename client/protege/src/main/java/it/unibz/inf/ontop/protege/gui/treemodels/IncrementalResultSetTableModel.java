@@ -26,6 +26,7 @@ import javax.swing.table.TableModel;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -87,12 +88,12 @@ public class IncrementalResultSetTableModel implements TableModel {
 	 */
 	public void close() {
 		try {
-			set.close();
-		} catch (SQLException e) {
-			// NO-OP
-		}
-		try {
-			set.getStatement().close();			
+			Statement statement = set.getStatement();
+			if (statement!=null && !statement.isClosed())
+				statement.close();
+			// Normally not necessary (according to the JDBC standard)
+			if (set!=null && !set.isClosed())
+				set.close();
 		} catch (SQLException e) {
 			// NO-OP
 		}

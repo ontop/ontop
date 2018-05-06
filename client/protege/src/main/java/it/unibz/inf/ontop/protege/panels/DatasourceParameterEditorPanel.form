@@ -136,7 +136,7 @@
             </Property>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
               <StringArray count="7">
-                <StringItem index="0" value="select or type the JDBC Driver&apos;s class..."/>
+                <StringItem index="0" value="select or type the JDBC Driver class..."/>
                 <StringItem index="1" value="org.postgresql.Driver"/>
                 <StringItem index="2" value="com.mysql.jdbc.Driver"/>
                 <StringItem index="3" value="org.h2.Driver"/>

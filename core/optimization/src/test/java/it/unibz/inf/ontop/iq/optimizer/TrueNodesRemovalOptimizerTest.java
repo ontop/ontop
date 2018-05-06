@@ -24,9 +24,9 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 
 public class TrueNodesRemovalOptimizerTest {
 
-    private final AtomPredicate ANS1_ARITY_0_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 0);
-    private final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private final AtomPredicate ANS1_ARITY_0_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(0);
+    private final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
 
     private final Variable A = TERM_FACTORY.getVariable("a");
     private final Variable B = TERM_FACTORY.getVariable("b");

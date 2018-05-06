@@ -23,13 +23,10 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import org.semanticweb.owlapi.model.IRI;
-import org.semarglproject.vocab.OWL;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Implements MutableOntologyVocabulary
@@ -46,37 +43,30 @@ import java.util.function.Function;
 public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary {
 
 	private static final class MutableOntologyVocabularyCategoryImpl implements MutableOntologyVocabularyCategory {
-		private final Map<String, Predicate> entities = new HashMap<>();
-		private final ImmutableSet<String> builtins;
-		private final Function<String, Predicate> ctor;
+		private final Set<IRI> entities;
+		private final ImmutableSet<IRI> builtins;
 
-		MutableOntologyVocabularyCategoryImpl(ImmutableSet<String> builtins, Function<String, Predicate> ctor) {
+		MutableOntologyVocabularyCategoryImpl(ImmutableSet<IRI> builtins) {
             this.builtins = builtins;
-            this.ctor = ctor;
-		    builtins.forEach(c -> entities.put(c, ctor.apply(c)));
+            entities = new HashSet<>(builtins);
 		}
 
 		@Override
-		public boolean contains(String iri) { return entities.containsKey(iri); }
+		public boolean contains(IRI iri) { return entities.contains(iri); }
 
 		@Override
 		public void declare(IRI iri) {
-		    String s = iri.toString();
-		    if (!entities.containsKey(s)) {
-		        Predicate p = ctor.apply(s);
-                entities.put(s, p);
-            }
+			entities.add(iri);
 		}
 
 		@Override
 		public void remove(IRI iri) {
-            String s = iri.toString();
-		    if (!builtins.contains(s))
-		        entities.remove(s);
+		    if (!builtins.contains(iri))
+		        entities.remove(iri);
 		}
 
 		@Override
-		public Iterator<Predicate> iterator() { return entities.values().iterator(); }
+		public Iterator<IRI> iterator() { return entities.iterator(); }
 	}
 
 	private final MutableOntologyVocabularyCategoryImpl classes;
@@ -86,22 +76,18 @@ public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary 
 	private final MutableOntologyVocabularyCategoryImpl annotationProperties;
 
 	// package only
-	MutableOntologyVocabularyImpl(AtomFactory atomFactory) {
+	MutableOntologyVocabularyImpl() {
 		classes = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(OWL.THING, OWL.NOTHING),
-				atomFactory::getClassPredicate);
+				ImmutableSet.of(OWL.THING, OWL.NOTHING));
 
 		objectProperties = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(OWL.BOTTOM_OBJECT_PROPERTY, OWL.TOP_OBJECT_PROPERTY),
-				atomFactory::getObjectPropertyPredicate);
+				ImmutableSet.of(OWL.BOTTOM_OBJECT_PROPERTY, OWL.TOP_OBJECT_PROPERTY));
 
 		dataProperties = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(OWL.BOTTOM_DATA_PROPERTY, OWL.TOP_DATA_PROPERTY),
-				atomFactory::getDataPropertyPredicate);
+				ImmutableSet.of(OWL.BOTTOM_DATA_PROPERTY, OWL.TOP_DATA_PROPERTY));
 
 		annotationProperties = new MutableOntologyVocabularyCategoryImpl(
-				ImmutableSet.of(),
-				atomFactory::getAnnotationPropertyPredicate);
+				ImmutableSet.of());
 	}
 
 	@Override

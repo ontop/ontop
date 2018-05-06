@@ -18,4 +18,9 @@ public class DistinctVariableOnlyDataAtomImpl extends VariableOnlyDataAtomImpl i
     protected DistinctVariableOnlyDataAtomImpl(AtomPredicate predicate, Variable... variables) {
         super(predicate, variables);
     }
+
+    @Override
+    public Variable getTerm(int index) {
+        return (Variable) super.getTerm(index);
+    }
 }

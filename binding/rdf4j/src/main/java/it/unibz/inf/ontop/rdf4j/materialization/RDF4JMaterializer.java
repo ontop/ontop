@@ -3,14 +3,13 @@ package it.unibz.inf.ontop.rdf4j.materialization;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.rdf4j.materialization.impl.DefaultRDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
+import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
 import javax.annotation.Nonnull;
-import java.net.URI;
 
 public interface RDF4JMaterializer {
 
@@ -25,7 +24,7 @@ public interface RDF4JMaterializer {
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
     MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                          @Nonnull ImmutableSet<URI> selectedVocabulary,
+                                          @Nonnull ImmutableSet<IRI> selectedVocabulary,
                                           @Nonnull MaterializationParams params)
             throws RepositoryException;
 
@@ -42,7 +41,7 @@ public interface RDF4JMaterializer {
      * with the default options
      */
     default MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                  @Nonnull ImmutableSet<URI> selectedVocabulary)
+                                                  @Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws RepositoryException {
         return materialize(configuration, selectedVocabulary, MaterializationParams.defaultBuilder().build());
     }

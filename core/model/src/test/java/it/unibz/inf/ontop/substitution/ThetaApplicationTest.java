@@ -58,7 +58,7 @@ public class ThetaApplicationTest extends TestCase {
 		Term t4 = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t4);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot = (FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 
 		Term t5 = TERM_FACTORY.getConstantLiteral("con");
@@ -66,10 +66,10 @@ public class ThetaApplicationTest extends TestCase {
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars5.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars5.size());
 		FunctionalTermImpl ot2 = (FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars5);
 
-		Predicate pred1 = TERM_FACTORY.getPredicate("A", 5);
+		Predicate pred1 = new OntopModelTestPredicate("A", 5);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
 		terms1.add(t2);
@@ -89,10 +89,10 @@ public class ThetaApplicationTest extends TestCase {
 		Term t12 = TERM_FACTORY.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
-		Predicate fs3 = TERM_FACTORY.getPredicate("uri", vars3.size());
+		Predicate fs3 = new OntopModelTestPredicate("uri", vars3.size());
 		FunctionalTermImpl otx = (FunctionalTermImpl) TERM_FACTORY.getFunction(fs3, vars3);
 
-		Predicate head = TERM_FACTORY.getPredicate("q", 1);
+		Predicate head = new OntopModelTestPredicate("q", 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t10);
 		Function h = TERM_FACTORY.getFunction(head, terms2);

@@ -1,0 +1,31 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/incidents#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-Incident
+target		:incident{IncidntNum} a :Incident .
+source		SELECT IncidntNum
+			  FROM SFincidents.incidents_trunc
+
+mappingId	MAPID-IncidenthasCity
+target		:incident{IncidntNum} :hasCity :city{zip} .
+source		SELECT inc.IncidntNum, join_zip.zip
+			  FROM SFincidents.incidents_trunc AS inc
+			 LEFT JOIN SFincidents.zip_lookup AS join_zip ON inc.Lon = join_zip.Lon AND inc.Lat = join_zip.Lat
+
+mappingId	MAPID-CityName
+target		:city{zip} :hasName {city} . 
+source		SELECT zip.zip, join_demo.city
+			  FROM SFincidents.zip_lookup as zip
+			 INNER JOIN SFincidents.zip_demographics AS join_demo ON zip.zip = join_demo.zip
+
+mappingId	MAPID-City
+target		:city{zip} a :City . 
+source		SELECT zip FROM SFincidents.zip_lookup
+]]
+

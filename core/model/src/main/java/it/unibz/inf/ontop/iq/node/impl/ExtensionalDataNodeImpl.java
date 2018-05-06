@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -105,6 +106,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
             RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
             ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
+            ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(arguments);
 
             // NB: DB column indexes start at 1.
             nullableVariables = IntStream.range(0, arguments.size())
@@ -112,6 +114,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                     .filter(i -> relation.getAttribute(i + 1).canNull())
                     .mapToObj(arguments::get)
                     .map(a -> (Variable) a)
+                    // An implicit filter condition makes them non-nullable
+                    .filter(a -> argMultiset.count(a) < 2)
                     .collect(ImmutableCollectors.toSet());
         }
         return nullableVariables;

@@ -175,6 +175,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        return child.getPossibleVariableDefinitions();
+    }
+
+    @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
         IQTree newChild = child.removeDistincts();
 

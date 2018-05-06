@@ -485,6 +485,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
                 + "ELSE NULL END ";
     }
 
+    @Override
+    public String getNullForLang() {
+        return "NULL";
+    }
+
     /**
      * Concatenates the strings.
      * Default way to name a variable or a view.

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -29,9 +30,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree rightChild;
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> nullableVariables = null;
+    private ImmutableSet<Variable> nullableVariables;
     @Nullable
-    private Boolean isDistinct = null;
+    private Boolean isDistinct;
+    @Nullable
+    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
@@ -41,6 +44,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
+        this.nullableVariables = null;
+        this.possibleVariableDefinitions = null;
+        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -148,6 +154,23 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         return properties.areDistinctAlreadyRemoved()
                 ? this
                 : getRootNode().removeDistincts(leftChild, rightChild, properties);
+    }
+
+    @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        return iqFactory.createBinaryNonCommutativeIQTree(getRootNode(),
+                leftChild.replaceSubTree(subTreeToReplace, newSubTree),
+                rightChild.replaceSubTree(subTreeToReplace, newSubTree));
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (possibleVariableDefinitions == null)
+            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
+        return possibleVariableDefinitions;
     }
 
     @Override

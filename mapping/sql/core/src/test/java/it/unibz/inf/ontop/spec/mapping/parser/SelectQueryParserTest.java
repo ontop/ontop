@@ -401,13 +401,13 @@ public class SelectQueryParserTest {
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
-    private Function dataAtomOf(String predicate, String var1, String var2) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
+    private Function dataAtomOf(String predicateName, String var1, String var2) {
+        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 2, TYPE_FACTORY),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
-    private Function dataAtomOf(String predicate, String var1, String var2, String var3, String var4) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(predicate, ImmutableList.of(ROOT_TERM_TYPE, ROOT_TERM_TYPE)),
+    private Function dataAtomOf(String predicateName, String var1, String var2, String var3, String var4) {
+        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 4, TYPE_FACTORY),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 

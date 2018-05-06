@@ -26,9 +26,9 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE2_PREDICATE;
     private final static RelationPredicate TABLE1_PREDICATE;
-    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans2", 2);
-    private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS3_VAR3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans3", 3);
+    private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final static AtomPredicate ANS3_VAR3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");

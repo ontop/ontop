@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -29,6 +30,8 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     }
 
     ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild);
+
+    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 
     IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild);
 

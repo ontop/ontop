@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
@@ -104,6 +105,36 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             throws QueryNodeTransformationException {
         return transformer.transform(this);
     }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
+        return children.stream()
+                .map(IQTree::getPossibleVariableDefinitions)
+                .filter(s -> !s.isEmpty())
+                .reduce(ImmutableSet.of(), this::combineVarDefs);
+    }
+
+    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> combineVarDefs(
+            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s1,
+            ImmutableSet<ImmutableSubstitution<NonVariableTerm>> s2) {
+        return s1.isEmpty()
+                ? s2
+                : s1.stream()
+                    .flatMap(d1 -> s2.stream()
+                        /*
+                         * Takes the first definition of a common variable.
+                         *
+                         * Behaves like an union except that is robust to "non-identical" definitions.
+                         * If normalized, two definitions for the same variables are expected to be compatible.
+                         *
+                         * If not normalized, the definitions may be incompatible, but that's fine
+                         * since they will not produce any result.
+                         *
+                         */
+                        .map(d2 -> d2.composeWith2(d1)))
+                    .collect(ImmutableCollectors.toSet());
+    }
+
 
     @Override
     public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
@@ -242,7 +273,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .filter(e -> e.getValue().size() == 1)
                 .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
                 .map(Map.Entry::getKey)
-                .filter(this::isFilteringNullValue)
+                .filter(v -> !isFilteringNullValue(v))
                 .collect(ImmutableCollectors.toSet());
     }
 

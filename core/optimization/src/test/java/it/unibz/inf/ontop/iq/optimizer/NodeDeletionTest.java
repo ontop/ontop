@@ -27,7 +27,7 @@ public class NodeDeletionTest {
         Variable x = TERM_FACTORY.getVariable("x");
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 1), x);
+                ATOM_FACTORY.getRDFAnswerPredicate( 1), x);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
@@ -63,7 +63,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 2), x, y);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
@@ -107,7 +107,7 @@ public class NodeDeletionTest {
         Variable y = TERM_FACTORY.getVariable("y");
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 2), x, y);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
@@ -173,7 +173,7 @@ public class NodeDeletionTest {
         Variable y = TERM_FACTORY.getVariable("y");
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 2), x, y);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
         ImmutableSet<Variable> projectedVariables = projectionAtom.getVariables();
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
 
@@ -187,7 +187,7 @@ public class NodeDeletionTest {
         UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
         queryBuilder.addChild(rootNode, topUnion);
 
-        //DataAtom subAtom = ATOM_FACTORY.getDataAtom(ATOM_FACTORY.getAtomPredicate("ansu1", 2), x, y);
+        //DataAtom subAtom = ATOM_FACTORY.getDataAtom(ATOM_FACTORY.getRDFAnswerPredicate("ansu1", 2), x, y);
         
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectedVariables);
         queryBuilder.addChild(topUnion, constructionNode1);
@@ -240,7 +240,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(x,y));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                ATOM_FACTORY.getAtomPredicate("ans1", 2), x, y);
+                ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);

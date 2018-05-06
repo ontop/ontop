@@ -2,18 +2,17 @@ package it.unibz.inf.ontop.si.impl;
 
 
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.IriConstants;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
+import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import it.unibz.inf.ontop.si.SemanticIndexException;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.*;
@@ -49,8 +48,9 @@ public class RDF4JGraphLoading {
 
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
-        SIRepository repo = new SIRepository(vocabulary.tbox(), defaultConfiguration.getAtomFactory(),
-                defaultConfiguration.getTermFactory(), defaultConfiguration.getTypeFactory());
+        SIRepository repo = new SIRepository(vocabulary.tbox(), defaultConfiguration.getTermFactory(),
+                defaultConfiguration.getTypeFactory(),
+                defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class));
         Connection connection = repo.createConnection();
 
         //  Load the data
@@ -77,7 +77,7 @@ public class RDF4JGraphLoading {
         public void handleStatement(Statement st) throws RDFHandlerException {
             String predicateName = st.getPredicate().stringValue();
             Value obj = st.getObject();
-            if (predicateName.equals(IriConstants.RDF_TYPE)) {
+            if (predicateName.equals(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.stringValue())) {
                 vb.declareClass(obj.stringValue());
             }
             else if (obj instanceof Literal) {
@@ -152,7 +152,7 @@ public class RDF4JGraphLoading {
             Resource subject = st.getSubject();
             final ObjectConstant c;
             if (subject instanceof IRI) {
-                c = termFactory.getConstantURI(subject.stringValue());
+                c = termFactory.getConstantIRI(rdfFactory.createIRI(subject.stringValue()));
             }
             else if (subject instanceof BNode) {
                 c = termFactory.getConstantBNode(subject.stringValue());
@@ -166,11 +166,11 @@ public class RDF4JGraphLoading {
 
             // Create the assertion
             try {
-                if (predicateName.equals(IriConstants.RDF_TYPE)) {
+                if (predicateName.equals(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.stringValue() )) {
                     return builder.createClassAssertion(object.stringValue(), c);
                 }
                 else if (object instanceof IRI) {
-                    ObjectConstant c2 = termFactory.getConstantURI(object.stringValue());
+                    ObjectConstant c2 = termFactory.getConstantIRI(rdfFactory.createIRI(object.stringValue()));
                     return builder.createObjectPropertyAssertion(predicateName, c, c2);
                 }
                 else if (object instanceof BNode) {

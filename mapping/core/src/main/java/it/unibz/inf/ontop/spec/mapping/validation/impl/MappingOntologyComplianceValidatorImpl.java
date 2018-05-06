@@ -7,20 +7,27 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
+import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -63,29 +70,38 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableMultimap<String, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
-        for (Map.Entry<IntermediateQuery, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
+        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
         }
     }
 
-    private void validateAssertion(IntermediateQuery mappingAssertion, PPMappingAssertionProvenance provenance,
+    private void validateAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance,
                                    Ontology ontology,
                                    ImmutableMultimap<String, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
-        String predicateIRI = extractPredicateIRI(mappingAssertion);
+        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
 
-        Optional<RDFTermType> tripleObjectType = extractTripleObjectType(mappingAssertion);
-        checkTripleObject(predicateIRI, tripleObjectType, provenance, ontology, datatypeMap);
+        IRI predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
+
+        Optional<RDFTermType> tripleObjectType;
+
+
+        /*
+         * Class property
+         */
+        if(predicateIRI.equals(RDF.TYPE)){
+            predicateIRI = MappingTools.extractPredicateTerm(mappingAssertion, projectedVariables.get(2));
+            tripleObjectType= Optional.empty();
+        }
+        else{
+            tripleObjectType = extractTripleObjectType(mappingAssertion);
+        }
+
+        checkTripleObject(predicateIRI.getIRIString(), tripleObjectType, provenance, ontology, datatypeMap);
     }
 
-    private String extractPredicateIRI(IntermediateQuery mappingAssertion) {
-        AtomPredicate projectionAtomPredicate = mappingAssertion.getProjectionAtom().getPredicate();
-        if (projectionAtomPredicate.equals(atomFactory.getTripleAtomPredicate()))
-            throw new RuntimeException("TODO: extract the RDF predicate from a triple atom");
-        else
-            return projectionAtomPredicate.getName();
-    }
+
 
     /**
      * For a mapping assertion using an RDF property (not rdf:type) the building expression of the triple object
@@ -98,85 +114,47 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * TODO: refactor it!
      *
      */
-    private Optional<RDFTermType> extractTripleObjectType(IntermediateQuery mappingAssertion)
+    private Optional<RDFTermType> extractTripleObjectType(IQ mappingAssertion)
             throws TripleObjectTypeInferenceException {
 
-        Optional<Variable> optionalObjectVariable = extractTripleObjectVariable(mappingAssertion);
-        if (optionalObjectVariable.isPresent()) {
-            Variable objectVariable = optionalObjectVariable.get();
-
-            ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getRootNode())
-                    .filter(n -> n instanceof ConstructionNode)
-                    .map((n) -> (ConstructionNode) n)
-                    .map(ConstructionNode::getSubstitution)
-                    .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
-                    .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                            "Not defined in the root node (expected for a mapping assertion)"));
-
-            if (constructionTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
-                Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
-                if ((functionSymbol instanceof BNodePredicate)
-                        || (functionSymbol instanceof URITemplatePredicate)) {
-                    return Optional.of(typeFactory.getIRITermType());
-                }
-                else if (functionSymbol instanceof DatatypePredicate) {
-                    DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
-                    return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());
-                }
-                else {
-                    throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                            "Unexpected function symbol: " + functionSymbol);
-                }
-            }
-
-            else {
-                /*
-                 * TODO: consider variables and constants (NB: could be relevant for SPARQL->SPARQL
-                  * but not much for SPARQL->SQL where RDF terms have to built)
-                 */
-                throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                        "Was expecting a functional term (constants and variables are not yet supported). \n"
-                                + "Term definition: " + constructionTerm);
-            }
-
-        }
-        /*
-         * Class property
-         */
-        else
-            return Optional.empty();
-    }
-
-    private RDFDatatype extractLangTermType(ImmutableFunctionalTerm constructionFunctionalTerm) {
-        ImmutableList<? extends ImmutableTerm> arguments = constructionFunctionalTerm.getArguments();
-        ImmutableTerm langTerm = arguments.get(1);
-
-        if (!(langTerm instanceof Constant)) {
-            // TODO: throw a proper exception
-            throw new IllegalStateException("A langString must have a constant language tag: "
-                    + constructionFunctionalTerm);
-        }
-        return typeFactory.getLangTermType(((Constant) langTerm).getValue());
-    }
-
-    private Optional<Variable> extractTripleObjectVariable(IntermediateQuery mappingAssertion)
-            throws TripleObjectTypeInferenceException {
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
+        Variable objectVariable = projectedVariables.get(2);
 
-        switch (projectedVariables.size()) {
-            // Class
-            case 1:
-                return Optional.empty();
-            // Property
-            case 2:
-                return Optional.of(projectedVariables.get(1));
-            // Triple predicate
-            case 3:
-                return Optional.of(projectedVariables.get(2));
-            default:
-                throw new TripleObjectTypeInferenceException(mappingAssertion, "Unexpected arity of the projection atom");
+        ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getTree().getRootNode())
+                .filter(n -> n instanceof ConstructionNode)
+                .map((n) -> (ConstructionNode) n)
+                .map(ConstructionNode::getSubstitution)
+                .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
+                .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                        "Not defined in the root node (expected for a mapping assertion)"));
+
+        if (constructionTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
+            Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
+            if ((functionSymbol instanceof BNodePredicate)
+                    || (functionSymbol instanceof URITemplatePredicate)) {
+                return Optional.of(typeFactory.getIRITermType());
+            }
+            else if (functionSymbol instanceof DatatypePredicate) {
+                DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
+                return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());
+            }
+            else {
+                throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                        "Unexpected function symbol: " + functionSymbol);
+            }
         }
+
+        else {
+            /*
+             * TODO: consider variables and constants (NB: could be relevant for SPARQL->SPARQL
+              * but not much for SPARQL->SQL where RDF terms have to built)
+             */
+            throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                    "Was expecting a functional term (constants and variables are not yet supported). \n"
+                            + "Term definition: " + constructionTerm);
+        }
+
     }
 
 
@@ -328,28 +306,28 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
                 .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap(
-                        e -> e.getKey().getName(),
+                        e -> e.getKey().getIRIString(),
                         Map.Entry::getValue));
     }
 
 
-    private ImmutableMap<Predicate, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
+    private ImmutableMap<IRI, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
                                                                                ClassifiedTBox reasoner) {
         DataRangeExpression node = nodeSet.getRepresentative();
 
-        return ImmutableMap.<Predicate, Datatype>builder()
+        return ImmutableMap.<IRI, Datatype>builder()
                 .putAll(getDescendentNodesPartialMap(reasoner, node, nodeSet))
                 .putAll(getEquivalentNodesPartialMap(node, nodeSet))
                 .build();
     }
 
-    private ImmutableMap<Predicate, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
+    private ImmutableMap<IRI, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
             return reasoner.dataRangesDAG().getSub(nodeSet).stream()
                     .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
-                    .map(this::getPredicate)
+                    .map(this::getPredicateIRI)
                     .filter(Optional::isPresent)
                     .collect(ImmutableCollectors.toMap(
                             Optional::get,
@@ -359,17 +337,17 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         return ImmutableMap.of();
     }
 
-    private ImmutableMap<Predicate, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node,
+    private ImmutableMap<IRI, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
-        ImmutableMap.Builder<Predicate, Datatype> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<IRI, Datatype> builder = ImmutableMap.builder();
         for (DataRangeExpression equivalent : nodeSet) {
             if (equivalent != node) {
                 if (equivalent instanceof Datatype) {
-                    getPredicate(node)
+                    getPredicateIRI(node)
                             .ifPresent(p -> builder.put(p, (Datatype) equivalent));
                 }
                 if (node instanceof Datatype) {
-                    getPredicate(equivalent)
+                    getPredicateIRI(equivalent)
                             .ifPresent(p -> builder.put(p, (Datatype) node));
                 }
             }
@@ -380,31 +358,30 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     //TODO: check whether the DataRange expression can be neither a Datatype nor a DataPropertyRangeExpression:
     // if the answer is no, drop the Optional and throw an exception instead
-    private Optional<Predicate> getPredicate(DataRangeExpression expression) {
+    private Optional<IRI> getPredicateIRI(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
-            return typeFactory.getOptionalDatatype(((Datatype) expression).getIRI())
-                    .flatMap(termFactory::getOptionalTypePredicate)
-                    .map(p -> (Predicate) p);
+            return Optional.of(((Datatype) expression).getIRI());
         }
         if (expression instanceof DataPropertyRangeExpression) {
-            return Optional.of(atomFactory.getDataPropertyPredicate(
-                    ((DataPropertyRangeExpression) expression).getProperty().getIRI()));
+            return Optional.of(((DataPropertyRangeExpression) expression).getProperty().getIRI());
         }
         return Optional.empty();
     }
 
     private static class TripleObjectTypeInferenceException extends OntopInternalBugException {
-        TripleObjectTypeInferenceException(IntermediateQuery mappingAssertion, Variable tripleObjectVariable,
+        TripleObjectTypeInferenceException(IQ mappingAssertion, Variable tripleObjectVariable,
                                            String reason) {
             super("Internal bug: cannot infer the type of " + tripleObjectVariable + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
 
-        TripleObjectTypeInferenceException(IntermediateQuery mappingAssertion, String reason) {
+        TripleObjectTypeInferenceException(IQ mappingAssertion, String reason) {
             super("Internal bug: cannot infer the type of the object term " + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
     }
+
+
 
     private static class UndeterminedTripleObjectType extends OntopInternalBugException {
         UndeterminedTripleObjectType(String predicateName, TermType tripleObjectType) {

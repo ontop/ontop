@@ -3,44 +3,11 @@ package it.unibz.inf.ontop.model.atom;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
 public interface AtomFactory {
 
-    @Deprecated
-    AtomPredicate getAtomPredicate(String name, int arity);
-
-    AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes);
-
-    AtomPredicate getAtomPredicate(Predicate datalogPredicate);
-
-    @Deprecated
-    AtomPredicate getObjectPropertyPredicate(String name);
-
-    AtomPredicate getObjectPropertyPredicate(IRI iri);
-
-    AtomPredicate getDataPropertyPredicate(String name, TermType type);
-
-    @Deprecated
-    AtomPredicate getAnnotationPropertyPredicate(String name);
-
-    AtomPredicate getAnnotationPropertyPredicate(IRI iri);
-
-    @Deprecated
-    AtomPredicate getDataPropertyPredicate(String name);
-
-    AtomPredicate getDataPropertyPredicate(IRI iri);
-
-    @Deprecated
-    AtomPredicate getClassPredicate(String name);
-
-    AtomPredicate getClassPredicate(IRI iri);
-
-    AtomPredicate getOWLSameAsPredicate();
-
-    AtomPredicate getOBDACanonicalIRI();
+    AtomPredicate getRDFAnswerPredicate(int arity);
 
     /**
      * Beware: a DataAtom is immutable
@@ -66,13 +33,48 @@ public interface AtomFactory {
 
     VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> terms);
 
-    Function getTripleAtom(Term subject, Term predicate, Term object);
-
-    AtomPredicate getTripleAtomPredicate();
+    Function getMutableTripleAtom(Term subject, Term predicate, Term object);
 
     /**
-     * TODO: create an abstraction of DataAtom (Atom) that accepts arbitrary ImmutableTerms as arguments
-     * (not only Variable or ground terms)
+     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
      */
-    ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
+    Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object);
+    
+    /**
+     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
+     */
+    Function getMutableTripleBodyAtom(Term subject, IRI classIRI);
+
+    /**
+     * In the head, constant IRIs are wrapped into a URI function
+     */
+    Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object);
+
+    /**
+     * In the head, constant IRIs are wrapped into a URI function
+     */
+    Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
+
+    DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
+
+    /**
+     * TODO: change the generic-type to RDFAtomPredicate?
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                     VariableOrGroundTerm object);
+
+    /**
+     * TODO: change the generic-type to RDFAtomPredicate?
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
+                                                     VariableOrGroundTerm object);
+
+    /**
+     * TODO: change the generic-type to RDFAtomPredicate?
+     */
+    DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI);
+
+
+    DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
+                                                     Variable namedGraph);
 }

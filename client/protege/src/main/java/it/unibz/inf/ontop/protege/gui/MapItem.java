@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.protege.gui;
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 public class MapItem {
 
@@ -45,7 +46,7 @@ public class MapItem {
 		}
 	}
 	
-	public Predicate getSourcePredicate() {
+	public IRI getPredicateIRI() {
 		return predicateItem.getSource();
 	}
 

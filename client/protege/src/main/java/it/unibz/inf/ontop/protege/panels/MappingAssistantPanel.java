@@ -28,8 +28,10 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLSer
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -49,6 +51,7 @@ import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
 import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
+import org.apache.commons.rdf.api.IRI;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -95,8 +98,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
     private final TermFactory termFactory;
-	private final AtomFactory atomFactory;
 	private final JdbcTypeMapper jdbcTypeMapper;
+	private final TargetAtomFactory targetAtomFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -105,7 +108,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		this.owlModelManager = owlModelManager;
 		prefixManager = obdaModel.getMutablePrefixManager();
         termFactory = obdaModel.getTermFactory();
-        atomFactory = obdaModel.getAtomFactory();
+        targetAtomFactory = obdaModel.getTargetAtomFactory();
         jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
 		initComponents();
 
@@ -307,7 +310,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 		pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
 		Vector<Object> v = new Vector<>();
-		for (Predicate c : obdaModel.getCurrentVocabulary().classes()) {
+		for (IRI c : obdaModel.getCurrentVocabulary().classes()) {
 			v.addElement(new PredicateItem(c, CLASS, prefixManager));
 		}
 		cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -534,7 +537,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Prepare the mapping target
 			List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			ImmutableList<ImmutableFunctionalTerm> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			ImmutableList<TargetAtom> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 
 			if (target.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
@@ -558,14 +561,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 
-	private ImmutableList<ImmutableFunctionalTerm> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private ImmutableList<TargetAtom> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
-		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
 		// Store concept in the body, if any
 		ImmutableTerm subjectTerm = createSubjectTerm(predicateSubjectMap);
-		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			ImmutableFunctionalTerm concept = termFactory.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+		if (!predicateSubjectMap.getPredicateIRI().equals(OWL.THING)) {
+			TargetAtom concept = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateSubjectMap.getPredicateIRI());
 			bodyBuilder.add(concept);
 		}
 
@@ -574,12 +577,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				ImmutableTerm objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				ImmutableFunctionalTerm attribute = termFactory.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				TargetAtom attribute = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateObjectMap.getPredicateIRI(), objectTerm);
 				bodyBuilder.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				ImmutableFunctionalTerm objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				ImmutableFunctionalTerm role = termFactory.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				TargetAtom role = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateObjectMap.getPredicateIRI(), objectRefTerm);
 				bodyBuilder.add(role);
 			}
 		}
@@ -659,7 +662,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(atomFactory.getClassPredicate("owl:Thing"), CLASS, prefixManager));
+		return new MapItem(new PredicateItem(OWL.THING, CLASS, prefixManager));
 	}
 
 	private ImmutableFunctionalTerm getUriFunctionTerm(String text) {

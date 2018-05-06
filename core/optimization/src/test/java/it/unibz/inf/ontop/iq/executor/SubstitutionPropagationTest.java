@@ -27,8 +27,8 @@ import static org.junit.Assert.assertTrue;
 public class SubstitutionPropagationTest {
 
 
-    private static final AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private static final AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private static final AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private static final AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
 
 
     private static final Variable X = TERM_FACTORY.getVariable("x");

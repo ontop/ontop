@@ -22,26 +22,32 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.datalog.OrderCondition;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -92,7 +98,7 @@ public class OneShotSQLGeneratorEngine {
 	private final RDBMetadata metadata;
 	private final QuotedIDFactory idFactory;
 	private final SQLDialectAdapter sqladapter;
-	private final IntermediateQuery2DatalogTranslator iq2DatalogTranslator;
+	private final IQ2DatalogTranslator iq2DatalogTranslator;
 	private final TypeExtractor typeExtractor;
 
 	private final boolean distinctResultSet;
@@ -111,6 +117,8 @@ public class OneShotSQLGeneratorEngine {
 	private final DatalogFactory datalogFactory;
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
+	private final IQConverter iqConverter;
+	private final UnionFlattener unionFlattener;
 
 
 	// the only two mutable (query-dependent) fields
@@ -122,11 +130,11 @@ public class OneShotSQLGeneratorEngine {
 							  IRIDictionary iriDictionary,
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
-							  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+							  IQ2DatalogTranslator iq2DatalogTranslator,
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-							  TypeFactory typeFactory, TermFactory termFactory) {
+							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter, UnionFlattener unionFlattener) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -134,6 +142,8 @@ public class OneShotSQLGeneratorEngine {
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
+		this.iqConverter = iqConverter;
+		this.unionFlattener = unionFlattener;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -165,13 +175,15 @@ public class OneShotSQLGeneratorEngine {
 	 * For clone purposes only
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
-                                      boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
+									  boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<ExpressionOperation, String> operations,
-									  IntermediateQuery2DatalogTranslator iq2DatalogTranslator,
+									  IQ2DatalogTranslator iq2DatalogTranslator,
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
-									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory, TypeFactory typeFactory, TermFactory termFactory) {
+									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
+									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
+									  UnionFlattener unionFlattener) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -188,6 +200,8 @@ public class OneShotSQLGeneratorEngine {
 		this.datalogFactory = datalogFactory;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
+		this.iqConverter = iqConverter;
+		this.unionFlattener = unionFlattener;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -245,7 +259,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory);
+                typeFactory, termFactory, iqConverter, unionFlattener);
 	}
 
 	/**
@@ -260,7 +274,7 @@ public class OneShotSQLGeneratorEngine {
 	public SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
 			throws OntopReformulationException {
 
-		IntermediateQuery normalizedQuery = normalizeIQ(intermediateQuery);
+		IQ normalizedQuery = normalizeIQ(intermediateQuery);
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
@@ -315,16 +329,24 @@ public class OneShotSQLGeneratorEngine {
 		return new SQLExecutableQuery(resultingQuery, signature);
 	}
 
-	private IntermediateQuery normalizeIQ(IntermediateQuery intermediateQuery) {
+	private IQ normalizeIQ(IntermediateQuery intermediateQuery) {
 
-		IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
-				.optimize(intermediateQuery);
-		log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(intermediateQuery));
+		log.debug("New query after flattening the union: \n" + flattenIQ);
 
-		IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
-		log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+		try {
+			IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+					.optimize(iqConverter.convert(flattenIQ, intermediateQuery.getDBMetadata(),
+							intermediateQuery.getExecutorRegistry()));
+			log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
 
-		return queryAfterPullOut;
+			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
+			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+
+			return iqConverter.convert(queryAfterPullOut);
+		} catch (EmptyQueryException e) {
+			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
+		}
 	}
 
 
@@ -964,7 +986,7 @@ public class OneShotSQLGeneratorEngine {
 		if (ht instanceof Variable) {
 			return index.getLangColumn((Variable) ht)
 					.map(QualifiedAttributeID::getSQLRendering)
-					.orElse("NULL");
+					.orElse(sqladapter.getNullForLang());
 		}
 		else {
 			return optionalTermType
@@ -972,7 +994,7 @@ public class OneShotSQLGeneratorEngine {
 					.map(t -> (RDFDatatype)t)
 					.flatMap(RDFDatatype::getLanguageTag)
 					.map(tag -> sqladapter.getSQLLexicalFormString(tag.getFullString()))
-					.orElse("NULL");
+					.orElseGet(sqladapter::getNullForLang);
 		}
     }
 
@@ -1173,8 +1195,8 @@ public class OneShotSQLGeneratorEngine {
 			}
 			return getSQLLexicalForm(ct);
 		}
-		else if (term instanceof URIConstant) {
-			URIConstant uc = (URIConstant) term;
+		else if (term instanceof IRIConstant) {
+			IRIConstant uc = (IRIConstant) term;
 			if (hasIRIDictionary()) {
 				int id = getUriid(uc.getValue());
 				return sqladapter.getSQLLexicalFormString(String.valueOf(id));

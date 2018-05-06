@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -24,15 +25,20 @@ import java.util.Optional;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
-
+    // Lazy
     @Nullable
-    private Boolean isDistinct = null;
+    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
+    @Nullable
+    private Boolean isDistinct;
+
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+        possibleVariableDefinitions = null;
+        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -113,6 +119,22 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         return getRootNode().propagateDownConstraint(constraint, getChild());
+    }
+
+    @Override
+    public IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree) {
+        if (equals(subTreeToReplace))
+            return newSubTree;
+
+        return iqFactory.createUnaryIQTree(getRootNode(),
+                getChild().replaceSubTree(subTreeToReplace, newSubTree));
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        if (possibleVariableDefinitions == null)
+            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
+        return possibleVariableDefinitions;
     }
 
     @Override

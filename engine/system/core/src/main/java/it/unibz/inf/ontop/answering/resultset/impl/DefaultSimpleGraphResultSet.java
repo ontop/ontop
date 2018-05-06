@@ -27,17 +27,22 @@ import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
@@ -120,11 +125,11 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 String predicateName = predicateConstant.getValue();
                 try {
                     Assertion assertion;
-                    if (predicateName.equals(IriConstants.RDF_TYPE)) {
+                    if (predicateName.equals(RDF.TYPE.getIRIString())) {
                         assertion = builder.createClassAssertion(objectConstant.getValue(), subjectConstant);
                     }
                     else {
-                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
+                        if ((objectConstant instanceof IRIConstant) || (objectConstant instanceof BNode)) {
                             assertion = builder.createObjectPropertyAssertion(predicateName,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
@@ -187,7 +192,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
-                constant = termFactory.getConstantURI(vc.getValue().stringValue());
+                constant = termFactory.getConstantIRI(new SimpleRDF().createIRI(vc.getValue().stringValue()));
             }
             else if (vc.getValue() instanceof Literal) {
                 constant = termFactory.getConstantLiteral(vc.getValue().stringValue());

@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -39,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
 /**
@@ -684,8 +685,10 @@ public class ExpressionEvaluator {
                 return valueFalse;
             }
             if (!function1.isDataTypeFunction()){
-                return evalRegexSingleExpression( eval(expr));
-
+				Term evaluatedExpression = eval(expr);
+				return expr.equals(evaluatedExpression)
+						? expr
+						: evalRegexSingleExpression(evaluatedExpression);
             }
         }
         return expr;
@@ -723,13 +726,29 @@ public class ExpressionEvaluator {
 			return termFactory.getBooleanConstant(!isnull);
 		}
 
-		/*
-		 * Special optimization for URI templates
-		 */
 		if (result instanceof Function) {
 			Function functionalTerm = (Function) result;
-			if (functionalTerm.getFunctionSymbol() instanceof URITemplatePredicate) {
+			Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+			/*
+			 * Special optimization for URI templates
+			 */
+			if (functionSymbol instanceof URITemplatePredicate) {
 				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull);
+			}
+			/*
+			 * All the functions that accepts null
+			 * TODO: add COALESCE
+			 */
+			else if (functionSymbol != IS_NULL
+					&& functionSymbol != IS_NOT_NULL
+					&& functionSymbol != IF_ELSE_NULL) {
+				Expression notNullExpression = datalogTools.foldBooleanConditions(
+						functionalTerm.getTerms().stream()
+								.map(t -> termFactory.getFunction(IS_NOT_NULL, t))
+								.collect(Collectors.toList()));
+				return eval(isnull
+						? termFactory.getFunction(NOT, notNullExpression)
+						: notNullExpression);
 			}
 		}
 

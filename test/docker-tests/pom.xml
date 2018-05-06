@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-test</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-beta-2-SNAPSHOT</version>
+        <version>3.0.0-beta-2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <properties>
@@ -79,6 +79,10 @@
         <dependency>
             <groupId>com.sap.db.jdbc.Driver</groupId>
             <artifactId>hana</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dremio.jdbc</groupId>
+            <artifactId>dremio-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jtds</groupId>

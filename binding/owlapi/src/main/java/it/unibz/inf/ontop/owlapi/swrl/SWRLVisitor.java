@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 	private final DatalogFactory datalogFactory;
+	private final SimpleRDF rdfFactory;
 
 	public SWRLVisitor(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
 					   DatalogFactory datalogFactory){
@@ -52,6 +55,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogFactory = datalogFactory;
+		this.rdfFactory = new SimpleRDF();
 
 		facts = new HashSet<CQIE>();
 		
@@ -161,7 +165,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 			
 		//get predicate for datalog
-		Predicate predicate= atomFactory.getClassPredicate(node.getPredicate().asOWLClass().toStringID());
+		IRI classIRI = rdfFactory.createIRI(node.getPredicate().asOWLClass().toStringID());
 		
 		terms = new ArrayList<Term>();
 		//get terms for datalog
@@ -169,8 +173,9 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 			argument.accept(this);
 			
 		}
-		
-		function = termFactory.getFunction(predicate, terms);
+
+		//TODO: check if it a head or a body
+		function = atomFactory.getMutableTripleBodyAtom(terms.get(0), classIRI);
 		}
 		else{
 			notSupported=false;
@@ -195,7 +200,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		//we consider only namedOwlObjectProperty example not an object property expression such as inv(p)
 		if(!node.getPredicate().isAnonymous()){
 			
-			predicate= atomFactory.getObjectPropertyPredicate(node.getPredicate().asOWLObjectProperty().toStringID());
+			IRI propertyIRI = rdfFactory.createIRI(node.getPredicate().asOWLObjectProperty().toStringID());
 			
 			terms = new ArrayList<Term>();
 			//get terms for datalog
@@ -203,7 +208,9 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 				argument.accept(this);
 	
 			}
-			function = termFactory.getFunction(predicate, terms);
+
+			//TODO: check if it a head or a body
+			function = atomFactory.getMutableTripleBodyAtom(terms.get(0), propertyIRI, terms.get(1));
 		}
 		else{
 			notSupported=false;
@@ -219,7 +226,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if(!node.getPredicate().isAnonymous()){
 		
 			//get predicate for datalog
-			 predicate= atomFactory.getDataPropertyPredicate(node.getPredicate().asOWLDataProperty().toStringID());
+			IRI propertyIRI = rdfFactory.createIRI(node.getPredicate().asOWLDataProperty().toStringID());
 					
 			terms = new ArrayList<Term>();
 					//get terms for datalog
@@ -227,7 +234,8 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 						argument.accept(this);
 			
 					}
-			function = termFactory.getFunction(predicate, terms);
+			//TODO: check if it a head or a body
+			function = atomFactory.getMutableTripleBodyAtom(terms.get(0), propertyIRI, terms.get(1));
 		}
 		else{
 			notSupported=false;

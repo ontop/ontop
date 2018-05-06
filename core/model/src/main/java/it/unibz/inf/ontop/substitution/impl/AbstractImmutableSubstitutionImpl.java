@@ -369,6 +369,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
+        if (restrictingDomain.containsAll(getDomain()))
+            return this;
         return substitutionFactory.getSubstitution(
                 this.getImmutableMap().entrySet().stream()
                         .filter(e -> restrictingDomain.contains(e.getKey()))
@@ -535,6 +537,17 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> (ImmutableFunctionalTerm) e.getValue()));
+
+        return substitutionFactory.getSubstitution(newMap);
+    }
+
+    @Override
+    public ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment() {
+        ImmutableMap<Variable, NonVariableTerm> newMap = getImmutableMap().entrySet().stream()
+                .filter(e -> e.getValue() instanceof NonVariableTerm)
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (NonVariableTerm) e.getValue()));
 
         return substitutionFactory.getSubstitution(newMap);
     }

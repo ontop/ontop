@@ -13,9 +13,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
  */
 public interface AtomPredicate extends Predicate {
 
-    @Override
-    @Deprecated
-    boolean isTriplePredicate();
 
     /**
      * TODO: get rid of it after splitting predicates and functional symbols

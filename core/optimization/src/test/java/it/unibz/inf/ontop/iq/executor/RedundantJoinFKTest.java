@@ -32,8 +32,8 @@ public class RedundantJoinFKTest {
     private final static RelationPredicate TABLE2_PREDICATE;
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE4_PREDICATE;
-    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final static AtomPredicate ANS1_PREDICATE_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable B = TERM_FACTORY.getVariable("B");

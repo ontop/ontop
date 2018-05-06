@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.core;
  */
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
@@ -30,9 +31,10 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -41,7 +43,10 @@ import it.unibz.inf.ontop.spec.mapping.converter.OldSyntaxMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.querymanager.*;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -93,6 +98,7 @@ public class OBDAModelManager implements Disposable {
 	private final OntopConfigurationManager configurationManager;
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
+	private final RDF rdfFactory = new SimpleRDF();
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -116,6 +122,7 @@ public class OBDAModelManager implements Disposable {
 	private final AtomFactory atomFactory;
 	private final Relation2Predicate relation2Predicate;
 	private final DatalogFactory datalogFactory;
+	private final TargetAtomFactory targetAtomFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
 
@@ -138,6 +145,9 @@ public class OBDAModelManager implements Disposable {
 		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
+		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
+		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
+		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -160,7 +170,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper);
+				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, jdbcTypeMapper);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -200,7 +210,12 @@ public class OBDAModelManager implements Disposable {
 		return typeFactory;
 	}
 
-    /***
+	public TargetAtomFactory getTargetAtomFactory() {
+		return targetAtomFactory;
+	}
+
+
+	/***
 	 * This ontology change listener has some euristics that determine if the
 	 * user is refactoring his ontology. In particular, this listener will try
 	 * to determine if some add/remove axioms are in fact a "renaming"
@@ -233,16 +248,16 @@ public class OBDAModelManager implements Disposable {
 
 					// Setup the entity declarations
 					for (OWLClass c : addedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().classes().declare(c.getIRI());
+						activeOBDAModel.getCurrentVocabulary().classes().declare(getIRI(c));
 
 					for (OWLObjectProperty r : addedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().objectProperties().declare(r.getIRI());
+						activeOBDAModel.getCurrentVocabulary().objectProperties().declare(getIRI(r));
 
 					for (OWLDataProperty p : addedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().dataProperties().declare(p.getIRI());
+						activeOBDAModel.getCurrentVocabulary().dataProperties().declare(getIRI(p));
 
 					for (OWLAnnotationProperty p : addedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(p.getIRI());
+						activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(getIRI(p));
 
 					continue;
 				}
@@ -255,16 +270,16 @@ public class OBDAModelManager implements Disposable {
 					OBDAModel activeOBDAModel = getActiveOBDAModel();
 
 					for (OWLClass c : removedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().classes().remove(c.getIRI());
+						activeOBDAModel.getCurrentVocabulary().classes().remove(getIRI(c));
 
 					for (OWLObjectProperty r : removedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().objectProperties().remove(r.getIRI());
+						activeOBDAModel.getCurrentVocabulary().objectProperties().remove(getIRI(r));
 
 					for (OWLDataProperty p : removedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().dataProperties().remove(p.getIRI());
+						activeOBDAModel.getCurrentVocabulary().dataProperties().remove(getIRI(p));
 
 					for (OWLAnnotationProperty p : removedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(p.getIRI());
+						activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(getIRI(p));
 
 					continue;
 				}
@@ -276,19 +291,19 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().classes().declare(oc.getIRI());
+							activeOBDAModel.getCurrentVocabulary().classes().declare(getIRI(oc));
 						}
 						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().objectProperties().declare(or.getIRI());
+							activeOBDAModel.getCurrentVocabulary().objectProperties().declare(getIRI(or));
 						}
 						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().dataProperties().declare(op.getIRI());
+							activeOBDAModel.getCurrentVocabulary().dataProperties().declare(getIRI(op));
 						}
 						else if (entity instanceof OWLAnnotationProperty){
 							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(ap.getIRI());
+							activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(getIRI(ap));
 						}
 					}
 				}
@@ -299,20 +314,20 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().classes().remove(oc.getIRI());
+							activeOBDAModel.getCurrentVocabulary().classes().remove(getIRI(oc));
 						}
 						else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().objectProperties().remove(or.getIRI());
+							activeOBDAModel.getCurrentVocabulary().objectProperties().remove(getIRI(or));
 						}
 						else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().dataProperties().remove(op.getIRI());
+							activeOBDAModel.getCurrentVocabulary().dataProperties().remove(getIRI(op));
 						}
 
 						else if (entity instanceof  OWLAnnotationProperty ){
 							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(ap.getIRI());
+							activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(getIRI(ap));
 						}
 
 					}
@@ -355,16 +370,16 @@ public class OBDAModelManager implements Disposable {
 
 				// This set of changes appears to be a "renaming" operation,
 				// hence we will modify the OBDA model accordingly
-				Predicate removedPredicate = getPredicate(removedEntity);
-				Predicate newPredicate = getPredicate(newEntity);
+				org.apache.commons.rdf.api.IRI removedIRI = getIRI(removedEntity);
+				org.apache.commons.rdf.api.IRI newIRI = getIRI(newEntity);
 
-				obdamodel.renamePredicate(removedPredicate, newPredicate);
+				obdamodel.changePredicateIri(removedIRI, newIRI);
 			}
 
 			// Applying the deletions to the obda model
 			for (OWLEntity removede : removals) {
-				Predicate removedPredicate = getPredicate(removede);
-				obdamodel.deletePredicate(removedPredicate);
+				org.apache.commons.rdf.api.IRI removedIRI = getIRI(removede);
+				obdamodel.deletePredicateIRI(removedIRI);
 			}
 		}
 
@@ -402,31 +417,8 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private Predicate getPredicate(OWLEntity entity) {
-		Predicate p = null;
-		if (entity instanceof OWLClass) {
-			/* We ignore TOP and BOTTOM (Thing and Nothing) */
-			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
-				return null;
-			}
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getClassPredicate(uri);
-		} else if (entity instanceof OWLObjectProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getObjectPropertyPredicate(uri);
-		} else if (entity instanceof OWLDataProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getDataPropertyPredicate(uri);
-
-		} else if (entity instanceof OWLAnnotationProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getAnnotationPropertyPredicate(uri);
-		}
-		return p;
+	private org.apache.commons.rdf.api.IRI getIRI(OWLEntity entity) {
+		return rdfFactory.createIRI(entity.getIRI().toString());
 	}
 
 
@@ -617,7 +609,7 @@ public class OBDAModelManager implements Disposable {
 				}
 				// adding type information to the mapping predicates
 				for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
-					List<? extends Function> tq = mapping.getTargetAtoms();
+					ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
 					if (!TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary()).isEmpty()) {
 						throw new Exception("Found an invalid target query: " + tq.toString());
 					}
@@ -690,21 +682,21 @@ public class OBDAModelManager implements Disposable {
 		}
 	}
 
-	private static void loadVocabularyAndDefaultPrefix(OBDAModel obdaModel, Set<OWLOntology> ontologies,
+	private void loadVocabularyAndDefaultPrefix(OBDAModel obdaModel, Set<OWLOntology> ontologies,
 													   OWLOntology activeOntology) {
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
 			for (OWLClass c : ontology.getClassesInSignature())
-				obdaModel.getCurrentVocabulary().classes().declare(c.getIRI());
+				obdaModel.getCurrentVocabulary().classes().declare(getIRI(c));
 
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().objectProperties().declare(r.getIRI());
+				obdaModel.getCurrentVocabulary().objectProperties().declare(getIRI(r));
 
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().dataProperties().declare(p.getIRI());
+				obdaModel.getCurrentVocabulary().dataProperties().declare(getIRI(p));
 
 			for (OWLAnnotationProperty p : ontology.getAnnotationPropertiesInSignature())
-				obdaModel.getCurrentVocabulary().annotationProperties().declare(p.getIRI());
+				obdaModel.getCurrentVocabulary().annotationProperties().declare(getIRI(p));
 		}
 
 		String unsafeDefaultPrefix = activeOntology.getOntologyID().getOntologyIRI()
