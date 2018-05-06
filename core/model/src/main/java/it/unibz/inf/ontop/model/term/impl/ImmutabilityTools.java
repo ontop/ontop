@@ -97,6 +97,16 @@ public class ImmutabilityTools {
         return mutableList;
     }
 
+    public Term convertToMutableTerm(ImmutableTerm term) {
+        if (term instanceof Variable)
+            return (Variable) term;
+        else if (term instanceof Constant)
+            return (Constant) term;
+        else {
+            return convertToMutableFunction((ImmutableFunctionalTerm) term);
+        }
+    }
+
 
     /**
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.

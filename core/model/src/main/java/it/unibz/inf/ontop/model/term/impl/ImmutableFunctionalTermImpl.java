@@ -91,6 +91,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
                     .collect(Collectors.toList());
 
             sb.append(String.join(",", argumentStrings));
+            sb.append(")");
             string = sb.toString();
         }
         return string;
