@@ -1602,8 +1602,7 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        // TODO: simplify it
-        ImmutableExpression newExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, createInjectiveFunctionalTerm1(B));
+        ImmutableExpression newExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, B);
 
         ConstructionNode newConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X, D),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(B)));
