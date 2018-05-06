@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.atom;
 
+import it.unibz.inf.ontop.model.term.Variable;
+
 /**
  * TODO: find a better name
  *
@@ -7,4 +9,7 @@ package it.unibz.inf.ontop.model.atom;
  *
  */
 public interface DistinctVariableOnlyDataAtom extends VariableOnlyDataAtom, DistinctVariableDataAtom {
+
+    @Override
+    Variable getTerm(int index);
 }

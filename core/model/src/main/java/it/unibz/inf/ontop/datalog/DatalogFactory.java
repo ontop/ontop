@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.datalog;
 
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 
@@ -41,5 +42,10 @@ public interface DatalogFactory {
     AlgebraOperatorPredicate getSparqlGroupPredicate();
     AlgebraOperatorPredicate getSparqlHavingPredicate();
 
-    String getSubqueryPredicatePrefix();
+    AtomPredicate getSubqueryPredicate(String suffix, int arity);
+
+    /**
+     * TODO: is suffix necessary?
+     */
+    AtomPredicate getDummyPredicate(int suffix);
 }

@@ -22,9 +22,9 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 
 public interface TargetQueryParser {
 
-	ImmutableList<ImmutableFunctionalTerm> parse(String input) throws TargetQueryParserException;
+	ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException;
 }

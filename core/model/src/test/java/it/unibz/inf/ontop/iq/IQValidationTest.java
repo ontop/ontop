@@ -35,8 +35,8 @@ public class IQValidationTest {
     private final static RelationPredicate TABLE2_3;
     private final static RelationPredicate TABLE2_4;
     private final static RelationPredicate TABLE3;
-    private final static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 3);
-    private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_VAR3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
+    private final static AtomPredicate ANS1_VAR1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
@@ -120,7 +120,7 @@ public class IQValidationTest {
     public void testUnionNodeChild() {
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P3_PREDICATE, ImmutableList.of(A, B, C));
+                        ANS1_VAR3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(DB_METADATA, EXECUTOR_REGISTRY);
 
@@ -149,7 +149,7 @@ public class IQValidationTest {
     public void testUnionNodeProjectedVariables() {
         DistinctVariableOnlyDataAtom ROOT_CONSTRUCTION_NODE_ATOM =
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
-                        P3_PREDICATE, ImmutableList.of(A, B, C));
+                        ANS1_VAR3_PREDICATE, ImmutableList.of(A, B, C));
 
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(DB_METADATA, EXECUTOR_REGISTRY);
 

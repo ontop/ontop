@@ -25,8 +25,8 @@ import static junit.framework.TestCase.assertTrue;
 
 public class PushUpBooleanExpressionOptimizerTest {
     
-    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static Variable U = TERM_FACTORY.getVariable("U");
     private final static Variable V = TERM_FACTORY.getVariable("V");
     private final static Variable W = TERM_FACTORY.getVariable("W");

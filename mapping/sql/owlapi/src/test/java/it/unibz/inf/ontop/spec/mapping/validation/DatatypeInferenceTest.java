@@ -4,11 +4,12 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -93,11 +94,14 @@ public class DatatypeInferenceTest {
     }
 
     private void checkDatatype(Mapping mapping, IRI expectedType) {
-        Optional<Predicate> optionalDatatype = mapping.getPredicates().stream()
-                .map(mapping::getDefinition)
+        RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
+                .findFirst().get();
+
+        Optional<Predicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+                .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .flatMap(query -> Optional.of(query.getRootNode())
+                .flatMap(query -> Optional.of(query.getTree().getRootNode())
                         .filter(r -> r instanceof ConstructionNode)
                         .map(r -> (ConstructionNode)r)
                         .map(r -> r.getSubstitution().getImmutableMap().values().stream())

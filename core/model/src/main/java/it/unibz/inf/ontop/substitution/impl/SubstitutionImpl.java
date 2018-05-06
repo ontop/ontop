@@ -22,12 +22,15 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.impl.*;
+import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
+import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
 import it.unibz.inf.ontop.substitution.AppendableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
 
@@ -247,7 +250,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
                     || (term1 instanceof ValueConstantImpl)
-                    || (term1 instanceof URIConstantImpl)
+                    || (term1 instanceof IRIConstantImpl)
                     || (term1 instanceof BNodeConstantImpl)
                     ) {
 
@@ -283,7 +286,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             else
                 return new SingletonSubstitution(t1, t2);
         }
-        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
+        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof IRIConstantImpl)) {
             return new SingletonSubstitution(t1, t2);
         }
         else if (t2 instanceof Function) {

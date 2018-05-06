@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class ReformulationTestingTools {
 
@@ -36,6 +37,8 @@ public class ReformulationTestingTools {
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final CQCUtilities CQC_UTILITIES;
+
+    public static final SimpleRDF RDF_FACTORY;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -60,6 +63,8 @@ public class ReformulationTestingTools {
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
+
+        RDF_FACTORY = new SimpleRDF();
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {

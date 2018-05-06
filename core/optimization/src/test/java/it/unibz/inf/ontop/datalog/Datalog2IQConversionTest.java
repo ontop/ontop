@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
@@ -31,7 +32,7 @@ public class Datalog2IQConversionTest {
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-        AtomPredicate predicate = ATOM_FACTORY.getAtomPredicate("ans", 5);
+        AtomPredicate predicate = ATOM_FACTORY.getRDFAnswerPredicate(5);
 
         Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 

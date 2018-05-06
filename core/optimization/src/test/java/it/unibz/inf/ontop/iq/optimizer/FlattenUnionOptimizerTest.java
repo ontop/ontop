@@ -21,7 +21,7 @@ import static junit.framework.TestCase.assertTrue;
 public class FlattenUnionOptimizerTest {
 
     
-    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");

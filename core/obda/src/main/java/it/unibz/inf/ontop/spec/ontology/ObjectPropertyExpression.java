@@ -52,6 +52,7 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	
 	IRI getIRI();
 
+	@Deprecated
 	public String getName();
 	
 	/**

@@ -23,13 +23,12 @@ package it.unibz.inf.ontop.answering.connection.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.*;
 import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.URIConstant;
-import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQueryUtility;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -276,9 +275,9 @@ public abstract class QuestStatement implements OntopStatement {
 				while (resultSet.hasNext()) {
                     final OntopBindingSet bindingSet = resultSet.next();
                     Constant constant = bindingSet.getConstant(1);
-					if (constant instanceof URIConstant) {
+					if (constant instanceof IRIConstant) {
 						// collect constants in list
-						constantSetBuilder.add(((URIConstant) constant).getURI());
+						constantSetBuilder.add(((IRIConstant) constant).getIRI().getIRIString());
 					}
 				}
 				return constantSetBuilder.build();

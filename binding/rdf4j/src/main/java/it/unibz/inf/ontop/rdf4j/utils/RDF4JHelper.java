@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.utils;
 
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -8,6 +7,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Objects;
 
@@ -18,8 +18,8 @@ public class RDF4JHelper {
 	public static Resource getResource(ObjectConstant obj) {
 		if (obj instanceof BNode)
 			return fact.createBNode(((BNode)obj).getName());
-		else if (obj instanceof URIConstant)
-			return fact.createIRI(((URIConstant)obj).getURI());
+		else if (obj instanceof IRIConstant)
+			return fact.createIRI(((IRIConstant) obj).getIRI().getIRIString());
 		else
             return null;
 			//throw new IllegalArgumentException("Invalid constant as subject!" + obj);
@@ -106,7 +106,7 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(ClassAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getIndividual()),
-				createURI(IriConstants.RDF_TYPE),
+				RDF.TYPE,
 				createURI(assertion.getConcept().getIRI().getIRIString()));
 	}
 }

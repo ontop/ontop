@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.protege.panels;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
@@ -41,6 +41,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,10 +180,10 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	}
 
 	private void insertMapping(String target, String source) {
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = parse(target);
+		ImmutableList<TargetAtom> targetQuery = parse(target);
 		if (targetQuery != null) {
 			// List of invalid predicates that are found by the validator.
-			List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
+			List<IRI> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
 			if (invalidPredicates.isEmpty()) {
 				try {
 					OBDAModel mapcon = obdaModel;
@@ -212,7 +213,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			}
 			else {
 				String invalidList = "";
-				for (String predicate : invalidPredicates) {
+				for (IRI predicate : invalidPredicates) {
 					invalidList += "- " + predicate + "\n";
 				}
 				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
@@ -587,9 +588,9 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 
 	private SQLPPTriplesMap mapping;
 
-	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
+	private ImmutableList<TargetAtom> parse(String query) {
         TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
+				obdaModel.getTermFactory(), obdaModel.getTargetAtomFactory());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
@@ -624,11 +625,11 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
+		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
+		ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
 	}

@@ -94,6 +94,7 @@ public class IQImpl implements IQ {
     @Override
     public boolean equals(Object otherObject) {
         return (otherObject instanceof IQ)
+                && projectionAtom.equals(((IQ) otherObject).getProjectionAtom())
                 && tree.isEquivalentTo(((IQ) otherObject).getTree());
     }
 

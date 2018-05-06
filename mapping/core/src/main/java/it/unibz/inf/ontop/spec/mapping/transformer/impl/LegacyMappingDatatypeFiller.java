@@ -81,7 +81,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         for(CQIE rule : ruleMap.keySet()){
             typeCompletion.insertDataTyping(rule);
         }
-        return datalog2MappingConverter.convertMappingRules(ruleMap, dbMetadata,
-                mapping.getExecutorRegistry(), mapping.getMetadata());
+        return datalog2MappingConverter.convertMappingRules(ruleMap, mapping.getMetadata());
     }
 }

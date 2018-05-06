@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
-
-import java.net.URI;
+import org.apache.commons.rdf.api.IRI;
 
 
 public class OntopMaterializedGraphOWLResultSet extends OntopGraphOWLResultSet
@@ -24,12 +23,12 @@ public class OntopMaterializedGraphOWLResultSet extends OntopGraphOWLResultSet
     }
 
     @Override
-    public ImmutableList<URI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
+    public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
         return graphResultSet.getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
     }
 
     @Override
-    public ImmutableSet<URI> getSelectedVocabulary() {
+    public ImmutableSet<IRI> getSelectedVocabulary() {
         return graphResultSet.getSelectedVocabulary();
     }
 }

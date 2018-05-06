@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.impl.Datalog2QueryTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
@@ -81,16 +82,18 @@ public class MappingDataTypeCompletion {
 
     public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
         Function atom = rule.getHead();
-        Predicate predicate = atom.getFunctionSymbol();
-        if (predicate.getArity() == 2) { // we check both for data and object property
-            Term term = atom.getTerm(1); // the second argument only
+
+        //case of data and object property
+        if(!Datalog2QueryTools.isURIRDFType(atom.getTerm(1))){
+            Term object = atom.getTerm(2); // the object, third argument only
             Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
-            insertVariableDataTyping(term, atom, 1, termOccurenceIndex);
+            insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
             // Infer operation datatypes from variable datatypes
-            insertOperationDatatyping(term, atom, 1);
+            insertOperationDatatyping(object, atom, 2);
         }
     }
+
 
     /**
      * This method wraps the variable that holds data property values with a data type predicate.
@@ -99,9 +102,10 @@ public class MappingDataTypeCompletion {
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
                                           Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
-        Predicate predicate = atom.getFunctionSymbol();
+
 
         if (term instanceof Function) {
+
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (function.isDataTypeFunction() ||
@@ -117,11 +121,12 @@ public class MappingDataTypeCompletion {
                 throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
             }
         } else if (term instanceof Variable) {
+
             Variable variable = (Variable) term;
             Term newTerm;
             RDFDatatype type = getDataType(termOccurenceIndex, variable);
             newTerm = termFactory.getTypedTerm(variable, type);
-            log.info("Datatype "+type+" for the value " + variable + " of the property " + predicate + " has been " +
+            log.info("Datatype "+type+" for the value " + variable + " of the property " + atom + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
@@ -268,7 +273,7 @@ public class MappingDataTypeCompletion {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
                     // NO-OP
-                } else if (t instanceof URIConstant) {
+                } else if (t instanceof IRIConstant) {
                     // NO-OP
                 }
                 // fabad (4 Oct 2017) Quick fix if there are constants in arguments.

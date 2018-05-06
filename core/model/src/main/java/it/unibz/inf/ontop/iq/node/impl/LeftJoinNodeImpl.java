@@ -161,6 +161,39 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .collect(ImmutableCollectors.toSet());
     }
 
+    /**
+     * Returns possible definitions for left and right-specific variables.
+     */
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild) {
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> leftDefs = leftChild.getPossibleVariableDefinitions();
+
+        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
+                .immutableCopy();
+
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = leftChild.getPossibleVariableDefinitions().stream()
+                .map(s -> s.reduceDomainToIntersectionWith(rightSpecificVariables))
+                .collect(ImmutableCollectors.toSet());
+
+        if (leftDefs.isEmpty())
+            return rightDefs;
+        else if (rightDefs.isEmpty())
+            return leftDefs;
+        else
+            return leftDefs.stream()
+                    .flatMap(l -> rightDefs.stream()
+                            .map(r -> combine(l, r)))
+                    .collect(ImmutableCollectors.toSet());
+    }
+
+    private ImmutableSubstitution<NonVariableTerm> combine(ImmutableSubstitution<NonVariableTerm> l,
+                                                           ImmutableSubstitution<NonVariableTerm> r) {
+        return l.union(r)
+                .orElseThrow(() -> new MinorOntopInternalBugException(
+                        "Unexpected conflict between " + l + " and " + r));
+    }
+
+
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree leftChild, IQTree rightChild) {
         return transformer.transformLeftJoin(tree,this, leftChild, rightChild);

@@ -237,6 +237,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                     .filter(e -> isNullable(e.getValue(), nullableChildVariables))
                     .map(Map.Entry::getKey),
                 nullableChildVariables.stream()
+                    .filter(projectedVariables::contains)
         ).collect(ImmutableCollectors.toSet());
     }
 
@@ -306,6 +307,24 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         }
     }
 
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> childDefs = child.getPossibleVariableDefinitions();
+
+        if (childDefs.isEmpty()) {
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            return def.isEmpty()
+                    ? ImmutableSet.of()
+                    : ImmutableSet.of(def);
+        }
+
+        return childDefs.stream()
+                .map(childDef -> childDef.composeWith(substitution))
+                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .collect(ImmutableCollectors.toSet());
+    }
+
     /**
      * TODO: involve the function to reduce the number of false positive
      */
@@ -314,7 +333,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             return term.equals(termFactory.getNullConstant());
         // TODO: improve this
         else if (term.isGround())
-            return true;
+            return false;
         // TODO: improve this
         return term.getVariableStream()
                 .anyMatch(nullableChildVariables::contains);

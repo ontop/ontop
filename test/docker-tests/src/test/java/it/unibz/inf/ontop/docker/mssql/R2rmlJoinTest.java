@@ -6,10 +6,10 @@ import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
+import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class R2rmlJoinTest {
     final String obdaFile = "/mssql/oreda/oreda_bootstrapped_mapping.obda";
     final String propertyFile = "/mssql/oreda/oreda_bootstrapped_mapping.properties";
 
-    private void runTests(String filename, boolean isR2rml) throws Exception {
+    private void runTests(boolean isR2rml) throws Exception {
 
         String owlFileName =  this.getClass().getResource(owlFile).toString();
         String obdaFileName =  this.getClass().getResource(obdaFile).toString();
@@ -95,7 +95,7 @@ public class R2rmlJoinTest {
 
         log.info("Loading r2rml file");
 
-        runTests(r2rmlFile, true);
+        runTests( true);
     }
 
 
@@ -103,7 +103,7 @@ public class R2rmlJoinTest {
     public void testOBDA() throws Exception {
 
         log.info("Loading OBDA file");
-        runTests(obdaFile, false);
+        runTests( false);
     }
 
 }

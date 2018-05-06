@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -91,4 +89,27 @@ public interface IQTree {
     IQTree propagateDownConstraint(ImmutableExpression constraint);
 
     void validate() throws InvalidIntermediateQueryException;
+
+    /**
+     * If subTreeToReplace is not found, has no effect (besides creating a novel copy).
+     */
+    IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree);
+
+    /**
+     * Returns a set of substitutions that define the projected variables when they are constructed.
+     *
+     * Guarantee: each tuple in the result set having constructed values matches at least one of these substitutions.
+     *
+     * It is advised to call this method on a normalized IQ so as to reduce the number of possible substitutions
+     * (normalization drops unsatisfiable substitutions).
+     *
+     *
+     * The intended usage of this method it to determine the definition of a variable from the returned substitution.
+     * Therefore this method is robust to simple variable renaming and to multiple complex substitutions.
+     * E.g. if [x/x2], [x2/x3] and [x3/URI("http://myURI{}", x4] are three substitutions found in that order in a same
+     * branch,
+     * then x/URI("http://myURI{}", x4) will be the only output substitution for that branch.
+     *
+     */
+    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
 }

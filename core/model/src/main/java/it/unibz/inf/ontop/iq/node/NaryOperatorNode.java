@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -43,4 +43,9 @@ public interface NaryOperatorNode extends QueryNode {
      * Only validates the node, not its children
      */
     void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException;
+
+    NaryOperatorNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException;
+
+    ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
 }

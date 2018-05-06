@@ -2,13 +2,11 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -20,104 +18,34 @@ import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 
 public class AtomFactoryImpl implements AtomFactory {
 
-    private final AtomPredicate triplePredicate;
+    private final TriplePredicate triplePredicate;
+    private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final ObjectRDFType objectRDFType;
-    private final RDFTermType rootRdfTermType;
-    private final RDFDatatype rdfsLiteral;
 
     @Inject
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        triplePredicate = getAtomPredicate("triple", 3);
-        objectRDFType = typeFactory.getAbstractObjectRDFType();
-        rootRdfTermType = typeFactory.getAbstractRDFTermType();
-        rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
+        triplePredicate = new TriplePredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType()
+        ));
+        quadPredicate = new QuadPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getIRITermType()
+        ));
     }
 
     @Override
-    public AtomPredicate getAtomPredicate(String name, int arity) {
+    public AtomPredicate getRDFAnswerPredicate(int arity) {
         ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
                 .map(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
-        return getAtomPredicate(name, defaultBaseTypes);
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(String name, ImmutableList<TermType> expectedBaseTypes) {
-        return new AtomPredicateImpl(name, expectedBaseTypes.size(), expectedBaseTypes);
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
-        return new AtomPredicateImpl(datalogPredicate);
-    }
-
-    @Override
-    public AtomPredicate getObjectPropertyPredicate(String name) {
-        return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, objectRDFType));
-    }
-
-    @Override
-    public AtomPredicate getObjectPropertyPredicate(IRI iri) {
-        return getObjectPropertyPredicate(iri.getIRIString());
-    }
-
-    @Override
-    public AtomPredicate getDataPropertyPredicate(String name) {
-        return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, rdfsLiteral));
-    }
-
-    /**
-     * TODO: create a proper constructor
-     */
-    @Override
-    public AtomPredicate getDataPropertyPredicate(IRI iri) {
-        return getDataPropertyPredicate(iri.getIRIString());
-    }
-
-    @Override
-    public AtomPredicate getDataPropertyPredicate(String name, TermType type) {
-        return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, type)); // COL_TYPE.LITERAL
-    }
-
-    //defining annotation property we still don't know if the values that it will assume, will be an object or a data property
-    @Override
-    public AtomPredicate getAnnotationPropertyPredicate(String name) {
-        return new AtomPredicateImpl(name, 2, ImmutableList.of(objectRDFType, rootRdfTermType));
-    }
-
-    /**
-     * TODO: create a proper constructor
-     */
-    @Override
-    public AtomPredicate getAnnotationPropertyPredicate(IRI iri) {
-        return getDataPropertyPredicate(iri.getIRIString());
-    }
-
-    @Override
-    public AtomPredicate getClassPredicate(String name) {
-        return new AtomPredicateImpl(name, 1, ImmutableList.of(objectRDFType));
-    }
-
-    /**
-     * TODO: create a proper constructor
-     */
-    @Override
-    public AtomPredicate getClassPredicate(IRI iri) {
-        return getClassPredicate(iri.getIRIString());
-    }
-
-    @Override
-    public AtomPredicate getOWLSameAsPredicate() {
-        return new AtomPredicateImpl(IriConstants.SAME_AS, 2, ImmutableList.of(objectRDFType, objectRDFType));
-    }
-
-    @Override
-    public AtomPredicate getOBDACanonicalIRI() {
-        return new AtomPredicateImpl(IriConstants.CANONICAL_IRI, 2, ImmutableList.of(objectRDFType, objectRDFType));
+        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, arity, defaultBaseTypes);
     }
 
     @Override
@@ -175,19 +103,73 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public Function getTripleAtom(Term subject, Term predicate, Term object) {
-        return termFactory.getFunction(triplePredicate, subject, predicate, object);
+    public Function getMutableTripleAtom(Term subject, Term property, Term object) {
+        return termFactory.getFunction(triplePredicate, subject, property, object);
     }
 
     @Override
-    public AtomPredicate getTripleAtomPredicate() {
-        return triplePredicate;
+    public Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object) {
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, propertyIRI, object);
     }
 
+    @Override
+    public Function getMutableTripleBodyAtom(Term subject, IRI classIRI) {
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, classIRI);
+    }
 
     @Override
-    public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
-                                                          ImmutableTerm object) {
-        return termFactory.getImmutableFunctionalTerm(triplePredicate, subject, predicate, object);
+    public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
+        return getMutableTripleAtom(
+                subject,
+                convertIRIIntoFunctionalGroundTerm(propertyIRI),
+                object);
+    }
+
+    @Override
+    public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
+        return getMutableTripleAtom(
+                subject,
+                convertIRIIntoFunctionalGroundTerm(RDF.TYPE),
+                convertIRIIntoFunctionalGroundTerm(classIRI));
+    }
+
+    private Function convertIRIIntoFunctionalGroundTerm(IRI iri) {
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    }
+
+    private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
+        return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object) {
+        return getDistinctVariableOnlyDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                            VariableOrGroundTerm object) {
+        return getDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
+                                                            VariableOrGroundTerm object) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, convertIRIIntoGroundFunctionalTerm(propertyIRI), object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoGroundFunctionalTerm(classIRI));
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
+                                                            Variable namedGraph) {
+        return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
     }
 }

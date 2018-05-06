@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.datalog.QueryModifiers;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -89,32 +92,7 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
     public IntermediateQueryBuilder initBuilder(IntermediateQueryFactory iqFactory, IntermediateQueryBuilder queryBuilder,
                                                 DistinctVariableOnlyDataAtom projectionAtom, QueryNode childNode) {
 
-        long correctedOffset = offset > 0 ? offset : 0;
-
-        Optional<SliceNode> sliceNode = Optional.of(limit)
-                .filter(l -> l >= 0)
-                .map(l -> Optional.of(iqFactory.createSliceNode(correctedOffset, l)))
-                .orElseGet(() -> Optional.of(correctedOffset)
-                        .filter(o -> o > 0)
-                        .map(iqFactory::createSliceNode));
-
-        Optional<QueryNode> distinctNode = isDistinct()
-                ? Optional.of(iqFactory.createDistinctNode())
-                : Optional.empty();
-
-        ImmutableList<OrderByNode.OrderComparator> orderComparators = getSortConditions().stream()
-                .map(o -> iqFactory.createOrderComparator(o.getVariable(),
-                        o.getDirection() == OrderCondition.ORDER_ASCENDING))
-                .collect(ImmutableCollectors.toList());
-
-        Optional<QueryNode> orderByNode = orderComparators.isEmpty()
-                ? Optional.empty()
-                : Optional.of(iqFactory.createOrderByNode(orderComparators));
-
-        ImmutableList<QueryNode> modifierNodes = Stream.of(sliceNode, distinctNode, orderByNode)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<UnaryOperatorNode> modifierNodes = extractModifierNodes(iqFactory);
 
         if (modifierNodes.isEmpty())
             queryBuilder.init(projectionAtom, childNode);
@@ -125,6 +103,48 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
             queryBuilder.addChild(modifierNodes.get(modifierNodes.size() - 1), childNode);
         }
         return queryBuilder;
+    }
+
+    @Override
+    public IQTree insertAbove(IQTree childTree, IntermediateQueryFactory iqFactory) {
+        ImmutableList<UnaryOperatorNode> modifierNodes = extractModifierNodes(iqFactory);
+
+        return modifierNodes.reverse().stream()
+                .reduce(childTree,
+                        (t, n) -> iqFactory.createUnaryIQTree(n, t),
+                        (t1, t2) ->  {throw new MinorOntopInternalBugException("Merging should never been executed"); });
+    }
+
+    /**
+     * Top-down order
+     */
+    private ImmutableList<UnaryOperatorNode> extractModifierNodes(IntermediateQueryFactory iqFactory) {
+        long correctedOffset = offset > 0 ? offset : 0;
+
+        Optional<SliceNode> sliceNode = Optional.of(limit)
+                .filter(l -> l >= 0)
+                .map(l -> Optional.of(iqFactory.createSliceNode(correctedOffset, l)))
+                .orElseGet(() -> Optional.of(correctedOffset)
+                        .filter(o -> o > 0)
+                        .map(iqFactory::createSliceNode));
+
+        Optional<UnaryOperatorNode> distinctNode = isDistinct()
+                ? Optional.of(iqFactory.createDistinctNode())
+                : Optional.empty();
+
+        ImmutableList<OrderByNode.OrderComparator> orderComparators = getSortConditions().stream()
+                .map(o -> iqFactory.createOrderComparator(o.getVariable(),
+                        o.getDirection() == OrderCondition.ORDER_ASCENDING))
+                .collect(ImmutableCollectors.toList());
+
+        Optional<UnaryOperatorNode> orderByNode = orderComparators.isEmpty()
+                ? Optional.empty()
+                : Optional.of(iqFactory.createOrderByNode(orderComparators));
+
+         return Stream.of(sliceNode, distinctNode, orderByNode)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toList());
     }
 
     @Override

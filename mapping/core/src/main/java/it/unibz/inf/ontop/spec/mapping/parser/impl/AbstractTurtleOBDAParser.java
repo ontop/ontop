@@ -23,19 +23,16 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
-import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.vocabulary.*;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.listener.ThrowingErrorListener;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
@@ -43,17 +40,12 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	private final TurtleOBDAVisitor visitor;
 
 	private final Map<String, String> prefixes;
-	private final AtomFactory atomFactory;
-	private final TermFactory termFactory;
 
 	/**
 	 * Default constructor;
 	 */
-	public AbstractTurtleOBDAParser(TurtleOBDAVisitor visitor,
-									AtomFactory atomFactory, TermFactory termFactory) {
+	public AbstractTurtleOBDAParser(TurtleOBDAVisitor visitor) {
 		this.visitor = visitor;
-        this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
 		this.prefixes = ImmutableMap.of();
 	}
 
@@ -63,12 +55,9 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * (i.e., the directives @BASE and @PREFIX).
 	 *
 	 */
-	public AbstractTurtleOBDAParser(Map<String, String> prefixes, TurtleOBDAVisitor visitor,
-                                    AtomFactory atomFactory, TermFactory termFactory) {
+	public AbstractTurtleOBDAParser(Map<String, String> prefixes, TurtleOBDAVisitor visitor) {
 		this.prefixes = prefixes;
 		this.visitor = visitor;
-		this.atomFactory = atomFactory;
-		this.termFactory = termFactory;
 	}
 
 	/**
@@ -80,7 +69,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 	 * @return A CQIE object.
 	 */
 	@Override
-	public ImmutableList<ImmutableFunctionalTerm> parse(String input) throws TargetQueryParserException {
+	public ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException {
 		StringBuffer bf = new StringBuffer(input.trim());
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
@@ -103,9 +92,7 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			parser.removeErrorListeners();
 			parser.addErrorListener(ThrowingErrorListener.INSTANCE);
 
-			return ((List<Function>)visitor.visitParse(parser.parse())).stream()
-					.map(termFactory::getImmutableFunctionalTerm)
-					.collect(ImmutableCollectors.toList());
+			return (ImmutableList<TargetAtom>)visitor.visitParse(parser.parse());
 		} catch (RuntimeException e) {
 			throw new TargetQueryParserException(e.getMessage(), e);
 		}
@@ -128,11 +115,11 @@ public abstract class AbstractTurtleOBDAParser implements TargetQueryParser {
 			sb.append(">");
 			sb.append(" .\n");
 		}
-		sb.append("@PREFIX " + IriConstants.PREFIX_XSD + " <" + IriConstants.NS_XSD + "> .\n");
-		sb.append("@PREFIX " + IriConstants.PREFIX_OBDA + " <" + IriConstants.NS_OBDA + "> .\n");
-		sb.append("@PREFIX " + IriConstants.PREFIX_RDF + " <" + IriConstants.NS_RDF + "> .\n");
-		sb.append("@PREFIX " + IriConstants.PREFIX_RDFS + " <" + IriConstants.NS_RDFS + "> .\n");
-		sb.append("@PREFIX " + IriConstants.PREFIX_OWL + " <" + IriConstants.NS_OWL + "> .\n");
+		sb.append("@PREFIX " + OntopInternal.PREFIX_XSD + " <" + XSD.PREFIX + "> .\n");
+		sb.append("@PREFIX " + OntopInternal.PREFIX_OBDA + " <" + Ontop.PREFIX + "> .\n");
+		sb.append("@PREFIX " + OntopInternal.PREFIX_RDF + " <" + RDF.PREFIX + "> .\n");
+		sb.append("@PREFIX " + OntopInternal.PREFIX_RDFS + " <" + RDFS.PREFIX + "> .\n");
+		sb.append("@PREFIX " + OntopInternal.PREFIX_OWL + " <" + OWL.PREFIX + "> .\n");
 		query.insert(0, sb);
 	}
 }

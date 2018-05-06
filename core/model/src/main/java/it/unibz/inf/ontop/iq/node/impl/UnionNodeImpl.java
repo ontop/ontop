@@ -65,6 +65,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(
+            ImmutableList<IQTree> children) {
+        return children.stream()
+                .flatMap(c -> c.getPossibleVariableDefinitions().stream())
+                .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
     public boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children) {
         return children.stream()
                 .anyMatch(c -> (c.getRootNode() instanceof ConstructionNode)

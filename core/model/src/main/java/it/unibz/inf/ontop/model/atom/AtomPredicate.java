@@ -9,7 +9,5 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
  */
 public interface AtomPredicate extends Predicate {
 
-    @Deprecated
-    boolean isTriplePredicate();
 
 }

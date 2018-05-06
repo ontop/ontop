@@ -9,8 +9,10 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -19,6 +21,8 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class OptimizationTestingTools {
 
@@ -32,6 +36,7 @@ public class OptimizationTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
+    public static final QueryTransformerFactory TRANSFORMER_FACTORY;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
@@ -40,6 +45,8 @@ public class OptimizationTestingTools {
     public static final IQConverter IQ_CONVERTER;
     public static final ValueConstant NULL, TRUE, FALSE;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
+    public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final RDF RDF_FACTORY;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
@@ -62,6 +69,7 @@ public class OptimizationTestingTools {
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
+        TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
@@ -70,10 +78,12 @@ public class OptimizationTestingTools {
         PULL_OUT_VARIABLE_OPTIMIZER = injector.getInstance(PullOutVariableOptimizer.class);
         DATALOG_CONVERSION_TOOLS = injector.getInstance(DatalogConversionTools.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
+        UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         NULL = TERM_FACTORY.getNullConstant();
         TRUE = TERM_FACTORY.getBooleanConstant(true);
         FALSE = TERM_FACTORY.getBooleanConstant(false);
+        RDF_FACTORY = new SimpleRDF();
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {

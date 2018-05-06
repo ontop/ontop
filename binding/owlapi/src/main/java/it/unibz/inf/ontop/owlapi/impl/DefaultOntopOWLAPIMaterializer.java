@@ -21,20 +21,20 @@ package it.unibz.inf.ontop.owlapi.impl;
  */
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
-import it.unibz.inf.ontop.owlapi.resultset.impl.OntopMaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
+import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import it.unibz.inf.ontop.owlapi.resultset.impl.OntopMaterializedGraphOWLResultSet;
+import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
-import java.net.URI;
 
 public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 
@@ -57,7 +57,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 
 	@Override
 	public MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                     @Nonnull ImmutableSet<URI> selectedVocabulary,
+                                                     @Nonnull ImmutableSet<IRI> selectedVocabulary,
                                                      @Nonnull MaterializationParams params)
 			throws OWLException {
 		try {

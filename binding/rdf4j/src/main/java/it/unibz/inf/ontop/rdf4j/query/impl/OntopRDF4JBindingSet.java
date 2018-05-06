@@ -20,8 +20,9 @@ package it.unibz.inf.ontop.rdf4j.query.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.OntopResultConversionException;
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
 import org.eclipse.rdf4j.model.Value;
@@ -34,8 +35,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingSet {
@@ -51,12 +50,10 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Override
     @Nullable
     public Binding getBinding(String bindingName) {
-        if (!hasBinding(bindingName)) {
-            return null;
-        } else {
-            final Value value = getValue(bindingName);
-            return new SimpleBinding(bindingName, value);
-        }
+        OntopBinding ontopBinding = ontopBindingSet.getBinding(bindingName);
+        return ontopBinding == null?
+                null:
+                convertBinding(ontopBinding);
     }
 
     @Override
@@ -66,19 +63,18 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
 
     @Override
     @Nullable
-    public Value getValue(String bindingName) {
-        if (!hasBinding(bindingName)) {
-            return null;
-        } else {
-            try {
-                final Constant constant = ontopBindingSet.getConstant(bindingName);
-                return RDF4JHelper.getValue(constant);
-            } catch (OntopResultConversionException e) {
-                throw new RuntimeException(e);
-            }
+    public Value getValue(String variableName) {
+        try {
+            final Constant constant = ontopBindingSet.getConstant(variableName);
+            return constant == null?
+                    null:
+                    RDF4JHelper.getValue(constant);
+        } catch (OntopResultConversionException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    /** Inefficient */
     @Override
     public boolean hasBinding(String bindingName) {
         return ontopBindingSet.hasBinding(bindingName);
@@ -87,14 +83,20 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Override
     @Nonnull
     public Iterator<Binding> iterator() {
-        List<Binding> allBindings = new LinkedList<>();
-        List<String> names = ontopBindingSet.getBindingNames();
-        for (String s : names) {
-            if (ontopBindingSet.hasBinding(s)) {
-                allBindings.add(getBinding(s));
-            }
+        return ontopBindingSet.getBindings()
+                .map(this::convertBinding)
+                .iterator();
+    }
+
+    private Binding convertBinding(OntopBinding ontopBinding) {
+        try {
+            return new SimpleBinding(
+                    ontopBinding.getName(),
+                    RDF4JHelper.getValue(ontopBinding.getValue())
+            );
+        } catch (OntopResultConversionException e) {
+            throw new RuntimeException(e);
         }
-        return allBindings.iterator();
     }
 
     @Override

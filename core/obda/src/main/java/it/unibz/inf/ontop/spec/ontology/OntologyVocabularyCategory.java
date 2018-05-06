@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.ontology;
 
 
+import org.apache.commons.rdf.api.IRI;
+
 public interface OntologyVocabularyCategory<T> extends Iterable<T> {
     /**
      * check whether the entity has been declared and return the entity object
@@ -10,7 +12,10 @@ public interface OntologyVocabularyCategory<T> extends Iterable<T> {
      * @throws RuntimeException if the entity has not been declared
      */
 
+    @Deprecated
     T get(String uri);
+
+    T get(IRI iri);
 
     /**
      * check whether the entity has been declared
@@ -19,5 +24,8 @@ public interface OntologyVocabularyCategory<T> extends Iterable<T> {
      * @return
      */
 
+    @Deprecated
     boolean contains(String uri);
+
+    boolean contains(IRI iri);
 }

@@ -104,6 +104,19 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
         return substitutionFactory.getSubstitution(map);
     }
 
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ImmutableSubstitution) {
+            return map.equals(((ImmutableSubstitution) o).getImmutableMap());
+        }
+        else
+            return false;
+    }
 
 
 }

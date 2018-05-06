@@ -33,10 +33,10 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
  */
 public class BindingLiftTest {
 
-    private final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private final AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
+    private final AtomPredicate ANS1_ARITY_1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private final AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private final AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
     private final Variable X = TERM_FACTORY.getVariable("x");
     private final Variable Y = TERM_FACTORY.getVariable("y");

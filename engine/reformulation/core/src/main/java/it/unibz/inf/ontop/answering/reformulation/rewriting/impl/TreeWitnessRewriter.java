@@ -26,12 +26,12 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
@@ -73,11 +73,13 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
+	private final ImmutabilityTools immutabilityTools;
 
 	@Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
 								DatalogQueryServices datalogQueryServices, UnifierUtilities unifierUtilities,
-								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities) {
+								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
+								ImmutabilityTools immutabilityTools) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -85,6 +87,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 	@Override
@@ -117,7 +120,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 */
 	
 	private Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = termFactory.getPredicate(base + suffix, arguments.size());
+		Predicate predicate = datalogFactory.getSubqueryPredicate(base + suffix, arguments.size());
 		return termFactory.getFunction(predicate, arguments);
 	}
 	
@@ -141,18 +144,17 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
-				atom = termFactory.getFunction(atomFactory.getClassPredicate(((OClass)con).getIRI()), r0);
+				atom = atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
 			}
 			else if (con instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
-				AtomPredicate propertyPredicate = atomFactory.getObjectPropertyPredicate(some.getIRI());
-				atom = (!some.isInverse()) ?  
-						termFactory.getFunction(propertyPredicate, r0, getFreshVariable()) :
-							termFactory.getFunction(propertyPredicate, getFreshVariable(), r0);
+				atom = (!some.isInverse())
+						? atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable())
+						: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), some.getIRI(), r0);
 			}
 			else {
 				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = termFactory.getFunction(atomFactory.getDataPropertyPredicate(some.getIRI()), r0, getFreshVariable());
+				atom = atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable());
 			}
 			genAtoms.add(atom);
 		}
@@ -310,7 +312,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 		for (CQIE cqie : dp.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
-					termFactory, atomFactory);
+					atomFactory, immutabilityTools);
 			Function cqieAtom = cqie.getHead();
 		
 			if (ccs.size() == 1) {

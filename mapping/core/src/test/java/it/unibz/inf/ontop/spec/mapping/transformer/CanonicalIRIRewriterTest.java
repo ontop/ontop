@@ -1,18 +1,26 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -98,34 +106,32 @@ public class CanonicalIRIRewriterTest {
     }
 
     private Function getFunction(String name, List<Term> terms) {
-        return TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(name, terms.size()), terms);
+        return TERM_FACTORY.getFunction(new FakePredicate(name, terms.size()), terms);
     }
 
     private Function getCanonIRIFunction(Term term1, Term term2) {
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getOBDACanonicalIRI(), list);
+        return ATOM_FACTORY.getMutableTripleHeadAtom(term1, Ontop.CANONICAL_IRI, term2);
+
     }
 
     private Function getClassPropertyFunction(String name, Term term1) {
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getClassPredicate(name), term1);
+
+        Function classProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        Function rdfType =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(RDF.TYPE.getIRIString()));
+        return ATOM_FACTORY.getMutableTripleAtom(term1, rdfType, classProperty);
 
     }
     private Function getDataPropertyFunction(String name, Term term1, Term term2) {
 
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getDataPropertyPredicate(name, TYPE_FACTORY.getAbstractRDFSLiteral()), list);
+        Function dataProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        return ATOM_FACTORY.getMutableTripleAtom(term1, dataProperty, term2);
 
     }
 
     private Function getObjectPropertyFunction(String name, Term term1, Term term2) {
-        List<Term> list = new ArrayList<>(2);
-        list.add(term1);
-        list.add(term2);
-        return TERM_FACTORY.getFunction(ATOM_FACTORY.getObjectPropertyPredicate(name), list);
+
+        Function objectProperty =  TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(name));
+        return ATOM_FACTORY.getMutableTripleAtom(term1, objectProperty, term2);
 
     }
 
@@ -322,7 +328,8 @@ public class CanonicalIRIRewriterTest {
 
         addClassPropertiesMappings();
 
-        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY, UNIFIER_UTILITIES)
+        List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY, UNIFIER_UTILITIES,
+                IMMUTABILITY_TOOLS)
                 .buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
@@ -362,7 +369,7 @@ public class CanonicalIRIRewriterTest {
         addDataPropertiesMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -402,7 +409,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -443,7 +450,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesOnlyObjectURIMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print(Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -478,7 +485,7 @@ public class CanonicalIRIRewriterTest {
 
 
     @Test
-    public void testCanonicalIRIObjectPropertyDoubleURI() throws Exception {
+    public void testCanonicalIRIObjectPropertyDoubleURI() {
 
         addClassPropertiesMappings();
         addDataPropertiesMappings();
@@ -486,7 +493,7 @@ public class CanonicalIRIRewriterTest {
         addObjectPropertiesDoubleURIMappings();
 
         List<CQIE> canonicalSameAsMappings = new CanonicalIRIRewriter(SUBSTITUTION_UTILITIES, TERM_FACTORY,
-                UNIFIER_UTILITIES).buildCanonicalIRIMappings(mappings);
+                UNIFIER_UTILITIES, IMMUTABILITY_TOOLS).buildCanonicalIRIMappings(mappings);
 
         System.out.print( Joiner.on("\n").join(canonicalSameAsMappings));
 
@@ -523,9 +530,27 @@ public class CanonicalIRIRewriterTest {
 
         Function tableT2 = getFunction("PUBLIC.T2", new LinkedList<>(atomTerms));
         body.add(tableT2);
+        CQIE testRule = DATALOG_FACTORY.getCQIE(head, body);
 
-        assertTrue(canonicalSameAsMappings.contains(DATALOG_FACTORY.getCQIE(head,body)));
+        assertTrue(canonicalSameAsMappings.contains(testRule));
 
+    }
+
+
+    private static class FakePredicate extends PredicateImpl {
+
+        protected FakePredicate(@Nonnull String name, int arity) {
+            super(name, arity, createExpectedBaseTermTypeList(arity));
+        }
+
+        private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {
+            TermType rootTermType = TYPE_FACTORY.getAbstractAtomicTermType();
+
+            return IntStream.range(0, arity)
+                    .boxed()
+                    .map(i -> rootTermType)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
 
 

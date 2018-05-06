@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -28,6 +29,7 @@ public class OntopModelTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
+    public static final IQConverter IQ_CONVERTER;
 
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -45,6 +47,7 @@ public class OntopModelTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
+        IQ_CONVERTER = injector.getInstance(IQConverter.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
 

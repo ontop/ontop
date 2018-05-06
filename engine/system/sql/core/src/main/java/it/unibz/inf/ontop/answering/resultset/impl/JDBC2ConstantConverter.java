@@ -3,14 +3,15 @@ package it.unibz.inf.ontop.answering.resultset.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -147,7 +148,7 @@ public class JDBC2ConstantConverter {
                             // we leave realValue as it is.
                         }
                     }
-                    return termFactory.getConstantURI(stringValue.trim());
+                    return termFactory.getConstantIRI(new SimpleRDF().createIRI(stringValue.trim()));
 
                 case BNODE:
                     String scopedLabel = this.bnodeMap.get(stringValue);

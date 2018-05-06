@@ -20,17 +20,12 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.vocabulary.*;
+
+import java.util.*;
 
 public class SimplePrefixManager extends AbstractPrefixManager {
 
@@ -84,11 +79,11 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 
     private static Map<String, String> initKnownPrefixes() {
         Map<String, String> prefixToURIMap = new HashMap<>();
-        prefixToURIMap.put(IriConstants.PREFIX_RDF, IriConstants.NS_RDF);
-        prefixToURIMap.put(IriConstants.PREFIX_RDFS, IriConstants.NS_RDFS);
-        prefixToURIMap.put(IriConstants.PREFIX_OWL, IriConstants.NS_OWL);
-        prefixToURIMap.put(IriConstants.PREFIX_XSD, IriConstants.NS_XSD);
-        prefixToURIMap.put(IriConstants.PREFIX_OBDA, IriConstants.NS_OBDA);
+        prefixToURIMap.put(OntopInternal.PREFIX_RDF, RDF.PREFIX);
+        prefixToURIMap.put(OntopInternal.PREFIX_RDFS, RDFS.PREFIX);
+        prefixToURIMap.put(OntopInternal.PREFIX_OWL, OWL.PREFIX);
+        prefixToURIMap.put(OntopInternal.PREFIX_XSD, XSD.PREFIX);
+        prefixToURIMap.put(OntopInternal.PREFIX_OBDA, Ontop.PREFIX);
         return prefixToURIMap;
 	}
 

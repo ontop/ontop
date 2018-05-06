@@ -31,9 +31,9 @@ public class UnionLiftInternalTest {
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
 
-    private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 1);
-    private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 2);
-    private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getAtomPredicate("p1", 3);
+    private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
+    private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private static AtomPredicate P3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
 
     private static Variable X = TERM_FACTORY.getVariable("x");
     private static Variable Y = TERM_FACTORY.getVariable("y");

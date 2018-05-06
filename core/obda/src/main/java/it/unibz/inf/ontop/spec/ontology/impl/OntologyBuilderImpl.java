@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.function.Function;
@@ -106,8 +107,18 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         }
 
         @Override
+        public T get(IRI iri) {
+            return get(iri.getIRIString());
+        }
+
+        @Override
         public boolean contains(String uri) {
             return map.containsKey(uri);
+        }
+
+        @Override
+        public boolean contains(IRI iri) {
+            return contains(iri.getIRIString());
         }
 
         @Override

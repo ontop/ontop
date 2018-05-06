@@ -24,25 +24,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 
 @Singleton
 public class TermFactoryImpl implements TermFactory {
 
-	private final TermType rootTermType;
 	private final TypeFactory typeFactory;
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
@@ -60,30 +59,13 @@ public class TermFactoryImpl implements TermFactory {
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
 		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
 		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
-		this.rootTermType = typeFactory.getAbstractAtomicTermType();
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.type2FunctionSymbolMap = new HashMap<>();
 	}
 
-	@Deprecated
-	public PredicateImpl getPredicate(String name, int arity) {
-		ImmutableList<TermType> expectedArgumentTypes = IntStream.range(0, arity)
-				.boxed()
-				.map(i -> rootTermType)
-				.collect(ImmutableCollectors.toList());
-
-			return new PredicateImpl(name, arity, expectedArgumentTypes);
-	}
-	
 	@Override
-	public Predicate getPredicate(String uri, ImmutableList<TermType> types) {
-		return new PredicateImpl(uri, types.size(), types);
-	}
-
-	@Override
-	@Deprecated
-	public URIConstant getConstantURI(String uriString) {
-		return new URIConstantImpl(uriString, typeFactory);
+	public IRIConstant getConstantIRI(IRI iri) {
+		return new IRIConstantImpl(iri, typeFactory);
 	}
 	
 	@Override

@@ -27,27 +27,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface TermFactory {
-
-	/**
-	 * Construct a {@link Predicate} object.
-	 *
-	 * @param uri
-	 *            the name of the predicate (defined as a URI).
-	 * @param arity
-	 *            the number of elements inside the predicate.
-	 * @return a predicate object.
-	 */
-	@Deprecated
-	public Predicate getPredicate(String uri, int arity);
-
-	public Predicate getPredicate(String uri, ImmutableList<TermType> types);
 
 	/*
 	 * Built-in function predicates
@@ -148,7 +133,7 @@ public interface TermFactory {
 	public Expression getFunctionCast(Term term1, Term term2);
 
 	/**
-	 * Construct a {@link URIConstant} object. This type of term is written as a
+	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification
 	 * (RFC 3986).
 	 * <p>
@@ -166,11 +151,11 @@ public interface TermFactory {
 	 * <p>
 	 * are all well-formed URI strings.
 	 * 
-	 * @param uri
+	 * @param iri
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getConstantURI(String uri);
+	public IRIConstant getConstantIRI(IRI iri);
 	
 	public BNode getConstantBNode(String name);
 

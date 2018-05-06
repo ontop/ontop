@@ -20,44 +20,10 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-
 /**
  * This filter receives a string like parameter in the constructor and returns
  * true if any mapping contains an atom in the head whose predicate matches
  * predicate.
  */
-public class MappingPredicateTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {
-
-	public MappingPredicateTreeModelFilter() {
-		super.bNegation = false;
-	}
-
-	@Override
-	public boolean match(SQLPPTriplesMap object) {
-		ImmutableList<ImmutableFunctionalTerm> atoms = object.getTargetAtoms();
-
-		boolean isMatch = false;
-		for (String keyword : vecKeyword) {
-			for (int i = 0; i < atoms.size(); i++) {
-				Function predicate = atoms.get(i);
-				isMatch = isMatch || match(keyword.trim(), predicate);
-			}
-			if (isMatch) {
-				break; // end loop if a match is found!
-			}
-		}
-		return (bNegation ? !isMatch : isMatch);
-	}
-
-	/** A helper method to check a match */
-	private boolean match(String keyword, Function predicate) {
-		if (predicate.getFunctionSymbol().toString().indexOf(keyword) != -1) {
-			return true;
-		}
-		return false;
-	}
+public class MappingPredicateTreeModelFilter extends MappingBasedTreeModelFilter {
 }

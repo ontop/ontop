@@ -7,7 +7,9 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryModifierNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 
 public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements QueryModifierNode {
@@ -32,6 +34,11 @@ public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements Que
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint));
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        return child.getPossibleVariableDefinitions();
     }
 
     @Override

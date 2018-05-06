@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
 import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -147,10 +148,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (Predicate dp : obdaModel.getCurrentVocabulary().dataProperties()) {
+        for (IRI dp : obdaModel.getCurrentVocabulary().dataProperties()) {
             v.addElement(new PredicateItem(dp, PredicateItem.PredicateType.DATA_PROPERTY, prefixManager));
         }
-        for (Predicate op : obdaModel.getCurrentVocabulary().objectProperties()) {
+        for (IRI op : obdaModel.getCurrentVocabulary().objectProperties()) {
             v.addElement(new PredicateItem(op, PredicateItem.PredicateType.OBJECT_PROPERTY, prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);

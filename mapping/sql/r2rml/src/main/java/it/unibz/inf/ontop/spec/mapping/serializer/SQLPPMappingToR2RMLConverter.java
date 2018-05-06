@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -100,8 +101,8 @@ public class SQLPPMappingToR2RMLConverter {
     }
 
     private ImmutableList<SQLPPTriplesMap> splitMappingAxiom(SQLPPTriplesMap mappingAxiom, String delimiterSubstring) {
-        Multimap<ImmutableFunctionalTerm, ImmutableFunctionalTerm> subjectTermToTargetTriples = ArrayListMultimap.create();
-        for (ImmutableFunctionalTerm targetTriple : mappingAxiom.getTargetAtoms()) {
+        Multimap<ImmutableFunctionalTerm, TargetAtom> subjectTermToTargetTriples = ArrayListMultimap.create();
+        for (TargetAtom targetTriple : mappingAxiom.getTargetAtoms()) {
             ImmutableFunctionalTerm subjectTerm = getFirstFunctionalTerm(targetTriple)
                     .orElseThrow(() -> new IllegalStateException("Invalid OBDA mapping"));
             subjectTermToTargetTriples.put(subjectTerm, targetTriple);
@@ -125,8 +126,8 @@ public class SQLPPMappingToR2RMLConverter {
         return ImmutableList.of(mappingAxiom);
     }
 
-    private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm(ImmutableFunctionalTerm inputFunction) {
-        return inputFunction.getArguments().stream()
+    private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm(TargetAtom targetAtom) {
+        return targetAtom.getSubstitution().getImmutableMap().values().stream()
                 .findFirst()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t);

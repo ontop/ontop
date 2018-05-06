@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EmptyNodeRemovalTest {
 
-    private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
     private static Variable X = TERM_FACTORY.getVariable("x");
     private static Variable Y = TERM_FACTORY.getVariable("y");
     private static Variable A = TERM_FACTORY.getVariable("a");

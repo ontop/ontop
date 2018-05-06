@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui;
  */
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 public class PredicateItem {
 
@@ -31,12 +31,12 @@ public class PredicateItem {
 		CLASS
 	}
 	
-	private Predicate predicate;
+	private IRI iri;
 	private final PredicateType predicateType;
 	private PrefixManager prefixManager;
 	
-	public PredicateItem(Predicate target, PredicateType predicateType, PrefixManager pm) {
-		predicate = target;
+	public PredicateItem(IRI iri, PredicateType predicateType, PrefixManager pm) {
+		this.iri = iri;
 		this.predicateType = predicateType;
 		prefixManager = pm;
 	}
@@ -58,12 +58,12 @@ public class PredicateItem {
 		}
 	}
 	
-	public Predicate getSource() {
-		return predicate;
+	public IRI getSource() {
+		return iri;
 	}
 	
 	public String getFullName() {
-		return predicate.getName().toString();
+		return iri.getIRIString();
 	}
 	
 	public boolean isDataPropertyPredicate() {

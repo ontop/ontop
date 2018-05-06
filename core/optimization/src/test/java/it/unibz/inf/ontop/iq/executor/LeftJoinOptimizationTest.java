@@ -40,9 +40,9 @@ public class LeftJoinOptimizationTest {
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE4_PREDICATE;
     private final static RelationPredicate TABLE5_PREDICATE;
-    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 4);
+    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
     private static URITemplatePredicate URI_PREDICATE_ONE_VAR = TERM_FACTORY.getURITemplatePredicate(2);
     private static Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");

@@ -20,32 +20,35 @@ package it.unibz.inf.ontop.si.repository.impl;
  * #L%
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.IRI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
-
-import org.apache.commons.rdf.api.IRI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Store ABox assertions in the DB
@@ -248,17 +251,18 @@ public class RDBMSSIRepositoryManager {
 	private final SemanticIndexCache cacheSI;
 
 	private final SemanticIndexViewsManager views;
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
+	private final TargetAtomFactory targetAtomFactory;
 
-	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag, AtomFactory atomFactory,
-									TermFactory termFactory, TypeFactory typeFactory) {
+	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag,
+									TermFactory termFactory, TypeFactory typeFactory,
+									TargetAtomFactory targetAtomFactory) {
 		this.reasonerDag = reasonerDag;
-		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		views = new SemanticIndexViewsManager(typeFactory);
         cacheSI = new SemanticIndexCache(reasonerDag);
-        cacheSI.buildSemanticIndexFromReasoner();
+		this.targetAtomFactory = targetAtomFactory;
+		cacheSI.buildSemanticIndexFromReasoner();
 	}
 
 
@@ -625,11 +629,12 @@ public class RDBMSSIRepositoryManager {
 	private int getObjectConstantUriId(ObjectConstant c, PreparedStatement uriidStm) throws SQLException {
 		
 		// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
-		String uri = (c instanceof BNode) ? ((BNode) c).getName() : ((URIConstant) c).getURI().toString();
+		String uri = (c instanceof BNode) ? ((BNode) c).getName() : ((IRIConstant) c).getIRI().getIRIString();
 
 		int uri_id = uriMap.getId(uri);
 		if (uri_id < 0) {
 			uri_id = maxURIId + 1;
+
 			uriMap.set(uri, uri_id);
 			maxURIId++;
 			
@@ -778,7 +783,7 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(atomFactory.getObjectPropertyPredicate(ope.getIRI()),
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ope.getIRI().getIRIString())),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
@@ -817,8 +822,8 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
-						atomFactory.getDataPropertyPredicate(dpe.getIRI()),
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
+						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(dpe.getIRI().getIRIString())) ,
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
@@ -851,8 +856,8 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<ImmutableFunctionalTerm> targetQuery = constructTargetQuery(
-						atomFactory.getClassPredicate(classNode.getIRI()), view.getId().getType1());
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
+						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(classNode.getIRI().getIRIString())), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
@@ -893,7 +898,7 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
@@ -904,12 +909,15 @@ public class RDBMSSIRepositoryManager {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm);
-		return ImmutableList.of(body);
+		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(
+				org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString()));
+
+		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm ,classTerm);
+		return ImmutableList.of(targetAtom);
 	}
 	
 	
-	private ImmutableList<ImmutableFunctionalTerm> constructTargetQuery(Predicate predicate, ObjectRDFType type1,
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm iriTerm, ObjectRDFType type1,
 																		RDFTermType type2) {
 
 		Variable X = termFactory.getVariable("X");
@@ -921,7 +929,7 @@ public class RDBMSSIRepositoryManager {
 		else {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
-		
+
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
@@ -939,8 +947,9 @@ public class RDBMSSIRepositoryManager {
 			}
 		}
 
-		ImmutableFunctionalTerm body = termFactory.getImmutableFunctionalTerm(predicate, subjectTerm, objectTerm);
-		return ImmutableList.of(body);
+		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm,iriTerm,objectTerm);
+
+		return ImmutableList.of(targetAtom);
 	}
 
 	
