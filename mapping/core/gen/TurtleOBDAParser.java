@@ -1,4 +1,4 @@
-// Generated from /home/jcorman/workspace/ontop/mongo/ontop/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
+// Generated from /home/jcorman/workspace/ontop/v3/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -19,13 +19,13 @@ public class TurtleOBDAParser extends Parser {
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, WS=11, STRING_WITH_CURLY_BRACKET=12, BOOLEAN_LITERAL=13, IRIREF_EXT=14, 
 		IRIREF=15, PNAME_NS=16, PN_PREFIX=17, PREFIXED_NAME=18, PREFIXED_NAME_EXT=19, 
-		BLANK_NODE_LABEL=20, LANGTAG=21, INTEGER=22, DECIMAL=23, DOUBLE=24, EXPONENT=25, 
-		INTEGER_POSITIVE=26, INTEGER_NEGATIVE=27, DOUBLE_POSITIVE=28, DOUBLE_NEGATIVE=29, 
-		DECIMAL_POSITIVE=30, DECIMAL_NEGATIVE=31, STRING_LITERAL_LONG_SINGLE_QUOTE=32, 
-		STRING_LITERAL_LONG_QUOTE=33, STRING_LITERAL_QUOTE=34, STRING_LITERAL_SINGLE_QUOTE=35, 
-		UCHAR=36, ECHAR=37, ANON_WS=38, ANON=39, PN_CHARS_BASE=40, PN_CHARS_U=41, 
-		PN_CHARS=42, PN_LOCAL_EXT=43, PN_LOCAL=44, PLX=45, PERCENT=46, HEX=47, 
-		PN_LOCAL_ESC=48;
+		BLANK_NODE_FUNCTION=20, BLANK_NODE_LABEL=21, LANGTAG=22, INTEGER=23, DECIMAL=24, 
+		DOUBLE=25, EXPONENT=26, INTEGER_POSITIVE=27, INTEGER_NEGATIVE=28, DOUBLE_POSITIVE=29, 
+		DOUBLE_NEGATIVE=30, DECIMAL_POSITIVE=31, DECIMAL_NEGATIVE=32, STRING_LITERAL_LONG_SINGLE_QUOTE=33, 
+		STRING_LITERAL_LONG_QUOTE=34, STRING_LITERAL_QUOTE=35, STRING_LITERAL_SINGLE_QUOTE=36, 
+		UCHAR=37, ECHAR=38, ANON_WS=39, ANON=40, PN_CHARS_BASE=41, PN_CHARS_U=42, 
+		PN_CHARS=43, PN_LOCAL_EXT=44, PN_LOCAL=45, PLX=46, PERCENT=47, HEX=48, 
+		PN_LOCAL_ESC=49;
 	public static final int
 		RULE_parse = 0, RULE_directiveStatement = 1, RULE_triplesStatement = 2, 
 		RULE_directive = 3, RULE_prefixID = 4, RULE_base = 5, RULE_triples = 6, 
@@ -51,13 +51,13 @@ public class TurtleOBDAParser extends Parser {
 	private static final String[] _SYMBOLIC_NAMES = {
 		null, null, null, null, null, null, null, null, null, null, null, "WS", 
 		"STRING_WITH_CURLY_BRACKET", "BOOLEAN_LITERAL", "IRIREF_EXT", "IRIREF", 
-		"PNAME_NS", "PN_PREFIX", "PREFIXED_NAME", "PREFIXED_NAME_EXT", "BLANK_NODE_LABEL", 
-		"LANGTAG", "INTEGER", "DECIMAL", "DOUBLE", "EXPONENT", "INTEGER_POSITIVE", 
-		"INTEGER_NEGATIVE", "DOUBLE_POSITIVE", "DOUBLE_NEGATIVE", "DECIMAL_POSITIVE", 
-		"DECIMAL_NEGATIVE", "STRING_LITERAL_LONG_SINGLE_QUOTE", "STRING_LITERAL_LONG_QUOTE", 
-		"STRING_LITERAL_QUOTE", "STRING_LITERAL_SINGLE_QUOTE", "UCHAR", "ECHAR", 
-		"ANON_WS", "ANON", "PN_CHARS_BASE", "PN_CHARS_U", "PN_CHARS", "PN_LOCAL_EXT", 
-		"PN_LOCAL", "PLX", "PERCENT", "HEX", "PN_LOCAL_ESC"
+		"PNAME_NS", "PN_PREFIX", "PREFIXED_NAME", "PREFIXED_NAME_EXT", "BLANK_NODE_FUNCTION", 
+		"BLANK_NODE_LABEL", "LANGTAG", "INTEGER", "DECIMAL", "DOUBLE", "EXPONENT", 
+		"INTEGER_POSITIVE", "INTEGER_NEGATIVE", "DOUBLE_POSITIVE", "DOUBLE_NEGATIVE", 
+		"DECIMAL_POSITIVE", "DECIMAL_NEGATIVE", "STRING_LITERAL_LONG_SINGLE_QUOTE", 
+		"STRING_LITERAL_LONG_QUOTE", "STRING_LITERAL_QUOTE", "STRING_LITERAL_SINGLE_QUOTE", 
+		"UCHAR", "ECHAR", "ANON_WS", "ANON", "PN_CHARS_BASE", "PN_CHARS_U", "PN_CHARS", 
+		"PN_LOCAL_EXT", "PN_LOCAL", "PLX", "PERCENT", "HEX", "PN_LOCAL_ESC"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -127,14 +127,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_parse; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterParse(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitParse(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitParse(this);
 			else return visitor.visitChildren(this);
@@ -175,7 +167,7 @@ public class TurtleOBDAParser extends Parser {
 				setState(65); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING_WITH_CURLY_BRACKET) | (1L << IRIREF_EXT) | (1L << IRIREF) | (1L << PREFIXED_NAME) | (1L << PREFIXED_NAME_EXT) | (1L << BLANK_NODE_LABEL) | (1L << ANON))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING_WITH_CURLY_BRACKET) | (1L << IRIREF_EXT) | (1L << IRIREF) | (1L << PREFIXED_NAME) | (1L << PREFIXED_NAME_EXT) | (1L << BLANK_NODE_FUNCTION) | (1L << BLANK_NODE_LABEL) | (1L << ANON))) != 0) );
 			setState(67);
 			match(EOF);
 			}
@@ -199,14 +191,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_directiveStatement; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterDirectiveStatement(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitDirectiveStatement(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitDirectiveStatement(this);
@@ -245,14 +229,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_triplesStatement; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTriplesStatement(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTriplesStatement(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTriplesStatement(this);
@@ -294,14 +270,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_directive; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterDirective(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitDirective(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitDirective(this);
@@ -355,14 +323,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_prefixID; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPrefixID(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPrefixID(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPrefixID(this);
 			else return visitor.visitChildren(this);
@@ -409,14 +369,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_base; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBase(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBase(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBase(this);
@@ -468,14 +420,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_triples; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTriples(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTriples(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTriples(this);
 			else return visitor.visitChildren(this);
@@ -516,14 +460,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_predicateObjectList; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPredicateObjectList(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPredicateObjectList(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPredicateObjectList(this);
@@ -581,14 +517,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_predicateObject; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterPredicateObject(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitPredicateObject(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitPredicateObject(this);
 			else return visitor.visitChildren(this);
@@ -629,14 +557,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_objectList; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterObjectList(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitObjectList(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitObjectList(this);
@@ -690,14 +610,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_verb; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVerb(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVerb(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVerb(this);
@@ -759,14 +671,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_subject; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterSubject(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitSubject(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitSubject(this);
 			else return visitor.visitChildren(this);
@@ -797,6 +701,7 @@ public class TurtleOBDAParser extends Parser {
 				variable();
 				}
 				break;
+			case BLANK_NODE_FUNCTION:
 			case BLANK_NODE_LABEL:
 			case ANON:
 				enterOuterAlt(_localctx, 3);
@@ -837,14 +742,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_object; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterObject(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitObject(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitObject(this);
@@ -912,14 +809,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_resource; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterResource(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitResource(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitResource(this);
 			else return visitor.visitChildren(this);
@@ -972,14 +861,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_iriExt; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterIriExt(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitIriExt(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitIriExt(this);
 			else return visitor.visitChildren(this);
@@ -1017,20 +898,13 @@ public class TurtleOBDAParser extends Parser {
 	}
 
 	public static class BlankContext extends ParserRuleContext {
+		public TerminalNode BLANK_NODE_FUNCTION() { return getToken(TurtleOBDAParser.BLANK_NODE_FUNCTION, 0); }
 		public TerminalNode BLANK_NODE_LABEL() { return getToken(TurtleOBDAParser.BLANK_NODE_LABEL, 0); }
 		public TerminalNode ANON() { return getToken(TurtleOBDAParser.ANON, 0); }
 		public BlankContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_blank; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBlank(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBlank(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBlank(this);
@@ -1047,7 +921,7 @@ public class TurtleOBDAParser extends Parser {
 			{
 			setState(129);
 			_la = _input.LA(1);
-			if ( !(_la==BLANK_NODE_LABEL || _la==ANON) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BLANK_NODE_FUNCTION) | (1L << BLANK_NODE_LABEL) | (1L << ANON))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1074,14 +948,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_variable; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVariable(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVariable(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVariable(this);
@@ -1130,14 +996,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		public VariableLiteral_2Context(VariableLiteralContext ctx) { copyFrom(ctx); }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVariableLiteral_2(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVariableLiteral_2(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVariableLiteral_2(this);
 			else return visitor.visitChildren(this);
@@ -1151,14 +1009,6 @@ public class TurtleOBDAParser extends Parser {
 			return getRuleContext(LanguageTagContext.class,0);
 		}
 		public VariableLiteral_1Context(VariableLiteralContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterVariableLiteral_1(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitVariableLiteral_1(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitVariableLiteral_1(this);
@@ -1218,14 +1068,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_languageTag; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLanguageTag(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLanguageTag(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLanguageTag(this);
 			else return visitor.visitChildren(this);
@@ -1277,14 +1119,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_iri; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterIri(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitIri(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitIri(this);
@@ -1342,14 +1176,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_literal; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterLiteral(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitLiteral(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitLiteral(this);
@@ -1428,14 +1254,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_typedLiteral; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterTypedLiteral(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitTypedLiteral(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitTypedLiteral(this);
 			else return visitor.visitChildren(this);
@@ -1473,14 +1291,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stringLiteral; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterStringLiteral(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitStringLiteral(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitStringLiteral(this);
@@ -1523,14 +1333,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_numericLiteral; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericLiteral(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericLiteral(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericLiteral(this);
@@ -1594,14 +1396,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_booleanLiteral; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterBooleanLiteral(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitBooleanLiteral(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitBooleanLiteral(this);
 			else return visitor.visitChildren(this);
@@ -1637,14 +1431,6 @@ public class TurtleOBDAParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_numericUnsigned; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericUnsigned(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericUnsigned(this);
-		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericUnsigned(this);
@@ -1691,14 +1477,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_numericPositive; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericPositive(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericPositive(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericPositive(this);
 			else return visitor.visitChildren(this);
@@ -1744,14 +1522,6 @@ public class TurtleOBDAParser extends Parser {
 		}
 		@Override public int getRuleIndex() { return RULE_numericNegative; }
 		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).enterNumericNegative(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TurtleOBDAListener ) ((TurtleOBDAListener)listener).exitNumericNegative(this);
-		}
-		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof TurtleOBDAVisitor ) return ((TurtleOBDAVisitor<? extends T>)visitor).visitNumericNegative(this);
 			else return visitor.visitChildren(this);
@@ -1789,7 +1559,7 @@ public class TurtleOBDAParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\62\u00b4\4\2\t\2"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\63\u00b4\4\2\t\2"+
 		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
 		"\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -1803,9 +1573,9 @@ public class TurtleOBDAParser extends Parser {
 		"\26\3\26\5\26\u009a\n\26\3\26\3\26\3\26\5\26\u009f\n\26\3\27\3\27\3\27"+
 		"\3\27\3\30\3\30\3\31\3\31\3\31\5\31\u00aa\n\31\3\32\3\32\3\33\3\33\3\34"+
 		"\3\34\3\35\3\35\3\35\2\2\36\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \""+
-		"$&(*,.\60\62\64\668\2\n\3\2\4\5\3\2\6\7\4\2\20\20\25\25\4\2\26\26))\4"+
-		"\2\21\21\24\24\3\2\30\32\5\2\34\34\36\36  \5\2\35\35\37\37!!\2\u00ab\2"+
-		"=\3\2\2\2\4G\3\2\2\2\6J\3\2\2\2\bO\3\2\2\2\nQ\3\2\2\2\fU\3\2\2\2\16X\3"+
+		"$&(*,.\60\62\64\668\2\n\3\2\4\5\3\2\6\7\4\2\20\20\25\25\4\2\26\27**\4"+
+		"\2\21\21\24\24\3\2\31\33\5\2\35\35\37\37!!\5\2\36\36  \"\"\2\u00ab\2="+
+		"\3\2\2\2\4G\3\2\2\2\6J\3\2\2\2\bO\3\2\2\2\nQ\3\2\2\2\fU\3\2\2\2\16X\3"+
 		"\2\2\2\20[\3\2\2\2\22c\3\2\2\2\24f\3\2\2\2\26p\3\2\2\2\30u\3\2\2\2\32"+
 		"{\3\2\2\2\34\177\3\2\2\2\36\u0081\3\2\2\2 \u0083\3\2\2\2\"\u0085\3\2\2"+
 		"\2$\u008e\3\2\2\2&\u0093\3\2\2\2(\u0095\3\2\2\2*\u009e\3\2\2\2,\u00a0"+
@@ -1827,14 +1597,14 @@ public class TurtleOBDAParser extends Parser {
 		"\u0084\t\5\2\2\u0084!\3\2\2\2\u0085\u0086\7\16\2\2\u0086#\3\2\2\2\u0087"+
 		"\u0088\5\"\22\2\u0088\u0089\5&\24\2\u0089\u008f\3\2\2\2\u008a\u008b\5"+
 		"\"\22\2\u008b\u008c\7\13\2\2\u008c\u008d\5(\25\2\u008d\u008f\3\2\2\2\u008e"+
-		"\u0087\3\2\2\2\u008e\u008a\3\2\2\2\u008f%\3\2\2\2\u0090\u0094\7\27\2\2"+
+		"\u0087\3\2\2\2\u008e\u008a\3\2\2\2\u008f%\3\2\2\2\u0090\u0094\7\30\2\2"+
 		"\u0091\u0092\7\f\2\2\u0092\u0094\5\"\22\2\u0093\u0090\3\2\2\2\u0093\u0091"+
 		"\3\2\2\2\u0094\'\3\2\2\2\u0095\u0096\t\6\2\2\u0096)\3\2\2\2\u0097\u0099"+
 		"\5.\30\2\u0098\u009a\5&\24\2\u0099\u0098\3\2\2\2\u0099\u009a\3\2\2\2\u009a"+
 		"\u009f\3\2\2\2\u009b\u009f\5,\27\2\u009c\u009f\5\60\31\2\u009d\u009f\5"+
 		"\62\32\2\u009e\u0097\3\2\2\2\u009e\u009b\3\2\2\2\u009e\u009c\3\2\2\2\u009e"+
 		"\u009d\3\2\2\2\u009f+\3\2\2\2\u00a0\u00a1\5.\30\2\u00a1\u00a2\7\13\2\2"+
-		"\u00a2\u00a3\5(\25\2\u00a3-\3\2\2\2\u00a4\u00a5\7$\2\2\u00a5/\3\2\2\2"+
+		"\u00a2\u00a3\5(\25\2\u00a3-\3\2\2\2\u00a4\u00a5\7%\2\2\u00a5/\3\2\2\2"+
 		"\u00a6\u00aa\5\64\33\2\u00a7\u00aa\5\66\34\2\u00a8\u00aa\58\35\2\u00a9"+
 		"\u00a6\3\2\2\2\u00a9\u00a7\3\2\2\2\u00a9\u00a8\3\2\2\2\u00aa\61\3\2\2"+
 		"\2\u00ab\u00ac\7\17\2\2\u00ac\63\3\2\2\2\u00ad\u00ae\t\7\2\2\u00ae\65"+

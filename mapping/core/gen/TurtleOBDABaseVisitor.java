@@ -1,4 +1,4 @@
-// Generated from /home/jcorman/workspace/ontop/mongo/ontop/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
+// Generated from /home/jcorman/workspace/ontop/v3/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**

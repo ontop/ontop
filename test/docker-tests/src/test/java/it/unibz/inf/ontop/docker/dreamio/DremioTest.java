@@ -8,7 +8,7 @@ import org.junit.Test;
 public class DremioTest extends AbstractVirtualModeTest {
 
     private static final String owlfile = "/dremio/incidents/incidents.owl";
-    private static final String obdafile = "/dremio/book.obda";
+    private static final String obdafile = "/dremio/incidents/incidents.obda";
     private static final String propertyfile = "/dremio/dremio.properties";
 
     public DremioTest() {

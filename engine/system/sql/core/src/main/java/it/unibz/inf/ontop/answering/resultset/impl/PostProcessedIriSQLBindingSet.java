@@ -42,6 +42,12 @@ public class PostProcessedIriSQLBindingSet extends AbstractOntopBindingSet imple
 
     @Nullable
     @Override
+    protected OntopBinding computeBinding(String variableName) {
+        throw new RuntimeException("TODO: implement");
+    }
+
+    @Nullable
+    @Override
     public OntopBinding getBinding(String name) {
         throw new RuntimeException("TODO: implement");
     }

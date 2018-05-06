@@ -23,6 +23,10 @@ import java.util.stream.Stream;
 
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
+    // Column placeholder pattern
+    private static final Pattern varPattern = Pattern.compile("\\{([^\\}]+)\\}");
+    private static final Pattern constantBnodePattern = Pattern.compile("^_:(.*)");
+
     protected abstract boolean validateAttributeName(String value);
 
     /**
@@ -59,11 +63,11 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return termFactory.getImmutableTypedTerm(integerConstant, datatype);
     }
 
-    protected ImmutableTerm construct(String text) {
+    protected ImmutableTerm constructIRI(String text) {
         ImmutableTerm toReturn = null;
         final String PLACEHOLDER = "{}";
         List<ImmutableTerm> terms = new LinkedList<>();
-        List<FormatString> tokens = parse(text);
+        List<FormatString> tokens = parseIRI(text);
         int size = tokens.size();
         if (size == 1) {
             FormatString token = tokens.get(0);
@@ -93,13 +97,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return toReturn;
     }
 
-    // Column placeholder pattern
-    private static final String formatSpecifier = "\\{([^\\}]+)?\\}";
-    private static Pattern chPattern = Pattern.compile(formatSpecifier);
 
-    private List<FormatString> parse(String text) {
+    private List<FormatString> parseIRI(String text) {
         List<FormatString> toReturn = new ArrayList<>();
-        Matcher m = chPattern.matcher(text);
+        Matcher m = varPattern.matcher(text);
         int i = 0;
         while (i < text.length()) {
             if (m.find(i)) {
@@ -117,6 +118,20 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             }
         }
         return toReturn;
+    }
+
+    private ImmutableTerm constructConstantBNode(String text) {
+        Matcher m = constantBnodePattern.matcher(text);
+        return termFactory.getConstantBNode(m.group(1));
+    }
+
+    private ImmutableTerm constructBnodeFunction(String text) {
+        ImmutableList.Builder<ImmutableTerm> args = ImmutableList.builder();
+        Matcher m = varPattern.matcher(text);
+        while (m.find()) {
+            args.add(termFactory.getVariable(m.group(1)));
+        }
+        return termFactory.getImmutableBNodeTemplate(args.build());
     }
 
     private interface FormatString {
@@ -310,6 +325,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (vc != null) {
             return visitVariable(vc);
         }
+        BlankContext bc = ctx.blank();
+        if (bc != null) {
+            return visitBlank(bc);
+        }
         return null;
     }
 
@@ -323,14 +342,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (ctx.iriExt() != null) {
             return visitIriExt(ctx.iriExt());
         }
-        return construct(this.visitIri(ctx.iri()).getIRIString());
+        return constructIRI(this.visitIri(ctx.iri()).getIRIString());
     }
 
     public ImmutableTerm visitIriExt(IriExtContext ctx) {
         if (ctx.IRIREF_EXT() != null) {
-            return construct(removeBrackets(ctx.IRIREF_EXT().getText()));
+            return constructIRI(removeBrackets(ctx.IRIREF_EXT().getText()));
         }
-        return construct(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
+        return constructIRI(concatPrefix(ctx.PREFIXED_NAME_EXT().getText()));
     }
 
     @Override
@@ -359,6 +378,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
         validateAttributeName(variableName);
         return termFactory.getVariable(variableName);
+    }
+
+    @Override
+    public ImmutableTerm visitBlank(BlankContext ctx) {
+        if (ctx.BLANK_NODE_FUNCTION() != null){
+            return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
+        }
+        if (ctx.BLANK_NODE_LABEL() != null){
+            return constructConstantBNode (ctx.BLANK_NODE_LABEL().getText());
+        }
+        throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
 
     @Override

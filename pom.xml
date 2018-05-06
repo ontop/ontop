@@ -613,6 +613,11 @@
                 <artifactId>hana</artifactId>
                 <version>1.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.dremio.jdbc</groupId>
+                <artifactId>dremio-jdbc</artifactId>
+                <version>1.4.4</version>
+            </dependency>
 
             <!-- Optique R2RML API -->
             <dependency>

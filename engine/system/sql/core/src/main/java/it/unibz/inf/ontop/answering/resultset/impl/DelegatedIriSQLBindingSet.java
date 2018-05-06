@@ -17,7 +17,7 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     private final ImmutableMap<String, Integer> columnMap;
 
     public DelegatedIriSQLBindingSet(List<MainTypeLangValues> row, ImmutableList<String> signature, ImmutableMap<String, Integer> columnMap,
-                                     JDBC2ConstantConverter constantRetriever, ImmutableMap<String, Integer> columnMap1) {
+                                     JDBC2ConstantConverter constantRetriever) {
         super(signature);
         this.row = row;
         this.constantRetriever = constantRetriever;
@@ -30,18 +30,17 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Override
     @Nullable
     public OntopBinding getBinding(int column) {
-        final MainTypeLangValues cell = row.get(column - 1);
-        if (cell.getMainValue() == null) {
-            return null;
-        } else {
-            return new SQLOntopBinding(signature.get(column - 1), cell, constantRetriever);
-        }
+        return variableName2BindingMap.isPresent() ?
+                variableName2BindingMap.get().get(signature.get(column - 1)) :
+                computeBinding(column);
     }
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return signature.contains(bindingName) &&
-                row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
+        return variableName2BindingMap.isPresent()?
+                variableName2BindingMap.get().containsKey(bindingName):
+                signature.contains(bindingName) &&
+                        row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
     }
 
     /***
@@ -62,12 +61,22 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Nullable
     public Constant getConstant(String name) throws OntopResultConversionException {
         Integer columnIndex = columnMap.get(name);
-        return getConstant(columnIndex);
+        return columnIndex == null?
+                null:
+                getConstant(columnIndex);
     }
 
     @Override
-    @Nullable
-    public OntopBinding getBinding(String name) {
-        return getBinding(columnMap.get(name));
+    protected OntopBinding computeBinding(String variableName) {
+        return computeBinding(columnMap.get(variableName));
+    }
+
+    private OntopBinding computeBinding(int column) {
+        final MainTypeLangValues cell = row.get(column - 1);
+        if (cell.getMainValue() == null) {
+            return null;
+        } else {
+            return new SQLOntopBinding(signature.get(column - 1), cell, constantRetriever);
+        }
     }
 }
