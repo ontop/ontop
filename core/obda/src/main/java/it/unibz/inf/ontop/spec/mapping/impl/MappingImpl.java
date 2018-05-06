@@ -25,24 +25,6 @@ public class MappingImpl implements Mapping {
     private final SpecificationFactory specificationFactory;
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
 
-    @Deprecated
-    @AssistedInject
-    private MappingImpl(@Assisted MappingMetadata metadata,
-                        @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
-                        @Assisted("classMap") ImmutableMap<IRI, IQ> classMap,
-                        OntopModelSettings settings,
-                        SpecificationFactory specificationFactory) {
-        this(metadata, transformIntoTable(propertyMap), transformIntoTable(classMap), settings, specificationFactory);
-    }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-    }
-
     @AssistedInject
     private MappingImpl(@Assisted MappingMetadata metadata,
                         @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -14,10 +11,9 @@ import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -69,7 +65,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                         r -> r
                 ));
 
-
         ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
                 .flatMap(r -> r.getBody().stream())
                 .flatMap(Datalog2QueryTools::extractPredicates)
@@ -89,26 +84,27 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .map(IQ::normalizeForOptimization)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<IRI, IQ> mappingClassMap = intermediateQueryList.stream()
-                .filter (assertion ->  {
-                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
-                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
-                    return (predicateIRI.equals(RDF.TYPE));})
+        ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = intermediateQueryList.stream()
                 .collect(ImmutableCollectors.toMap(
-                        MappingTools::extractClassIRI,
-                        a -> a));
+                        iq -> iq,
+                        MappingTools::extractRDFPredicate
+                ));
 
-        ImmutableMap<IRI, IQ> mappingPropertiesMap = intermediateQueryList.stream()
-                .filter (assertion ->  {
-                    ImmutableList<Variable> projectedVariables = assertion.getProjectionAtom().getArguments();
-                    IRI predicateIRI =  MappingTools.extractPredicateTerm(assertion, projectedVariables.get(1));
-                    return (!predicateIRI.equals(RDF.TYPE));})
-                .collect(ImmutableCollectors.toMap(
-                        MappingTools::extractPropertiesIRI,
-                        a -> a));
+        return specificationFactory.createMapping(mappingMetadata,
+                extractTable(iqClassificationMap, false),
+                extractTable(iqClassificationMap, true));
+    }
 
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
+            ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap, boolean isClass) {
 
-        return specificationFactory.createMapping(mappingMetadata, mappingPropertiesMap, mappingClassMap);
+        return iqClassificationMap.entrySet().stream()
+                .filter(e -> e.getValue().isClass() == isClass)
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate) e.getKey().getProjectionAtom().getPredicate(),
+                        e.getValue().getIri(),
+                        e.getKey()))
+                .collect(ImmutableCollectors.toTable());
     }
 
     @Override

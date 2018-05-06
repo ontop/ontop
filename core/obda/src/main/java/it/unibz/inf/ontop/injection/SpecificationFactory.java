@@ -23,11 +23,6 @@ public interface SpecificationFactory {
 
     MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
 
-    @Deprecated
-    Mapping createMapping(MappingMetadata metadata,
-                          @Assisted("propertyMap") ImmutableMap<IRI, IQ> propertyMap,
-                          @Assisted("classMap") ImmutableMap<IRI, IQ> classMap);
-
     Mapping createMapping(MappingMetadata metadata,
                           @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                           @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable);

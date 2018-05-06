@@ -2,15 +2,18 @@ package it.unibz.inf.ontop.spec.mapping.utils;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * To deal with the extraction of the predicates IRI from the MappingAssertion
@@ -18,74 +21,70 @@ import java.util.Optional;
  */
 public class MappingTools {
 
-    private final static RDF rdfFactory = new SimpleRDF();
+    public static RDFPredicateInfo extractRDFPredicate(IQ mappingAssertion) {
+        DistinctVariableOnlyDataAtom projectionAtom = mappingAssertion.getProjectionAtom();
+        RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
+                        "is not having a RDFAtomPredicate: " + mappingAssertion));
 
-    public static IRI extractPredicateTerm(IQ mappingAssertion, Variable predicateVariable)  {
 
-        ImmutableTerm predicateTerm = Optional.of(mappingAssertion.getTree().getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map((n) -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .flatMap(s -> Optional.ofNullable(s.get(predicateVariable)))
-                .filter(s -> s instanceof ImmutableFunctionalTerm)
-                .map(s -> ((ImmutableFunctionalTerm)s).getTerm(0))
-                .orElseThrow(() -> new TriplePredicateTypeException( mappingAssertion , predicateVariable , "The variable is not defined in the root node (expected for a mapping assertion)"));
+        ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
+                = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
+                .map(s -> s.apply(projectionAtom.getArguments()))
+                .collect(ImmutableCollectors.toSet());
 
-        if (predicateTerm instanceof IRIConstant) {
-            return ((IRIConstant) predicateTerm).getIRI();
-        }
-        // TODO: remove this
-        else if (predicateTerm instanceof ValueConstant) {
-            return rdfFactory.createIRI( ((ValueConstant) predicateTerm).getValue());
-        }
-        else throw new MappingTools.TriplePredicateTypeException(mappingAssertion , "Predicate is not defined as a constant (expected for a mapping assertion)");
+        IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
+
+        return propertyIRI.equals(RDF.TYPE)
+                ? new RDFPredicateInfo(true, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
+                : new RDFPredicateInfo(false, propertyIRI);
     }
 
-    private static class TriplePredicateTypeException extends OntopInternalBugException {
-        TriplePredicateTypeException(IQ mappingAssertion, Variable triplePredicateVariable,
-                                     String reason) {
-            super("Internal bug: cannot retrieve  " + triplePredicateVariable + " in: \n" + mappingAssertion
-                    + "\n Reason: " + reason);
-        }
+    private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,
+                                  Function<ImmutableList<? extends ImmutableTerm>, Optional<IRI>> iriExtractor) {
+        ImmutableList<Optional<IRI>> possibleIris = possibleSubstitutedArguments.stream()
+                .map(iriExtractor)
+                .distinct()
+                .collect(ImmutableCollectors.toList());
 
-        TriplePredicateTypeException(IQ mappingAssertion, String reason) {
-            super("Internal bug: cannot retrieve the predicate IRI in: \n" + mappingAssertion
-                    + "\n Reason: " + reason);
-        }
+        if (!possibleIris.stream().allMatch(Optional::isPresent))
+            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
+        if (possibleIris.size() != 1)
+            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique");
+
+        return possibleIris.stream()
+                .map(Optional::get)
+                .findFirst()
+                .get();
     }
 
 
-    //method to retrieve the class IRI from the mapping assertion.
-    public static IRI extractClassIRI(IQ mappingAssertion) {
+    private static class MappingPredicateIRIExtractionException extends OntopInternalBugException {
 
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
-        if(projectedVariables.size()!=3){
-            throw new MappingTools.TriplePredicateTypeException(mappingAssertion , "Expected a projection atom with 3 variables for a mapping assertion)");
+        private MappingPredicateIRIExtractionException(String message) {
+            super("Internal bug: " + message);
         }
-        IRI predicateIRI = extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
-
-        if (predicateIRI.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)) {
-            return extractPredicateTerm(mappingAssertion, projectedVariables.get(2));
-        }
-        throw new MappingTools.TriplePredicateTypeException(mappingAssertion, "Expected a property IRI not a class IRI");
-
     }
 
-    //method to retrieve the object or data properties IRI from the mapping assertion.
-    public static IRI extractPropertiesIRI(IQ mappingAssertion)  {
+    public static class RDFPredicateInfo {
+        private final boolean isClass;
+        private final IRI iri;
 
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
-        if(projectedVariables.size()!=3){
-            throw new MappingTools.TriplePredicateTypeException(mappingAssertion , "Expected a projection atom with 3 variables for a mapping assertion)");
+        public RDFPredicateInfo(boolean isClass, IRI iri) {
+            this.isClass = isClass;
+            this.iri = iri;
         }
-        IRI predicateIRI = extractPredicateTerm(mappingAssertion, projectedVariables.get(1));
 
-        if (predicateIRI.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)) {
-            throw new MappingTools.TriplePredicateTypeException(mappingAssertion, "Expected a property IRI not a class IRI");
+        public boolean isClass() {
+            return isClass;
         }
-        return predicateIRI;
 
+        public IRI getIri() {
+            return iri;
+        }
     }
 
 
