@@ -20,9 +20,4 @@ public class NonGroundDistinctVariableDataAtomImpl extends AbstractDataAtomImpl<
     protected NonGroundDistinctVariableDataAtomImpl(AtomPredicate predicate, Variable... distinctVariables) {
         this(predicate, ImmutableList.copyOf(distinctVariables));
     }
-
-    @Override
-    public boolean isGround() {
-        return false;
-    }
 }

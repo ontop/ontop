@@ -123,7 +123,7 @@ public class AtomFactoryImpl implements AtomFactory {
     public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
         return getMutableTripleAtom(
                 subject,
-                convertIRIIntoFunctionalGroundTerm(propertyIRI),
+                convertIRIIntoFunction(propertyIRI),
                 object);
     }
 
@@ -131,11 +131,11 @@ public class AtomFactoryImpl implements AtomFactory {
     public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
         return getMutableTripleAtom(
                 subject,
-                convertIRIIntoFunctionalGroundTerm(RDF.TYPE),
-                convertIRIIntoFunctionalGroundTerm(classIRI));
+                convertIRIIntoFunction(RDF.TYPE),
+                convertIRIIntoFunction(classIRI));
     }
 
-    private Function convertIRIIntoFunctionalGroundTerm(IRI iri) {
+    private Function convertIRIIntoFunction(IRI iri) {
         return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 

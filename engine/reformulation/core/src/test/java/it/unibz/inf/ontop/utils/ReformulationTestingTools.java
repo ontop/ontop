@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -33,6 +34,7 @@ public class ReformulationTestingTools {
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -59,6 +61,7 @@ public class ReformulationTestingTools {
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         CQC_UTILITIES = injector.getInstance(CQCUtilities.class);
+        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();

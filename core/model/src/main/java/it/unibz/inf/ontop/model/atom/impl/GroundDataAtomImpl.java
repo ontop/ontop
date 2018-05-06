@@ -17,11 +17,6 @@ public class GroundDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate> impl
     }
 
     @Override
-    public boolean isGround() {
-        return true;
-    }
-
-    @Override
     public boolean containsGroundTerms() {
         return !getArguments().isEmpty();
     }

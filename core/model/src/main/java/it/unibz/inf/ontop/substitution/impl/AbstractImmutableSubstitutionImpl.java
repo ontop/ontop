@@ -64,7 +64,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         }
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
 
-        /**
+        /*
          * Distinguishes the BooleanExpression from the other functional terms.
          */
         if (functionSymbol instanceof OperationPredicate) {
@@ -98,26 +98,16 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     @Override
     public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
-        ImmutableFunctionalTerm newFunctionalTerm = applyToFunctionalTerm(atom);
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(atom.getArguments());
 
-        if (newFunctionalTerm instanceof DataAtom)
-            return (DataAtom) newFunctionalTerm;
-
-        AtomPredicate predicate = (AtomPredicate) newFunctionalTerm.getFunctionSymbol();
-
-        /**
-         * Casts all the sub-terms into VariableOrGroundTerm
-         *
-         * Throws a ConversionException if this cast is impossible.
-         */
-        ImmutableList.Builder<VariableOrGroundTerm> argBuilder = ImmutableList.builder();
-        for (ImmutableTerm subTerm : newFunctionalTerm.getArguments()) {
+        for (ImmutableTerm subTerm : newArguments) {
             if (!(subTerm instanceof VariableOrGroundTerm))
                 throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
-            argBuilder.add((VariableOrGroundTerm)subTerm);
 
         }
-        return atomFactory.getDataAtom(predicate, argBuilder.build());
+
+        return atomFactory.getDataAtom(atom.getPredicate(),
+                (ImmutableList<? extends VariableOrGroundTerm>) newArguments);
     }
 
     @Override

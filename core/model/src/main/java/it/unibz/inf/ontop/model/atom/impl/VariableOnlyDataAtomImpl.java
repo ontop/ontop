@@ -2,8 +2,11 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.atom.VariableOnlyDataAtom;
+
+import java.util.List;
 
 public class VariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate> implements VariableOnlyDataAtom {
     protected VariableOnlyDataAtomImpl(AtomPredicate predicate, ImmutableList<Variable> variables) {
@@ -17,10 +20,5 @@ public class VariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate
     @Override
     public ImmutableList<Variable> getArguments() {
         return (ImmutableList<Variable>)super.getArguments();
-    }
-
-    @Override
-    public boolean isGround() {
-        return getVariables().isEmpty();
     }
 }

@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -32,10 +33,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 
@@ -49,9 +47,10 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
+	private final boolean isTestModeEnabled;
 
 	@Inject
-	private TermFactoryImpl(TypeFactory typeFactory) {
+	private TermFactoryImpl(TypeFactory typeFactory, OntopModelSettings settings) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
@@ -61,6 +60,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.type2FunctionSymbolMap = new HashMap<>();
+		this.isTestModeEnabled = settings.isTestModeEnabled();
 	}
 
 	@Override
@@ -130,21 +130,19 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
-		if (functor instanceof OperationPredicate) {
-			return getExpression((OperationPredicate)functor, arguments);
-		}
-
-		// Default constructor
-		return new FunctionalTermImpl(functor, arguments);
+		return getFunction(functor, Arrays.asList(arguments));
 	}
 	
 	@Override
 	public Expression getExpression(OperationPredicate functor, Term... arguments) {
-		return new ExpressionImpl(functor, arguments);
+		return getExpression(functor, Arrays.asList(arguments));
 	}
 
 	@Override
 	public Expression getExpression(OperationPredicate functor, List<Term> arguments) {
+		if (isTestModeEnabled) {
+			checkMutability(arguments);
+		}
 		return new ExpressionImpl(functor, arguments);
 	}
 
@@ -177,12 +175,25 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
+		if (isTestModeEnabled) {
+			checkMutability(arguments);
+		}
+
 		if (functor instanceof OperationPredicate) {
 			return getExpression((OperationPredicate) functor, arguments);
 		}
 
 		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
+	}
+
+	private void checkMutability(List<Term> terms) {
+		for(Term term : terms) {
+			if (term instanceof ImmutableFunctionalTerm)
+				throw new IllegalArgumentException("Was expecting a mutable term, not a " + term.getClass());
+			else if (term instanceof Function)
+				checkMutability(((Function) term).getTerms());
+		}
 	}
 
 	@Override

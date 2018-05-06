@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -34,16 +35,19 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(Datalog2QueryMappingConverter datalog2QueryMappingConverter,
                                               SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              TermFactory termFactory, DatalogFactory datalogFactory) {
+                                              TermFactory termFactory, DatalogFactory datalogFactory,
+                                              ImmutabilityTools immutabilityTools) {
         this.datalog2QueryMappingConverter = datalog2QueryMappingConverter;
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -91,7 +95,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRIConstant c = (IRIConstant) ca.getIndividual();
             IRI classIRI = ca.getConcept().getIRI();
             Function head = atomFactory.getMutableTripleHeadAtom(
-                    uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString()), classIRI);
+                    immutabilityTools.convertToMutableFunction(
+                            uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString())), classIRI);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);

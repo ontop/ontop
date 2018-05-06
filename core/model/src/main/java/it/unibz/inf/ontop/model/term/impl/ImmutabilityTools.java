@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -65,11 +66,18 @@ public class ImmutabilityTools {
      * This method takes a immutable term and convert it into an old mutable function.
      */
     public Function convertToMutableFunction(ImmutableFunctionalTerm functionalTerm) {
+        return convertToMutableFunction(functionalTerm.getFunctionSymbol(),
+                functionalTerm.getArguments());
+    }
 
-        Predicate pred = functionalTerm.getFunctionSymbol();
-        ImmutableList<Term> otherTerms = functionalTerm.getTerms();
+    public Function convertToMutableFunction(DataAtom dataAtom) {
+        return convertToMutableFunction(dataAtom.getPredicate(), dataAtom.getArguments());
+    }
+
+    public Function convertToMutableFunction(Predicate predicateOrFunctionSymbol,
+                                             ImmutableList<? extends ImmutableTerm> otherTerms) {
         List<Term> mutableList = new ArrayList<>();
-        Iterator<Term> iterator = otherTerms.iterator();
+        Iterator<? extends ImmutableTerm> iterator = otherTerms.iterator();
         while (iterator.hasNext()) {
 
             Term nextTerm = iterator.next();
@@ -82,10 +90,10 @@ public class ImmutabilityTools {
             }
 
         }
-        Function mutFunc = termFactory.getFunction(pred, mutableList);
+        Function mutFunc = termFactory.getFunction(predicateOrFunctionSymbol, mutableList);
         return mutFunc;
-
     }
+
 
     /**
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.

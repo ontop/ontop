@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -83,6 +84,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private int predicateIdx = 0;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
     private final it.unibz.inf.ontop.model.term.ValueConstant valueNull;
+    private final ImmutabilityTools immutabilityTools;
 
     /**
      * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
@@ -90,18 +92,20 @@ public class SparqlAlgebraToDatalogTranslator {
      * @param termFactory
      * @param typeFactory
      * @param datalogFactory
+     * @param immutabilityTools
      *
 	 */
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
                                      @Nullable IRIDictionary iriDictionary,
                                      AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-                                     DatalogFactory datalogFactory) {
+                                     DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
+        this.immutabilityTools = immutabilityTools;
 
         this.program = this.datalogFactory.getDatalogProgram();
         this.rdfFactory = new SimpleRDF();
@@ -573,7 +577,8 @@ public class SparqlAlgebraToDatalogTranslator {
                         typeFactory.getXsdIntegerDatatype()));
         }
         else {
-            Function constantFunction = uriTemplateMatcher.generateURIFunction(uri);
+            Function constantFunction =  immutabilityTools.convertToMutableFunction(
+                    uriTemplateMatcher.generateURIFunction(uri));
             if (constantFunction.getArity() == 1 && unknownUrisToTemplates) {
                 // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
                 // despite the name, this is NOT necessarily a datatype
