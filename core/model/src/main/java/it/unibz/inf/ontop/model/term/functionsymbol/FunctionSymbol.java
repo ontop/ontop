@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
-public interface FunctionSymbol extends BuiltinPredicate {
+/**
+ * FunctionSymbols are the functors needed to build ImmutableFunctionalTerms
+ */
+public interface FunctionSymbol extends Predicate {
 
 }

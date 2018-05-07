@@ -28,10 +28,10 @@ import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -420,7 +420,7 @@ public class TMappingProcessor {
 			else {
 				int c = 0;
 				for (Function a : mapping.getBody()) 
-					if (!(a.getFunctionSymbol() instanceof BuiltinPredicate))
+					if (a.getFunctionSymbol() instanceof AtomPredicate)
 						c++;
 				
 				if (c == 1)
