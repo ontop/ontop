@@ -46,7 +46,7 @@ public class GroundTermTools {
         if (term instanceof Function) {
             return ((Function)term).getVariables().isEmpty();
         }
-        return false;
+        return term instanceof Constant;
     }
 
     public static boolean areGroundTerms(Collection<? extends ImmutableTerm> terms) {
