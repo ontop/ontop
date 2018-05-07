@@ -73,7 +73,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
                                          VariableGenerator variableGenerator) {
-        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree)
+        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree.getChild())
                 .normalizeForOptimization(variableGenerator);
         return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
                 iqFactory.createIQProperties().declareNormalizedForOptimization());
