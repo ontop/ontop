@@ -188,11 +188,6 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public boolean isTriplePredicate() {
-		return false;
-	}
-
-	@Override
 	public TermType getExpectedBaseType(int index) {
 		return argumentValidator.getExpectedBaseType(index);
 	}

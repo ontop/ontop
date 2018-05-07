@@ -90,10 +90,4 @@ public class PredicateImpl implements Predicate {
 	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
 		return expectedBaseTypes;
 	}
-
-
-	@Override
-	public boolean isTriplePredicate() {
-		return (arity == 3 && name.equals("triple"));
-	}
 }
