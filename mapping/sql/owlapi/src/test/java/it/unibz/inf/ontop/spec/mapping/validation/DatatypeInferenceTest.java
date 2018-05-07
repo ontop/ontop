@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -96,7 +97,7 @@ public class DatatypeInferenceTest {
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
-        Optional<Predicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+        Optional<FunctionSymbol> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
                 .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -113,7 +114,7 @@ public class DatatypeInferenceTest {
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        Predicate datatype = optionalDatatype.get();
+        FunctionSymbol datatype = optionalDatatype.get();
 
         assertEquals(TERM_FACTORY.getRequiredTypePredicate(expectedType), datatype);
     }

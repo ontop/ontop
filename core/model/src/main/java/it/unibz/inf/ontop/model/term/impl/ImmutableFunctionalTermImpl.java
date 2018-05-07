@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  */
 public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctionalTerm {
 
-    private final Predicate functionSymbol;
+    private final FunctionSymbol functionSymbol;
     private final ImmutableList<? extends ImmutableTerm> terms;
 
     /**
@@ -23,11 +23,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
      */
     private String string;
 
-    protected ImmutableFunctionalTermImpl(Predicate functor, ImmutableTerm... terms) {
-        this(functor, ImmutableList.<ImmutableTerm>builder().add(terms).build());
+    protected ImmutableFunctionalTermImpl(FunctionSymbol functor, ImmutableTerm... terms) {
+        this(functor, ImmutableList.copyOf(terms));
     }
 
-    protected ImmutableFunctionalTermImpl(Predicate functionSymbol, ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableFunctionalTermImpl(FunctionSymbol functionSymbol, ImmutableList<? extends ImmutableTerm> terms) {
         this.functionSymbol = functionSymbol;
         // No problem since the list is immutable
         this.terms = terms;
@@ -45,7 +45,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public Predicate getFunctionSymbol() {
+    public FunctionSymbol getFunctionSymbol() {
         return functionSymbol;
     }
 

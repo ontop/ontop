@@ -106,7 +106,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type) {
-		Predicate pred = getRequiredTypePredicate(type);
+		FunctionSymbol pred = getRequiredTypePredicate(type);
 		if (pred == null)
 			throw new RuntimeException("Unknown data type: " + type);
 
@@ -197,7 +197,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<? extends ImmutableTerm> terms) {
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms) {
 		if (functor instanceof OperationPredicate) {
 			return getImmutableExpression((OperationPredicate)functor, terms);
 		}
@@ -212,28 +212,17 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
 		return getImmutableFunctionalTerm(functor, ImmutableList.copyOf(terms));
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Function functionalTerm) {
-		if (GroundTermTools.isGroundTerm(functionalTerm)) {
-			return new GroundFunctionalTermImpl(functionalTerm);
-		}
-		else {
-			return new NonGroundFunctionalTermImpl(functionalTerm.getFunctionSymbol(), convertTerms(functionalTerm));
-		}
-
-	}
-
-	@Override
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms) {
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
 		return new NonGroundFunctionalTermImpl(functor, terms);
 	}
 
 	@Override
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms) {
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
 		return new NonGroundFunctionalTermImpl(functor, terms);
 	}
 
@@ -243,25 +232,25 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = getURITemplatePredicate(terms.length);
+		FunctionSymbol uriPred = getURITemplatePredicate(terms.length);
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm... terms) {
-		Predicate pred = getURITemplatePredicate(terms.length);
+		FunctionSymbol pred = getURITemplatePredicate(terms.length);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = getURITemplatePredicate(terms.size());
+		FunctionSymbol pred = getURITemplatePredicate(terms.size());
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
-		Predicate uriPred = getURITemplatePredicate(terms.size());
+		FunctionSymbol uriPred = getURITemplatePredicate(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
@@ -272,25 +261,25 @@ public class TermFactoryImpl implements TermFactory {
 	
 	@Override
 	public Function getBNodeTemplate(Term... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
+		FunctionSymbol pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getFunction(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
-		Predicate pred = new BNodePredicateImpl(terms.length, typeFactory);
+		FunctionSymbol pred = new BNodePredicateImpl(terms.length, typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
+		FunctionSymbol pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getBNodeTemplate(List<Term> terms) {
-		Predicate pred = new BNodePredicateImpl(terms.size(), typeFactory);
+		FunctionSymbol pred = new BNodePredicateImpl(terms.size(), typeFactory);
 		return getFunction(pred, terms);
 	}
 

@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class GroundTermTools {
 
@@ -33,7 +35,13 @@ public class GroundTermTools {
         if (term instanceof Function) {
             Function functionalTerm = (Function) term;
             // Recursive
-            return new GroundFunctionalTermImpl(functionalTerm);
+            FunctionSymbol functionSymbol = Optional.of(functionalTerm.getFunctionSymbol())
+                    .filter(p -> p instanceof FunctionSymbol)
+                    .map(p -> (FunctionSymbol)p)
+                    .orElseThrow(() -> new NonGroundTermException(term + "is not using a function symbol but a"
+                            + functionalTerm.getFunctionSymbol().getClass()));
+
+            return new GroundFunctionalTermImpl(castIntoGroundTerms(functionalTerm.getTerms()), functionSymbol);
         }
 
         throw new NonGroundTermException(term + " is not a ground term");

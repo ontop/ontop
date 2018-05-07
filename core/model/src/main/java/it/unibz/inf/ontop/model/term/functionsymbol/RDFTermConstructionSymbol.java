@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 /**
  * Symbol of (non-SPARQL) functions that construct RDF terms
  */
-public interface RDFTermConstructionSymbol extends BuiltinPredicate {
+public interface RDFTermConstructionSymbol extends FunctionSymbol {
 
     RDFTermType getReturnedType();
 }

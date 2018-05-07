@@ -62,7 +62,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         for (ImmutableTerm subTerm : functionalTerm.getTerms()) {
             subTermsBuilder.add(apply(subTerm));
         }
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
         /*
          * Distinguishes the BooleanExpression from the other functional terms.

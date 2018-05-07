@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.protege.gui.component;
  */
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -552,7 +553,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public Object getCellEditorValue() {
 			if (editedItem != null) {
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
-				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
+				editedItem.setDataType((FunctionSymbol) cboDataTypes.getSelectedItem());
 			}
 			return editedItem;
 		}
@@ -574,7 +575,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public boolean stopCellEditing() {
 			try { // handling unknown array out of bound exception (?)
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
-				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
+				editedItem.setDataType((FunctionSymbol) cboDataTypes.getSelectedItem());
 				if (editedItem.isValid()) { // Validate the entry
 					setNormalBackground(txtPropertyTargetMap);
 				} else {

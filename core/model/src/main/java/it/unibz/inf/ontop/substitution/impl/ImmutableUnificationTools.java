@@ -157,11 +157,18 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
+        // TODO: avoid use it
         TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size(), typeFactory);
 
-        return computeMGU(termFactory.getImmutableFunctionalTerm(functionSymbol, args1),
-                termFactory.getImmutableFunctionalTerm(functionSymbol, args2))
-                .map(u -> (ImmutableSubstitution<T>) u);
+        Substitution mutableSubstitution = unifierUtilities.getMGU(
+                immutabilityTools.convertToMutableFunction(functionSymbol, args1),
+                immutabilityTools.convertToMutableFunction(functionSymbol, args2));
+
+        if (mutableSubstitution == null) {
+            return Optional.empty();
+        }
+        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution))
+                .map(s -> (ImmutableSubstitution<T>)s);
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
@@ -217,12 +224,7 @@ public class ImmutableUnificationTools {
         ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
         ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
 
-        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(firstArgList.size(), typeFactory);
-
-        ImmutableFunctionalTerm functionalTerm1 = termFactory.getImmutableFunctionalTerm(functionSymbol, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = termFactory.getImmutableFunctionalTerm(functionSymbol, secondArgList);
-
-        return computeMGU(functionalTerm1, functionalTerm2);
+        return computeMGU(firstArgList, secondArgList);
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGUS(

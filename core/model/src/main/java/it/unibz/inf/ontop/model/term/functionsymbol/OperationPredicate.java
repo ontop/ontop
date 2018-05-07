@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
-public interface OperationPredicate extends BuiltinPredicate {
+public interface OperationPredicate extends FunctionSymbol {
 
 
     Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException;

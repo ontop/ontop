@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -605,7 +606,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
-	private ImmutableTerm createObjectTerm(String column, Predicate datatype) {
+	private ImmutableTerm createObjectTerm(String column, FunctionSymbol datatype) {
 		ImmutableTerm object;
 		if(column.matches("\"([\\w.]+)?\"")){
 			object = termFactory.getConstantLiteral(column.substring(1, column.length()-1));

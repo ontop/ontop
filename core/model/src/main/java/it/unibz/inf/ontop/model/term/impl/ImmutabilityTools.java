@@ -5,7 +5,9 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -36,17 +38,22 @@ public class ImmutabilityTools {
      */
     public ImmutableTerm convertIntoImmutableTerm(Term term) {
         if (term instanceof Function) {
-            if (term instanceof ImmutableFunctionalTerm) {
-                return (ImmutableTerm) term;
-            } else if (term instanceof Expression) {
+            if (term instanceof Expression) {
                 Expression expression = (Expression) term;
                 return termFactory.getImmutableExpression(expression);
             } else {
                 Function functionalTerm = (Function) term;
-                return termFactory.getImmutableFunctionalTerm(functionalTerm);
+
+                if (functionalTerm.getFunctionSymbol() instanceof FunctionSymbol)
+                    return termFactory.getImmutableFunctionalTerm(
+                            (FunctionSymbol) functionalTerm.getFunctionSymbol(),
+                            convertTerms(functionalTerm));
+                else
+                    throw new NotAFunctionSymbolException(term + " is not using a FunctionSymbol but a "
+                            + functionalTerm.getFunctionSymbol().getClass());
             }
         }
-        /**
+        /*
          * Other terms (constant and variable) are immutable.
          */
         return (ImmutableTerm) term;
@@ -194,5 +201,19 @@ public class ImmutabilityTools {
         return filterMethod.test(expression) ?
                 ImmutableSet.of(expression) :
                 ImmutableSet.of();
+    }
+
+    private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
+        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+        for (Term term : functionalTermToClone.getTerms()) {
+            builder.add(convertIntoImmutableTerm(term));
+        }
+        return builder.build();
+    }
+
+    private static class NotAFunctionSymbolException extends MinorOntopInternalBugException {
+        private NotAFunctionSymbolException(String message) {
+            super(message);
+        }
     }
 }
