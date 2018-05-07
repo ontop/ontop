@@ -10,11 +10,14 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
@@ -99,7 +102,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Applies the substitution resulting from the data and composite atoms to the other atoms (filter, group atoms).
          */
-        final Var2VarSubstitution substitution = mainAtomsResult.getVar2VarSubstitution();
+        final Substitution substitution = mainAtomsResult.getVar2VarSubstitution();
+
         List<Function> otherAtoms = initialAtoms
                 .filter(atom -> !datalogTools.isDataOrLeftJoinOrJoinAtom(atom))
                 .map(atom -> {
@@ -119,6 +123,14 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         return new PullOutEqLocalNormResult(nonPushableAtoms, pushableAtoms, substitution);
     }
 
+    private Substitution convertToMutableSubstitution(Var2VarSubstitution var2VarSubstitution) {
+        Map<Variable, Term> map = var2VarSubstitution.getImmutableMap().entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (Term) e.getValue()));
+        return new SubstitutionImpl(map, termFactory);
+    }
+
     /**
      * Normalizes the data and composite atoms and merges them into a PullOutEqLocalNormResult.
      */
@@ -128,10 +140,10 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Normalizes the data atoms.
          */
-        P3<List<Function>, List<Function>, Var2VarSubstitution> dataAtomResults = normalizeDataAtoms(sameLevelAtoms, variableDispatcher);
+        P3<List<Function>, List<Function>, Substitution> dataAtomResults = normalizeDataAtoms(sameLevelAtoms, variableDispatcher);
         List<Function> firstNonPushableAtoms = dataAtomResults._1();
         List<Function> firstPushableAtoms = dataAtomResults._2();
-        Var2VarSubstitution dataAtomSubstitution = dataAtomResults._3();
+        Substitution dataAtomSubstitution = dataAtomResults._3();
 
         /**
          * Normalizes the composite atoms.
@@ -151,11 +163,11 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          *
          * Additional equalities might be produced during this process.
          */
-        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults
+        List<Substitution> substitutionsToMerge = compositeAtomResults
                 .map(PullOutEqLocalNormResult::getVar2VarSubstitution).snoc(dataAtomSubstitution);
 
-        P2<Var2VarSubstitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
-        Var2VarSubstitution mergedSubstitution = substitutionResult._1();
+        P2<Substitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
+        Substitution mergedSubstitution = substitutionResult._1();
         List<Function> additionalEqualities = substitutionResult._2();
 
 
@@ -173,7 +185,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *
      * Returns the normalized data atoms, the pushable atoms produced (equalities) and the produced substitution.
      */
-    private P3<List<Function>, List<Function>, Var2VarSubstitution> normalizeDataAtoms(final List<Function> sameLevelAtoms,
+    private P3<List<Function>, List<Function>, Substitution> normalizeDataAtoms(final List<Function> sameLevelAtoms,
                                                                                        final VariableDispatcher variableDispatcher) {
         /**
          * Normalizes all the data atoms.
@@ -194,8 +206,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         /**
          * Merges the variable renamings into a substitution and a list of variable-to-variable equalities.
          */
-        P2<Var2VarSubstitution, List<Function>> renamingResult = mergeVariableRenamings(variableRenamings);
-        Var2VarSubstitution substitution = renamingResult._1() ;
+        P2<Substitution, List<Function>> renamingResult = mergeVariableRenamings(variableRenamings);
+        Substitution substitution = renamingResult._1() ;
         List<Function> var2varEqualities = renamingResult._2();
 
         /**
@@ -262,12 +274,12 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          * Merges the substitutions produced by the left and right parts into one substitution.
          * Variable-to-variable equalities might be produced during this process.
          */
-        List<Var2VarSubstitution> substitutionsToMerge = List.<Var2VarSubstitution>nil()
+        List<Substitution> substitutionsToMerge = List.<Substitution>nil()
                 .snoc(leftNormalizationResults.getVar2VarSubstitution())
                 .snoc(rightNormalizationResults.getVar2VarSubstitution());
-        P2<Var2VarSubstitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
+        P2<Substitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
 
-        Var2VarSubstitution mergedSubstitution = substitutionResult._1();
+        Substitution mergedSubstitution = substitutionResult._1();
         List<Function> joiningEqualities = substitutionResult._2();
 
         /**
@@ -450,15 +462,17 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * See mergeVariableRenamings for further details.
      *
      */
-    private P2<Var2VarSubstitution, List<Function>> mergeSubstitutions(List<Var2VarSubstitution> substitutionsToMerge) {
+    private P2<Substitution, List<Function>> mergeSubstitutions(List<Substitution> substitutionsToMerge) {
 
         /**
          * Transforms the substitutions into list of variable-to-variable pairs and concatenates them.
          */
         List<P2<Variable, Variable>> renamingPairs = substitutionsToMerge
                 // Transforms the map of the substitution in a list of pairs
-                .bind(substitution -> TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getImmutableMap())
-                        .toStream().toList());
+                .bind(substitution -> TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getMap())
+                        .toStream()
+                        .map(e -> P.p(e._1(), (Variable) e._2()))
+                        .toList());
 
         /**
          * Merges renaming variable-to-variable pairs into a substitution
@@ -476,7 +490,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      *
      * The first variable (lowest) is selecting according a hash ordering.
      */
-    private P2<Var2VarSubstitution, List<Function>> mergeVariableRenamings(
+    private P2<Substitution, List<Function>> mergeVariableRenamings(
             List<P2<Variable, Variable>> renamingPairs) {
         /**
          * Groups pairs according to the initial variable
@@ -501,8 +515,8 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         TreeMap<Variable, Variable> mergedMap = commonMap
                 .map(variables -> variables.toList().head());
-        Var2VarSubstitution mergedSubstitution = substitutionFactory.getVar2VarSubstitution(
-                ImmutableMap.copyOf(mergedMap.toMutableMap()));
+        Substitution mergedSubstitution = new SubstitutionImpl(
+                ImmutableMap.copyOf(mergedMap.toMutableMap()), termFactory);
 
         return P.p(mergedSubstitution, newEqualities);
     }

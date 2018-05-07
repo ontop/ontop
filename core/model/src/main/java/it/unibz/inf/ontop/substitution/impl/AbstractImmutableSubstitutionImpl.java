@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
-public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm> extends LocallyImmutableSubstitutionImpl
+public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         implements ImmutableSubstitution<T> {
 
     final AtomFactory atomFactory;
@@ -59,12 +59,12 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
 
-        for (ImmutableTerm subTerm : functionalTerm.getArguments()) {
+        for (ImmutableTerm subTerm : functionalTerm.getTerms()) {
             subTermsBuilder.add(apply(subTerm));
         }
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-        /**
+        /*
          * Distinguishes the BooleanExpression from the other functional terms.
          */
         if (functionSymbol instanceof OperationPredicate) {
@@ -77,47 +77,22 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm) {
-        if (isEmpty())
-            return mutableFunctionalTerm;
-
-        List<Term> transformedSubTerms = new ArrayList<>();
-
-        for (Term subTerm : mutableFunctionalTerm.getTerms()) {
-            transformedSubTerms.add(applyToMutableTerm(subTerm));
-        }
-        Predicate functionSymbol = mutableFunctionalTerm.getFunctionSymbol();
-
-        return termFactory.getFunction(functionSymbol, transformedSubTerms);
-    }
-
-    @Override
     public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
         return (ImmutableExpression) apply(booleanExpression);
     }
 
     @Override
     public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
-        ImmutableFunctionalTerm newFunctionalTerm = applyToFunctionalTerm(atom);
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(atom.getArguments());
 
-        if (newFunctionalTerm instanceof DataAtom)
-            return (DataAtom) newFunctionalTerm;
-
-        AtomPredicate predicate = (AtomPredicate) newFunctionalTerm.getFunctionSymbol();
-
-        /**
-         * Casts all the sub-terms into VariableOrGroundTerm
-         *
-         * Throws a ConversionException if this cast is impossible.
-         */
-        ImmutableList.Builder<VariableOrGroundTerm> argBuilder = ImmutableList.builder();
-        for (ImmutableTerm subTerm : newFunctionalTerm.getArguments()) {
+        for (ImmutableTerm subTerm : newArguments) {
             if (!(subTerm instanceof VariableOrGroundTerm))
                 throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
-            argBuilder.add((VariableOrGroundTerm)subTerm);
 
         }
-        return atomFactory.getDataAtom(predicate, argBuilder.build());
+
+        return atomFactory.getDataAtom(atom.getPredicate(),
+                (ImmutableList<? extends VariableOrGroundTerm>) newArguments);
     }
 
     @Override
@@ -128,38 +103,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
-            throws ConversionException {
-        DataAtom newDataAtom = applyToDataAtom(dataAtom);
-
-        if (newDataAtom instanceof DistinctVariableDataAtom) {
-            return (DistinctVariableDataAtom) newDataAtom;
-        }
-
-        /**
-         * Checks if new data atom can be converted into a DistinctVariableDataAtom
-         */
-        if (newDataAtom.getArguments().size() == newDataAtom.getVariables().size()) {
-            return atomFactory.getDistinctVariableDataAtom(newDataAtom.getPredicate(),
-                    (ImmutableList<Variable>)newDataAtom.getArguments());
-        }
-        else {
-            throw new ConversionException("The substitution has transformed a DistinctVariableDataAtom into" +
-                    "a non-DistinctVariableDataAtom: " + newDataAtom);
-        }
-    }
-
-    @Override
     public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
             throws ConversionException {
-        DistinctVariableDataAtom newDataAtom = applyToDistinctVariableDataAtom(dataAtom);
+        ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());
 
-        if (newDataAtom instanceof DistinctVariableOnlyDataAtom) {
-            return (DistinctVariableOnlyDataAtom) newDataAtom;
+        if (!newArguments.stream().allMatch(t -> t instanceof Variable)) {
+            throw new ConversionException("The substitution applied to a DistinctVariableOnlyDataAtom has " +
+                    " produced some non-Variable arguments " + newArguments);
         }
+        ImmutableList<Variable> variableArguments =  (ImmutableList<Variable>) newArguments;
+
+        if (variableArguments.size() == ImmutableSet.copyOf(variableArguments).size())
+            return atomFactory.getDistinctVariableOnlyDataAtom(dataAtom.getPredicate(), variableArguments);
         else {
-            throw new ConversionException("The substitution has transformed a DistinctVariableOnlyDataAtom into" +
-                    "a DistinctVariableDataAtom containing GroundTerm-s: " + newDataAtom);
+            throw new ConversionException("The substitution applied a DistinctVariableOnlyDataAtom has introduced" +
+                    " redundant variables: " + newArguments);
         }
     }
 
@@ -245,7 +203,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     @Override
     public Optional<ImmutableSubstitution<T>> union(ImmutableSubstitution<T> otherSubstitution) {
         if (otherSubstitution.isEmpty())
-            return Optional.of((ImmutableSubstitution<T>)this);
+            return Optional.of(this);
         else if(isEmpty())
             return Optional.of(otherSubstitution);
 
@@ -412,7 +370,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             return functionalTerm;
         }
 
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getArguments().stream()
+        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getTerms().stream()
                 .map(arg -> (arg instanceof ImmutableFunctionalTerm)
                         ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
                         : arg)
@@ -470,26 +428,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                             equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);
-        }
-    }
-
-
-    /**
-     * For backward compatibility with mutable terms (used in CQIE).
-     * TO BE REMOVED with the support for CQIE
-     */
-    private Term applyToMutableTerm(Term term) {
-        if (term instanceof Constant) {
-            return term;
-        }
-        else if (term instanceof Variable) {
-            return applyToVariable((Variable) term);
-        }
-        else if (term instanceof Function) {
-            return applyToMutableFunctionalTerm((Function)term);
-        }
-        else {
-            throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
         }
     }
 

@@ -7,14 +7,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
+public interface ImmutableSubstitution<T extends ImmutableTerm> {
 
     ImmutableMap<Variable, T> getImmutableMap();
 
@@ -22,8 +21,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableSet<Variable> getDomain();
 
-    @Override
     T get(Variable variable);
+
+    boolean isEmpty();
 
     /**
      * Applies the substitution to an immutable term.
@@ -37,11 +37,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
-    /**
-     * Please use applyToFunctionalTerm() instead if you can.
-     */
-    Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm);
-
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
     /**
@@ -53,9 +48,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
     ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
-
-    DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
-            throws ConversionException;
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;

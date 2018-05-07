@@ -60,6 +60,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	private final SubstitutionFactory substitutionFactory;
 	private final DatalogFactory datalogFactory;
 	private final ImmutabilityTools immutabilityTools;
+	private final TermFactory termFactory;
 	private final OrderByLifter orderByLifter;
 
 	private static class RuleHead {
@@ -84,12 +85,13 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	@Inject
 	private IQ2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
 									 SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-									 ImmutabilityTools immutabilityTools, OrderByLifter orderByLifter) {
+									 ImmutabilityTools immutabilityTools, TermFactory termFactory, OrderByLifter orderByLifter) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.datalogFactory = datalogFactory;
 		this.immutabilityTools = immutabilityTools;
+		this.termFactory = termFactory;
 		this.orderByLifter = orderByLifter;
 		this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
@@ -236,13 +238,15 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			RuleHead head = heads.poll();
 
 			//Applying substitutions in the head.
-			ImmutableFunctionalTerm substitutedHeadAtom = head.substitution.applyToFunctionalTerm(
-					head.atom);
+			ImmutableList<? extends ImmutableTerm> substitutedHeadAtomArguments = head.substitution.apply(head.atom.getArguments());
 
 			List<Function> atoms = new LinkedList<>();
 
+			Function newHead = immutabilityTools.convertToMutableFunction(head.atom.getPredicate(),
+					substitutedHeadAtomArguments);
+
 			//Constructing the rule
-			CQIE newrule = datalogFactory.getCQIE(immutabilityTools.convertToMutableFunction(substitutedHeadAtom), atoms);
+			CQIE newrule = datalogFactory.getCQIE(newHead, atoms);
 
 			pr.appendRule(newrule);
 
@@ -378,10 +382,9 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			//heads.add(new RuleHead(new ImmutableSubstitutionImpl<>(ImmutableMap.of()), projectionAtom,Optional.empty()));
 			//return body;
 			if (isNested) {
-				body.add(atomFactory.getDistinctVariableOnlyDataAtom(
+				body.add(termFactory.getFunction(
 						datalogFactory.getDummyPredicate(++dummyPredCounter),
-						ImmutableList.of()
-				));
+						new ArrayList<>()));
 			}
 			// Otherwise, ignores it
 			return body;

@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 public class FakeRelationPredicate extends PredicateImpl {
 
     protected FakeRelationPredicate(@Nonnull String name, int arity, TypeFactory typeFactory) {
-        super(name, arity, createExpectedTermTypes(arity, typeFactory), false);
+        super(name, arity, createExpectedTermTypes(arity, typeFactory));
     }
 
     private static ImmutableList<TermType> createExpectedTermTypes(int arity, TypeFactory typeFactory) {

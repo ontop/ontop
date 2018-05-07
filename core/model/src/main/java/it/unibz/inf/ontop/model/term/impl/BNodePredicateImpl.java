@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -38,8 +42,7 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())
-				.collect(ImmutableCollectors.toList()),
-				false);
+				.collect(ImmutableCollectors.toList()));
 		type = typeFactory.getBlankNodeType();
 	}
 
@@ -51,5 +54,11 @@ public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate 
 	@Override
 	public ObjectRDFType getReturnedType() {
 		return type;
+	}
+
+	@Override
+	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+		// TODO: implement it
+		return false;
 	}
 }

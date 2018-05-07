@@ -13,7 +13,7 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 public class OntopModelTestPredicate extends PredicateImpl {
 
     protected OntopModelTestPredicate(@Nonnull String name, int arity) {
-        super(name, arity, createExpectedBaseTermTypeList(arity), false);
+        super(name, arity, createExpectedBaseTermTypeList(arity));
     }
 
     private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {

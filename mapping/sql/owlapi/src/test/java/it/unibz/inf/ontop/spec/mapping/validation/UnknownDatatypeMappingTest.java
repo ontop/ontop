@@ -93,7 +93,7 @@ public class UnknownDatatypeMappingTest {
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
-        Optional<Predicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+        Optional<DatatypePredicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
                 .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -104,13 +104,14 @@ public class UnknownDatatypeMappingTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(Function::getFunctionSymbol)
+                .map(ImmutableFunctionalTerm::getFunctionSymbol)
                 .filter(p -> p instanceof DatatypePredicate)
+                .map(p -> (DatatypePredicate) p)
                 .findFirst();
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        Predicate datatype = optionalDatatype.get();
+        DatatypePredicate datatype = optionalDatatype.get();
 
         assertEquals(TERM_FACTORY.getRequiredTypePredicate(expectedType), datatype);
     }

@@ -21,9 +21,6 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TermType;
 
@@ -33,15 +30,12 @@ import javax.annotation.Nonnull;
 public class PredicateImpl implements Predicate {
 
 	private final ImmutableList<TermType> expectedBaseTypes;
-	private final boolean isInjective;
 
 	private int arity = -1;
 	private String name = null;
 	private int identifier = -1;
 
-	protected PredicateImpl(@Nonnull String name, int arity, @Nonnull ImmutableList<TermType> expectedBaseTypes,
-							boolean isInjective) {
-		this.isInjective = isInjective;
+	protected PredicateImpl(@Nonnull String name, int arity, @Nonnull ImmutableList<TermType> expectedBaseTypes) {
 		if (expectedBaseTypes.size() != arity)
 			throw new IllegalArgumentException("expectedBaseTypes.size() must be equal to the arity");
 		this.name = name;
@@ -95,17 +89,5 @@ public class PredicateImpl implements Predicate {
 	@Override
 	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
 		return expectedBaseTypes;
-	}
-
-
-	@Override
-	public boolean isTriplePredicate() {
-		return (arity == 3 && name.equals("triple"));
-	}
-
-	@Override
-	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
-							   ImmutableSet<Variable> nonNullVariables) {
-		throw new RuntimeException("TODO: implement PredicateImpl.isInjective(...)");
 	}
 }

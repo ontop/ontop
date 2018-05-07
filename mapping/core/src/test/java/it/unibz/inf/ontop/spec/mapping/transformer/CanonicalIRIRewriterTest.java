@@ -540,7 +540,7 @@ public class CanonicalIRIRewriterTest {
     private static class FakePredicate extends PredicateImpl {
 
         protected FakePredicate(@Nonnull String name, int arity) {
-            super(name, arity, createExpectedBaseTermTypeList(arity), false);
+            super(name, arity, createExpectedBaseTermTypeList(arity));
         }
 
         private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {

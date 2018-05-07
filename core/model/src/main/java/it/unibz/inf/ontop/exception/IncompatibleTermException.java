@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.exception;
 
 import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
 
@@ -28,6 +29,13 @@ public class IncompatibleTermException extends RuntimeException {
      * Incompatibility detected in an expression
      */
     public IncompatibleTermException(Expression expression, IncompatibleTermException caughtException) {
+        super("In " + expression + ": " + caughtException.getMessage());
+    }
+
+    /**
+     * Incompatibility detected in an expression
+     */
+    public IncompatibleTermException(ImmutableExpression expression, IncompatibleTermException caughtException) {
         super("In " + expression + ": " + caughtException.getMessage());
     }
 

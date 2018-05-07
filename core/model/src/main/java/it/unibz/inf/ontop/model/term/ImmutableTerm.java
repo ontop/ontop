@@ -7,13 +7,7 @@ import java.util.stream.Stream;
  *
  * In the future, every term should be immutable
  */
-public interface ImmutableTerm extends Term {
-
-    /**
-     * Now is trivial to implement
-     */
-    @Override
-    ImmutableTerm clone();
+public interface ImmutableTerm {
 
     boolean isGround();
 

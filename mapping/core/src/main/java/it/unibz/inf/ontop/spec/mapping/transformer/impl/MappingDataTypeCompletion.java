@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
@@ -147,7 +148,8 @@ public class MappingDataTypeCompletion {
 
         if (immutableTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
-            if (castTerm.isOperation()) {
+            Predicate functionSymbol = castTerm.getFunctionSymbol();
+            if (functionSymbol instanceof OperationPredicate) {
 
                 Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
                 if(inferredType.isPresent()){

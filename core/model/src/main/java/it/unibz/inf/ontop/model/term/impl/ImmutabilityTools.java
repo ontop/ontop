@@ -5,6 +5,9 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -35,17 +38,22 @@ public class ImmutabilityTools {
      */
     public ImmutableTerm convertIntoImmutableTerm(Term term) {
         if (term instanceof Function) {
-            if (term instanceof ImmutableFunctionalTerm) {
-                return (ImmutableTerm) term;
-            } else if (term instanceof Expression) {
+            if (term instanceof Expression) {
                 Expression expression = (Expression) term;
                 return termFactory.getImmutableExpression(expression);
             } else {
                 Function functionalTerm = (Function) term;
-                return termFactory.getImmutableFunctionalTerm(functionalTerm);
+
+                if (functionalTerm.getFunctionSymbol() instanceof FunctionSymbol)
+                    return termFactory.getImmutableFunctionalTerm(
+                            (FunctionSymbol) functionalTerm.getFunctionSymbol(),
+                            convertTerms(functionalTerm));
+                else
+                    throw new NotAFunctionSymbolException(term + " is not using a FunctionSymbol but a "
+                            + functionalTerm.getFunctionSymbol().getClass());
             }
         }
-        /**
+        /*
          * Other terms (constant and variable) are immutable.
          */
         return (ImmutableTerm) term;
@@ -61,57 +69,69 @@ public class ImmutabilityTools {
         }
     }
 
+    public static VariableOrGroundTerm convertIntoVariableOrGroundTerm(ImmutableTerm term) {
+        if (term instanceof Variable) {
+            return (Variable) term;
+        } else if (term.isGround()) {
+            return (GroundTerm) term;
+        } else {
+            throw new IllegalArgumentException("Not a variable nor a ground term: " + term);
+        }
+    }
+
     /**
      * This method takes a immutable term and convert it into an old mutable function.
      */
     public Function convertToMutableFunction(ImmutableFunctionalTerm functionalTerm) {
+        return convertToMutableFunction(functionalTerm.getFunctionSymbol(),
+                functionalTerm.getTerms());
+    }
 
-        Predicate pred = functionalTerm.getFunctionSymbol();
-        ImmutableList<Term> otherTerms = functionalTerm.getTerms();
+    public Function convertToMutableFunction(DataAtom dataAtom) {
+        return convertToMutableFunction(dataAtom.getPredicate(), dataAtom.getArguments());
+    }
+
+    public Function convertToMutableFunction(Predicate predicateOrFunctionSymbol,
+                                             ImmutableList<? extends ImmutableTerm> terms) {
+        return termFactory.getFunction(predicateOrFunctionSymbol, convertToMutableTerms(terms));
+    }
+
+    private List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
         List<Term> mutableList = new ArrayList<>();
-        Iterator<Term> iterator = otherTerms.iterator();
+        Iterator<? extends ImmutableTerm> iterator = terms.iterator();
         while (iterator.hasNext()) {
 
-            Term nextTerm = iterator.next();
+            ImmutableTerm nextTerm = iterator.next();
             if (nextTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
                 Function newTerm = convertToMutableFunction(term2Change);
                 mutableList.add(newTerm);
             } else {
-                mutableList.add(nextTerm);
+                // Variables and constants are Term-instances
+                mutableList.add((Term)nextTerm);
             }
 
         }
-        Function mutFunc = termFactory.getFunction(pred, mutableList);
-        return mutFunc;
-
+        return mutableList;
     }
+
+    public Term convertToMutableTerm(ImmutableTerm term) {
+        if (term instanceof Variable)
+            return (Term) term;
+        else if (term instanceof Constant)
+            return (Term) term;
+        else {
+            return convertToMutableFunction((ImmutableFunctionalTerm) term);
+        }
+    }
+
 
     /**
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.
      */
     public Expression convertToMutableBooleanExpression(ImmutableExpression booleanExpression) {
-
-        OperationPredicate pred = (OperationPredicate) booleanExpression.getFunctionSymbol();
-        ImmutableList<Term> otherTerms = booleanExpression.getTerms();
-        List<Term> mutableList = new ArrayList<>();
-
-        Iterator<Term> iterator = otherTerms.iterator();
-        while (iterator.hasNext()) {
-
-            Term nextTerm = iterator.next();
-            if (nextTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-                Function newTerm = convertToMutableFunction(term2Change);
-                mutableList.add(newTerm);
-            } else {
-                mutableList.add(nextTerm);
-            }
-
-        }
-        Expression mutFunc = termFactory.getExpression(pred, mutableList);
-        return mutFunc;
-
+        OperationPredicate pred = booleanExpression.getFunctionSymbol();
+        return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
     }
 
     public Optional<ImmutableExpression> foldBooleanExpressions(
@@ -181,5 +201,19 @@ public class ImmutabilityTools {
         return filterMethod.test(expression) ?
                 ImmutableSet.of(expression) :
                 ImmutableSet.of();
+    }
+
+    private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
+        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+        for (Term term : functionalTermToClone.getTerms()) {
+            builder.add(convertIntoImmutableTerm(term));
+        }
+        return builder.build();
+    }
+
+    private static class NotAFunctionSymbolException extends MinorOntopInternalBugException {
+        private NotAFunctionSymbolException(String message) {
+            super(message);
+        }
     }
 }

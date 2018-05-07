@@ -21,6 +21,9 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -35,7 +38,7 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	private final RDFDatatype returnedType;
 
 	protected DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
-		super(returnedType.toString(), 1, ImmutableList.of(argumentType), true);
+		super(returnedType.toString(), 1, ImmutableList.of(argumentType));
 		this.returnedType = returnedType;
 	}
 	
@@ -48,5 +51,10 @@ public class DatatypePredicateImpl extends PredicateImpl implements DatatypePred
 	@Override
 	public RDFDatatype getReturnedType() {
 		return returnedType;
+	}
+
+	@Override
+	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+		return true;
 	}
 }

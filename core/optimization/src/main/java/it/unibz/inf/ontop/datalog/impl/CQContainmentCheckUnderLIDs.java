@@ -14,8 +14,8 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
@@ -201,7 +201,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Term> groundTerms = new HashSet<>();
 		for (Function atom : query.getBody())
 			// non-database atom
-			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
 				collectVariables(groundTerms, atom);
 			}
 			else {

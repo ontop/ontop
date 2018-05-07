@@ -21,11 +21,10 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 
 import java.util.ArrayList;
@@ -106,27 +105,27 @@ public class URITemplates {
      * @param uriFunction URI Function
      * @return a URI template with variable names inside the placeholders
      */
-    public static String getUriTemplateString(Function uriFunction) {
+    public static String getUriTemplateString(ImmutableFunctionalTerm uriFunction) {
         ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
         final String template = term.getValue();
-        List<Variable> varList = new ArrayList<>();
-        TermUtils.addReferencedVariablesTo(varList, uriFunction);
+        ImmutableList<? extends ImmutableTerm> otherSubTerms = uriFunction.getTerms()
+                .subList(1, uriFunction.getTerms().size());
 
         List<String> splitParts = Splitter.on(PLACE_HOLDER).splitToList(template);
 
         StringBuilder templateWithVars = new StringBuilder();
 
-        int numVars = varList.size();
+        int numVars = otherSubTerms.size();
         int numParts = splitParts.size();
 
         if (numParts != numVars + 1 && numParts != numVars) {
-            throw new IllegalArgumentException("the number of place holders should be equal to the number of variables.");
+            throw new IllegalArgumentException("the number of place holders should be equal to the number of other terms.");
         }
 
         for (int i = 0; i < numVars; i++) {
             templateWithVars.append(splitParts.get(i))
                     .append("{")
-                    .append(varList.get(i))
+                    .append(otherSubTerms.get(i))
                     .append("}");
         }
 
@@ -137,7 +136,7 @@ public class URITemplates {
         return templateWithVars.toString();
     }
 
-    public static String getUriTemplateString(Function uriTemplate, PrefixManager prefixmng) {
+    public static String getUriTemplateString(ImmutableFunctionalTerm uriTemplate, PrefixManager prefixmng) {
         String template = getUriTemplateString(uriTemplate);
         try {
             template = prefixmng.getExpandForm(template);

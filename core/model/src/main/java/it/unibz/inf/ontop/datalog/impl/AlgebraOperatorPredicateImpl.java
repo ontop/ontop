@@ -37,7 +37,7 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements Algeb
 	 */
 	protected AlgebraOperatorPredicateImpl(String name, TypeFactory typeFactory) {
 		super(name, 2, ImmutableList.of(typeFactory.getAbstractAtomicTermType(),
-				typeFactory.getAbstractAtomicTermType()), false);
+				typeFactory.getAbstractAtomicTermType()));
 	}
 
 

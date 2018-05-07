@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -216,7 +217,10 @@ public class QueryConnectedComponent {
 		
 		for (Function atom : cqie.getBody()) {
 			Predicate p = atom.getFunctionSymbol();
-			if (atom.isDataFunction() && !p.isTriplePredicate()) { // if DL predicates
+			/*
+			 * TODO: update it! (all the data atoms in a SPARQL query use a RDFAtomPredicate)
+			 */
+			if (atom.isDataFunction() && !(p instanceof RDFAtomPredicate)) { // if DL predicates
 				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
 				Term t0 = a.getTerm(0);
 				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {

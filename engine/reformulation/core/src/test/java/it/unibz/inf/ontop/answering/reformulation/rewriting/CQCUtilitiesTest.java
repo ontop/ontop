@@ -635,7 +635,7 @@ public class CQCUtilitiesTest {
 
 	private static class FakeTestPredicate extends PredicateImpl {
 		protected FakeTestPredicate(@Nonnull String name, int arity) {
-			super(name, arity, createExpectedBaseTermTypeList(arity), false);
+			super(name, arity, createExpectedBaseTermTypeList(arity));
 		}
 
 		private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {

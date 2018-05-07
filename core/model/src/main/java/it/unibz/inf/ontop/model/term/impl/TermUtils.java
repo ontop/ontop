@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 

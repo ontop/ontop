@@ -187,7 +187,8 @@ public class TypeExtractor {
                                          * If not defined, extracts the cast type of the variable by looking at its defining
                                          * data atom (normally intensional)
                                          */
-                                        .orElseGet(() -> getCastTypeFromSubRule(headArguments.get(i),
+                                        .orElseGet(() -> getCastTypeFromSubRule(
+                                                immutabilityTools.convertIntoImmutableTerm(headArguments.get(i)),
                                                 extractDataAtoms(rule.getBody()).collect(ImmutableCollectors.toList()),
                                                 alreadyKnownCastTypes));
 
@@ -224,7 +225,7 @@ public class TypeExtractor {
      * from the body atom that provides it.
      */
     private TermType getCastTypeFromSubRule(
-            Term term,
+            ImmutableTerm term,
             ImmutableList<Function> bodyDataAtoms,
             Map<Predicate, ImmutableList<TermType>> alreadyKnownCastTypes) {
 
@@ -252,8 +253,8 @@ public class TypeExtractor {
 
             throw new IllegalStateException("Unbounded variable: " + variable);
         }
-        else if (term instanceof Expression) {
-            ImmutableExpression expression = (ImmutableExpression) immutabilityTools.convertIntoImmutableTerm(term);
+        else if (term instanceof ImmutableExpression) {
+            ImmutableExpression expression = (ImmutableExpression) term;
             ImmutableList<Optional<TermType>> argumentTypes = expression.getTerms().stream()
                     .map(t -> getCastTypeFromSubRule(t, bodyDataAtoms, alreadyKnownCastTypes))
                     .map(Optional::of)
@@ -265,8 +266,8 @@ public class TypeExtractor {
         else if (term instanceof Constant) {
             return ((Constant) term).getType();
         }
-        else if (term instanceof Function) {
-            Predicate functionSymbol = ((Function) term).getFunctionSymbol();
+        else if (term instanceof ImmutableFunctionalTerm) {
+            Predicate functionSymbol = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
             if (functionSymbol instanceof DatatypePredicate)
                 return functionSymbol.getExpectedBaseType(0);
         }

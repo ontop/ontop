@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -50,12 +51,15 @@ public class SQLPPMapping2DatalogConverter {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+    private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
+                                          ImmutabilityTools immutabilityTools) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -109,7 +113,9 @@ public class SQLPPMapping2DatalogConverter {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
 
-                        ImmutableFunctionalTerm mergedAtom = atom.getSubstitution().applyToFunctionalTerm(atom.getProjectionAtom());
+                        Function mergedAtom = immutabilityTools.convertToMutableFunction(
+                                atom.getProjectionAtom().getPredicate(),
+                                atom.getSubstitutedTerms());
 
                         Function head = renameVariables(mergedAtom, lookupTable, idfac);
                         CQIE rule = datalogFactory.getCQIE(head, body);

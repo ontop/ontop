@@ -2187,7 +2187,7 @@ public class BindingLiftTest {
     private static ImmutableFunctionalTerm generateIfIsNotNullElseNull(Variable rightSpecificVariable,
                                                                        ImmutableTerm conditionalValue) {
         return TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
-                TERM_FACTORY.getImmutableExpression(TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable)),
+                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable),
                 conditionalValue);
     }
 

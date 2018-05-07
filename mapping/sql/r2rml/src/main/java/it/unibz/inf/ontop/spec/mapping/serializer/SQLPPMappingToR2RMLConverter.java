@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.jena.JenaGraph;
@@ -110,9 +109,9 @@ public class SQLPPMappingToR2RMLConverter {
         // If the partition per target triple subject is non trivial
         if (subjectTermToTargetTriples.size() > 1) {
             // Create ids for the new mapping axioms
-            Map<Function, String> subjectTermToMappingIndex = new HashMap<>();
+            Map<ImmutableFunctionalTerm, String> subjectTermToMappingIndex = new HashMap<>();
             int i = 1;
-            for (Function subjectTerm : subjectTermToTargetTriples.keySet()) {
+            for (ImmutableFunctionalTerm subjectTerm : subjectTermToTargetTriples.keySet()) {
                 subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId() + delimiterSubstring + i);
                 i++;
             }

@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -39,8 +43,7 @@ public class URITemplatePredicateImpl extends PredicateImpl implements URITempla
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())
-				.collect(ImmutableCollectors.toList()),
-				false);
+				.collect(ImmutableCollectors.toList()));
 		type = typeFactory.getIRITermType();
 	}
 	
@@ -52,5 +55,13 @@ public class URITemplatePredicateImpl extends PredicateImpl implements URITempla
 	@Override
 	public RDFTermType getReturnedType() {
 		return type;
+	}
+
+	/**
+	 * TODO: implement it
+	 */
+	@Override
+	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+		return false;
 	}
 }
