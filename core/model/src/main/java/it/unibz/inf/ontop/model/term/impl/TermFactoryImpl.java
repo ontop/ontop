@@ -203,7 +203,7 @@ public class TermFactoryImpl implements TermFactory {
 		}
 
 		if (GroundTermTools.areGroundTerms(terms)) {
-			return new GroundFunctionalTermImpl(functor, terms);
+			return new GroundFunctionalTermImpl((ImmutableList<? extends GroundTerm>)terms, functor);
 		}
 		else {
 			// Default constructor

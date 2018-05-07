@@ -24,7 +24,9 @@ import java.io.Serializable;
 
 /**
  * This class defines the basic component of expressions that are constructed from
- * literals, bnodes, URIs and variables using functions 
+ * literals, bnodes, URIs and variables using functions
+ *
+ * OLD! Only use it for Datalog
  */
 public interface Term extends Serializable {
 

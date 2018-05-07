@@ -327,7 +327,7 @@ public class MetaMappingExpander {
 		if (term instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm func = (ImmutableFunctionalTerm) term;
 			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
-				Term t0 = func.getTerm(0);
+				ImmutableTerm t0 = func.getTerm(0);
 				if (t0 instanceof ValueConstant)
 					return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
 			}
@@ -370,7 +370,7 @@ public class MetaMappingExpander {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private static String getPredicateName(Term templateTerm, List<String> values) {
+	private static String getPredicateName(ImmutableTerm templateTerm, List<String> values) {
 		if (templateTerm instanceof Variable) {
 			return values.get(0);
 		}

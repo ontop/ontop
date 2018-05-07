@@ -26,7 +26,7 @@ import it.unibz.inf.ontop.model.type.TermType;
  * This class defines a type of {@link Term} in which it has a constant
  * value.
  */
-public interface Constant extends NonFunctionalTerm, GroundTerm {
+public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 
 	TermType getType();
 

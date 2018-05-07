@@ -14,9 +14,6 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
     @Override
     OperationPredicate getFunctionSymbol();
 
-    @Override
-    ImmutableExpression clone();
-
     /**
      * Flattens AND expressions.
      */

@@ -17,13 +17,8 @@ public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implem
         super(functor, terms);
     }
 
-    protected GroundFunctionalTermImpl(Predicate functor, List<? extends ImmutableTerm> terms)
-            throws GroundTermTools.NonGroundTermException {
-        this(GroundTermTools.castIntoGroundTerms(terms), functor);
-    }
-
     public GroundFunctionalTermImpl(Function functionalTermToClone) throws GroundTermTools.NonGroundTermException {
-        this(functionalTermToClone.getFunctionSymbol(), GroundTermTools.castIntoGroundTerms(functionalTermToClone.getTerms()));
+        this(GroundTermTools.castIntoGroundTerms(functionalTermToClone.getTerms()), functionalTermToClone.getFunctionSymbol());
     }
 
 

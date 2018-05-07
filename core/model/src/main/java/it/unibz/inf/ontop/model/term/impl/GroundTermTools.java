@@ -33,8 +33,7 @@ public class GroundTermTools {
         if (term instanceof Function) {
             Function functionalTerm = (Function) term;
             // Recursive
-            return new GroundFunctionalTermImpl(functionalTerm.getFunctionSymbol(),
-                    castIntoGroundTerms(functionalTerm.getTerms()));
+            return new GroundFunctionalTermImpl(functionalTerm);
         }
 
         throw new NonGroundTermException(term + " is not a ground term");
@@ -44,14 +43,10 @@ public class GroundTermTools {
      * Returns true if is a ground term (even if it is not explicitly typed as such).
      */
     public static boolean isGroundTerm(Term term) {
-        if (term instanceof ImmutableTerm)
-            return ((ImmutableTerm) term).isGround();
-
         if (term instanceof Function) {
             return ((Function)term).getVariables().isEmpty();
         }
-
-        return false;
+        return term instanceof Constant;
     }
 
     public static boolean areGroundTerms(Collection<? extends ImmutableTerm> terms) {
