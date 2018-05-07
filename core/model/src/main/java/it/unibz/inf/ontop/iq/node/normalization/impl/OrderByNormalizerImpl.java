@@ -32,6 +32,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             State newState = state.liftChild();
             if (newState.hasConverged(state))
                 return newState.createNormalizedTree(variableGenerator, currentIQProperties);
+            state = newState;
         }
         throw new MinorOntopInternalBugException("OrderByNormalizerImpl.normalizeForOptimization has not converged after "
                  + MAX_ITERATIONS + " iterations");
