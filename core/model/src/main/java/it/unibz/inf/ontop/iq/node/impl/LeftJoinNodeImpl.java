@@ -429,7 +429,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {
-                    ImmutableList<? extends ImmutableTerm> arguments = e.getArguments();
+                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
                     return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
                             && arguments.stream().anyMatch(rightVariables::contains);
                 })
@@ -438,7 +438,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSubstitution<NonFunctionalTerm> downSubstitution =
                 substitutionFactory.getSubstitution(
                         downSubstitutionExpressions.stream()
-                            .map(ImmutableFunctionalTerm::getArguments)
+                            .map(ImmutableFunctionalTerm::getTerms)
                             .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
                             // Rename right-specific variables if possible
                             .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
@@ -450,7 +450,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         Optional<ImmutableExpression> newExpression = getImmutabilityTools().foldBooleanExpressions(
                 expressions.stream()
                         .filter(e -> (!downSubstitutionExpressions.contains(e))
-                                || e.getArguments().stream().anyMatch(rightSpecificVariables::contains)))
+                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains)))
                 .map(downSubstitution::applyToBooleanExpression);
 
         return new ExpressionAndSubstitution(newExpression, downSubstitution);

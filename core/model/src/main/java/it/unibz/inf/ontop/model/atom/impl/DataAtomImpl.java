@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.areGroundTerms;
-
 public class DataAtomImpl<P extends AtomPredicate> extends AbstractDataAtomImpl<P> {
 
     protected DataAtomImpl(P predicate, ImmutableList<? extends VariableOrGroundTerm> variableOrGroundTerms) {
@@ -15,10 +13,5 @@ public class DataAtomImpl<P extends AtomPredicate> extends AbstractDataAtomImpl<
 
     protected DataAtomImpl(P predicate, VariableOrGroundTerm... variableOrGroundTerms) {
         super(predicate, variableOrGroundTerms);
-    }
-
-    @Override
-    public boolean isGround() {
-        return areGroundTerms(getArguments());
     }
 }

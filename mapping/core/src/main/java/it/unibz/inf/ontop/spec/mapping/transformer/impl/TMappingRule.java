@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -65,7 +65,7 @@ public class TMappingRule {
 		List<Function> filters = new ArrayList<>(body.size());
 		
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
 				Function clone = (Function)atom.clone();
 				filters.add(clone);
 			}

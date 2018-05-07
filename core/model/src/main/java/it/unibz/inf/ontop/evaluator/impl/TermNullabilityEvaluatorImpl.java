@@ -74,7 +74,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     }
 
     private boolean hasNullableArgument(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> nullableVariables) {
-        return functionalTerm.getArguments().stream()
+        return functionalTerm.getTerms().stream()
                 .anyMatch(t -> isNullable(t, nullableVariables));
     }
 

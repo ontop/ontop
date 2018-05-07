@@ -21,7 +21,7 @@ public class TreeModelTools {
                 return true;
             }
             // Recursive
-            return functionTerm.getArguments().stream()
+            return functionTerm.getTerms().stream()
                     .anyMatch(t -> match(keyword, t));
         }
         if (term instanceof Variable) {

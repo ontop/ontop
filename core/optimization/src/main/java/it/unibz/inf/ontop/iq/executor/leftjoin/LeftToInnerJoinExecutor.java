@@ -249,7 +249,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         // --> x will not be affected by the condition
         ImmutableSet<Variable> rightVariablesToUpdate = Optional.of(ljCondition)
                 .filter(c -> c.getFunctionSymbol().equals(IS_NOT_NULL))
-                .map(c -> c.getArguments().get(0))
+                .map(c -> c.getTerms().get(0))
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable) v)
                 .map(specialVariable -> requiredRightVariables.stream()

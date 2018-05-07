@@ -86,11 +86,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public ImmutableMap<Variable, Term> getMap() {
-        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>)map;
-    }
-
-    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }

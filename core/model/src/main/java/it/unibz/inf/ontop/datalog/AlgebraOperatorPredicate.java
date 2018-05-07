@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.datalog;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
-public interface AlgebraOperatorPredicate extends BuiltinPredicate {
+public interface AlgebraOperatorPredicate extends Predicate {
 	// NO-OP
 }

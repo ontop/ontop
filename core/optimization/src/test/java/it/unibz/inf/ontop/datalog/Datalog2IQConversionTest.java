@@ -62,6 +62,6 @@ public class Datalog2IQConversionTest {
 
         Variable fifthVariable = projectedArguments.get(4);
         assertTrue(bindings.isDefining(fifthVariable));
-        assertEquals(bindings.get(fifthVariable), URI_TEMPLATE);
+        assertEquals(IMMUTABILITY_TOOLS.convertToMutableTerm(bindings.get(fifthVariable)), URI_TEMPLATE);
     }
 }

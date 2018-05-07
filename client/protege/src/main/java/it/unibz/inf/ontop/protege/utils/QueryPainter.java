@@ -421,8 +421,8 @@ public class QueryPainter {
 			ImmutableList<ImmutableTerm> substitutedTerms = atom.getSubstitutedTerms();
 			RDFAtomPredicate atomPredicate = (RDFAtomPredicate) atom.getProjectionAtom().getPredicate();
 
-			Term term1 = atomPredicate.getSubject(substitutedTerms);
-			Term term2 = atomPredicate.getObject(substitutedTerms);
+			ImmutableTerm term1 = atomPredicate.getSubject(substitutedTerms);
+			ImmutableTerm term2 = atomPredicate.getObject(substitutedTerms);
 
 			if (term1 instanceof IRIConstant) {
 				String rendered = man.getShortForm(((IRIConstant) term1).getIRI().toString());

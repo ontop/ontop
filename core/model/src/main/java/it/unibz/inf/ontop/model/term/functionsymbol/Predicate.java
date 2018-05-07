@@ -48,8 +48,4 @@ public interface Predicate {
 	TermType getExpectedBaseType(int index);
 
 	ImmutableList<TermType> getExpectedBaseArgumentTypes();
-
-	boolean isTriplePredicate();
-
-//  boolean isAggregationPredicate();
 }

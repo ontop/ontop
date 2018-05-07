@@ -25,7 +25,7 @@ package it.unibz.inf.ontop.model.term;
  * that during a calculation is assumed to vary or be capable of varying in
  * value.
  */
-public interface Variable extends NonFunctionalTerm, VariableOrGroundTerm, NonGroundTerm, Comparable<Variable> {
+public interface Variable extends NonFunctionalTerm, NonGroundTerm, Comparable<Variable>, Term {
 
 	public String getName();
 }

@@ -163,7 +163,7 @@ public class MetaMappingExpander {
 				boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1));
 				// if isClass, then the template is the object;
 				// otherwise, it's a property and the template is the predicate
-				Function templateAtom = (Function)m.target.getSubstitutedTerm(isClass ? 2 : 1);
+				ImmutableFunctionalTerm templateAtom = (ImmutableFunctionalTerm)m.target.getSubstitutedTerm(isClass ? 2 : 1);
 
 				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
 
@@ -323,11 +323,11 @@ public class MetaMappingExpander {
 	 *
 	 * TODO: refactor so as to use RDFPredicate.getClassIRI() instead
 	 */
-	private static boolean isURIRDFType(Term term) {
-		if (term instanceof Function) {
-			Function func = (Function) term;
+	private static boolean isURIRDFType(ImmutableTerm term) {
+		if (term instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm func = (ImmutableFunctionalTerm) term;
 			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
-				Term t0 = func.getTerm(0);
+				ImmutableTerm t0 = func.getTerm(0);
 				if (t0 instanceof ValueConstant)
 					return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
 			}
@@ -345,12 +345,13 @@ public class MetaMappingExpander {
 	 *
 	 */
 
-	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac, List<Term> templateTerms) {
+	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac,
+																  ImmutableList<? extends ImmutableTerm> templateTerms) {
 
 		final ImmutableList<Variable> vars;
 		int len = templateTerms.size();
 		if (len == 1) { // the case of <{varUri}>
-			Term uri = templateTerms.get(0);
+			ImmutableTerm uri = templateTerms.get(0);
 			if (uri instanceof Variable)
 				 vars = ImmutableList.of((Variable) uri);
 			else
@@ -369,7 +370,7 @@ public class MetaMappingExpander {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private static String getPredicateName(Term templateTerm, List<String> values) {
+	private static String getPredicateName(ImmutableTerm templateTerm, List<String> values) {
 		if (templateTerm instanceof Variable) {
 			return values.get(0);
 		}

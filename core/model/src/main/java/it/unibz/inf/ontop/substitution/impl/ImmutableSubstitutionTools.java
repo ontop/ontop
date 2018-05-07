@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-
 /**
  * Tools for the new generation of (immutable) substitutions
  */
@@ -114,7 +112,7 @@ public class ImmutableSubstitutionTools {
         /*
          * Source is ground term
          */
-        if (isGroundTerm(sourceFunctionalTerm)) {
+        if (sourceFunctionalTerm.isGround()) {
             if (sourceFunctionalTerm.equals(targetFunctionalTerm)) {
                 return Optional.of(substitutionFactory.getSubstitution());
             }
@@ -123,8 +121,8 @@ public class ImmutableSubstitutionTools {
             }
         }
 
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getArguments();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getArguments();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getTerms();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getTerms();
 
         /*
          * Arity equality
@@ -168,7 +166,7 @@ public class ImmutableSubstitutionTools {
     ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
             ImmutableSubstitution<ImmutableTerm> substitution) {
         ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
+        for (Map.Entry<Variable, ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
             VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
 
             substitutionMapBuilder.put(entry.getKey(), value);
