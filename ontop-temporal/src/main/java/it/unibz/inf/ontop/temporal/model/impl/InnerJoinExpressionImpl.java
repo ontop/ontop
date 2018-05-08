@@ -32,7 +32,7 @@ public class InnerJoinExpressionImpl implements InnerJoinExpression{
     public String toString() {
         StringBuilder s= new StringBuilder();
         for (DatalogMTLExpression expression : getOperands())
-            s.append(expression).append(",");
+            s.append(expression).append("\n\t");
         return s.toString();
     }
 

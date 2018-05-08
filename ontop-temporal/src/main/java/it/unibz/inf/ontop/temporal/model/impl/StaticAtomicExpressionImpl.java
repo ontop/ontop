@@ -76,9 +76,9 @@ public class StaticAtomicExpressionImpl implements StaticAtomicExpression {
                 return String.format("%s %s %s .", subject, predicate, terms.get(1));
             }
         } else if(terms.size()==1){
-            return String.format("%s %s %s .", subject, RDF.TYPE, predicate);
+            return String.format("%s %s %s .", subject, RDF.TYPE.getIRIString(), predicate);
         }
-        return String.format("%s(%s)", predicate, terms.stream().map(Term::toString).collect(joining(",")));
+        return String.format("%s(%s)", predicate, terms.stream().map(Term::toString).collect(joining(" ")));
     }
 
     @Override

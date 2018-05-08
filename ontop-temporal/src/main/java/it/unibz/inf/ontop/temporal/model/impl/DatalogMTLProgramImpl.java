@@ -55,8 +55,11 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
     public String toString(){
         StringBuilder stringBuilder = new StringBuilder();
         prefixes.forEach((key, value) -> stringBuilder.append("PREFIX ").append(key).append("\t<").append(value).append(">\n"));
-        stringBuilder.append("BASE <").append(base).append(">\n\n");
-        stringBuilder.append(render());
+        String renderedRules = render();
+        for(Map.Entry<String, String> prefixEntry:prefixes.entrySet()){
+            renderedRules = renderedRules.replaceAll(prefixEntry.getValue(), prefixEntry.getKey());
+        }
+        stringBuilder.append(renderedRules);
         return stringBuilder.toString();
     }
 }

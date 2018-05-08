@@ -23,7 +23,7 @@ public class FilterExpressionImpl implements FilterExpression {
 
     @Override
     public String toString() {
-        return datalogMTLExpression.toString() +", "+comparisonExpression.toString();
+        return datalogMTLExpression.toString() +" "+comparisonExpression.toString();
     }
 
     @Override
