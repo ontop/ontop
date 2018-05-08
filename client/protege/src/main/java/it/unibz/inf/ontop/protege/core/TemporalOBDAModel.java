@@ -104,7 +104,7 @@ public class TemporalOBDAModel extends OBDAModel {
         prefixManager.getPrefixMap().forEach((key,value)->{
             header.append("PREFIX ").append(key).append("\t<").append(value).append(">\n");
         });
-        header.append("BASE <").append(getNamespace()).append(">");
+        header.append("BASE <").append(getNamespace()).append(">\n");
         DatalogMTLSyntaxParser datalogMTLSyntaxParser = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
         LOGGER.info("Parsing rule:\n"+header+"\n"+rule+"\n");
         return datalogMTLSyntaxParser.parse(header+"\n"+rule).getRules().get(0);
