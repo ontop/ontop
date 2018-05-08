@@ -173,9 +173,9 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 				parent.dispose();
 			}
 			else {
-				String invalidList = "";
+                StringBuilder invalidList = new StringBuilder();
 				for (String predicate : invalidPredicates) {
-					invalidList += "- " + predicate + "\n";
+                    invalidList.append("- ").append(predicate).append("\n");
 				}
 				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
 			}

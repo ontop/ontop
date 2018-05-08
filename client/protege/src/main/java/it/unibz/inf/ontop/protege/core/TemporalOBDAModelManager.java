@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 public class TemporalOBDAModelManager extends OBDAModelManager {
@@ -76,9 +77,7 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
 
         updateModelManagerListener(new OBDAPluginTemporalOWLModelManagerListener());
 
-        // Adding ontology change listeners to synchronize with the mappings
         owlEditorKit.getModelManager().getOWLOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
-
 
         PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(owlEditorKit.getModelManager().getActiveOntology());
 
@@ -94,6 +93,57 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
 
     public TemporalOBDAModel getActiveOBDAModel() {
         return (TemporalOBDAModel) super.getActiveOBDAModel();
+    }
+
+    private void saveRuleFile(String owlName) {
+        File ruleFile = new File(URI.create(owlName + RULE_EXT));
+        new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory())
+                .save(getActiveOBDAModel().getDatalogMTLProgram(), ruleFile);
+        log.info("rules are saved to {} file", ruleFile);
+    }
+
+    private void saveTOBDAFile(String owlName) throws IOException {
+        File tobdaFile = new File(URI.create(owlName + TOBDA_EXT));
+        new OntopNativeMappingSerializer(getActiveOBDAModel().generatePPMapping())
+                .save(tobdaFile);
+        log.info("mappings are saved to {} file", tobdaFile);
+    }
+
+    private void loadTOBDAFile(String owlName) throws Exception {
+        File tobdaFile = new File(URI.create(owlName + TOBDA_EXT));
+
+        if (tobdaFile.exists()) {
+            try {
+                getActiveOBDAModel().parseMapping(tobdaFile, getConfigurationManager().snapshotProperties());
+            } catch (Exception ex) {
+                throw new Exception("Exception occurred while loading TOBDA file: " + tobdaFile + "\n\n" + ex.getMessage());
+            }
+        } else {
+            log.warn("Temporal OBDA model couldn't be loaded because .tobda file doesn't exist in the same location of the .owl file");
+        }
+        //TODO validation of temporal mappings
+        /*for (SQLPPTriplesMap mapping : getActiveOBDAModel().generatePPMapping().getTripleMaps()) {
+            List<? extends Function> tq = mapping.getTargetAtoms();
+            if (!TargetQueryValidator.validate(tq, getActiveOBDAModel().getCurrentVocabulary()).isEmpty()) {
+                throw new Exception("Found an invalid target query: " + tq.toString());
+            }
+        }*/
+    }
+
+    private void loadRuleFile(String owlName) throws Exception {
+        File ruleFile = new File(URI.create(owlName + RULE_EXT));
+        if (ruleFile.exists()) {
+            try {
+                getActiveOBDAModel().setDatalogMTLProgram(
+                        new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory())
+                                .parse(ruleFile)
+                );
+            } catch (Exception ex) {
+                throw new Exception("Exception occurred while loading rule file: " + ruleFile + "\n\n" + ex.getMessage());
+            }
+        } else {
+            log.warn("Temporal rules couldn't be loaded because .dmtl file doesn't exist in the same location of the .owl file");
+        }
     }
 
     class OBDAPluginTemporalOWLModelManagerListener extends OBDAPluginOWLModelManagerListener {
@@ -112,47 +162,18 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
                 }
 
                 String owlDocumentIriString = documentIRI.toString();
-                int i = owlDocumentIriString.lastIndexOf(".");
-                String owlName = owlDocumentIriString.substring(0, i);
+                String owlName = owlDocumentIriString.substring(0, owlDocumentIriString.lastIndexOf("."));
 
                 loadProperties(owlName);
-
-                File tobdaFile = new File(URI.create(owlName + TOBDA_EXT));
-
-                if (tobdaFile.exists()) {
-                    try {
-                        getActiveOBDAModel().parseMapping(tobdaFile, getConfigurationManager().snapshotProperties());
-                    } catch (Exception ex) {
-                        throw new Exception("Exception occurred while loading TOBDA file: " + tobdaFile + "\n\n" + ex.getMessage());
-                    }
-
-                    File ruleFile = new File(URI.create(owlName + RULE_EXT));
-                    if (ruleFile.exists()) {
-                        try {
-                            getActiveOBDAModel().setDatalogMTLProgram(
-                                    new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory())
-                                            .parse(ruleFile)
-                            );
-                        } catch (Exception ex) {
-                            throw new Exception("Exception occurred while loading rule file: " + ruleFile + "\n\n" + ex.getMessage());
-                        }
-                    }
-                } else {
-                    log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
-                }
-                //TODO validation of temporal mappings
-                /*for (SQLPPTriplesMap mapping : getActiveOBDAModel().generatePPMapping().getTripleMaps()) {
-                    List<? extends Function> tq = mapping.getTargetAtoms();
-                    if (!TargetQueryValidator.validate(tq, getActiveOBDAModel().getCurrentVocabulary()).isEmpty()) {
-                        throw new Exception("Found an invalid target query: " + tq.toString());
-                    }
-                }*/
+                loadOBDAFile(owlName);
+                loadTOBDAFile(owlName);
+                loadRuleFile(owlName);
             } catch (Exception e) {
                 InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
                 DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
                 log.error(e.getMessage());
             } finally {
-                loadingData = false; // flag off
+                loadingData = false;
                 fireActiveOBDAModelChange();
             }
         }
@@ -169,21 +190,8 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
                 int i = owlDocumentIriString.lastIndexOf(".");
                 String owlName = owlDocumentIriString.substring(0, i);
 
-                String tobdaDocumentIri = owlName + TOBDA_EXT;
-
-                // Save the TOBDA model
-                File tobdaFile = new File(URI.create(tobdaDocumentIri));
-                new OntopNativeMappingSerializer(getActiveOBDAModel().generatePPMapping())
-                        .save(tobdaFile);
-
-                log.info("mappings are saved to {} file", tobdaFile);
-
-                String ruleDocumentIri = owlName + RULE_EXT;
-                File ruleFile = new File(URI.create(ruleDocumentIri));
-                new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory())
-                        .save(getActiveOBDAModel().getDatalogMTLProgram(), ruleFile);
-
-                log.info("rules are saved to {} file", ruleFile);
+                saveTOBDAFile(owlName);
+                saveRuleFile(owlName);
 
             } catch (Exception e) {
                 log.error(e.getMessage());

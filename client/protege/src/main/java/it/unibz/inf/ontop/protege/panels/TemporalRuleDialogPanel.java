@@ -36,7 +36,7 @@ public class TemporalRuleDialogPanel extends JDialog {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private JButton btnInsertRule;
     private JCheckBox chkStatic;
-    private JTextPane txtRule;
+    private TemporalRuleTextPane txtRule;
     private TemporalRuleEditorPanel editorPanel;
 
     TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel) {
@@ -49,9 +49,6 @@ public class TemporalRuleDialogPanel extends JDialog {
         this.editorPanel = editorPanel;
 
         initComponents();
-
-        // TODO painter for rules
-        //QueryPainter painter = new QueryPainter(obdaModel, txtRule);
 
         btnInsertRule.addActionListener(e -> insertRule());
         txtRule.addKeyListener(new TabKeyListener());
@@ -66,7 +63,7 @@ public class TemporalRuleDialogPanel extends JDialog {
 
         if (datalogMTLRule != null) {
             btnInsertRule.setText("Update");
-            txtRule.setText(datalogMTLRule.toString());
+            txtRule.setRule(datalogMTLRule, false);
             chkStatic.setSelected(datalogMTLRule.isStatic());
             setTitle("Edit Rule");
         }else {
@@ -147,17 +144,10 @@ public class TemporalRuleDialogPanel extends JDialog {
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         add(pnlCommandButton, gridBagConstraints);
 
-        JScrollPane scrTargetQuery = new JScrollPane();
-        scrTargetQuery.setFocusable(false);
-        scrTargetQuery.setMinimumSize(new Dimension(600, 170));
-        scrTargetQuery.setPreferredSize(new Dimension(600, 170));
-
-        txtRule = new JTextPane();
-        txtRule.setFont(new Font("Lucida Sans Typewriter", Font.PLAIN, 13)); // NOI18N
-        txtRule.setFocusCycleRoot(false);
-        txtRule.setMinimumSize(new Dimension(600, 170));
-        txtRule.setPreferredSize(new Dimension(600, 170));
-        scrTargetQuery.setViewportView(txtRule);
+        txtRule = new TemporalRuleTextPane();
+        //txtRule.setPreferredSize(new Dimension(600, 170));
+        //JScrollPane scrRule = new JScrollPane(txtRule);
+        //scrRule.setPreferredSize(new Dimension(600, 170));
 
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -166,7 +156,7 @@ public class TemporalRuleDialogPanel extends JDialog {
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        add(scrTargetQuery, gridBagConstraints);
+        add(new JScrollPane(txtRule), gridBagConstraints);
 
         getAccessibleContext().setAccessibleName("Rule editor");
     }

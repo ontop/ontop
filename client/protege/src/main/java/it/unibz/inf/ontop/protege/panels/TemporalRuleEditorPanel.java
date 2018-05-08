@@ -35,7 +35,10 @@ import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +47,6 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
     private TemporalOBDAModel tobdaModel;
     private JCheckBox chkFilter;
     private JTextField txtRules;
-
     private JList<DatalogMTLRule> lstRules;
     private JTextField txtFilter;
 
@@ -64,7 +66,8 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
             }
         });
 
-        //TODO rule painter
+        lstRules.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> new TemporalRuleTextPane(value, isSelected));
+
         DefaultListModel<DatalogMTLRule> model = new DefaultListModel<>();
 
         if (!tobdaModel.getRules().isEmpty()) {
@@ -209,12 +212,13 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
         pnlMappingButtons.add(lblNamespace, gridBagConstraints);
 
         JTextField txtNamespace = new JTextField(tobdaModel.getNamespace());
-        txtNamespace.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                tobdaModel.updateNamespace(txtNamespace.getText());
-            }
-        });
+
+        JButton btnNamespace = new JButton("Save Namespace");
+        gridBagConstraints.gridx = 5;
+        btnNamespace.setPreferredSize(new Dimension(80, 25));
+        btnNamespace.addActionListener(e -> tobdaModel.updateNamespace(txtNamespace.getText()));
+        pnlMappingButtons.add(btnNamespace, gridBagConstraints);
+
         gridBagConstraints.gridx = 4;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;

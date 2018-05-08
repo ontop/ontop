@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
-
 public class StaticJoinExpressionImpl implements StaticJoinExpression {
 
     private final List<StaticExpression> operands;
@@ -42,7 +40,7 @@ public class StaticJoinExpressionImpl implements StaticJoinExpression {
     public String toString() {
         StringBuilder s= new StringBuilder();
         for (DatalogMTLExpression expression : getOperands())
-            s.append(expression).append(",");
+            s.append(expression).append(",\n\t");
         return s.toString();
     }
 

@@ -30,8 +30,8 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
@@ -454,6 +454,55 @@ public class OBDAModelManager implements Disposable {
 		return queryController;
 	}
 
+    void loadOBDAFile(String owlName) throws Exception {
+        File obdaFile = new File(URI.create(owlName + OBDA_EXT));
+        File queryFile = new File(URI.create(owlName + QUERY_EXT));
+        if (obdaFile.exists()) {
+            try {
+                //convert old syntax OBDA file
+                Reader mappingReader = new FileReader(obdaFile);
+                OldSyntaxMappingConverter converter = new OldSyntaxMappingConverter(new FileReader(obdaFile), obdaFile.getName());
+                java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
+
+                if (optionalDataSourceProperties.isPresent()) {
+                    configurationManager.loadProperties(optionalDataSourceProperties.get());
+                    mappingReader = converter.getOutputReader();
+                }
+                // Load the OBDA model
+                getActiveOBDAModel().parseMapping(mappingReader, configurationManager.snapshotProperties());
+
+            } catch (Exception ex) {
+                throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
+            }
+
+            try {
+                // Load the saved queries
+                QueryIOManager queryIO = new QueryIOManager(queryController);
+                queryIO.load(queryFile);
+            } catch (Exception ex) {
+                queryController.reset();
+                throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
+            }
+        } else {
+            log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
+        }
+        // adding type information to the mapping predicates
+        for (SQLPPTriplesMap mapping : getActiveOBDAModel().generatePPMapping().getTripleMaps()) {
+            List<? extends Function> tq = mapping.getTargetAtoms();
+            if (!TargetQueryValidator.validate(tq, getActiveOBDAModel().getCurrentVocabulary()).isEmpty()) {
+                throw new Exception("Found an invalid target query: " + tq.toString());
+            }
+        }
+    }
+
+    void loadProperties(String owlName) throws IOException {
+        // Loads the properties (and the data source)
+        File propertyFile = new File(URI.create(owlName + PROPERTY_EXT));
+        if (propertyFile.exists()) {
+            configurationManager.loadPropertyFile(propertyFile);
+        }
+    }
+
 	/**
 	 * Internal class responsible for coordinating actions related to updates in
 	 * the ontology environment.
@@ -565,62 +614,14 @@ public class OBDAModelManager implements Disposable {
 				}
 
 				String owlDocumentIriString = documentIRI.toString();
-				int i = owlDocumentIriString.lastIndexOf(".");
-				String owlName = owlDocumentIriString.substring(0,i);
+                String owlName = owlDocumentIriString.substring(0, owlDocumentIriString.lastIndexOf("."));
 
-				String obdaDocumentIri = owlName + OBDA_EXT;
-				String queryDocumentIri = owlName + QUERY_EXT;
-				String implicitDBConstraintFilePath = owlName + DBPREFS_EXT;
-
-				File obdaFile = new File(URI.create(obdaDocumentIri));
-				File queryFile = new File(URI.create(queryDocumentIri));
-				File implicitDBConstraintFile = new File(URI.create(implicitDBConstraintFilePath));
-
+                File implicitDBConstraintFile = new File(URI.create(owlName + DBPREFS_EXT));
 				if(implicitDBConstraintFile.exists())
 					configurationManager.setImplicitDBConstraintFile(implicitDBConstraintFile);
 
 				loadProperties(owlName);
-
-
-				if (obdaFile.exists()) {
-					try {
-						//convert old syntax OBDA file
-						Reader mappingReader = new FileReader(obdaFile);
-						OldSyntaxMappingConverter converter =  new OldSyntaxMappingConverter(new FileReader(obdaFile), obdaFile.getName());
-						java.util.Optional<Properties> optionalDataSourceProperties = converter.getOBDADataSourceProperties();
-
-						if (optionalDataSourceProperties.isPresent()) {
-							configurationManager.loadProperties(optionalDataSourceProperties.get());
-							mappingReader = converter.getOutputReader();
-						}
-						// Load the OBDA model
-						getActiveOBDAModel().parseMapping(mappingReader, configurationManager.snapshotProperties());
-
-					}
-					catch (Exception ex) {
-						throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + ex.getMessage());
-					}
-
-					try {
-						// Load the saved queries
-						QueryIOManager queryIO = new QueryIOManager(queryController);
-						queryIO.load(queryFile);
-					}
-					catch (Exception ex) {
-						queryController.reset();
-						throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
-					}
-				}
-				else {
-					log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
-				}
-				// adding type information to the mapping predicates
-				for (SQLPPTriplesMap mapping : getActiveOBDAModel().generatePPMapping().getTripleMaps()) {
-					List<? extends Function> tq = mapping.getTargetAtoms();
-					if (!TargetQueryValidator.validate(tq, getActiveOBDAModel().getCurrentVocabulary()).isEmpty()) {
-						throw new Exception("Found an invalid target query: " + tq.toString());
-					}
-				}
+                loadOBDAFile(owlName);
 			}
 			catch (Exception e) {
 				InvalidOntopConfigurationException ex = new InvalidOntopConfigurationException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
@@ -686,14 +687,6 @@ public class OBDAModelManager implements Disposable {
 				DialogUtils.showQuickErrorDialog(null, newException, "Error saving OBDA file");
 				triggerOntologyChanged();
 			}
-		}
-	}
-
-	public void loadProperties(String owlName) throws IOException {
-		// Loads the properties (and the data source)
-		File propertyFile = new File(URI.create(owlName + PROPERTY_EXT));
-		if (propertyFile.exists()) {
-			configurationManager.loadPropertyFile(propertyFile);
 		}
 	}
 

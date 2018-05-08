@@ -4,15 +4,10 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 import it.unibz.inf.ontop.temporal.model.TemporalJoinExpression;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.calcite.adapter.java.Array;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
 
 public class TemporalJoinExpressionImpl implements TemporalJoinExpression {
 
@@ -36,7 +31,7 @@ public class TemporalJoinExpressionImpl implements TemporalJoinExpression {
     public String toString() {
         StringBuilder s= new StringBuilder();
         for (DatalogMTLExpression expression : getOperands())
-            s.append(expression).append(",");
+            s.append(expression).append(",\n\t");
         return s.toString();
     }
 

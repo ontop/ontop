@@ -45,6 +45,6 @@ public class DatalogMTLRuleImpl implements DatalogMTLRule {
 
     @Override
     public String toString(){
-        return String.format("%s :- \n{ %s . }\n", head.toString(), body.toString());
+        return String.format("%s :- \n{\n\t%s\n}", head.toString(), body.toString());
     }
 }
