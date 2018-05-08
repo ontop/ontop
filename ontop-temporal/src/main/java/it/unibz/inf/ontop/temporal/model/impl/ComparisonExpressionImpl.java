@@ -55,7 +55,16 @@ public class ComparisonExpressionImpl implements ComparisonExpression {
 
     @Override
     public String toString() {
-        return String.format("(%s %s %s)", leftTerm, getPredicateString(), rightTerm);
+        String leftStr = "";
+        String rightStr = "";
+        if (leftTerm instanceof Variable)
+            leftStr = "?" + ((Variable) leftTerm).getName();
+        else leftStr = leftTerm.toString();
+        if (rightTerm instanceof Variable)
+            rightStr = "?" + ((Variable) rightTerm).getName();
+        else
+            rightStr = rightTerm.toString();
+        return String.format("(%s %s %s)", leftStr, getPredicateString(), rightStr);
     }
 
     private String getPredicateString(){

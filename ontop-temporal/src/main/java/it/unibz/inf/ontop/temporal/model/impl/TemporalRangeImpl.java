@@ -34,8 +34,14 @@ public class TemporalRangeImpl implements TemporalRange {
 
     @Override
     public String toString() {
-        return (beginInclusive ? "[" : "(") + begin + "," + end + (endInclusive ? "]" : ")");
+        return (beginInclusive ? "[" : "(") + durationToString(begin) + "," + durationToString(end) + (endInclusive ? "]" : ")");
 
+    }
+
+    public String durationToString(Duration dur){
+        String durStr = dur.toString().replace("PT", "");
+        durStr = durStr.replace("P", "");
+        return durStr;
     }
 
     //@Inject

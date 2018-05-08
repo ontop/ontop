@@ -47,7 +47,7 @@ annotation
   ;
 
 head
-  : (temporalOperator temporalRange)? triple
+  : (temporalOperator temporalRange)? (triple | triple_with_dot)
   ;
 
 body
@@ -152,7 +152,7 @@ WS
  *------------------------------------------------------------------*/
 
 DURATION
-  : '0' | ([1-9] [0-9]* ('D' | 'H' | 'M' | 'S' | 'MS'))
+  : '0' | ([0-9]+ ('D' | 'H' | 'M' | 'S' | 'MS'))
   ;
 
 INTEGER

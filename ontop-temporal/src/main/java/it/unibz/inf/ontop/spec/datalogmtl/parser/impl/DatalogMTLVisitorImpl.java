@@ -89,11 +89,19 @@ public class DatalogMTLVisitorImpl extends DatalogMTLBaseVisitor implements Data
     public AtomicExpression visitHead(DatalogMTLParser.HeadContext ctx, boolean isHeadOfStaticRule){
 
         if(isHeadOfStaticRule){
-            return visitTriple(ctx.triple(), true);
+            if (ctx.triple() != null) {
+                return visitTriple(ctx.triple(), true);
+            } else {
+                return visitTriple(ctx.triple_with_dot().triple(), true);
+            }
         }else {
             if (ctx.temporalOperator() == null) {
                 if (ctx.temporalRange() == null) {
-                    return visitTriple(ctx.triple(), false);
+                    if (ctx.triple() != null) {
+                        return visitTriple(ctx.triple(), false);
+                    } else {
+                        return visitTriple(ctx.triple_with_dot().triple(), false);
+                    }
                 } else {
                     throw new IllegalArgumentException("Invalid temporal expression. Temporal range is missing.");
                 }
