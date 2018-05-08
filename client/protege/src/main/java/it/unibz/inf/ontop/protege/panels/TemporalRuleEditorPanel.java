@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
-import it.unibz.inf.ontop.protege.gui.treemodels.FilteredModel;
-import it.unibz.inf.ontop.protege.gui.treemodels.TreeModelFilter;
 import it.unibz.inf.ontop.protege.utils.EditorKeyListener;
 import it.unibz.inf.ontop.protege.utils.EditorPanel;
 import it.unibz.inf.ontop.protege.utils.PopupListener;
@@ -39,7 +37,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
@@ -66,7 +63,7 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
             }
         });
 
-        lstRules.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> new TemporalRuleTextPane(value, isSelected));
+        lstRules.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> new TemporalRuleTextPane(tobdaModel.dmtlRuleToString(value), isSelected));
 
         DefaultListModel<DatalogMTLRule> model = new DefaultListModel<>();
 
@@ -118,7 +115,10 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
     @Override
     public void edit() {
         if(!lstRules.isSelectionEmpty()) {
-            new TemporalRuleDialogPanel(this, lstRules.getSelectedValue());
+            new TemporalRuleDialogPanel(this,
+                    lstRules.getSelectedIndex(),
+                    tobdaModel.dmtlRuleToString(lstRules.getSelectedValue()),
+                    lstRules.getSelectedValue().isStatic());
         }
     }
 
@@ -270,26 +270,7 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
     }
 
     private void processFilterAction() {
-        if (!(chkFilter.isSelected())) {
-            applyFilters(new ArrayList<>());
-        }
-        if (chkFilter.isSelected()) {
-            if (txtFilter.getText().isEmpty()) {
-                chkFilter.setSelected(false);
-                applyFilters(new ArrayList<>());
-                return;
-            }
-            try {
-                List<TreeModelFilter<DatalogMTLRule>> filters = parseSearchString(txtFilter.getText());
-                if (filters == null) {
-                    throw new Exception("Impossible to parse search string");
-                }
-                applyFilters(filters);
-            } catch (Exception e) {
-                LoggerFactory.getLogger(this.getClass()).debug(e.getMessage(), e);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }
-        }
+        //TODO filter the rules
     }
 
     /***
@@ -364,33 +345,18 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
         processFilterAction();
     }
 
-    /**
-     * Parses the string in the search field.
-     *
-     * @param textToParse The target text
-     * @return A list of filter objects or null if the string was empty or
-     * erroneous
-     */
-    private List<TreeModelFilter<DatalogMTLRule>> parseSearchString(String textToParse) throws Exception {
-        List<TreeModelFilter<DatalogMTLRule>> listOfFilters = null;
-        if (textToParse != null) {
-        }
-        return listOfFilters;
-    }
-
-    private void applyFilters(List<TreeModelFilter<DatalogMTLRule>> filters) {
-        FilteredModel model = (FilteredModel) lstRules.getModel();
-        model.removeAllFilters();
-        //TODO add filters
-        //model.addFilters(filters);
-    }
-
-    boolean addRule(String rule) {
+    boolean addRule(int ruleIndex, String rule) {
         try {
             DatalogMTLRule parsedRule = tobdaModel.parse(rule);
             if (parsedRule != null) {
-                tobdaModel.addRule(parsedRule);
-                ((DefaultListModel<DatalogMTLRule>) lstRules.getModel()).addElement(parsedRule);
+                DefaultListModel<DatalogMTLRule> ruleListModel = (DefaultListModel<DatalogMTLRule>) lstRules.getModel();
+                if (ruleIndex < 0) {
+                    tobdaModel.addRule(parsedRule);
+                    ruleListModel.addElement(parsedRule);
+                } else {
+                    tobdaModel.updateRule(ruleListModel.getElementAt(ruleIndex), parsedRule);
+                    ruleListModel.setElementAt(parsedRule, ruleIndex);
+                }
                 return true;
         }
         } catch (Exception e) {

@@ -600,5 +600,7 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
 		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		txtTargetQuery.setText(trgQuery);
+
+		txtInterval.setText(mapping.getTemporalMappingInterval().toString());
 	}
 }

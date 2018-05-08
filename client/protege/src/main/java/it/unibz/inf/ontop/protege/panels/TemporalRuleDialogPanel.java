@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.TabKeyListener;
-import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +37,17 @@ public class TemporalRuleDialogPanel extends JDialog {
     private JCheckBox chkStatic;
     private TemporalRuleTextPane txtRule;
     private TemporalRuleEditorPanel editorPanel;
+    private int ruleIndex;
 
     TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel) {
-        this(editorPanel, null);
+        this(editorPanel, -1, null, false);
     }
 
-    TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel, DatalogMTLRule datalogMTLRule) {
+    TemporalRuleDialogPanel(TemporalRuleEditorPanel editorPanel, int ruleIndex, String datalogMTLRule, boolean staticRule) {
 
         DialogUtils.installEscapeCloseOperation(this);
         this.editorPanel = editorPanel;
+        this.ruleIndex = ruleIndex;
 
         initComponents();
 
@@ -64,7 +65,7 @@ public class TemporalRuleDialogPanel extends JDialog {
         if (datalogMTLRule != null) {
             btnInsertRule.setText("Update");
             txtRule.setRule(datalogMTLRule, false);
-            chkStatic.setSelected(datalogMTLRule.isStatic());
+            chkStatic.setSelected(staticRule);
             setTitle("Edit Rule");
         }else {
             setTitle("New Rule");
@@ -91,7 +92,7 @@ public class TemporalRuleDialogPanel extends JDialog {
     }
 
     private void insertRule(String rule) {
-        if (editorPanel.addRule(rule)) {
+        if (editorPanel.addRule(ruleIndex, rule)) {
             setVisible(false);
             dispose();
         }

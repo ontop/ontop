@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.protege.panels;
 
-import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +23,7 @@ class TemporalRuleTextPane extends JTextPane {
     private static final SimpleAttributeSet braces = new SimpleAttributeSet();
     private static final SimpleAttributeSet uris = new SimpleAttributeSet();
     private static final SimpleAttributeSet defaultFont = new SimpleAttributeSet();
-    private static final Map<Pattern, AttributeSet> regexAndStyleMap = new HashMap<>();
+    private static final Map<Pattern, AttributeSet> regexAndStyleMap = new LinkedHashMap<>();
 
     static {
         defaultFont.addAttribute(StyleConstants.CharacterConstants.Family, "Lucida Grande");
@@ -35,12 +34,13 @@ class TemporalRuleTextPane extends JTextPane {
         variables.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
         uris.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(41, 119, 167));
-        uris.addAttribute(StyleConstants.CharacterConstants.Italic, true);
+        uris.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
         intervals.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(41, 167, 121));
         intervals.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
         braces.addAttribute(StyleConstants.CharacterConstants.Bold, true);
+        braces.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
         regexAndStyleMap.put(
                 Pattern.compile("\\?[a-zA-Z0-9]+|always in past|always in future|sometime in past|sometime in future|true|false", Pattern.CASE_INSENSITIVE), variables);
@@ -49,7 +49,7 @@ class TemporalRuleTextPane extends JTextPane {
         regexAndStyleMap.put(
                 Pattern.compile("\\([a-zA-Z0-9]+\\s*[<=>]+\\s*[\"a-zA-Z0-9]+\\s*\\)", Pattern.CASE_INSENSITIVE), intervals);
         regexAndStyleMap.put(
-                Pattern.compile("http://[a-zA-Z0-9.#/-]*|[a-zA-Z0-9]+:[a-zA-Z0-9]+", Pattern.CASE_INSENSITIVE), uris);
+                Pattern.compile("http://[a-zA-Z0-9.#/-]*|[a-zA-Z0-9]*:", Pattern.CASE_INSENSITIVE), uris);
         regexAndStyleMap.put(Pattern.compile("[{}()\\[\\]]|:-", Pattern.CASE_INSENSITIVE), braces);
     }
 
@@ -74,7 +74,7 @@ class TemporalRuleTextPane extends JTextPane {
         });
     }
 
-    TemporalRuleTextPane(DatalogMTLRule datalogMTLRule, boolean selected) {
+    TemporalRuleTextPane(String datalogMTLRule, boolean selected) {
         setRule(datalogMTLRule, selected);
     }
 
@@ -84,7 +84,7 @@ class TemporalRuleTextPane extends JTextPane {
                 try {
                     Matcher matcher = regexPattern.matcher(getStyledDocument().getText(0, getStyledDocument().getLength()));
                     while (matcher.find()) {
-                        getStyledDocument().setCharacterAttributes(matcher.start(), matcher.end() - matcher.start(), style, false);
+                        getStyledDocument().setCharacterAttributes(matcher.start(), matcher.end() - matcher.start(), style, true);
                     }
                 } catch (BadLocationException e) {
                     LOGGER.error(e.getMessage());
@@ -103,8 +103,8 @@ class TemporalRuleTextPane extends JTextPane {
         getStyledDocument().setParagraphAttributes(0, getStyledDocument().getLength(), defaultFont, false);
     }
 
-    void setRule(DatalogMTLRule datalogMTLRule, boolean selected) {
-        setText(datalogMTLRule.toString());
+    void setRule(String datalogMTLRule, boolean selected) {
+        setText(datalogMTLRule);
         setOpaque(true);
         setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, new Color(192, 192, 192), new Color(192, 192, 192).darker()));
         stylize(selected);

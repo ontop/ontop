@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -87,6 +86,11 @@ public class TemporalOBDAModel extends OBDAModel {
         ruleList.add(parsedRule);
     }
 
+    public void updateRule(DatalogMTLRule previousRule, DatalogMTLRule newRule) {
+        ruleList.remove(previousRule);
+        ruleList.add(newRule);
+    }
+
     public void removeRule(DatalogMTLRule rule){
         ruleList.remove(rule);
     }
@@ -108,6 +112,14 @@ public class TemporalOBDAModel extends OBDAModel {
         DatalogMTLSyntaxParser datalogMTLSyntaxParser = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
         LOGGER.info("Parsing rule:\n"+header+"\n"+rule+"\n");
         return datalogMTLSyntaxParser.parse(header+"\n"+rule).getRules().get(0);
+    }
+
+    public String dmtlRuleToString(DatalogMTLRule datalogMTLRule) {
+        String ruleString = datalogMTLRule.toString();
+        for (Map.Entry<String, String> prefixEntry : prefixManager.getPrefixMap().entrySet()) {
+            ruleString = ruleString.replaceAll(prefixEntry.getValue(), prefixEntry.getKey());
+        }
+        return ruleString;
     }
 
     public void updateNamespace(String namespace) {
