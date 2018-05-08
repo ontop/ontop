@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.temporal.model.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.temporal.model.ComparisonExpression;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLExpression;
 
@@ -57,13 +55,18 @@ public class ComparisonExpressionImpl implements ComparisonExpression {
     public String toString() {
         String leftStr = "";
         String rightStr = "";
-        if (leftTerm instanceof Variable)
+        if (leftTerm instanceof ValueConstant)
+            leftStr = ((ValueConstant) leftTerm).getValue();
+        else if (leftTerm instanceof Variable)
             leftStr = "?" + ((Variable) leftTerm).getName();
         else leftStr = leftTerm.toString();
-        if (rightTerm instanceof Variable)
+
+        if (rightTerm instanceof ValueConstant)
+            rightStr = "?" + ((ValueConstant) rightTerm).getValue();
+        else if (rightTerm instanceof Variable)
             rightStr = "?" + ((Variable) rightTerm).getName();
-        else
-            rightStr = rightTerm.toString();
+        else rightStr = rightTerm.toString();
+
         return String.format("(%s %s %s)", leftStr, getPredicateString(), rightStr);
     }
 
