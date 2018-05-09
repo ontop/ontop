@@ -92,20 +92,9 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
         Optional<Ontology> optionalOntology = ontologySupplier.get();
         Optional<DBMetadata> optionalMetadata = options.mappingSQLOptions.mappingSQLOptions.mappingOptions.dbMetadata;
 
-        /*
-         * Pre-processed mapping
-         */
-        Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
 
         TOBDASpecInput.Builder specInputBuilder = TOBDASpecInput.defaultBuilder();
         constraintFileSupplier.get().ifPresent(specInputBuilder::addConstraintFile);
-
-        if (optionalPPMapping.isPresent()) {
-            PreProcessedMapping ppMapping = optionalPPMapping.get();
-
-            return extractor.extract(specInputBuilder.build(), ppMapping, optionalMetadata, optionalOntology,
-                    getExecutorRegistry());
-        }
 
         /*
          * Rule program
@@ -132,7 +121,7 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
             specInputBuilder.addTemporalMappingFile(optionalTemporalMappingFile.get());
         }
 
-        if (optionalTemporalMappingFile.isPresent() || optionalMappingFile.isPresent()) {
+        if (optionalMappingFile.isPresent()) {
             return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
                     getExecutorRegistry());
         }
@@ -157,6 +146,15 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
 
             return extractor.extract(specInputBuilder.build(), optionalMetadata, optionalOntology,
                     getExecutorRegistry());
+        }
+
+        /*
+         * Pre-processed mapping
+         */
+        Optional<PreProcessedMapping> optionalPPMapping = ppMappingSupplier.get();
+        if (optionalPPMapping.isPresent()) {
+            PreProcessedMapping ppMapping = optionalPPMapping.get();
+            return extractor.extract(specInputBuilder.build(), ppMapping, optionalMetadata, optionalOntology, getExecutorRegistry());
         }
 
         throw new MissingInputMappingException();

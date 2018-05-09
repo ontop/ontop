@@ -70,7 +70,7 @@ public class TemporalOBDASpecificationExtractorImpl implements OBDASpecification
         MappingExtractor.MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
                 ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
-        TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(ppMapping, specInput, dbMetadata,
+        TemporalMappingExtractor.MappingAndDBMetadata temporalMappingAndDBMetadata = temporalMappingExtractor.extract(specInput, dbMetadata,
                     optionalOntology, executorRegistry, Optional.ofNullable(((RDBMetadata)mappingAndDBMetadata.getDBMetadata())));
 
         DatalogMTLProgram datalogMTLProgram = ruleNormalizer.normalize(((TOBDASpecInput) specInput).getTemporalRuleProgram().get(), mappingAndDBMetadata.getMapping());
