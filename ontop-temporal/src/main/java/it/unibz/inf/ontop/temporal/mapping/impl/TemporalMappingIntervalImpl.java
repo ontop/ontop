@@ -48,7 +48,7 @@ public class TemporalMappingIntervalImpl implements TemporalMappingInterval {
         if(beginInclusive instanceof BooleanConstant)
             return (((BooleanConstant)beginInclusive).getBooleanValue() ? "[" : "(") + begin + "," + end + (((BooleanConstant)endInclusive).getBooleanValue() ? "]" : ")");
         else
-            return ((Variable)beginInclusive).getName() + " " + begin + "," + end + " " + ((Variable)endInclusive).getName();
+            return String.format("{%s} {%s}^^xsd:dateTimeStamp,{%s}^^xsd:dateTimeStamp {%s}",((Variable)beginInclusive).getName(), begin, end, ((Variable)endInclusive).getName());
     }
 
     public TemporalMappingIntervalImpl(VariableOrGroundTerm beginInclusive, VariableOrGroundTerm endInclusive, Variable begin, Variable end) {

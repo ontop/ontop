@@ -62,7 +62,7 @@ public class ComparisonExpressionImpl implements ComparisonExpression {
         else leftStr = leftTerm.toString();
 
         if (rightTerm instanceof ValueConstant)
-            rightStr = "?" + ((ValueConstant) rightTerm).getValue();
+            rightStr = ((ValueConstant) rightTerm).getValue();
         else if (rightTerm instanceof Variable)
             rightStr = "?" + ((Variable) rightTerm).getName();
         else rightStr = rightTerm.toString();

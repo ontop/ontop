@@ -23,7 +23,7 @@ import java.io.*;
  */
 public class OntopNativeMappingSerializer {
 
-    private final SQLPPMapping ppMapping;
+    protected final SQLPPMapping ppMapping;
 
     /**
      * TODO: may consider building it through Assisted Injection.
@@ -60,7 +60,7 @@ public class OntopNativeMappingSerializer {
      * Helper methods related to save file.
      */
 
-    private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
+    protected void writePrefixDeclaration(BufferedWriter writer) throws IOException {
         final ImmutableMap<String, String> prefixMap = ppMapping.getMetadata().getPrefixManager().getPrefixMap();
 
         if (prefixMap.size() == 0) {
@@ -76,7 +76,7 @@ public class OntopNativeMappingSerializer {
         writer.write("\n");
     }
 
-    private void writeMappingDeclaration(BufferedWriter writer) throws IOException {
+    protected void writeMappingDeclaration(BufferedWriter writer) throws IOException {
 
         writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
         writer.write("\n");
@@ -100,16 +100,16 @@ public class OntopNativeMappingSerializer {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(ImmutableList<ImmutableFunctionalTerm> query) {
+    protected String printTargetQuery(ImmutableList<ImmutableFunctionalTerm> query) {
         return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
     }
 
-    private String printSourceQuery(OBDASQLQuery query) {
+    protected String printSourceQuery(OBDASQLQuery query) {
         String sourceString = SourceQueryRenderer.encode(query);
         String toReturn = convertTabToSpaces(sourceString);
         return toReturn.replaceAll("\n", "\n\t\t\t");
     }
-    private String convertTabToSpaces(String input) {
+    protected String convertTabToSpaces(String input) {
         return input.replaceAll("\t", "   ");
     }
 }

@@ -42,7 +42,7 @@ import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIn
 
 public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
-    protected enum Label {
+    public enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
         /* Mapping decl.: */mappingId, target, source, interval
     }
