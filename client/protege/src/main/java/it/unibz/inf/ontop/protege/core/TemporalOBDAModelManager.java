@@ -86,7 +86,9 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
                 atomFactory, termFactory, typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper)
         );
 
-        setConfigurationManager(new TemporalOntopConfigurationManager(getActiveOBDAModel(),
+        setConfigurationManager(new TemporalOntopConfigurationManager(
+                ((OBDAModelManager) owlEditorKit.get(OBDAModelManager.class.getName())).getActiveOBDAModel(),
+                getActiveOBDAModel(),
                 (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName())));
     }
 
@@ -165,7 +167,6 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
                 String owlName = owlDocumentIriString.substring(0, owlDocumentIriString.lastIndexOf("."));
 
                 loadProperties(owlName);
-                loadOBDAFile(owlName);
                 loadTOBDAFile(owlName);
                 loadRuleFile(owlName);
             } catch (Exception e) {

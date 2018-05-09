@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec;
 
 import it.unibz.inf.ontop.spec.impl.TOBDASpecInputImpl;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import org.apache.commons.rdf.api.Graph;
 
 import java.io.File;
@@ -17,9 +18,7 @@ public interface TOBDASpecInput extends OBDASpecInput {
         return getFile(TEMPORAL_MAPPING_KEY);
     }
 
-    default Optional<File> getTemporalRuleFile() {
-        return getFile(TEMPORAL_RULE_KEY);
-    }
+    Optional<DatalogMTLProgram> getTemporalRuleProgram();
 
     interface Builder {
 
@@ -37,9 +36,7 @@ public interface TOBDASpecInput extends OBDASpecInput {
             return addFile(TEMPORAL_MAPPING_KEY, temporalMappingFile);
         }
 
-        default TOBDASpecInput.Builder addTemporalRuleFile(File temporalRuleFile) {
-            return addFile(TEMPORAL_RULE_KEY, temporalRuleFile);
-        }
+        TOBDASpecInput.Builder addTemporalRuleProgram(DatalogMTLProgram temporalRuleProgram);
 
         default TOBDASpecInput.Builder addMappingReader(Reader mappingReader) {
             return addReader(MAPPING_KEY, mappingReader);
@@ -55,5 +52,5 @@ public interface TOBDASpecInput extends OBDASpecInput {
     }
 
     String TEMPORAL_MAPPING_KEY = "temporalMapping";
-    String TEMPORAL_RULE_KEY = "temporalRule";
+    //String TEMPORAL_RULE_KEY = "temporalRule";
 }

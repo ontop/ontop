@@ -8,9 +8,11 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.OBDASpecificationExtractor;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
+import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import org.apache.commons.rdf.api.Graph;
 
 import javax.annotation.Nonnull;
@@ -57,10 +59,10 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
     }
 
     public OBDASpecification loadOBDASpecification(OntologySupplier ontologySupplier) throws OBDASpecificationException {
-        return loadSpecification(ontologySupplier, Optional.empty());
+        return loadSpecification(ontologySupplier, Optional.empty(), Optional.empty());
     }
 
-    OBDASpecification loadSpecification(OntologySupplier ontologySupplier, Optional<File> ruleFile)
+    OBDASpecification loadSpecification(OntologySupplier ontologySupplier, Optional<DatalogMTLProgram> ruleProgram, Optional<File> ruleFile)
             throws OBDASpecificationException {
         return loadSpecification(
                 ontologySupplier,
@@ -70,7 +72,8 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
                 () -> options.mappingReader,
                 () -> options.mappingGraph,
                 () -> options.constraintFile,
-                () -> ruleFile
+                () -> ruleFile,
+                () -> ruleProgram
         );
     }
 
@@ -81,7 +84,8 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
                                         Supplier<Optional<Reader>> mappingReaderSupplier,
                                         Supplier<Optional<Graph>> mappingGraphSupplier,
                                         Supplier<Optional<File>> constraintFileSupplier,
-                                        Supplier<Optional<File>> ruleFileSupplier
+                                        Supplier<Optional<File>> ruleFileSupplier,
+                                        Supplier<Optional<DatalogMTLProgram>> ruleProgramSupplier
     ) throws OBDASpecificationException {
         OBDASpecificationExtractor extractor = getInjector().getInstance(OBDASpecificationExtractor.class);
 
@@ -96,13 +100,22 @@ public class OntopTemporalMappingSQLAllConfigurationImpl extends OntopMappingSQL
         TOBDASpecInput.Builder specInputBuilder = TOBDASpecInput.defaultBuilder();
         constraintFileSupplier.get().ifPresent(specInputBuilder::addConstraintFile);
 
-        ruleFileSupplier.get().ifPresent(specInputBuilder::addTemporalRuleFile);
-
         if (optionalPPMapping.isPresent()) {
             PreProcessedMapping ppMapping = optionalPPMapping.get();
 
             return extractor.extract(specInputBuilder.build(), ppMapping, optionalMetadata, optionalOntology,
                     getExecutorRegistry());
+        }
+
+        /*
+         * Rule program
+         */
+        Optional<DatalogMTLProgram> datalogMTLProgram = ruleProgramSupplier.get();
+        if (datalogMTLProgram.isPresent()) {
+            ruleProgramSupplier.get().ifPresent(specInputBuilder::addTemporalRuleProgram);
+        } else {
+            DatalogMTLSyntaxParser datalogMTLSyntaxParser = getInjector().getInstance(DatalogMTLSyntaxParser.class);
+            ruleFileSupplier.get().ifPresent(ruleFile -> specInputBuilder.addTemporalRuleProgram(datalogMTLSyntaxParser.parse(ruleFile)));
         }
 
         /*

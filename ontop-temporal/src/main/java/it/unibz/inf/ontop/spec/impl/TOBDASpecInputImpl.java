@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.TOBDASpecInput;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import org.apache.commons.rdf.api.Graph;
 
 import java.io.File;
@@ -15,13 +16,16 @@ public class TOBDASpecInputImpl implements TOBDASpecInput {
     private final ImmutableMap<String, File> files;
     private final ImmutableMap<String, Reader> readers;
     private final ImmutableMap<String, Graph> graphs;
+    private final DatalogMTLProgram temporalRuleProgram;
 
     private TOBDASpecInputImpl(ImmutableMap<String, File> files,
-                              ImmutableMap<String, Reader> readers,
-                              ImmutableMap<String, Graph> graphs) {
+                               ImmutableMap<String, Reader> readers,
+                               ImmutableMap<String, Graph> graphs,
+                               DatalogMTLProgram temporalRuleProgram) {
         this.files = files;
         this.readers = readers;
         this.graphs = graphs;
+        this.temporalRuleProgram = temporalRuleProgram;
     }
 
 
@@ -40,16 +44,9 @@ public class TOBDASpecInputImpl implements TOBDASpecInput {
         return Optional.ofNullable(graphs.get(key));
     }
 
-    public Optional<File> getTemporalFile(String key) {
-        return Optional.ofNullable(files.get(key));
-    }
-
-    public Optional<Reader> getTemporalReader(String key) {
-        return Optional.ofNullable(readers.get(key));
-    }
-
-    public Optional<Graph> getTemporalGraph(String key) {
-        return Optional.ofNullable(graphs.get(key));
+    @Override
+    public Optional<DatalogMTLProgram> getTemporalRuleProgram() {
+        return Optional.of(temporalRuleProgram);
     }
 
 
@@ -58,6 +55,7 @@ public class TOBDASpecInputImpl implements TOBDASpecInput {
         private final Map<String, File> files = new HashMap<>();
         private final Map<String, Reader> readers = new HashMap<>();
         private final Map<String, Graph> graphs = new HashMap<>();
+        private DatalogMTLProgram temporalRuleProgram;
 
         @Override
         public Builder addFile(String key, File file) {
@@ -78,11 +76,18 @@ public class TOBDASpecInputImpl implements TOBDASpecInput {
         }
 
         @Override
+        public Builder addTemporalRuleProgram(DatalogMTLProgram temporalRuleProgram) {
+            this.temporalRuleProgram = temporalRuleProgram;
+            return this;
+        }
+
+        @Override
         public TOBDASpecInput build() {
             return new TOBDASpecInputImpl(
                     ImmutableMap.copyOf(files),
                     ImmutableMap.copyOf(readers),
-                    ImmutableMap.copyOf(graphs));
+                    ImmutableMap.copyOf(graphs),
+                    temporalRuleProgram);
         }
     }
 }

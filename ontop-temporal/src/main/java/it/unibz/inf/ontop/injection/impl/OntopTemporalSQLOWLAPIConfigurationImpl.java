@@ -3,8 +3,11 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
+import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
+import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -46,7 +49,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
     @Override
     public OBDASpecification loadOBDASpecification() throws OBDASpecificationException {
-        return temporalConfiguration.loadSpecification(mappingOWLConfiguration::loadOntology, options.ruleFile);
+        return temporalConfiguration.loadSpecification(mappingOWLConfiguration::loadOntology, options.ruleProgram, options.ruleFile);
     }
 
     @Override
@@ -57,12 +60,16 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
     static class OntopTemporalSQLOWLAPIOptions {
         final Optional<File> ruleFile;
         final Optional<Reader> ruleReader;
+        final Optional<DatalogMTLProgram> ruleProgram;
         final OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions;
         final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions;
 
-        OntopTemporalSQLOWLAPIOptions(Optional<File> ruleFile, Optional<Reader> ruleReader, OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions, OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
+        OntopTemporalSQLOWLAPIOptions(Optional<File> ruleFile, Optional<Reader> ruleReader, Optional<DatalogMTLProgram> ruleProgram,
+                                      OntopSQLOWLAPIConfigurationImpl.OntopSQLOWLAPIOptions owlOptions,
+                                      OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions temporalOptions) {
             this.ruleFile = ruleFile;
             this.ruleReader = ruleReader;
+            this.ruleProgram = ruleProgram;
             this.owlOptions = owlOptions;
             this.temporalOptions = temporalOptions;
         }
@@ -76,6 +83,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
         Optional<File> ruleFile = Optional.empty();
         Optional<Reader> ruleReader = Optional.empty();
+        Optional<DatalogMTLProgram> ruleProgram = Optional.empty();
 
         boolean useRule = false;
 
@@ -117,6 +125,13 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             return builder;
         }
 
+        @Override
+        public B nativeOntopTemporalRuleProgram(@Nonnull DatalogMTLProgram ruleProgram) {
+            this.ruleProgram = Optional.of(ruleProgram);
+            useRule = true;
+            return builder;
+        }
+
     }
 
     static abstract class OntopTemporalSQLOWLAPIBuilderMixin<B extends OntopTemporalSQLOWLAPIConfiguration.Builder<B>>
@@ -152,6 +167,11 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         @Override
         public B nativeOntopTemporalRuleReader(@Nonnull Reader ruleReader) {
             return localFragmentBuilder.nativeOntopTemporalRuleReader(ruleReader);
+        }
+
+        @Override
+        public B nativeOntopTemporalRuleProgram(@Nonnull DatalogMTLProgram ruleProgram) {
+            return localFragmentBuilder.nativeOntopTemporalRuleProgram(ruleProgram);
         }
 
         @Override
@@ -198,7 +218,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
 
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
             return new OntopTemporalSQLOWLAPIOptions(localFragmentBuilder.ruleFile, localFragmentBuilder.ruleReader,
-                    generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
+                    localFragmentBuilder.ruleProgram, generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
         }
 
         @Override
