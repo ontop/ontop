@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
+import it.unibz.inf.ontop.spec.mapping.serializer.OntopNativeTemporalMappingSerializer;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
@@ -106,7 +107,7 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
 
     private void saveTOBDAFile(String owlName) throws IOException {
         File tobdaFile = new File(URI.create(owlName + TOBDA_EXT));
-        new OntopNativeMappingSerializer(getActiveOBDAModel().generatePPMapping())
+        new OntopNativeTemporalMappingSerializer(getActiveOBDAModel().generatePPMapping())
                 .save(tobdaFile);
         log.info("mappings are saved to {} file", tobdaFile);
     }
