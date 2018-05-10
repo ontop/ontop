@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
-import it.unibz.inf.ontop.temporal.model.term.BooleanConstant;
-import it.unibz.inf.ontop.temporal.model.term.impl.BooleanConstantImpl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +13,7 @@ public class IntervalQueryParser {
     private final TermFactory termFactory;
 
     @Inject
-    IntervalQueryParser(TermFactory termFactory){
+    public IntervalQueryParser(TermFactory termFactory) {
 
         this.termFactory = termFactory;
     }

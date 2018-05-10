@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.protege.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
@@ -12,15 +13,25 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.DatalogMTLSyntaxParser;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.temporal.mapping.IntervalQueryParser;
+import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
+import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
+import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLRule;
 import it.unibz.inf.ontop.temporal.model.impl.DatalogMTLFactoryImpl;
@@ -61,6 +72,10 @@ public class TemporalOBDAModel extends OBDAModel {
 
     private List<DatalogMTLRule> ruleList = new ArrayList<>();
     private String base;
+    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+    private final DatalogMTLSyntaxParser DATALOG_MTL_SYNTAX_PARSER;
+    private final IntervalQueryParser INTERVAL_QUERY_PARSER;
+
 
     public TemporalOBDAModel(SpecificationFactory specificationFactory,
                              SQLPPMappingFactory ppMappingFactory,
@@ -69,13 +84,12 @@ public class TemporalOBDAModel extends OBDAModel {
                              TypeFactory typeFactory, DatalogFactory datalogFactory,
                              Relation2Predicate relation2Predicate, JdbcTypeMapper jdbcTypeMapper) {
         super(specificationFactory, ppMappingFactory, owlPrefixManager, atomFactory, termFactory, typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper);
+        DATALOG_MTL_SYNTAX_PARSER = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
+        INTERVAL_QUERY_PARSER = new IntervalQueryParser(getTermFactory());
     }
 
-    public void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram){
-        prefixManager.addPrefixes(ImmutableMap.copyOf(datalogMTLProgram.getPrefixes()));
-        this.ruleList = new ArrayList<>();
-        this.ruleList.addAll(datalogMTLProgram.getRules());
-        this.base = datalogMTLProgram.getBase();
+    public void removeRule(DatalogMTLRule rule) {
+        ruleList.remove(rule);
     }
 
     public List<DatalogMTLRule> getRules() {
@@ -91,27 +105,29 @@ public class TemporalOBDAModel extends OBDAModel {
         ruleList.add(newRule);
     }
 
-    public void removeRule(DatalogMTLRule rule){
-        ruleList.remove(rule);
-    }
-
-    public DatalogMTLProgram getDatalogMTLProgram(){
+    public DatalogMTLProgram getDatalogMTLProgram() {
         Map<String, String> prefixMap = Maps.newHashMap();
         prefixManager.getPrefixMap().forEach(prefixMap::put);
         return DatalogMTLFactoryImpl.getInstance().createProgram(prefixMap, base, ruleList);
     }
 
-    public DatalogMTLRule parse(String rule) {
+    public void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram) {
+        prefixManager.addPrefixes(ImmutableMap.copyOf(datalogMTLProgram.getPrefixes()));
+        this.ruleList = new ArrayList<>();
+        this.ruleList.addAll(datalogMTLProgram.getRules());
+        this.base = datalogMTLProgram.getBase();
+    }
+
+    public DatalogMTLRule parseRule(String rule) {
         //TODO prefixes and base are added, must think about if one rule parsing is needed
         StringBuilder header = new StringBuilder();
         PrefixManager prefixManager = getMutablePrefixManager();
-        prefixManager.getPrefixMap().forEach((key,value)->{
+        prefixManager.getPrefixMap().forEach((key, value) -> {
             header.append("PREFIX ").append(key).append("\t<").append(value).append(">\n");
         });
         header.append("BASE <").append(getNamespace()).append(">\n");
-        DatalogMTLSyntaxParser datalogMTLSyntaxParser = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
-        LOGGER.info("Parsing rule:\n"+header+"\n"+rule+"\n");
-        return datalogMTLSyntaxParser.parse(header+"\n"+rule).getRules().get(0);
+        LOGGER.info("Parsing rule:\n" + header + "\n" + rule + "\n");
+        return DATALOG_MTL_SYNTAX_PARSER.parse(header + "\n" + rule).getRules().get(0);
     }
 
     public String dmtlRuleToString(DatalogMTLRule datalogMTLRule) {
@@ -146,5 +162,45 @@ public class TemporalOBDAModel extends OBDAModel {
                 .collect(collectTriplesMaps(
                         SQLPPTriplesMap::getId,
                         m -> m));
+    }
+
+    private ImmutableList<ImmutableFunctionalTerm> parseTargetQuery(String query) {
+        TargetQueryParser textParser = new TurtleOBDASQLParser(getMutablePrefixManager().getPrefixMap(),
+                getAtomFactory(), getTermFactory());
+        try {
+            return textParser.parse(query);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    public boolean insertMapping(SQLPPTemporalTriplesMap mapping, String newId, String target, String source, String interval) {
+        ImmutableList<ImmutableFunctionalTerm> targetQuery = parseTargetQuery(target);
+        if (targetQuery != null) {
+            List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, getCurrentVocabulary());
+            if (invalidPredicates.isEmpty()) {
+                try {
+                    OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
+                    TemporalMappingInterval mappingInterval = INTERVAL_QUERY_PARSER.parse(interval);
+
+                    LOGGER.info("Insert Mapping: \n" + mappingInterval + "\n" + target + "\n" + source);
+
+                    if (mapping == null) {
+                        // Case when we are creating a new mapping
+                        addTriplesMap(new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval),
+                                false);
+                    } else {
+                        triplesMapMap.remove(mapping.getId());
+                        addTriplesMap(new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval),
+                                false);
+                    }
+                } catch (DuplicateMappingException e) {
+                    //JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }

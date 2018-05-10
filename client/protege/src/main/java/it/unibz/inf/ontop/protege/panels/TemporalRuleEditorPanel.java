@@ -347,7 +347,7 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
 
     boolean addRule(int ruleIndex, String rule) {
         try {
-            DatalogMTLRule parsedRule = tobdaModel.parse(rule);
+            DatalogMTLRule parsedRule = tobdaModel.parseRule(rule);
             if (parsedRule != null) {
                 DefaultListModel<DatalogMTLRule> ruleListModel = (DefaultListModel<DatalogMTLRule>) lstRules.getModel();
                 if (ruleIndex < 0) {

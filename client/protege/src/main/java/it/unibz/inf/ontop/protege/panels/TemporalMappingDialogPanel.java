@@ -21,10 +21,8 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.protege.core.TargetQueryValidator;
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
@@ -32,11 +30,6 @@ import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
@@ -56,7 +49,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
@@ -67,7 +59,6 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 	private TemporalOBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
 
@@ -99,7 +90,7 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
 		//painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
-		cmdInsertMapping.addActionListener(this::cmdInsertMappingActionPerformed);
+		cmdInsertMapping.addActionListener(e -> insertMapping());
 
 		txtTargetQuery.addKeyListener(new TabKeyListener());
 		txtSourceQuery.addKeyListener(new TabKeyListener());
@@ -121,6 +112,37 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
 	}
 
+	private void insertMapping() {
+		releaseResultset();
+
+		final String targetQueryString = txtTargetQuery.getText();
+		final String sourceQueryString = txtSourceQuery.getText();
+		final String mappingId = txtMappingID.getText().trim();
+		final String interval = txtInterval.getText().trim();
+
+		if (mappingId.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (targetQueryString.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (sourceQueryString.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (interval.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "ERROR: The interval cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (obdaModel.insertMapping(mapping, mappingId, targetQueryString, sourceQueryString, interval)) {
+				parent.setVisible(false);
+				parent.dispose();
+		}
+		//TODO show possible errors exceptions
+	}
+
 	private class CTRLEnterKeyListener implements KeyListener {
 		@Override
 		public void keyTyped(KeyEvent e) {
@@ -130,7 +152,7 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		@Override
 		public void keyPressed(KeyEvent e) {
 			if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-				cmdInsertMappingActionPerformed(null);
+				insertMapping();
 			} else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
 				cmdTestQueryActionPerformed(null);
 			}
@@ -138,47 +160,6 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-		}
-	}
-
-	private void insertMapping(String target, String source) {
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = parse(target);
-		if (targetQuery != null) {
-			// List of invalid predicates that are found by the validator.
-			List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, obdaModel.getCurrentVocabulary());
-			if (invalidPredicates.isEmpty()) {
-				try {
-					TemporalOBDAModel mapcon = obdaModel;
-
-					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
-
-					String newId = txtMappingID.getText().trim();
-					log.info("Insert Mapping: \n"+ target + "\n" + source);
-
-					if (mapping == null) {
-						// Case when we are creating a new mapping
-						OntopNativeSQLPPTriplesMap newmapping = new OntopNativeSQLPPTriplesMap(newId, body, targetQuery);
-						mapcon.addTriplesMap(newmapping, false);
-					} else {
-						// Case when we are updating an existing mapping
-						mapcon.updateMappingsSourceQuery(mapping.getId(), body);
-						mapcon.updateTargetQueryMapping(mapping.getId(), targetQuery);
-						mapcon.updateMapping(mapping.getId(), newId);
-					}
-				} catch (DuplicateMappingException e) {
-					JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
-					return;
-				}
-				parent.setVisible(false);
-				parent.dispose();
-			}
-			else {
-                StringBuilder invalidList = new StringBuilder();
-				for (String predicate : invalidPredicates) {
-                    invalidList.append("- ").append(predicate).append("\n");
-				}
-				JOptionPane.showMessageDialog(this, "This list of predicates is unknown by the ontology: \n" + invalidList, "New Mapping", JOptionPane.WARNING_MESSAGE);
-			}
 		}
 	}
 
@@ -502,28 +483,6 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		}
 	}
 
-	private void cmdInsertMappingActionPerformed(ActionEvent e) {// GEN-FIRST:event_cmdInsertMappingActionPerformed
-
-		releaseResultset();
-
-		final String targetQueryString = txtTargetQuery.getText();
-		final String sourceQueryString = txtSourceQuery.getText();
-
-		if (txtMappingID.getText().trim().length() == 0) {
-			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (targetQueryString.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (sourceQueryString.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		insertMapping(targetQueryString, sourceQueryString);
-	}// GEN-LAST:event_cmdInsertMappingActionPerformed
-
 	private void cmdCancelActionPerformed(ActionEvent evt) {// GEN-FIRST:event_cmdCancelActionPerformed
 		parent.setVisible(false);
 		parent.dispose();
@@ -557,16 +516,6 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
     // End of variables declaration//GEN-END:variables
 
 	private SQLPPTemporalTriplesMap mapping;
-
-	private ImmutableList<ImmutableFunctionalTerm> parse(String query) {
-        TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getAtomFactory(), obdaModel.getTermFactory());
-		try {
-			return textParser.parse(query);
-		} catch (Exception e) {
-			return null;
-		}
-	}
 
 	@Override
 	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
