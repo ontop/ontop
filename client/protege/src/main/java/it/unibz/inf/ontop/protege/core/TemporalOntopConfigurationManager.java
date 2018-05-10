@@ -2,11 +2,13 @@ package it.unibz.inf.ontop.protege.core;
 
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.serializer.OntopNativeTemporalMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Optional;
 
 public class TemporalOntopConfigurationManager extends OntopConfigurationManager {
@@ -25,7 +27,7 @@ public class TemporalOntopConfigurationManager extends OntopConfigurationManager
             temporaryTemporalFile = File.createTempFile("temporal-mapping-for-configuration", ".tobda");
             new OntopNativeTemporalMappingSerializer(tobdaModel.generatePPMapping()).save(temporaryTemporalFile);
 
-            printOutMappingFile(temporaryTemporalFile);
+            //printOutMappingFile(temporaryTemporalFile);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,25 +45,18 @@ public class TemporalOntopConfigurationManager extends OntopConfigurationManager
     }
 
     private void printOutMappingFile(File temporaryTemporalFile){
-        // FileReader reads text files in the default encoding.
-        FileReader fileReader =
-                null;
+        FileReader fileReader;
         try {
             fileReader = new FileReader(temporaryTemporalFile);
-            // Always wrap FileReader in BufferedReader.
             BufferedReader bufferedReader =
                     new BufferedReader(fileReader);
 
-            String line = null;
+            String line;
             System.out.println("temporaryTemporalFile:\n");
             while((line = bufferedReader.readLine()) != null) {
                 System.out.println(line);
             }
-
-            // Always close files.
             bufferedReader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

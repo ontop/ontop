@@ -196,7 +196,7 @@ public class TemporalOBDAModel extends OBDAModel {
                                 false);
                     }
                 } catch (DuplicateMappingException e) {
-                    //JOptionPane.showMessageDialog(this, "Error while inserting mapping: " + e.getMessage() + " is already taken");
+                    LOGGER.error(e.getMessage(), e);
                     return false;
                 }
             }

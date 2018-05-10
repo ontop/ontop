@@ -19,31 +19,32 @@ import java.util.regex.Pattern;
 
 class TemporalRuleTextPane extends JTextPane {
     private static final SimpleAttributeSet variables = new SimpleAttributeSet();
+    private static final SimpleAttributeSet operators = new SimpleAttributeSet();
     private static final SimpleAttributeSet intervals = new SimpleAttributeSet();
     private static final SimpleAttributeSet braces = new SimpleAttributeSet();
     private static final SimpleAttributeSet uris = new SimpleAttributeSet();
-    private static final SimpleAttributeSet defaultFont = new SimpleAttributeSet();
     private static final Map<Pattern, AttributeSet> regexAndStyleMap = new LinkedHashMap<>();
 
     static {
-        defaultFont.addAttribute(StyleConstants.CharacterConstants.Family, "Dialog");
-        defaultFont.addAttribute(StyleConstants.CharacterConstants.Size, 12);
-        defaultFont.addAttribute(StyleConstants.CharacterConstants.Bold, false);
-
-        variables.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(199, 155, 41));
+        variables.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(0xc79b29));
         variables.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
-        uris.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(41, 119, 167));
+        operators.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(0xd0766c));
+        operators.addAttribute(StyleConstants.CharacterConstants.Bold, true);
+
+        uris.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(0x2977a7));
         uris.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
-        intervals.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(41, 167, 121));
+        intervals.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(0x29a779));
         intervals.addAttribute(StyleConstants.CharacterConstants.Bold, true);
 
         braces.addAttribute(StyleConstants.CharacterConstants.Bold, true);
         braces.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.BLACK);
 
         regexAndStyleMap.put(
-                Pattern.compile("\\?[a-zA-Z0-9]+|always in past|always in future|sometime in past|sometime in future|true|false", Pattern.CASE_INSENSITIVE), variables);
+                Pattern.compile("\\?[a-zA-Z0-9]+", Pattern.CASE_INSENSITIVE), variables);
+        regexAndStyleMap.put(
+                Pattern.compile("always in past|always in future|sometime in past|sometime in future|true|false", Pattern.CASE_INSENSITIVE), operators);
         regexAndStyleMap.put(
                 Pattern.compile("[(\\[]\\s*[a-zA-Z0-9]+\\s*,\\s*[a-zA-Z0-9]+\\s*[)\\]]", Pattern.CASE_INSENSITIVE), intervals);
         regexAndStyleMap.put(
@@ -93,20 +94,18 @@ class TemporalRuleTextPane extends JTextPane {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
-        // set background color
         if (selected) {
             setBackground(Color.LIGHT_GRAY);
-        } else {
-            setBackground(new Color(240, 245, 240));
         }
-        // set font style
-        getStyledDocument().setParagraphAttributes(0, getStyledDocument().getLength(), defaultFont, false);
     }
 
     void setRule(String datalogMTLRule, boolean selected) {
         setText(datalogMTLRule);
         setOpaque(true);
-        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, new Color(192, 192, 192), new Color(192, 192, 192).darker()));
+        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED,
+                new Color(0xc0c0c0),
+                new Color(0xc0c0c0).darker())
+        );
         stylize(selected);
     }
 

@@ -20,6 +20,7 @@
         <protege.version>5.2.0</protege.version>
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
         <commons-rdf.version>0.3.0-incubating</commons-rdf.version>
+        <jackson.version>2.9.4</jackson.version>
     </properties>
 
     <dependencies>
@@ -309,7 +310,7 @@
 
         <!-- transitive closure of commons-rdf-jena starts -->
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>3.1.1</version>
@@ -353,23 +354,23 @@
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.7.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.7.4</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.7.4</version>
+            <version>${jackson.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
             <version>0.9.3</version>
@@ -378,8 +379,8 @@
             <groupId>com.github.jsonld-java</groupId>
             <artifactId>jsonld-java</artifactId>
             <version>0.9.0</version>
-        </dependency>
-        <!-- transtiive closure of commons-rdf-jena ends -->
+        </dependency>-->
+        <!-- transitive closure of commons-rdf-jena ends -->
 
         <!-- Protege and OWLAPI bundle dependencies -->
 
@@ -679,7 +680,7 @@
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
                         <Import-Package>
-                            !org.pentaho.aggdes.*,!org.apache.tools.ant.*,!net.hydromatic,!com.yahoo.sketches.hll,!com.esri.core.geometry,
+                            !org.apache.jena.*,!org.pentaho.aggdes.*,!org.apache.tools.ant.*,!net.hydromatic,!com.yahoo.sketches.hll,!com.esri.core.geometry,
                             !org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,*
                         </Import-Package>
 
