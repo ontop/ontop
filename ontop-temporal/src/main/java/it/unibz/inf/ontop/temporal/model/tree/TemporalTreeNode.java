@@ -43,7 +43,7 @@ public class TemporalTreeNode {
 
         //TODO: move this function into where it will be used
         public TreeTraverser<TemporalTreeNode> getTreeTraverser(){
-            return TreeTraverser.using(TemporalTreeNode::getChildNodes);
+            return CustomTreeTraverser.using(TemporalTreeNode::getChildNodes);
             /*return new TreeTraverser<TemporalTreeNode>() {
                 @Override
                 public Iterable<TemporalTreeNode> children(TemporalTreeNode o) {

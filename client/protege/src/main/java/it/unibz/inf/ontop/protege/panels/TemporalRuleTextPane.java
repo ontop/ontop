@@ -26,7 +26,7 @@ class TemporalRuleTextPane extends JTextPane {
     private static final Map<Pattern, AttributeSet> regexAndStyleMap = new LinkedHashMap<>();
 
     static {
-        defaultFont.addAttribute(StyleConstants.CharacterConstants.Family, "Lucida Grande");
+        defaultFont.addAttribute(StyleConstants.CharacterConstants.Family, "Dialog");
         defaultFont.addAttribute(StyleConstants.CharacterConstants.Size, 12);
         defaultFont.addAttribute(StyleConstants.CharacterConstants.Bold, false);
 

@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.MissingTemporalIntermediateQueryNodeException;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -17,7 +15,8 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
-import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.TemporalMapping;
 import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.spec.mapping.transformer.RedundantTemporalCoalesceEliminator;
@@ -25,11 +24,14 @@ import it.unibz.inf.ontop.spec.mapping.transformer.TemporalMappingSaturator;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.mapping.impl.TemporalMappingIntervalImpl;
 import it.unibz.inf.ontop.temporal.model.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.temporal.model.tree.CustomTreeTraverser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -162,9 +164,14 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     }
 
     private ImmutableList<AtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
-        return TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
+        return CustomTreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody())
                 .filter(dMTLexp -> dMTLexp instanceof AtomicExpression)
-                .map(dMTLexp -> (AtomicExpression) dMTLexp)
-                .collect(ImmutableCollectors.toList());
+                .transform(dMTLexp -> (AtomicExpression) dMTLexp)
+                .toList();
+
+        // return TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
+        //        .filter(dMTLexp -> dMTLexp instanceof AtomicExpression)
+        //        .map(dMTLexp -> (AtomicExpression) dMTLexp)
+        //        .collect(ImmutableCollectors.toList());
     }
 }

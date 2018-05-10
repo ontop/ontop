@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
@@ -16,20 +15,17 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.TemporalQuadrupleMapping;
-import it.unibz.inf.ontop.spec.mapping.impl.IntervalAndIntermediateQuery;
 import it.unibz.inf.ontop.spec.mapping.transformer.DatalogMTLToIntermediateQueryConverter;
 import it.unibz.inf.ontop.temporal.datalog.impl.DatalogMTLConversionTools;
 import it.unibz.inf.ontop.temporal.iq.TemporalIntermediateQueryBuilder;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalCoalesceNode;
 import it.unibz.inf.ontop.temporal.iq.node.TemporalJoinNode;
-import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
 import it.unibz.inf.ontop.temporal.model.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.temporal.model.tree.CustomTreeTraverser;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToIntermediateQueryConverter{
 
@@ -49,7 +45,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
     @Override
     public IntermediateQuery dMTLToIntermediateQuery(DatalogMTLRule rule, DBMetadata temporalDBMetadata, ExecutorRegistry executorRegistry) {
 
-        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
+        TreeTraverser treeTraverser = CustomTreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.postOrderTraversal(rule.getBody());
         Stack<DatalogMTLExpression> teStack = new Stack<>();
         it.iterator().forEachRemaining(teStack::push);
@@ -116,7 +112,7 @@ public class DatalogMTLToIntermediateQueryConverterImpl implements DatalogMTLToI
     }
 
     private ImmutableSet<NonGroundTerm> extractVariablesInTheSubTree(DatalogMTLExpression root){
-        TreeTraverser treeTraverser = TreeTraverser.using(DatalogMTLExpression::getChildNodes);
+        TreeTraverser treeTraverser = CustomTreeTraverser.using(DatalogMTLExpression::getChildNodes);
         Iterable<DatalogMTLExpression> it = treeTraverser.postOrderTraversal(root);
         List<NonGroundTerm> varList = new ArrayList<>();
         for (DatalogMTLExpression expression : it) {

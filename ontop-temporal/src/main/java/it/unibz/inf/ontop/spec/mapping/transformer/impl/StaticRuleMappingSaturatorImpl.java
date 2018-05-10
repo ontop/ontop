@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.TreeTraverser;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -21,9 +23,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.reformulation.RuleUnfolder;
-import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.StaticRuleMappingSaturator;
 import it.unibz.inf.ontop.temporal.model.*;
+import it.unibz.inf.ontop.temporal.model.tree.CustomTreeTraverser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
@@ -131,12 +134,12 @@ public class StaticRuleMappingSaturatorImpl implements StaticRuleMappingSaturato
 
     private ImmutableList<StaticAtomicExpression> getAtomicExpressions(DatalogMTLRule rule) {
 
-        if (TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
+        if (CustomTreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody())
                 .allMatch(dMTLExp -> dMTLExp instanceof StaticExpression)) {
-            return TreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody()).stream()
+            return CustomTreeTraverser.using(DatalogMTLExpression::getChildNodes).postOrderTraversal(rule.getBody())
                     .filter(dMTLexp -> dMTLexp instanceof StaticAtomicExpression)
-                    .map(dMTLexp -> (StaticAtomicExpression) dMTLexp)
-                    .collect(ImmutableCollectors.toList());
+                    .transform(dMTLexp -> (StaticAtomicExpression) dMTLexp)
+                    .toList();
         }
         return null;
     }
