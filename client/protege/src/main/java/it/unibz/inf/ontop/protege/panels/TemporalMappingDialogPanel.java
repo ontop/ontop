@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
@@ -48,28 +47,27 @@ import java.sql.Statement;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
-public class TemporalMappingDialogPanel extends JPanel implements DatasourceSelectorListener {
-	private TemporalOBDAModel obdaModel;
-	private OBDADataSource dataSource;
-	private JDialog parent;
+public class TemporalMappingDialogPanel extends JPanel {
+    private final TemporalOBDAModel obdaModel;
+    private final JDialog parent;
 
-	private PrefixManager prefixManager;
+    private final PrefixManager prefixManager;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private JButton btnTestQuery;
 
-	public TemporalMappingDialogPanel(TemporalOBDAModel obdaModel, JDialog parent, OBDADataSource dataSource) {
+    TemporalMappingDialogPanel(TemporalOBDAModel obdaModel, JDialog parent) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
 		this.parent = parent;
-		this.dataSource = dataSource;
 
 		prefixManager = obdaModel.getMutablePrefixManager();
 
 		initComponents();
 
 		//cmdInsertMapping.setEnabled(false);
-		QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
+        //QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
 		//painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
 		cmdInsertMapping.addActionListener(e -> insertMapping());
@@ -82,13 +80,13 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		txtSourceQuery.addKeyListener(new CTRLEnterKeyListener());
 		txtMappingID.addKeyListener(new CTRLEnterKeyListener());
 
-		cmdTestQuery.setFocusable(true);
-		Vector<Component> order = new Vector<Component>(8);
+        btnTestQuery.setFocusable(true);
+        Vector<Component> order = new Vector<>(8);
 		order.add(this.txtMappingID);
 		order.add(this.txtTargetQuery);
 		order.add(this.txtInterval);
 		order.add(this.txtSourceQuery);
-		order.add(this.cmdTestQuery);
+        order.add(this.btnTestQuery);
 		order.add(this.cmdInsertMapping);
 		order.add(this.cmdCancel);
 		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
@@ -118,42 +116,106 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 			JOptionPane.showMessageDialog(this, "ERROR: The interval cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		if (obdaModel.insertMapping(mapping, mappingId, targetQueryString, sourceQueryString, interval)) {
-				parent.setVisible(false);
-				parent.dispose();
-		}
-		//TODO show possible errors exceptions
-	}
+        try {
+            if (obdaModel.insertMapping(mapping, mappingId, targetQueryString, sourceQueryString, interval)) {
+                parent.setVisible(false);
+                parent.dispose();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            JOptionPane.showMessageDialog(this, "ERROR: An error occured when saving the mapping:" + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void testQueryActionPerformed() {
+        releaseResultset();
+
+        OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
+        CountDownLatch latch = new CountDownLatch(1);
+        ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
+        progMonitor.addProgressListener(action);
+        progMonitor.start();
+        try {
+            action.run();
+            latch.await();
+            progMonitor.stop();
+            ResultSet set = action.getResult();
+            if (set != null) {
+                ResultSetTableModel model = new ResultSetTableModel(set);
+                tblQueryResult.setModel(model);
+                scrQueryResult.getParent().revalidate();
+
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void releaseResultset() {
+        TableModel model = tblQueryResult.getModel();
+        if (model == null)
+            return;
+        if (!(model instanceof IncrementalResultSetTableModel))
+            return;
+        IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
+        imodel.close();
+    }
+
+    private void cmdCancelActionPerformed() {
+        parent.setVisible(false);
+        parent.dispose();
+        releaseResultset();
+    }
+
+    private class CTRLEnterKeyListener implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent e) {
+            // NO-OP
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
+                insertMapping();
+            } else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
+                testQueryActionPerformed();
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+    }
 
     private void initComponents() {
         GridBagConstraints gridBagConstraints;
 
-        lblMappingID = new JLabel();
-        pnlTestButton = new JPanel();
-        cmdTestQuery = new JButton();
-        lblTestQuery = new JLabel();
-        pnlCommandButton = new JPanel();
+        JLabel lblMappingID = new JLabel();
+        JPanel pnlTestButton = new JPanel();
+        btnTestQuery = new JButton();
+        JLabel lblTestQuery = new JLabel();
+        JPanel pnlCommandButton = new JPanel();
         cmdInsertMapping = new JButton();
         cmdCancel = new JButton();
         txtMappingID = new JTextField();
-        splitTargetSource = new JSplitPane();
-        pnlTargetQueryEditor = new JPanel();
-        lblTargetQuery = new JLabel();
-        scrTargetQuery = new JScrollPane();
+        JSplitPane splitTargetSource = new JSplitPane();
+        JPanel pnlTargetQueryEditor = new JPanel();
+        JLabel lblTargetQuery = new JLabel();
+        JScrollPane scrTargetQuery = new JScrollPane();
         txtTargetQuery = new JTextPane();
-        splitSQL = new JSplitPane();
-        pnlSourceQueryEditor = new JPanel();
-        lblInterval = new JLabel();
+        JSplitPane splitSQL = new JSplitPane();
+        JPanel pnlSourceQueryEditor = new JPanel();
+        JLabel lblInterval = new JLabel();
 		txtInterval = new JTextField();
-        lblSourceQuery = new JLabel();
-        scrSourceQuery = new JScrollPane();
+        JLabel lblSourceQuery = new JLabel();
+        JScrollPane scrSourceQuery = new JScrollPane();
         txtSourceQuery = new JTextPane();
-        pnlQueryResult = new JPanel();
+        JPanel pnlQueryResult = new JPanel();
         scrQueryResult = new JScrollPane();
         tblQueryResult = new JTable();
 
         setFocusable(false);
-        setMinimumSize(new Dimension(600, 500));
         setPreferredSize(new Dimension(600, 500));
         setLayout(new GridBagLayout());
 
@@ -171,19 +233,17 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 		gridBagConstraints.gridy = 1;
 		add(lblInterval, gridBagConstraints);
 
-        cmdTestQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
-        cmdTestQuery.setMnemonic('t');
-        cmdTestQuery.setText("Test SQL Query");
-        cmdTestQuery.setToolTipText("Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
-        cmdTestQuery.setActionCommand("Test SQL query");
-        cmdTestQuery.setBorder(BorderFactory.createEtchedBorder());
-        cmdTestQuery.setContentAreaFilled(false);
-        cmdTestQuery.setIconTextGap(5);
-        cmdTestQuery.setMaximumSize(new Dimension(115, 25));
-        cmdTestQuery.setMinimumSize(new Dimension(115, 25));
-        cmdTestQuery.setPreferredSize(new Dimension(115, 25));
-        cmdTestQuery.addActionListener(e -> testQueryActionPerformed());
-        pnlTestButton.add(cmdTestQuery);
+        btnTestQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
+        btnTestQuery.setMnemonic('t');
+        btnTestQuery.setText("Test SQL Query");
+        btnTestQuery.setToolTipText("Execute the SQL query in the SQL query text pane\nand display the first 100 results in the table.");
+        btnTestQuery.setActionCommand("Test SQL query");
+        btnTestQuery.setBorder(BorderFactory.createEtchedBorder());
+        btnTestQuery.setContentAreaFilled(false);
+        btnTestQuery.setIconTextGap(5);
+        btnTestQuery.setPreferredSize(new Dimension(115, 25));
+        btnTestQuery.addActionListener(e -> testQueryActionPerformed());
+        pnlTestButton.add(btnTestQuery);
 
         lblTestQuery.setText("(100 rows)");
         pnlTestButton.add(lblTestQuery);
@@ -238,12 +298,10 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
         splitTargetSource.setResizeWeight(0.5);
         splitTargetSource.setDoubleBuffered(true);
         splitTargetSource.setFocusable(false);
-        splitTargetSource.setMinimumSize(new Dimension(600, 430));
         splitTargetSource.setOneTouchExpandable(true);
         splitTargetSource.setPreferredSize(new Dimension(600, 430));
 
         pnlTargetQueryEditor.setFocusable(false);
-        pnlTargetQueryEditor.setMinimumSize(new Dimension(600, 180));
         pnlTargetQueryEditor.setPreferredSize(new Dimension(600, 180));
         pnlTargetQueryEditor.setLayout(new BorderLayout());
 
@@ -252,11 +310,9 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
         pnlTargetQueryEditor.add(lblTargetQuery, BorderLayout.NORTH);
 
         scrTargetQuery.setFocusable(false);
-        scrTargetQuery.setMinimumSize(new Dimension(600, 170));
         scrTargetQuery.setPreferredSize(new Dimension(600, 170));
 
         txtTargetQuery.setFocusCycleRoot(false);
-        txtTargetQuery.setMinimumSize(new Dimension(600, 170));
         txtTargetQuery.setPreferredSize(new Dimension(600, 170));
         scrTargetQuery.setViewportView(txtTargetQuery);
 
@@ -268,12 +324,10 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
         splitSQL.setOrientation(JSplitPane.VERTICAL_SPLIT);
         splitSQL.setResizeWeight(0.8);
         splitSQL.setFocusable(false);
-        splitSQL.setMinimumSize(new Dimension(600, 280));
         splitSQL.setOneTouchExpandable(true);
         splitSQL.setPreferredSize(new Dimension(600, 280));
 
         pnlSourceQueryEditor.setFocusable(false);
-        pnlSourceQueryEditor.setMinimumSize(new Dimension(600, 150));
         pnlSourceQueryEditor.setPreferredSize(new Dimension(600, 150));
         pnlSourceQueryEditor.setLayout(new BorderLayout());
 
@@ -291,14 +345,13 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
         splitSQL.setTopComponent(pnlSourceQueryEditor);
 
         pnlQueryResult.setFocusable(false);
-        pnlQueryResult.setMinimumSize(new Dimension(600, 120));
         pnlQueryResult.setPreferredSize(new Dimension(600, 120));
         pnlQueryResult.setLayout(new BorderLayout());
 
         scrQueryResult.setFocusable(false);
         scrQueryResult.setPreferredSize(new Dimension(454, 70));
 
-        tblQueryResult.setMinimumSize(new Dimension(600, 180));
+        tblQueryResult.setPreferredSize(new Dimension(600, 180));
         scrQueryResult.setViewportView(tblQueryResult);
 
         pnlQueryResult.add(scrQueryResult, BorderLayout.CENTER);
@@ -321,72 +374,15 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
         getAccessibleContext().setAccessibleName("Mapping editor");
     }
 
-    private void testQueryActionPerformed() {
-		releaseResultset();
-
-		OBDAProgressMonitor progMonitor = new OBDAProgressMonitor("Executing query...", this);
-		CountDownLatch latch = new CountDownLatch(1);
-		ExecuteSQLQueryAction action = new ExecuteSQLQueryAction(latch);
-		progMonitor.addProgressListener(action);
-		progMonitor.start();
-		try {
-			action.run();
-			latch.await();
-			progMonitor.stop();
-			ResultSet set = action.getResult();
-			if (set != null) {
-				ResultSetTableModel model = new ResultSetTableModel(set);
-				tblQueryResult.setModel(model);
-				scrQueryResult.getParent().revalidate();
-
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}
-    }
-
-    private void releaseResultset() {
-        TableModel model = tblQueryResult.getModel();
-        if (model == null)
-            return;
-        if (!(model instanceof IncrementalResultSetTableModel))
-            return;
-        IncrementalResultSetTableModel imodel = (IncrementalResultSetTableModel) model;
-        imodel.close();
-    }
-
-    private void cmdCancelActionPerformed() {
-        parent.setVisible(false);
-        parent.dispose();
-        releaseResultset();
-    }
-
-    private class CTRLEnterKeyListener implements KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // NO-OP
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-                insertMapping();
-            } else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
-                testQueryActionPerformed();
-            }
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-        }
-    }
+    private JButton cmdCancel;
+    private JButton cmdInsertMapping;
 
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
 
-        CountDownLatch latch;
+        final CountDownLatch latch;
 		Thread thread = null;
 		ResultSet result = null;
-		Statement statement = null;
+        final Statement statement = null;
 		private boolean isCancelled = false;
 		private boolean errorShown = false;
 
@@ -408,32 +404,30 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 			latch.countDown();
 		}
 
-		public ResultSet getResult() {
+        ResultSet getResult() {
 			return result;
 		}
 
-		public void run() {
-			thread = new Thread() {
-				public void run() {
-					try {
-						TableModel oldmodel = tblQueryResult.getModel();
+        void run() {
+            thread = new Thread(() -> {
+                try {
+                    TableModel oldmodel = tblQueryResult.getModel();
 
-						if ((oldmodel != null) && (oldmodel instanceof ResultSetTableModel)) {
-							ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
-							rstm.close();
-						}
-						Connection c = ConnectionTools.getConnection(dataSource);
-						Statement st = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-						st.setMaxRows(100);
-						result = st.executeQuery(txtSourceQuery.getText().trim());
-						latch.countDown();
-					} catch (Exception e) {
-						latch.countDown();
-						DialogUtils.showQuickErrorDialog(getRootPane(), e);
-						errorShown = true;
-					}
-				}
-			};
+                    if ((oldmodel instanceof ResultSetTableModel)) {
+                        ResultSetTableModel rstm = (ResultSetTableModel) oldmodel;
+                        rstm.close();
+                    }
+                    Connection c = ConnectionTools.getConnection(obdaModel.getDatasource());
+                    Statement st = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    st.setMaxRows(100);
+                    result = st.executeQuery(txtSourceQuery.getText().trim());
+                    latch.countDown();
+                } catch (Exception e) {
+                    latch.countDown();
+                    DialogUtils.showQuickErrorDialog(getRootPane(), e);
+                    errorShown = true;
+                }
+            });
 			thread.start();
 		}
 
@@ -447,25 +441,7 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
 			return this.errorShown;
 		}
 	}
-
-    private JButton cmdCancel;
-    private JButton cmdInsertMapping;
-    private JButton cmdTestQuery;
-    private JLabel lblMappingID;
-    private JLabel lblSourceQuery;
-    private JLabel lblInterval;
-    private JLabel lblTargetQuery;
-    private JLabel lblTestQuery;
-    private JPanel pnlCommandButton;
-    private JPanel pnlQueryResult;
-    private JPanel pnlSourceQueryEditor;
-    private JPanel pnlTargetQueryEditor;
-    private JPanel pnlTestButton;
     private JScrollPane scrQueryResult;
-    private JScrollPane scrSourceQuery;
-    private JScrollPane scrTargetQuery;
-    private JSplitPane splitSQL;
-    private JSplitPane splitTargetSource;
     private JTable tblQueryResult;
     private JTextField txtMappingID;
     private JTextPane txtSourceQuery;
@@ -473,11 +449,6 @@ public class TemporalMappingDialogPanel extends JPanel implements DatasourceSele
     private JTextField txtInterval;
 
 	private SQLPPTemporalTriplesMap mapping;
-
-	@Override
-	public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-		dataSource = newSource;
-	}
 
 	public void setID(String id) {
 		this.txtMappingID.setText(id);

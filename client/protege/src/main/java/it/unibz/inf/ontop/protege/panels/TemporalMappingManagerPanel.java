@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.protege.panels;
 
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialConfiguration;
-import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.dialogs.MappingValidationDialog;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -50,7 +49,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemporalMappingManagerPanel extends JPanel implements DatasourceSelectorListener, EditorPanel {
+public class TemporalMappingManagerPanel extends JPanel implements EditorPanel {
 
     private static final long serialVersionUID = -486013653814714526L;
 
@@ -58,9 +57,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
 
     private SQLSourceQueryValidator validator;
 
-    private TemporalOBDAModel apic;
-
-    private OBDADataSource selectedSource;
+    private TemporalOBDAModel temporalOBDAModel;
 
     private boolean canceled;
 
@@ -69,17 +66,12 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
     private JList<SQLPPTemporalTriplesMap> mappingList;
     private JTextField txtFilter;
 
-    /**
-     * Creates a new panel.
-     *
-     * @param apic The API controller object.
-     */
-    public TemporalMappingManagerPanel(TemporalOBDAModel apic) {
+    public TemporalMappingManagerPanel(TemporalOBDAModel _temporalOBDAModel) {
+        temporalOBDAModel = _temporalOBDAModel;
 
         initComponents();
 
-        // Setting up the mappings tree
-        mappingList.setCellRenderer(new OBDAMappingListRenderer(apic));
+        mappingList.setCellRenderer(new OBDAMappingListRenderer(temporalOBDAModel));
         mappingList.setFixedCellWidth(-1);
         mappingList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         mappingList.addMouseListener(new PopupListener(createPopupMenu()));
@@ -94,17 +86,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
             }
         });
 
-        setOBDAModel(apic); // TODO Bad code! Change this later!
-    }
-
-    public OBDADataSource getSelectedSource() {
-        return selectedSource;
-    }
-
-    private void setOBDAModel(TemporalOBDAModel omodel) {
-
-        this.apic = omodel;
-        ListModel model = new SynchronizedMappingListModel(omodel);
+        ListModel model = new SynchronizedMappingListModel(temporalOBDAModel);
 
         model.addListDataListener(new ListDataListener() {
             @Override
@@ -167,7 +149,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
         dialog.setTitle("Edit Mapping");
         dialog.setModal(true);
 
-        TemporalMappingDialogPanel panel = new TemporalMappingDialogPanel(apic, dialog, selectedSource);
+        TemporalMappingDialogPanel panel = new TemporalMappingDialogPanel(temporalOBDAModel, dialog);
         panel.setMapping(mapping);
         dialog.setContentPane(panel);
         dialog.setSize(600, 500);
@@ -392,7 +374,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
                 String id = o.getId();
                 outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
                 OntopSQLCredentialConfiguration config = OntopSQLCredentialConfiguration.defaultBuilder()
-                        .properties(DataSource2PropertiesConvertor.convert(selectedSource))
+                        .properties(DataSource2PropertiesConvertor.convert(temporalOBDAModel.getDatasource()))
                         .build();
                 validator = new SQLSourceQueryValidator(config.getSettings(), o.getSourceQuery());
                 long timestart = System.nanoTime();
@@ -458,7 +440,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
         }
         final String sqlQuery = mapping.getSourceQuery().toString();
 
-        SQLQueryPanel pnlQueryResult = new SQLQueryPanel(selectedSource, sqlQuery);
+        SQLQueryPanel pnlQueryResult = new SQLQueryPanel(temporalOBDAModel.getDatasource(), sqlQuery);
 
         JDialog dlgQueryResult = new JDialog();
         DialogUtils.installEscapeCloseOperation(dlgQueryResult);
@@ -485,8 +467,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
         if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
             return;
         }
-        TemporalOBDAModel controller = apic;
-        URI current_srcuri = selectedSource.getSourceID();
+        URI current_srcuri = temporalOBDAModel.getDatasource().getSourceID();
 
         for (SQLPPTemporalTriplesMap mapping : currentSelection) {
             String id = mapping.getId();
@@ -494,7 +475,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
             // Computing the next available ID
             int new_index = -1;
             for (int index = 0; index < 999999999; index++) {
-                if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+                if (temporalOBDAModel.indexOf(id + "(" + index + ")") == -1) {
                     new_index = index;
                     break;
                 }
@@ -504,10 +485,10 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
             // inserting the new mapping
             try {
 
-                SQLPPTemporalTriplesMap oldmapping = (SQLPPTemporalTriplesMap) controller.getTriplesMap(id);
+                SQLPPTemporalTriplesMap oldmapping = (SQLPPTemporalTriplesMap) temporalOBDAModel.getTriplesMap(id);
                 SQLPPTemporalTriplesMap newmapping = new SQLPPTemporalTriplesMapImpl(newId, oldmapping.getSourceQuery(),
                         oldmapping.getTargetAtoms(), oldmapping.getTemporalMappingInterval());
-                controller.addTriplesMap(current_srcuri, newmapping, false);
+                temporalOBDAModel.addTriplesMap(current_srcuri, newmapping, false);
 
             } catch (DuplicateMappingException e) {
                 JOptionPane.showMessageDialog(this, "Duplicate Mapping: " + newId);
@@ -532,19 +513,18 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
 
         List<SQLPPTemporalTriplesMap> values = mappingList.getSelectedValuesList();
 
-        TemporalOBDAModel controller = apic;
-        URI srcuri = selectedSource.getSourceID();
+        URI srcuri = temporalOBDAModel.getDatasource().getSourceID();
 
         for (SQLPPTemporalTriplesMap mapping : values) {
             if (mapping != null) {
-                controller.removeTriplesMap(srcuri, mapping.getId());
+                temporalOBDAModel.removeTriplesMap(srcuri, mapping.getId());
             }
         }
         mappingList.clearSelection();
     }
 
     private void cmdAddMappingActionPerformed() {
-        if (selectedSource != null) {
+        if (temporalOBDAModel.getDatasource() != null) {
             add();
         } else {
             JOptionPane.showMessageDialog(this, "Select a data source to proceed", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -559,7 +539,7 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
         dialog.setTitle("New Mapping");
         dialog.setModal(true);
 
-        TemporalMappingDialogPanel panel = new TemporalMappingDialogPanel(apic, dialog, selectedSource);
+        TemporalMappingDialogPanel panel = new TemporalMappingDialogPanel(temporalOBDAModel, dialog);
         panel.setID(id);
         dialog.setContentPane(panel);
         dialog.setSize(600, 500);
@@ -609,20 +589,11 @@ public class TemporalMappingManagerPanel extends JPanel implements DatasourceSel
         model.addFilters(filters);
     }
 
-    @Override
-    public void datasourceChanged(OBDADataSource oldSource, OBDADataSource newSource) {
-
-        if (newSource == null) {
-            return;
-        }
-        this.selectedSource = newSource;
-
-        // Update the mapping tree.
+    public void updateModel(TemporalOBDAModel temporalOBDAModel) {
+        this.temporalOBDAModel = temporalOBDAModel;
         SynchronizedMappingListModel model = (SynchronizedMappingListModel) mappingList.getModel();
-        model.setFocusedSource(newSource.getSourceID());
-
+        model.setFocusedSource(temporalOBDAModel.getSourceId());
         mappingList.revalidate();
-
     }
 
 

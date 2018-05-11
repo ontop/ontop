@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.panels.MappingAssistantPanel;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
     @Override
     protected void initialiseOWLView() throws Exception {
 
-        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
+        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelManager.class.getName());
         obdaModelManager.addListener(this);
 
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();

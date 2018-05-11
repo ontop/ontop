@@ -40,7 +40,7 @@ public class SynchronizedMappingListModel extends AbstractListModel implements F
 	public SynchronizedMappingListModel(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
-		filters = new LinkedList<TreeModelFilter<SQLPPTriplesMap>>();
+        filters = new LinkedList<>();
 	}
 
 	public void setFocusedSource(URI source) {

@@ -20,13 +20,11 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
-import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.panels.MappingManagerPanel;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.owlapi.model.OWLEntity;
@@ -39,11 +37,11 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	private static final long serialVersionUID = 1790921396564256165L;
 
-	OBDAModelManager controller = null;
+	private OBDAModelManager controller = null;
 
-	OBDAModel obdaModel;
+	private OBDAModel obdaModel;
 
-	MappingManagerPanel mappingPanel = null;
+	private MappingManagerPanel mappingPanel = null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -56,7 +54,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Retrieve the editor kit.
 		final OWLEditorKit editor = getOWLEditorKit();
 
-		controller = (OBDAModelManager) editor.get(SQLPPMappingImpl.class.getName());
+		controller = (OBDAModelManager) editor.get(OBDAModelManager.class.getName());
 		controller.addListener(this);
 
 		obdaModel = controller.getActiveOBDAModel();
@@ -64,22 +62,19 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(obdaModel);
 
-		editor.getOWLWorkspace().getOWLSelectionModel().addListener(new OWLSelectionModelListener() {
-			@Override
-			public void selectionChanged() throws Exception {
-				OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
-				if (entity == null)
-					return;
-				if (!entity.isTopEntity()) {
-					String shortf = entity.getIRI().getFragment();
-					if (shortf == null) {
-						String iri = entity.getIRI().toString();
-						shortf = iri.substring(iri.lastIndexOf("/"));
-					}
-					mappingPanel.setFilter("pred:" + shortf);
-				} else {
-					mappingPanel.setFilter("");
+		editor.getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
+			OWLEntity entity = editor.getOWLWorkspace().getOWLSelectionModel().getSelectedEntity();
+			if (entity == null)
+				return;
+			if (!entity.isTopEntity()) {
+				String shortf = entity.getIRI().getFragment();
+				if (shortf == null) {
+					String iri = entity.getIRI().toString();
+					shortf = iri.substring(iri.lastIndexOf("/"));
 				}
+				mappingPanel.setFilter("pred:" + shortf);
+			} else {
+				mappingPanel.setFilter("");
 			}
 		});
 		if (obdaModel.getSources().size() > 0) {

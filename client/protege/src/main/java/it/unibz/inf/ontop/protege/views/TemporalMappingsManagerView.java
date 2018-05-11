@@ -20,9 +20,10 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.protege.core.*;
+import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
+import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
+import it.unibz.inf.ontop.protege.core.TemporalOBDAModelManager;
 import it.unibz.inf.ontop.protege.panels.TemporalMappingManagerPanel;
-import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLEntity;
 
@@ -30,9 +31,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class TemporalMappingsManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
-	TemporalOBDAModelManager controller = null;
-	TemporalOBDAModel obdaModel;
-	TemporalMappingManagerPanel mappingPanel = null;
+	private TemporalOBDAModelManager controller = null;
+	private TemporalMappingManagerPanel mappingPanel = null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -44,9 +44,8 @@ public class TemporalMappingsManagerView extends AbstractOWLViewComponent implem
 		controller = (TemporalOBDAModelManager) getOWLEditorKit().get(TemporalOBDAModelManager.class.getName());
 		controller.addListener(this);
 
-		obdaModel = controller.getActiveOBDAModel();
+		TemporalOBDAModel obdaModel = controller.getActiveOBDAModel();
 
-		// Init the Mapping Manager panel.
 		mappingPanel = new TemporalMappingManagerPanel(obdaModel);
 
 		getOWLEditorKit().getOWLWorkspace().getOWLSelectionModel().addListener(() -> {
@@ -64,12 +63,10 @@ public class TemporalMappingsManagerView extends AbstractOWLViewComponent implem
 				mappingPanel.setFilter("");
 			}
 		});
-		if (obdaModel.getSources().size() > 0) {
-			mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
-		}
-
 		mappingPanel.setBorder(new TitledBorder("Temporal Mapping Manager"));
-
+		if (obdaModel.getSources().size() > 0) {
+			mappingPanel.updateModel(obdaModel);
+		}
 		setLayout(new BorderLayout());
         add(mappingPanel, BorderLayout.CENTER);
 
@@ -77,7 +74,6 @@ public class TemporalMappingsManagerView extends AbstractOWLViewComponent implem
 
 	@Override
 	public void activeOntologyChanged() {
-		obdaModel = controller.getActiveOBDAModel();
-		mappingPanel.datasourceChanged(mappingPanel.getSelectedSource(), obdaModel.getSources().get(0));
+		mappingPanel.updateModel(controller.getActiveOBDAModel());
 	}
 }

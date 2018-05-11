@@ -23,7 +23,6 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
-import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -77,12 +76,12 @@ public class TemporalOBDAModel extends OBDAModel {
     private final IntervalQueryParser INTERVAL_QUERY_PARSER;
 
 
-    public TemporalOBDAModel(SpecificationFactory specificationFactory,
-                             SQLPPMappingFactory ppMappingFactory,
-                             PrefixDocumentFormat owlPrefixManager,
-                             AtomFactory atomFactory, TermFactory termFactory,
-                             TypeFactory typeFactory, DatalogFactory datalogFactory,
-                             Relation2Predicate relation2Predicate, JdbcTypeMapper jdbcTypeMapper) {
+    TemporalOBDAModel(SpecificationFactory specificationFactory,
+                      SQLPPMappingFactory ppMappingFactory,
+                      PrefixDocumentFormat owlPrefixManager,
+                      AtomFactory atomFactory, TermFactory termFactory,
+                      TypeFactory typeFactory, DatalogFactory datalogFactory,
+                      Relation2Predicate relation2Predicate, JdbcTypeMapper jdbcTypeMapper) {
         super(specificationFactory, ppMappingFactory, owlPrefixManager, atomFactory, termFactory, typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper);
         DATALOG_MTL_SYNTAX_PARSER = new DatalogMTLSyntaxParserImpl(getAtomFactory(), getTermFactory());
         INTERVAL_QUERY_PARSER = new IntervalQueryParser(getTermFactory());
@@ -105,13 +104,13 @@ public class TemporalOBDAModel extends OBDAModel {
         ruleList.add(newRule);
     }
 
-    public DatalogMTLProgram getDatalogMTLProgram() {
+    DatalogMTLProgram getDatalogMTLProgram() {
         Map<String, String> prefixMap = Maps.newHashMap();
         prefixManager.getPrefixMap().forEach(prefixMap::put);
         return DatalogMTLFactoryImpl.getInstance().createProgram(prefixMap, base, ruleList);
     }
 
-    public void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram) {
+    void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram) {
         prefixManager.addPrefixes(ImmutableMap.copyOf(datalogMTLProgram.getPrefixes()));
         this.ruleList = new ArrayList<>();
         this.ruleList.addAll(datalogMTLProgram.getRules());
@@ -146,7 +145,7 @@ public class TemporalOBDAModel extends OBDAModel {
         return base;
     }
 
-    public void parseMapping(File mappingFile, Properties properties) throws DuplicateMappingException,
+    void parseMapping(File mappingFile, Properties properties) throws DuplicateMappingException,
             InvalidMappingException, MappingIOException {
 
         OntopTemporalMappingSQLAllConfiguration configuration = OntopTemporalMappingSQLAllConfiguration.defaultBuilder()
@@ -164,43 +163,26 @@ public class TemporalOBDAModel extends OBDAModel {
                         m -> m));
     }
 
-    private ImmutableList<ImmutableFunctionalTerm> parseTargetQuery(String query) {
-        TargetQueryParser textParser = new TurtleOBDASQLParser(getMutablePrefixManager().getPrefixMap(),
-                getAtomFactory(), getTermFactory());
-        try {
-            return textParser.parse(query);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-
-    public boolean insertMapping(SQLPPTemporalTriplesMap mapping, String newId, String target, String source, String interval) {
-        ImmutableList<ImmutableFunctionalTerm> targetQuery = parseTargetQuery(target);
+    public boolean insertMapping(SQLPPTemporalTriplesMap mapping, String newId, String target, String source, String interval) throws Exception {
+        ImmutableList<ImmutableFunctionalTerm> targetQuery = new TurtleOBDASQLParser(getMutablePrefixManager().getPrefixMap(),
+                getAtomFactory(), getTermFactory()).parse(target);
         if (targetQuery != null) {
-            List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, getCurrentVocabulary());
-            if (invalidPredicates.isEmpty()) {
-                try {
-                    OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
-                    TemporalMappingInterval mappingInterval = INTERVAL_QUERY_PARSER.parse(interval);
+            //List<String> invalidPredicates = TargetQueryValidator.validate(targetQuery, getCurrentVocabulary());
+            //if (invalidPredicates.isEmpty()) {
+            OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
+            TemporalMappingInterval mappingInterval = INTERVAL_QUERY_PARSER.parse(interval);
 
-                    LOGGER.info("Insert Mapping: \n" + mappingInterval + "\n" + target + "\n" + source);
+            LOGGER.info("Inserting Mapping: \n" + mappingInterval + "\n" + target + "\n" + source);
 
-                    if (mapping == null) {
-                        // Case when we are creating a new mapping
-                        addTriplesMap(new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval),
-                                false);
-                    } else {
-                        triplesMapMap.remove(mapping.getId());
-                        addTriplesMap(new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval),
-                                false);
-                    }
-                } catch (DuplicateMappingException e) {
-                    LOGGER.error(e.getMessage(), e);
-                    return false;
-                }
+            if (mapping == null) {
+                addTriplesMap(new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval),
+                        false);
+            } else {
+                triplesMapMap.put(mapping.getId(), new SQLPPTemporalTriplesMapImpl(newId, body, targetQuery, mappingInterval));
             }
+            return true;
         }
-        return false;
+        //}
+        throw new NullPointerException("targetQuery is null");
     }
 }

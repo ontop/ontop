@@ -103,12 +103,8 @@ public class OBDAModel {
 
         this.sourceListeners = new ArrayList<>();
         this.mappingListeners = new ArrayList<>();
-        source = initDataSource();
+        source = DS_FACTORY.getJDBCDataSource("", "", "", "");
         currentMutableVocabulary = new MutableOntologyVocabularyImpl(atomFactory);
-    }
-
-    private static OBDADataSource initDataSource() {
-        return DS_FACTORY.getJDBCDataSource("","","","");
     }
 
     public SQLPPMapping generatePPMapping() {
@@ -299,7 +295,7 @@ public class OBDAModel {
             return formerTriplesMap;
     }
 
-    URI getSourceId() {
+    public URI getSourceId() {
         return source.getSourceID();
     }
 
@@ -400,7 +396,7 @@ public class OBDAModel {
         }
     }
 
-    public int indexOf(URI currentSource, String mappingId) {
+    public int indexOf(String mappingId) {
         ImmutableList<SQLPPTriplesMap> sourceMappings = ImmutableList.copyOf(triplesMapMap.values());
         if (sourceMappings == null) {
             return -1;

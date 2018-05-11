@@ -20,15 +20,13 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanel;
 import it.unibz.inf.ontop.protege.panels.SavedQueriesPanelListener;
-
-import java.awt.BorderLayout;
-
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
+
+import java.awt.*;
 
 public class QueryManagerView extends AbstractOWLViewComponent implements OBDAModelManagerListener {
 
@@ -50,7 +48,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
+        obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelManager.class.getName());
 		obdaController.addListener(this);
 
 		setLayout(new BorderLayout());

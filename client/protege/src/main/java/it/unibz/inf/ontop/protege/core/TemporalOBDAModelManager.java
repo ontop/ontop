@@ -33,12 +33,10 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.spec.datalogmtl.parser.impl.DatalogMTLSyntaxParserImpl;
 import it.unibz.inf.ontop.spec.mapping.serializer.OntopNativeTemporalMappingSerializer;
-import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import org.protege.editor.core.ui.util.UIUtil;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
-import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -49,10 +47,8 @@ import java.io.IOException;
 import java.net.URI;
 
 public class TemporalOBDAModelManager extends OBDAModelManager {
-    private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
-    // The temporal OBDA file extension
+    private static final Logger log = LoggerFactory.getLogger(TemporalOBDAModelManager.class);
     private static final String TOBDA_EXT = ".tobda";
-    // The temporal rules file extension
     private static final String RULE_EXT = ".dmtl";
 
     TemporalOBDAModelManager(OWLEditorKit owlEditorKit) {
@@ -78,21 +74,33 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
 
         updateModelManagerListener(new OBDAPluginTemporalOWLModelManagerListener());
 
-        owlEditorKit.getModelManager().getOWLOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
-
-        PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(owlEditorKit.getModelManager().getActiveOntology());
+        owlEditorKit.getModelManager().getOWLOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener(owlEditorKit, this));
 
         setActiveModel(new TemporalOBDAModel(specificationFactory, ppMappingFactory,
                 PrefixUtilities.getPrefixOWLOntologyFormat(owlEditorKit.getModelManager().getActiveOntology()),
                 atomFactory, termFactory, typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper)
         );
 
-        setConfigurationManager(new TemporalOntopConfigurationManager(
+        setConfigurationManager(new TemporalOntopConfigurationManager(getActiveOBDAModel(),
                 ((OBDAModelManager) owlEditorKit.get(OBDAModelManager.class.getName())).getActiveOBDAModel(),
-                getActiveOBDAModel(),
                 (DisposableProperties) owlEditorKit.get(DisposableProperties.class.getName())));
-    }
 
+        // FIX for classloding problems in janino compiler
+        // Calcite uses janino compiler and janino compiler tries to create a CompilerFactor in CompilerFactoryFactory class
+        // using the following line:
+        //
+        // Thread.currentThread().getContextClassLoader().loadClass(compilerFactoryClassName).newInstance()
+        //
+        // unfortunately osgi/felix doesn't work (well) with current thread context class loader.
+        //
+        // References:
+        //      http://apache-felix.18485.x6.nabble.com/Can-the-thread-context-classloader-issue-be-solved-at-all-td4835872.html
+        //      https://helpx.adobe.com/experience-manager/kb/OsgiClassLoading3Party.html
+        //      https://stackoverflow.com/a/20336267
+        //
+        // for this reason, we need to overcome classnotfound exception by setting the current thread's class loader:
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+    }
 
     public TemporalOBDAModel getActiveOBDAModel() {
         return (TemporalOBDAModel) super.getActiveOBDAModel();
@@ -205,5 +213,4 @@ public class TemporalOBDAModelManager extends OBDAModelManager {
             }
         }
     }
-
 }

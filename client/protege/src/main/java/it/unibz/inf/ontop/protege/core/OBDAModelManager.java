@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.core;
  * #L%
  */
 
-import com.google.common.base.Optional;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
@@ -32,7 +31,6 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -53,19 +51,20 @@ import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
-import org.semanticweb.owlapi.change.AddImportData;
-import org.semanticweb.owlapi.change.RemoveImportData;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 public class OBDAModelManager implements Disposable {
+    private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	private static final String OBDA_EXT = ".obda"; // The default OBDA file extension.
 	private static final String QUERY_EXT = ".q"; // The default query file extension.
@@ -87,8 +86,6 @@ public class OBDAModelManager implements Disposable {
 	private final JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
 	private OntopConfigurationManager configurationManager;
-
-	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -138,8 +135,6 @@ public class OBDAModelManager implements Disposable {
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
 
-		//lastKnownOntologyId = java.util.Optional.empty();
-
 		if (!(editorKit instanceof OWLEditorKit)) {
 			throw new IllegalArgumentException("The OBDA Plugin only works with OWLEditorKit instances.");
 		}
@@ -147,11 +142,11 @@ public class OBDAModelManager implements Disposable {
 		updateModelManagerListener(new OBDAPluginOWLModelManagerListener());
 
 		// Adding ontology change listeners to synchronize with the mappings
-		owlEditorKit.getModelManager().getOWLOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener());
+        owlEditorKit.getModelManager().getOWLOntologyManager().addOntologyChangeListener(new OntologyRefactoringListener(owlEditorKit, this));
 
-		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(owlEditorKit.getModelManager().getActiveOntology());
-		setActiveModel(new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper));
+        setActiveModel(new OBDAModel(specificationFactory, ppMappingFactory,
+                PrefixUtilities.getPrefixOWLOntologyFormat(owlEditorKit.getModelManager().getActiveOntology()),
+                atomFactory, termFactory, typeFactory, datalogFactory, relation2Predicate, jdbcTypeMapper));
 
 		// Printing the version information to the console
 		//System.out.println("Using " + VersionInfo.getVersionInfo().toString() + "\n");
@@ -188,10 +183,6 @@ public class OBDAModelManager implements Disposable {
 		return atomFactory;
 	}
 
-	public Relation2Predicate getRelation2Predicate() {
-		return relation2Predicate;
-	}
-
 	public TermFactory getTermFactory() {
 		return termFactory;
 	}
@@ -206,235 +197,6 @@ public class OBDAModelManager implements Disposable {
 
 	public TypeFactory getTypeFactory() {
 		return typeFactory;
-	}
-
-    /***
-	 * This ontology change listener has some euristics that determine if the
-	 * user is refactoring his ontology. In particular, this listener will try
-	 * to determine if some add/remove axioms are in fact a "renaming"
-	 * operation. This happens when a list of axioms has a
-	 * remove(DeclarationAxiom(x)) immediatly followed by an
-	 * add(DeclarationAxiom(y)), in this case, y is a renaming for x.
-	 */
-	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
-
-		@Override
-		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
-			Map<OWLEntity, OWLEntity> renamings = new HashMap<OWLEntity, OWLEntity>();
-			Set<OWLEntity> removals = new HashSet<OWLEntity>();
-
-			for (int idx = 0; idx < changes.size(); idx++) {
-				OWLOntologyChange change = changes.get(idx);
-				if (change instanceof SetOntologyID) {
-
-					updateOntologyID((SetOntologyID) change);
-
-					continue;
-				}
-				else if (change instanceof AddImport) {
-
-					AddImportData addedImport = ((AddImport) change).getChangeData();
-					IRI addedOntoIRI = addedImport.getDeclaration().getIRI();
-
-					OWLOntology addedOnto = owlEditorKit.getModelManager().getOWLOntologyManager().getOntology(addedOntoIRI);
-					OBDAModel activeOBDAModel = getActiveOBDAModel();
-
-					// Setup the entity declarations
-					for (OWLClass c : addedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().classes().declare(c.getIRI());
-
-					for (OWLObjectProperty r : addedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().objectProperties().declare(r.getIRI());
-
-					for (OWLDataProperty p : addedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().dataProperties().declare(p.getIRI());
-
-					for (OWLAnnotationProperty p : addedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(p.getIRI());
-
-					continue;
-				}
-				else if (change instanceof RemoveImport) {
-
-					RemoveImportData removedImport = ((RemoveImport) change).getChangeData();
-					IRI removedOntoIRI = removedImport.getDeclaration().getIRI();
-
-					OWLOntology removedOnto = owlEditorKit.getModelManager().getOWLOntologyManager().getOntology(removedOntoIRI);
-					OBDAModel activeOBDAModel = getActiveOBDAModel();
-
-					for (OWLClass c : removedOnto.getClassesInSignature())
-						activeOBDAModel.getCurrentVocabulary().classes().remove(c.getIRI());
-
-					for (OWLObjectProperty r : removedOnto.getObjectPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().objectProperties().remove(r.getIRI());
-
-					for (OWLDataProperty p : removedOnto.getDataPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().dataProperties().remove(p.getIRI());
-
-					for (OWLAnnotationProperty p : removedOnto.getAnnotationPropertiesInSignature())
-						activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(p.getIRI());
-
-					continue;
-				}
-				else if (change instanceof AddAxiom) {
-					OWLAxiom axiom = change.getAxiom();
-					if (axiom instanceof OWLDeclarationAxiom) {
-
-						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-						OBDAModel activeOBDAModel = getActiveOBDAModel();
-						if (entity instanceof OWLClass) {
-							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().classes().declare(oc.getIRI());
-						}
-						else if (entity instanceof OWLObjectProperty) {
-							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().objectProperties().declare(or.getIRI());
-						}
-						else if (entity instanceof OWLDataProperty) {
-							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().dataProperties().declare(op.getIRI());
-						}
-						else if (entity instanceof OWLAnnotationProperty){
-							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().annotationProperties().declare(ap.getIRI());
-						}
-					}
-				}
-				else if (change instanceof RemoveAxiom) {
-					OWLAxiom axiom = change.getAxiom();
-					if (axiom instanceof OWLDeclarationAxiom) {
-						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-						OBDAModel activeOBDAModel = getActiveOBDAModel();
-						if (entity instanceof OWLClass) {
-							OWLClass oc = (OWLClass) entity;
-							activeOBDAModel.getCurrentVocabulary().classes().remove(oc.getIRI());
-						}
-						else if (entity instanceof OWLObjectProperty) {
-							OWLObjectProperty or = (OWLObjectProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().objectProperties().remove(or.getIRI());
-						}
-						else if (entity instanceof OWLDataProperty) {
-							OWLDataProperty op = (OWLDataProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().dataProperties().remove(op.getIRI());
-						}
-
-						else if (entity instanceof  OWLAnnotationProperty ){
-							OWLAnnotationProperty ap = (OWLAnnotationProperty) entity;
-							activeOBDAModel.getCurrentVocabulary().annotationProperties().remove(ap.getIRI());
-						}
-
-					}
-				}
-
-				 if (idx + 1 < changes.size() && change instanceof RemoveAxiom && changes.get(idx + 1) instanceof AddAxiom) {
-
-					// Found the pattern of a renaming refactoring
-					RemoveAxiom remove = (RemoveAxiom) change;
-					AddAxiom add = (AddAxiom) changes.get(idx + 1);
-
-					if (!(remove.getAxiom() instanceof OWLDeclarationAxiom && add.getAxiom() instanceof OWLDeclarationAxiom)) {
-						continue;
-					}
-					// Found the patter we are looking for, a remove and add of
-					// declaration axioms
-					OWLEntity olde = ((OWLDeclarationAxiom) remove.getAxiom()).getEntity();
-					OWLEntity newe = ((OWLDeclarationAxiom) add.getAxiom()).getEntity();
-					renamings.put(olde, newe);
-
-				}
-				else if (change instanceof RemoveAxiom && change.getAxiom() instanceof OWLDeclarationAxiom) {
-					// Found the pattern of a deletion
-					OWLDeclarationAxiom declaration = (OWLDeclarationAxiom) change.getAxiom();
-					OWLEntity removedEntity = declaration.getEntity();
-
-					if(removedEntity.getIRI().toQuotedString().equals("<http://www.unibz.it/inf/obdaplugin#RandomClass6677841155>")){
-						//Hack this has been done just to trigger a change int the ontology
-						continue;
-					 }
-					removals.add(removedEntity);
-				}
-			}
-
-			// Applying the renaming to the OBDA model
-			OBDAModel obdamodel = getActiveOBDAModel();
-			for (OWLEntity olde : renamings.keySet()) {
-				OWLEntity removedEntity = olde;
-				OWLEntity newEntity = renamings.get(removedEntity);
-
-				// This set of changes appears to be a "renaming" operation,
-				// hence we will modify the OBDA model accordingly
-				Predicate removedPredicate = getPredicate(removedEntity);
-				Predicate newPredicate = getPredicate(newEntity);
-
-				obdamodel.renamePredicate(removedPredicate, newPredicate);
-			}
-
-			// Applying the deletions to the obda model
-			for (OWLEntity removede : removals) {
-				Predicate removedPredicate = getPredicate(removede);
-				obdamodel.deletePredicate(removedPredicate);
-			}
-		}
-
-		private void updateOntologyID(SetOntologyID change) {
-			// original ontology id
-			OWLOntologyID originalOntologyID = change.getOriginalOntologyID();
-			Optional<IRI> oldOntologyIRI = originalOntologyID.getOntologyIRI();
-
-			URI oldiri = null;
-			if(oldOntologyIRI.isPresent()) {
-				oldiri = oldOntologyIRI.get().toURI();
-			}
-			else {
-				oldiri = URI.create(originalOntologyID.toString());
-			}
-
-			log.debug("Ontology ID changed");
-			log.debug("Old ID: {}", oldiri);
-
-			// new ontology id
-			OWLOntologyID newOntologyID = change.getNewOntologyID();
-			Optional<IRI> optionalNewIRI = newOntologyID.getOntologyIRI();
-
-			URI newiri = null;
-			if(optionalNewIRI.isPresent()) {
-				newiri = optionalNewIRI.get().toURI();
-				getActiveOBDAModel().addPrefix(PrefixManager.DEFAULT_PREFIX, getProperPrefixURI(newiri.toString()));
-			}
-			else {
-				newiri = URI.create(newOntologyID.toString());
-				getActiveOBDAModel().addPrefix(PrefixManager.DEFAULT_PREFIX, "");
-			}
-
-			log.debug("New ID: {}", newiri);
-		}
-	}
-
-	private Predicate getPredicate(OWLEntity entity) {
-		Predicate p = null;
-		if (entity instanceof OWLClass) {
-			/* We ignore TOP and BOTTOM (Thing and Nothing) */
-			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
-				return null;
-			}
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getClassPredicate(uri);
-		} else if (entity instanceof OWLObjectProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getObjectPropertyPredicate(uri);
-		} else if (entity instanceof OWLDataProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getDataPropertyPredicate(uri);
-
-		} else if (entity instanceof OWLAnnotationProperty) {
-			String uri = entity.getIRI().toString();
-
-			p = atomFactory.getAnnotationPropertyPredicate(uri);
-		}
-		return p;
 	}
 
 
@@ -875,7 +637,7 @@ public class OBDAModelManager implements Disposable {
 	/**
 	 * A utility method to ensure a proper naming for prefix URI
 	 */
-	private static String getProperPrefixURI(String prefixUri) {
+    static String getProperPrefixURI(String prefixUri) {
 		if (!prefixUri.endsWith("#")) {
 			if (!prefixUri.endsWith("/")) {
 				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();

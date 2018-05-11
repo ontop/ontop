@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.core.OBDAModelManagerListener;
 import it.unibz.inf.ontop.protege.panels.DatasourceParameterEditorPanel;
@@ -38,7 +37,7 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	DatasourceParameterEditorPanel editor;
 
-	OBDAModelManager obdaModelManager = null;
+    private OBDAModelManager obdaModelManager = null;
 
 	@Override
 	protected void disposeOWLView() {
@@ -46,16 +45,13 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 	}
 
 	@Override
-	protected void initialiseOWLView() throws Exception {
-		
-		obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(SQLPPMappingImpl.class.getName());
-		obdaModelManager.addListener(this);
+    protected void initialiseOWLView() {
 
-        //OWLModelManager owlModelManager = getOWLEditorKit().getOWLModelManager();
+        obdaModelManager = (OBDAModelManager) getOWLEditorKit().get(OBDAModelManager.class.getName());
+		obdaModelManager.addListener(this);
 
         setLayout(new BorderLayout());
 
-		//editor = new DatasourceParameterEditorPanel(obdaModelManager.getActiveOBDAModel(), owlModelManager);
 		editor = new DatasourceParameterEditorPanel(getOWLEditorKit());
 		add(editor, BorderLayout.NORTH);
 
