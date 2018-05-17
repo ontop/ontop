@@ -1,0 +1,22 @@
+PREFIX mt:	   <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
+PREFIX ms:     <http://www.semanticweb.org/ontologies/2018/4/mimic/>
+PREFIX obda:   <https://w3id.org/obda/vocabulary#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+BASE <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
+
+?p rdf:type mt:HasFever :- {
+    ALWAYS IN PAST [0, 7D] {
+        ?p mt:hasBodyTemp ?v . (?v > 38.5)
+    }
+}
+
+?p rdf:type mt:ICUPatientHavingFever :- {
+    SOMETIME IN PAST [0, 14D] {
+        ?p rdf:type mt:ICUStay . ?p rdf:type mt:HasFever .
+    }
+}
+
+?p rdf:type mt:AdultICUPatientExcludedFromHIVClinicalTrial :- {
+    ?p rdf:type ms:Adult . ?p rdf:type mt:ICUPatientHavingFever .
+    }
+}

@@ -1,0 +1,21 @@
+[PrefixDeclaration]
+ms:		http://www.semanticweb.org/ontologies/2018/4/mimic/
+icd:		http://purl.bioontology.org/ontology/HOM-ICD9CM/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+onprom:		http://kaos.inf.unibz.it/onprom/
+
+[MappingDeclaration] @collection [[
+mappingId	urn:Map-Adult
+target		ms:Adult/{subject_id} a ms:Adult .
+source		SELECT "patients"."subject_id" FROM "public"."icustays", "public"."patients" WHERE "icustays"."subject_id" = "patients"."subject_id" AND ("icustays"."intime" - interval '18' YEAR) > "patients"."dob"
+
+mappingId	urn:Map-Sepsis
+target		icd:995.91/{subject_id} a icd:995.91 .
+source		SELECT "diagnoses_icd"."subject_id" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '99591'
+]]
+

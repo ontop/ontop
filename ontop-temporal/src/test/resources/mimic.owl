@@ -1,0 +1,332 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2018/4/mimic/"
+     xml:base="http://www.semanticweb.org/ontologies/2018/4/mimic/"
+     xmlns:onprom="http://kaos.inf.unibz.it/onprom/"
+     xmlns:obda="https://w3id.org/obda/vocabulary#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:icd="http://purl.bioontology.org/ontology/HOM-ICD9CM/">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/"/>
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://kaos.inf.unibz.it/onprom/coordinates -->
+
+    <owl:AnnotationProperty rdf:about="http://kaos.inf.unibz.it/onprom/coordinates"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/fromPrev -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/fromPrev">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Service"/>
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">203,318</onprom:coordinates>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionLocation -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionLocation">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Location"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenAdmittedWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenAdmittedWith">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenCaredIn -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenCaredIn">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Service"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenDiagnosedWith -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenDiagnosedWith">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenTransferedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasBeenTransferedBy">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasDischargeLocation -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasDischargeLocation">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Location"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasICUUnit -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasICUUnit">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Service"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/ICU"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/toCurrent -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/toCurrent">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Service"/>
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">124,318;124,318;126,318</onprom:coordinates>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionTime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionType -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasAdmissionType">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasDateOfBirth -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasDateOfBirth">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasDateOfDeath -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasDateOfDeath">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasEthnicity -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasEthnicity">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasGender -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasGender">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasICDCode -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasICDCode">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasLanguage -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasLanguage">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasLocationName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasLocationName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Location"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasMaritalStatus -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasMaritalStatus">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasTransferTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasTransferTime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Admission -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">507,607</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Adult -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Adult">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">723,153</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1065,342</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/ICU -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/ICU">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">331,103</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Location -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Location">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">0,617</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/NeoNatal -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/NeoNatal">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">583,153</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/NonAdult -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/NonAdult">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">482,153</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Patient -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">514,290</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Service -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Service">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">115,103</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer">
+        <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">39,342</onprom:coordinates>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi -->
+

@@ -30,6 +30,8 @@ import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.temporal.mapping.impl.SQLTemporalMappingAssertionProvenance;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -54,6 +56,7 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DBMetadataMerger dbMetadataMerger;
+    private static final Logger log = LoggerFactory.getLogger(TemporalMappingExtractorImpl.class);
 
 
 
@@ -155,6 +158,9 @@ public class TemporalMappingExtractorImpl implements TemporalMappingExtractor {
                                             OBDASpecInput specInput, Optional<RDBMetadata> staticDBMetadata) throws MetaMappingExpansionException, DBMetadataExtractionException {
 
         RDBMetadata temporalDBMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+        log.debug("Temporal DB Metadata: \n{}", temporalDBMetadata);
+        log.debug(temporalDBMetadata.printKeys());
+
         if(staticDBMetadata.isPresent())
             return dbMetadataMerger.mergeDBMetadata(temporalDBMetadata, staticDBMetadata.get());
         else return temporalDBMetadata;

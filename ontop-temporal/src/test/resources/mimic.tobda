@@ -1,0 +1,23 @@
+[PrefixDeclaration]
+mt:		http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/
+ms:      http://www.semanticweb.org/ontologies/2018/4/mimic/
+icd:		http://purl.bioontology.org/ontology/HOM-ICD9CM/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+onprom:		http://kaos.inf.unibz.it/onprom/
+
+[MappingDeclaration] @collection [[
+mappingId	urn:Map-bodytemp
+target		ms:Adult/{subject_id} mt:hasBodyTemp {value}.
+interval    {temp_begin_inc} {temp_begin}^^xsd:dateTimeStamp, {temp_end}^^xsd:dateTimeStamp {temp_end_inc}
+source		SELECT "chartevents_1"."subject_id", CASE WHEN "chartevents_1"."itemid" IN (223762, 676, 677) THEN "chartevents_1"."valuenum" WHEN "chartevents_1"."itemid" IN (223761, 678, 679) THEN ("chartevents_1"."valuenum" - 32) * 5 / 9 END AS "value", CAST('TRUE' AS Boolean) AS "temp_begin_inc", "chartevents_1"."charttime" AS "temp_begin", LEAD("chartevents_1"."charttime",1) OVER(PARTITION BY "chartevents_1"."subject_id" ORDER BY "chartevents_1"."charttime") AS "temp_end", CAST('TRUE' AS Boolean) AS "temp_end_inc" FROM "public"."chartevents_1" WHERE "chartevents_1"."valuenum" is NOT NULL AND "chartevents_1"."itemid" IN (676, 677, 678, 679, 223761 , 223762)
+
+mappingId	urn:Map-icustay
+target		ms:Adult/{subject_id} a mt:ICUStay.
+interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
+source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."outtime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc" FROM "public"."icustays"
+]]

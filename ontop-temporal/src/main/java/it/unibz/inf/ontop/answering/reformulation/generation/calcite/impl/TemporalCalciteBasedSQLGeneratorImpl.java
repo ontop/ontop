@@ -1310,13 +1310,14 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
         public void visit(BoxMinusNode boxMinusNode) {
             query.getChildrenStream(boxMinusNode).forEach(n -> n.acceptVisitor(this));
             TemporalRange range = boxMinusNode.getRange();
+            System.out.println(range.getEnd().getUnits().get(0));
             createBoxView(range, SqlStdOperatorTable.PLUS);
         }
 
         private SqlIntervalQualifier getSQLIQualifier() {
             //Calcite does not support millisecond precision
-            return new SqlIntervalQualifier(TimeUnit.SECOND,
-                    TimeUnit.SECOND, SqlParserPos.ZERO);
+            return new SqlIntervalQualifier(TimeUnit.DAY,
+                    TimeUnit.DAY, SqlParserPos.ZERO);
         }
 
         private boolean lastProjectedArgumentsContains(String s){
@@ -1373,6 +1374,11 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                     if (!(child instanceof ExtensionalDataNode)) {
                         updateProjectedArguments(temporalCoalesceNode.getTerms(),
                                 ImmutableList.copyOf(lastProjectedArguments.subList(lastProjectedArguments.size() - 4, lastProjectedArguments.size())));
+
+                        if(!materializationStack.empty()){
+                            String table = materializationStack.pop();
+                            relBuilder.scan(table);
+                        }
 
                         RelNode node = relBuilder.peek();
                         if (!(node instanceof LogicalProject)) {
