@@ -228,17 +228,18 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
-        ImmutableSet<Variable> nullableChildVariables = child.getNullableVariables();
-
-
-        return Stream.concat(
-                getSubstitution().getImmutableMap().entrySet().stream()
-                    .filter(e -> isNullable(e.getValue(), nullableChildVariables))
-                    .map(Map.Entry::getKey),
-                nullableChildVariables.stream()
-                    .filter(projectedVariables::contains)
-        ).collect(ImmutableCollectors.toSet());
+    public VariableNullability getVariableNullability(IQTree child) {
+//        ImmutableSet<Variable> nullableChildVariables = child.getNullableVariables();
+//
+//
+//        return Stream.concat(
+//                getSubstitution().getImmutableMap().entrySet().stream()
+//                    .filter(e -> isNullable(e.getValue(), nullableChildVariables))
+//                    .map(Map.Entry::getKey),
+//                nullableChildVariables.stream()
+//                    .filter(projectedVariables::contains)
+//        ).collect(ImmutableCollectors.toSet());
+        throw new RuntimeException("TODO: implement CN.getVariableNullability(...)");
     }
 
     @Override

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
 @Singleton
@@ -56,6 +57,20 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
+                .applyToBooleanExpression(expression);
+
+        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
+                .evaluateExpression(nullCaseExpression);
+        return evaluationResult.isEffectiveFalse();
+    }
+
+    @Override
+    public boolean isFilteringNullValues(ImmutableExpression expression, ImmutableSet<Variable> tightVariables) {
+        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(
+                tightVariables.stream()
+                        .collect(ImmutableCollectors.toMap(
+                                v -> v,
+                                v -> valueNull)))
                 .applyToBooleanExpression(expression);
 
         EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()

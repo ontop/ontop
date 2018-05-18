@@ -10,4 +10,9 @@ public interface TermNullabilityEvaluator {
     boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableVariables);
 
     boolean isFilteringNullValue(ImmutableExpression expression, Variable variable);
+
+    /**
+     * tightVariables: if one is null the others as well
+     */
+    boolean isFilteringNullValues(ImmutableExpression expression, ImmutableSet<Variable> tightVariables);
 }

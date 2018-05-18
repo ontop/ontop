@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Collection;
 import java.util.Optional;
 
 
@@ -71,11 +74,19 @@ public interface IQTree {
      */
     boolean isDeclaredAsEmpty();
 
+    @Deprecated
     default boolean containsNullableVariable(Variable variable) {
-        return getNullableVariables().contains(variable);
+        return getVariableNullability().isPossiblyNullable(variable);
     }
 
-    ImmutableSet<Variable> getNullableVariables();
+    @Deprecated
+    default ImmutableSet<Variable> getNullableVariables() {
+        return getVariableNullability().getNullableGroups().stream()
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    VariableNullability getVariableNullability();
 
     boolean isEquivalentTo(IQTree tree);
 

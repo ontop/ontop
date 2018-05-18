@@ -66,6 +66,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
+    public VariableNullability getVariableNullability() {
+        return VariableNullabilityImpl.empty();
+    }
+
+    @Override
     public void validate() throws InvalidIntermediateQueryException {
     }
 

@@ -35,7 +35,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> nullableVariables;
+    private VariableNullability variableNullability;
 
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
@@ -92,8 +92,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        if (nullableVariables == null) {
+    public VariableNullability getVariableNullability() {
+        if (variableNullability == null) {
             DataAtom<RelationPredicate> atom = getProjectionAtom();
             RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
@@ -101,16 +101,20 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
             ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(arguments);
 
             // NB: DB column indexes start at 1.
-            nullableVariables = IntStream.range(0, arguments.size())
+            ImmutableSet<ImmutableSet<Variable>> nullableGroups = IntStream.range(0, arguments.size())
                     .filter(i -> arguments.get(i) instanceof Variable)
                     .filter(i -> relation.getAttribute(i + 1).canNull())
                     .mapToObj(arguments::get)
                     .map(a -> (Variable) a)
                     // An implicit filter condition makes them non-nullable
                     .filter(a -> argMultiset.count(a) < 2)
+                    .map(ImmutableSet::of)
                     .collect(ImmutableCollectors.toSet());
+
+            variableNullability = new VariableNullabilityImpl(nullableGroups);
         }
-        return nullableVariables;
+
+        return variableNullability;
     }
 
     @Override

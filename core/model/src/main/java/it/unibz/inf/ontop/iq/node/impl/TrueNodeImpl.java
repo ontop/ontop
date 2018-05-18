@@ -122,6 +122,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
+    public VariableNullability getVariableNullability() {
+        return VariableNullabilityImpl.empty();
+    }
+
+    @Override
     public void validate() throws InvalidIntermediateQueryException {
     }
 }

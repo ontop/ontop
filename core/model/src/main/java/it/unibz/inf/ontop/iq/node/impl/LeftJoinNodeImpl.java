@@ -150,15 +150,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild) {
-        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
-
-        return Stream.concat(
-                leftChild.getNullableVariables().stream(),
-                // Right-specific variables
-                rightChild.getVariables().stream()
-                    .filter(v -> !leftVariables.contains(v)))
-                .collect(ImmutableCollectors.toSet());
+    public VariableNullability getVariableNullability(IQTree leftChild, IQTree rightChild) {
+        throw new RuntimeException("TODO: implement LJ.getVariableNullability(...)");
     }
 
     /**

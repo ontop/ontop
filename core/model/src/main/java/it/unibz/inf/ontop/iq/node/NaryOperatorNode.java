@@ -29,7 +29,7 @@ public interface NaryOperatorNode extends QueryNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             ImmutableList<IQTree> children);
 
-    ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children);
+    VariableNullability getVariableNullability(ImmutableList<IQTree> children);
 
     boolean isConstructed(Variable variable, ImmutableList<IQTree> children);
 

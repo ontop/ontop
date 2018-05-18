@@ -321,19 +321,28 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
+    public VariableNullability getVariableNullability(ImmutableList<IQTree> children) {
+
         ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
                 .flatMap(c -> c.getVariables().stream()
                         .map(v -> Maps.immutableEntry(v, c)))
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
-        return variableProvenanceMap.entrySet().stream()
-                .filter(e -> e.getValue().size() == 1)
-                .filter(e -> e.getValue().iterator().next().containsNullableVariable(e.getKey()))
+        ImmutableSet<Variable> coOccuringVariables = variableProvenanceMap.entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
                 .map(Map.Entry::getKey)
-                .filter(v -> !isFilteringNullValue(v))
                 .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()
+                .flatMap(c -> c.getVariableNullability().getNullableGroups().stream())
+                .filter(g -> g.stream()
+                        .noneMatch(coOccuringVariables::contains))
+                .collect(ImmutableCollectors.toSet());
+
+        return getOptionalFilterCondition()
+                .map(e -> updateWithFilter(e, nullableGroups))
+                .orElseGet(() -> new VariableNullabilityImpl(nullableGroups));
     }
 
     @Override
