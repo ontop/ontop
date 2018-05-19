@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class VariableNullabilityImpl implements VariableNullability {
 
@@ -64,8 +64,36 @@ public class VariableNullabilityImpl implements VariableNullability {
         return nullableGroups;
     }
 
+    /**
+     * TODO: check the input in TEST MODE
+     */
+    @Override
+    public VariableNullability appendNewVariables(ImmutableMap<Variable, Variable> nullabilityBindings) {
+        ImmutableList<ImmutableSet<Variable>> groupList = ImmutableList.copyOf(nullableGroups);
+        ImmutableMap<Variable, Integer> originalVariableMap = extractVariableMap(groupList);
+
+        AtomicInteger groupCount = new AtomicInteger(groupList.size());
+
+        ImmutableMultimap<Integer, Variable> newVariableMultimap = nullabilityBindings.entrySet().stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> e.getKey().equals(e.getValue())
+                                ? groupCount.getAndIncrement()
+                                : originalVariableMap.get(e.getValue()),
+                        Map.Entry::getKey));
+
+        ImmutableSet<ImmutableSet<Variable>> newNullableGroups = IntStream.range(0, groupCount.get())
+                .boxed()
+                .map(i -> i < groupList.size()
+                        ? Sets.union(groupList.get(i), ImmutableSet.copyOf(newVariableMultimap.get(i)))
+                            .immutableCopy()
+                        : ImmutableSet.copyOf(newVariableMultimap.get(i)))
+                .collect(ImmutableCollectors.toSet());
+
+        return new VariableNullabilityImpl(newNullableGroups);
+    }
+
     private static ImmutableMap<Variable, Integer> extractVariableMap(
-            ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
+            ImmutableCollection<ImmutableSet<Variable>> nullableGroups) {
 
         ImmutableList<ImmutableSet<Variable>> groupList = ImmutableList.copyOf(nullableGroups);
         return IntStream.range(0, groupList.size())

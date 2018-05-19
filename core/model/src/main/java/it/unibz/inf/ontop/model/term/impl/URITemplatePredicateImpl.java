@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.IntStream;
 
-public class URITemplatePredicateImpl extends PredicateImpl implements URITemplatePredicate {
+public class URITemplatePredicateImpl extends FunctionSymbolImpl implements URITemplatePredicate {
 
 	// The name of the function that creates URI's in Quest
 	private static final String URI_PREFIX = "URI";
