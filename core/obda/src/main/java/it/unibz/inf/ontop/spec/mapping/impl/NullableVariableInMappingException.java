@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 public class NullableVariableInMappingException extends OntopInternalBugException {
 
-    protected NullableVariableInMappingException(IQ definition, ImmutableSet<Variable> nullableVariables) {
-        super("The following definition projects nullable variables: " + nullableVariables
+    protected NullableVariableInMappingException(IQ definition, ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
+        super("The following definition projects nullable variables: " + nullableGroups
                 + ".\n Definition:\n" + definition);
     }
 }

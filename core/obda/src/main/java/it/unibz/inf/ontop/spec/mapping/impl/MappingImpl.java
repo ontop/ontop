@@ -6,8 +6,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -50,9 +50,9 @@ public class MappingImpl implements Mapping {
     }
 
     private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
-        ImmutableSet<Variable> nullableVariables = query.getTree().getNullableVariables();
-        if (!nullableVariables.isEmpty())
-            throw new NullableVariableInMappingException(query, nullableVariables);
+        VariableNullability variableNullability = query.getTree().getVariableNullability();
+        if (!variableNullability.getNullableGroups().isEmpty())
+            throw new NullableVariableInMappingException(query, variableNullability.getNullableGroups());
     }
 
     @Override

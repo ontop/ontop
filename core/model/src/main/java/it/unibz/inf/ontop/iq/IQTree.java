@@ -74,18 +74,6 @@ public interface IQTree {
      */
     boolean isDeclaredAsEmpty();
 
-    @Deprecated
-    default boolean containsNullableVariable(Variable variable) {
-        return getVariableNullability().isPossiblyNullable(variable);
-    }
-
-    @Deprecated
-    default ImmutableSet<Variable> getNullableVariables() {
-        return getVariableNullability().getNullableGroups().stream()
-                .flatMap(Collection::stream)
-                .collect(ImmutableCollectors.toSet());
-    }
-
     VariableNullability getVariableNullability();
 
     boolean isEquivalentTo(IQTree tree);

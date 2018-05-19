@@ -692,9 +692,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .allMatch(leftVariables::contains)
                         || value.isGround())) {
 
+            VariableNullability rightVariableNullability = rightTree.getVariableNullability();
+
             Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
                     .filter(v -> !leftVariables.contains(v))
-                    .filter(v -> !rightTree.getNullableVariables().contains(v))
+                    .filter(v -> !rightVariableNullability.isPossiblyNullable(v))
                     .findFirst();
 
             if (nonNullableRightVariable.isPresent()) {

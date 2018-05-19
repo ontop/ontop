@@ -117,11 +117,6 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        return EMPTY_VARIABLE_SET;
-    }
-
-    @Override
     public VariableNullability getVariableNullability() {
         return VariableNullabilityImpl.empty();
     }

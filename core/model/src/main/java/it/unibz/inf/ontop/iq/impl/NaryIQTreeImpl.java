@@ -146,9 +146,4 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
             variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
         return variableDefinition;
     }
-
-    @Override
-    public boolean containsNullableVariable(Variable variable) {
-        return getNullableVariables().contains(variable);
-    }
 }

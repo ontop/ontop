@@ -61,11 +61,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
     public VariableNullability getVariableNullability() {
         return VariableNullabilityImpl.empty();
     }

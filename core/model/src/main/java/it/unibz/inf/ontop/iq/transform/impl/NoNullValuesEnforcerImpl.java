@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
 
@@ -29,21 +31,23 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     @Override
     public IQ transform(IQ originalQuery) {
         IQTree tree = originalQuery.getTree();
-        ImmutableSet<Variable> nullableVariables = tree.getNullableVariables();
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = tree.getVariableNullability().getNullableGroups();
 
-        return nullableVariables.isEmpty() ?
+        return nullableGroups.isEmpty() ?
                 originalQuery :
-                insertFilter(originalQuery, nullableVariables);
+                insertFilter(originalQuery, nullableGroups);
     }
 
 
-    private ImmutableExpression computeFilterExpression(ImmutableSet<Variable> variables) {
-        return variables.stream()
+    private ImmutableExpression computeFilterExpression(ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
+        return nullableGroups.stream()
+                .map(g -> g.stream().findFirst())
+                .map(Optional::get)
                 .map(v -> termFactory.getImmutableExpression(IS_NOT_NULL, v))
                 .reduce(null, (a, b) -> (a == null) ? b : termFactory.getImmutableExpression(AND, a, b));
     }
 
-    private IQ insertFilter(IQ originalQuery, ImmutableSet<Variable> nullableVariables) {
+    private IQ insertFilter(IQ originalQuery, ImmutableSet<ImmutableSet<Variable>> nullableVariables) {
         FilterNode filterNode = iQFactory.createFilterNode(computeFilterExpression(nullableVariables));
         UnaryIQTree newTree = iQFactory.createUnaryIQTree(filterNode, originalQuery.getTree());
 
