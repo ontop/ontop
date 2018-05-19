@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -28,6 +29,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     // Lazy
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
+    private VariableNullability variableNullability;
 
 
     @AssistedInject
@@ -103,8 +105,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        return getRootNode().getNullableVariables(getChild());
+    public VariableNullability getVariableNullability() {
+        if (variableNullability == null)
+            variableNullability = getRootNode().getVariableNullability(getChild());
+        return variableNullability;
     }
 
     @Override

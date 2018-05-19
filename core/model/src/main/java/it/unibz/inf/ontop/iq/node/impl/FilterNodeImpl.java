@@ -87,10 +87,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
-        return child.getNullableVariables().stream()
-                .filter(v -> !isFilteringNullValue(v))
-                .collect(ImmutableCollectors.toSet());
+    public VariableNullability getVariableNullability(IQTree child) {
+        return updateWithFilter(getFilterCondition(), child.getVariableNullability().getNullableGroups());
     }
 
 

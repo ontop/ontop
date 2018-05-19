@@ -29,7 +29,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
         RIGHT
     }
 
-    ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild);
+    VariableNullability getVariableNullability(IQTree leftChild, IQTree rightChild);
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 

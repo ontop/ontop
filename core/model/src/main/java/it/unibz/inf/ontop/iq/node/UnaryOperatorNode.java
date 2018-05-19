@@ -29,7 +29,7 @@ public interface UnaryOperatorNode extends QueryNode {
     IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        IQTree child);
 
-    ImmutableSet<Variable> getNullableVariables(IQTree child);
+    VariableNullability getVariableNullability(IQTree child);
 
     boolean isConstructed(Variable variable, IQTree child);
 

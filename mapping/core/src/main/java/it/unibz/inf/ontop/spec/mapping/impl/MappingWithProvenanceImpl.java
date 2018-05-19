@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -48,9 +49,9 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
-        ImmutableSet<Variable> nullableVariables = query.getTree().getNullableVariables();
-        if (!nullableVariables.isEmpty())
-            throw new NullableVariableInMappingException(query, nullableVariables);
+        VariableNullability variableNullability = query.getTree().getVariableNullability();
+        if (!variableNullability.getNullableGroups().isEmpty())
+            throw new NullableVariableInMappingException(query, variableNullability.getNullableGroups());
     }
 
     @Override

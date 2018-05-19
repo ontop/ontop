@@ -2,7 +2,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
@@ -214,5 +218,18 @@ public enum ExpressionOperation implements OperationPredicate {
 		argumentValidator.validate(argumentTypes);
 
 		return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
+	}
+
+
+	/**
+	 * TODO: IMPLEMENT IT SERIOUSLY
+	 */
+	@Override
+	public FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
+														 VariableNullability childNullability) {
+		boolean isNullable = arguments.stream()
+				.filter(a -> a instanceof Variable)
+				.anyMatch(a -> childNullability.isPossiblyNullable((Variable) a));
+		return new FunctionalTermNullabilityImpl(isNullable);
 	}
 }
