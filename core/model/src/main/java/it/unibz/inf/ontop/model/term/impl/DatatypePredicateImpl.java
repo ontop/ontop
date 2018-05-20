@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 
 //import com.hp.hpl.jena.iri.IRI;
 
-public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
+public class DatatypePredicateImpl extends FunctionSymbolImpl implements DatatypePredicate {
 
 	@Nonnull
 	private final RDFDatatype returnedType;

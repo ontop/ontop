@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -24,7 +25,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     // Lazy
     @Nullable
-    private ImmutableSet<Variable> nullableVariables;
+    private VariableNullability variableNullability;
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
     @Nullable
@@ -37,7 +38,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        nullableVariables = null;
+        variableNullability = null;
         variableDefinition = null;
         isDistinct = null;
 
@@ -126,10 +127,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        if (nullableVariables == null)
-            nullableVariables = getRootNode().getNullableVariables(getChildren());
-        return nullableVariables;
+    public VariableNullability getVariableNullability() {
+        if (variableNullability == null)
+            variableNullability = getRootNode().getVariableNullability(getChildren());
+        return variableNullability;
     }
 
     @Override
@@ -162,10 +163,5 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         return properties.areDistinctAlreadyRemoved()
                 ? this
                 : getRootNode().removeDistincts(getChildren(), properties);
-    }
-
-    @Override
-    public boolean containsNullableVariable(Variable variable) {
-        return getNullableVariables().contains(variable);
     }
 }

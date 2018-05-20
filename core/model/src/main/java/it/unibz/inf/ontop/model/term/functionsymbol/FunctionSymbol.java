@@ -2,8 +2,12 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+
+import java.util.Optional;
 
 /**
  * FunctionSymbols are the functors needed to build ImmutableFunctionalTerms
@@ -11,5 +15,20 @@ import it.unibz.inf.ontop.model.term.Variable;
 public interface FunctionSymbol extends Predicate {
 
     boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables);
+
+    FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
+                               VariableNullability childNullability);
+
+
+    interface FunctionalTermNullability {
+
+        boolean isNullable();
+
+        /**
+         * When the nullability of a functional term is bound to the nullability
+         * of a variable
+         */
+        Optional<Variable> getBoundVariable();
+    }
 
 }

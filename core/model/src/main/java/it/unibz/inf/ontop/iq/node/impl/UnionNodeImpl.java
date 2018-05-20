@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -24,6 +21,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -95,10 +94,55 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(ImmutableList<IQTree> children) {
-        return children.stream()
-                .flatMap(c -> c.getNullableVariables().stream())
+    public VariableNullability getVariableNullability(ImmutableList<IQTree> children) {
+        ImmutableSet<VariableNullability> variableNullabilities = children.stream()
+                .map(IQTree::getVariableNullability)
                 .collect(ImmutableCollectors.toSet());
+
+        ImmutableMultimap<Variable, ImmutableSet<Variable>> multimap = variableNullabilities.stream()
+                .flatMap(vn -> vn.getNullableGroups().stream())
+                .flatMap(g -> g.stream()
+                        .map(v -> Maps.immutableEntry(v, g)))
+                .collect(ImmutableCollectors.toMultimap());
+
+        ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap = multimap.asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> intersect(e.getValue())));
+
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = preselectedGroupMap.keySet().stream()
+                .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
+                .collect(ImmutableCollectors.toSet());
+
+        return new VariableNullabilityImpl(nullableGroups);
+    }
+
+    private ImmutableSet<Variable> computeNullableGroup(Variable mainVariable,
+                                                        ImmutableMap<Variable,ImmutableSet<Variable>> preselectedGroupMap,
+                                                        ImmutableSet<VariableNullability> variableNullabilities) {
+        return preselectedGroupMap.get(mainVariable).stream()
+                .filter(v -> mainVariable.equals(v)
+                        || areInterdependent(mainVariable, v, preselectedGroupMap, variableNullabilities))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private boolean areInterdependent(Variable v1, Variable v2,
+                                      ImmutableMap<Variable, ImmutableSet<Variable>> preselectedGroupMap,
+                                      ImmutableSet<VariableNullability> variableNullabilities) {
+        return preselectedGroupMap.get(v2).contains(v1)
+                && variableNullabilities.stream()
+                .allMatch(vn -> {
+                    boolean v1Nullable = vn.isPossiblyNullable(v1);
+                    boolean v2Nullable = vn.isPossiblyNullable(v2);
+
+                    return (v1Nullable && v2Nullable) || ((!v1Nullable) && (!v2Nullable));
+                });
+    }
+
+    private static ImmutableSet<Variable> intersect(Collection<ImmutableSet<Variable>> groups) {
+        return groups.stream()
+                .reduce((g1, g2) -> Sets.intersection(g1, g2).immutableCopy())
+                .orElseThrow(() -> new IllegalArgumentException("groups must not be empty"));
     }
 
     @Override

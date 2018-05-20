@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.IntStream;
 
-public class BNodePredicateImpl extends PredicateImpl implements BNodePredicate {
+public class BNodePredicateImpl extends FunctionSymbolImpl implements BNodePredicate {
 	
 	// The name of the function that creates URI's in Quest
 	private static final String QUEST_BNODE = "BNODE";

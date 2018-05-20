@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -85,6 +86,15 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         return getOptionalFilterCondition()
                 .filter(e -> nullabilityEvaluator.isFilteringNullValue(e, variable))
                 .isPresent();
+    }
+
+    protected VariableNullability updateWithFilter(ImmutableExpression filter,
+                                                   ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
+        ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
+                .filter(g -> !nullabilityEvaluator.isFilteringNullValues(filter, g))
+                .collect(ImmutableCollectors.toSet());
+
+        return new VariableNullabilityImpl(newNullableGroups);
     }
 
     protected TermNullabilityEvaluator getNullabilityEvaluator() {

@@ -152,15 +152,48 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(IQTree leftChild, IQTree rightChild) {
-        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+    public VariableNullability getVariableNullability(IQTree leftChild, IQTree rightChild) {
 
-        return Stream.concat(
-                leftChild.getNullableVariables().stream(),
-                // Right-specific variables
-                rightChild.getVariables().stream()
-                    .filter(v -> !leftVariables.contains(v)))
+        /*
+         * We apply the filter to the right (and then ignore it)
+         */
+        VariableNullability rightNullability = getOptionalFilterCondition()
+                .map(c -> updateWithFilter(c, rightChild.getVariableNullability().getNullableGroups()))
+                .orElseGet(rightChild::getVariableNullability);
+
+        ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
+                .immutableCopy();
+
+        ImmutableSet<ImmutableSet<Variable>> rightSelectedGroups = rightNullability.getNullableGroups().stream()
+                .map(g -> g.stream()
+                        .filter(rightSpecificVariables::contains)
+                        .collect(ImmutableCollectors.toSet()))
+                .filter(g -> !g.isEmpty())
                 .collect(ImmutableCollectors.toSet());
+
+        /*
+         * New group for variables that can only become null due to the natural LJ
+         */
+        ImmutableSet<Variable> initiallyNonNullableRightSpecificGroup = rightSpecificVariables.stream()
+                .filter(v -> !rightNullability.isPossiblyNullable(v))
+                .collect(ImmutableCollectors.toSet());
+
+        Stream<ImmutableSet<Variable>> rightGroupStream = initiallyNonNullableRightSpecificGroup.isEmpty()
+                ? rightSelectedGroups.stream()
+                : Stream.concat(Stream.of(initiallyNonNullableRightSpecificGroup), rightSelectedGroups.stream());
+
+        /*
+         * Nullable groups from the left are preserved
+         *
+         * Nullable groups from the right are only dealing with right-specific variables
+         */
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = Stream.concat(
+                leftChild.getVariableNullability().getNullableGroups().stream(),
+                rightGroupStream)
+                .collect(ImmutableCollectors.toSet());
+
+        return new VariableNullabilityImpl(nullableGroups);
+
     }
 
     /**

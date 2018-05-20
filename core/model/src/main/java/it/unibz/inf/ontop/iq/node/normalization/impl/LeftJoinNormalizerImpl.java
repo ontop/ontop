@@ -565,9 +565,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                             .allMatch(leftVariables::contains)
                             || value.isGround())) {
 
+                VariableNullability rightNullability = rightTree.getVariableNullability();
+
                 Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
                         .filter(v -> !leftVariables.contains(v))
-                        .filter(v -> !rightTree.getNullableVariables().contains(v))
+                        .filter(v -> !rightNullability.isPossiblyNullable(v))
                         .findFirst();
 
                 if (nonNullableRightVariable.isPresent()) {

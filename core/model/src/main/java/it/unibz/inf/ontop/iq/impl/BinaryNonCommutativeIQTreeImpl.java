@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -30,7 +31,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree rightChild;
     // LAZY
     @Nullable
-    private ImmutableSet<Variable> nullableVariables;
+    private VariableNullability variableNullability;
     @Nullable
     private Boolean isDistinct;
     @Nullable
@@ -44,7 +45,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.nullableVariables = null;
+        this.variableNullability = null;
         this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
@@ -137,10 +138,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables() {
-        if (nullableVariables == null)
-            nullableVariables = getRootNode().getNullableVariables(leftChild, rightChild);
-        return nullableVariables;
+    public VariableNullability getVariableNullability() {
+        if (variableNullability == null)
+            variableNullability = getRootNode().getVariableNullability(leftChild, rightChild);
+        return variableNullability;
     }
 
     @Override

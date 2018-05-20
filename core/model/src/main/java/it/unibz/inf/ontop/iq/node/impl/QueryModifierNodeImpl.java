@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryModifierNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -22,8 +23,8 @@ public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements Que
     }
 
     @Override
-    public ImmutableSet<Variable> getNullableVariables(IQTree child) {
-        return child.getNullableVariables();
+    public VariableNullability getVariableNullability(IQTree child) {
+        return child.getVariableNullability();
     }
 
     @Override
