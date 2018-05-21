@@ -14,7 +14,7 @@ public class Mimic {
                 "PREFIX icd: <http://purl.bioontology.org/ontology/HOM-ICD9CM/>\n" +
                         "SELECT ?s " +
                         "WHERE {" +
-                        "?s a icd:995.91 ." +
+                        "?s a icd:250 ." +
                         "}";
 
         executeQuery(query);

@@ -12,12 +12,66 @@ onprom:		http://kaos.inf.unibz.it/onprom/
 
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-bodytemp
-target		ms:Adult/{subject_id} mt:hasBodyTemp {value}.
+target		ms:Patient/{subject_id} mt:hasBodyTemp {value}.
 interval    {temp_begin_inc} {temp_begin}^^xsd:dateTimeStamp, {temp_end}^^xsd:dateTimeStamp {temp_end_inc}
-source		SELECT "chartevents_1"."subject_id", CASE WHEN "chartevents_1"."itemid" IN (223762, 676, 677) THEN "chartevents_1"."valuenum" WHEN "chartevents_1"."itemid" IN (223761, 678, 679) THEN ("chartevents_1"."valuenum" - 32) * 5 / 9 END AS "value", CAST('TRUE' AS Boolean) AS "temp_begin_inc", "chartevents_1"."charttime" AS "temp_begin", LEAD("chartevents_1"."charttime",1) OVER(PARTITION BY "chartevents_1"."subject_id" ORDER BY "chartevents_1"."charttime") AS "temp_end", CAST('TRUE' AS Boolean) AS "temp_end_inc" FROM "public"."chartevents_1" WHERE "chartevents_1"."valuenum" is NOT NULL AND "chartevents_1"."itemid" IN (676, 677, 678, 679, 223761 , 223762)
+source		SELECT "charteventscopy"."subject_id",
+            CASE WHEN "charteventscopy"."itemid" IN (223762, 676, 677) THEN "charteventscopy"."valuenum"
+            WHEN "charteventscopy"."itemid" IN (223761, 678, 679) THEN ("charteventscopy"."valuenum" - 32) * 5 / 9 END AS "value",
+            CAST('TRUE' AS Boolean) AS "temp_begin_inc", "charteventscopy"."charttime" AS "temp_begin",
+            LEAD("charteventscopy"."charttime",1) OVER(PARTITION BY "charteventscopy"."subject_id" ORDER BY "charteventscopy"."charttime") AS "temp_end",
+            CAST('TRUE' AS Boolean) AS "temp_end_inc" FROM "public"."charteventscopy"
+            WHERE "charteventscopy"."valuenum" is NOT NULL AND "charteventscopy"."itemid" IN (676, 677, 678, 679, 223761 , 223762)
 
 mappingId	urn:Map-icustay
-target		ms:Adult/{subject_id} a mt:ICUStay.
+target		ms:Patient/{subject_id} a mt:ICUStay.
 interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
 source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."outtime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc" FROM "public"."icustays"
+
+mappingId   urn:Map-CreatinineLevel
+target      ms:Patient/{subject_id} mt:hasCreatinineLevel {value}.
+interval    {lab_begin_inc} {lab_begin}^^xsd:dateTimeStamp, {lab_end}^^xsd:dateTimeStamp {lab_end_inc}
+source      SELECT "labevents"."subject_id", "labevents"."valuenum" AS "value",
+            CAST('TRUE' AS Boolean) AS "lab_begin_inc", "labevents"."charttime" AS "lab_begin",
+            "labevents"."charttime" AS "lab_end", CAST('TRUE' AS Boolean) AS "lab_end_inc"
+            FROM "public"."labevents" LIMIT 10
+
+mappingId   urn:Map-Arterial-line
+target      ms:Patient/{subject_id} a mt:ArterialLineCatheterDressed.
+interval    {c_begin_inc} {c_begin}^^xsd:dateTimeStamp, {c_end}^^xsd:dateTimeStamp {c_end_inc}
+source      select "subject_id", CAST('TRUE' AS Boolean) AS "c_begin_inc", "c_begin", "c_end", CAST('FALSE' AS Boolean) AS "c_end_inc"
+                                   from (
+                                       select "subject_id",
+                                       LAG("charttime", 1) OVER (partition by "icustay_id" order by "charttime") as "c_begin",
+                                       "charttime" AS "c_end"
+                                       FROM (
+                                           select "subject_id", "icustay_id", "charttime"
+                                           FROM (
+                                               select "charteventscopy"."subject_id", "charteventscopy"."icustay_id", "charteventscopy"."charttime"
+                                               , max(case when "charteventscopy"."itemid" =  229  then "charteventscopy"."value" else null end) as INV1_Type
+                                               , max(case when "charteventscopy"."itemid" =  8392 then "charteventscopy"."value" else null end) as INV1_Site
+                                               , max(case when "charteventscopy"."itemid" =  235  then "charteventscopy"."value" else null end) as INV2_Type
+                                               , max(case when "charteventscopy"."itemid" =  8393 then "charteventscopy"."value" else null end) as INV2_Site
+                                               , max(case when "charteventscopy"."itemid" =  241  then "charteventscopy"."value" else null end) as INV3_Type
+                                               , max(case when "charteventscopy"."itemid" =  8394 then "charteventscopy"."value" else null end) as INV3_Site
+                                               , max(case when "charteventscopy"."itemid" =  247  then "charteventscopy"."value" else null end) as INV4_Type
+                                               , max(case when "charteventscopy"."itemid" =  8395 then "charteventscopy"."value" else null end) as INV4_Site
+                                               , max(case when "charteventscopy"."itemid" =  253  then "charteventscopy"."value" else null end) as INV5_Type
+                                               , max(case when "charteventscopy"."itemid" =  8396 then "charteventscopy"."value" else null end) as INV5_Site
+                                               , max(case when "charteventscopy"."itemid" =  259  then "charteventscopy"."value" else null end) as INV6_Type
+                                               , max(case when "charteventscopy"."itemid" =  8397 then "charteventscopy"."value" else null end) as INV6_Site
+                                               , max(case when "charteventscopy"."itemid" =  265  then "charteventscopy"."value" else null end) as INV7_Type
+                                               , max(case when "charteventscopy"."itemid" =  8398 then "charteventscopy"."value" else null end) as INV7_Site
+                                               , max(case when "charteventscopy"."itemid" =  271  then "charteventscopy"."value" else null end) as INV8_Type
+                                               , max(case when "charteventscopy"."itemid" =  8399 then "charteventscopy"."value" else null end) as INV8_Site
+                                               FROM "public"."charteventscopy"
+                                               where "charteventscopy"."itemid" in
+                                               (229, 235, 241, 247, 253, 259, 265, 271, 8392, 8393, 8394, 8395, 8396, 8397, 8398, 8399)
+                                               and "charteventscopy"."value" is not null
+                                               group by "charteventscopy"."subject_id", "charteventscopy"."icustay_id", "charteventscopy"."charttime"
+                                               )SUBQ1
+                                          where (inv1_type = 'A-Line') OR (inv2_type = 'A-Line') OR (inv3_type = 'A-Line') OR (inv4_type = 'A-Line') OR (inv5_type = 'A-Line')
+                                            OR (inv6_type = 'A-Line') OR (inv7_type = 'A-Line') OR (inv8_type = 'A-Line')
+                                        )SUBQ2
+                                   )SUBQ3
+                                   where "c_end" is not null and "c_end" - interval '16' hour < "c_begin"
 ]]

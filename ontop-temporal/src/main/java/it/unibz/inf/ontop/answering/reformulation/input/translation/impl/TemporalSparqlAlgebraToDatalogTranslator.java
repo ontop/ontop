@@ -477,9 +477,7 @@ public class TemporalSparqlAlgebraToDatalogTranslator {
             else {
                 // term uri term . (where uri is either an object or a datatype property)
                 Term oTerm = (o == null) ? getTermForVariable(statementPattern.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-                Predicate predicate = termFactory.getPredicate(p.stringValue(), ImmutableList.of(
-                        typeFactory.getAbstractObjectRDFType(),
-                        typeFactory.getAbstractRDFTermType()));
+                Predicate predicate = atomFactory.getAtomPredicate(p.stringValue(), 6);
                 atom = termFactory.getFunction(predicate, sTerm, oTerm, bIncTerm, bTerm, eTerm, eIncTerm);
             }
         }

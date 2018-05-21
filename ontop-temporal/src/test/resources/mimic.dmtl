@@ -18,5 +18,24 @@ BASE <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
 
 ?p rdf:type mt:AdultICUPatientExcludedFromHIVClinicalTrial :- {
     ?p rdf:type ms:Adult . ?p rdf:type mt:ICUPatientHavingFever .
+}
+
+?p rdf:type mt:ICUStayFirstDay :- {
+    SOMETIME IN FUTURE [0, 24H] {
+        ALWAYS IN PAST [0, 24H] {
+            ?p rdf:type mt:ICUStay .
+        }
+    }
+}
+
+?p mt:hasFirstDayCreatinineLevel ?v :- {
+    ?p rdf:type mt:ICUStayFirstDay .
+    ?p mt:hasCreatinineLevel ?v .
+}
+
+?p rdf:type mt:ICUPatientDressedArterialLineCatheter :- {
+    ?p rdf:type mt:ICUStay .
+    ALWAYS IN PAST [0, 4D] {
+        ?p rdf:type mt:ArterialLineCatheterDressed .
     }
 }
