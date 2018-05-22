@@ -21,6 +21,8 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
+    private static final String NATIVE_STRING = "NATIVE ";
+
     private final ImmutableSet<Variable> variables;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
@@ -125,5 +127,10 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public String toString() {
+        return NATIVE_STRING + variables + "\n" + nativeQueryString;
     }
 }
