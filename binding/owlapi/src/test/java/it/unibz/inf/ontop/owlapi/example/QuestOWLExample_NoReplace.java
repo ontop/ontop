@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.owlapi.example;
  */
 
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -92,7 +92,7 @@ public class QuestOWLExample_NoReplace {
 			/*
              * Print the query summary
 			 */
-            ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+            IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
             System.out.println();
             System.out.println("The input SPARQL query:");

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -519,7 +519,7 @@ public class QuestOWLExample_ReasoningDisabled {
 				/*
 				 * Print the query summary
 				 */
-                String sqlQuery = ((SQLExecutableQuery)st.getExecutableQuery(sparqlQuery)).getSQL();
+                IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -529,7 +529,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 System.out.println("The output SQL query:");
                 System.out.println("=====================");
-                System.out.println(sqlQuery);
+                System.out.println(executableQuery);
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");

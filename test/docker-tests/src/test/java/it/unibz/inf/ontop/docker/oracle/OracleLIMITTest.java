@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.docker.oracle;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -96,7 +95,7 @@ public class OracleLIMITTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x a :Country} LIMIT 10";
 		
 		OntopOWLStatement st = conn.createStatement();
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();;
+		String sql = st.getExecutableQuery(query).toString();
 		boolean m = sql.matches("(?ms)(.*)WHERE ROWNUM <= 10(.*)");
 		assertTrue(m);
 	}

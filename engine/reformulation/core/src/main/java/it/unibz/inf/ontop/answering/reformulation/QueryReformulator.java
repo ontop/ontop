@@ -4,10 +4,11 @@ package it.unibz.inf.ontop.answering.reformulation;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.iq.IQ;
 
 public interface QueryReformulator {
 
-    ExecutableQuery reformulateIntoNativeQuery(InputQuery inputQuery) throws OntopReformulationException;
+    IQ reformulateIntoNativeQuery(InputQuery inputQuery) throws OntopReformulationException;
 
     /**
      * For analysis purposes

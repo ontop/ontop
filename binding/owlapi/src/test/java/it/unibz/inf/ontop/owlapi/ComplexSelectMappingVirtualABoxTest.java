@@ -20,8 +20,8 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -145,9 +145,9 @@ public class ComplexSelectMappingVirtualABoxTest  {
 
         OWLLiteral val;
 		try {
-			String sql = ((SQLExecutableQuery)st.getExecutableQuery(this.query)).getSQL();
+			IQ iq = st.getExecutableQuery(this.query);
 			Pattern pat = Pattern.compile("TABLE1 ");
-		    Matcher m = pat.matcher(sql);
+		    Matcher m = pat.matcher(iq.toString());
 		    int num_joins = -1;
 		    while (m.find()){
 		    	num_joins +=1;

@@ -25,7 +25,9 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.ResultSet;
@@ -41,12 +43,13 @@ public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet imp
 
     private Set<List<Object>> rowKeys;
 
-    public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<String> signature,
+    public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
+                                     ConstructionNode rootConstructionNode,
                                      DBMetadata dbMetadata,
                                      Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
                                      TypeFactory typeFactory) {
 
-        super(rs, signature, dbMetadata, iriDictionary, termFactory, typeFactory);
+        super(rs, signature, rootConstructionNode, dbMetadata, iriDictionary, termFactory, typeFactory);
         rowKeys = new HashSet<>();
     }
 

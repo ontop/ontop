@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation;
 
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
+import it.unibz.inf.ontop.iq.IQ;
 
 /**
  * Cache of queries.
@@ -9,9 +10,9 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
  *
  */
 public interface QueryCache {
-    ExecutableQuery get(InputQuery inputQuery);
+    IQ get(InputQuery inputQuery);
 
-    void put(InputQuery inputQuery, ExecutableQuery executableQuery);
+    void put(InputQuery inputQuery, IQ executableQuery);
 
     void clear();
 }

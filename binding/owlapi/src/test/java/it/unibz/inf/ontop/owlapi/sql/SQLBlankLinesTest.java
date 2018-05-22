@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.owlapi.sql;
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -98,7 +97,7 @@ public class SQLBlankLinesTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
+		String sql = st.getExecutableQuery(query).toString();
 		boolean m = sql.matches("(?ms)(.*)\\n\\n(.*)");
 		assertFalse(m);
 	}

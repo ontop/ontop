@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -339,7 +339,7 @@ public class SameAsOntowisTest {
 				/*
 				 * Print the query summary
 				 */
-                ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+                IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");

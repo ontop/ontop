@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -101,7 +100,6 @@ public class QuestOWLExampleNotLatinTest {
 			 * Print the query summary
 			 */
 			OntopOWLStatement qst = st;
-			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");
@@ -111,7 +109,7 @@ public class QuestOWLExampleNotLatinTest {
 			
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
-			System.out.println(sqlQuery);
+			System.out.println(qst.getExecutableQuery(sparqlQuery));
 
             System.out.println("Query Execution Time:");
             System.out.println("=====================");

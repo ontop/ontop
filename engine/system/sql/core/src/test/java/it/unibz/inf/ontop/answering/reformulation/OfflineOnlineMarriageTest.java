@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
@@ -15,6 +14,9 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemSQLConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.junit.*;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Optional;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
@@ -88,8 +91,13 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = inputQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
-        SQLExecutableQuery executableQuery = (SQLExecutableQuery) queryReformulator.reformulateIntoNativeQuery(query);
-        String sqlQuery = executableQuery.getSQL();
+        IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query);
+        String sqlQuery = Optional.of(executableQuery.getTree())
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> ((NativeNode) n).getNativeQueryString())
+                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
 
         assertFalse(sqlQuery.isEmpty());
         LOGGER.info(sqlQuery);

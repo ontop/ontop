@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.iq.IQ;
 
 /**
  * Does not cache anything.
@@ -10,12 +10,12 @@ import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 public class DummyQueryCache implements QueryCache {
 
     @Override
-    public ExecutableQuery get(InputQuery inputQuery) {
+    public IQ get(InputQuery inputQuery) {
         return null;
     }
 
     @Override
-    public void put(InputQuery inputQuery, ExecutableQuery executableQuery) {
+    public void put(InputQuery inputQuery, IQ executableQuery) {
     }
 
     @Override

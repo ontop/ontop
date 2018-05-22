@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
@@ -13,12 +12,12 @@ import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -46,22 +45,16 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
-                               IQConverter iqConverter, UnionFlattener unionFlattener) {
+                               IQConverter iqConverter, UnionFlattener unionFlattener, IntermediateQueryFactory iqFactory) {
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate,
-                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, unionFlattener);
+                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, iqFactory, unionFlattener);
     }
 
     @Override
-    public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
+    public IQ generateSourceQuery(IQ query, ExecutorRegistry executorRegistry)
             throws OntopReformulationException {
         return originalEngine.clone()
-                .generateSourceQuery(query, signature);
-    }
-
-    @Override
-    public ExecutableQuery generateEmptyQuery(ImmutableList<String> signatureContainer) {
-        // Empty string query
-        return new SQLExecutableQuery(signatureContainer);
+                .generateSourceQuery(query, executorRegistry);
     }
 }

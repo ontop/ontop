@@ -3,7 +3,6 @@
  */
 package it.unibz.inf.ontop.owlapi.sql;
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -116,8 +115,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 		
 		
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertTrue(m);
 		
 		
@@ -148,8 +147,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -178,8 +177,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		boolean m = sql.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
 		
 		
@@ -207,8 +206,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -243,9 +242,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		System.out.println(sql);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
 		
 		
@@ -278,9 +276,8 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
-		System.out.println(sql);
-		boolean m = sql.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
+		String queryString = st.getExecutableQuery(query).toString();
+		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
 		
 		

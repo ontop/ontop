@@ -4,7 +4,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
@@ -21,6 +20,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -33,6 +33,10 @@ import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -40,6 +44,7 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +83,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
 	private final IQConverter iqConverter;
+	private final AtomFactory atomFactory;
+	private final TermFactory termFactory;
+	private final IntermediateQueryFactory iqFactory;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -94,7 +102,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools, IQConverter iqConverter) {
+								ImmutabilityTools immutabilityTools, IQConverter iqConverter, AtomFactory atomFactory, TermFactory termFactory, IntermediateQueryFactory iqFactory) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -108,6 +116,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
 		this.iqConverter = iqConverter;
+		this.atomFactory = atomFactory;
+		this.termFactory = termFactory;
+		this.iqFactory = iqFactory;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
@@ -181,10 +192,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 
 	@Override
-	public ExecutableQuery reformulateIntoNativeQuery(InputQuery inputQuery)
+	public IQ reformulateIntoNativeQuery(InputQuery inputQuery)
 			throws OntopReformulationException {
 
-		ExecutableQuery cachedQuery = queryCache.get(inputQuery);
+		IQ cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null)
 			return cachedQuery;
 
@@ -256,8 +267,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 //				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
-				ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
-						ImmutableList.copyOf(translation.getSignature()));
+				IQ executableQuery = generateExecutableQuery(iqConverter.convert(intermediateQuery));
 				queryCache.put(inputQuery, executableQuery);
 				return executableQuery;
 
@@ -266,8 +276,16 @@ public class QuestQueryProcessor implements QueryReformulator {
 			 * No solution.
 			 */
 			catch (EmptyQueryException e) {
-				ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-						ImmutableList.copyOf(translation.getSignature()));
+				ImmutableList<Variable> variables = translation.getSignature().stream()
+						.map(termFactory::getVariable)
+						.collect(ImmutableCollectors.toList());
+
+				DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+						atomFactory.getRDFAnswerPredicate(variables.size()),
+						variables);
+
+				IQ emptyQuery = iqFactory.createIQ(projectionAtom,
+						iqFactory.createEmptyNode(projectionAtom.getVariables()));
 
 				log.debug("Empty query --> no solution.");
 				queryCache.put(inputQuery, emptyQuery);
@@ -290,11 +308,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
+	private IQ generateExecutableQuery(IQ iq)
 			throws OntopReformulationException {
 		log.debug("Producing the native query string...");
 
-		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature);
+		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq, executorRegistry);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 

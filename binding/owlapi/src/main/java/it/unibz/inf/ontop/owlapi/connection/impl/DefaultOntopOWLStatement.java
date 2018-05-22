@@ -25,8 +25,8 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -223,7 +223,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		}
 	}
 
-	public ExecutableQuery getExecutableQuery(String query) throws OntopOWLException {
+	public IQ getExecutableQuery(String query) throws OntopOWLException {
 		try {
 			return st.getExecutableQuery(parseQueryString(query));
 		} catch (OntopReformulationException e) {

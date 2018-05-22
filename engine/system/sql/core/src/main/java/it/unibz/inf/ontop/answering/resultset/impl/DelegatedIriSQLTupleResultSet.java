@@ -27,7 +27,9 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -45,11 +47,17 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
 
     private final ImmutableMap<String, Integer> columnMap;
     protected final JDBC2ConstantConverter ontopConstantRetriever;
+    private final ConstructionNode rootConstructionNode;
 
-    public DelegatedIriSQLTupleResultSet(ResultSet rs, ImmutableList<String> signature, DBMetadata dbMetadata,
+    public DelegatedIriSQLTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
+                                         ConstructionNode rootConstructionNode,
+                                         DBMetadata dbMetadata,
                                          Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
                                          TypeFactory typeFactory) {
-        super(rs, signature);
+        super(rs, signature.stream()
+                .map(Variable::getName)
+                .collect(ImmutableCollectors.toList()));
+        this.rootConstructionNode = rootConstructionNode;
         this.columnMap = buildColumnMap();
         this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory);
     }

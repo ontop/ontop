@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.docker.oracle;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class OracleORDERBYTest extends AbstractVirtualModeTest {
     private void runQueryAndCheckSQL(String query) throws OWLException{
 
         OntopOWLStatement st = conn.createStatement();
-        String sql = ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
+        String sql = st.getExecutableQuery(query).toString();
         //boolean m = sql.matches("(?ms)(.*)ORDER BY country_name (.*)");
         boolean m = sql.matches("(?ms)(.*)ORDER BY (.*)");
         log.debug(sql);

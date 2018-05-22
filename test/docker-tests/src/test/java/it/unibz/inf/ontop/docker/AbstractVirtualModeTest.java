@@ -2,9 +2,10 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
@@ -23,10 +24,7 @@ import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -217,10 +215,13 @@ public abstract class AbstractVirtualModeTest {
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
         try {
-            ExecutableQuery executableQuery = st.getExecutableQuery(query);
-            if (! (executableQuery instanceof SQLExecutableQuery))
-                throw new IllegalStateException("A SQLExecutableQuery was expected");
-            sql = ((SQLExecutableQuery)executableQuery).getSQL();
+            IQ executableQuery = st.getExecutableQuery(query);
+            sql = Optional.of(executableQuery.getTree())
+                    .filter(t -> t instanceof UnaryIQTree)
+                    .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                    .filter(n -> n instanceof NativeNode)
+                    .map(n -> ((NativeNode) n).getNativeQueryString())
+                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -302,7 +303,12 @@ public abstract class AbstractVirtualModeTest {
         /*
          * Print the query summary
          */
-        String sqlQuery = ((SQLExecutableQuery) st.getExecutableQuery(query)).getSQL();
+        String sqlQuery = Optional.of(st.getExecutableQuery(query).getTree())
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> ((NativeNode) n).getNativeQueryString())
+                .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query"));
         log.info("");
         log.info("The input SPARQL query:");
         log.info("=======================");

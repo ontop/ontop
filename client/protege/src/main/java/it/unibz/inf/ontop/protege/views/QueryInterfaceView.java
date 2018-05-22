@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;

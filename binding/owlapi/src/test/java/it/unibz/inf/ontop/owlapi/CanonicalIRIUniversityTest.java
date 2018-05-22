@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.owlapi;
 
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
@@ -127,7 +127,7 @@ public class CanonicalIRIUniversityTest {
 			            * Print the query summary
 			         */
 
-                    ExecutableQuery executableQuery = st.getExecutableQuery(sparqlQuery);
+                    IQ executableQuery = st.getExecutableQuery(sparqlQuery);
 
                     System.out.println();
                     System.out.println("The input SELECT SPARQL query:");

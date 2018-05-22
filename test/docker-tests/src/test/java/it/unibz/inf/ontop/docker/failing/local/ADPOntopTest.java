@@ -3,12 +3,11 @@ package it.unibz.inf.ontop.docker.failing.local;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -71,8 +70,7 @@ public class ADPOntopTest {
 			/*
 			 * Print the query summary
 			 */
-			DefaultOntopOWLStatement qst = (DefaultOntopOWLStatement) st;
-			String sqlQuery = ((SQLExecutableQuery)qst.getExecutableQuery(sparqlQuery)).getSQL();;
+			OntopOWLStatement qst = (OntopOWLStatement) st;
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");
@@ -82,7 +80,7 @@ public class ADPOntopTest {
 			
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
-			System.out.println(sqlQuery);
+			System.out.println(qst.getExecutableQuery(sparqlQuery));
 			
 		} finally {
 			

@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
+import it.unibz.inf.ontop.iq.IQ;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BasicQueryCache implements QueryCache {
 
-    private final Map<InputQuery, ExecutableQuery> mutableMap;
+    private final Map<InputQuery, IQ> mutableMap;
 
     @Inject
     private BasicQueryCache() {
@@ -22,12 +22,12 @@ public class BasicQueryCache implements QueryCache {
     }
 
     @Override
-    public ExecutableQuery get(InputQuery inputQuery) {
+    public IQ get(InputQuery inputQuery) {
         return mutableMap.get(inputQuery);
     }
 
     @Override
-    public void put(InputQuery inputQuery, ExecutableQuery executableQuery) {
+    public void put(InputQuery inputQuery, IQ executableQuery) {
         mutableMap.put(inputQuery, executableQuery);
     }
 

@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.answering.connection;
 
-import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.iq.IQ;
 
 /**
  * OBDAStatement specific to Ontop.
@@ -17,5 +17,5 @@ public interface OntopStatement extends OBDAStatement {
 
     String getRewritingRendering(InputQuery inputQuery) throws OntopReformulationException;
 
-    ExecutableQuery getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException;
+    IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException;
 }
