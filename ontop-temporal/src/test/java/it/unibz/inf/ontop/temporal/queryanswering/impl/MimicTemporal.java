@@ -214,27 +214,27 @@ public class MimicTemporal {
 
         String query =
                 "PREFIX mt: <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>\n" +
-                        "PREFIX ms: <http://www.semanticweb.org/ontologies/2018/4/mimic/>" +
-                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                        "PREFIX time: <http://www.w3.org/2006/time#>" +
+                        "PREFIX ms: <http://www.semanticweb.org/ontologies/2018/4/mimic/>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX time: <http://www.w3.org/2006/time#>\n" +
                         "PREFIX icd: <http://purl.bioontology.org/ontology/ICD9CM/>\n" +
-                        "SELECT ?id ?v ?l ?bInc ?b ?e ?eInc " +
-                        "WHERE {" +
-                        "GRAPH ?g {?p mt:hasFirstDayCreatinineLevel ?v.}" +
-                        "?g time:hasTime _:intv ." +
-                        "_:inv time:isBeginInclusive ?bInc ." +
-                        "_:intv time:hasBeginning _:beginInst ." +
-                        "_:beginInst rdf:type time:Instant ." +
-                        "_:beginInst time:inXSDDateTime ?b ." +
-                        "_:intv time:hasEnd _:endInst ." +
-                        "_:endInst rdf:type time:Instant ." +
-                        "_:endInst time:inXSDDateTime ?e ." +
-                        "_:inv time:isEndInclusive ?eInc . " +
-                        "?p ms:hasBeenDiagnosedWith ?d." +
-                        "?p ms:hasPatientID ?id ." +
-                        "?d ms:icd9Code ?cd ." +
-                        "?d ms:icd9Class icd:995.91 ." +
-                        "icd:995.91 rdfs:label ?l ." +
+                        "SELECT ?id ?v ?l ?bInc ?b ?e ?eInc\n" +
+                        "WHERE {\n" +
+                        "GRAPH ?g {?p mt:hasFirstDayCreatinineLevel ?v.}\n" +
+                        "?g time:hasTime _:intv .\n" +
+                        "_:inv time:isBeginInclusive ?bInc .\n" +
+                        "_:intv time:hasBeginning _:beginInst .\n" +
+                        "_:beginInst rdf:type time:Instant .\n" +
+                        "_:beginInst time:inXSDDateTime ?b .\n" +
+                        "_:intv time:hasEnd _:endInst .\n" +
+                        "_:endInst rdf:type time:Instant .\n" +
+                        "_:endInst time:inXSDDateTime ?e .\n" +
+                        "_:inv time:isEndInclusive ?eInc .\n" +
+                        "?p ms:hasBeenDiagnosedWith ?d.\n" +
+                        "?p ms:hasPatientID ?id .\n" +
+                        "?d ms:icd9Code ?cd .\n" +
+                        "?d ms:icd9Class icd:995.91 .\n" +
+                        "icd:995.91 rdfs:label ?l .\n" +
                         "}";
 
         executeQuery(query);

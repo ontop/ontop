@@ -12,7 +12,7 @@ onprom:		http://kaos.inf.unibz.it/onprom/
 
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-Adult
-target		:Patient/{subject_id} a :Adult ; :hasPatientID {subject_id}^^xsd:int .
+target		:Patient/{subject_id} a :Adult ; :hasPatientID {subject_id}^^xsd:int . 
 source		SELECT "patients"."subject_id" FROM "public"."icustays", "public"."patients" WHERE "icustays"."subject_id" = "patients"."subject_id" AND ("icustays"."intime" - interval '18' YEAR) > "patients"."dob"
 
 mappingId	urn:Map-PatientOlderThan15

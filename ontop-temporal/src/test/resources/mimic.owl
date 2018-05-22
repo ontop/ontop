@@ -330,6 +330,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/PatientOlderThan15 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/PatientOlderThan15">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Service -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Service">
