@@ -51,6 +51,9 @@ public interface IntermediateQueryFactory {
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
+    NativeNode createNativeNode(ImmutableSet<Variable> projectedVariables, String nativeQueryString,
+                                VariableNullability variableNullability);
+
     TrueNode createTrueNode();
 
     DistinctNode createDistinctNode();

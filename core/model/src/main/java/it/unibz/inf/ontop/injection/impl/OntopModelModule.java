@@ -56,6 +56,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 FilterNode.class,
                 ExtensionalDataNode.class,
                 IntensionalDataNode.class,
+                NativeNode.class,
                 EmptyNode.class,
                 TrueNode.class,
                 DistinctNode.class,
