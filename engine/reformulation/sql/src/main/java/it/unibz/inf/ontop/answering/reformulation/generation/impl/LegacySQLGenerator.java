@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -45,10 +46,11 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
-                               IQConverter iqConverter, UnionFlattener unionFlattener, IntermediateQueryFactory iqFactory) {
+                               IQConverter iqConverter, UnionFlattener unionFlattener, IntermediateQueryFactory iqFactory,
+                               AtomFactory atomFactory) {
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate,
-                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, iqFactory, unionFlattener);
+                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener);
     }
 
     @Override

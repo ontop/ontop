@@ -51,6 +51,8 @@ import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
@@ -60,6 +62,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +127,7 @@ public class OneShotSQLGeneratorEngine {
 	private final TermFactory termFactory;
 	private final IQConverter iqConverter;
 	private final IntermediateQueryFactory iqFactory;
+	private final AtomFactory atomFactory;
 	private final UnionFlattener unionFlattener;
 
 
@@ -141,7 +145,7 @@ public class OneShotSQLGeneratorEngine {
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-							  IntermediateQueryFactory iqFactory, UnionFlattener unionFlattener) {
+							  IntermediateQueryFactory iqFactory, AtomFactory atomFactory, UnionFlattener unionFlattener) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -151,6 +155,7 @@ public class OneShotSQLGeneratorEngine {
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
 		this.iqFactory = iqFactory;
+		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
 
 		String driverURI = settings.getJdbcDriver()
@@ -191,7 +196,8 @@ public class OneShotSQLGeneratorEngine {
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-									  IntermediateQueryFactory iqFactory, UnionFlattener unionFlattener) {
+									  IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+									  UnionFlattener unionFlattener) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -210,6 +216,7 @@ public class OneShotSQLGeneratorEngine {
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
 		this.iqFactory = iqFactory;
+		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
 	}
 
@@ -268,7 +275,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, iqFactory, unionFlattener);
+                typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener);
 	}
 
 	/**
@@ -282,22 +289,20 @@ public class OneShotSQLGeneratorEngine {
 	public IQ generateSourceQuery(IQ initialIQ, ExecutorRegistry executorRegistry)
 			throws OntopReformulationException {
 
-		IQ normalizedQuery = normalizeIQ(initialIQ, executorRegistry);
-
-		UnaryIQTree normalizedTree = Optional.of(normalizedQuery.getTree())
+		UnaryIQTree initialTree = Optional.of(initialIQ.getTree())
 				.filter(t -> t.getRootNode() instanceof ConstructionNode)
 				.map(t -> (UnaryIQTree) t)
 				.orElseThrow(() -> new MinorOntopInternalBugException(
-						"After normalization, the tree is not starting with a construction node.\n" + normalizedQuery));
-		ConstructionNode rootNode = (ConstructionNode) normalizedTree.getRootNode();
+						"The initial IQ is not starting with a construction node.\n" + initialIQ));
+		ConstructionNode rootNode = (ConstructionNode) initialTree.getRootNode();
 
 		/*
 		 * Only the SUB-tree is translated into SQL
 		 */
-		IQTree childTree = normalizedTree.getChild();
-		ImmutableList<Variable> childSignature = ImmutableList.copyOf(childTree.getVariables());
+		IQTree normalizedSubTree = normalizeSubTree(initialTree.getChild(), initialIQ.getVariableGenerator(), executorRegistry);
+		ImmutableList<Variable> childSignature = ImmutableList.copyOf(normalizedSubTree.getVariables());
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(childTree, childSignature);
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, childSignature);
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.foldJoinTrees(cq);
@@ -351,27 +356,33 @@ public class OneShotSQLGeneratorEngine {
 			resultingQuery = queryString;
 		}
 
-		NativeNode nativeNode = iqFactory.createNativeNode(childTree.getVariables(), resultingQuery,
-				childTree.getVariableNullability());
+		NativeNode nativeNode = iqFactory.createNativeNode(normalizedSubTree.getVariables(), resultingQuery,
+				normalizedSubTree.getVariableNullability());
 		UnaryIQTree newTree = iqFactory.createUnaryIQTree(rootNode, nativeNode);
 
 		return iqFactory.createIQ(initialIQ.getProjectionAtom(), newTree);
 	}
 
-	private IQ normalizeIQ(IQ iq, ExecutorRegistry executorRegistry) {
-
-		IQ flattenIQ = unionFlattener.optimize(iq);
-		log.debug("New query after flattening the union: \n" + flattenIQ);
+	private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator, ExecutorRegistry executorRegistry) {
+		IQTree flattenSubTree = unionFlattener.optimize(subTree, variableGenerator);
+		log.debug("New query after flattening the union: \n" + flattenSubTree);
 
 		try {
-			IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
-					.optimize(iqConverter.convert(flattenIQ, metadata, executorRegistry));
-			log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+			// Just here for converting the IQTree into an IntermediateQuery (will be ignored later on)
+			DistinctVariableOnlyDataAtom temporaryProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+					atomFactory.getRDFAnswerPredicate(flattenSubTree.getVariables().size()),
+					ImmutableList.copyOf(flattenSubTree.getVariables()));
 
-			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
-			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+			IQ flattenSubQuery = iqFactory.createIQ(temporaryProjectionAtom, flattenSubTree);
 
-			return iqConverter.convert(queryAfterPullOut);
+			IntermediateQuery groundTermFreeSubQuery = new GroundTermRemovalFromDataNodeReshaper()
+					.optimize(iqConverter.convert(flattenSubQuery, metadata, executorRegistry));
+			log.debug("New query after removing ground terms: \n" + groundTermFreeSubQuery);
+
+			IntermediateQuery subQueryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeSubQuery);
+			log.debug("New query after pulling out equalities: \n" + subQueryAfterPullOut);
+
+			return iqConverter.convert(subQueryAfterPullOut).getTree();
 		} catch (EmptyQueryException e) {
 			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
 		}
