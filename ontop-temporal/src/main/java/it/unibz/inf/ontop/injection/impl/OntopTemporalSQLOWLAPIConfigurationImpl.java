@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
-import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -138,7 +137,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             extends OntopSQLOWLAPIBuilderMixin<B>
             implements OntopTemporalSQLOWLAPIConfiguration.Builder<B> {
 
-        private final OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<B> temporalMappingBuilderFragment;
+        final OntopTemporalMappingSQLAllConfigurationImpl.StandardTemporalMappingSQLBuilderFragment<B> temporalMappingBuilderFragment;
         private final StandardOntopTemporalSQLOWLAPIBuilderFragment<B> localFragmentBuilder;
 
         OntopTemporalSQLOWLAPIBuilderMixin() {
@@ -189,36 +188,11 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
             return temporalMappingBuilderFragment.nativeOntopTemporalMappingReader(mappingReader);
         }
 
-        @Override
-        public B nativeOntopMappingFile(@Nonnull final String mappingFile) {
-            return temporalMappingBuilderFragment.nativeOntopMappingFile(mappingFile);
-        }
-
-        @Override
-        public B r2rmlMappingFile(@Nonnull final File mappingFile) {
-            return temporalMappingBuilderFragment.r2rmlMappingFile(mappingFile);
-        }
-
-        @Override
-        public B r2rmlMappingGraph(@Nonnull final Graph rdfGraph) {
-            return temporalMappingBuilderFragment.r2rmlMappingGraph(rdfGraph);
-        }
-
-        boolean isTemporal() {
-            return temporalMappingBuilderFragment.isTemporal();
-        }
-
-        boolean isR2rml(){
-            return temporalMappingBuilderFragment.isR2rml();
-        }
-
-        final OntopTemporalMappingSQLAllConfigurationImpl.OntopTemporalMappingSQLAllOptions generateTemporalMappingSQLAllOptions() {
-            return temporalMappingBuilderFragment.generateMappingSQLTemporalOptions(generateMappingSQLOptions());
-        }
-
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
             return new OntopTemporalSQLOWLAPIOptions(localFragmentBuilder.ruleFile, localFragmentBuilder.ruleReader,
-                    localFragmentBuilder.ruleProgram, generateSQLOWLAPIOptions(), generateTemporalMappingSQLAllOptions());
+                    localFragmentBuilder.ruleProgram, generateSQLOWLAPIOptions(),
+                    temporalMappingBuilderFragment.generateMappingSQLTemporalOptions(generateMappingSQLOptions())
+            );
         }
 
         @Override
@@ -236,7 +210,7 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         @Override
         public OntopTemporalSQLOWLAPIConfiguration build() {
             OntopTemporalMappingSQLAllSettingsImpl temporalSettings =
-                    new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), isTemporal());
+                    new OntopTemporalMappingSQLAllSettingsImpl(generateProperties(), isR2rml(), temporalMappingBuilderFragment.isTemporal());
             Properties standaloneProperties = generateProperties();
             standaloneProperties.put("it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator",
                     "it.unibz.inf.ontop.answering.reformulation.input.translation.impl.TemporalDatalogSparqlQueryTranslatorImpl");
