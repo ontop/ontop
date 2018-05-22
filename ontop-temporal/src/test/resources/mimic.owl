@@ -5,11 +5,13 @@
      xmlns:obda="https://w3id.org/obda/vocabulary#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:ms="http://www.semanticweb.org/ontologies/2018/4/mimic/"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:icd="http://purl.bioontology.org/ontology/HOM-ICD9CM/">
+     xmlns:icd="http://purl.bioontology.org/ontology/ICD9CM/">
     <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/"/>
+    
 
 
     <!-- 
@@ -113,6 +115,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/icd9Class -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/icd9Class">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/toCurrent -->
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/toCurrent">
@@ -188,15 +198,6 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasICDCode -->
-
-    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasICDCode">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-    </owl:DatatypeProperty>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasLanguage -->
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasLanguage">
@@ -224,11 +225,29 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasPatientID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasPatientID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/hasTransferTime -->
 
     <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/hasTransferTime">
         <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/icd9Code -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/icd9Code">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     </owl:DatatypeProperty>
     
 

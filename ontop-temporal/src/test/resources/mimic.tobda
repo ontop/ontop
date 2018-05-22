@@ -1,7 +1,7 @@
 [PrefixDeclaration]
 mt:		http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/
 ms:      http://www.semanticweb.org/ontologies/2018/4/mimic/
-icd:		http://purl.bioontology.org/ontology/HOM-ICD9CM/
+icd:		http://purl.bioontology.org/ontology/ICD9CM/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xml:		http://www.w3.org/XML/1998/namespace
@@ -12,11 +12,11 @@ onprom:		http://kaos.inf.unibz.it/onprom/
 
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-bodytemp
-target		ms:Patient/{subject_id} mt:hasBodyTemp {value}.
+target		ms:Patient/{subject_id} mt:hasBodyTemp {v}.
 interval    {temp_begin_inc} {temp_begin}^^xsd:dateTimeStamp, {temp_end}^^xsd:dateTimeStamp {temp_end_inc}
 source		SELECT "charteventscopy"."subject_id",
             CASE WHEN "charteventscopy"."itemid" IN (223762, 676, 677) THEN "charteventscopy"."valuenum"
-            WHEN "charteventscopy"."itemid" IN (223761, 678, 679) THEN ("charteventscopy"."valuenum" - 32) * 5 / 9 END AS "value",
+            WHEN "charteventscopy"."itemid" IN (223761, 678, 679) THEN ("charteventscopy"."valuenum" - 32) * 5 / 9 END AS "v",
             CAST('TRUE' AS Boolean) AS "temp_begin_inc", "charteventscopy"."charttime" AS "temp_begin",
             LEAD("charteventscopy"."charttime",1) OVER(PARTITION BY "charteventscopy"."subject_id" ORDER BY "charteventscopy"."charttime") AS "temp_end",
             CAST('TRUE' AS Boolean) AS "temp_end_inc" FROM "public"."charteventscopy"
@@ -27,13 +27,18 @@ target		ms:Patient/{subject_id} a mt:ICUStay.
 interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
 source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."outtime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc" FROM "public"."icustays"
 
+mappingId	urn:Map-admittedToICU
+target		ms:Patient/{subject_id} a mt:AdmittedToICU.
+interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
+source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."intime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc" FROM "public"."icustays"
+
 mappingId   urn:Map-CreatinineLevel
-target      ms:Patient/{subject_id} mt:hasCreatinineLevel {value}.
+target      ms:Patient/{subject_id} mt:hasCreatinineLevel {v}.
 interval    {lab_begin_inc} {lab_begin}^^xsd:dateTimeStamp, {lab_end}^^xsd:dateTimeStamp {lab_end_inc}
-source      SELECT "labevents"."subject_id", "labevents"."valuenum" AS "value",
+source      SELECT "labevents"."subject_id", "labevents"."valuenum" AS "v",
             CAST('TRUE' AS Boolean) AS "lab_begin_inc", "labevents"."charttime" AS "lab_begin",
             "labevents"."charttime" AS "lab_end", CAST('TRUE' AS Boolean) AS "lab_end_inc"
-            FROM "public"."labevents" LIMIT 10
+            FROM "public"."labevents" WHERE "labevents"."valuenum" IS NOT NULL LIMIT 10010
 
 mappingId   urn:Map-Arterial-line
 target      ms:Patient/{subject_id} a mt:ArterialLineCatheterDressed.

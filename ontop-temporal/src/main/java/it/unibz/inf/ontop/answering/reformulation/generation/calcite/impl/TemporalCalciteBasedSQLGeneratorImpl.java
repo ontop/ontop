@@ -1372,7 +1372,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                     // Calcite throws this exception.
                     QueryNode child = query.getFirstChild(temporalCoalesceNode).orElseThrow(() ->
                             new MissingTemporalIntermediateQueryNodeException("child of filter node is missing"));
-                    if (!(child instanceof ExtensionalDataNode)) {
+                    //if (!(child instanceof ExtensionalDataNode)) {
                         updateProjectedArguments(temporalCoalesceNode.getTerms(),
                                 ImmutableList.copyOf(lastProjectedArguments.subList(lastProjectedArguments.size() - 4, lastProjectedArguments.size())));
 
@@ -1398,7 +1398,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
 
                         createCoalesceClauses(clauseName);
                     }
-                }
+                //}
                 else {
                     System.out.println();
                 }
