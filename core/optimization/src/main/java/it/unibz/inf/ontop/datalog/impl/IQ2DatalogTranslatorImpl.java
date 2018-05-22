@@ -105,15 +105,15 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	 */
 	@Override
 	public DatalogProgram translate(IQ initialQuery) {
-		return translate(initialQuery.getTree(), Optional.of(initialQuery.getProjectionAtom()));
+		return translate(initialQuery.getTree(), initialQuery.getProjectionAtom());
 	}
 
 	@Override
-	public DatalogProgram translate(IQTree iqTree) {
-		return translate(iqTree, Optional.empty());
+	public DatalogProgram translate(IQTree iqTree, ImmutableList<Variable> childSignature) {
+		return translate(iqTree, generateProjectionAtom(childSignature));
 	}
 
-	private DatalogProgram translate(IQTree initialTree, Optional<DistinctVariableOnlyDataAtom> optionalProjectionAtom) {
+	private DatalogProgram translate(IQTree initialTree, DistinctVariableOnlyDataAtom projectionAtom) {
 
 		IQTree orderLiftedTree = liftOrderBy(initialTree);
 		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(orderLiftedTree);
@@ -130,7 +130,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 		}
 
 		normalizeIQTree(orderLiftedTree)
-				.forEach(t -> translate(t,  dProgram, optionalProjectionAtom));
+				.forEach(t -> translate(t,  dProgram, projectionAtom));
 
 		return dProgram;
 	}
@@ -219,7 +219,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private void translate(IQTree tree, DatalogProgram pr, Optional<DistinctVariableOnlyDataAtom> optionalProjectionAtom) {
+	private void translate(IQTree tree, DatalogProgram pr, DistinctVariableOnlyDataAtom projectionAtom) {
 		QueryNode root = tree.getRootNode();
 
 		Queue<RuleHead> heads = new LinkedList<>();
@@ -233,9 +233,6 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 		IQTree bodyTree = (tree.getRootNode() instanceof ConstructionNode)
 				? ((UnaryIQTree) tree).getChild()
 				: tree;
-
-		DistinctVariableOnlyDataAtom projectionAtom = optionalProjectionAtom
-				.orElseGet(() -> generateProjectionAtom(tree.getVariables()));
 
 		heads.add(new RuleHead(topSubstitution, projectionAtom, Optional.of(bodyTree)));
 
@@ -445,6 +442,10 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	}
 
 	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableSet<Variable> projectedVariables) {
+		return generateProjectionAtom(ImmutableList.copyOf(projectedVariables));
+	}
+
+	private DistinctVariableOnlyDataAtom generateProjectionAtom(ImmutableList<Variable> projectedVariables) {
 		AtomPredicate newPredicate = datalogFactory.getSubqueryPredicate("" + ++subQueryCounter, projectedVariables.size());
 		return atomFactory.getDistinctVariableOnlyDataAtom(newPredicate, ImmutableList.copyOf(projectedVariables));
 	}
