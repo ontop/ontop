@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.exception.DatalogConversionException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
@@ -106,32 +105,41 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	 */
 	@Override
 	public DatalogProgram translate(IQ initialQuery) {
+		return translate(initialQuery.getTree(), Optional.of(initialQuery.getProjectionAtom()));
+	}
 
-		IQ orderLiftedQuery = liftOrderBy(initialQuery);
-		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(orderLiftedQuery);
+	@Override
+	public DatalogProgram translate(IQTree iqTree) {
+		return translate(iqTree, Optional.empty());
+	}
+
+	private DatalogProgram translate(IQTree initialTree, Optional<DistinctVariableOnlyDataAtom> optionalProjectionAtom) {
+
+		IQTree orderLiftedTree = liftOrderBy(initialTree);
+		Optional<MutableQueryModifiers> optionalModifiers =  extractTopQueryModifiers(orderLiftedTree);
 
 		// Mutable
-        DatalogProgram dProgram;
+		DatalogProgram dProgram;
 		if (optionalModifiers.isPresent()){
 			MutableQueryModifiers mutableModifiers = optionalModifiers.get();
 
-            dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
+			dProgram = datalogFactory.getDatalogProgram(mutableModifiers);
 		}
-        else {
-            dProgram = datalogFactory.getDatalogProgram();
-        }
+		else {
+			dProgram = datalogFactory.getDatalogProgram();
+		}
 
-		normalizeIQ(orderLiftedQuery)
-				.forEach(q -> translate(q,  dProgram));
+		normalizeIQTree(orderLiftedTree)
+				.forEach(t -> translate(t,  dProgram, optionalProjectionAtom));
 
 		return dProgram;
 	}
+
 	/**
 	 * Assumes that ORDER BY is ABOVE the first construction node
 	 * and the order between these operators is respected and they appear ONE time maximum
 	 */
-	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IQ query) {
-		IQTree tree = query.getTree();
+	private Optional<MutableQueryModifiers> extractTopQueryModifiers(IQTree tree) {
 		QueryNode rootNode = tree.getRootNode();
 		if (rootNode instanceof QueryModifierNode) {
 			Optional<SliceNode> sliceNode = Optional.of(rootNode)
@@ -193,9 +201,9 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	/**
 	 * Assumes that ORDER BY is ABOVE the first construction node
 	 */
-	private IQTree getFirstNonQueryModifierTree(IQ query) {
+	private IQTree getFirstNonQueryModifierTree(IQTree initialTree) {
 		// Non-final
-		IQTree iqTree = query.getTree();
+		IQTree iqTree = initialTree;
 		while (iqTree.getRootNode() instanceof QueryModifierNode) {
 			iqTree = ((UnaryIQTree) iqTree).getChild();
 		}
@@ -211,26 +219,29 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
 	 */
-	private void translate(IQ query, DatalogProgram pr) {
-		QueryNode root = query.getTree().getRootNode();
-		if(!(root instanceof ConstructionNode)){
-			throw new DatalogConversionException("the root is expected to be a Construction Node");
-		}
+	private void translate(IQTree tree, DatalogProgram pr, Optional<DistinctVariableOnlyDataAtom> optionalProjectionAtom) {
+		QueryNode root = tree.getRootNode();
 
-		UnaryIQTree tree = (UnaryIQTree) query.getTree();
-
-		ConstructionNode rootCn = (ConstructionNode) root;
 		Queue<RuleHead> heads = new LinkedList<>();
 
-		ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(rootCn)
-			.map(ConstructionNode::getSubstitution)
-			.orElseGet(substitutionFactory::getSubstitution);
+		ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(root)
+				.filter(n -> n instanceof ConstructionNode)
+				.map(n -> (ConstructionNode)n)
+				.map(ConstructionNode::getSubstitution)
+				.orElseGet(substitutionFactory::getSubstitution);
 
-		heads.add(new RuleHead(topSubstitution, query.getProjectionAtom(), Optional.of(tree.getChild())));
+		IQTree bodyTree = (tree.getRootNode() instanceof ConstructionNode)
+				? ((UnaryIQTree) tree).getChild()
+				: tree;
+
+		DistinctVariableOnlyDataAtom projectionAtom = optionalProjectionAtom
+				.orElseGet(() -> generateProjectionAtom(tree.getVariables()));
+
+		heads.add(new RuleHead(topSubstitution, projectionAtom, Optional.of(bodyTree)));
 
 		// Mutable (append-only)
 		Map<QueryNode, DataAtom> subQueryProjectionAtoms = new HashMap<>();
-		subQueryProjectionAtoms.put(root, query.getProjectionAtom());
+		subQueryProjectionAtoms.put(root, projectionAtom);
 
 		//In heads we keep the heads of the sub-rules in the program, e.g. ans5() :- LeftJoin(....)
 		while(!heads.isEmpty()) {
@@ -459,14 +470,12 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 				: datalogFactory.getSPARQLJoin(atoms.get(0), rightTerm);
 	}
 
-	private ImmutableList<IQ> normalizeIQ(IQ query) {
-		IQTree tree = query.getTree();
+	private ImmutableList<IQTree> normalizeIQTree(IQTree tree) {
 		while(tree.getRootNode() instanceof QueryModifierNode){
 			tree = ((UnaryIQTree)tree).getChild();
 		}
 		return splitRootUnion(tree)
 				.map(this::enforceRootCn)
-				.map(t -> iqFactory.createIQ(query.getProjectionAtom(), t))
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -488,12 +497,12 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 	/**
 	 * Move ORDER BY above the highest construction node (required by Datalog)
 	 */
-	private IQ liftOrderBy(IQ iq) {
-		IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(iq);
+	private IQTree liftOrderBy(IQTree tree) {
+		IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(tree);
 		if ((topNonQueryModifierTree instanceof UnaryIQTree)
 				&& (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByNode)) {
-			return orderByLifter.liftOrderBy(iq);
+			return orderByLifter.liftOrderBy(tree);
 		}
-		return iq;
+		return tree;
 	}
 }

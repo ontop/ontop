@@ -39,12 +39,12 @@ public class OrderByLifter {
         this.iqFactory = iqFactory;
     }
 
-    public IQ liftOrderBy(IQ iq) {
+    public IQTree liftOrderBy(IQTree iqTree) {
 
         List<QueryModifierNode> ancestors = new ArrayList<>();
 
         // Non-final
-        IQTree parentTree = iq.getTree();
+        IQTree parentTree = iqTree;
         while ((parentTree.getRootNode() instanceof QueryModifierNode)) {
             ancestors.add((QueryModifierNode) parentTree.getRootNode());
             parentTree = ((UnaryIQTree)parentTree).getChild();
@@ -69,7 +69,7 @@ public class OrderByLifter {
                 for (QueryModifierNode modifierNode : ancestors) {
                     newTree = iqFactory.createUnaryIQTree(modifierNode, newTree);
                 }
-                return iqFactory.createIQ(iq.getProjectionAtom(), newTree);
+                return newTree;
             }
             else
                 throw new IllegalArgumentException(
