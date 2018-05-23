@@ -100,6 +100,12 @@ public class TemporalJoinNodeImpl extends JoinLikeNodeImpl implements TemporalJo
                 substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
     }
 
+    @Override
+    public TemporalJoinNode clone() {
+        return new TemporalJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(),
+                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), getImmutabilityTools(), iqFactory,
+                substitutionFactory, constructionNodeTools, unificationTools, substitutionTools);
+    }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {

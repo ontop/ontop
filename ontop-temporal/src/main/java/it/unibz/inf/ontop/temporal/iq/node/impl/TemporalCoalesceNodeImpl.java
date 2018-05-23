@@ -62,6 +62,12 @@ public class TemporalCoalesceNodeImpl implements TemporalCoalesceNode {
 
     @Override
     public QueryNode clone() {
+        try {
+            return iqFactory.createTemporalCoalesceNode(terms);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

@@ -37,7 +37,7 @@ PREFIX mt: <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
 PREFIX ms: <http://www.semanticweb.org/ontologies/2018/4/mimic/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX time: <http://www.w3.org/2006/time#>
-SELECT ?p ?d
+SELECT ?p ?bInc ?b ?e ?eInc
 WHERE {
 ?p ms:hasBeenDiagnosedWith ?d.
 ?d a HOM-ICD9CM:MM_CLASS_4648 .

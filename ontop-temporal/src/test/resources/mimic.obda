@@ -1,14 +1,18 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/ontologies/2018/4/mimic/
 ms:		http://www.semanticweb.org/ontologies/2018/4/mimic/
-icd:		http://purl.bioontology.org/ontology/ICD9CM/
+mt:		http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/
+icd:		http://purl.bioontology.org/ontology/HOM-ICD9CM/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
 xml:		http://www.w3.org/XML/1998/namespace
 xsd:		http://www.w3.org/2001/XMLSchema#
 obda:		https://w3id.org/obda/vocabulary#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
+time:		http://www.w3.org/2006/time#
+tobda:		https://w3id.org/tobda/vocabulary#
 onprom:		http://kaos.inf.unibz.it/onprom/
+HOM-ICD9CM:	http://purl.bioontology.org/ontology/HOM-ICD9CM/
 
 [MappingDeclaration] @collection [[
 mappingId	urn:Map-Adult
@@ -20,31 +24,31 @@ target		:Patient/{subject_id} a :PatientOlderThan15 .
 source		SELECT "patients"."subject_id" FROM "public"."icustays", "public"."patients" WHERE "icustays"."subject_id" = "patients"."subject_id" AND ("icustays"."intime" - interval '15' YEAR) > "patients"."dob"
 
 mappingId	urn:Map-Acidosis
-target		:Diagnosis/{icd9_code} a :Acidosis ; :ic9Code "276.2"^^xsd:string .
+target		:Diagnosis/{icd9_code} a :Acidosis . 
 source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '2762'
 
 mappingId	urn:Map-OtherAndUnspecifiedHyperlipidemia
-target		:Diagnosis/{icd9_code} a :OtherAndUnspecifiedHyperlipidemia ; :ic9Code "276.4"^^xsd:string .
+target		:Diagnosis/{icd9_code} a :OtherAndUnspecifiedHyperlipidemia . 
 source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '2724'
 
-mappingId	urn:Map-PureHyperglyceridemia
-target		:Diagnosis/{icd9_code} a :PureHyperglyceridemia ; :ic9Code "276.2"^^xsd:string .
-source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '2721'
+mappingId	urn:Map-PureHypercholesterolemia
+target		:Diagnosis/{icd9_code} a :PureHypercholesterolemia .
+source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '2720'
 
 mappingId	urn:Map-DiagnosedWithAcidosis
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} .
-source		SELECT DISTINCT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2762'
+target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2762'
 
 mappingId	urn:Map-DiagnosedWithOtherAndUnspecifiedHyperlipidemia
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} .
-source		SELECT DISTINCT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2724'
+target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2724'
 
-mappingId	urn:Map-DiagnosedWithPureHyperglyceridemia
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} .
-source		SELECT DISTINCT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2721'
+mappingId	urn:Map-DiagnosedWithPureHypercholesterolemia
+target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2720'
 
 mappingId	urn:Map-DiagnosedWithSepsis
-target		:Diagnosis/{subject_id}/{hadm_id}/{icd9_code} :icd9Code "995.91"^^xsd:string ; :icd9Class icd:995.91 . 
+target		:Diagnosis/{subject_id}/{hadm_id}/{icd9_code} :icd9Code "995.91"^^xsd:string ; :icd9Class <http://purl.bioontology.org/ontology/ICD9CM/995.91> . 
 source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."hadm_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '99591'
 
 mappingId	urn:Map-icdLabel

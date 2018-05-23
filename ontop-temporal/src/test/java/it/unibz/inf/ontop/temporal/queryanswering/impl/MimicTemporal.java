@@ -240,7 +240,33 @@ public class MimicTemporal {
         executeQuery(query);
     }
 
+    @Test
+    public void test10(){
 
+        String query =
+                "PREFIX HOM-ICD9CM: <http://purl.bioontology.org/ontology/HOM-ICD9CM/>\n" +
+                        "PREFIX mt: <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>\n" +
+                        "PREFIX ms: <http://www.semanticweb.org/ontologies/2018/4/mimic/>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX time: <http://www.w3.org/2006/time#>\n" +
+                        "SELECT ?p ?d \n" +
+                        "WHERE {\n" +
+                        "GRAPH ?g {?p  rdf:type mt:AdultICUPatientExcludedFromHIVClinicalTrial .}\n" +
+                        "?g time:hasTime _:intv .\n" +
+                        "_:inv time:isBeginInclusive ?bInc .\n" +
+                        "_:intv time:hasBeginning _:beginInst .\n" +
+                        "_:beginInst rdf:type time:Instant .\n" +
+                        "_:beginInst time:inXSDDateTime ?b .\n" +
+                        "_:intv time:hasEnd _:endInst .\n" +
+                        "_:endInst rdf:type time:Instant .\n" +
+                        "_:endInst time:inXSDDateTime ?e .\n" +
+                        "_:inv time:isEndInclusive ?eInc .\n" +
+                        "?p ms:hasBeenDiagnosedWith ?d.\n" +
+                        "?d a HOM-ICD9CM:MM_CLASS_4648 .\n" +
+                        "}";
+
+        executeQuery(query);
+    }
     private void executeQuery(String query) {
         try {
             OntopOWLFactory factory = OntopOWLFactory.defaultFactory();

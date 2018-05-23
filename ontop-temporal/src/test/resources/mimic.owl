@@ -1,16 +1,18 @@
 <?xml version="1.0"?>
 <rdf:RDF xmlns="http://www.semanticweb.org/ontologies/2018/4/mimic/"
      xml:base="http://www.semanticweb.org/ontologies/2018/4/mimic/"
+     xmlns:tobda="https://w3id.org/tobda/vocabulary#"
      xmlns:onprom="http://kaos.inf.unibz.it/onprom/"
      xmlns:obda="https://w3id.org/obda/vocabulary#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:ms="http://www.semanticweb.org/ontologies/2018/4/mimic/"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:mt="http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:HOM-ICD9CM="http://purl.bioontology.org/ontology/HOM-ICD9CM/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:icd="http://purl.bioontology.org/ontology/ICD9CM/">
+     xmlns:time="http://www.w3.org/2006/time#">
     <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/">
         <owl:imports rdf:resource="http://purl.bioontology.org/ontology/HOM-ICD9CM/"/>
     </owl:Ontology>
@@ -266,9 +268,9 @@
     
 
 
-    <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7726 -->
+    <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7725 -->
 
-    <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7726">
+    <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7725">
         <owl:equivalentClass rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/PureHypercholesterolemia"/>
     </rdf:Description>
     

@@ -21,17 +21,19 @@ source		SELECT "charteventscopy"."subject_id",
             LEAD("charteventscopy"."charttime",1) OVER(PARTITION BY "charteventscopy"."subject_id" ORDER BY "charteventscopy"."charttime") AS "temp_end",
             CAST('TRUE' AS Boolean) AS "temp_end_inc" FROM "public"."charteventscopy"
             WHERE "charteventscopy"."valuenum" is NOT NULL AND "charteventscopy"."itemid" IN (676, 677, 678, 679, 223761 , 223762)
+            LIMIT 10000
 
 mappingId	urn:Map-admittedToICU
 target		ms:Patient/{subject_id} a mt:AdmittedToICU.
 interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
 source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."intime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc" FROM "public"."icustays"
+            LIMIT 50000
 
 mappingId	urn:Map-icustay
 target		ms:Patient/{subject_id} a mt:ICUStay .
 interval    {icu_begin_inc} {icu_begin}^^xsd:dateTimeStamp, {icu_end}^^xsd:dateTimeStamp {icu_end_inc}
 source		SELECT "icustays"."subject_id", CAST('TRUE' AS Boolean) AS "icu_begin_inc", "icustays"."intime" AS "icu_begin", "icustays"."outtime" AS "icu_end", CAST('TRUE' AS Boolean) AS "icu_end_inc"
-            FROM "public"."icustays" LIMIT 10
+            FROM "public"."icustays" LIMIT 10000
 
 mappingId   urn:Map-CreatinineLevel
 target      ms:Patient/{subject_id} mt:hasCreatinineLevel {v}.
@@ -39,7 +41,7 @@ interval    {lab_begin_inc} {lab_begin}^^xsd:dateTimeStamp, {lab_end}^^xsd:dateT
 source      SELECT "labevents"."subject_id", "labevents"."valuenum" AS "v",
             CAST('TRUE' AS Boolean) AS "lab_begin_inc", "labevents"."charttime" AS "lab_begin",
             "labevents"."charttime" AS "lab_end", CAST('TRUE' AS Boolean) AS "lab_end_inc"
-            FROM "public"."labevents" LIMIT 10
+            FROM "public"."labevents" LIMIT 10000
 
 mappingId   urn:Map-Arterial-line
 target      ms:Patient/{subject_id} a mt:ArterialLineCatheterDressed.

@@ -237,9 +237,9 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
-                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+                //intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
 
-                log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
+                //log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
 
 //                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
 //
