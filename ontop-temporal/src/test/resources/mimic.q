@@ -30,3 +30,25 @@ _:inv time:isEndInclusive ?eInc .
 ?d ms:icd9Class icd:995.91 .
 icd:995.91 rdfs:label ?l .
 }
+
+[QueryItem="q2"]
+PREFIX HOM-ICD9CM: <http://purl.bioontology.org/ontology/HOM-ICD9CM/>
+PREFIX mt: <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
+PREFIX ms: <http://www.semanticweb.org/ontologies/2018/4/mimic/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX time: <http://www.w3.org/2006/time#>
+SELECT ?p ?d
+WHERE {
+?p ms:hasBeenDiagnosedWith ?d.
+?d a HOM-ICD9CM:MM_CLASS_4648 .
+GRAPH ?g {?p  rdf:type mt:AdultICUPatientExcludedFromHIVClinicalTrial .}
+?g time:hasTime _:intv .
+_:inv time:isBeginInclusive ?bInc .
+_:intv time:hasBeginning _:beginInst .
+_:beginInst rdf:type time:Instant .
+_:beginInst time:inXSDDateTime ?b .
+_:intv time:hasEnd _:endInst .
+_:endInst rdf:type time:Instant .
+_:endInst time:inXSDDateTime ?e .
+_:inv time:isEndInclusive ?eInc .
+}

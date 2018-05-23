@@ -8,9 +8,12 @@
      xmlns:ms="http://www.semanticweb.org/ontologies/2018/4/mimic/"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:HOM-ICD9CM="http://purl.bioontology.org/ontology/HOM-ICD9CM/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:icd="http://purl.bioontology.org/ontology/ICD9CM/">
-    <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/"/>
+    <owl:Ontology rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/">
+        <owl:imports rdf:resource="http://purl.bioontology.org/ontology/HOM-ICD9CM/"/>
+    </owl:Ontology>
     
 
 
@@ -263,6 +266,38 @@
     
 
 
+    <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7726 -->
+
+    <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7726">
+        <owl:equivalentClass rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/PureHypercholesterolemia"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7729 -->
+
+    <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7729">
+        <owl:equivalentClass rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/OtherAndUnspecifiedHyperlipidemia"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7778 -->
+
+    <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_7778">
+        <owl:equivalentClass rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Acidosis"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Acidosis -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Acidosis">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Admission -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Admission">
@@ -284,6 +319,22 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis">
         <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1065,342</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/DiseaseAndInjury -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/DiseaseAndInjury">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/Diagnosis"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/DiseaseAndInjury"/>
     </owl:Class>
     
 
@@ -322,6 +373,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/OtherAndUnspecifiedHyperlipidemia -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/OtherAndUnspecifiedHyperlipidemia">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Patient -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Patient">
@@ -338,6 +397,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/PureHypercholesterolemia -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/PureHypercholesterolemia">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Service -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Service">
@@ -350,6 +417,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Transfer">
         <onprom:coordinates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">39,342</onprom:coordinates>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/UnspecifiedAcquiredHypothyroidism -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/UnspecifiedAcquiredHypothyroidism">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders"/>
     </owl:Class>
 </rdf:RDF>
 

@@ -11,13 +11,11 @@ public class Mimic {
     public void test1(){
 
         String query = "PREFIX ms:  <http://www.semanticweb.org/ontologies/2018/4/mimic/>\n" +
-                "PREFIX icd: <http://purl.bioontology.org/ontology/ICD9CM/>\n" +
-                        "SELECT ?s ?c ?x ?y ?l " +
+                "PREFIX icd: <http://purl.bioontology.org/ontology/HOM-ICD9CM/>\n" +
+                        "SELECT ?s ?c " +
                         "WHERE {" +
                         "?s ms:hasBeenDiagnosedWith ?c." +
-                        "?c ms:icd9Code ?x ." +
-                        "?c ms:icd9Class ?y ." +
-                        "?y rdfs:label ?l ." +
+                        "?c a ms:EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders ." +
                         "}";
 
 //        String query = "PREFIX ms:  <http://www.semanticweb.org/ontologies/2018/4/mimic/>\n" +
