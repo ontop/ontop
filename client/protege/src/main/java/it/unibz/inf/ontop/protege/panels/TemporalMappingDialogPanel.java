@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
@@ -51,8 +50,6 @@ public class TemporalMappingDialogPanel extends JPanel {
     private final TemporalOBDAModel obdaModel;
     private final JDialog parent;
 
-    private final PrefixManager prefixManager;
-
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
     private JButton btnTestQuery;
 
@@ -62,13 +59,7 @@ public class TemporalMappingDialogPanel extends JPanel {
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 
-		prefixManager = obdaModel.getMutablePrefixManager();
-
 		initComponents();
-
-		//cmdInsertMapping.setEnabled(false);
-        //QueryPainter painter = new QueryPainter(obdaModel, txtTargetQuery);
-		//painter.addValidatorListener(result -> cmdInsertMapping.setEnabled(result));
 
 		cmdInsertMapping.addActionListener(e -> insertMapping());
 
@@ -475,7 +466,7 @@ public class TemporalMappingDialogPanel extends JPanel {
 		txtSourceQuery.setText(srcQuery);
 
 		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
+        String trgQuery = TargetQueryRenderer.encode(targetQuery, obdaModel.getMutablePrefixManager());
 		txtTargetQuery.setText(trgQuery);
 
 		txtInterval.setText(mapping.getTemporalMappingInterval().toString());

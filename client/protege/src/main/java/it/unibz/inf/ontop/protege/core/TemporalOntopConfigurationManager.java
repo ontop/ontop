@@ -29,11 +29,10 @@ public class TemporalOntopConfigurationManager extends OntopConfigurationManager
             e.printStackTrace();
         }
         OntopTemporalSQLOWLAPIConfiguration.Builder builder = OntopTemporalSQLOWLAPIConfiguration.defaultBuilder()
-                .enableTemporalMode()
                 .properties(snapshotProperties())
-                .ppMapping(nativeObdaModel.generatePPMapping())
                 .nativeOntopTemporalMappingFile(temporaryTemporalFile)
-                .nativeOntopTemporalRuleProgram(((TemporalOBDAModel) obdaModel).getDatalogMTLProgram());
+                .nativeOntopTemporalRuleProgram(((TemporalOBDAModel) obdaModel).getDatalogMTLProgram())
+                .ppMapping(nativeObdaModel.generatePPMapping());
         Optional.ofNullable(implicitDBConstraintFile)
                 .ifPresent(builder::basicImplicitConstraintFile);
         builder.ontology(currentOntology);

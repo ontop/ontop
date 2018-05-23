@@ -84,11 +84,6 @@
             <artifactId>calcite-core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.calcite</groupId>
-            <artifactId>calcite-server</artifactId>
-        </dependency>
-
         <!-- JDBC Drivers -->
 
         <dependency>
