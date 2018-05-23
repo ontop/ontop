@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.OntopTemporalMappingSQLAllSettings;
 import it.unibz.inf.ontop.injection.OntopTemporalSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.temporal.model.DatalogMTLProgram;
+import org.apache.commons.rdf.api.Graph;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -149,11 +150,6 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         }
 
         @Override
-        public B enableTemporalMode(){
-            return temporalMappingBuilderFragment.enableTemporalMode();
-        }
-
-        @Override
         public B nativeOntopTemporalRuleFile(@Nonnull File ruleFile) {
             return localFragmentBuilder.nativeOntopTemporalRuleFile(ruleFile);
         }
@@ -174,6 +170,11 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         }
 
         @Override
+        public B enableTemporalMode() {
+            return temporalMappingBuilderFragment.enableTemporalMode();
+        }
+
+        @Override
         public B nativeOntopTemporalMappingFile(@Nonnull final File mappingFile) {
             return temporalMappingBuilderFragment.nativeOntopTemporalMappingFile(mappingFile);
         }
@@ -186,6 +187,61 @@ public class OntopTemporalSQLOWLAPIConfigurationImpl
         @Override
         public B nativeOntopTemporalMappingReader(@Nonnull final Reader mappingReader) {
             return temporalMappingBuilderFragment.nativeOntopTemporalMappingReader(mappingReader);
+        }
+
+        @Override
+        public B nativeOntopMappingFile(@Nonnull final String mappingFile) {
+            return temporalMappingBuilderFragment.nativeOntopMappingFile(mappingFile);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull final File mappingFile) {
+            return temporalMappingBuilderFragment.r2rmlMappingFile(mappingFile);
+        }
+
+        @Override
+        public B r2rmlMappingGraph(@Nonnull final Graph rdfGraph) {
+            return temporalMappingBuilderFragment.r2rmlMappingGraph(rdfGraph);
+        }
+
+        @Override
+        public B nativeOntopMappingFile(@Nonnull File mappingFile) {
+            return temporalMappingBuilderFragment.nativeOntopMappingFile(mappingFile);
+        }
+
+        @Override
+        public B nativeOntopMappingReader(@Nonnull Reader mappingReader) {
+            return temporalMappingBuilderFragment.nativeOntopMappingReader(mappingReader);
+        }
+
+        @Override
+        public B r2rmlMappingFile(@Nonnull String mappingFilename) {
+            return temporalMappingBuilderFragment.r2rmlMappingFile(mappingFilename);
+        }
+
+        @Override
+        public B r2rmlMappingReader(@Nonnull Reader mappingReader) {
+            return temporalMappingBuilderFragment.r2rmlMappingReader(mappingReader);
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull File constraintFile) {
+            return temporalMappingBuilderFragment.basicImplicitConstraintFile(constraintFile);
+        }
+
+        @Override
+        public B basicImplicitConstraintFile(@Nonnull String constraintFilename) {
+            return temporalMappingBuilderFragment.basicImplicitConstraintFile(constraintFilename);
+        }
+
+        @Override
+        void declareImplicitConstraintSetDefined() {
+            super.declareImplicitConstraintSetDefined();
+        }
+
+        @Override
+        boolean isR2rml() {
+            return temporalMappingBuilderFragment.isR2rml();
         }
 
         final OntopTemporalSQLOWLAPIOptions generateTemporalSQLOWLAPIOptions() {
