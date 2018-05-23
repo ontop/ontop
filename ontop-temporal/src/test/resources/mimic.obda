@@ -28,22 +28,7 @@ target		:Diagnosis/{subject_id}/{hadm_id}/{icd9_code} :icd9Code "995.91"^^xsd:st
 source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."hadm_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '99591'
 
 mappingId	urn:Map-icdLabel
-target		<{classid}> rdfs:label {preferredlabel} . 
+target		<{classid}> rdfs:label {preferredlabel} .
 source		SELECT "icd9"."classid", "icd9"."preferredlabel" FROM "public"."icd9"
-
-mappingId	urn:Map-Peripheral-Vascular-Disorder
-target		icd:443.9/{subject_id} a icd:443.9 . 
-source		SELECT "diagnoses_icd"."subject_id" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" between '4400 ' and '4409 ' OR "diagnoses_icd"."icd9_code"  between '4420 ' and '4429 ' OR "diagnoses_icd"."icd9_code" between '4431 ' and '4439 '
-			OR "diagnoses_icd"."icd9_code" between '44421' and '44422' OR "diagnoses_icd"."icd9_code" IN ('4471 ', '449  ', '5571 ', '5579 ', 'V434 ')
-
-mappingId	urn:Map-Diabetes
-target		icd:250/{subject_id} a icd:250 . 
-source		SELECT "diagnoses_icd"."subject_id" FROM "public"."diagnoses_icd"
-			WHERE "diagnoses_icd"."icd9_code" between '25000' and '25033'
-			OR "diagnoses_icd"."icd9_code" between '64800' and '64804'
-			OR "diagnoses_icd"."icd9_code" between '24900' and '24931'
-			OR "diagnoses_icd"."icd9_code" between '25040' and '25093'
-			OR "diagnoses_icd"."icd9_code" between '24940' and '24991'
-			OR "diagnoses_icd"."icd9_code" = '7751 '
 ]]
 
