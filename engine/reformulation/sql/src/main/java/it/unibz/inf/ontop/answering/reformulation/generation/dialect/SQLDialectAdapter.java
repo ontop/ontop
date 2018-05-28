@@ -149,5 +149,5 @@ public interface SQLDialectAdapter {
 
     String ifElseNull(String condition, String valueIfTrue);
 
-    String getNullForLang();
+    String getNullConstant();
 }

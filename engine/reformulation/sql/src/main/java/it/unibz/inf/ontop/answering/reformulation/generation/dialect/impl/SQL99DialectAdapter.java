@@ -486,7 +486,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
     @Override
-    public String getNullForLang() {
+    public String getNullConstant() {
         return "NULL";
     }
 
