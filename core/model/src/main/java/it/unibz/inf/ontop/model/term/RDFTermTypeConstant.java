@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term;
 
+import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
 /**
@@ -8,9 +9,13 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
  * Should disappear from the query before its translation
  * into a native query.
  *
+ * Plays at a "meta-level".
+ *
  */
 public interface RDFTermTypeConstant extends Constant {
 
     @Override
-    RDFTermType getType();
+    MetaRDFTermType getType();
+
+    RDFTermType getRDFTermType();
 }

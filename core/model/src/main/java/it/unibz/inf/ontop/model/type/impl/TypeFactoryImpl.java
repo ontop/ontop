@@ -28,7 +28,9 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final Map<String, RDFDatatype> langTypeCache = new ConcurrentHashMap<>();
 
 	private final TermType rootTermType;
+	private final MetaRDFTermType metaRDFTermType;
 	private final RDFTermType rootRDFTermType;
+	@Deprecated
 	private final UnboundRDFTermType unboundRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
@@ -49,7 +51,7 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
-
+		metaRDFTermType = MetaRDFTermTypeImpl.createMetaRDFTermType(rootRDFTermType.getAncestry());
 		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
 
 		objectRDFType = AbstractObjectRDFType.createAbstractObjectRDFType(rootRDFTermType.getAncestry());
@@ -211,7 +213,12 @@ public class TypeFactoryImpl implements TypeFactory {
 		return objectRDFType;
     }
 
-    private RDFDatatype createLangStringDatatype(String languageTagString) {
+	@Override
+	public MetaRDFTermType getMetaRDFTermType() {
+		return metaRDFTermType;
+	}
+
+	private RDFDatatype createLangStringDatatype(String languageTagString) {
 		return LangDatatype.createLangDatatype(
 				new LanguageTagImpl(languageTagString), xsdStringDatatype.getAncestry(), this);
 	}

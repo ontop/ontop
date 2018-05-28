@@ -42,6 +42,7 @@ import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 public class TermFactoryImpl implements TermFactory {
 
 	private final TypeFactory typeFactory;
+	private final FunctionSymbolFactory functionSymbolFactory;
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
 	private final ValueConstant valueNull;
@@ -52,9 +53,10 @@ public class TermFactoryImpl implements TermFactory {
 	private final boolean isTestModeEnabled;
 
 	@Inject
-	private TermFactoryImpl(TypeFactory typeFactory, OntopModelSettings settings) {
+	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory, OntopModelSettings settings) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
+		this.functionSymbolFactory = functionSymbolFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
@@ -134,7 +136,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type) {
 		return termTypeConstantMap
-				.computeIfAbsent(type, RDFTermTypeConstantImpl::new);
+				.computeIfAbsent(type, t -> new RDFTermTypeConstantImpl(t, typeFactory.getMetaRDFTermType()));
 	}
 
 	@Override
@@ -432,6 +434,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public URITemplatePredicate getURITemplatePredicate(int arity) {
 		return new URITemplatePredicateImpl(arity, typeFactory);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunction(), lexicalTerm, typeTerm);
 	}
 
 	private static class NoConstructionFunctionException extends OntopInternalBugException {

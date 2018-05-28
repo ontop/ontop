@@ -3,26 +3,34 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.stream.Stream;
 
 public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
 
-    private final RDFTermType termType;
+    private final RDFTermType rdfTermType;
+    private final MetaRDFTermType metaType;
 
-    protected RDFTermTypeConstantImpl(RDFTermType rdfTermType) {
-        termType = rdfTermType;
+    protected RDFTermTypeConstantImpl(RDFTermType rdfTermType, MetaRDFTermType metaType) {
+        this.rdfTermType = rdfTermType;
+        this.metaType = metaType;
     }
 
     @Override
-    public RDFTermType getType() {
-        return termType;
+    public MetaRDFTermType getType() {
+        return metaType;
+    }
+
+    @Override
+    public RDFTermType getRDFTermType() {
+        return rdfTermType;
     }
 
     @Override
     public String getValue() {
-        return termType.toString();
+        return rdfTermType.toString();
     }
 
     @Override
@@ -37,13 +45,13 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
 
     @Override
     public int hashCode() {
-        return termType.hashCode();
+        return rdfTermType.hashCode();
     }
 
     @Override
     public boolean equals(Object other) {
         return (other instanceof RDFTermTypeConstant)
-                && termType.equals(((RDFTermTypeConstant) other).getType());
+                && rdfTermType.equals(((RDFTermTypeConstant) other).getRDFTermType());
     }
 
     @Override
@@ -57,6 +65,6 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
     @Deprecated
     @Override
     public Term clone() {
-        return new RDFTermTypeConstantImpl(termType);
+        return new RDFTermTypeConstantImpl(rdfTermType, metaType);
     }
 }
