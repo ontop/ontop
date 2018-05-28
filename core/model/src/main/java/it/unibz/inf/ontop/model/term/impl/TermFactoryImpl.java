@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -47,6 +48,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
+	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
 
 	@Inject
@@ -60,6 +62,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.type2FunctionSymbolMap = new HashMap<>();
+		this.termTypeConstantMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
 	}
 
@@ -126,6 +129,12 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Variable getVariable(String name) {
 		return new VariableImpl(name);
+	}
+
+	@Override
+	public RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type) {
+		return termTypeConstantMap
+				.computeIfAbsent(type, RDFTermTypeConstantImpl::new);
 	}
 
 	@Override

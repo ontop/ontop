@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.model.term;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -232,6 +233,8 @@ public interface TermFactory {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
+
+	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
 
 	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
