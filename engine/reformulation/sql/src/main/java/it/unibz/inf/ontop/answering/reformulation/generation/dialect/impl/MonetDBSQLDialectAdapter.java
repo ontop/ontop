@@ -244,8 +244,8 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
     }
 
     @Override
-    public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
-        return sqlQuote(signatureVariableName + proposedSuffix);
+    public String nameTopVariable(String variableName, Set<String> sqlVariableNames) {
+        return sqlQuote(variableName);
     }
 
 }

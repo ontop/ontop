@@ -34,7 +34,7 @@ public class TypeExtractor {
 
     @Inject
     private TypeExtractor(Relation2Predicate relation2Predicate, TermTypeInferenceTools termTypeInferenceTools,
-                          TypeFactory typeFactory, ImmutabilityTools immutabilityTools, JdbcTypeMapper jdbcTypeMapper) {
+                          TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
         this.relation2Predicate = relation2Predicate;
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.literalType = typeFactory.getAbstractRDFSLiteral();
@@ -43,17 +43,10 @@ public class TypeExtractor {
 
 
     public static class TypeResults {
-        private final ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap;
         private final ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap;
 
-        private TypeResults(ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-                           ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap) {
-            this.termTypeMap = termTypeMap;
+        private TypeResults(ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap) {
             this.castTypeMap = castTypeMap;
-        }
-
-        public ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> getTermTypeMap() {
-            return termTypeMap;
         }
 
         public ImmutableMap<Predicate, ImmutableList<TermType>> getCastTypeMap() {
@@ -70,8 +63,7 @@ public class TypeExtractor {
             throws IncompatibleTermException {
         ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
 
-        return new TypeResults(termTypeMap,
-                extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
+        return new TypeResults(extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
     }
 
     private ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules)

@@ -120,7 +120,7 @@ public interface SQLDialectAdapter {
 	/**
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
-	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
+	public String nameTopVariable(String signatureVariable, Set<String> sqlVariableNames);
 
 	public String dateNow();
 	

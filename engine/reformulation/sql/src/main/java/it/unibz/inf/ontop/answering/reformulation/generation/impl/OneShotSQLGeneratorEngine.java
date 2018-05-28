@@ -56,7 +56,6 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
-import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -73,8 +72,6 @@ import java.sql.Types;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.*;
 
 /**
  * This class generates an SQLExecutableQuery from the datalog program coming from the
@@ -96,10 +93,6 @@ public class OneShotSQLGeneratorEngine {
     private static final String VIEW_SUFFIX = "VIEW";
     private static final String VIEW_ANS_SUFFIX = "View";
 	private static final String OUTER_VIEW_NAME = "SUB_QVIEW";
-
-	private static final String TYPE_COLUMN_SUFFIX = "QuestType";
-    private static final String LANG_COLUMN_SUFFIX = "Lang";
-    private static final String MAIN_COLUMN_SUFFIX = "";
 
 	private static final String INDENT = "    ";
 
@@ -415,7 +408,6 @@ public class OneShotSQLGeneratorEngine {
 			throw new OntopTypingException(e.getMessage());
 		}
 
-		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
 
 		// non-top-level intensional predicates - need to create subqueries
@@ -456,17 +448,15 @@ public class OneShotSQLGeneratorEngine {
 
 				// Creates the body of the subquery
 				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
-						subQueryDefinitionsBuilder.build(), termTypeMap, false);
+						subQueryDefinitionsBuilder.build(), false);
 
 				RelationID subQueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
 				usedAliases.add(subQueryAlias);
 
 				ImmutableList.Builder<QualifiedAttributeID> columnsBuilder = ImmutableList.builder();
 				for (SignatureVariable var : s) {
-					for (String alias : var.columnAliases) {
-						columnsBuilder.add(new QualifiedAttributeID(subQueryAlias,
-								metadata.getQuotedIDFactory().createAttributeID(alias)));
-					}
+					columnsBuilder.add(new QualifiedAttributeID(subQueryAlias,
+							metadata.getQuotedIDFactory().createAttributeID(var.columnAlias)));
 				}
 				FromItem item = new FromItem(subQueryAlias, inBrackets(subQuery), columnsBuilder.build());
 				subQueryDefinitionsBuilder.put(pred, item);
@@ -478,8 +468,7 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableList<SignatureVariable> topSignature = createSignature(signature, castTypeMap.get(topLevelPredicate));
 
 		return generateQueryFromRules(ruleIndex.get(topLevelPredicate), topSignature,
-				subQueryDefinitionsBuilder.build(), termTypeMap,
-				isDistinct && !distinctResultSet);
+				subQueryDefinitionsBuilder.build(), isDistinct && !distinctResultSet);
 	}
 
 
@@ -490,13 +479,11 @@ public class OneShotSQLGeneratorEngine {
 	 * @param cqs
 	 * @param signature
 	 * @param subQueryDefinitions
-	 * @param termTypeMap
 	 * @param unionNoDuplicates
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariable> signature,
 										  ImmutableMap<Predicate, FromItem> subQueryDefinitions,
-										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
 										  boolean unionNoDuplicates) {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
@@ -513,10 +500,9 @@ public class OneShotSQLGeneratorEngine {
 			List<String> select;
 			if (!signature.isEmpty()) {
 				List<Term> terms = cq.getHead().getTerms();
-				List<Optional<TermType>> termTypes = termTypeMap.get(cq);
 				select = Lists.newArrayListWithCapacity(signature.size());
 				for (int i = 0; i < signature.size(); i++) {
-					select.add(getSelectClauseFragment(signature.get(i), terms.get(i), termTypes.get(i), index));
+					select.add(getSelectClauseFragment(signature.get(i), terms.get(i), index));
 				}
 			}
 			else {
@@ -945,11 +931,11 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final class SignatureVariable {
 		private final String name;
-		private final ImmutableList<String> columnAliases;
+		private final String columnAlias;
 		private final TermType castType;
-		SignatureVariable(String name, ImmutableList<String> columnAliases, TermType castType) {
+		SignatureVariable(String name, String columnAlias, TermType castType) {
 			this.name = name;
-			this.columnAliases = columnAliases;
+			this.columnAlias = columnAlias;
 			this.castType = castType;
 		}
 	}
@@ -961,29 +947,14 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSelectClauseFragment(SignatureVariable var,
 										   Term term,
-										   Optional<TermType> termType,
 										   AliasIndex index) {
-		/*
-		 * Datatype for the main column (to which it is cast).
-		 * Beware, it may defer the RDF datatype (the one of the type column).
-		 *
-		 * Why? Because most DBs (if not all) require the result table to have
-		 * one datatype per column. If the sub-queries are producing results of different types,
-		 * them there will be a difference between the type in the main column and the RDF one.
-		 */
-		String typeColumn = getTypeColumnForSELECT(term, index, termType);
-		String langColumn = getLangColumnForSELECT(term, index, termType);
 		String mainColumn = getMainColumnForSELECT(term, index, var.castType);
 
-		return new StringBuffer().append("\n   ")
-				.append(typeColumn).append(" AS ").append(var.columnAliases.get(0)).append(", ")
-				.append(langColumn).append(" AS ").append(var.columnAliases.get(1)).append(", ")
-				.append(mainColumn).append(" AS ").append(var.columnAliases.get(2))
-				.toString();
+		return "\n   " + mainColumn + " AS " + var.columnAlias;
 	}
 
 	private ImmutableList<SignatureVariable> createSignature(List<String> names, ImmutableList<TermType> castTypes) {
-		/**
+		/*
 		 * Set that contains all the variable names created on the top query.
 		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
 		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
@@ -993,19 +964,10 @@ public class OneShotSQLGeneratorEngine {
 		for (int i = 0; i < names.size(); i++) {
 			String name = names.get(i);
 
-			// Creates name names that satisfy the restrictions of the SQL dialect.
-			String typeAlias = sqladapter.nameTopVariable(name, TYPE_COLUMN_SUFFIX, columnAliases);
-			columnAliases.add(typeAlias);
-
-			String langAlias = sqladapter.nameTopVariable(name, LANG_COLUMN_SUFFIX, columnAliases);
-			columnAliases.add(langAlias);
-
-			String mainAlias = sqladapter.nameTopVariable(name, MAIN_COLUMN_SUFFIX, columnAliases);
+			String mainAlias = sqladapter.nameTopVariable(name, columnAliases);
 			columnAliases.add(mainAlias);
 
-			builder.add(new SignatureVariable(name,
-					ImmutableList.of(typeAlias, langAlias, mainAlias),
-					castTypes.get(i)));
+			builder.add(new SignatureVariable(name, mainAlias, castTypes.get(i)));
 		}
 		return builder.build();
 	}
@@ -1018,65 +980,6 @@ public class OneShotSQLGeneratorEngine {
 			return sqladapter.sqlCast(column, jdbcTypeMapper.getSQLType(castDataType));
 		}
 		return column;
-	}
-
-	private String getLangColumnForSELECT(Term ht, AliasIndex index, Optional<TermType> optionalTermType) {
-
-		if (ht instanceof Variable) {
-			return index.getLangColumn((Variable) ht)
-					.map(QualifiedAttributeID::getSQLRendering)
-					.orElse(sqladapter.getNullForLang());
-		}
-		else {
-			return optionalTermType
-					.filter(t -> t instanceof RDFDatatype)
-					.map(t -> (RDFDatatype)t)
-					.flatMap(RDFDatatype::getLanguageTag)
-					.map(tag -> sqladapter.getSQLLexicalFormString(tag.getFullString()))
-					.orElseGet(sqladapter::getNullForLang);
-		}
-    }
-
-	/**
-	 * Infers the type of a projected term.
-	 *
-	 * Note this type may differ from the one used for casting the main column (in some special cases).
-	 * This type will appear as the RDF datatype.
-	 *
-	 * @param ht
-	 * @param index Used when the term correspond to a column name
-	 * @param optionalTermType
-	 */
-	private String getTypeColumnForSELECT(Term ht, AliasIndex index, Optional<TermType> optionalTermType) {
-
-		if (ht instanceof Variable) {
-	        // Such variable does not hold this information, so we have to look
-	        // at the database metadata.
-			return index.getTypeColumn((Variable) ht)
-					.map(QualifiedAttributeID::getSQLRendering)
-					// By default, we assume that the variable is an IRI.
-					.orElseGet(() -> String.valueOf(OBJECT.getQuestCode()));
-		}
-		else {
-			COL_TYPE colType = optionalTermType
-					.flatMap(this::extractColType)
-					// By default, we apply the "most" general COL_TYPE
-					.orElse(STRING);
-
-			return String.valueOf(colType.getQuestCode());
-		}
-	}
-
-	private Optional<COL_TYPE> extractColType(TermType termType) {
-		if (termType instanceof ObjectRDFType) {
-			COL_TYPE colType = ((ObjectRDFType)termType).isBlankNode() ? BNODE : OBJECT;
-			return Optional.of(colType);
-		}
-		else if (termType instanceof RDFDatatype) {
-			return Optional.of(COL_TYPE.getColType(((RDFDatatype)termType).getIRI()));
-		}
-		else
-			return Optional.empty();
 	}
 
 
@@ -1306,11 +1209,7 @@ public class OneShotSQLGeneratorEngine {
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
 		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
-			Variable var = (Variable) function.getTerm(0);
-			Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
-			if (!lang.isPresent())
-				throw new RuntimeException("Cannot find LANG column for " + var);
-			return lang.get().getSQLRendering();
+			throw new RuntimeException("SPARQL_LANG is not supported by the SQL generator");
 		}
 		/**
 		 * TODO: replace by a switch
@@ -1667,34 +1566,6 @@ public class OneShotSQLGeneratorEngine {
 		public QualifiedAttributeID getColumn(Function atom, int column) {
 			FromItem dd = fromItemsForAtoms.get(atom);
 			return dd.attributes.get(column);
-		}
-
-		public Optional<QualifiedAttributeID> getTypeColumn(Variable var) {
-			return getNonMainColumn(var, -2);
-		}
-
-		public Optional<QualifiedAttributeID> getLangColumn(Variable var) {
-			return getNonMainColumn(var, -1);
-		}
-
-		private Optional<QualifiedAttributeID> getNonMainColumn(Variable var, int relativeIndexWrtMainColumn) {
-
-			// For each column reference corresponding to the variable.
-			// For instance, columnRef is `Qans4View`.`v1` .
-			for (QualifiedAttributeID mainColumn : getColumns(var)) {
-				// If the var is defined in a ViewDefinition, then there is a
-				// column for the type and we just need to refer to that column.
-				//
-				// For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
-
-				FromItem subQuery = subQueryFromItems.get(mainColumn.getRelation());
-				if (subQuery != null) {
-					int mainColumnIndex = subQuery.attributes.indexOf(mainColumn);
-					return Optional.of(subQuery.attributes.get(
-							mainColumnIndex + relativeIndexWrtMainColumn));
-				}
-			}
-			return Optional.empty();
 		}
 	}
 
