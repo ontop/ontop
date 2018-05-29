@@ -25,15 +25,13 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.*;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +48,7 @@ public class R2RMLParser {
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final SimpleRDF rdfFactory;
 
 	/**
 	 * empty constructor
@@ -60,8 +59,9 @@ public class R2RMLParser {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		mapManager = RDF4JR2RMLMappingManager.getInstance();
-		classPredicates = new ArrayList<ImmutableFunctionalTerm>();
+		classPredicates = new ArrayList<>();
 		joinPredObjNodes = new ArrayList<>();
+		rdfFactory = new SimpleRDF();
 	}
 
 	/**
@@ -537,33 +537,28 @@ public class R2RMLParser {
 		string = string.replace("[", "{");
 		string = string.replace("]", "}");
 
-		ImmutableTerm uriTemplate = null;
 		switch (type) {
 		// constant uri
 		case 0:
-			uriTemplate = termFactory.getConstantLiteral(string);
-			terms.add(0, uriTemplate); // the URI template is always on the
-										// first position in the term list
-			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			IRI iri = rdfFactory.createIRI(string);
+			return termFactory.getIRIFunctionalTerm(iri);
 			// URI or IRI
 		case 1:
-			uriTemplate = termFactory.getConstantLiteral(string);
-			terms.add(0, uriTemplate); // the URI template is always on the
-										// first position in the term list
-			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			return termFactory.getIRIFunctionalTerm(string, ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
-			uriTemplate = termFactory.getConstantBNode(string);
-			terms.add(0, uriTemplate); // the URI template is always on the
+			// TODO: refactor
+			BNode bnodeTemplate = termFactory.getConstantBNode(string);
+			terms.add(0, bnodeTemplate); // the URI template is always on the
 										// first position in the term list
 			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
 			// simple LITERAL
 		case 3:
-			uriTemplate = terms.remove(0);
+			ImmutableTerm lexicalValue = terms.remove(0);
 			// pred = typeFactory.getRequiredTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return termFactory.getImmutableTypedTerm(uriTemplate, XSD.STRING);
+			return termFactory.getImmutableTypedTerm(lexicalValue, XSD.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

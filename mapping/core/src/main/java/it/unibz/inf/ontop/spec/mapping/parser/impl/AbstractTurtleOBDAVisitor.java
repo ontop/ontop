@@ -72,12 +72,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (size == 1) {
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
-                ValueConstant uriTemplate = termFactory.getConstantLiteral(token.toString()); // a single URI template
-                toReturn = termFactory.getImmutableUriTemplate(uriTemplate);
+                IRI iri = rdfFactory.createIRI(token.toString());
+                toReturn = termFactory.getIRIFunctionalTerm(iri);
             } else if (token instanceof ColumnString) {
-                // a single URI template
+                // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getImmutableUriTemplate(column);
+                toReturn = termFactory.getIRIFunctionalTerm(column);
             }
         } else {
             StringBuilder sb = new StringBuilder();
@@ -90,9 +90,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                     terms.add(column);
                 }
             }
-            ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
-            terms.add(0, uriTemplate);
-            toReturn = termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+            String iriTemplate = sb.toString(); // complete IRI template
+            toReturn = termFactory.getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(terms));
         }
         return toReturn;
     }
@@ -306,7 +305,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (rc != null) {
             return visitResource(rc);
         }
-        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+        return termFactory.getIRIFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
     }
 
     @Override

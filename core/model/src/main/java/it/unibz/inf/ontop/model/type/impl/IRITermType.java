@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 public class IRITermType extends RDFTermTypeImpl implements ObjectRDFType {
 
     protected IRITermType(TermTypeAncestry parentAncestry) {
-        super("OBJECT", parentAncestry, false);
+        super("IRI", parentAncestry, false);
     }
 
     @Override

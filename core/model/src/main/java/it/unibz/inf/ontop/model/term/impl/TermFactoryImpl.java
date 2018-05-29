@@ -450,6 +450,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable) {
+		return getRDFFunctionalTerm(variable, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableTerm... arguments) {
 		return getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(arguments));
 	}

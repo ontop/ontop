@@ -257,6 +257,8 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRI iri);
 
+	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable);
+
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
@@ -266,5 +268,4 @@ public interface TermFactory {
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
-
 }
