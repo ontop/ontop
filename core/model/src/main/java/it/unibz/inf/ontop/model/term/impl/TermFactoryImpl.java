@@ -437,8 +437,35 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunction(), lexicalTerm, typeTerm);
+	public ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getIRIFunctionalTerm(IRI iri) {
+		// TODO: build a DB string
+		ValueConstant lexicalConstant = getConstantLiteral(iri.getIRIString());
+
+		return getRDFFunctionalTerm(lexicalConstant, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableTerm... arguments) {
+		return getIRIFunctionalTerm(iriTemplate, ImmutableList.copyOf(arguments));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate,
+														ImmutableList<? extends ImmutableTerm> arguments) {
+		if (arguments.isEmpty())
+			throw new IllegalArgumentException("At least one argument for the IRI functional term " +
+					"with an IRI template is required");
+
+		FunctionSymbol templateFunctionSymbol = functionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
+		ImmutableFunctionalTerm templateFunctionalTerm = getImmutableFunctionalTerm(templateFunctionSymbol, arguments);
+
+		return getRDFFunctionalTerm(templateFunctionalTerm, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+
 	}
 
 	private static class NoConstructionFunctionException extends OntopInternalBugException {

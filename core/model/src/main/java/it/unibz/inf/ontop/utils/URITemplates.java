@@ -22,12 +22,8 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -73,6 +69,16 @@ public class URITemplates {
 
         return sb.toString();
 
+    }
+
+    public static int getArity(String uriTemplate) {
+        int count = 0;
+        int currentIndex = uriTemplate.indexOf(PLACE_HOLDER);
+        while (currentIndex >= 0) {
+            currentIndex = uriTemplate.indexOf(PLACE_HOLDER, currentIndex + 1);
+            count++;
+        }
+        return count;
     }
 
     /**
@@ -134,16 +140,6 @@ public class URITemplates {
         }
 
         return templateWithVars.toString();
-    }
-
-    public static String getUriTemplateString(ImmutableFunctionalTerm uriTemplate, PrefixManager prefixmng) {
-        String template = getUriTemplateString(uriTemplate);
-        try {
-            template = prefixmng.getExpandForm(template);
-        } catch (InvalidPrefixWritingException ex) {
-            // in this case, the we do not need to expand
-        }
-        return template;
     }
 
 

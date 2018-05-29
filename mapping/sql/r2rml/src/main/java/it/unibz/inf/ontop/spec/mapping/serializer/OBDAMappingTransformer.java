@@ -37,7 +37,7 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.utils.URITemplates;
+import it.unibz.inf.ontop.utils.IRIPrefixes;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -47,7 +47,6 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -101,7 +100,7 @@ public class OBDAMappingTransformer {
 		
 		//SubjectMap
 		ImmutableFunctionalTerm uriTemplate = (ImmutableFunctionalTerm) tquery.get(0).getSubstitutedTerm(0); //URI("..{}..", , )
-		String subjectTemplate =  URITemplates.getUriTemplateString(uriTemplate, prefixmng);		
+		String subjectTemplate =  IRIPrefixes.getUriTemplateString(uriTemplate, prefixmng);
 		Template templs = mfact.createTemplate(subjectTemplate);
 		SubjectMap sm = mfact.createSubjectMap(templs);
 
@@ -123,7 +122,7 @@ public class OBDAMappingTransformer {
 					}
 					else {
 						//template
-						predUri = rdfFactory.createIRI(URITemplates.getUriTemplateString(predf, prefixmng));
+						predUri = rdfFactory.createIRI(IRIPrefixes.getUriTemplateString(predf, prefixmng));
                         templp = Optional.of(mfact.createTemplate(subjectTemplate));
 					}
 				}
@@ -199,7 +198,7 @@ public class OBDAMappingTransformer {
 						}
 						else {
 
-							String objectURI = URITemplates.getUriTemplateString(o, prefixmng);
+							String objectURI = IRIPrefixes.getUriTemplateString(o, prefixmng);
 							//add template object
 							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.template, rdfFactory.createLiteral(objectURI)));
 							//obm.setTemplate(mfact.createTemplate(objectURI));

@@ -20,5 +20,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
+@Deprecated
 public interface URITemplatePredicate extends RDFTermConstructionSymbol {
 }

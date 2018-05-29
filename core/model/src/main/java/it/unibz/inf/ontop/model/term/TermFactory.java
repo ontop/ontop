@@ -36,12 +36,16 @@ public interface TermFactory {
 	 * Built-in function predicates
 	 */
 
+	@Deprecated
 	public Function getUriTemplate(Term...terms);
 
+	@Deprecated
 	public Function getUriTemplate(List<Term> terms);
 
+	@Deprecated
 	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm...terms);
 
+	@Deprecated
 	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms);
 	
 	public Function getUriTemplateForDatatype(String type);
@@ -246,5 +250,21 @@ public interface TermFactory {
 	@Deprecated
 	URITemplatePredicate getURITemplatePredicate(int arity);
 
-	ImmutableFunctionalTerm getRDFTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
+	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
+
+	/**
+	 * TODO: use a more precise type for the argument
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(IRI iri);
+
+	/**
+	 * At least one argument for the IRI functional term with an IRI template is required
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableTerm... arguments);
+
+	/**
+	 * At least one argument for the IRI functional term with an IRI template is required
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+
 }
