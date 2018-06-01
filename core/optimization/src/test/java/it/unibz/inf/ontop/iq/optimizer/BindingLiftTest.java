@@ -1361,22 +1361,10 @@ public class BindingLiftTest {
 
     }
 
-    @Ignore("TODO: re-enable it after fixing the expression evaluator")
     @Test
     public void testTrueNode() throws EmptyQueryException {
         testTrueNode(TERM_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
-    }
-
-    /**
-     * Simplified to overcome limitations of the expression evaluator
-     */
-    @Test
-    public void testTrueNodeSimplified() throws EmptyQueryException {
-        testTrueNode(TERM_FACTORY.getImmutableExpression(EQ,
-                buildSparqlDatatype(X),
-                TERM_FACTORY.getImmutableUriTemplate(
-                        TERM_FACTORY.getConstantLiteral(XSD.INTEGER.getIRIString(), XSD.STRING))));
     }
 
     private void testTrueNode(ImmutableExpression joiningCondition) throws EmptyQueryException {
@@ -1431,19 +1419,10 @@ public class BindingLiftTest {
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
-    @Ignore("TODO: re-enable after fixing the expression evaluator")
     @Test
     public void testJoinAndNotMatchingDatatypesDoubleRun() throws EmptyQueryException {
         testJoinAndNotMatchingDatatypesDoubleRun(TERM_FACTORY.getImmutableExpression(EQ,
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
-    }
-
-    @Test
-    public void testJoinAndNotMatchingDatatypesDoubleRunSimplified() throws EmptyQueryException {
-        testJoinAndNotMatchingDatatypesDoubleRun(TERM_FACTORY.getImmutableExpression(EQ,
-                buildSparqlDatatype(X), TERM_FACTORY.getImmutableUriTemplate(
-                        TERM_FACTORY.getConstantLiteral(XSD.INTEGER.getIRIString(), XSD.STRING)
-                )));
     }
 
 

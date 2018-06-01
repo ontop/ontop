@@ -26,15 +26,16 @@ public class Datalog2IQConversionTest {
     private static final Variable X = TERM_FACTORY.getVariable("x");
     private static final Variable Y = TERM_FACTORY.getVariable("y");
     private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static final Function URI_TEMPLATE = TERM_FACTORY.getUriTemplate(
-            TERM_FACTORY.getConstantLiteral("http://example.org/"),
-            TERM_FACTORY.getVariable("z"));
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         AtomPredicate predicate = ATOM_FACTORY.getRDFAnswerPredicate(5);
 
-        Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
+        Function uriTemplate = (Function) IMMUTABILITY_TOOLS.convertToMutableTerm(
+                TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                ImmutableList.of(TERM_FACTORY.getVariable("z"))));
+
+        Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, uriTemplate);
 
         TargetAtom targetAtom = DATALOG_CONVERSION_TOOLS.convertFromDatalogDataAtom(datalogHead);
 
@@ -62,6 +63,6 @@ public class Datalog2IQConversionTest {
 
         Variable fifthVariable = projectedArguments.get(4);
         assertTrue(bindings.isDefining(fifthVariable));
-        assertEquals(IMMUTABILITY_TOOLS.convertToMutableTerm(bindings.get(fifthVariable)), URI_TEMPLATE);
+        assertEquals(IMMUTABILITY_TOOLS.convertToMutableTerm(bindings.get(fifthVariable)), uriTemplate);
     }
 }

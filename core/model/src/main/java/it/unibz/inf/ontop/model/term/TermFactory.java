@@ -39,22 +39,6 @@ public interface TermFactory {
 	@Deprecated
 	public Function getUriTemplate(Term...terms);
 
-	@Deprecated
-	public Function getUriTemplate(List<Term> terms);
-
-	@Deprecated
-	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm...terms);
-
-	@Deprecated
-	ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms);
-	
-	public Function getUriTemplateForDatatype(String type);
-	
-
-	public Function getBNodeTemplate(List<Term> terms);
-
-	public Function getBNodeTemplate(Term... terms);
-
 	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms);
@@ -255,17 +239,23 @@ public interface TermFactory {
 	/**
 	 * TODO: use a more precise type for the argument
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(IRI iri);
+	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
 
 	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableTerm... arguments);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
-	 * At least one argument for the IRI functional term with an IRI template is required
+	 * When IRIs are encoded into numbers using a dictionary
 	 */
-	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
+	ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI);
+
+	/**
+	 * When fact IRIs are decomposed (so as to be included in the mapping)
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
+												 ImmutableList<ValueConstant> arguments);
 }

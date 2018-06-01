@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -12,19 +12,17 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.areVariablesDistinct;
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
-
 
 public class AtomFactoryImpl implements AtomFactory {
 
     private final TriplePredicate triplePredicate;
     private final QuadPredicate quadPredicate;
+    private final ImmutabilityTools immutabilityTools;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
 
     @Inject
-    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         triplePredicate = new TriplePredicateImpl(ImmutableList.of(
@@ -38,6 +36,7 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getIRITermType()
         ));
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -102,11 +101,11 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     private Function convertIRIIntoFunction(IRI iri) {
-        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+        return (Function) immutabilityTools.convertToMutableTerm(termFactory.getIRIFunctionalTerm(iri));
     }
 
     private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
-        return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+        return (GroundFunctionalTerm) termFactory.getIRIFunctionalTerm(iri);
     }
 
     @Override

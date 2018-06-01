@@ -537,7 +537,8 @@ public class SparqlAlgebraToDatalogTranslator {
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
-                return termFactory.getUriTemplateForDatatype(typeURI.stringValue());
+                return immutabilityTools.convertToMutableTerm(
+                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(typeURI.stringValue())));
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
@@ -570,21 +571,14 @@ public class SparqlAlgebraToDatalogTranslator {
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
-                return termFactory.getUriTemplateForDatatype(uri);
+                return immutabilityTools.convertToMutableFunction(
+                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(uri)));
             else
-                // TODO: use a lexical term type instead
-                return termFactory.getUriTemplate(termFactory.getConstantLiteral(String.valueOf(id),
-                        typeFactory.getXsdIntegerDatatype()));
+                return immutabilityTools.convertToMutableFunction(termFactory.getRDFFunctionalTerm(id));
         }
         else {
-            Function constantFunction =  immutabilityTools.convertToMutableFunction(
-                    uriTemplateMatcher.generateURIFunction(uri));
-            if (constantFunction.getArity() == 1 && unknownUrisToTemplates) {
-                // ROMAN (27 June 2016: this means ZERO arguments, e.g., xsd:double or :z
-                // despite the name, this is NOT necessarily a datatype
-                constantFunction = termFactory.getUriTemplateForDatatype(uri);
-            }
-            return constantFunction;
+            return immutabilityTools.convertToMutableFunction(
+                    uriTemplateMatcher.generateIRIFunctionalTerm(rdfFactory.createIRI(uri)));
         }
     }
 

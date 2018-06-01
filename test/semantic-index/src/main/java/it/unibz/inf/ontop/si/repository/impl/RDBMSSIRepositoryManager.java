@@ -783,7 +783,7 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ope.getIRI().getIRIString())),
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getIRIFunctionalTerm(ope.getIRI()),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
@@ -823,7 +823,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(dpe.getIRI().getIRIString())) ,
+						termFactory.getIRIFunctionalTerm(dpe.getIRI()) ,
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
@@ -857,7 +857,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(classNode.getIRI().getIRIString())), view.getId().getType1());
+						termFactory.getIRIFunctionalTerm(classNode.getIRI()), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
@@ -904,13 +904,12 @@ public class RDBMSSIRepositoryManager {
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = termFactory.getImmutableUriTemplate(X);
+			subjectTerm = termFactory.getIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
 
-		ImmutableTerm predTerm = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(
-				org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.toString()));
+		ImmutableTerm predTerm = termFactory.getIRIFunctionalTerm(RDF.TYPE);
 
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm ,classTerm);
 		return ImmutableList.of(targetAtom);
@@ -925,7 +924,7 @@ public class RDBMSSIRepositoryManager {
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = termFactory.getImmutableUriTemplate(X);
+			subjectTerm = termFactory.getIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
 		}
@@ -934,7 +933,7 @@ public class RDBMSSIRepositoryManager {
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
 					? termFactory.getImmutableBNodeTemplate(Y)
-					: termFactory.getImmutableUriTemplate(Y);
+					: termFactory.getIRIFunctionalTerm(Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;

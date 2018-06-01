@@ -267,12 +267,15 @@ public class ExpressionEvaluator {
 			case SUBTRACT:
 			case MULTIPLY:
 			case DIVIDE:
-				Function returnedDatatype = getDatatype(term);
-            //expression has not been removed
-            if(returnedDatatype != null &&
-                    (returnedDatatype.getFunctionSymbol().equals(pred) || isNumeric((ValueConstant) returnedDatatype.getTerm(0)))){
-                return term;
-            }
+				Term returnedDatatype = getDatatype(term);
+				// TODO: refactor this horror
+//            //expression has not been removed
+//            if(returnedDatatype != null &&
+//                    (returnedDatatype.getFunctionSymbol().equals(pred) || isNumeric((ValueConstant) returnedDatatype.getTerm(0)))){
+//                return term;
+//            }
+				if (returnedDatatype != null)
+					return term;
 			else
 				return valueFalse;
 			case AND :
@@ -468,11 +471,15 @@ public class ExpressionEvaluator {
 		}
 		return term;
 	}
-	
-	private Function getDatatype(Function function) {
+
+	/**
+	 * TODO: refactor
+	 */
+	private Term getDatatype(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		if (function.isDataTypeFunction()) {
-			return termFactory.getUriTemplateForDatatype(predicate.toString());
+		// TODO: refactor it
+		if (predicate instanceof DatatypePredicate) {
+			return termFactory.getConstantIRI(((DatatypePredicate) predicate).getReturnedType().getIRI());
 		} 
 		else if (predicate instanceof BNodePredicate) {
 			return null;
@@ -481,9 +488,9 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (function.isAlgebraFunction()) {
-			return termFactory.getUriTemplateForDatatype(typeFactory.getXsdBooleanDatatype().getIRI().getIRIString());
+			return termFactory.getConstantIRI(XSD.BOOLEAN);
 		} 
-		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT || 
+		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT ||
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
 			//return numerical if arguments have same type
@@ -493,14 +500,14 @@ public class ExpressionEvaluator {
 			if (arg1 instanceof Variable|| arg2 instanceof Variable){
 				return function;
 			}
-			Predicate pred1 = getDatatypePredicate(arg1);
+			DatatypePredicate pred1 = getDatatypePredicate(arg1);
 
-			Predicate pred2 = getDatatypePredicate(arg2);
+			DatatypePredicate pred2 = getDatatypePredicate(arg2);
 			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-				return termFactory.getUriTemplateForDatatype(pred1.toString());
+				return termFactory.getConstantIRI(pred1.getReturnedType().getIRI());
 			} 
 			else if (isNumeric(pred1) && isDouble(pred2)) {
-				return termFactory.getUriTemplateForDatatype(pred2.toString());
+				return termFactory.getConstantIRI(pred2.getReturnedType().getIRI());
 			} 
 			else {
 				return null;
@@ -508,20 +515,21 @@ public class ExpressionEvaluator {
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
-			return termFactory.getUriTemplateForDatatype(XSD.BOOLEAN.getIRIString());
+			return termFactory.getConstantIRI(XSD.BOOLEAN);
 		}
 		return null;
 	}
-	
-	private Predicate getDatatypePredicate(Term term) {
-		if (term instanceof Function) {
+
+	@Deprecated
+	private DatatypePredicate getDatatypePredicate(Term term) {
+		if (term instanceof Function && term instanceof DatatypePredicate) {
 			Function function = (Function) term;
-			return function.getFunctionSymbol();
+			return (DatatypePredicate) function.getFunctionSymbol();
 		} 
 		else if (term instanceof ValueConstant) {
 			ValueConstant constant = (ValueConstant) term;
 			RDFDatatype type = constant.getType();
-			Predicate pred = termFactory.getRequiredTypePredicate(type);
+			DatatypePredicate pred = termFactory.getRequiredTypePredicate(type);
 			if (pred == null)
 				pred = termFactory.getRequiredTypePredicate(XSD.STRING); // .XSD_STRING;
 			return pred;

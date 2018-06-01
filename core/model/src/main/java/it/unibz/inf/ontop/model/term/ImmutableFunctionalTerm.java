@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
  * Functional term that is declared as immutable.
  *
  */
-public interface ImmutableFunctionalTerm extends NonVariableTerm {
+public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTerm {
 
     ImmutableList<? extends ImmutableTerm> getTerms();
 

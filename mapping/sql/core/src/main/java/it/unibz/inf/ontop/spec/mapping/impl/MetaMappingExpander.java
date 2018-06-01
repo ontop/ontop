@@ -56,6 +56,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,7 @@ public class MetaMappingExpander {
 	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
 	private final ImmutableList<Expansion> mappingsToBeExpanded;
 	private final SubstitutionFactory substitutionFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
 
 
 	private static final class Expansion {
@@ -104,6 +106,7 @@ public class MetaMappingExpander {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
+		this.rdfFactory = new SimpleRDF();
 
 		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
@@ -203,8 +206,8 @@ public class MetaMappingExpander {
 
 						// In a mapping assertion, we create ground terms instead of constants for IRIs
 						// (so as to guarantee that RDF functions can ALWAYS be lifted after unfolding)
-						GroundFunctionalTerm predicateTerm = (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(
-								termFactory.getConstantLiteral(getPredicateName(templateAtom.getTerm(0), values)));
+						GroundFunctionalTerm predicateTerm = termFactory.getIRIFunctionalTerm(
+								rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
 
 						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
 						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()

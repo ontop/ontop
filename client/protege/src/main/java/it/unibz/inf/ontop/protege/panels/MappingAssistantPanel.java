@@ -40,7 +40,6 @@ import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -680,9 +679,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
-		terms.add(0, uriTemplate);
-		return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+		return termFactory.getIRIFunctionalTerm(sb.toString(), ImmutableList.copyOf(terms));
 	}
 
 	// Column placeholder pattern

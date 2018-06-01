@@ -230,7 +230,7 @@ public class MappingTest {
      * TODO: stop this practise
      */
     private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
-        return TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantIRI(iri));
+        return TERM_FACTORY.getIRIFunctionalTerm(iri);
     }
 
     private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {

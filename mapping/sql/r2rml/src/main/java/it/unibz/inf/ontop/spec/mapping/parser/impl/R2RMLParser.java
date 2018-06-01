@@ -155,7 +155,7 @@ public class R2RMLParser {
 		if (subj != null) {
 			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
 
-				subjectAtom = termFactory.getImmutableUriTemplate(termFactory.getVariable(subj));
+				subjectAtom = termFactory.getIRIFunctionalTerm(termFactory.getVariable(subj));
 
 			}
 			else {
@@ -177,7 +177,7 @@ public class R2RMLParser {
 		// process class declaration
 		List<IRI> classes = sMap.getClasses();
 		for (IRI o : classes) {
-            classPredicates.add( termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(o.getIRIString())));
+            classPredicates.add(termFactory.getIRIFunctionalTerm(o));
 		}
 
 		if (subjectAtom == null)
@@ -200,9 +200,10 @@ public class R2RMLParser {
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 
-			String pmConstant = pm.getConstant().toString();
+			RDFTerm pmConstant = pm.getConstant();
 			if (pmConstant != null) {
-				ImmutableFunctionalTerm bodyPredicate = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(pmConstant));
+				ImmutableFunctionalTerm bodyPredicate = termFactory.getIRIFunctionalTerm(
+						rdfFactory.createIRI(pmConstant.toString()));
 				predicateAtoms.add(bodyPredicate);
 			}
 
@@ -312,8 +313,7 @@ public class R2RMLParser {
 								 // .RDFS_LITERAL;
 					}
                 } else if (constantObj instanceof IRI){
-                    objectAtom = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral( ((IRI) constantObj).getIRIString()));
-
+                    objectAtom = termFactory.getIRIFunctionalTerm((IRI) constantObj);
                 }
 			}
 		}
@@ -375,7 +375,8 @@ public class R2RMLParser {
 
 			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
-					objectAtom = termFactory.getImmutableUriTemplate(objectAtom);
+					// Cast to Variable added. TODO: check
+					objectAtom = termFactory.getIRIFunctionalTerm((Variable) objectAtom);
 				}
 			}
 

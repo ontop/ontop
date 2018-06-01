@@ -120,8 +120,7 @@ public class QueryMergingTest {
     }
 
     private GroundFunctionalTerm generateGroundTerm(IRI iri) {
-        return (GroundFunctionalTerm) TERM_FACTORY.getImmutableUriTemplate(
-                TERM_FACTORY.getConstantLiteral(iri.getIRIString()));
+        return (GroundFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iri);
     }
 
 

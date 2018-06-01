@@ -72,6 +72,6 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     private ImmutableFunctionalTerm createGroundFunctionalTerm(IRI iri) {
-        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+        return termFactory.getIRIFunctionalTerm(iri);
     }
 }

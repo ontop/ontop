@@ -23,15 +23,14 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
@@ -225,25 +224,24 @@ public class DirectMappingAxiomProducer {
      */
     private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref) {
 		
-		String varNamePrefix = "";
-		if (ref)
-			varNamePrefix = td.getID().getTableName() + "_";
+		String varNamePrefix = ref
+				? td.getID().getTableName() + "_"
+				: "";
 
 		UniqueConstraint pk = td.getPrimaryKey();
 		if (pk != null) {
-			List<ImmutableTerm> terms = new ArrayList<>(pk.getAttributes().size() + 1);
 			
 			List<String> attributes = new ArrayList<>(pk.getAttributes().size());
 			for (Attribute att : pk.getAttributes()) 
 				attributes.add(R2RMLIRISafeEncoder.encode(att.getID().getName()) + "={}");
 			
 			String template = baseIRI + R2RMLIRISafeEncoder.encode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
-			terms.add(termFactory.getConstantLiteral(template));
-			
-			for (Attribute att : pk.getAttributes())
-				terms.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			ImmutableList<Variable> arguments = pk.getAttributes().stream()
+					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+					.collect(ImmutableCollectors.toList());
+
+			return termFactory.getIRIFunctionalTerm(template, arguments);
 		}
 		else {
 			List<ImmutableTerm> vars = new ArrayList<>(td.getAttributes().size());
@@ -256,18 +254,14 @@ public class DirectMappingAxiomProducer {
 
 	private TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
 		return targetAtomFactory.getTripleTargetAtom(s,
-				convertIRIIntoGroundFunctionalTerm(iri),
+				termFactory.getIRIFunctionalTerm(iri),
 				o);
 	}
 
 	private TargetAtom getAtom(IRI iri, ImmutableTerm s) {
     	return targetAtomFactory.getTripleTargetAtom(s,
-				convertIRIIntoGroundFunctionalTerm(RDF.TYPE),
-				convertIRIIntoGroundFunctionalTerm(iri));
-	}
-
-	private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
-    	return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+				termFactory.getIRIFunctionalTerm(RDF.TYPE),
+				termFactory.getIRIFunctionalTerm(iri));
 	}
 
 

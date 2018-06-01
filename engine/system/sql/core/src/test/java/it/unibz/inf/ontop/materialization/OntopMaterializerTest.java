@@ -122,13 +122,13 @@ public class OntopMaterializerTest {
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 
-		type = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
-		person = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(personIRI.getIRIString()));
-		fn = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(fnIRI.getIRIString()));
-		ln = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(lnIRI.getIRIString()));
-		age =termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ageIRI.getIRIString()));
-		hasschool = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(hasschoolIRI.getIRIString()));
-		school = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(schoolIRI.getIRIString()));
+		type = termFactory.getIRIFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+		person = termFactory.getIRIFunctionalTerm(personIRI);
+		fn = termFactory.getIRIFunctionalTerm(fnIRI);
+		ln = termFactory.getIRIFunctionalTerm(lnIRI);
+		age =termFactory.getIRIFunctionalTerm(ageIRI);
+		hasschool = termFactory.getIRIFunctionalTerm(hasschoolIRI);
+		school = termFactory.getIRIFunctionalTerm(schoolIRI);
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -218,14 +218,13 @@ public class OntopMaterializerTest {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		ImmutableFunctionalTerm personTemplate = termFactory.getImmutableUriTemplate(
-				termFactory.getConstantLiteral("http://schools.com/person/{}-{}"),
-				termFactory.getVariable("fn"),
-				termFactory.getVariable("ln"));
+		ImmutableFunctionalTerm personTemplate = termFactory.getIRIFunctionalTerm(
+				"http://schools.com/person/{}-{}",
+				ImmutableList.of(
+					termFactory.getVariable("fn"),
+					termFactory.getVariable("ln")));
 
-		ImmutableFunctionalTerm schoolTemplate = termFactory.getImmutableUriTemplate(
-				termFactory.getConstantLiteral("{}"),
-				termFactory.getVariable("schooluri"));
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getIRIFunctionalTerm(termFactory.getVariable("schooluri"));
 
 		RDFDatatype stringDatatype = xsdStringDt;
 

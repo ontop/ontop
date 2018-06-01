@@ -23,12 +23,15 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class UriTemplateMatcher {
@@ -39,7 +42,7 @@ public class UriTemplateMatcher {
         this.termFactory = termFactory;
     }
 
-    private final Map<Pattern, ImmutableFunctionalTerm> uriTemplateMatcher = new HashMap<>();
+    private final Map<Pattern, NonConstantTerm> uriTemplateMatcher = new HashMap<>();
 
     /**
      * TODO: refactor using streaming.
@@ -74,7 +77,7 @@ public class UriTemplateMatcher {
                     continue;
                 }
 
-                ImmutableFunctionalTerm templateFunction = termFactory.getImmutableUriTemplate(termFactory.getVariable("x"));
+                ImmutableFunctionalTerm templateFunction = termFactory.getIRIFunctionalTerm(termFactory.getVariable("x"));
                 Pattern matcher = Pattern.compile("(.+)");
                 uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
                 templateStrings.add("(.+)");
@@ -98,14 +101,14 @@ public class UriTemplateMatcher {
 
     public static UriTemplateMatcher merge(Stream<UriTemplateMatcher> uriTemplateMatchers, TermFactory termFactory) {
 
-        ImmutableMap<Pattern, Collection<ImmutableFunctionalTerm>> pattern2Terms = uriTemplateMatchers
-                .flatMap(m -> m.getMap().entrySet().stream())
+        ImmutableMap<Pattern, Collection<NonConstantTerm>> pattern2Terms = uriTemplateMatchers
+                .flatMap(m -> m.uriTemplateMatcher.entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
-        ImmutableMap<Pattern, ImmutableFunctionalTerm> pattern2Term = pattern2Terms.entrySet().stream()
+        ImmutableMap<Pattern, NonConstantTerm> pattern2Term = pattern2Terms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey(),
+                        Map.Entry::getKey,
                         e -> flatten(e.getKey(), e.getValue())
                 ));
         UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher(termFactory);
@@ -113,7 +116,7 @@ public class UriTemplateMatcher {
         return uriTemplateMatcher;
     }
 
-    private static ImmutableFunctionalTerm flatten(Pattern pattern, Collection<ImmutableFunctionalTerm> collection) {
+    private static NonConstantTerm flatten(Pattern pattern, Collection<NonConstantTerm> collection) {
         if (ImmutableSet.copyOf(collection).size() == 1) {
             return collection.iterator().next();
         }
@@ -125,65 +128,33 @@ public class UriTemplateMatcher {
      * have a corresponding function, and the parameters for this function. The
      * parameters are the values for the groups of the pattern.
      */
-    public ImmutableFunctionalTerm generateURIFunction(String uriString) {
-        ImmutableFunctionalTerm functionURI = null;
+    public ImmutableFunctionalTerm generateIRIFunctionalTerm(IRI iri) {
+        Optional<Pattern> longestMatchingPattern = uriTemplateMatcher.keySet().stream()
+                .filter(p -> p.matcher(iri.getIRIString()).matches())
+                .max(Comparator.comparingInt(c -> c.pattern().length()));
 
-        List<Pattern> patternsMatched = new LinkedList<>();
-        for (Pattern pattern : uriTemplateMatcher.keySet()) {
-
-            Matcher matcher = pattern.matcher(uriString);
-            boolean match = matcher.matches();
-            if (!match) {
-                continue;
-            }
-            patternsMatched.add(pattern);
-        }
-        Comparator<Pattern> comparator = new Comparator<Pattern>() {
-            public int compare(Pattern c1, Pattern c2) {
-                return c2.pattern().length() - c1.pattern().length(); // use your logic
-            }
-        };
-
-        Collections.sort(patternsMatched, comparator);
-        for (Pattern pattern : patternsMatched) {
-            ImmutableFunctionalTerm matchingFunction = uriTemplateMatcher.get(pattern);
-            ImmutableTerm baseParameter = matchingFunction.getTerm(0);
-            if (baseParameter instanceof Constant) {
-				/*
-				 * This is a general template function of the form
-				 * uri("http://....", var1, var2,...) <p> we need to match var1,
-				 * var2, etc with substrings from the subjectURI
-				 */
-                Matcher matcher = pattern.matcher(uriString);
-                if (matcher.matches()) {
-                    ImmutableList.Builder<ImmutableTerm> values = ImmutableList.builder();
-                    values.add(baseParameter);
-                    for (int i = 0; i < matcher.groupCount(); i++) {
-                        String value = matcher.group(i + 1);
-                        values.add(termFactory.getConstantLiteral(value));
-                    }
-                    functionURI = termFactory.getImmutableUriTemplate(values.build());
-                }
-            } else if (baseParameter instanceof Variable) {
-				/*
-				 * This is a direct mapping to a column, uri(x)
-				 * we need to match x with the subjectURI
-				 */
-                functionURI = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(uriString));
-            }
-            break;
-        }
-        if (functionURI == null) {
-			/* If we cannot match against a template, we try to match against the most general template (which will
-			 * generate empty queries later in the query answering process
-			 */
-            functionURI = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(uriString));
-        }
-
-        return functionURI;
+        return longestMatchingPattern
+                .map(p -> generateIRIFunctionalTerm(iri, p))
+                .orElseGet(() -> termFactory.getIRIFunctionalTerm(iri));
     }
 
-    private ImmutableMap<Pattern, ImmutableFunctionalTerm> getMap() {
-        return ImmutableMap.copyOf(uriTemplateMatcher);
+    private ImmutableFunctionalTerm generateIRIFunctionalTerm(IRI iri, Pattern pattern) {
+        NonConstantTerm matchingTerm = uriTemplateMatcher.get(pattern);
+        if (matchingTerm instanceof Variable)
+            return termFactory.getIRIFunctionalTerm(iri);
+
+        // TODO: refactor
+        IRIStringTemplateFunctionSymbol matchingFunctionSymbol =
+                (IRIStringTemplateFunctionSymbol)((ImmutableFunctionalTerm) matchingTerm).getFunctionSymbol();
+
+        Matcher matcher = pattern.matcher(iri.getIRIString());
+        ImmutableList<ValueConstant> arguments = IntStream.range(1, matcher.groupCount() + 1)
+                .boxed()
+                .map(matcher::group)
+                // TODO: use a DB string
+                .map(termFactory::getConstantLiteral)
+                .collect(ImmutableCollectors.toList());
+
+        return termFactory.getIRIFunctionalTerm(matchingFunctionSymbol, arguments);
     }
 }

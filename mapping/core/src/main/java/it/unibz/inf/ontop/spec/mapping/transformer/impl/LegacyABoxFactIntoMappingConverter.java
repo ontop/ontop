@@ -96,7 +96,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRI classIRI = ca.getConcept().getIRI();
             Function head = atomFactory.getMutableTripleHeadAtom(
                     immutabilityTools.convertToMutableFunction(
-                            uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString())), classIRI);
+                            uriTemplateMatcher.generateIRIFunctionalTerm(c.getIRI())), classIRI);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -111,9 +111,9 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRIConstant o = (IRIConstant) pa.getObject();
             IRI propertyIRI = pa.getProperty().getIRI();
             Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString())),
+                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateIRIFunctionalTerm(s.getIRI())),
                     propertyIRI,
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString())));
+                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateIRIFunctionalTerm(o.getIRI())));
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
