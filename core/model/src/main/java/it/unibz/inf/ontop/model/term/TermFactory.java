@@ -36,9 +36,6 @@ public interface TermFactory {
 	 * Built-in function predicates
 	 */
 
-	@Deprecated
-	public Function getUriTemplate(Term...terms);
-
 	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms);
@@ -255,4 +252,10 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<ValueConstant> arguments);
+
+	/**
+	 * Temporary
+	 */
+	Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments);
+	Function getIRIMutableFunctionalTerm(IRI iri);
 }

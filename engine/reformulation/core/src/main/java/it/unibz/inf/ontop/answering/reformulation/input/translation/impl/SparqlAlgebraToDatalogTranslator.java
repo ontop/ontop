@@ -470,13 +470,13 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p.equals(RDF.TYPE)) {
                 Term oTerm;
 					// term rdf:type variable .
-                Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+                Term pTerm = termFactory.getIRIMutableFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
                 if (o == null) {
                     oTerm = getTermForVariable(triple.getObjectVar(), variables);
 
 				}
 				else if (o instanceof IRI) {
-                    oTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(o.stringValue()));
+                    oTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(o.stringValue()));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
@@ -485,7 +485,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-                Term pTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral(p.stringValue()));
+                Term pTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(p.stringValue()));
                 atom = atomFactory.getMutableTripleAtom(sTerm, pTerm, oTerm);
 			}
 		}

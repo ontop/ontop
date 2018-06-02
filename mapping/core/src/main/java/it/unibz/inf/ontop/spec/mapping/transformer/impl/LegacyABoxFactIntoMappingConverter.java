@@ -131,12 +131,10 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
 
             Function head = o.getType().getLanguageTag()
-                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
+                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
                             termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
+                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
                             termFactory.getTypedTerm(o, o.getType())));
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
@@ -160,21 +158,21 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 ValueConstant o = (ValueConstant) aa.getValue();
 
                 head = o.getType().getLanguageTag()
-                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                    termFactory.getConstantLiteral(s.getIRI().getIRIString())),
+                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
+                                    s.getIRI()),
                                     propertyIRI,
                                     termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                termFactory.getConstantLiteral(s.getIRI().getIRIString())),
+                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
+                                s.getIRI()),
                                 propertyIRI,
                                 termFactory.getTypedTerm(o, o.getType())));
             } else {
 
                 IRIConstant o = (IRIConstant) aa.getValue();
                 head = atomFactory.getMutableTripleHeadAtom(
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRI().getIRIString())),
+                        termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                         propertyIRI,
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getIRI().getIRIString())));
+                        termFactory.getIRIMutableFunctionalTerm(o.getIRI()));
 
 
             }

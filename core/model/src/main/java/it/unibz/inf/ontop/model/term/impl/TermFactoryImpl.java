@@ -241,13 +241,6 @@ public class TermFactoryImpl implements TermFactory {
 		return typeFactory;
 	}
 
-	@Deprecated
-	@Override
-	public Function getUriTemplate(Term... terms) {
-		FunctionSymbol uriPred = new URITemplatePredicateImpl(terms.length, typeFactory);
-		return getFunction(uriPred, terms);		
-	}
-
 	@Override
 	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
 		FunctionSymbol pred = new BNodePredicateImpl(terms.length, typeFactory);
@@ -441,6 +434,24 @@ public class TermFactoryImpl implements TermFactory {
 														ImmutableList<ValueConstant> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(templateSymbol, arguments);
 		return getRDFFunctionalTerm(lexicalTerm, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+	}
+
+	@Override
+	public Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments) {
+		FunctionSymbol templateFunctionSymbol = functionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
+		Function lexicalTerm = getFunction(templateFunctionSymbol, arguments);
+		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalTerm);
+	}
+
+	@Override
+	public Function getIRIMutableFunctionalTerm(IRI iri) {
+		ValueConstant lexicalConstant = getConstantLiteral(iri.getIRIString());
+		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
+	}
+
+	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
+		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
+				getRDFTermTypeConstant(typeFactory.getIRITermType()));
 	}
 
 	private static class NoConstructionFunctionException extends OntopInternalBugException {

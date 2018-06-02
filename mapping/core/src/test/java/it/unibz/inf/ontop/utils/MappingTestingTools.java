@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.sql.Types;
 import java.util.stream.Stream;
@@ -64,6 +66,7 @@ public class MappingTestingTools {
     public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
     public static final IQConverter IQ_CONVERTER;
+    public static final RDF RDF_FACTORY;
 
 
     public static final RelationPredicate TABLE1_AR2;
@@ -103,6 +106,8 @@ public class MappingTestingTools {
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
         EMPTY_MAPPING_METADATA = MAPPING_FACTORY.createMetadata(EMPTY_PREFIX_MANAGER, EMPTY_URI_TEMPLATE_MATCHER);
+
+        RDF_FACTORY = new SimpleRDF();
 
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

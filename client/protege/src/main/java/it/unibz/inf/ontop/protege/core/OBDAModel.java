@@ -228,8 +228,7 @@ public class OBDAModel {
                                         .map(e -> e.getKey().equals(predicateVariable)
                                                 ? Maps.immutableEntry(predicateVariable,
                                                 // We build a ground term for the IRI
-                                                (ImmutableTerm) termFactory.getUriTemplate(
-                                                        termFactory.getConstantLiteral(newIRI.getIRIString())))
+                                                (ImmutableTerm) termFactory.getIRIMutableFunctionalTerm(newIRI))
                                                 : e)
                                         .collect(ImmutableCollectors.toMap()));
 

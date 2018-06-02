@@ -99,7 +99,7 @@ public class LinearInclusionDependencyTools {
         final Variable varX = termFactory.getVariable(variableXname);
         final Variable varY = termFactory.getVariable(variableYname);
 
-        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+        Function propertyFunction = termFactory.getIRIMutableFunctionalTerm(property.getIRI());
         if (property.isInverse())
             return atomFactory.getMutableTripleAtom(varY, propertyFunction, varX);
         else
@@ -110,7 +110,7 @@ public class LinearInclusionDependencyTools {
         final Variable varX = termFactory.getVariable(variableXname);
         final Variable varY = termFactory.getVariable(variableYname);
 
-        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+        Function propertyFunction = termFactory.getIRIMutableFunctionalTerm(property.getIRI());
         return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
     }
 
@@ -118,14 +118,14 @@ public class LinearInclusionDependencyTools {
         final Variable varX = termFactory.getVariable(variableXname);
         if (description instanceof OClass) {
             OClass klass = (OClass) description;
-            Function classFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(klass.getIRI().getIRIString()));
-            Function rdfTypeFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.getIRIString()));
+            Function classFunction = termFactory.getIRIMutableFunctionalTerm(klass.getIRI());
+            Function rdfTypeFunction = termFactory.getIRIMutableFunctionalTerm(RDF.TYPE);
             return atomFactory.getMutableTripleAtom(varX, rdfTypeFunction, classFunction);
         }
         else if (description instanceof ObjectSomeValuesFrom) {
             final Variable varY = termFactory.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
-            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+            Function propertyFunction = termFactory.getIRIMutableFunctionalTerm(property.getIRI());
             if (property.isInverse())
                 return atomFactory.getMutableTripleAtom(varY, propertyFunction, varX);
             else
@@ -135,7 +135,7 @@ public class LinearInclusionDependencyTools {
             assert (description instanceof DataSomeValuesFrom);
             final Variable varY = termFactory.getVariable(existentialVariableName);
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
+            Function propertyFunction = termFactory.getIRIMutableFunctionalTerm(property.getIRI());
             return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
         }
     }
