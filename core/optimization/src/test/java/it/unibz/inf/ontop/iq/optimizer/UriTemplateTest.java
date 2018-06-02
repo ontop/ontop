@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -8,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -25,13 +25,11 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 public class UriTemplateTest {
-
-    private static URITemplatePredicate URI_PREDICATE_ONE_VAR =  TERM_FACTORY.getURITemplatePredicate(2);
-    private static Constant URI_TEMPLATE_STR_1_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/");
-    private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX.getValue() + "{}");
-    private static Constant URI_TEMPLATE_STR_2_PREFIX =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/");
-    private static Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_2_PREFIX.getValue() + "{}");
-    private static Constant URI_TEMPLATE_STR_3 =  TERM_FACTORY.getConstantLiteral("{}");
+    private static String URI_TEMPLATE_STR_1_PREFIX =  "http://example.org/ds1/";
+    private static String URI_TEMPLATE_STR_1 =  URI_TEMPLATE_STR_1_PREFIX + "{}";
+    private static String URI_TEMPLATE_STR_2_PREFIX =  "http://example.org/ds2/";
+    private static String URI_TEMPLATE_STR_2 =  URI_TEMPLATE_STR_2_PREFIX + "{}";
+    private static String URI_TEMPLATE_STR_3 =  "{}";
 
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
@@ -93,7 +91,7 @@ public class UriTemplateTest {
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(EQ,
-                        TERM_FACTORY.getImmutableExpression(CONCAT, URI_TEMPLATE_STR_1_PREFIX, A),
+                        TERM_FACTORY.getImmutableExpression(CONCAT, TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX), A),
                         C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);
@@ -109,7 +107,7 @@ public class UriTemplateTest {
     }
 
 
-    private static ImmutableFunctionalTerm generateOneVarURITemplate(Constant templateString, ImmutableTerm value) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, templateString, value);
+    private static ImmutableFunctionalTerm generateOneVarURITemplate(String templateString, ImmutableTerm value) {
+        return TERM_FACTORY.getIRIFunctionalTerm(templateString, ImmutableList.of(value));
     }
 }

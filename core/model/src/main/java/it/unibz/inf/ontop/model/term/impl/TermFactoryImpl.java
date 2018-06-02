@@ -241,9 +241,10 @@ public class TermFactoryImpl implements TermFactory {
 		return typeFactory;
 	}
 
+	@Deprecated
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		FunctionSymbol uriPred = getURITemplatePredicate(terms.length);
+		FunctionSymbol uriPred = new URITemplatePredicateImpl(terms.length, typeFactory);
 		return getFunction(uriPred, terms);		
 	}
 
@@ -394,11 +395,6 @@ public class TermFactoryImpl implements TermFactory {
 							.map(tag -> new DatatypePredicateImpl(type, typeFactory.getDatatype(XSD.STRING)))
 							// Other datatypes
 							.orElseGet(() -> new DatatypePredicateImpl(type, type))));
-	}
-
-	@Override
-	public URITemplatePredicate getURITemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity, typeFactory);
 	}
 
 	@Override

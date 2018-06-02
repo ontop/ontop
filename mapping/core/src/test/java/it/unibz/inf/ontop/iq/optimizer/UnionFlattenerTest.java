@@ -46,8 +46,11 @@ public class UnionFlattenerTest {
             ATOM_FACTORY.getDataAtom(TABLE2_AR2, Y, Z)
     );
 
-    private static Constant uriTemplate1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static Constant uriTemplate2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}{}");
+    private static String uriTemplate1 = "http://example.org/ds1/{}";
+    private static String uriTemplate2 = "http://example.org/ds1/{}{}";
+
+    private final static ValueConstant CONSTANT_STRING = TERM_FACTORY.getConstantLiteral("john");
+
 
     @Test
     public void testMergeUnions() {
@@ -86,7 +89,7 @@ public class UnionFlattenerTest {
     @Test
     public void testLiftUnion() {
 
-        ImmutableSubstitution sub = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI(X, Y));
+        ImmutableSubstitution sub = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
         ConstructionNode cn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
@@ -131,8 +134,8 @@ public class UnionFlattenerTest {
     @Test
     public void testLiftUnionAndMergeCn() {
 
-        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI(X, Y));
-        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(X, uriTemplate1);
+        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
+        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(X, CONSTANT_STRING);
         ConstructionNode cn1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub1);
         ConstructionNode cn2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z), sub2);
         UnionNode unionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
@@ -162,7 +165,7 @@ public class UnionFlattenerTest {
 
 
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Z));
-        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI(uriTemplate1, Y));
+        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(CONSTANT_STRING, Y));
         ConstructionNode cn3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub3);
 
         IQTree c4 = IQ_FACTORY.createUnaryIQTree(
@@ -187,8 +190,8 @@ public class UnionFlattenerTest {
     @Test
     public void testLiftUnionAndMergeUnion() {
 
-        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(X, uriTemplate1);
-        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI(X, Y));
+        ImmutableSubstitution sub1 = SUBSTITUTION_FACTORY.getSubstitution(X, CONSTANT_STRING);
+        ImmutableSubstitution sub2 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(X, Y));
         ConstructionNode cn1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, Z), sub1);
         ConstructionNode cn2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub2);
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(Y, Z));
@@ -224,7 +227,7 @@ public class UnionFlattenerTest {
 
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(W, Z));
-        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI(uriTemplate1, Y));
+        ImmutableSubstitution sub3 = SUBSTITUTION_FACTORY.getSubstitution(W, generateURI2(CONSTANT_STRING, Y));
         ConstructionNode cn3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(W, Z), sub3);
 
         IQTree union3 = IQ_FACTORY.createNaryIQTree(
@@ -249,11 +252,7 @@ public class UnionFlattenerTest {
         assertTrue((optimizedIQ.equals(expectedIQ)));
     }
 
-
-    private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getURITemplatePredicate(arguments.length),
-                arguments
-        );
+    private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
+        return TERM_FACTORY.getIRIFunctionalTerm(uriTemplate2, ImmutableList.of(argument1, argument2));
     }
 }

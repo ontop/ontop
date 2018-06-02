@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -8,7 +9,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Ignore;
@@ -37,12 +37,8 @@ public class ConstructionNodeCleanerTest {
     private final static Variable Z1 = TERM_FACTORY.getVariable("Z1");
     private final static Variable Z2 = TERM_FACTORY.getVariable("Z2");
 
-
-    private URITemplatePredicate URI_PREDICATE = TERM_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_2PREDICATE = TERM_FACTORY.getURITemplatePredicate(3);
-
-    private Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private Constant URI_TEMPLATE_STR_2_2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
+    private String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
+    private String URI_TEMPLATE_STR_2_2 = "http://example.org/ds2/{}/{}";
 
     // TODO: choose an implementation
     private static IntermediateQueryOptimizer constructionNodeCleaner = null;
@@ -691,10 +687,10 @@ public class ConstructionNodeCleanerTest {
 
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(argument));
     }
 
     private ImmutableFunctionalTerm generateCompositeURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_2PREDICATE, URI_TEMPLATE_STR_2_2, argument1, argument2);
+        return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_2_2, ImmutableList.of(argument1, argument2));
     }
 }

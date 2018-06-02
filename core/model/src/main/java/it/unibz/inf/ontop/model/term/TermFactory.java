@@ -231,9 +231,6 @@ public interface TermFactory {
 
 	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
 
-	@Deprecated
-	URITemplatePredicate getURITemplatePredicate(int arity);
-
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**

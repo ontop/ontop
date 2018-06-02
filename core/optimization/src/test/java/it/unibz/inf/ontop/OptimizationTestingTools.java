@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -34,6 +35,7 @@ public class OptimizationTestingTools {
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final TermFactory TERM_FACTORY;
+    public static final FunctionSymbolFactory FUNCTION_SYMBOL_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryTransformerFactory TRANSFORMER_FACTORY;
@@ -63,6 +65,7 @@ public class OptimizationTestingTools {
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
+        FUNCTION_SYMBOL_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);

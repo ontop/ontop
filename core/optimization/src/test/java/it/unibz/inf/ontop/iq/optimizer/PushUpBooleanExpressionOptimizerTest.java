@@ -695,15 +695,12 @@ public class PushUpBooleanExpressionOptimizerTest {
 
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        URITemplatePredicate uriTemplatePredicate = TERM_FACTORY.getURITemplatePredicate(arguments.length + 1);
         String uriTemplateString = "http://example.org/ds1/";
         for (VariableOrGroundTerm argument : arguments) {
             uriTemplateString = uriTemplateString.toString() + "{}";
         }
-        Constant uriTemplate = TERM_FACTORY.getConstantLiteral(uriTemplateString);
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-        builder.add(uriTemplate);
         builder.add(arguments);
-        return TERM_FACTORY.getImmutableFunctionalTerm(uriTemplatePredicate, builder.build());
+        return TERM_FACTORY.getIRIFunctionalTerm(uriTemplateString, builder.build());
     }
 }
