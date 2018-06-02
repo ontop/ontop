@@ -36,7 +36,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
                 TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
 
         InternalSparqlQuery program = translator.translate(pq);
@@ -60,7 +60,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(queryBind, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
                 TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
@@ -85,7 +85,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
                 TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
@@ -105,7 +105,7 @@ public class SPARQLQueryFlattenerTest {
         ParsedQuery pq = parser.parseQuery(query6, null);
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
                 TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);

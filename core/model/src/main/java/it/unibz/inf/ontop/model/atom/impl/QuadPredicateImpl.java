@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.atom.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.QuadPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
 
@@ -12,8 +13,8 @@ public class QuadPredicateImpl extends RDFAtomPredicateImpl implements QuadPredi
 
     private static int NAMED_GRAPH_INDEX = 3;
 
-    protected QuadPredicateImpl(ImmutableList<TermType> expectedBaseTypes) {
-        super("triple", 4, expectedBaseTypes,0, 1, 2);
+    protected QuadPredicateImpl(ImmutableList<TermType> expectedBaseTypes, RDFTermTypeConstant iriType) {
+        super("triple", 4, expectedBaseTypes,0, 1, 2, iriType);
     }
 
     @Override

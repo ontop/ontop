@@ -146,7 +146,7 @@ public class MappingTest {
          * Renaming
          */
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY));
 
         Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
                 propertyMapBuilder.build()), transformIntoTable(classMap));
@@ -210,7 +210,7 @@ public class MappingTest {
         LOGGER.info(mappingAssertion.toString());
 
         MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY));
+                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY));
         MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
                 transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
         );

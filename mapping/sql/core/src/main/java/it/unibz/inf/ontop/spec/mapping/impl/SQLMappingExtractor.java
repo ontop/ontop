@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
@@ -46,12 +47,14 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
-                                AtomFactory atomFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+                                AtomFactory atomFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                TypeFactory typeFactory) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
@@ -61,6 +64,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.typeFactory = typeFactory;
     }
 
     /**
@@ -100,7 +104,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
             throws MetaMappingExpansionException {
 
         MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory,
-                substitutionFactory);
+                substitutionFactory, typeFactory);
         final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
         if (expander.hasMappingsToBeExpanded()) {
             try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {

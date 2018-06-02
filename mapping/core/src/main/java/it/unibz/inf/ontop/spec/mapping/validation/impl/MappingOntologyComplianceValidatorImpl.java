@@ -10,16 +10,9 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -120,11 +113,17 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
-            Predicate functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
-            if ((functionSymbol instanceof BNodePredicate)
-                    || (functionSymbol instanceof URITemplatePredicate)) {
-                return Optional.of(typeFactory.getIRITermType());
+            FunctionSymbol functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
+            if ((functionSymbol instanceof RDFTermFunctionSymbol)) {
+                return Optional.of(constructionFunctionalTerm)
+                        .map(f -> f.getTerm(1))
+                        .filter(t -> t instanceof RDFTermTypeConstant)
+                        .map(t -> ((RDFTermTypeConstant)t).getRDFTermType())
+                        .map(Optional::of)
+                        .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                                "Not defined in the root node (expected for a mapping assertion)"));
             }
+            // TODO: remove it after building the RDF literals with the RDF function symbol
             else if (functionSymbol instanceof DatatypePredicate) {
                 DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
                 return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());

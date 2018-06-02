@@ -26,10 +26,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -85,7 +82,7 @@ public class MappingDataTypeCompletion {
         Function atom = rule.getHead();
 
         //case of data and object property
-        if(!Datalog2QueryTools.isURIRDFType(atom.getTerm(1))){
+        if(!Datalog2QueryTools.isURIRDFType(atom.getTerm(1), termFactory, typeFactory)){
             Term object = atom.getTerm(2); // the object, third argument only
             Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
@@ -110,7 +107,7 @@ public class MappingDataTypeCompletion {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (function.isDataTypeFunction() ||
-                    (functionSymbol instanceof URITemplatePredicate)
+                    (functionSymbol instanceof IRIStringTemplateFunctionSymbol)
                     || (functionSymbol instanceof BNodePredicate)) {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
             }

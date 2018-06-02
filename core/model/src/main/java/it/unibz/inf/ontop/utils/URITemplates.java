@@ -23,6 +23,8 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,27 +103,38 @@ public class URITemplates {
 
 
     /**
-     * Converts a URI function to a URI template
+     * Converts a IRI function into a URI template
      * <p>
      * For instance:
      * <pre>
-     * URI("http://example.org/{}/{}/{}", X, Y, X) -> "http://example.org/{X}/{Y}/{X}"
+     * RDF(http://example.org/{}/{}/{}(X, Y, X), IRI) -> "http://example.org/{X}/{Y}/{X}"
      * </pre>
      *
-     * @param uriFunction URI Function
+     * @param iriFunctionalTerm URI Function
      * @return a URI template with variable names inside the placeholders
      */
-    public static String getUriTemplateString(ImmutableFunctionalTerm uriFunction) {
-        ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
-        final String template = term.getValue();
-        ImmutableList<? extends ImmutableTerm> otherSubTerms = uriFunction.getTerms()
-                .subList(1, uriFunction.getTerms().size());
+    public static String getUriTemplateString(ImmutableFunctionalTerm iriFunctionalTerm) {
+        if (!(iriFunctionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol))
+            throw new IllegalArgumentException("Not an RDFTermFunctionSymbol: " + iriFunctionalTerm);
+
+        ImmutableTerm lexicalTerm = iriFunctionalTerm.getTerm(0);
+
+        if (!((lexicalTerm instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol)))
+            throw new IllegalArgumentException(
+                    "The lexical term was expected to have a IRIStringTemplateFunctionSymbol: "
+                            + lexicalTerm);
+
+        ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+
+        final String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getIRITemplate();
+        ImmutableList<? extends ImmutableTerm> subTerms = lexicalFunctionalTerm.getTerms();
 
         List<String> splitParts = Splitter.on(PLACE_HOLDER).splitToList(template);
 
         StringBuilder templateWithVars = new StringBuilder();
 
-        int numVars = otherSubTerms.size();
+        int numVars = subTerms.size();
         int numParts = splitParts.size();
 
         if (numParts != numVars + 1 && numParts != numVars) {
@@ -131,7 +144,7 @@ public class URITemplates {
         for (int i = 0; i < numVars; i++) {
             templateWithVars.append(splitParts.get(i))
                     .append("{")
-                    .append(otherSubTerms.get(i))
+                    .append(subTerms.get(i))
                     .append("}");
         }
 

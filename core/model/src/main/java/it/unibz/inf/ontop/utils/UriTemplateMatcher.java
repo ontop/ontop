@@ -23,9 +23,11 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
@@ -47,28 +49,22 @@ public class UriTemplateMatcher {
     /**
      * TODO: refactor using streaming.
      */
-    public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetAtomStream,
-                                            TermFactory termFactory) {
+    public static UriTemplateMatcher create(Stream<? extends ImmutableFunctionalTerm> targetTermStream,
+                                            TermFactory termFactory, TypeFactory typeFactory) {
         Set<String> templateStrings = new HashSet<>();
 
         UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher(termFactory);
 
-        ImmutableList<? extends ImmutableFunctionalTerm> targetAtoms = targetAtomStream.collect(ImmutableCollectors.toList());
+        ImmutableList<ImmutableTerm> iriLexicalTerms = targetTermStream
+                .filter(f -> f.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+                .filter(f -> f.getTerm(1)
+                        .equals(termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType())))
+                .map(f -> f.getTerm(0))
+                .collect(ImmutableCollectors.toList());
 
-        for (ImmutableFunctionalTerm fun : targetAtoms) {
+        for (ImmutableTerm lexicalTerm : iriLexicalTerms) {
 
-            // Collecting URI templates and making pattern matchers for them.
-            if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
-                continue;
-            }
-            /*
-			 * This is a URI function, so it can generate pattern matchers
-			 * for the URIs. We have two cases, one where the arity is 1,
-			 * and there is a constant/variable. The second case is
-			 * where the first element is a string template of the URI, and
-			 * the rest of the terms are variables/constants
-			 */
-            if (fun.getTerms().size() == 1) {
+            if (lexicalTerm instanceof NonFunctionalTerm) {
 				/*
 				 * URI without template, we get it directly from the column
 				 * of the table, and the function is only f(x)
@@ -76,14 +72,16 @@ public class UriTemplateMatcher {
                 if (templateStrings.contains("(.+)")) {
                     continue;
                 }
-
-                ImmutableFunctionalTerm templateFunction = termFactory.getIRIFunctionalTerm(termFactory.getVariable("x"));
                 Pattern matcher = Pattern.compile("(.+)");
-                uriTemplateMatcher.uriTemplateMatcher.put(matcher, templateFunction);
+                uriTemplateMatcher.uriTemplateMatcher.put(matcher, termFactory.getVariable("x"));
                 templateStrings.add("(.+)");
             } else {
-                ValueConstant template = (ValueConstant) fun.getTerms().get(0);
-                String templateString = template.getValue();
+                ImmutableFunctionalTerm functionalLexicalTerm = ((ImmutableFunctionalTerm) lexicalTerm);
+                FunctionSymbol functionSymbol = functionalLexicalTerm.getFunctionSymbol();
+                if (!(functionSymbol instanceof IRIStringTemplateFunctionSymbol))
+                    continue;
+                IRIStringTemplateFunctionSymbol templateSymbol = (IRIStringTemplateFunctionSymbol) functionSymbol;
+                String templateString = templateSymbol.getIRITemplate();
                 templateString = templateString.replace("{}", "(.+)");
 
                 if (templateStrings.contains(templateString)) {
@@ -91,7 +89,7 @@ public class UriTemplateMatcher {
                 }
 
                 Pattern matcher = Pattern.compile(templateString);
-                uriTemplateMatcher.uriTemplateMatcher.put(matcher, fun);
+                uriTemplateMatcher.uriTemplateMatcher.put(matcher, functionalLexicalTerm);
                 templateStrings.add(templateString);
 
             }

@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 public class IRIPrefixes {
 
-    public static String getUriTemplateString(ImmutableFunctionalTerm uriTemplate, PrefixManager prefixmng) {
-        String template = URITemplates.getUriTemplateString(uriTemplate);
+    public static String getUriTemplateString(ImmutableFunctionalTerm iriTemplateFunctionalTerm, PrefixManager prefixmng) {
+        String template = URITemplates.getUriTemplateString(iriTemplateFunctionalTerm);
         try {
             template = prefixmng.getExpandForm(template);
         } catch (InvalidPrefixWritingException ex) {

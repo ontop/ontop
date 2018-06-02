@@ -32,7 +32,8 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -87,6 +88,7 @@ public class MetaMappingExpander {
 	private final ImmutableList<Expansion> mappingsToBeExpanded;
 	private final SubstitutionFactory substitutionFactory;
 	private final org.apache.commons.rdf.api.RDF rdfFactory;
+	private final TypeFactory typeFactory;
 
 
 	private static final class Expansion {
@@ -102,11 +104,12 @@ public class MetaMappingExpander {
 	}
 
 	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, AtomFactory atomFactory, TermFactory termFactory,
-							   SubstitutionFactory substitutionFactory) {
+							   SubstitutionFactory substitutionFactory, TypeFactory typeFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.rdfFactory = new SimpleRDF();
+		this.typeFactory = typeFactory;
 
 		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
@@ -119,7 +122,7 @@ public class MetaMappingExpander {
 
 						ImmutableTerm propertyTerm = targetAtom.getSubstitutedTerm(1);
 
-							if(isURIRDFType(propertyTerm)){
+							if(isURIRDFType(propertyTerm,termFactory, typeFactory)){
 								//check if the class is grounded
 								return  !targetAtom.getSubstitutedTerm(2).isGround();
 							}
@@ -163,7 +166,7 @@ public class MetaMappingExpander {
 
 		for (Expansion m : mappingsToBeExpanded) {
 			try {
-				boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1));
+				boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1), termFactory, typeFactory);
 				// if isClass, then the template is the object;
 				// otherwise, it's a property and the template is the predicate
 				ImmutableFunctionalTerm templateAtom = (ImmutableFunctionalTerm)m.target.getSubstitutedTerm(isClass ? 2 : 1);
@@ -326,14 +329,20 @@ public class MetaMappingExpander {
 	 *
 	 * TODO: refactor so as to use RDFPredicate.getClassIRI() instead
 	 */
-	private static boolean isURIRDFType(ImmutableTerm term) {
+	private static boolean isURIRDFType(ImmutableTerm term, TermFactory termFactory, TypeFactory typeFactory) {
 		if (term instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm func = (ImmutableFunctionalTerm) term;
-			if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
-				ImmutableTerm t0 = func.getTerm(0);
-				if (t0 instanceof ValueConstant)
-					return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
+			if (func.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+				ImmutableTerm lexicalTerm = func.getTerm(0);
+				ImmutableTerm typeTerm = func.getTerm(1);
+				// If typeTerm is a variable, we are unsure so we return false
+				if (typeTerm.equals(termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()))
+						&& (lexicalTerm instanceof ValueConstant))
+					return ((ValueConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
 			}
+		}
+		else if (term instanceof IRIConstant) {
+			return ((IRIConstant) term).getIRI().equals(RDF.TYPE);
 		}
 		return false;
 	}

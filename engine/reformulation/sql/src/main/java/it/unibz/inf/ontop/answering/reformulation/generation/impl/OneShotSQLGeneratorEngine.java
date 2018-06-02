@@ -1056,7 +1056,7 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
-			if (functionSymbol instanceof URITemplatePredicate) {
+			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
 				/*
 				 * A URI function always returns a string, thus it is a string
 				 * column type.
@@ -1168,7 +1168,7 @@ public class OneShotSQLGeneratorEngine {
 			// atoms of the form integer(x)
 			return getSQLString(function.getTerm(0), index, false);
 		}
-		if (functionSymbol instanceof URITemplatePredicate
+		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol
 				|| functionSymbol instanceof BNodePredicate) {
 
 		 	// The atom must be of the form uri("...", x, y)

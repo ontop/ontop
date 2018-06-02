@@ -103,7 +103,7 @@ public class MappingTestingTools {
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
 
-        EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
+        EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
         EMPTY_MAPPING_METADATA = MAPPING_FACTORY.createMetadata(EMPTY_PREFIX_MANAGER, EMPTY_URI_TEMPLATE_MATCHER);
 

@@ -18,7 +18,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Inject
     private FunctionSymbolFactoryImpl(TypeFactory typeFactory) {
         this.typeFactory = typeFactory;
-        this.rdfTermFunction = new RDFTermFunctionImpl(
+        this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getMetaRDFTermType());
         this.iriTemplateMap = new HashMap<>();

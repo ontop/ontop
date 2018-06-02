@@ -27,10 +27,7 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -116,9 +113,13 @@ public class OBDAMappingTransformer {
 			//triple
 			ImmutableFunctionalTerm predf = (ImmutableFunctionalTerm)func.getSubstitutedTerm(1);
 
-			if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
-					if (predf.getTerms().size() == 1) { //fixed string
-						predUri = rdfFactory.createIRI(((ValueConstant)(predf.getTerm(0))).getValue());
+			if (predf.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+					ImmutableTerm lexicalTerm = predf.getTerm(0);
+					if (lexicalTerm instanceof ValueConstant) { //fixed string
+						predUri = rdfFactory.createIRI(((ValueConstant) lexicalTerm).getValue());
+					}
+					else if (lexicalTerm instanceof Variable) {
+						throw new RuntimeException("TODO: support the OBDA->R2RML conversion for variables (IRIs)");
 					}
 					else {
 						//template

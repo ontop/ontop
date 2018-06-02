@@ -13,7 +13,9 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -37,6 +39,8 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final DatalogRule2QueryConverter datalogRule2QueryConverter;
+    private final TypeFactory typeFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private Datalog2QueryMappingConverterImpl(DatalogProgram2QueryConverter converter,
@@ -44,13 +48,16 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                                               IntermediateQueryFactory iqFactory,
                                               ProvenanceMappingFactory provMappingFactory,
                                               NoNullValueEnforcer noNullValueEnforcer,
-                                              DatalogRule2QueryConverter datalogRule2QueryConverter){
+                                              DatalogRule2QueryConverter datalogRule2QueryConverter,
+                                              TypeFactory typeFactory, TermFactory termFactory){
         this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.datalogRule2QueryConverter = datalogRule2QueryConverter;
+        this.typeFactory = typeFactory;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
         ImmutableMultimap<Term, CQIE> ruleIndex = mappingRules.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))
+                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1), termFactory, typeFactory)
                                 ? r.getHead().getTerm(2)
                                 : r.getHead().getTerm(1),
                         r -> r

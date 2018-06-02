@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -86,7 +85,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                             .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
                             .map(t -> (ImmutableFunctionalTerm) t),
-                    termFactory);
+                    termFactory, typeFactory);
 
             //TODO: try to extract prefixes from the R2RML mappings
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());

@@ -128,7 +128,7 @@ public class OBDAModel {
                             .flatMap(targetAtom -> targetAtom.getSubstitution().getImmutableMap().values().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
                             .map(t -> (ImmutableFunctionalTerm) t),
-                    termFactory);
+                    termFactory, typeFactory);
 
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!

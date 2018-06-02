@@ -25,17 +25,20 @@ public class AtomFactoryImpl implements AtomFactory {
     private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+
+        RDFTermTypeConstant iriType = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
+
         triplePredicate = new TriplePredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType()
-        ));
+                typeFactory.getAbstractRDFTermType()),
+                iriType);
         quadPredicate = new QuadPredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
-                typeFactory.getIRITermType()
-        ));
+                typeFactory.getIRITermType()),
+                iriType);
         this.immutabilityTools = immutabilityTools;
     }
 

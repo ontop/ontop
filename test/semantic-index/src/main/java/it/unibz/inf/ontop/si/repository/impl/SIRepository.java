@@ -91,7 +91,7 @@ public class SIRepository {
                         .flatMap(ax -> ax.getTargetAtoms().stream())
                         .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t), termFactory);
+                        .map(t -> (ImmutableFunctionalTerm) t), termFactory, typeFactory);
 
         try {
             return new SQLPPMappingImpl(mappingAxioms,

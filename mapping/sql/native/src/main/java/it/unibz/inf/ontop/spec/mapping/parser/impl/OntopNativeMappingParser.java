@@ -25,9 +25,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -63,7 +63,6 @@ import static it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator.
  */
 public class OntopNativeMappingParser implements SQLMappingParser {
 
-
     public enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
         /* Mapping decl.: */mappingId, target, source
@@ -86,6 +85,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
 
     /**
@@ -94,10 +94,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
+                                     TypeFactory typeFactory,
                                      TargetAtomFactory targetAtomFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
     }
 
@@ -218,7 +220,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                         .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                         .filter(t -> t instanceof ImmutableFunctionalTerm)
                         .map(t -> (ImmutableFunctionalTerm) t),
-                termFactory);
+                termFactory, typeFactory);
 
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
