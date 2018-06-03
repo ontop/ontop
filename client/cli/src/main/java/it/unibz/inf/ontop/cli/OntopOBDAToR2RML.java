@@ -93,7 +93,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
         }
 
         SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, ontology,
-                config.getTermFactory());
+                config.getTermFactory(), typeFactory);
 
         final Collection<TriplesMap> tripleMaps = converter.getTripleMaps();
 //        final RDF4JR2RMLMappingManager mm = RDF4JR2RMLMappingManager.getInstance();

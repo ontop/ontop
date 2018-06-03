@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.evaluator;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,6 +56,7 @@ public class ExpressionEvaluator {
 	private final UnifierUtilities unifierUtilities;
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
+	private final RDFTermTypeConstant iriConstant, bnodeConstant;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
@@ -70,6 +71,8 @@ public class ExpressionEvaluator {
 		this.unifierUtilities = unifierUtilities;
 		this.normalizer = normalizer;
 		this.immutabilityTools = immutabilityTools;
+		this.iriConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
+		this.bnodeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 	}
 
 	public static class EvaluationResult {
@@ -181,15 +184,15 @@ public class ExpressionEvaluator {
 
 
 	private Term eval(Term expr) {
-		if (expr instanceof Variable) 
+		if (expr instanceof Variable)
 			return expr;
 
-		else if (expr instanceof Constant) 
+		else if (expr instanceof Constant)
 			return expr;
-		
-		else if (expr instanceof Function) 
+
+		else if (expr instanceof Function)
 			return eval((Function) expr);
-		 
+
 		throw new RuntimeException("Invalid expression");
 	}
 
@@ -220,7 +223,7 @@ public class ExpressionEvaluator {
 		}
 		else if (expr.isOperation()) {
 			return evalOperation(expr);
-		} 
+		}
 		else if (expr.isDataTypeFunction()) {
 			Term t0 = expr.getTerm(0);
 			if (t0 instanceof Constant) {
@@ -232,7 +235,7 @@ public class ExpressionEvaluator {
 				if (datatype.isA(XSD.BOOLEAN)) { // OBDAVocabulary.XSD_BOOLEAN
 					if (valueString.equals("true") || valueString.equals("1")) {
 						return valueTrue;
-					} 
+					}
 					else if (valueString.equals("false") || valueString.equals("0")) {
 						return valueFalse;
 					}
@@ -246,10 +249,10 @@ public class ExpressionEvaluator {
 					return termFactory.getBooleanConstant(valueString.length() != 0);
 				}
 				// TODO (R): year, date and time are not covered?
-			} 
+			}
 			else if (t0 instanceof Variable) {
 				return termFactory.getFunctionIsTrue(expr);
-			} 
+			}
 			else {
 				return expr;
 			}
@@ -391,7 +394,7 @@ public class ExpressionEvaluator {
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			return termFactory.getBooleanConstant(function.isDataTypeFunction());
-		} 
+		}
 		else {
 			return term;
 		}
@@ -416,11 +419,14 @@ public class ExpressionEvaluator {
 	private Term evalIsIri(Function term) {
 		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
-			Function function = (Function) teval;
-			Predicate predicate = function.getFunctionSymbol();
-			return termFactory.getBooleanConstant(predicate instanceof URITemplatePredicate);
+			return termFactory.getBooleanConstant(isKnownToBeIRI((Function) teval));
 		}
 		return term;
+	}
+
+	private boolean isKnownToBeIRI(Function functionalTerm) {
+		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+				&& functionalTerm.getTerm(1).equals(iriConstant);
 	}
 
 	/*
@@ -436,7 +442,7 @@ public class ExpressionEvaluator {
 				if (isXsdString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return termFactory.getTypedTerm(
 							termFactory.getVariable(parameter.toString()), typeFactory.getXsdStringDatatype());
-				} 
+				}
 
 				else {
 					return termFactory.getTypedTerm(
@@ -444,10 +450,15 @@ public class ExpressionEvaluator {
 									termFactory.getConstantLiteral(typeFactory.getXsdStringDatatype().getIRI().getIRIString())),
 										typeFactory.getXsdStringDatatype());
 				}
-			} 
-			else if (predicate instanceof URITemplatePredicate) {
-				return termFactory.getTypedTerm(function.clone(), typeFactory.getXsdStringDatatype());
-			} 
+			}
+			else if (predicate instanceof RDFTermFunctionSymbol) {
+
+				return (function.getTerm(1).equals(bnodeConstant))
+						// B-node are excluded
+						? valueNull
+						// Lexical term
+						: termFactory.getTypedTerm(function.getTerm(0), XSD.STRING);
+			}
 			else if (predicate instanceof BNodePredicate) {
 				return valueNull;
 			}
@@ -480,16 +491,14 @@ public class ExpressionEvaluator {
 		// TODO: refactor it
 		if (predicate instanceof DatatypePredicate) {
 			return termFactory.getConstantIRI(((DatatypePredicate) predicate).getReturnedType().getIRI());
-		} 
+		}
 		else if (predicate instanceof BNodePredicate) {
 			return null;
-		} 
-		else if (predicate instanceof URITemplatePredicate) {
-			return null;
-		} 
+		}
+		// TODO: remove
 		else if (function.isAlgebraFunction()) {
 			return termFactory.getConstantIRI(XSD.BOOLEAN);
-		} 
+		}
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT ||
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
@@ -505,10 +514,10 @@ public class ExpressionEvaluator {
 			DatatypePredicate pred2 = getDatatypePredicate(arg2);
 			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
 				return termFactory.getConstantIRI(pred1.getReturnedType().getIRI());
-			} 
+			}
 			else if (isNumeric(pred1) && isDouble(pred2)) {
 				return termFactory.getConstantIRI(pred2.getReturnedType().getIRI());
-			} 
+			}
 			else {
 				return null;
 			}
@@ -525,7 +534,7 @@ public class ExpressionEvaluator {
 		if (term instanceof Function && term instanceof DatatypePredicate) {
 			Function function = (Function) term;
 			return (DatatypePredicate) function.getFunctionSymbol();
-		} 
+		}
 		else if (term instanceof ValueConstant) {
 			ValueConstant constant = (ValueConstant) term;
 			RDFDatatype type = constant.getType();
@@ -533,22 +542,22 @@ public class ExpressionEvaluator {
 			if (pred == null)
 				pred = termFactory.getRequiredTypePredicate(XSD.STRING); // .XSD_STRING;
 			return pred;
-		} 
+		}
 		else {
 			throw new RuntimeException("Unexpected term type: " + term);
 		}
 	}
-	
+
 	private boolean isDouble(Predicate pred) {
 		return (pred.equals(termFactory.getRequiredTypePredicate(XSD.DOUBLE))
 				|| pred.equals(termFactory.getRequiredTypePredicate(XSD.FLOAT)));
 	}
-	
+
 	private boolean isNumeric(Predicate pred) {
 		return (pred instanceof DatatypePredicate)
 				&& (((DatatypePredicate) pred).getReturnedType() instanceof NumericRDFDatatype);
 	}
-	
+
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
 		Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(constantValue);
@@ -556,7 +565,7 @@ public class ExpressionEvaluator {
 			Predicate p = termFactory.getRequiredTypePredicate(type.get());
 			return isNumeric(p);
 		}
-		return false;	
+		return false;
 	}
 
 	/*
@@ -605,7 +614,7 @@ public class ExpressionEvaluator {
 	 */
 	private Term evalLangMatches(Function term) {
 		final String SELECT_ALL = "*";
-		
+
 		/*
 		 * Evaluate the first term
 		 */
@@ -626,17 +635,17 @@ public class ExpressionEvaluator {
 		 */
 		if (teval1 instanceof Constant && innerTerm2 instanceof Constant) {
 			String lang1 = ((Constant) teval1).getValue();
-			String lang2 = ((Constant) innerTerm2).getValue();	
+			String lang2 = ((Constant) innerTerm2).getValue();
 			if (lang2.equals(SELECT_ALL)) {
-				if (lang1.isEmpty()) 
+				if (lang1.isEmpty())
 					return termFactory.getFunctionIsNull(teval1);
-				else 
+				else
 					return termFactory.getFunctionIsNotNull(teval1);
-			} 
+			}
 			else {
 				return termFactory.getBooleanConstant(lang1.equals(lang2));
 			}
-		} 
+		}
 		else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
 			Variable var = (Variable) teval1;
 			Constant lang = (Constant) innerTerm2;
@@ -646,7 +655,7 @@ public class ExpressionEvaluator {
 			} else {
 				return termFactory.getFunctionEQ(var, lang);
 			}
-		} 
+		}
 		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
 			Function f1 = (Function) teval1;
 			Function f2 = (Function) innerTerm2;
@@ -655,7 +664,7 @@ public class ExpressionEvaluator {
 			}
 			return evalLangMatches(termFactory.getLANGMATCHESFunction(f1.getTerm(0),
 					f2.getTerm(0)));
-		} 
+		}
 		else {
 			return term;
 		}
@@ -688,8 +697,9 @@ public class ExpressionEvaluator {
         if (expr instanceof Function) {
             Function function1 = (Function) expr;
             Predicate predicate1 = function1.getFunctionSymbol();
-            if((predicate1 instanceof URITemplatePredicate)
-                    ||(predicate1 instanceof BNodePredicate)) {
+            if((predicate1 instanceof RDFTermFunctionSymbol)
+                    && (function1.getTerm(1).equals(iriConstant)
+						|| function1.getTerm(1).equals(bnodeConstant))) {
                 return valueFalse;
             }
             if (!function1.isDataTypeFunction()){
@@ -729,7 +739,7 @@ public class ExpressionEvaluator {
 		Term result = eval(innerTerm);
 		if (result == valueNull) {
 			return termFactory.getBooleanConstant(isnull);
-		} 
+		}
 		else if (result instanceof Constant) {
 			return termFactory.getBooleanConstant(!isnull);
 		}
@@ -740,7 +750,7 @@ public class ExpressionEvaluator {
 			/*
 			 * Special optimization for URI templates
 			 */
-			if (functionSymbol instanceof URITemplatePredicate) {
+			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
 				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull);
 			}
 			/*
@@ -824,8 +834,8 @@ public class ExpressionEvaluator {
 		}
 		return term;
 	}
-	
-	
+
+
 	private Term evalNot(Function term) {
 		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
@@ -857,7 +867,7 @@ public class ExpressionEvaluator {
 		/*
 		 * Evaluate the first term
 		 */
-		
+
 		// Do not eval if term is DataTypeFunction, e.g. integer(10)
 		Term teval1;
 		if (term.getTerm(0) instanceof Function) {
@@ -903,35 +913,35 @@ public class ExpressionEvaluator {
 			teval2 = eval(term.getTerm(1));
 		}
 
-		/* 
-		 * Normalizing the location of terms, functions first 
+		/*
+		 * Normalizing the location of terms, functions first
 		 */
 		Term eval1 = teval1 instanceof Function ? teval1 : teval2;
 		Term eval2 = teval1 instanceof Function ? teval2 : teval1;
 
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
 			// no - op
-		} 
+		}
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
-			if (eval1.equals(eval2)) 
+			if (eval1.equals(eval2))
 				return termFactory.getBooleanConstant(eq);
-			else 
+			else
 				return termFactory.getBooleanConstant(!eq);
-			
-		} 
+
+		}
 		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
 			Predicate pred1 = f1.getFunctionSymbol();
-			
+
 			if (f1.isDataTypeFunction()) {
 //				if (pred1.getTermType(0) == COL_TYPE.UNSUPPORTED) {
 //					throw new RuntimeException("Unsupported type: " + pred1);
 //				}
-			} 
+			}
 			else if (f1.isOperation()) {
 				return term;
 			}
-			
+
 			/*
 			 * Evaluate the second term
 			 */
@@ -956,7 +966,7 @@ public class ExpressionEvaluator {
 					if (f1.getTerms().size() != f2.getTerms().size()) {
 						// case one is with language another without
 						return termFactory.getBooleanConstant(!eq);
-					} 
+					}
 					else if (f1.getTerms().size() == 2) {
 						// SIZE == 2
 						// these are literals with languages, we need to
@@ -979,30 +989,30 @@ public class ExpressionEvaluator {
 					if (eq) {
 						Function neweq = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, true);
-					} 
+					}
 					else {
 						Function neweq = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 						return evalEqNeq(neweq, false);
 					}
-				} 
+				}
 				else if (pred1.equals(pred2)) {
-					if (pred1 instanceof URITemplatePredicate) {
+					if (pred1 instanceof IRIStringTemplateFunctionSymbol) {
 						return evalUriTemplateEqNeq(f1, f2, eq);
-					} 
+					}
 					else {
 						if (eq) {
 							Function neweq = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, true);
-						} 
+						}
 						else {
 							Function neweq = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
 							return evalEqNeq(neweq, false);
 						}
 					}
-				} 
+				}
 				else if (!pred1.equals(pred2)) {
 					return termFactory.getBooleanConstant(!eq);
-				} 
+				}
 				else {
 					return term;
 				}
@@ -1019,7 +1029,7 @@ public class ExpressionEvaluator {
 
 	private Term evalUriTemplateEqNeq(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		int arityForFunction1 = uriFunction1.getArity();
-		int arityForFunction2 = uriFunction2.getArity();		
+		int arityForFunction2 = uriFunction2.getArity();
 		if (arityForFunction1 == 1) {
 			if (arityForFunction2 == 1) {
 				return evalUriFunctionsWithSingleTerm(uriFunction1, uriFunction2, isEqual);
@@ -1037,7 +1047,7 @@ public class ExpressionEvaluator {
 		}
 		return null;
 	}
-	
+
 	private Term evalUriFunctionsWithSingleTerm(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Term term1 = uriFunction1.getTerm(0);
 		Term term2 = uriFunction2.getTerm(0);
@@ -1081,22 +1091,22 @@ public class ExpressionEvaluator {
 		Substitution theta = unifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			return termFactory.getBooleanConstant(!isEqual);
-		} 
+		}
 		else {
 			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
 				return termFactory.getBooleanConstant(!isEqual);
-			} 
+			}
 			else {
 				Function result = null;
 				List<Function> temp = new ArrayList<>();
 				Set<Variable> keys = theta.getMap().keySet();
 				for (Variable var : keys) {
-					if (isEqual) 
+					if (isEqual)
 						result = termFactory.getFunctionEQ(var, theta.get(var));
-					else 
+					else
 						result = termFactory.getFunctionNEQ(var, theta.get(var));
-					
+
 					temp.add(result);
 					if (temp.size() == 2) {
 						if (isEqual){
@@ -1109,40 +1119,40 @@ public class ExpressionEvaluator {
 					}
 				}
 				return result;
-			}				
+			}
 		}
 	}
-		
-	
+
+
 	private Term evalAnd(Term t1, Term t2) {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
-	
+
 		if (e1 == valueFalse || e2 == valueFalse)
 			return valueFalse;
-		
+
 		if (e1 == valueTrue)
 			return e2;
-		
+
 		if (e2 == valueTrue)
 			return e1;
-		
+
 		return termFactory.getFunctionAND(e1, e2);
 	}
 
 	private Term evalOr(Term t1, Term t2) {
 		Term e1 = eval(t1);
 		Term e2 = eval(t2);
-	
+
 		if (e1 == valueTrue || e2 == valueTrue)
 			return valueTrue;
-		
+
 		if (e1 == valueFalse)
 			return e2;
-		
+
 		if (e2 == valueFalse)
 			return e1;
-		
+
 		return termFactory.getFunctionOR(e1, e2);
 	}
 

@@ -29,6 +29,7 @@ import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -59,16 +60,19 @@ public class SQLPPMappingToR2RMLConverter {
     private PrefixManager prefixmng;
     private OWLOntology ontology;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, TermFactory termFactory) {
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, TermFactory termFactory,
+                                        TypeFactory typeFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
         this.ontology = ontology;
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory);
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory, typeFactory);
         transformer.setOntology(ontology);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
                 .map(a -> transformer.getTriplesMap(a, prefixmng))
