@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
@@ -174,8 +175,13 @@ public class TargetQueryRenderer {
         String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
         if (functionSymbol instanceof DatatypePredicate)
             return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
-        if (functionSymbol instanceof URITemplatePredicate)
-            return displayURITemplate(function, prefixManager);
+        if (functionSymbol instanceof RDFTermType) {
+            ImmutableTerm lexicalTerm = function.getTerm(0);
+            if ((lexicalTerm instanceof ImmutableFunctionalTerm)
+                    && (((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol))
+                return displayURITemplate((ImmutableFunctionalTerm)lexicalTerm, prefixManager);
+        }
+        // TODO: remove?
         if (functionSymbol == ExpressionOperation.CONCAT)
             return displayConcat(function);
         if (functionSymbol instanceof BNodePredicate)
@@ -236,19 +242,26 @@ public class TargetQueryRenderer {
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         StringBuilder sb = new StringBuilder();
-        ImmutableTerm firstTerm = function.getTerms().get(0);
+        ImmutableTerm lexicalTerm = function.getTerms().get(0);
 
-        if (firstTerm instanceof Variable) {
+        if (lexicalTerm instanceof Variable) {
             sb.append("<{");
-            sb.append(((Variable) firstTerm).getName());
+            sb.append(((Variable) lexicalTerm).getName());
             sb.append("}>");
-        } else {
-            String template = ((ValueConstant) firstTerm).getValue();
+        }
+        else if (lexicalTerm instanceof ValueConstant) {
+            return "<" + ((ValueConstant) lexicalTerm).getValue() + ">";
+        }
+        else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
+
+            ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+            String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getIRITemplate();
 
             // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
             String templateFormat = template.replace("{}", "%s");
-            List<String> varNames = new ArrayList<String>();
-            for (ImmutableTerm innerTerm : function.getTerms()) {
+            List<String> varNames = new ArrayList<>();
+            for (ImmutableTerm innerTerm : lexicalFunctionalTerm.getTerms()) {
                 if (innerTerm instanceof Variable) {
                     varNames.add(getDisplayName(innerTerm, prefixManager));
                 }

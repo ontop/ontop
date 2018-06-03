@@ -25,11 +25,14 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.R2RMLMappingManager;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
@@ -61,14 +64,18 @@ public class OBDAMappingTransformer {
 	private RDF rdfFactory = new SimpleRDF();
     private String baseIRIString;
 	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final RDFTermTypeConstant iriTypeConstant;
 
-	OBDAMappingTransformer(TermFactory termFactory) {
-        this("urn:", termFactory);
+	OBDAMappingTransformer(TermFactory termFactory, TypeFactory typeFactory) {
+        this("urn:", termFactory, typeFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory) {
+    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory, TypeFactory typeFactory) {
         this.baseIRIString = baseIRIString;
 		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
+		this.iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
     /**
@@ -110,6 +117,12 @@ public class OBDAMappingTransformer {
 
 			Optional<Template> templp = Optional.empty();
 
+			RDFAtomPredicate rdfAtomPredicate = Optional.of(func.getProjectionAtom().getPredicate())
+					.filter(p -> p instanceof RDFAtomPredicate)
+					.map(p -> (RDFAtomPredicate)p)
+					.orElseThrow(() -> new MinorOntopInternalBugException(
+							"A target atom in a OBDA mapping must use a RDFAtomPredicate"));
+
 			//triple
 			ImmutableFunctionalTerm predf = (ImmutableFunctionalTerm)func.getSubstitutedTerm(1);
 
@@ -131,15 +144,13 @@ public class OBDAMappingTransformer {
 			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
 			ImmutableFunctionalTerm object = (ImmutableFunctionalTerm) func.getSubstitutedTerm(2);
 
+			Optional<IRI> objectClassIRI = rdfAtomPredicate.getClassIRI(func.getSubstitutedTerms());
+
 			//if the class IRI is constant
-			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)
-					&& object.getFunctionSymbol() instanceof URITemplatePredicate && object.getTerms().size() == 1) {
-
-				IRI classIRI = rdfFactory.createIRI(((ValueConstant)(object.getTerm(0))).getValue());
-					// The term is actually a SubjectMap (class)
-					//add class declaration to subject Map node
-					sm.addClass(classIRI);
-
+			if (objectClassIRI.isPresent()) {
+				// The term is actually a SubjectMap (class)
+				//add class declaration to subject Map node
+				sm.addClass(objectClassIRI.get());
 			} else {
 
 				String predURIString = predUri.getIRIString();
@@ -188,23 +199,25 @@ public class OBDAMappingTransformer {
 					//check if uritemplate we create a template, in case of datatype with single variable we create a column
  					ImmutableFunctionalTerm o = (ImmutableFunctionalTerm) object;
  					Predicate objectPred = o.getFunctionSymbol();
-					if (objectPred instanceof URITemplatePredicate) {
+					if (objectPred instanceof RDFTermFunctionSymbol) {
+						ImmutableTerm typeTerm =  o.getTerm(1);
+						if (typeTerm.equals(iriTypeConstant)) {
+							ImmutableTerm lexicalTerm = o.getTerm(0);
 
-						ImmutableTerm objectTerm = o.getTerm(0);
+							if (lexicalTerm instanceof Variable) {
+								obm = mfact.createObjectMap(((Variable) lexicalTerm).getName());
+								obm.setTermType(R2RMLVocabulary.iri);
+							} else {
 
-						if(objectTerm instanceof Variable)
-						{
-							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
-							obm.setTermType(R2RMLVocabulary.iri);
+								String objectURI = IRIPrefixes.getUriTemplateString(o, prefixmng);
+								//add template object
+								//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.template, rdfFactory.createLiteral(objectURI)));
+								//obm.setTemplate(mfact.createTemplate(objectURI));
+								obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
+							}
 						}
-						else {
 
-							String objectURI = IRIPrefixes.getUriTemplateString(o, prefixmng);
-							//add template object
-							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.template, rdfFactory.createLiteral(objectURI)));
-							//obm.setTemplate(mfact.createTemplate(objectURI));
-							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-						}
+						// TODO: support literal, bnodes and so on
 					}
 					else if (objectPred instanceof DatatypePredicate) {
 						ImmutableTerm objectTerm = object.getTerm(0);
