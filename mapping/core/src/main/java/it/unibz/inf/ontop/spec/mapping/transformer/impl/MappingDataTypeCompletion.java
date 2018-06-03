@@ -107,8 +107,7 @@ public class MappingDataTypeCompletion {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (function.isDataTypeFunction() ||
-                    (functionSymbol instanceof IRIStringTemplateFunctionSymbol)
-                    || (functionSymbol instanceof BNodePredicate)) {
+                    (functionSymbol instanceof ObjectStringTemplateFunctionSymbol)) {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
             }
             else if (function.isOperation()) {

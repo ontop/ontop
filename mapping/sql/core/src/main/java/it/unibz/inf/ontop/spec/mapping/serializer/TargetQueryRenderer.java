@@ -177,15 +177,18 @@ public class TargetQueryRenderer {
             return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
         if (functionSymbol instanceof RDFTermType) {
             ImmutableTerm lexicalTerm = function.getTerm(0);
-            if ((lexicalTerm instanceof ImmutableFunctionalTerm)
-                    && (((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol))
-                return displayURITemplate((ImmutableFunctionalTerm)lexicalTerm, prefixManager);
+            if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+                FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
+                if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
+                    return displayURITemplate((ImmutableFunctionalTerm)lexicalTerm, prefixManager);
+                else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
+                    return displayFunctionalBnode(function);
+            }
         }
         // TODO: remove?
         if (functionSymbol == ExpressionOperation.CONCAT)
             return displayConcat(function);
-        if (functionSymbol instanceof BNodePredicate)
-            return displayFunctionalBnode(function);
         return displayOrdinaryFunction(function, fname, prefixManager);
     }
 

@@ -1168,8 +1168,7 @@ public class OneShotSQLGeneratorEngine {
 			// atoms of the form integer(x)
 			return getSQLString(function.getTerm(0), index, false);
 		}
-		if (functionSymbol instanceof IRIStringTemplateFunctionSymbol
-				|| functionSymbol instanceof BNodePredicate) {
+		if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
 
 		 	// The atom must be of the form uri("...", x, y)
 			return getSQLStringForTemplateFunction(function.getTerms(), index);

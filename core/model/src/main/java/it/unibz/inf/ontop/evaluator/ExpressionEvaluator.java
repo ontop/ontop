@@ -406,9 +406,7 @@ public class ExpressionEvaluator {
 	private Term evalIsBlank(Function term) {
 		Term teval = eval(term.getTerm(0));
 		if (teval instanceof Function) {
-			Function function = (Function) teval;
-			Predicate predicate = function.getFunctionSymbol();
-			return termFactory.getBooleanConstant(predicate instanceof BNodePredicate);
+			return termFactory.getBooleanConstant(isKnownToBeBlank((Function)teval));
 		}
 		return term;
 	}
@@ -427,6 +425,11 @@ public class ExpressionEvaluator {
 	private boolean isKnownToBeIRI(Function functionalTerm) {
 		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				&& functionalTerm.getTerm(1).equals(iriConstant);
+	}
+
+	private boolean isKnownToBeBlank(Function functionalTerm) {
+		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+				&& functionalTerm.getTerm(1).equals(bnodeConstant);
 	}
 
 	/*
@@ -459,9 +462,6 @@ public class ExpressionEvaluator {
 						// Lexical term
 						: termFactory.getTypedTerm(function.getTerm(0), XSD.STRING);
 			}
-			else if (predicate instanceof BNodePredicate) {
-				return valueNull;
-			}
 		}
 		return term;
 	}
@@ -491,9 +491,6 @@ public class ExpressionEvaluator {
 		// TODO: refactor it
 		if (predicate instanceof DatatypePredicate) {
 			return termFactory.getConstantIRI(((DatatypePredicate) predicate).getReturnedType().getIRI());
-		}
-		else if (predicate instanceof BNodePredicate) {
-			return null;
 		}
 		// TODO: remove
 		else if (function.isAlgebraFunction()) {

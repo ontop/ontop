@@ -398,8 +398,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                     return false;
             }
         }
-        else if ((functionSymbol instanceof RDFTermFunctionSymbol)
-                || (functionSymbol instanceof BNodePredicate)) {
+        else if (functionSymbol instanceof RDFTermFunctionSymbol) {
             return false;
         }
         return true;
