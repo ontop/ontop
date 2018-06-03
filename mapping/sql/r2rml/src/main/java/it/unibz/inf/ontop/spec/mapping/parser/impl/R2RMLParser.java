@@ -548,11 +548,7 @@ public class R2RMLParser {
 			return termFactory.getIRIFunctionalTerm(string, ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
-			// TODO: refactor
-			BNode bnodeTemplate = termFactory.getConstantBNode(string);
-			terms.add(0, bnodeTemplate); // the URI template is always on the
-										// first position in the term list
-			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
+			return termFactory.getBnodeFunctionalTerm(string, ImmutableList.copyOf(terms));
 			// simple LITERAL
 		case 3:
 			ImmutableTerm lexicalValue = terms.remove(0);

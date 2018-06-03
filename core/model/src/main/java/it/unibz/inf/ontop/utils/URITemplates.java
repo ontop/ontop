@@ -73,11 +73,11 @@ public class URITemplates {
 
     }
 
-    public static int getArity(String uriTemplate) {
+    public static int getArity(String template) {
         int count = 0;
-        int currentIndex = uriTemplate.indexOf(PLACE_HOLDER);
+        int currentIndex = template.indexOf(PLACE_HOLDER);
         while (currentIndex >= 0) {
-            currentIndex = uriTemplate.indexOf(PLACE_HOLDER, currentIndex + 1);
+            currentIndex = template.indexOf(PLACE_HOLDER, currentIndex + 1);
             count++;
         }
         return count;
@@ -127,7 +127,7 @@ public class URITemplates {
 
         ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 
-        final String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getIRITemplate();
+        final String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
         ImmutableList<? extends ImmutableTerm> subTerms = lexicalFunctionalTerm.getTerms();
 
         List<String> splitParts = Splitter.on(PLACE_HOLDER).splitToList(template);

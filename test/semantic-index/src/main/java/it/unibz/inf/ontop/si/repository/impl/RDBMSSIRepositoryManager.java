@@ -25,8 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -38,9 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -906,7 +901,7 @@ public class RDBMSSIRepositoryManager {
 		if (!type.isBlankNode())
 			subjectTerm = termFactory.getIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
 
 		ImmutableTerm predTerm = termFactory.getIRIFunctionalTerm(RDF.TYPE);
@@ -926,13 +921,13 @@ public class RDBMSSIRepositoryManager {
 		if (!type1.isBlankNode())
 			subjectTerm = termFactory.getIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getImmutableBNodeTemplate(X);
+			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
 
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
-					? termFactory.getImmutableBNodeTemplate(Y)
+					? termFactory.getFreshBnodeFunctionalTerm(Y)
 					: termFactory.getIRIFunctionalTerm(Y);
 		}
 		else {

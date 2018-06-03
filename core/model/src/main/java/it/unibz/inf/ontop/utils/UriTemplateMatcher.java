@@ -81,7 +81,7 @@ public class UriTemplateMatcher {
                 if (!(functionSymbol instanceof IRIStringTemplateFunctionSymbol))
                     continue;
                 IRIStringTemplateFunctionSymbol templateSymbol = (IRIStringTemplateFunctionSymbol) functionSymbol;
-                String templateString = templateSymbol.getIRITemplate();
+                String templateString = templateSymbol.getTemplate();
                 templateString = templateString.replace("{}", "(.+)");
 
                 if (templateStrings.contains(templateString)) {

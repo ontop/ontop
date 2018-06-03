@@ -248,7 +248,7 @@ public class DirectMappingAxiomProducer {
 			for (Attribute att : td.getAttributes())
 				vars.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
+			return termFactory.getFreshBnodeFunctionalTerm(ImmutableList.copyOf(vars));
 		}
 	}
 

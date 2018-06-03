@@ -256,7 +256,7 @@ public class TargetQueryRenderer {
                 && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
 
             ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-            String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getIRITemplate();
+            String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
 
             // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
             String templateFormat = template.replace("{}", "%s");

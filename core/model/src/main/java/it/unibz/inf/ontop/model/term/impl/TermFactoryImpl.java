@@ -51,6 +51,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
+	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
 
 	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory, OntopModelSettings settings) {
@@ -66,6 +67,8 @@ public class TermFactoryImpl implements TermFactory {
 		this.type2FunctionSymbolMap = new HashMap<>();
 		this.termTypeConstantMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
+		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
+		this.bnodeTypeConstant = getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 	}
 
 	@Override
@@ -242,18 +245,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms) {
-		FunctionSymbol pred = new BNodePredicateImpl(terms.length, typeFactory);
-		return getImmutableFunctionalTerm(pred, terms);
-	}
-
-	@Override
-	public ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms) {
-		FunctionSymbol pred = new BNodePredicateImpl(terms.size(), typeFactory);
-		return getImmutableFunctionalTerm(pred, terms);
-	}
-
-	@Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(ExpressionOperation.EQ, firstTerm, secondTerm);
 	}
@@ -400,12 +391,12 @@ public class TermFactoryImpl implements TermFactory {
 		// TODO: build a DB string
 		ValueConstant lexicalConstant = getConstantLiteral(iri.getIRIString());
 
-		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
     }
 
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable) {
-		return getRDFFunctionalTerm(variable, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+		return getRDFFunctionalTerm(variable, iriTypeConstant);
 	}
 
 	@Override
@@ -418,7 +409,7 @@ public class TermFactoryImpl implements TermFactory {
 		FunctionSymbol templateFunctionSymbol = functionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
 		ImmutableFunctionalTerm templateFunctionalTerm = getImmutableFunctionalTerm(templateFunctionSymbol, arguments);
 
-		return getRDFFunctionalTerm(templateFunctionalTerm, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+		return getRDFFunctionalTerm(templateFunctionalTerm, iriTypeConstant);
 
 	}
 
@@ -426,14 +417,14 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI) {
 		// TODO: use an int-to-string casting function
 		ValueConstant lexicalValue = getConstantLiteral(String.valueOf(encodedIRI));
-		return getRDFFunctionalTerm(lexicalValue, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+		return getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 														ImmutableList<ValueConstant> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(templateSymbol, arguments);
-		return getRDFFunctionalTerm(lexicalTerm, getRDFTermTypeConstant(typeFactory.getIRITermType()));
+		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
 	}
 
 	@Override
@@ -449,9 +440,31 @@ public class TermFactoryImpl implements TermFactory {
 		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable) {
+		return getRDFFunctionalTerm(variable, bnodeTypeConstant);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate, 
+														  ImmutableList<? extends ImmutableTerm> arguments) {
+		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
+				functionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
+				arguments);
+		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
+		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
+				functionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				arguments);
+		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
+	}
+
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
-				getRDFTermTypeConstant(typeFactory.getIRITermType()));
+				iriTypeConstant);
 	}
 
 	private static class NoConstructionFunctionException extends OntopInternalBugException {

@@ -35,10 +35,6 @@ public interface TermFactory {
 	/*
 	 * Built-in function predicates
 	 */
-
-	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableTerm... terms);
-
-	ImmutableFunctionalTerm getImmutableBNodeTemplate(ImmutableList<ImmutableTerm> terms);
 	
 	/**
 	 * Construct a {@link Function} object. A function expression consists of
@@ -258,4 +254,16 @@ public interface TermFactory {
 	 */
 	Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments);
 	Function getIRIMutableFunctionalTerm(IRI iri);
+
+	/**
+	 * NB: a fresh Bnode template is created
+	 */
+	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable);
+	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
+												   ImmutableList<? extends ImmutableTerm> arguments);
+
+	/**
+	 * NB: a fresh Bnode template is created
+	 */
+	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 }

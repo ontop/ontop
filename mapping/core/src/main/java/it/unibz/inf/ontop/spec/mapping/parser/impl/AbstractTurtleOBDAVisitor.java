@@ -130,7 +130,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         while (m.find()) {
             args.add(termFactory.getVariable(m.group(1)));
         }
-        return termFactory.getImmutableBNodeTemplate(args.build());
+        return termFactory.getFreshBnodeFunctionalTerm(args.build());
     }
 
     private interface FormatString {
