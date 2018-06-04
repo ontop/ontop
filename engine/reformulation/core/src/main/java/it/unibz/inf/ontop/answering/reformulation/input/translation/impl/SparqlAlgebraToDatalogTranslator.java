@@ -519,7 +519,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         if (lang.isPresent()) {
             // TODO: use a string lexical type instead
-            return termFactory.getTypedTerm(termFactory.getConstantLiteral(value, typeFactory.getXsdStringDatatype()), lang.get());
+            return termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(value, typeFactory.getXsdStringDatatype()), lang.get());
 
         } else {
             RDFDatatype type;
@@ -548,7 +548,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
             Term constant = termFactory.getConstantLiteral(value, type);
 
-            return termFactory.getTypedTerm(constant, type);
+            return termFactory.getRDFLiteralMutableFunctionalTerm(constant, type);
 
         }
     }

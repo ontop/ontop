@@ -122,13 +122,13 @@ public class MappingDataTypeCompletion {
             Variable variable = (Variable) term;
             Term newTerm;
             RDFDatatype type = getDataType(termOccurenceIndex, variable);
-            newTerm = termFactory.getTypedTerm(variable, type);
+            newTerm = termFactory.getRDFLiteralMutableFunctionalTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + atom + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
         } else if (term instanceof ValueConstant) {
-            Term newTerm = termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
+            Term newTerm = termFactory.getRDFLiteralMutableFunctionalTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
@@ -154,7 +154,7 @@ public class MappingDataTypeCompletion {
                     // insert the datatype of the evaluated operation
                     atom.setTerm(
                             position,
-                            termFactory.getTypedTerm(
+                            termFactory.getRDFLiteralMutableFunctionalTerm(
                                     term,
                                     // TODO: refactor this cast
                                     (RDFDatatype) inferredType.get()
@@ -166,7 +166,7 @@ public class MappingDataTypeCompletion {
 
                     if (defaultDatatypeInferred) {
 
-                        atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
+                        atom.setTerm(position, termFactory.getRDFLiteralMutableFunctionalTerm(term, typeFactory.getXsdStringDatatype()));
                     } else {
                         throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +

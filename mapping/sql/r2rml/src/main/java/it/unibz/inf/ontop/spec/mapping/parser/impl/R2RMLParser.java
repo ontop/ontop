@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -292,7 +291,7 @@ public class R2RMLParser {
 					// we check if it is a literal with language tag
 
 					if (lanConstant != null) {
-						objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, lanConstant);
+						objectAtom = termFactory.getRDFLiteralFunctionalTerm(constantLiteral, lanConstant);
 					}
 
 					// we check if it is a typed literal
@@ -304,7 +303,7 @@ public class R2RMLParser {
 							logger.warn("Unsupported datatype will not be converted: "
 									+ datatypeConstant.toString());
 						} else {
-							objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, type.get());
+							objectAtom = termFactory.getRDFLiteralFunctionalTerm(constantLiteral, type.get());
 						}
 					}
 					else {
@@ -385,7 +384,7 @@ public class R2RMLParser {
 		// we check if it is a literal with language tag
 
 		if (lan != null) {
-			objectAtom = termFactory.getImmutableTypedTerm(objectAtom, lan);
+			objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, lan);
 		}
 
 		// we check if it is a typed literal
@@ -397,7 +396,7 @@ public class R2RMLParser {
 				logger.warn("Unsupported datatype will not be converted: "
 						+ datatype.toString());
 			} else {
-				objectAtom = termFactory.getImmutableTypedTerm(objectAtom, type.get());
+				objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, type.get());
 			}
 		}
 
@@ -555,7 +554,7 @@ public class R2RMLParser {
 			// pred = typeFactory.getRequiredTypePredicate(); //
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
-			return termFactory.getImmutableTypedTerm(lexicalValue, XSD.STRING);
+			return termFactory.getRDFLiteralFunctionalTerm(lexicalValue, XSD.STRING);
 		case 4://concat
 			ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
             for(int j=2;j<terms.size();j++){

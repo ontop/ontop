@@ -136,7 +136,7 @@ public class DirectMappingAxiomProducer {
 			// TODO: revisit this
 			RDFDatatype type = (RDFDatatype) att.getTermType();
 			Variable objV = termFactory.getVariable(att.getID().getName());
-			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
+			ImmutableTerm obj = termFactory.getRDFLiteralFunctionalTerm(objV, type);
 			
 			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
 		}

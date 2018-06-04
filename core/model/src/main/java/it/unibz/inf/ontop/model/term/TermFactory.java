@@ -192,13 +192,13 @@ public interface TermFactory {
 	 */
 	public ValueConstant getConstantLiteral(String value, String language);
 
-	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, RDFDatatype type);
-	Function getTypedTerm(Term value, IRI datatype);
+	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language);
+	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type);
+	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, IRI datatype);
 
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type);
+	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -218,10 +218,13 @@ public interface TermFactory {
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
 
+	@Deprecated
 	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
 
+	@Deprecated
 	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
 
+	@Deprecated
 	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
 
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);

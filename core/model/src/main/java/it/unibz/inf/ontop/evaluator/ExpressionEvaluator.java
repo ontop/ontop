@@ -207,7 +207,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == valueFalse) {
 							//
-							terms.set(i, termFactory.getTypedTerm(valueFalse, typeFactory.getXsdBooleanDatatype()));
+							terms.set(i, termFactory.getRDFLiteralMutableFunctionalTerm(valueFalse, typeFactory.getXsdBooleanDatatype()));
 						} else if (newterm == valueTrue) {
 							//remove
 							terms.remove(i);
@@ -443,12 +443,12 @@ public class ExpressionEvaluator {
 			Term parameter = function.getTerm(0);
 			if (function.isDataTypeFunction()) {
 				if (isXsdString(predicate) ) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
-					return termFactory.getTypedTerm(
+					return termFactory.getRDFLiteralMutableFunctionalTerm(
 							termFactory.getVariable(parameter.toString()), typeFactory.getXsdStringDatatype());
 				}
 
 				else {
-					return termFactory.getTypedTerm(
+					return termFactory.getRDFLiteralMutableFunctionalTerm(
 							termFactory.getFunctionCast(termFactory.getVariable(parameter.toString()),
 									termFactory.getConstantLiteral(typeFactory.getXsdStringDatatype().getIRI().getIRIString())),
 										typeFactory.getXsdStringDatatype());
@@ -460,7 +460,7 @@ public class ExpressionEvaluator {
 						// B-node are excluded
 						? valueNull
 						// Lexical term
-						: termFactory.getTypedTerm(function.getTerm(0), XSD.STRING);
+						: termFactory.getRDFLiteralMutableFunctionalTerm(function.getTerm(0), XSD.STRING);
 			}
 		}
 		return term;
@@ -573,7 +573,7 @@ public class ExpressionEvaluator {
 
 		// Create a default return constant: blank language with literal type.
 		// TODO: avoid this constant wrapping thing
-		Function emptyString = termFactory.getTypedTerm(
+		Function emptyString = termFactory.getRDFLiteralMutableFunctionalTerm(
 				termFactory.getConstantLiteral("", XSD.STRING), XSD.STRING);
 
         if (innerTerm instanceof Variable) {
@@ -597,7 +597,7 @@ public class ExpressionEvaluator {
 
 			return datatype.getLanguageTag()
 					// TODO: avoid this constant wrapping thing
-					.map(tag -> termFactory.getTypedTerm(
+					.map(tag -> termFactory.getRDFLiteralMutableFunctionalTerm(
 							termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING),
 							XSD.STRING))
 					.orElse(emptyString);

@@ -934,10 +934,10 @@ public class RDBMSSIRepositoryManager {
 			RDFDatatype datatype = (RDFDatatype) type2;
 			if (datatype.getLanguageTag().isPresent()) {
 				LanguageTag languageTag = datatype.getLanguageTag().get();
-				objectTerm = termFactory.getImmutableTypedTerm(Y, languageTag.getFullString());
+				objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, languageTag.getFullString());
 			}
 			else {
-				objectTerm = termFactory.getImmutableTypedTerm(Y, datatype);
+				objectTerm = termFactory.getRDFLiteralFunctionalTerm(Y, datatype);
 			}
 		}
 

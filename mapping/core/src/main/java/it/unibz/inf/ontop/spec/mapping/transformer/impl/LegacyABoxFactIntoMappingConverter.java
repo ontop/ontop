@@ -133,10 +133,10 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             Function head = o.getType().getLanguageTag()
                     .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
-                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
                     .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
-                            termFactory.getTypedTerm(o, o.getType())));
+                            termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -161,11 +161,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                         .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                     s.getIRI()),
                                     propertyIRI,
-                                    termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
                         .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                 s.getIRI()),
                                 propertyIRI,
-                                termFactory.getTypedTerm(o, o.getType())));
+                                termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
             } else {
 
                 IRIConstant o = (IRIConstant) aa.getValue();

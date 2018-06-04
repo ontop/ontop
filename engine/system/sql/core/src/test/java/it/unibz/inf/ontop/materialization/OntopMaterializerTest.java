@@ -231,9 +231,9 @@ public class OntopMaterializerTest {
 		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
 		bodyBuilder.add(getTripleTargetAtom(personTemplate, type, person));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype)));
 		bodyBuilder.add(getTripleTargetAtom(personTemplate, hasschool, schoolTemplate));
 		bodyBuilder.add(getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
@@ -696,10 +696,10 @@ public class OntopMaterializerTest {
 //		Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //		List<Term> headTerms = new LinkedList<Term>();
 //
-//		final Term firstNameVariable = termFactory.getTypedTerm(termFactory.getVariable("fn"), COL_TYPE.STRING);
-//		final Term lastNameVariable = termFactory.getTypedTerm(termFactory.getVariable("ln"), COL_TYPE.STRING);
-//		final Term ageVariable = termFactory.getTypedTerm(termFactory.getVariable("age"), COL_TYPE.INTEGER);
-//		final Term schoolUriVariable = termFactory.getTypedTerm(termFactory.getVariable("schooluri"), COL_TYPE.STRING);
+//		final Term firstNameVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("fn"), COL_TYPE.STRING);
+//		final Term lastNameVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("ln"), COL_TYPE.STRING);
+//		final Term ageVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("age"), COL_TYPE.INTEGER);
+//		final Term schoolUriVariable = termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getVariable("schooluri"), COL_TYPE.STRING);
 //
 //		headTerms.add(firstNameVariable);
 //		headTerms.add(lastNameVariable);

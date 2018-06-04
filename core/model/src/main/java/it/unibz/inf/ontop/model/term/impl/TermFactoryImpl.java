@@ -92,13 +92,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, RDFDatatype type) {
-		return getFunction(getRequiredTypePredicate(type), value);
+	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type) {
+		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, getRDFTermTypeConstant(type));
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, IRI datatypeIRI) {
-		return getTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
+	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, IRI datatypeIRI) {
+		return getRDFLiteralMutableFunctionalTerm(lexicalTerm, typeFactory.getDatatype(datatypeIRI));
 	}
 
 	@Override
@@ -107,28 +107,23 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getTypedTerm(Term value, String language) {
-		DatatypePredicate functionSymbol = getRequiredTypePredicate(typeFactory.getLangTermType(language));
-		return getFunction(functionSymbol, value);
+	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language) {
+		return getRDFLiteralMutableFunctionalTerm(lexicalTerm, typeFactory.getLangTermType(language));
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type) {
-		FunctionSymbol pred = getRequiredTypePredicate(type);
-		if (pred == null)
-			throw new RuntimeException("Unknown data type: " + type);
-
-		return getImmutableFunctionalTerm(pred, value);
+	public ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type) {
+		return getRDFFunctionalTerm(lexicalTerm, getRDFTermTypeConstant(type));
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI) {
-		return getImmutableTypedTerm(value, typeFactory.getDatatype(datatypeIRI));
+	public ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI) {
+		return getRDFLiteralFunctionalTerm(lexicalTerm, typeFactory.getDatatype(datatypeIRI));
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language) {
-		return getImmutableTypedTerm(value, typeFactory.getLangTermType(language));
+	public ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language) {
+		return getRDFLiteralFunctionalTerm(lexicalTerm, typeFactory.getLangTermType(language));
 	}
 
 	@Override
@@ -353,6 +348,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 
+	@Deprecated
 	@Override
 	public DatatypePredicate getRequiredTypePredicate(RDFDatatype type) {
 		return getOptionalTypePredicate(type)
