@@ -217,10 +217,6 @@ public interface TermFactory {
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
 
-
-	@Deprecated
-	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
-
 	@Deprecated
 	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
 

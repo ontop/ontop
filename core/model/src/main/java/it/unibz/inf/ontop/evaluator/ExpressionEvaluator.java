@@ -25,14 +25,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -224,39 +222,39 @@ public class ExpressionEvaluator {
 		else if (expr.isOperation()) {
 			return evalOperation(expr);
 		}
-		else if (expr.isDataTypeFunction()) {
-			Term t0 = expr.getTerm(0);
-			if (t0 instanceof Constant) {
-				ValueConstant value = (ValueConstant) t0;
-				String valueString = value.getValue();
-
-				RDFDatatype datatype = value.getType();
-
-				if (datatype.isA(XSD.BOOLEAN)) { // OBDAVocabulary.XSD_BOOLEAN
-					if (valueString.equals("true") || valueString.equals("1")) {
-						return valueTrue;
-					}
-					else if (valueString.equals("false") || valueString.equals("0")) {
-						return valueFalse;
-					}
-				}
-				else if (isNumeric(p)) {
-					BigDecimal valueDecimal = new BigDecimal(valueString);
-					return termFactory.getBooleanConstant(!valueDecimal.equals(BigDecimal.ZERO));
-				}
-				else if (datatype.isA(XSD.STRING)) {
-					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
-					return termFactory.getBooleanConstant(valueString.length() != 0);
-				}
-				// TODO (R): year, date and time are not covered?
-			}
-			else if (t0 instanceof Variable) {
-				return termFactory.getFunctionIsTrue(expr);
-			}
-			else {
-				return expr;
-			}
-		}
+//		else if (expr.isDataTypeFunction()) {
+//			Term t0 = expr.getTerm(0);
+//			if (t0 instanceof Constant) {
+//				ValueConstant value = (ValueConstant) t0;
+//				String valueString = value.getValue();
+//
+//				RDFDatatype datatype = value.getType();
+//
+//				if (datatype.isA(XSD.BOOLEAN)) { // OBDAVocabulary.XSD_BOOLEAN
+//					if (valueString.equals("true") || valueString.equals("1")) {
+//						return valueTrue;
+//					}
+//					else if (valueString.equals("false") || valueString.equals("0")) {
+//						return valueFalse;
+//					}
+//				}
+//				else if (isNumeric(p)) {
+//					BigDecimal valueDecimal = new BigDecimal(valueString);
+//					return termFactory.getBooleanConstant(!valueDecimal.equals(BigDecimal.ZERO));
+//				}
+//				else if (datatype.isA(XSD.STRING)) {
+//					// ROMAN (18 Dec 2015): toString() was wrong -- it contains "" and so is never empty
+//					return termFactory.getBooleanConstant(valueString.length() != 0);
+//				}
+//				// TODO (R): year, date and time are not covered?
+//			}
+//			else if (t0 instanceof Variable) {
+//				return termFactory.getFunctionIsTrue(expr);
+//			}
+//			else {
+//				return expr;
+//			}
+//		}
 		return expr;
 	}
 
@@ -304,7 +302,7 @@ public class ExpressionEvaluator {
 			case SPARQL_LANG:
 				return evalLang(term);
 			case IS_NUMERIC:
-				return evalIsNumeric(term);
+				return evalIsRDFLiteralNumeric(term);
 			case IS_LITERAL:
 				return evalIsLiteral(term);
 			case IS_IRI:
@@ -375,15 +373,18 @@ public class ExpressionEvaluator {
 	 * Expression evaluator for isNumeric() function
 	 */
 
-	private Term evalIsNumeric(Function term) {
-		Term innerTerm = term.getTerm(0);
-		if (innerTerm instanceof Function) {
-			Function function = (Function) innerTerm;
-			return termFactory.getBooleanConstant(function.isDataTypeFunction() && isNumeric(function.getFunctionSymbol()));
-		}
-		else {
+	private Term evalIsRDFLiteralNumeric(Function term) {
+		Optional<TermType> optionalTermType = getTermType(term.getTerm(0));
+		if (!optionalTermType.isPresent())
 			return term;
-		}
+
+		boolean isNumeric = optionalTermType
+				.filter(t -> t instanceof RDFDatatype)
+				.map(t -> (RDFDatatype)t)
+				.map(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))
+				.orElse(false);
+
+		return termFactory.getBooleanConstant(isNumeric);
 	}
 
 	/*
@@ -488,14 +489,30 @@ public class ExpressionEvaluator {
 	 */
 	private Term getDatatype(Function function) {
 		Predicate predicate = function.getFunctionSymbol();
-		// TODO: refactor it
-		if (predicate instanceof DatatypePredicate) {
-			return termFactory.getConstantIRI(((DatatypePredicate) predicate).getReturnedType().getIRI());
+		if (predicate instanceof RDFTermFunctionSymbol) {
+			Optional<RDFTermType> optionalTermType = Optional.of(function.getTerm(1))
+					.filter(t -> t instanceof RDFTermTypeConstant)
+					.map(t -> ((RDFTermTypeConstant) t).getRDFTermType());
+			/*
+			 * Datatype cannot be inferred yet
+			 */
+			if (!optionalTermType.isPresent())
+				return function;
+
+			return optionalTermType
+					.filter(t -> t instanceof RDFDatatype)
+					.map(t -> ((RDFDatatype) t).getIRI())
+					.map(i -> (Term) termFactory.getConstantIRI(i))
+					// Not a Datatype
+					.orElse(null);
 		}
 		// TODO: remove
 		else if (function.isAlgebraFunction()) {
 			return termFactory.getConstantIRI(XSD.BOOLEAN);
 		}
+		/*
+		 * TODO: remove (let arbitrary functions infer the returned type)
+		 */
 		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT ||
 				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
 		{
@@ -506,18 +523,23 @@ public class ExpressionEvaluator {
 			if (arg1 instanceof Variable|| arg2 instanceof Variable){
 				return function;
 			}
-			DatatypePredicate pred1 = getDatatypePredicate(arg1);
 
-			DatatypePredicate pred2 = getDatatypePredicate(arg2);
-			if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-				return termFactory.getConstantIRI(pred1.getReturnedType().getIRI());
-			}
-			else if (isNumeric(pred1) && isDouble(pred2)) {
-				return termFactory.getConstantIRI(pred2.getReturnedType().getIRI());
-			}
-			else {
-				return null;
-			}
+			Optional<TermType> optionalType1 = getTermType(arg1);
+			Optional<TermType> optionalType2 = getTermType(arg2);
+
+			Optional<TermType> optionalCommonDenominator = optionalType1
+					.flatMap(t1 -> optionalType2
+							.map(t1::getCommonDenominator));
+
+			if (!optionalCommonDenominator.isPresent())
+				return function;
+
+			return optionalCommonDenominator
+					.filter(d -> !d.isAbstract())
+					.filter(d -> d instanceof RDFDatatype)
+					.map(d -> ((RDFDatatype)d).getIRI())
+					.map(termFactory::getConstantIRI)
+					.orElse(null);
 		}
 		else if (function.isOperation()) {
 			//return boolean uri
@@ -526,43 +548,38 @@ public class ExpressionEvaluator {
 		return null;
 	}
 
-	@Deprecated
-	private DatatypePredicate getDatatypePredicate(Term term) {
-		if (term instanceof Function && term instanceof DatatypePredicate) {
-			Function function = (Function) term;
-			return (DatatypePredicate) function.getFunctionSymbol();
+	private Optional<TermType> getTermType(Term term) {
+		if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+			if (!(functionalTerm.getFunctionSymbol() instanceof FunctionSymbol))
+				return Optional.empty();
+
+			/*
+			 * TODO: generalize it to any FunctionSymbol
+			 */
+			FunctionSymbol functionSymbol = (FunctionSymbol) functionalTerm.getFunctionSymbol();
+
+			if (functionSymbol instanceof RDFTermType) {
+				return Optional.of(functionalTerm.getTerm(1))
+						.filter(t -> t instanceof RDFTermTypeConstant)
+						.map(t -> ((RDFTermTypeConstant) t).getRDFTermType());
+			}
+			else if (functionSymbol instanceof OperationPredicate)
+				return ((OperationPredicate) functionSymbol).inferType(
+						functionalTerm.getTerms().stream()
+							.map(immutabilityTools::convertIntoImmutableTerm)
+							.collect(ImmutableCollectors.toList()));
+			else
+				return Optional.empty();
 		}
-		else if (term instanceof ValueConstant) {
-			ValueConstant constant = (ValueConstant) term;
-			RDFDatatype type = constant.getType();
-			DatatypePredicate pred = termFactory.getRequiredTypePredicate(type);
-			if (pred == null)
-				pred = termFactory.getRequiredTypePredicate(XSD.STRING); // .XSD_STRING;
-			return pred;
+		else if (term instanceof Constant) {
+			Constant constant = (Constant) term;
+			return Optional.of(constant.getType());
 		}
+		// Variable
 		else {
-			throw new RuntimeException("Unexpected term type: " + term);
+			return Optional.empty();
 		}
-	}
-
-	private boolean isDouble(Predicate pred) {
-		return (pred.equals(termFactory.getRequiredTypePredicate(XSD.DOUBLE))
-				|| pred.equals(termFactory.getRequiredTypePredicate(XSD.FLOAT)));
-	}
-
-	private boolean isNumeric(Predicate pred) {
-		return (pred instanceof DatatypePredicate)
-				&& (((DatatypePredicate) pred).getReturnedType() instanceof NumericRDFDatatype);
-	}
-
-	private boolean isNumeric(ValueConstant constant) {
-		String constantValue = constant.getValue();
-		Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(constantValue);
-		if (type.isPresent()) {
-			Predicate p = termFactory.getRequiredTypePredicate(type.get());
-			return isNumeric(p);
-		}
-		return false;
 	}
 
 	/*

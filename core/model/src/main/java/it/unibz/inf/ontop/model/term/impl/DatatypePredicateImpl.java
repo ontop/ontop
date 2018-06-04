@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 
 //import com.hp.hpl.jena.iri.IRI;
 
+@Deprecated
 public class DatatypePredicateImpl extends FunctionSymbolImpl implements DatatypePredicate {
 
 	@Nonnull

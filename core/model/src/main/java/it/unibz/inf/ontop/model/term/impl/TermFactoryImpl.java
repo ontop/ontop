@@ -48,6 +48,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant valueNull;
 	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
+	@Deprecated
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
@@ -347,21 +348,17 @@ public class TermFactoryImpl implements TermFactory {
 		return builder.build();
 	}
 
-
 	@Deprecated
-	@Override
-	public DatatypePredicate getRequiredTypePredicate(RDFDatatype type) {
-		return getOptionalTypePredicate(type)
-				.orElseThrow(() -> new NoConstructionFunctionException(type));
-	}
-
 	@Override
 	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
 		if (datatypeIri.equals(LANGSTRING))
 			throw new IllegalArgumentException("Lang string predicates are not unique (they depend on the language tag)");
-		return getRequiredTypePredicate(typeFactory.getDatatype(datatypeIri));
+		RDFDatatype type = typeFactory.getDatatype(datatypeIri);
+		return getOptionalTypePredicate(type)
+				.orElseThrow(() -> new NoConstructionFunctionException(type));
 	}
 
+	@Deprecated
 	@Override
 	public Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type) {
 		if (type.isAbstract())

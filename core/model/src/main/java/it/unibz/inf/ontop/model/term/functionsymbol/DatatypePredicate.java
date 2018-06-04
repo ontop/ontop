@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 
+@Deprecated
 public interface DatatypePredicate extends RDFTermConstructionSymbol {
 
 	@Override

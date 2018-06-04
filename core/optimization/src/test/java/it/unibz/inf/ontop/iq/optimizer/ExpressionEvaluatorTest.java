@@ -444,9 +444,7 @@ public class ExpressionEvaluatorTest {
     }
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, String languageTag) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getLangTermType(languageTag)),
-                argument1);
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument1, TYPE_FACTORY.getLangTermType(languageTag));
     }
 
 

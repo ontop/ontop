@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -61,12 +60,11 @@ public class QueryMergingTest {
     private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
     private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
     private static Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static DatatypePredicate XSD_INTEGER = TERM_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getXsdIntegerDatatype());
     private static Constant THREE = TERM_FACTORY.getConstantLiteral("3", XSD.INTEGER);
-    private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, THREE);
-    private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, ONE);
-    private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, TWO);
-    private static ImmutableFunctionalTerm INT_OF_B = TERM_FACTORY.getImmutableFunctionalTerm(XSD_INTEGER, B);
+    private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE, XSD.INTEGER);
+    private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(ONE, XSD.INTEGER);
+    private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(TWO, XSD.INTEGER);
+    private static ImmutableFunctionalTerm INT_OF_B = TERM_FACTORY.getRDFLiteralFunctionalTerm(B, XSD.INTEGER);
     private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
     private static ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, C));
     private static ExtensionalDataNode DATA_NODE_4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, S, T));
@@ -1174,8 +1172,7 @@ public class QueryMergingTest {
     }
 
     private static ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING), argument);
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.STRING);
     }
 
 

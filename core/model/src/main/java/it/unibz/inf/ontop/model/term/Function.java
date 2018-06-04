@@ -82,7 +82,8 @@ public interface Function extends Term {
 	boolean isOperation();
 
 	boolean isAlgebraFunction();
-	
+
+	@Deprecated
 	boolean isDataTypeFunction();
 
     public Set<Variable> getVariables();

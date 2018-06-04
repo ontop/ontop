@@ -6,11 +6,11 @@ import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -93,7 +93,7 @@ public class UnknownDatatypeMappingTest {
         RDFAtomPredicate triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .findFirst().get();
 
-        Optional<DatatypePredicate> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
+        Optional<IRI> optionalDatatype = mapping.getRDFProperties(triplePredicate).stream()
                 .map(i -> mapping.getRDFPropertyDefinition(triplePredicate, i))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -104,15 +104,18 @@ public class UnknownDatatypeMappingTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .map(ImmutableFunctionalTerm::getFunctionSymbol)
-                .filter(p -> p instanceof DatatypePredicate)
-                .map(p -> (DatatypePredicate) p)
+                .filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+                .map(t -> t.getTerm(1))
+                .filter(t -> t instanceof RDFTermTypeConstant)
+                .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
+                .filter(t -> t instanceof RDFDatatype)
+                .map(t -> ((RDFDatatype)t).getIRI())
                 .findFirst();
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        DatatypePredicate datatype = optionalDatatype.get();
+        IRI datatype = optionalDatatype.get();
 
-        assertEquals(TERM_FACTORY.getRequiredTypePredicate(expectedType), datatype);
+        assertEquals(expectedType, datatype);
     }
 }

@@ -601,10 +601,6 @@ public class OneShotSQLGeneratorEngine {
 					conditions.add(condition);
 				}
 			}
-			else if (atom.isDataTypeFunction()) {
-				String condition = getSQLString(atom, index, false);
-				conditions.add(condition);
-			}
 		}
 		return conditions;
 	}
@@ -621,9 +617,7 @@ public class OneShotSQLGeneratorEngine {
 				Term term = atom.getTerm(0);
 				final String arg;
 				if (functionSymbol == ExpressionOperation.NOT) {
-					arg = (term instanceof Function && ((Function) term).isDataTypeFunction())
-							? effectiveBooleanValue(term, index)
-							: getSQLString(term, index, false);
+					arg = getSQLString(term, index, false);
 				}
 				else {
 					arg = getSQLString(term, index, false);
@@ -758,7 +752,7 @@ public class OneShotSQLGeneratorEngine {
 				return join;
 			}
 		}
-		else if (!atom.isOperation() && !atom.isDataTypeFunction()) {
+		else if (!atom.isOperation()) {
 			return index.getViewDefinition(atom);  // a database atom
 		}
 		return null;
@@ -1155,19 +1149,6 @@ public class OneShotSQLGeneratorEngine {
 		Predicate functionSymbol = function.getFunctionSymbol();
 		int size = function.getTerms().size();
 
-		if (function.isDataTypeFunction()) {
-			if (functionSymbol.getExpectedBaseType(0)
-					.isA(typeFactory.getUnsupportedDatatype())) {
-				throw new RuntimeException("Unsupported type in the query: "
-						+ function);
-			}
-			// Note: datatype functions are unary.
-			// The only exception is rdf:langString (represented internally as a binary predicate, with string and
-			// language tag as arguments), but in this case the first argument only is used for SQL generation.
-
-			// atoms of the form integer(x)
-			return getSQLString(function.getTerm(0), index, false);
-		}
 		if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
 
 		 	// The atom must be of the form uri("...", x, y)
