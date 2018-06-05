@@ -7,13 +7,11 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,14 +27,12 @@ public class TypeExtractor {
 
     private final TermType literalType;
     private final Relation2Predicate relation2Predicate;
-    private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private TypeExtractor(Relation2Predicate relation2Predicate, TermTypeInferenceTools termTypeInferenceTools,
+    private TypeExtractor(Relation2Predicate relation2Predicate,
                           TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
         this.relation2Predicate = relation2Predicate;
-        this.termTypeInferenceTools = termTypeInferenceTools;
         this.literalType = typeFactory.getAbstractRDFSLiteral();
         this.immutabilityTools = immutabilityTools;
     }
@@ -60,14 +56,14 @@ public class TypeExtractor {
      * Extracts the TermTypes and the cast types from a set of Datalog rules.
      */
     public TypeResults extractTypes(Multimap<Predicate, CQIE> ruleIndex, List<Predicate> predicatesInBottomUp, DBMetadata metadata)
-            throws IncompatibleTermException {
+            throws FatalTypingException {
         ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = extractTermTypeMap(ruleIndex.values());
 
         return new TypeResults(extractCastTypeMap(ruleIndex, predicatesInBottomUp, termTypeMap, metadata));
     }
 
     private ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> extractTermTypeMap(Collection<CQIE> rules)
-            throws IncompatibleTermException {
+            throws FatalTypingException {
         return rules.stream()
                 .collect(ImmutableCollectors.toMap(
                         // Key mapper

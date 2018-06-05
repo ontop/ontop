@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
@@ -36,13 +34,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private static final String ANNOTATION_PROPERTY_STR = "an annotation property";
     private static final String CLASS_STR = "a class";
     private final TermFactory termFactory;
-    private final AtomFactory atomFactory;
     private final TypeFactory typeFactory;
 
     @Inject
-    private MappingOntologyComplianceValidatorImpl(TermFactory termFactory, AtomFactory atomFactory, TypeFactory typeFactory) {
+    private MappingOntologyComplianceValidatorImpl(TermFactory termFactory, TypeFactory typeFactory) {
         this.termFactory = termFactory;
-        this.atomFactory = atomFactory;
         this.typeFactory = typeFactory;
     }
 
@@ -92,10 +88,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      * Note that this assumption does not hold for intermediate query in general.
      *
-     * Return nothing if the property is rdf:type (class instance assertion)
-     *
-     * TODO: refactor it!
-     *
      */
     private Optional<RDFTermType> extractTripleObjectType(IQ mappingAssertion)
             throws TripleObjectTypeInferenceException {
@@ -113,27 +105,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
-            FunctionSymbol functionSymbol = constructionFunctionalTerm.getFunctionSymbol();
-            if ((functionSymbol instanceof RDFTermFunctionSymbol)) {
-                return Optional.of(constructionFunctionalTerm)
-                        .map(f -> f.getTerm(1))
-                        .filter(t -> t instanceof RDFTermTypeConstant)
-                        .map(t -> ((RDFTermTypeConstant)t).getRDFTermType())
-                        .map(Optional::of)
-                        .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                                "Not defined in the root node (expected for a mapping assertion)"));
-            }
-            // TODO: remove it after building the RDF literals with the RDF function symbol
-            else if (functionSymbol instanceof DatatypePredicate) {
-                DatatypePredicate datatypeConstructionFunctionSymbol = (DatatypePredicate) functionSymbol;
-                return Optional.of(datatypeConstructionFunctionSymbol.getReturnedType());
-            }
-            else {
-                throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                        "Unexpected function symbol: " + functionSymbol);
-            }
+            return Optional.of(
+                    constructionFunctionalTerm.inferType().getTermType()
+                            .filter(t -> t instanceof RDFTermType)
+                            .map(t -> (RDFTermType)t)
+                            .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                                "Not defined in the root node (expected for a mapping assertion)")));
         }
-
         else {
             /*
              * TODO: consider variables and constants (NB: could be relevant for SPARQL->SPARQL
@@ -143,7 +121,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     "Was expecting a functional term (constants and variables are not yet supported). \n"
                             + "Term definition: " + constructionTerm);
         }
-
     }
 
 

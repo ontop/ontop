@@ -1,5 +1,8 @@
 package it.unibz.inf.ontop.model.term;
 
+import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.model.type.TypeInference;
+
 import java.util.stream.Stream;
 
 /**
@@ -12,4 +15,6 @@ public interface ImmutableTerm {
     boolean isGround();
 
     Stream<Variable> getVariableStream();
+
+    TypeInference inferType() throws FatalTypingException;
 }

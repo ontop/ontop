@@ -21,7 +21,9 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeInference;
 
 import java.util.stream.Stream;
 
@@ -78,6 +80,11 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of(this);
+	}
+
+	@Override
+	public TypeInference inferType() throws FatalTypingException {
+		return TypeInference.declareNotDetermined();
 	}
 
 	@Override

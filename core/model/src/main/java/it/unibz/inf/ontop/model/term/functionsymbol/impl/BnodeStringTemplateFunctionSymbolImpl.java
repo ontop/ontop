@@ -11,7 +11,8 @@ public class BnodeStringTemplateFunctionSymbolImpl extends ObjectStringTemplateF
         super(template, arity, typeFactory);
     }
 
-    public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(String template, TypeFactory typeFactory) {
+    public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(String template,
+                                                                         TypeFactory typeFactory) {
         int arity = URITemplates.getArity(template);
         return new BnodeStringTemplateFunctionSymbolImpl(template, arity, typeFactory);
     }

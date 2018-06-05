@@ -1,16 +1,10 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.AbstractTermTypeException;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
+import it.unibz.inf.ontop.model.type.TypeInference;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * TODO: explain
@@ -18,8 +12,8 @@ import java.util.stream.IntStream;
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes)
-            throws IncompatibleTermException {
+    public TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> argumentTypes)
+            throws FatalTypingException {
 
         return postprocessInferredType(reduceInferredTypes(argumentTypes));
     }
@@ -27,13 +21,13 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     /**
      * Hook, does nothing by default
      */
-    protected Optional<TermType> postprocessInferredType(Optional<TermType> termType) {
-        return termType;
+    protected TypeInference postprocessInferredType(TypeInference typeInference) {
+        return typeInference;
     }
 
     /**
      * TODO: find a better name
      */
-    protected abstract Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes);
+    protected abstract TypeInference reduceInferredTypes(ImmutableList<TypeInference> argumentTypes);
 
 }

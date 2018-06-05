@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
@@ -10,9 +10,10 @@ import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
+import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.model.type.impl.SimpleArgumentValidator;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
-import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 
@@ -202,19 +203,17 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException {
+	public TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
 
-		TermTypeInferenceTools termTypeInferenceTools = new TermTypeInferenceTools();
-		ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
-				terms.stream()
-						.map(termTypeInferenceTools::inferType)
-						.collect(Collectors.toList()));
+		ImmutableList<TypeInference> argumentTypes = terms.stream()
+				.map(ImmutableTerm::inferType)
+				.collect(ImmutableCollectors.toList());
 
 		return inferTypeFromArgumentTypes(argumentTypes);
 	}
 
 	@Override
-	public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes) {
+	public TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> argumentTypes) {
 		argumentValidator.validate(argumentTypes);
 
 		return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);

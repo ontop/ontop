@@ -2,13 +2,9 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -35,7 +31,6 @@ public class DatatypeInferenceTest {
     private static final String DROP_SCRIPT = DIR + "drop-db.sql";
     private static final String DEFAULT_OWL_FILE = DIR + "marriage.ttl";
     private static TestConnectionManager TEST_MANAGER;
-    private static final TermFactory TERM_FACTORY = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -108,12 +103,13 @@ public class DatatypeInferenceTest {
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
-                .filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
-                .map(t -> t.getTerm(1))
-                .filter(t -> t instanceof RDFTermTypeConstant)
-                .map(t -> ((RDFTermTypeConstant) t).getRDFTermType())
+                .flatMap(t-> t.inferType()
+                        .getTermType()
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty))
                 .filter(t -> t instanceof RDFDatatype)
-                .map(t -> ((RDFDatatype)t).getIRI())
+                .map(t -> (RDFDatatype)t)
+                .map(RDFDatatype::getIRI)
                 .findFirst();
 
         assertTrue("A datatype was expected", optionalDatatype.isPresent());

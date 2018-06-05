@@ -565,10 +565,12 @@ public class ExpressionEvaluator {
 						.map(t -> ((RDFTermTypeConstant) t).getRDFTermType());
 			}
 			else if (functionSymbol instanceof OperationPredicate)
-				return ((OperationPredicate) functionSymbol).inferType(
+				// TODO: deal with the error
+				return functionSymbol.inferType(
 						functionalTerm.getTerms().stream()
 							.map(immutabilityTools::convertIntoImmutableTerm)
-							.collect(ImmutableCollectors.toList()));
+							.collect(ImmutableCollectors.toList()))
+						.getTermType();
 			else
 				return Optional.empty();
 		}

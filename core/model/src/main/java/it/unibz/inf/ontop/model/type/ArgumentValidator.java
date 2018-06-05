@@ -2,23 +2,24 @@ package it.unibz.inf.ontop.model.type;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 
-import java.util.Optional;
-
+/**
+ * TODO: refactor
+ */
 public interface ArgumentValidator {
 
-    void validate(ImmutableList<Optional<TermType>> argumentTypes) throws IncompatibleTermException;
+    void validate(ImmutableList<TypeInference> argumentTypes) throws FatalTypingException;
 
     TermType getExpectedBaseType(int index);
 
     ImmutableList<TermType> getExpectedBaseArgumentTypes();
 
-    default boolean areCompatible(ImmutableList<Optional<TermType>> argumentTypes) {
+    default boolean areCompatible(ImmutableList<TypeInference> argumentTypes) {
         try {
             validate(argumentTypes);
             return true;
-        } catch (IncompatibleTermException e) {
+        } catch (FatalTypingException e) {
             return false;
         }
     }

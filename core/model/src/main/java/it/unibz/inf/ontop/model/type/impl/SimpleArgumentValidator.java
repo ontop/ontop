@@ -2,9 +2,10 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.AbstractTermTypeException;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeInference;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -19,16 +20,18 @@ public class SimpleArgumentValidator implements ArgumentValidator {
     }
 
     @Override
-    public void validate(ImmutableList<Optional<TermType>> argumentTypes) throws IncompatibleTermException {
+    public void validate(ImmutableList<TypeInference> argumentTypes) throws FatalTypingException {
 
         if (expectedBaseTypes.size() != argumentTypes.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + argumentTypes + " and " + expectedBaseTypes);
         }
+
         /*
          * Checks the argument types
          */
         IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
+                        .getTermType()
                         .ifPresent(t -> checkTypes(expectedBaseTypes.get(i), t)));
     }
 
@@ -40,7 +43,7 @@ public class SimpleArgumentValidator implements ArgumentValidator {
             throw new AbstractTermTypeException(argumentType);
 
         if (!argumentType.isA(expectedBaseType)) {
-            throw new IncompatibleTermException(expectedBaseType, argumentType);
+            throw new FatalTypingException(expectedBaseType, argumentType);
         }
     }
 

@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
@@ -404,7 +404,7 @@ public class OneShotSQLGeneratorEngine {
 			/*
 			 * Currently, incompatible terms are treated as a reformulation error
 			 */
-		} catch (IncompatibleTermException e) {
+		} catch (FatalTypingException e) {
 			throw new OntopTypingException(e.getMessage());
 		}
 

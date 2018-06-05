@@ -28,6 +28,8 @@ import it.unibz.inf.ontop.model.type.TermType;
  */
 public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 
+	boolean isNull();
+
 	TermType getType();
 
 	// TODO: eliminate getValue from this interface

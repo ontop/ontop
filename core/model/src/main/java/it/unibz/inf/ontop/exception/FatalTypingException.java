@@ -6,21 +6,28 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
 
 /**
+ * FATAL typing error. NOT relevant for SPARQL errors (which are not fatal).
  *
- * Incompatibility found between an expected term type and the one inferred.
+ * Appears due:
+ *    - A problem in the mapping (e.g. the source query is generating a SQL error)
+ *    - A bug inside Ontop (when the mapping is valid, this error should never occur)
+ *
+ * TODO: integrate in the Ontop exception hierarchy
+ *
+ * TODO: refactor the error messages
  */
-public class IncompatibleTermException extends RuntimeException {
-    public IncompatibleTermException(Term term, TermType expectedTermType, TermType actualTermType) {
+public class FatalTypingException extends RuntimeException {
+    public FatalTypingException(Term term, TermType expectedTermType, TermType actualTermType) {
         super("Incompatible type inferred for " + term + ": expected: " + expectedTermType
                 + ", actual: " + actualTermType);
     }
 
-    public IncompatibleTermException(TermType expectedTermType, TermType actualTermType) {
+    public FatalTypingException(TermType expectedTermType, TermType actualTermType) {
         super("Incompatible type inferred " + ": expected: " + expectedTermType
                 + ", actual: " + actualTermType);
     }
 
-    public IncompatibleTermException(String exception, TermType actualTermType) {
+    public FatalTypingException(String exception, TermType actualTermType) {
         super("Incompatible type inferred " + ": expected: " + exception
                 + ", actual: " + actualTermType);
     }
@@ -28,18 +35,18 @@ public class IncompatibleTermException extends RuntimeException {
     /**
      * Incompatibility detected in an expression
      */
-    public IncompatibleTermException(Expression expression, IncompatibleTermException caughtException) {
+    public FatalTypingException(Expression expression, FatalTypingException caughtException) {
         super("In " + expression + ": " + caughtException.getMessage());
     }
 
     /**
      * Incompatibility detected in an expression
      */
-    public IncompatibleTermException(ImmutableExpression expression, IncompatibleTermException caughtException) {
+    public FatalTypingException(ImmutableExpression expression, FatalTypingException caughtException) {
         super("In " + expression + ": " + caughtException.getMessage());
     }
 
-    protected IncompatibleTermException(String message) {
+    protected FatalTypingException(String message) {
         super(message);
     }
 }

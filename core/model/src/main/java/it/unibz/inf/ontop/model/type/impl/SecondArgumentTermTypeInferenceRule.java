@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeInference;
 
-import java.util.Optional;
 
 public class SecondArgumentTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
-    protected Optional<TermType> reduceInferredTypes(ImmutableList<Optional<TermType>> argumentTypes) {
+    protected TypeInference reduceInferredTypes(ImmutableList<TypeInference> argumentTypes) {
         if (argumentTypes.size() < 2) {
             throw new IllegalStateException("At least two arguments is required by the SecondArgumentTermTypeReasoner");
         }

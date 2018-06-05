@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.TypeInference;
 
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
@@ -80,9 +81,18 @@ public class ValueConstantImpl implements ValueConstant {
 		return true;
 	}
 
+	public boolean isNull() {
+		return value.equals("null");
+	}
+
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
+	}
+
+	@Override
+	public TypeInference inferType() {
+		return TypeInference.declareTermType(getType());
 	}
 
 	@Override
