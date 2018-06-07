@@ -23,20 +23,15 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-
-import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 
 @Singleton
 public class TermFactoryImpl implements TermFactory {
@@ -48,8 +43,6 @@ public class TermFactoryImpl implements TermFactory {
 	private final ValueConstant valueNull;
 	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
-	@Deprecated
-	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
@@ -65,7 +58,6 @@ public class TermFactoryImpl implements TermFactory {
 		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
 		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
-		this.type2FunctionSymbolMap = new HashMap<>();
 		this.termTypeConstantMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
 		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
@@ -348,32 +340,6 @@ public class TermFactoryImpl implements TermFactory {
 		return builder.build();
 	}
 
-	@Deprecated
-	@Override
-	public DatatypePredicate getRequiredTypePredicate(IRI datatypeIri) {
-		if (datatypeIri.equals(LANGSTRING))
-			throw new IllegalArgumentException("Lang string predicates are not unique (they depend on the language tag)");
-		RDFDatatype type = typeFactory.getDatatype(datatypeIri);
-		return getOptionalTypePredicate(type)
-				.orElseThrow(() -> new NoConstructionFunctionException(type));
-	}
-
-	@Deprecated
-	@Override
-	public Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type) {
-		if (type.isAbstract())
-			throw new IllegalArgumentException("The datatype " + type + " is abstract and therefore cannot be constructed");
-
-		return Optional.of(type2FunctionSymbolMap
-				.computeIfAbsent(
-						type,
-						t -> t.getLanguageTag()
-							// Lang string
-							.map(tag -> new DatatypePredicateImpl(type, typeFactory.getDatatype(XSD.STRING)))
-							// Other datatypes
-							.orElseGet(() -> new DatatypePredicateImpl(type, type))));
-	}
-
 	@Override
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
@@ -458,13 +424,6 @@ public class TermFactoryImpl implements TermFactory {
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);
-	}
-
-	private static class NoConstructionFunctionException extends OntopInternalBugException {
-
-		private NoConstructionFunctionException(TermType type) {
-			super("No construction function found for " + type);
-		}
 	}
 
 }

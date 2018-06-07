@@ -648,15 +648,12 @@ public class BindingLiftTest {
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
-                argument);
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.INTEGER);
     }
 
     private ImmutableFunctionalTerm generateString(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING),
-                argument);
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.STRING);
+
     }
 
 

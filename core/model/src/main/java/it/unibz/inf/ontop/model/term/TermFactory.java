@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TermFactory {
 
@@ -216,12 +215,6 @@ public interface TermFactory {
 	public Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
-
-	@Deprecated
-	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
-
-	@Deprecated
-	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
 
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 

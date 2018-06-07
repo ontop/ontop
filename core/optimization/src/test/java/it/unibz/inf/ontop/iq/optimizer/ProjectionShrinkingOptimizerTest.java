@@ -37,10 +37,8 @@ public class ProjectionShrinkingOptimizerTest {
 
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
-                argument
-        );
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.INTEGER);
+
     }
 
     @Test

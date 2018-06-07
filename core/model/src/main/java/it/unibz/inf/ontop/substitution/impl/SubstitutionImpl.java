@@ -21,10 +21,7 @@ package it.unibz.inf.ontop.substitution.impl;
  */
 
 import com.google.common.base.Joiner;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
@@ -251,6 +248,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
                     || (term1 instanceof ValueConstantImpl)
                     || (term1 instanceof IRIConstantImpl)
+                    || (term1 instanceof RDFTermTypeConstant)
                     || (term1 instanceof BNodeConstantImpl)
                     ) {
 

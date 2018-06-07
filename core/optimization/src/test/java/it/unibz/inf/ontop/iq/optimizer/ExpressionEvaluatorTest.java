@@ -447,16 +447,7 @@ public class ExpressionEvaluatorTest {
         return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument1, TYPE_FACTORY.getLangTermType(languageTag));
     }
 
-
-    private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING),
-                argument1);
-    }
-
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(
-                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
-                argument);
+        return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.INTEGER);
     }
 }
