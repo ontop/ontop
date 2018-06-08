@@ -284,7 +284,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             else
                 return new SingletonSubstitution(t1, t2);
         }
-        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof IRIConstantImpl)) {
+        else if (t2 instanceof Constant) {
             return new SingletonSubstitution(t1, t2);
         }
         else if (t2 instanceof Function) {

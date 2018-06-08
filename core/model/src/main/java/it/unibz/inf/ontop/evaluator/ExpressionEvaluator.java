@@ -489,23 +489,23 @@ public class ExpressionEvaluator {
 	 * TODO: refactor
 	 */
 	private Term getDatatype(Function function) {
-		Predicate predicate = function.getFunctionSymbol();
-		if (predicate instanceof RDFTermFunctionSymbol) {
-			Optional<RDFTermType> optionalTermType = Optional.of(function.getTerm(1))
-					.filter(t -> t instanceof RDFTermTypeConstant)
-					.map(t -> ((RDFTermTypeConstant) t).getRDFTermType());
-			/*
-			 * Datatype cannot be inferred yet
-			 */
-			if (!optionalTermType.isPresent())
-				return function;
 
-			return optionalTermType
-					.filter(t -> t instanceof RDFDatatype)
-					.map(t -> ((RDFDatatype) t).getIRI())
-					.map(i -> (Term) termFactory.getConstantIRI(i))
-					// Not a Datatype
-					.orElse(null);
+		if (function.getFunctionSymbol() instanceof FunctionSymbol) {
+			TypeInference typeInference = immutabilityTools.convertIntoImmutableTerm(function)
+					.inferType();
+			switch (typeInference.getStatus()) {
+				case NOT_DETERMINED:
+					return function;
+				case DETERMINED:
+					return typeInference.getTermType()
+							.filter(t -> t instanceof RDFDatatype)
+							.map(t -> ((RDFDatatype) t).getIRI())
+							.map(i -> (Term) termFactory.getConstantIRI(i))
+							// Not a Datatype
+							.orElse(null);
+				case NON_FATAL_ERROR:
+					return null;
+			}
 		}
 		// TODO: remove
 		else if (function.isAlgebraFunction()) {
@@ -514,39 +514,39 @@ public class ExpressionEvaluator {
 		/*
 		 * TODO: remove (let arbitrary functions infer the returned type)
 		 */
-		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT ||
-				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
-		{
-			//return numerical if arguments have same type
-			Term arg1 = function.getTerm(0);
-			Term arg2 = function.getTerm(1);
-
-			if (arg1 instanceof Variable|| arg2 instanceof Variable){
-				return function;
-			}
-
-			Optional<TermType> optionalType1 = getTermType(arg1);
-			Optional<TermType> optionalType2 = getTermType(arg2);
-
-			Optional<TermType> optionalCommonDenominator = optionalType1
-					.flatMap(t1 -> optionalType2
-							.map(t1::getCommonDenominator));
-
-			if (!optionalCommonDenominator.isPresent())
-				return function;
-
-			return optionalCommonDenominator
-					.filter(d -> !d.isAbstract())
-					.filter(d -> d instanceof RDFDatatype)
-					.map(d -> ((RDFDatatype)d).getIRI())
-					.map(termFactory::getConstantIRI)
-					.orElse(null);
-		}
-		else if (function.isOperation()) {
-			//return boolean uri
-			return termFactory.getConstantIRI(XSD.BOOLEAN);
-		}
-		return null;
+//		else if (predicate == ExpressionOperation.ADD || predicate == ExpressionOperation.SUBTRACT ||
+//				predicate == ExpressionOperation.MULTIPLY || predicate == ExpressionOperation.DIVIDE)
+//		{
+//			//return numerical if arguments have same type
+//			Term arg1 = function.getTerm(0);
+//			Term arg2 = function.getTerm(1);
+//
+//			if (arg1 instanceof Variable|| arg2 instanceof Variable){
+//				return function;
+//			}
+//
+//			Optional<TermType> optionalType1 = getTermType(arg1);
+//			Optional<TermType> optionalType2 = getTermType(arg2);
+//
+//			Optional<TermType> optionalCommonDenominator = optionalType1
+//					.flatMap(t1 -> optionalType2
+//							.map(t1::getCommonDenominator));
+//
+//			if (!optionalCommonDenominator.isPresent())
+//				return function;
+//
+//			return optionalCommonDenominator
+//					.filter(d -> !d.isAbstract())
+//					.filter(d -> d instanceof RDFDatatype)
+//					.map(d -> ((RDFDatatype)d).getIRI())
+//					.map(termFactory::getConstantIRI)
+//					.orElse(null);
+//		}
+//		else if (function.isOperation()) {
+//			//return boolean uri
+//			return termFactory.getConstantIRI(XSD.BOOLEAN);
+//		}
+		throw new IllegalArgumentException("Unexpected functional term: " + function);
 	}
 
 	private Optional<TermType> getTermType(Term term) {
