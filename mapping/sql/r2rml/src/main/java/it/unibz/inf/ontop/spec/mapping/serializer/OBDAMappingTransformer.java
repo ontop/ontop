@@ -219,50 +219,51 @@ public class OBDAMappingTransformer {
 
 						// TODO: support literal, bnodes and so on
 					}
-					else if (objectPred instanceof DatatypePredicate) {
-						ImmutableTerm objectTerm = object.getTerm(0);
-						
-						if (objectTerm instanceof Variable) {
-
-							// column valued
-							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
-							//set the datatype for the typed literal
-							obm.setTermType(R2RMLVocabulary.literal);
-							
-							RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
-							Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
-							if (optionalLangTag.isPresent()) {
-								obm.setLanguageTag(optionalLangTag.get().getFullString());
-							}
-							else {
-								obm.setDatatype(objectDatatype.getIRI());
-							}
-						} else if (objectTerm instanceof Constant) {
-							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.constant, rdfFactory.createLiteral(((Constant) objectTerm).getValue())));
-							//obm.setConstant(rdfFactory.createLiteral(((Constant) objectTerm).getValue()).stringValue());
-							obm = mfact.createObjectMap(rdfFactory.createLiteral(((Constant) objectTerm).getValue(), rdfFactory.createIRI(objectPred.getName())));
-							
-						} else if(objectTerm instanceof ImmutableFunctionalTerm){
-							ImmutableFunctionalTerm functionalObjectTerm = (ImmutableFunctionalTerm) objectTerm;
-							
-							StringBuilder sb = new StringBuilder();
-							Predicate functionSymbol = functionalObjectTerm.getFunctionSymbol();
-							
-							if (functionSymbol == ExpressionOperation.CONCAT) { //concat
-								ImmutableList<? extends ImmutableTerm> terms = functionalObjectTerm.getTerms();
-								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
-								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
-								obm.setTermType(R2RMLVocabulary.literal);
-
-								RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
-								Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
-								if (optionalLangTag.isPresent()) {
-									obm.setLanguageTag(optionalLangTag.get().getFullString());
-								}
-							}
-						}
-						
-					}
+					// TODO: re-enable the support of literals
+//					else if (objectPred instanceof DatatypePredicate) {
+//						ImmutableTerm objectTerm = object.getTerm(0);
+//
+//						if (objectTerm instanceof Variable) {
+//
+//							// column valued
+//							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
+//							//set the datatype for the typed literal
+//							obm.setTermType(R2RMLVocabulary.literal);
+//
+//							RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
+//							Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
+//							if (optionalLangTag.isPresent()) {
+//								obm.setLanguageTag(optionalLangTag.get().getFullString());
+//							}
+//							else {
+//								obm.setDatatype(objectDatatype.getIRI());
+//							}
+//						} else if (objectTerm instanceof Constant) {
+//							//statements.add(rdfFactory.createTriple(objNode, R2RMLVocabulary.constant, rdfFactory.createLiteral(((Constant) objectTerm).getValue())));
+//							//obm.setConstant(rdfFactory.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+//							obm = mfact.createObjectMap(rdfFactory.createLiteral(((Constant) objectTerm).getValue(), rdfFactory.createIRI(objectPred.getName())));
+//
+//						} else if(objectTerm instanceof ImmutableFunctionalTerm){
+//							ImmutableFunctionalTerm functionalObjectTerm = (ImmutableFunctionalTerm) objectTerm;
+//
+//							StringBuilder sb = new StringBuilder();
+//							Predicate functionSymbol = functionalObjectTerm.getFunctionSymbol();
+//
+//							if (functionSymbol == ExpressionOperation.CONCAT) { //concat
+//								ImmutableList<? extends ImmutableTerm> terms = functionalObjectTerm.getTerms();
+//								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
+//								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
+//								obm.setTermType(R2RMLVocabulary.literal);
+//
+//								RDFDatatype objectDatatype = ((DatatypePredicate) objectPred).getReturnedType();
+//								Optional<LanguageTag> optionalLangTag = objectDatatype.getLanguageTag();
+//								if (optionalLangTag.isPresent()) {
+//									obm.setLanguageTag(optionalLangTag.get().getFullString());
+//								}
+//							}
+//						}
+//
+//					}
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
 				} else {

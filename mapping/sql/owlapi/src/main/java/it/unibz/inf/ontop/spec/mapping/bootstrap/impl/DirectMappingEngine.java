@@ -34,8 +34,8 @@ import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -189,17 +189,17 @@ public class DirectMappingEngine {
 
             	ImmutableTerm objectTerm = predicate.getObject(terms);
             	if (objectTerm instanceof ImmutableFunctionalTerm) {
-					/*
-					 * Temporary (later we will use the type of the RDF function)
-					 */
-					Predicate objectFunctionSymbol = ((ImmutableFunctionalTerm) objectTerm).getFunctionSymbol();
-					if (objectFunctionSymbol instanceof DatatypePredicate)
-					{
-						entity = dataFactory.getOWLDataProperty(iri);
-					}
-					else {
-						entity = dataFactory.getOWLObjectProperty(iri);
-					}
+					ImmutableFunctionalTerm objectFunctionalTerm = (ImmutableFunctionalTerm) objectTerm;
+
+					TermType termType = objectFunctionalTerm.inferType().getTermType()
+							.filter(t -> t.isA(typeFactory.getAbstractRDFTermType()))
+							.orElseThrow(() -> new MinorOntopInternalBugException(
+									"Could not infer the RDF type of " + objectFunctionalTerm));
+
+					// TODO: improve the test
+					entity = (termType instanceof RDFDatatype)
+							? dataFactory.getOWLDataProperty(iri)
+							: dataFactory.getOWLObjectProperty(iri);
 				}
 				else
 					throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);

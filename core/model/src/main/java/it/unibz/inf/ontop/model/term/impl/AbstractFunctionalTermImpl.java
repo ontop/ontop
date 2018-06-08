@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -113,8 +112,9 @@ public abstract class AbstractFunctionalTermImpl implements Function {
         return functor instanceof AlgebraOperatorPredicate;
     }
 
+    @Deprecated
     @Override
     public boolean isDataTypeFunction() {
-        return functor instanceof DatatypePredicate;
+        return false;
     }
 }

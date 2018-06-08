@@ -26,12 +26,14 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -171,12 +173,18 @@ public class TargetQueryRenderer {
     }
 
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
-        Predicate functionSymbol = function.getFunctionSymbol();
-        String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-        if (functionSymbol instanceof DatatypePredicate)
-            return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
+        FunctionSymbol functionSymbol = function.getFunctionSymbol();
         if (functionSymbol instanceof RDFTermType) {
             ImmutableTerm lexicalTerm = function.getTerm(0);
+
+            Optional<RDFDatatype> optionalDatatype = function.inferType().getTermType()
+                    .filter(t -> t instanceof RDFDatatype)
+                    .map(t -> (RDFDatatype) t);
+
+            if (optionalDatatype.isPresent()) {
+                return displayDatatypeFunction(lexicalTerm, optionalDatatype.get(), prefixManager);
+            }
+
             if (lexicalTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
                 FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
@@ -189,7 +197,7 @@ public class TargetQueryRenderer {
         // TODO: remove?
         if (functionSymbol == ExpressionOperation.CONCAT)
             return displayConcat(function);
-        return displayOrdinaryFunction(function, fname, prefixManager);
+        return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
     }
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
@@ -217,29 +225,13 @@ public class TargetQueryRenderer {
         return sb.toString();
     }
 
-    private static String displayDatatypeFunction(ImmutableFunctionalTerm function, Predicate functionSymbol, String fname, PrefixManager prefixManager) {
-        StringBuilder sb = new StringBuilder();
-        // Language tag case
-        if (functionSymbol.getName().equals(RDF.LANGSTRING.getIRIString())) {
-            // with the language tag
-            ImmutableTerm var = function.getTerms().get(0);
-            ImmutableTerm lang = function.getTerms().get(1);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("@");
-            if (lang instanceof ValueConstant) {
-                // Don't pass this to getDisplayName() because
-                // language constant is not written as @"lang-tag"
-                sb.append(((ValueConstant) lang).getValue());
-            } else {
-                sb.append(getDisplayName(lang, prefixManager));
-            }
-        } else { // for the other data types
-            ImmutableTerm var = function.getTerms().get(0);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("^^");
-            sb.append(fname);
-        }
-        return sb.toString();
+    private static String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype, PrefixManager prefixManager) {
+        String lexicalString = getDisplayName(lexicalTerm, prefixManager);
+
+        return datatype.getLanguageTag()
+                .map(tag -> lexicalString + "@" + tag.getFullString())
+                .orElseGet(() -> lexicalString + "^^"
+                        + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager, false));
     }
 
 

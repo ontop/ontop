@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.datalog.ListenableFunction;
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -212,7 +211,7 @@ public class FunctionalTermImpl extends AbstractFunctionalTermImpl implements Li
 	
 	@Override
 	public boolean isDataTypeFunction() {
-		return getFunctionSymbol() instanceof DatatypePredicate;
+		return false;
 	}
 	
 }

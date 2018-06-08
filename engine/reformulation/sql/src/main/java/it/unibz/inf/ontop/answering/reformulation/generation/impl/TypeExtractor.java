@@ -5,10 +5,10 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.TypeInference;
@@ -257,7 +257,7 @@ public class TypeExtractor {
         }
         else if (term instanceof ImmutableFunctionalTerm) {
             Predicate functionSymbol = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
-            if (functionSymbol instanceof DatatypePredicate)
+            if (functionSymbol instanceof RDFTermType)
                 return functionSymbol.getExpectedBaseType(0);
         }
 
