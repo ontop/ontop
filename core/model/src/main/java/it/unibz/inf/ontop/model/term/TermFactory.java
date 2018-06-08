@@ -47,11 +47,11 @@ public interface TermFactory {
 	 */
 	public Function getFunction(Predicate functor, Term... terms);
 
-	Expression getExpression(OperationPredicate functor, List<Term> arguments);
+	Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments);
 
-	ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments);
+	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments);
 
-	ImmutableExpression getImmutableExpression(OperationPredicate functor,
+	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
 											   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableExpression getImmutableExpression(Expression expression);
@@ -67,7 +67,7 @@ public interface TermFactory {
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms);
 
 
-	public Expression getExpression(OperationPredicate functor, Term... arguments);
+	public Expression getExpression(BooleanFunctionSymbol functor, Term... arguments);
 
 	/*
 	 * Boolean function terms
@@ -106,7 +106,7 @@ public interface TermFactory {
 	/*
 	 * Casting values cast(source-value AS destination-type)
 	 */
-	public Expression getFunctionCast(Term term1, Term term2);
+	public Function getFunctionCast(Term term1, Term term2);
 
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a

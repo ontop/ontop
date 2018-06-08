@@ -6,6 +6,7 @@ import fj.F2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -84,8 +85,8 @@ public class DatalogTools {
             return (Expression) atom;
 
         Predicate predicate = atom.getFunctionSymbol();
-        if (predicate instanceof OperationPredicate)
-            return termFactory.getExpression((OperationPredicate)predicate,
+        if (predicate instanceof BooleanFunctionSymbol)
+            return termFactory.getExpression((BooleanFunctionSymbol) predicate,
                     atom.getTerms());
 //        // XSD:BOOLEAN case
 //        if ((predicate instanceof DatatypePredicate)

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -130,7 +131,7 @@ public class ImmutabilityTools {
      * This method takes a immutable boolean term and convert it into an old mutable boolean function.
      */
     public Expression convertToMutableBooleanExpression(ImmutableExpression booleanExpression) {
-        OperationPredicate pred = booleanExpression.getFunctionSymbol();
+        BooleanFunctionSymbol pred = booleanExpression.getFunctionSymbol();
         return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
     }
 

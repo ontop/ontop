@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
@@ -10,11 +10,11 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
-    protected ImmutableExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
+    protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableTerm... terms) {
         super(functor, terms);
     }
 
-    protected ImmutableExpressionImpl(OperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor, terms);
     }
 
@@ -24,8 +24,8 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public OperationPredicate getFunctionSymbol() {
-        return (OperationPredicate) super.getFunctionSymbol();
+    public BooleanFunctionSymbol getFunctionSymbol() {
+        return (BooleanFunctionSymbol) super.getFunctionSymbol();
     }
 
     /**
@@ -42,7 +42,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public ImmutableSet<ImmutableExpression> flatten(OperationPredicate operator) {
+    public ImmutableSet<ImmutableExpression> flatten(BooleanFunctionSymbol operator) {
 
         /**
          * Only flattens OR expressions.

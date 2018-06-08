@@ -1007,7 +1007,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
                                 M
                                 )));
@@ -1192,7 +1192,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
                                 O
                         )));

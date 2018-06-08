@@ -50,8 +50,7 @@ public class ExpressionEvaluatorTest {
     private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
     private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D));
 
-    private final ImmutableExpression EXPR_LANG = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.SPARQL_LANG, W );
+    private final ImmutableFunctionalTerm EXPR_LANG = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.SPARQL_LANG, W );
 
 
     private final String languageTag =  "en-us";
@@ -399,7 +398,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableFunctionalTerm(
                     IF_ELSE_NULL,
                     TERM_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
@@ -413,7 +412,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableFunctionalTerm(
                         IF_ELSE_NULL,
                         TERM_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
@@ -427,7 +426,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableFunctionalTerm(
                         IF_ELSE_NULL,
                         TERM_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()

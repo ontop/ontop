@@ -272,7 +272,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQuery query = queryBuilder.build();
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(O, TERM_FACTORY.getImmutableExpression(
+                SUBSTITUTION_FACTORY.getSubstitution(O, TERM_FACTORY.getImmutableFunctionalTerm(
                         IF_ELSE_NULL, TERM_FACTORY.getImmutableExpression(EQ, OF0, TWO), OF0)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
@@ -332,7 +332,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 TERM_FACTORY.getImmutableExpression(EQ, ONE, TWO),
                                 NF1)));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
@@ -387,7 +387,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getImmutableExpression(
+                SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getImmutableFunctionalTerm(
                         IF_ELSE_NULL, TERM_FACTORY.getImmutableExpression(EQ, F0, TWO), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
@@ -415,7 +415,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getImmutableExpression(
+                SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getImmutableFunctionalTerm(
                         IF_ELSE_NULL, TERM_FACTORY.getImmutableExpression(EQ, F0, NF1), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
@@ -597,7 +597,7 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                    SUBSTITUTION_FACTORY.getSubstitution(O1, TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                    SUBSTITUTION_FACTORY.getSubstitution(O1, TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                             TERM_FACTORY.getImmutableExpression(EQ, F0, M1),
                             O1F1)));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
@@ -682,7 +682,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N1,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL, expression, N1F0)));
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL, expression, N1F0)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(newConstructionNode, joinNode);
@@ -717,7 +717,7 @@ public class LeftJoinOptimizationTest {
         ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, F0, TWO);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N1,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL, expression, N1F1)));
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL, expression, N1F1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(newConstructionNode, joinNode);
@@ -788,7 +788,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                             TERM_FACTORY.getImmutableExpression(EQ, N, N1),
                             OF1)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
@@ -887,7 +887,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M1),
-                        Y, TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        Y, TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 o1IsNotNull,
                                 generateURI1(O1))));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
@@ -944,7 +944,7 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M),
                         Y, generateURI1(N),
-                        Z, TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        Z, TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 zCondition,
                                 generateURI1(O1))));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
@@ -1004,7 +1004,7 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M),
                         Y, generateURI1(N),
-                        Z, TERM_FACTORY.getImmutableExpression(IF_ELSE_NULL,
+                        Z, TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
                                 zCondition,
                                 generateURI1(O1))));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);

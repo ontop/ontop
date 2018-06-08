@@ -149,12 +149,12 @@ public class ExpressionEvaluator {
 			ImmutableFunctionalTerm evaluatedFunctionalTerm = (ImmutableFunctionalTerm) evaluatedTerm;
 
 			FunctionSymbol functionSymbol = evaluatedFunctionalTerm.getFunctionSymbol();
-			if (!(functionSymbol instanceof OperationPredicate)) {
-				throw new RuntimeException("Functional term evaluated that does not have a OperationPredicate: "
+			if (!(functionSymbol instanceof BooleanFunctionSymbol)) {
+				throw new RuntimeException("Functional term evaluated that does not have a BooleanFunctionSymbol: "
 						+ evaluatedFunctionalTerm);
 			}
 
-			return new EvaluationResult(termFactory.getImmutableExpression((OperationPredicate) functionSymbol,
+			return new EvaluationResult(termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol,
 							evaluatedFunctionalTerm.getTerms()), normalizer, termFactory);
 		}
 		else if (evaluatedTerm instanceof Constant) {

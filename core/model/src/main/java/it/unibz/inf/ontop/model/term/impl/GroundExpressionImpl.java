@@ -1,17 +1,17 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.GroundTerm;
 
 public class GroundExpressionImpl extends ImmutableExpressionImpl implements GroundFunctionalTerm {
 
-    protected GroundExpressionImpl(OperationPredicate functor, GroundTerm... terms) {
+    protected GroundExpressionImpl(BooleanFunctionSymbol functor, GroundTerm... terms) {
         super(functor, terms);
     }
 
-    protected GroundExpressionImpl(OperationPredicate functor, ImmutableList<? extends GroundTerm> terms) {
+    protected GroundExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends GroundTerm> terms) {
         super(functor, terms);
     }
 

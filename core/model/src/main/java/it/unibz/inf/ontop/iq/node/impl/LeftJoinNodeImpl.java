@@ -765,7 +765,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .anyMatch(v -> !leftVariables.contains(v)))
             return value;
 
-        return termFactory.getImmutableExpression(
+        return termFactory.getImmutableFunctionalTerm(
                 IF_ELSE_NULL,
                 termFactory.getImmutableExpression(IS_NOT_NULL, rightProvenanceVariable),
                 value);

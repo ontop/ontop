@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -27,23 +27,17 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
         OperationPredicate functionSymbol = expression.getFunctionSymbol();
 
         if (functionSymbol instanceof BooleanExpressionOperation) {
+
+            BooleanFunctionSymbol booleanFunctionSymbol = (BooleanFunctionSymbol) functionSymbol;
+
             switch((BooleanExpressionOperation)functionSymbol) {
                 //case AND:
                 //case OR:
                 case EQ:
                 case NEQ:
-                    return normalizeCommutative(functionSymbol, expression.getTerms());
+                    return normalizeCommutative(booleanFunctionSymbol, expression.getTerms());
                 default:
-                    return normalizeArguments(functionSymbol, expression.getTerms());
-            }
-        }
-        else if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
-                case ADD:
-                case MULTIPLY:
-                    return normalizeCommutative(functionSymbol, expression.getTerms());
-                default:
-                    return normalizeArguments(functionSymbol, expression.getTerms());
+                    return normalizeArguments(booleanFunctionSymbol, expression.getTerms());
             }
         }
         else {
@@ -51,7 +45,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
         }
     }
 
-    private ImmutableExpression normalizeArguments(OperationPredicate functionSymbol,
+    private ImmutableExpression normalizeArguments(BooleanFunctionSymbol functionSymbol,
                                                    ImmutableList<? extends ImmutableTerm> arguments) {
         return termFactory.getImmutableExpression(
                 functionSymbol,
@@ -69,7 +63,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
         }
     }
 
-    private ImmutableExpression normalizeCommutative(OperationPredicate functionSymbol,
+    private ImmutableExpression normalizeCommutative(BooleanFunctionSymbol functionSymbol,
                                                      ImmutableList<? extends ImmutableTerm> arguments) {
         return termFactory.getImmutableExpression(functionSymbol, sortArguments(arguments));
     }

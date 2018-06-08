@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.term;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 
 /**
  * An expression has an Operation predicate.
@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 public interface Expression extends Function {
 
     @Override
-    OperationPredicate getFunctionSymbol();
+    BooleanFunctionSymbol getFunctionSymbol();
 
     @Override
     Expression clone();

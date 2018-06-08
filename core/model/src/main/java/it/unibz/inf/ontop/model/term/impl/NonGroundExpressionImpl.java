@@ -2,8 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.Expression;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -13,12 +12,12 @@ import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.checkNonGroundT
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {
 
-    protected NonGroundExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
+    protected NonGroundExpressionImpl(BooleanFunctionSymbol functor, ImmutableTerm... terms) {
         super(functor, terms);
         checkNonGroundTermConstraint(this);
     }
 
-    protected NonGroundExpressionImpl(OperationPredicate functor, ImmutableList<? extends ImmutableTerm> terms) {
+    protected NonGroundExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms) {
         super(functor, terms);
         checkNonGroundTermConstraint(this);
     }

@@ -136,12 +136,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 	
 	@Override
-	public Expression getExpression(OperationPredicate functor, Term... arguments) {
+	public Expression getExpression(BooleanFunctionSymbol functor, Term... arguments) {
 		return getExpression(functor, Arrays.asList(arguments));
 	}
 
 	@Override
-	public Expression getExpression(OperationPredicate functor, List<Term> arguments) {
+	public Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments) {
 		if (isTestModeEnabled) {
 			checkMutability(arguments);
 		}
@@ -149,12 +149,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getImmutableExpression(OperationPredicate functor, ImmutableTerm... arguments) {
+	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments) {
 		return getImmutableExpression(functor, ImmutableList.copyOf(arguments));
 	}
 
 	@Override
-	public ImmutableExpression getImmutableExpression(OperationPredicate functor,
+	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
 													  ImmutableList<? extends ImmutableTerm> arguments) {
 		if (GroundTermTools.areGroundTerms(arguments)) {
 			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
@@ -181,8 +181,8 @@ public class TermFactoryImpl implements TermFactory {
 			checkMutability(arguments);
 		}
 
-		if (functor instanceof OperationPredicate) {
-			return getExpression((OperationPredicate) functor, arguments);
+		if (functor instanceof BooleanFunctionSymbol) {
+			return getExpression((BooleanFunctionSymbol) functor, arguments);
 		}
 
 		// Default constructor
@@ -200,8 +200,8 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms) {
-		if (functor instanceof OperationPredicate) {
-			return getImmutableExpression((OperationPredicate)functor, terms);
+		if (functor instanceof BooleanFunctionSymbol) {
+			return getImmutableExpression((BooleanFunctionSymbol) functor, terms);
 		}
 
 		if (GroundTermTools.areGroundTerms(terms)) {
@@ -300,9 +300,9 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Expression getFunctionCast(Term term1, Term term2) {
+	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
-		return getExpression(ExpressionOperation.QUEST_CAST, term1, term2);
+		return getFunction(ExpressionOperation.QUEST_CAST, term1, term2);
 	}
 
 	

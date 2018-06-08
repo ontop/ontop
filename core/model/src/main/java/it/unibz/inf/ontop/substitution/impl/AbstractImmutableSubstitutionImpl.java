@@ -67,8 +67,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         /*
          * Distinguishes the BooleanExpression from the other functional terms.
          */
-        if (functionSymbol instanceof OperationPredicate) {
-            return termFactory.getImmutableExpression((OperationPredicate) functionSymbol,
+        if (functionSymbol instanceof BooleanFunctionSymbol) {
+            return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol,
                     subTermsBuilder.build());
         }
         else {
