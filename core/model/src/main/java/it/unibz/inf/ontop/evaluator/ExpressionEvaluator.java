@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
@@ -168,7 +169,7 @@ public class ExpressionEvaluator {
 		}
 		else if (evaluatedTerm instanceof Variable) {
 		    return new EvaluationResult(
-		    		termFactory.getImmutableExpression(ExpressionOperation.IS_TRUE, evaluatedTerm),
+		    		termFactory.getImmutableExpression(BooleanExpressionOperation.IS_TRUE, evaluatedTerm),
 					normalizer, termFactory);
         }
 		else {
@@ -202,102 +203,118 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalOperation(ImmutableFunctionalTerm term) {
 
 		FunctionSymbol functionSymbol = term.getFunctionSymbol();
-		ExpressionOperation expressionOperation = ExpressionOperation.valueOf(functionSymbol.toString());
-		switch(expressionOperation){
+		if (functionSymbol instanceof ExpressionOperation) {
+			ExpressionOperation expressionOperation = ExpressionOperation.valueOf(functionSymbol.toString());
+			switch (expressionOperation) {
 
-			case ADD:
-			case SUBTRACT:
-			case MULTIPLY:
-			case DIVIDE:
-				throw new RuntimeException("Refactor numeric operation evaluation");
-			case AND :
-				return evalAnd(term.getTerm(0), term.getTerm(1));
-			case OR:
-				return evalOr(term.getTerm(0), term.getTerm(1));
-			case NOT:
-				return evalNot(term);
-			case EQ:
-				return evalEqNeq(term, true);
-			case NEQ:
-				return evalEqNeq(term, false);
-			case IS_NULL:
-				return evalIsNullNotNull(term, true);
-			case IS_NOT_NULL:
-				return evalIsNullNotNull(term, false);
-			case IS_TRUE:
-				return evalIsTrue(term);
-			case SPARQL_STR:
-				return evalStr(term);
-			case SPARQL_DATATYPE:
-				return evalDatatype(term);
-			case SPARQL_LANG:
-				return evalLang(term);
-			case IS_NUMERIC:
-				return evalIsRDFLiteralNumeric(term);
-			case IS_LITERAL:
-				return evalIsLiteral(term);
-			case IS_IRI:
-				return evalIsIri(term);
-			case IS_BLANK:
-				return evalIsBlank(term);
-			case LANGMATCHES:
-				return evalLangMatches(term);
-			case REGEX:
-				return evalRegex(term);
-			case IF_ELSE_NULL:
-				return evalIfElseNull(term);
-			case UUID:
-			case STRUUID:
-			case MINUS:
-			case ABS:
-			case ROUND:
-			case CEIL:
-			case FLOOR:
-			case RAND:
-			case GTE:
-			case GT:
-			case LTE:
-			case LT:
-			case STR_STARTS:
-			case STR_ENDS:
-			case CONTAINS:
-			case STRLEN:
-			case UCASE:
-			case LCASE:
-			case SUBSTR2:
-			case SUBSTR3:
-			case STRBEFORE:
-			case STRAFTER:
-			case REPLACE:
-			case CONCAT:
-			case ENCODE_FOR_URI:
-			case MD5:
-			case SHA1:
-			case SHA512:
-			case SHA256:
-			case NOW:
-			case YEAR:
-			case DAY:
-			case MONTH:
-			case HOURS:
-			case MINUTES:
-			case SECONDS:
-			case TZ:
-			case SQL_LIKE:
-			case QUEST_CAST:
-			case AVG:
-			case SUM:
-			case MAX:
-			case MIN:
-			case COUNT:
-				return term;
-			default:
+				case ADD:
+				case SUBTRACT:
+				case MULTIPLY:
+				case DIVIDE:
+					throw new RuntimeException("Refactor numeric operation evaluation");
+				case SPARQL_STR:
+					return evalStr(term);
+				case SPARQL_DATATYPE:
+					return evalDatatype(term);
+				case SPARQL_LANG:
+					return evalLang(term);
+				case IF_ELSE_NULL:
+					return evalIfElseNull(term);
+				case UUID:
+				case STRUUID:
+				case MINUS:
+				case ABS:
+				case ROUND:
+				case CEIL:
+				case FLOOR:
+				case RAND:
+				case STRLEN:
+				case UCASE:
+				case LCASE:
+				case SUBSTR2:
+				case SUBSTR3:
+				case STRBEFORE:
+				case STRAFTER:
+				case REPLACE:
+				case CONCAT:
+				case ENCODE_FOR_URI:
+				case MD5:
+				case SHA1:
+				case SHA512:
+				case SHA256:
+				case NOW:
+				case YEAR:
+				case DAY:
+				case MONTH:
+				case HOURS:
+				case MINUTES:
+				case SECONDS:
+				case TZ:
+				case QUEST_CAST:
+				case AVG:
+				case SUM:
+				case MAX:
+				case MIN:
+				case COUNT:
+					return term;
+				default:
 					throw new RuntimeException(
+							"Evaluation of expression not supported: "
+									+ term.toString());
+
+			}
+		}
+		else if (functionSymbol instanceof BooleanExpressionOperation) {
+			switch((BooleanExpressionOperation) functionSymbol){
+				case AND :
+					return evalAnd(term.getTerm(0), term.getTerm(1));
+				case OR:
+					return evalOr(term.getTerm(0), term.getTerm(1));
+				case NOT:
+					return evalNot(term);
+				case EQ:
+					return evalEqNeq(term, true);
+				case NEQ:
+					return evalEqNeq(term, false);
+				case IS_NULL:
+					return evalIsNullNotNull(term, true);
+				case IS_NOT_NULL:
+					return evalIsNullNotNull(term, false);
+				case IS_TRUE:
+					return evalIsTrue(term);
+				case IS_NUMERIC:
+					return evalIsRDFLiteralNumeric(term);
+				case IS_LITERAL:
+					return evalIsLiteral(term);
+				case IS_IRI:
+					return evalIsIri(term);
+				case IS_BLANK:
+					return evalIsBlank(term);
+				case LANGMATCHES:
+					return evalLangMatches(term);
+				case REGEX:
+					return evalRegex(term);
+				case GTE:
+				case GT:
+				case LTE:
+				case LT:
+				case STR_STARTS:
+				case STR_ENDS:
+				case CONTAINS:
+				case SQL_LIKE:
+					return term;
+				default:
+					throw new RuntimeException(
+							"Evaluation of expression not supported: "
+									+ term.toString());
+
+			}
+		}
+		else {
+			throw new RuntimeException(
 					"Evaluation of expression not supported: "
 							+ term.toString());
-
 		}
-
 	}
 
 	/*
@@ -602,7 +619,7 @@ public class ExpressionEvaluator {
 			ImmutableFunctionalTerm functionalInnerTerm = (ImmutableFunctionalTerm) innerTerm;
 			if (functionalInnerTerm.getFunctionSymbol() instanceof RDFTermType) {
 				ImmutableFunctionalTerm isNotNullInnerInnerTerm = termFactory.getImmutableFunctionalTerm(
-						ExpressionOperation.IS_NOT_NULL,
+						IS_NOT_NULL,
 						((ImmutableFunctionalTerm) innerTerm).getTerm(0));
 				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
 			}
@@ -689,13 +706,13 @@ public class ExpressionEvaluator {
 		if (teval instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
 			FunctionSymbol functionSymbol = f.getFunctionSymbol();
-			if (functionSymbol == ExpressionOperation.IS_NOT_NULL) {
+			if (functionSymbol == IS_NOT_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
-			} else if (functionSymbol == ExpressionOperation.IS_NULL) {
+			} else if (functionSymbol == IS_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			} else if (functionSymbol == ExpressionOperation.NEQ) {
+			} else if (functionSymbol == NEQ) {
 				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
-			} else if (functionSymbol == ExpressionOperation.EQ) {
+			} else if (functionSymbol == EQ) {
 				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
@@ -710,13 +727,13 @@ public class ExpressionEvaluator {
 		if (teval instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
 			FunctionSymbol functionSymbol = f.getFunctionSymbol();
-			if (functionSymbol == ExpressionOperation.IS_NOT_NULL) {
+			if (functionSymbol == IS_NOT_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			} else if (functionSymbol == ExpressionOperation.IS_NULL) {
+			} else if (functionSymbol == IS_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
-			} else if (functionSymbol == ExpressionOperation.NEQ) {
+			} else if (functionSymbol == NEQ) {
 				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
-			} else if (functionSymbol == ExpressionOperation.EQ) {
+			} else if (functionSymbol == EQ) {
 				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {

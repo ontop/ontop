@@ -17,9 +17,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
 public enum ExpressionOperation implements OperationPredicate {
@@ -36,30 +33,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	CEIL("ceil", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
 	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT),
 	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE),
-	
-	/* Boolean operations */
 
-	AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
-	OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
-	NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT),
-	
-	EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
-	NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
-	/*
-	 * BC: is it defined for IRIs?
-	 */
-	GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-
-	IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-
-	STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-	STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-	CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
 	
 	/* SPARQL String functions */
 
@@ -101,18 +75,6 @@ public enum ExpressionOperation implements OperationPredicate {
 	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDFS_LITERAL_DT),
 	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE),
 	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE),
-
-	/* SPARQL built-in predicates */
-
-	IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-	LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-	
-	// ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-	SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
 	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE), // TODO: refactor
 

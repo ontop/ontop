@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
@@ -16,6 +15,8 @@ import it.unibz.inf.ontop.iq.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 
 /**
  * TODO: describe
@@ -105,10 +106,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableExpression currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND,
+                ImmutableExpression currentExpression = termFactory.getImmutableExpression(AND,
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
+                    currentExpression = termFactory.getImmutableExpression(AND, currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);

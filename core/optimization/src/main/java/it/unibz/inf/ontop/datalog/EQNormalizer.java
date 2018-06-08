@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.datalog;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -11,6 +10,8 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.List;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 
 @Singleton
 public class EQNormalizer {
@@ -50,7 +51,7 @@ public class EQNormalizer {
 			Function atom = body.get(i);
 			substitutionUtilities.applySubstitution(atom, mgu);
 
-            if (atom.getFunctionSymbol() == ExpressionOperation.EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function)) ) {
+            if (atom.getFunctionSymbol() == EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function)) ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
@@ -58,7 +59,7 @@ public class EQNormalizer {
                 i--;
             }
             //search for nested equalities in AND function
-            else if (atom.getFunctionSymbol() == ExpressionOperation.AND) {
+            else if (atom.getFunctionSymbol() == AND) {
                 nestedEQSubstitutions(atom, mgu);
 
                 //we remove the function if empty because all its terms were equalities
@@ -96,7 +97,7 @@ public class EQNormalizer {
                 substitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
-                if (t2.getFunctionSymbol() == ExpressionOperation.EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function))) {
+                if (t2.getFunctionSymbol() == EQ && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function))) {
                     if (!mgu.composeTerms(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     
@@ -105,7 +106,7 @@ public class EQNormalizer {
                 }
                 //consider the case of  AND function. Calls recursive method to consider nested equalities
                 else {
-                    if (t2.getFunctionSymbol() == ExpressionOperation.AND) {
+                    if (t2.getFunctionSymbol() == AND) {
                         nestedEQSubstitutions(t2, mgu);
 
                         //we remove the function if empty because all its terms were equalities

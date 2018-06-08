@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.*;
@@ -20,6 +19,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static junit.framework.TestCase.assertTrue;
 
 public class PushUpBooleanExpressionOptimizerTest {
@@ -34,15 +34,15 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, Z);
+            EQ, X, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, Y, Z);
+            NEQ, Y, Z);
     private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.GTE, W, Z);
+            GTE, W, Z);
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.LT, V, W);
+            LT, V, W);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, X, TERM_FACTORY.getConstantLiteral("a"));
+            NEQ, X, TERM_FACTORY.getConstantLiteral("a"));
 
     @Test
     public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {

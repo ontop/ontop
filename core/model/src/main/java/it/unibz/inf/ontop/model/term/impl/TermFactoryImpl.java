@@ -234,69 +234,69 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.EQ, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.GTE, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.GT, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.GT, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.LTE, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.LT, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.LT, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.NEQ, firstTerm, secondTerm);
+		return getExpression(BooleanExpressionOperation.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
 	public Expression getFunctionNOT(Term term) {
-		return getExpression(ExpressionOperation.NOT, term);
+		return getExpression(BooleanExpressionOperation.NOT, term);
 	}
 
 	@Override
 	public Expression getFunctionAND(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.AND, term1, term2);
+		return getExpression(BooleanExpressionOperation.AND, term1, term2);
 	}
 
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.OR,term1, term2);
+		return getExpression(BooleanExpressionOperation.OR,term1, term2);
 	}
 
 
 	@Override
 	public Expression getFunctionIsNull(Term term) {
-		return getExpression(ExpressionOperation.IS_NULL, term);
+		return getExpression(BooleanExpressionOperation.IS_NULL, term);
 	}
 
 	@Override
 	public Expression getFunctionIsNotNull(Term term) {
-		return getExpression(ExpressionOperation.IS_NOT_NULL, term);
+		return getExpression(BooleanExpressionOperation.IS_NOT_NULL, term);
 	}
 
 
 	@Override
 	public Expression getLANGMATCHESFunction(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.LANGMATCHES, term1, term2);
+		return getExpression(BooleanExpressionOperation.LANGMATCHES, term1, term2);
 	}
 
 	@Override
 	public Expression getSQLFunctionLike(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
+		return getExpression(BooleanExpressionOperation.SQL_LIKE, term1, term2);
 	}
 
 	@Override
@@ -313,7 +313,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionIsTrue(Term term) {
-		return getExpression(ExpressionOperation.IS_TRUE, term);
+		return getExpression(BooleanExpressionOperation.IS_TRUE, term);
 	}
 
 

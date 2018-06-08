@@ -19,6 +19,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker.areEquivalent;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -586,7 +587,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftJoin, leftConstructionNode, LEFT);
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ,
                 X, generateURI1(TERM_FACTORY.getConstantLiteral("two"))));
         initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
 

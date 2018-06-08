@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -25,14 +26,21 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
 
         OperationPredicate functionSymbol = expression.getFunctionSymbol();
 
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
-                case ADD:
-                case MULTIPLY:
+        if (functionSymbol instanceof BooleanExpressionOperation) {
+            switch((BooleanExpressionOperation)functionSymbol) {
                 //case AND:
                 //case OR:
                 case EQ:
                 case NEQ:
+                    return normalizeCommutative(functionSymbol, expression.getTerms());
+                default:
+                    return normalizeArguments(functionSymbol, expression.getTerms());
+            }
+        }
+        else if (functionSymbol instanceof ExpressionOperation) {
+            switch((ExpressionOperation)functionSymbol) {
+                case ADD:
+                case MULTIPLY:
                     return normalizeCommutative(functionSymbol, expression.getTerms());
                 default:
                     return normalizeArguments(functionSymbol, expression.getTerms());

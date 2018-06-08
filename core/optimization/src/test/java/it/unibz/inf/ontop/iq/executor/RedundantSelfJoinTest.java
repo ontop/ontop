@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.*;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,9 +24,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -72,7 +72,7 @@ public class RedundantSelfJoinTest {
     private final static Variable O2 = TERM_FACTORY.getVariable("o2");
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, M, N);
+            EQ, M, N);
 
     private static final DBMetadata METADATA;
 

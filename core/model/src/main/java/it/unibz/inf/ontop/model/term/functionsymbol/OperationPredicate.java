@@ -23,6 +23,9 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TypeInference;
 
+/**
+ * TODO: to be merged with FunctionSymbol
+ */
 public interface OperationPredicate extends FunctionSymbol {
 
     TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> actualArgumentTypes);

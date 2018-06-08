@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

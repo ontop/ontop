@@ -4,7 +4,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushDownBooleanExpressionOptimizerImpl;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -35,19 +35,19 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static Variable A = TERM_FACTORY.getVariable("A");
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, Z);
+            EQ, X, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, Y, Z);
+            NEQ, Y, Z);
     private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.LT, Z, W);
+            LT, Z, W);
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, Y, Z);
+            EQ, Y, Z);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, Z, W);
+            NEQ, Z, W);
     private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, W);
+            EQ, X, W);
     private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, Y);
+            EQ, X, Y);
 
     @Test
     public void testJoiningCondition1() throws EmptyQueryException {

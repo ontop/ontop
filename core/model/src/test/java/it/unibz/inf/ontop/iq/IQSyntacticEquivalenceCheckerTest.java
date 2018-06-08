@@ -18,6 +18,8 @@ import org.junit.Test;
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -33,8 +35,8 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
 
-    private final static ImmutableExpression EQ_X_Y = TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, X, Y);
-    private final static ImmutableExpression EQ_X_Z = TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ, X, Z);
+    private final static ImmutableExpression EQ_X_Y = TERM_FACTORY.getImmutableExpression(EQ, X, Y);
+    private final static ImmutableExpression EQ_X_Z = TERM_FACTORY.getImmutableExpression(EQ, X, Z);
 
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
@@ -298,7 +300,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(DB_METADATA, EXECUTOR_REGISTRY);
         queryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                ExpressionOperation.EQ, X, Z));
+                EQ, X, Z));
         queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         queryBuilder.addChild(filterNode, dataNode);
@@ -310,7 +312,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                ExpressionOperation.EQ, X, Z));
+                EQ, X, Z));
         queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         queryBuilder1.addChild(filterNode1, dataNode1);
@@ -327,7 +329,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQueryBuilder queryBuilder = IQ_FACTORY.createIQBuilder(DB_METADATA, EXECUTOR_REGISTRY);
         queryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                ExpressionOperation.EQ, X, Z));
+                EQ, X, Z));
         queryBuilder.addChild(constructionNode, filterNode);
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         queryBuilder.addChild(filterNode, dataNode);
@@ -339,7 +341,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                ExpressionOperation.NEQ, X, Z));
+                NEQ, X, Z));
         queryBuilder1.addChild(constructionNode1, filterNode1);
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         queryBuilder1.addChild(filterNode1, dataNode1);

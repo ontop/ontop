@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.checkNonGroundTermConstraint;
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {

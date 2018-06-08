@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import java.sql.Types;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -45,7 +46,7 @@ public class RedundantJoinFKTest {
     private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, B, ONE);
+            EQ, B, ONE);
 
     private static final DBMetadata DB_METADATA;
 

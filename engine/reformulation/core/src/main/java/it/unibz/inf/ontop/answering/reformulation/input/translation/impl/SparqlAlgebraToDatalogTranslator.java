@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -60,6 +61,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
 /***
@@ -624,27 +628,27 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunctionNOT(term);
             }
             else if (expr instanceof IsNumeric) {
-                return termFactory.getFunction(ExpressionOperation.IS_NUMERIC, term);
+                return termFactory.getFunction(IS_NUMERIC, term);
             }
             else if (expr instanceof IsLiteral) {
-                return termFactory.getFunction(ExpressionOperation.IS_LITERAL, term);
+                return termFactory.getFunction(IS_LITERAL, term);
             }
             else if (expr instanceof IsURI) {
-                return termFactory.getFunction(ExpressionOperation.IS_IRI, term);
+                return termFactory.getFunction(IS_IRI, term);
             }
             else if (expr instanceof Str) {
-                return termFactory.getFunction(ExpressionOperation.SPARQL_STR, term);
+                return termFactory.getFunction(SPARQL_STR, term);
             }
             else if (expr instanceof Datatype) {
-                return termFactory.getFunction(ExpressionOperation.SPARQL_DATATYPE, term);
+                return termFactory.getFunction(SPARQL_DATATYPE, term);
             }
             else if (expr instanceof IsBNode) {
-                return termFactory.getFunction(ExpressionOperation.IS_BLANK, term);
+                return termFactory.getFunction(IS_BLANK, term);
             }
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
-                    return termFactory.getFunction(ExpressionOperation.SPARQL_LANG, term);
+                    return termFactory.getFunction(SPARQL_LANG, term);
                 else
                     throw new RuntimeException("A variable or a value is expected in " + expr);
             }
@@ -681,10 +685,10 @@ public class SparqlAlgebraToDatalogTranslator {
                 Regex reg = (Regex) expr;
                 Term term3 = (reg.getFlagsArg() != null) ?
                         getExpression(reg.getFlagsArg(), variables) : valueNull;
-                return termFactory.getFunction(ExpressionOperation.REGEX, term1, term2, term3);
+                return termFactory.getFunction(REGEX, term1, term2, term3);
             }
             else if (expr instanceof Compare) {
-                ExpressionOperation p = RelationalOperations.get(((Compare) expr).getOperator());
+                OperationPredicate p = RelationalOperations.get(((Compare) expr).getOperator());
                 return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
@@ -737,7 +741,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
                     Term concat = terms.get(0);
                     for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                        concat = termFactory.getFunction(ExpressionOperation.CONCAT, concat, terms.get(i));
+                        concat = termFactory.getFunction(CONCAT, concat, terms.get(i));
                     return concat;
 
                 // REPLACE (Sec 17.4.3.15)
@@ -754,7 +758,7 @@ public class SparqlAlgebraToDatalogTranslator {
                         throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                                 + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
 
-                    return termFactory.getFunction(ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
+                    return termFactory.getFunction(REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
 
 
                     // SUBSTR (Sec 17.4.3.3)
@@ -762,9 +766,9 @@ public class SparqlAlgebraToDatalogTranslator {
                     // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
                 case "http://www.w3.org/2005/xpath-functions#substring":
                     if (arity == 2)
-                        return termFactory.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
+                        return termFactory.getFunction(SUBSTR2, terms.get(0), terms.get(1));
                     else if (arity == 3)
-                        return termFactory.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
+                        return termFactory.getFunction(SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
 
                     throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
                             + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
@@ -787,62 +791,62 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * String functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#upper-case", ExpressionOperation.UCASE)
-                    .put("http://www.w3.org/2005/xpath-functions#lower-case", ExpressionOperation.LCASE)
-                    .put("http://www.w3.org/2005/xpath-functions#string-length", ExpressionOperation.STRLEN)
-                    .put("http://www.w3.org/2005/xpath-functions#substring-before", ExpressionOperation.STRBEFORE)
-                    .put("http://www.w3.org/2005/xpath-functions#substring-after", ExpressionOperation.STRAFTER)
-                    .put("http://www.w3.org/2005/xpath-functions#starts-with", ExpressionOperation.STR_STARTS)
-                    .put("http://www.w3.org/2005/xpath-functions#ends-with", ExpressionOperation.STR_ENDS)
-                    .put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ExpressionOperation.ENCODE_FOR_URI)
-                    .put("http://www.w3.org/2005/xpath-functions#contains", ExpressionOperation.CONTAINS)
-                    .put("UUID", ExpressionOperation.UUID)
-                    .put("STRUUID", ExpressionOperation.STRUUID)
+                    .put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
+                    .put("http://www.w3.org/2005/xpath-functions#lower-case", LCASE)
+                    .put("http://www.w3.org/2005/xpath-functions#string-length", STRLEN)
+                    .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
+                    .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)
+                    .put("http://www.w3.org/2005/xpath-functions#starts-with", STR_STARTS)
+                    .put("http://www.w3.org/2005/xpath-functions#ends-with", STR_ENDS)
+                    .put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ENCODE_FOR_URI)
+                    .put("http://www.w3.org/2005/xpath-functions#contains", CONTAINS)
+                    .put("UUID", UUID)
+                    .put("STRUUID", STRUUID)
                     /*
                      * Numerical functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ExpressionOperation.ABS)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-ceil", ExpressionOperation.CEIL)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-floor", ExpressionOperation.FLOOR)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-round", ExpressionOperation.ROUND)
-                    .put("RAND", ExpressionOperation.RAND)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ABS)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-ceil", CEIL)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-floor", FLOOR)
+                    .put("http://www.w3.org/2005/xpath-functions#numeric-round", ROUND)
+                    .put("RAND", RAND)
                     /*
                      * Datetime functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", ExpressionOperation.YEAR)
-                    .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", ExpressionOperation.DAY)
-                    .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", ExpressionOperation.MONTH)
-                    .put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", ExpressionOperation.HOURS)
-                    .put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", ExpressionOperation.MINUTES)
-                    .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", ExpressionOperation.SECONDS)
-                    .put("NOW", ExpressionOperation.NOW)
-                    .put("TZ", ExpressionOperation.TZ)
+                    .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", YEAR)
+                    .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", DAY)
+                    .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", MONTH)
+                    .put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", HOURS)
+                    .put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", MINUTES)
+                    .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", SECONDS)
+                    .put("NOW", NOW)
+                    .put("TZ", TZ)
                     /*
                      * Hash functions
                      */
-                    .put("MD5", ExpressionOperation.MD5)
-                    .put("SHA1", ExpressionOperation.SHA1)
-                    .put("SHA256", ExpressionOperation.SHA256)
-                    .put("SHA512", ExpressionOperation.SHA512)
+                    .put("MD5", MD5)
+                    .put("SHA1", SHA1)
+                    .put("SHA256", SHA256)
+                    .put("SHA512", SHA512)
                     .build();
 
 
-	private static final ImmutableMap<Compare.CompareOp, ExpressionOperation> RelationalOperations =
-			new ImmutableMap.Builder<Compare.CompareOp, ExpressionOperation>()
-				.put(Compare.CompareOp.EQ, ExpressionOperation.EQ)
-				.put(Compare.CompareOp.GE, ExpressionOperation.GTE)
-				.put(Compare.CompareOp.GT, ExpressionOperation.GT)
-				.put(Compare.CompareOp.LE, ExpressionOperation.LTE)
-				.put(Compare.CompareOp.LT, ExpressionOperation.LT)
-				.put(Compare.CompareOp.NE, ExpressionOperation.NEQ)
+	private static final ImmutableMap<Compare.CompareOp, BooleanExpressionOperation> RelationalOperations =
+			new ImmutableMap.Builder<Compare.CompareOp, BooleanExpressionOperation>()
+				.put(Compare.CompareOp.EQ, EQ)
+				.put(Compare.CompareOp.GE, GTE)
+				.put(Compare.CompareOp.GT, GT)
+				.put(Compare.CompareOp.LE, LTE)
+				.put(Compare.CompareOp.LT, LT)
+				.put(Compare.CompareOp.NE, NEQ)
 				.build();
 
 	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
-			.put(MathExpr.MathOp.PLUS, ExpressionOperation.ADD)
-			.put(MathExpr.MathOp.MINUS, ExpressionOperation.SUBTRACT)
-			.put(MathExpr.MathOp.MULTIPLY, ExpressionOperation.MULTIPLY)
-			.put(MathExpr.MathOp.DIVIDE, ExpressionOperation.DIVIDE)
+			.put(MathExpr.MathOp.PLUS, ADD)
+			.put(MathExpr.MathOp.MINUS, SUBTRACT)
+			.put(MathExpr.MathOp.MULTIPLY, MULTIPLY)
+			.put(MathExpr.MathOp.DIVIDE, DIVIDE)
 			.build();
 
 

@@ -20,7 +20,7 @@ import org.junit.Test;
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;

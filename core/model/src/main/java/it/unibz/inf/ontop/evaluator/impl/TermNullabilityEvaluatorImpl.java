@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -96,8 +97,8 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     private boolean isExpressionNullable(ImmutableExpression expression, ImmutableSet<Variable> nullableVariables) {
         OperationPredicate functionSymbol = expression.getFunctionSymbol();
 
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation) functionSymbol) {
+        if (functionSymbol instanceof BooleanExpressionOperation) {
+            switch((BooleanExpressionOperation) functionSymbol) {
                 case IS_NOT_NULL:
                 case IS_NULL:
                     return false;

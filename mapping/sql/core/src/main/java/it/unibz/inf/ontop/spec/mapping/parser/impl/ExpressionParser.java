@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -98,7 +99,7 @@ public class ExpressionParser {
 
         // cancel double negation
         private Function negation(Function arg) {
-            return (arg.getFunctionSymbol() == ExpressionOperation.NOT)
+            return (arg.getFunctionSymbol() == BooleanExpressionOperation.NOT)
                     ? (Function) arg.getTerm(0)
                     : termFactory.getFunctionNOT(arg);
         }
@@ -180,32 +181,32 @@ public class ExpressionParser {
 
         @Override
         public void visit(EqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.EQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.EQ, t1, t2));
         }
 
         @Override
         public void visit(GreaterThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.GT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.GT, t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.GTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.GTE, t1, t2));
         }
 
         @Override
         public void visit(MinorThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.LT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.LT, t1, t2));
         }
 
         @Override
         public void visit(MinorThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.LTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.LTE, t1, t2));
         }
 
         @Override
         public void visit(NotEqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.NEQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.NEQ, t1, t2));
         }
 
 
@@ -231,7 +232,7 @@ public class ExpressionParser {
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, (t1, t2) ->  termFactory.getFunction(ExpressionOperation.REGEX, t1, t2, flags));
+            process(expression, (t1, t2) ->  termFactory.getFunction(BooleanExpressionOperation.REGEX, t1, t2, flags));
         }
 
         // POSIX Regular Expressions
@@ -262,7 +263,7 @@ public class ExpressionParser {
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->
-                    not.apply(termFactory.getFunction(ExpressionOperation.REGEX, t1, t2, flags)));
+                    not.apply(termFactory.getFunction(BooleanExpressionOperation.REGEX, t1, t2, flags)));
         }
 
 
@@ -278,14 +279,14 @@ public class ExpressionParser {
             Term t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
 
             if (expression.isNot()) {
-                Function atom1 = termFactory.getFunction(ExpressionOperation.LT, t1, t2);
-                Function atom2 = termFactory.getFunction(ExpressionOperation.GT, t3, t4);
+                Function atom1 = termFactory.getFunction(BooleanExpressionOperation.LT, t1, t2);
+                Function atom2 = termFactory.getFunction(BooleanExpressionOperation.GT, t3, t4);
 
                 result = ImmutableList.of(termFactory.getFunctionOR(atom1, atom2));
             }
             else {
-                Function atom1 = termFactory.getFunction(ExpressionOperation.GTE, t1, t2);
-                Function atom2 = termFactory.getFunction(ExpressionOperation.LTE, t3, t4);
+                Function atom1 = termFactory.getFunction(BooleanExpressionOperation.GTE, t1, t2);
+                Function atom2 = termFactory.getFunction(BooleanExpressionOperation.LTE, t3, t4);
 
                 result = ImmutableList.of(atom1, atom2);
             }
@@ -1164,11 +1165,11 @@ public class ExpressionParser {
         switch (terms.size()) {
             case 2:
                 return termFactory.getFunction(
-                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getConstantLiteral(""));
+                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getConstantLiteral(""));
             case 3:
                 // check the flag?
                 return termFactory.getFunction(
-                        ExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
+                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
         }
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments for SQL function", expression);
     }

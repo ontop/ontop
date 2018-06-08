@@ -37,6 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
+
 public class DatalogNormalizer {
 
 	private final TermFactory termFactory;
@@ -343,7 +345,7 @@ public class DatalogNormalizer {
 		Iterator<Function> iter = boolSet.iterator();
 		while (iter.hasNext()) {
 			Function eq = iter.next();
-			if (eq.getFunctionSymbol() != ExpressionOperation.EQ)
+			if (eq.getFunctionSymbol() != EQ)
 				continue;
 			Term v1 = eq.getTerm(0);
 			Term v2 = eq.getTerm(1);

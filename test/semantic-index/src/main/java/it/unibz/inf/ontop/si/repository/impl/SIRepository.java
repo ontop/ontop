@@ -40,12 +40,14 @@ public class SIRepository {
     private final RDBMSSIRepositoryManager dataRepository;
     private final String jdbcUrl;
     private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
     public SIRepository(ClassifiedTBox tbox, TermFactory termFactory, TypeFactory typeFactory,
                         TargetAtomFactory targetAtomFactory) {
 
         this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory, targetAtomFactory);
         this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
 

@@ -109,7 +109,7 @@ public class OneShotSQLGeneratorEngine {
 	@Nullable
 	private final IRIDictionary uriRefIds;
 
-	private final ImmutableMap<ExpressionOperation, String> operations;
+	private final ImmutableMap<FunctionSymbol, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
@@ -187,7 +187,7 @@ public class OneShotSQLGeneratorEngine {
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
 									  boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-									  ImmutableMap<ExpressionOperation, String> operations,
+									  ImmutableMap<FunctionSymbol, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator,
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
@@ -218,8 +218,8 @@ public class OneShotSQLGeneratorEngine {
 		this.immutabilityTools = immutabilityTools;
 	}
 
-	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
-		ImmutableMap.Builder<ExpressionOperation, String> builder = new ImmutableMap.Builder<ExpressionOperation, String>()
+	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
+		ImmutableMap.Builder<FunctionSymbol, String> builder = new ImmutableMap.Builder<FunctionSymbol, String>()
 				.put(ExpressionOperation.ADD, "%s + %s")
 				.put(ExpressionOperation.SUBTRACT, "%s - %s")
 				.put(ExpressionOperation.MULTIPLY, "%s * %s")
@@ -229,22 +229,22 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
 				.put(ExpressionOperation.ROUND, sqladapter.round())
 				.put(ExpressionOperation.RAND, sqladapter.rand())
-				.put(ExpressionOperation.EQ, "%s = %s")
-				.put(ExpressionOperation.NEQ, "%s <> %s")
-				.put(ExpressionOperation.GT, "%s > %s")
-				.put(ExpressionOperation.GTE, "%s >= %s")
-				.put(ExpressionOperation.LT, "%s < %s")
-				.put(ExpressionOperation.LTE, "%s <= %s")
-				.put(ExpressionOperation.AND, "%s AND %s")
-				.put(ExpressionOperation.OR, "%s OR %s")
-				.put(ExpressionOperation.NOT, "NOT %s")
-				.put(ExpressionOperation.IS_NULL, "%s IS NULL")
-				.put(ExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
+				.put(BooleanExpressionOperation.EQ, "%s = %s")
+				.put(BooleanExpressionOperation.NEQ, "%s <> %s")
+				.put(BooleanExpressionOperation.GT, "%s > %s")
+				.put(BooleanExpressionOperation.GTE, "%s >= %s")
+				.put(BooleanExpressionOperation.LT, "%s < %s")
+				.put(BooleanExpressionOperation.LTE, "%s <= %s")
+				.put(BooleanExpressionOperation.AND, "%s AND %s")
+				.put(BooleanExpressionOperation.OR, "%s OR %s")
+				.put(BooleanExpressionOperation.NOT, "NOT %s")
+				.put(BooleanExpressionOperation.IS_NULL, "%s IS NULL")
+				.put(BooleanExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
-				.put(ExpressionOperation.SQL_LIKE, "%s LIKE %s")
-				.put(ExpressionOperation.STR_STARTS, sqladapter.strStartsOperator())
-				.put(ExpressionOperation.STR_ENDS, sqladapter.strEndsOperator())
-				.put(ExpressionOperation.CONTAINS, sqladapter.strContainsOperator())
+				.put(BooleanExpressionOperation.SQL_LIKE, "%s LIKE %s")
+				.put(BooleanExpressionOperation.STR_STARTS, sqladapter.strStartsOperator())
+				.put(BooleanExpressionOperation.STR_ENDS, sqladapter.strEndsOperator())
+				.put(BooleanExpressionOperation.CONTAINS, sqladapter.strContainsOperator())
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
 
 		try {
@@ -594,7 +594,7 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isOperation()) {  // Boolean expression
-				if (atom.getFunctionSymbol() == ExpressionOperation.AND) {
+				if (atom.getFunctionSymbol() == BooleanExpressionOperation.AND) {
 					// flatten ANDs
 					for (Term t : atom.getTerms()) {
 						Set<String> arg = getBooleanConditions(ImmutableList.of((Function)t), index);
@@ -621,7 +621,7 @@ public class OneShotSQLGeneratorEngine {
 				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 				Term term = atom.getTerm(0);
 				final String arg;
-				if (functionSymbol == ExpressionOperation.NOT) {
+				if (functionSymbol == BooleanExpressionOperation.NOT) {
 					arg = getSQLString(term, index, false);
 				}
 				else {
@@ -636,10 +636,10 @@ public class OneShotSQLGeneratorEngine {
 				return String.format(inBrackets(expressionFormat), left, right);
 			}
 		}
-		else if (functionSymbol == ExpressionOperation.IS_TRUE) {
+		else if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
 			return effectiveBooleanValue(atom.getTerm(0), index);
 		}
-		else if (functionSymbol == ExpressionOperation.REGEX) {
+		else if (functionSymbol == BooleanExpressionOperation.REGEX) {
 			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
 			if (atom.getArity() == 3) {
 				String options = atom.getTerm(2).toString();
@@ -1174,10 +1174,10 @@ public class OneShotSQLGeneratorEngine {
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 		}
-		if (functionSymbol == ExpressionOperation.IS_TRUE) {
+		if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
 			return effectiveBooleanValue(function.getTerm(0), index);
 		}
-		if (functionSymbol == ExpressionOperation.REGEX) {
+		if (functionSymbol == BooleanExpressionOperation.REGEX) {
 			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
 			if (function.getArity() == 3) {
 				String options = function.getTerm(2).toString();

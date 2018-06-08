@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
     protected ImmutableExpressionImpl(OperationPredicate functor, ImmutableTerm... terms) {
@@ -31,12 +33,12 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
      */
     @Override
     public ImmutableSet<ImmutableExpression> flattenAND() {
-        return flatten(ExpressionOperation.AND);
+        return flatten(AND);
     }
 
     @Override
     public ImmutableSet<ImmutableExpression> flattenOR() {
-        return flatten(ExpressionOperation.OR);
+        return flatten(OR);
     }
 
     @Override

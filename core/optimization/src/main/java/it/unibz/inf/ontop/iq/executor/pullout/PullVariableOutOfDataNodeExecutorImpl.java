@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
+
 
 /**
  * TODO: explain
@@ -272,7 +274,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
         ImmutableList.Builder<ImmutableExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(termFactory.getImmutableExpression(ExpressionOperation.EQ,
+            equalityBuilder.add(termFactory.getImmutableExpression(EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
         return immutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();

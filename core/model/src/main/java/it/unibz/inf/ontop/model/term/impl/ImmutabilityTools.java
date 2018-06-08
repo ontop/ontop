@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 
 public class ImmutabilityTools {
 

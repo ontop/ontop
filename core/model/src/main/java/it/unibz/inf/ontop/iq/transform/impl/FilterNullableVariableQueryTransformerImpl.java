@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 @Singleton
 public class FilterNullableVariableQueryTransformerImpl implements FilterNullableVariableQueryTransformer {

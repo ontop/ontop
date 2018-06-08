@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Types;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static junit.framework.TestCase.assertEquals;
 
 public class NoNullValuesEnforcerTest {

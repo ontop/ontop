@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
@@ -22,6 +21,7 @@ import java.sql.Types;
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 public class IQValidationTest {
@@ -45,7 +45,7 @@ public class IQValidationTest {
     private final static Variable C = TERM_FACTORY.getVariable("c");
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, X, Y);
+            EQ, X, Y);
 
     private static final DBMetadata DB_METADATA;
 

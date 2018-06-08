@@ -388,8 +388,8 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
      */
     private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof ExpressionOperation) {
-            switch((ExpressionOperation)functionSymbol) {
+        if (functionSymbol instanceof BooleanExpressionOperation) {
+            switch((BooleanExpressionOperation)functionSymbol) {
                 case IS_NOT_NULL:
                 case IS_NULL:
                     // TODO: add COALESCE, EXISTS, NOT EXISTS
@@ -410,7 +410,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         List<ImmutableExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(termFactory.getImmutableExpression(BooleanExpressionOperation.EQ, entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {
@@ -423,7 +423,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 // Non-final
                 ImmutableExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, aggregateExpression,
+                    aggregateExpression = termFactory.getImmutableExpression(BooleanExpressionOperation.AND, aggregateExpression,
                             equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);

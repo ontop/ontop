@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -16,6 +15,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -31,9 +31,9 @@ public class ProjectionShrinkingOptimizerTest {
     private final static Variable B = TERM_FACTORY.getVariable("B");
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, Y, Z);
+            NEQ, Y, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.NEQ, W, X);
+            NEQ, W, X);
 
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {

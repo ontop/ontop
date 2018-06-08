@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 import static org.junit.Assert.assertEquals;
 
 public class SubstitutionTest {

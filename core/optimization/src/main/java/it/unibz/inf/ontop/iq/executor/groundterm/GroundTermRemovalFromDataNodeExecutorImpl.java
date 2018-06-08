@@ -19,10 +19,11 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException
 import it.unibz.inf.ontop.iq.proposal.ProposalResults;
 import it.unibz.inf.ontop.iq.proposal.impl.ProposalResultsImpl;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 
 import java.util.Collection;
 import java.util.Map;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 /**
  * Turns constant values from a data node d into explicit equalities.
@@ -148,7 +149,7 @@ public class GroundTermRemovalFromDataNodeExecutorImpl implements
 
         for (VariableGroundTermPair pair : pairs ) {
             booleanExpressionBuilder.add(termFactory.getImmutableExpression(
-                    ExpressionOperation.EQ, pair.variable, pair.groundTerm));
+                    EQ, pair.variable, pair.groundTerm));
         }
         Optional<ImmutableExpression> optionalFoldExpression = immutabilityTools.foldBooleanExpressions(
                 booleanExpressionBuilder.build());

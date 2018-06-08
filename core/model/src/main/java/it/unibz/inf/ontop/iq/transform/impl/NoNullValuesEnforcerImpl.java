@@ -12,8 +12,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 
 public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {

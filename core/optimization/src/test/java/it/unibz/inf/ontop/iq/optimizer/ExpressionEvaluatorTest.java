@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;
@@ -59,7 +60,7 @@ public class ExpressionEvaluatorTest {
             TERM_FACTORY.getConstantLiteral(languageTag, XSD.STRING), XSD.STRING);
 
     private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
-            ExpressionOperation.LANGMATCHES, EXPR_LANG, wrappedLanguageTag);
+            LANGMATCHES, EXPR_LANG, wrappedLanguageTag);
 
 
     private IntermediateQuery getExpectedQuery() {
