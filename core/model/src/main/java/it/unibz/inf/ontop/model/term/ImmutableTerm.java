@@ -17,4 +17,6 @@ public interface ImmutableTerm {
     Stream<Variable> getVariableStream();
 
     TypeInference inferType() throws FatalTypingException;
+
+    EvaluationResult evaluateEq(ImmutableTerm otherTerm);
 }

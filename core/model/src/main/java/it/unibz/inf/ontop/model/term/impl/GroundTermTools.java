@@ -18,17 +18,17 @@ public class GroundTermTools {
     }
 
 
-    public static ImmutableList<GroundTerm> castIntoGroundTerms(List<? extends Term> terms)
+    public static ImmutableList<GroundTerm> castIntoGroundTerms(List<? extends Term> terms, TermFactory termFactory)
             throws NonGroundTermException {
         ImmutableList.Builder<GroundTerm> termBuilder = ImmutableList.builder();
         for (Term term : terms) {
-            termBuilder.add(castIntoGroundTerm(term));
+            termBuilder.add(castIntoGroundTerm(term, termFactory));
         }
 
         return termBuilder.build();
     }
 
-    public static GroundTerm castIntoGroundTerm(Term term) throws NonGroundTermException{
+    public static GroundTerm castIntoGroundTerm(Term term, TermFactory termFactory) throws NonGroundTermException{
         if (term instanceof GroundTerm)
             return (GroundTerm) term;
 
@@ -41,7 +41,7 @@ public class GroundTermTools {
                     .orElseThrow(() -> new NonGroundTermException(term + "is not using a function symbol but a"
                             + functionalTerm.getFunctionSymbol().getClass()));
 
-            return new GroundFunctionalTermImpl(castIntoGroundTerms(functionalTerm.getTerms()), functionSymbol);
+            return new GroundFunctionalTermImpl(castIntoGroundTerms(functionalTerm.getTerms(), termFactory), functionSymbol, termFactory);
         }
 
         throw new NonGroundTermException(term + " is not a ground term");

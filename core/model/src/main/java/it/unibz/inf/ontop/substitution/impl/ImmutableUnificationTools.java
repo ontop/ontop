@@ -182,7 +182,7 @@ public class ImmutableUnificationTools {
 
         ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
         for (Map.Entry<Variable, Term> entry : mutableSubstitution.getMap().entrySet()) {
-            VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
+            VariableOrGroundTerm value = immutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
 
             substitutionMapBuilder.put(entry.getKey(), value);
         }

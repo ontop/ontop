@@ -157,10 +157,10 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
 													  ImmutableList<? extends ImmutableTerm> arguments) {
 		if (GroundTermTools.areGroundTerms(arguments)) {
-			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments);
+			return new GroundExpressionImpl(functor, (ImmutableList<GroundTerm>)arguments, this);
 		}
 		else {
-			return new NonGroundExpressionImpl(functor, arguments);
+			return new NonGroundExpressionImpl(functor, arguments, this);
 		}
 	}
 
@@ -168,10 +168,10 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableExpression getImmutableExpression(Expression expression) {
 		if (GroundTermTools.isGroundTerm(expression)) {
 			return new GroundExpressionImpl(expression.getFunctionSymbol(),
-					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression));
+					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression), this);
 		}
 		else {
-			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression));
+			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression), this);
 		}
 	}
 
@@ -205,11 +205,11 @@ public class TermFactoryImpl implements TermFactory {
 		}
 
 		if (GroundTermTools.areGroundTerms(terms)) {
-			return new GroundFunctionalTermImpl((ImmutableList<? extends GroundTerm>)terms, functor);
+			return new GroundFunctionalTermImpl((ImmutableList<? extends GroundTerm>)terms, functor, this);
 		}
 		else {
 			// Default constructor
-			return new NonGroundFunctionalTermImpl(functor, terms);
+			return new NonGroundFunctionalTermImpl(functor, terms, this);
 		}
 	}
 
@@ -220,12 +220,12 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms) {
-		return new NonGroundFunctionalTermImpl(functor, terms);
+		return new NonGroundFunctionalTermImpl(this, functor, terms);
 	}
 
 	@Override
 	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms) {
-		return new NonGroundFunctionalTermImpl(functor, terms);
+		return new NonGroundFunctionalTermImpl(functor, terms, this);
 	}
 
 	public TypeFactory getTypeFactory() {

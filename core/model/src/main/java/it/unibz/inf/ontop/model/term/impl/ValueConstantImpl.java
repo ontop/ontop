@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.TypeInference;
@@ -93,6 +92,20 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public TypeInference inferType() {
 		return TypeInference.declareTermType(getType());
+	}
+
+	@Override
+	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+		if (otherTerm instanceof ValueConstant) {
+			return equals(otherTerm)
+					? EvaluationResult.declareIsTrue()
+					// See https://www.w3.org/TR/sparql11-query/#func-RDFterm-equal
+					: EvaluationResult.declareIsNull();
+		}
+		else if (otherTerm instanceof Constant)
+			return EvaluationResult.declareIsFalse();
+		else
+			return otherTerm.evaluateEq(this);
 	}
 
 	@Override

@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.model.term.impl;
 
 
 import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.EvaluationResult;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeInference;
 
@@ -85,6 +88,22 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	@Override
 	public TypeInference inferType() throws FatalTypingException {
 		return TypeInference.declareNotDetermined();
+	}
+
+	@Override
+	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+		if (otherTerm instanceof Variable) {
+			return equals(otherTerm)
+					? EvaluationResult.declareIsTrue()
+					: EvaluationResult.declareSameExpression();
+		}
+		else if (otherTerm instanceof Constant) {
+			return EvaluationResult.declareSameExpression();
+		}
+		else {
+			// Functional term
+			return otherTerm.evaluateEq(this);
+		}
 	}
 
 	@Override

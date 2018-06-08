@@ -1,14 +1,14 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import it.unibz.inf.ontop.model.term.EvaluationResult;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class EvaluationResultImpl implements ImmutableFunctionalTerm.EvaluationResult {
+public class EvaluationResultImpl implements EvaluationResult {
 
-    private static final ImmutableFunctionalTerm.EvaluationResult SAME_EXPRESSION_RESULT, IS_NULL_RESULT, IS_TRUE_RESULT, IS_FALSE_RESULT;
+    private static final EvaluationResult SAME_EXPRESSION_RESULT, IS_NULL_RESULT, IS_TRUE_RESULT, IS_FALSE_RESULT;
 
     static {
         SAME_EXPRESSION_RESULT = new EvaluationResultImpl(Status.SAME_EXPRESSION);
@@ -44,24 +44,24 @@ public class EvaluationResultImpl implements ImmutableFunctionalTerm.EvaluationR
         return status;
     }
 
-    public static ImmutableFunctionalTerm.EvaluationResult declareSimplifiedExpression(
+    public static EvaluationResult declareSimplifiedExpression(
             ImmutableExpression simplifiedExpression) {
         return new EvaluationResultImpl(simplifiedExpression);
     }
 
-    public static ImmutableFunctionalTerm.EvaluationResult declareSameExpression() {
+    public static EvaluationResult declareSameExpression() {
         return SAME_EXPRESSION_RESULT;
     }
 
-    public static ImmutableFunctionalTerm.EvaluationResult declareIsNull() {
+    public static EvaluationResult declareIsNull() {
         return IS_NULL_RESULT;
     }
 
-    public static ImmutableFunctionalTerm.EvaluationResult declareIsFalse() {
+    public static EvaluationResult declareIsFalse() {
         return IS_FALSE_RESULT;
     }
 
-    public static ImmutableFunctionalTerm.EvaluationResult declareIsTrue() {
+    public static EvaluationResult declareIsTrue() {
         return IS_TRUE_RESULT;
     }
 }

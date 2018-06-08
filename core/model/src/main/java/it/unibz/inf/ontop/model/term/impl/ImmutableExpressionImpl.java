@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -10,12 +11,13 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
-    protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableTerm... terms) {
-        super(functor, terms);
+    protected ImmutableExpressionImpl(TermFactory termFactory, BooleanFunctionSymbol functor, ImmutableTerm... terms) {
+        super(functor, termFactory, terms);
     }
 
-    protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms) {
-        super(functor, terms);
+    protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms,
+                                      TermFactory termFactory) {
+        super(functor, terms, termFactory);
     }
 
     @Override

@@ -1,18 +1,20 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.GroundFunctionalTerm;
 import it.unibz.inf.ontop.model.term.GroundTerm;
 
 public class GroundExpressionImpl extends ImmutableExpressionImpl implements GroundFunctionalTerm {
 
-    protected GroundExpressionImpl(BooleanFunctionSymbol functor, GroundTerm... terms) {
-        super(functor, terms);
+    protected GroundExpressionImpl(TermFactory termFactory, BooleanFunctionSymbol functor, GroundTerm... terms) {
+        super(termFactory, functor, terms);
     }
 
-    protected GroundExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends GroundTerm> terms) {
-        super(functor, terms);
+    protected GroundExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends GroundTerm> terms,
+                                   TermFactory termFactory) {
+        super(functor, terms, termFactory);
     }
 
     @Override

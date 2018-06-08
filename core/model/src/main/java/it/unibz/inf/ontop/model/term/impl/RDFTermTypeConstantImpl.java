@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeInference;
@@ -77,5 +75,16 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
     @Override
     public TypeInference inferType() {
         return TypeInference.declareTermType(metaType);
+    }
+
+    @Override
+    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+        if (otherTerm instanceof Constant) {
+            return equals(otherTerm)
+                    ? EvaluationResult.declareIsTrue()
+                    : EvaluationResult.declareIsFalse();
+        }
+        else
+            return otherTerm.evaluateEq(this);
     }
 }

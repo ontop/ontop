@@ -17,20 +17,23 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
 
     private final FunctionSymbol functionSymbol;
     private final ImmutableList<? extends ImmutableTerm> terms;
+    private final TermFactory termFactory;
 
     /**
      * Lazy cache for toString()
      */
     private String string;
 
-    protected ImmutableFunctionalTermImpl(FunctionSymbol functor, ImmutableTerm... terms) {
-        this(functor, ImmutableList.copyOf(terms));
+    protected ImmutableFunctionalTermImpl(FunctionSymbol functor, TermFactory termFactory, ImmutableTerm... terms) {
+        this(functor, ImmutableList.copyOf(terms), termFactory);
     }
 
-    protected ImmutableFunctionalTermImpl(FunctionSymbol functionSymbol, ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableFunctionalTermImpl(FunctionSymbol functionSymbol, ImmutableList<? extends ImmutableTerm> terms,
+                                          TermFactory termFactory) {
         this.functionSymbol = functionSymbol;
         // No problem since the list is immutable
         this.terms = terms;
+        this.termFactory = termFactory;
         string = null;
 
         if (functionSymbol.getArity() != terms.size()) {
@@ -114,6 +117,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @Override
+    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+        return functionSymbol.evaluateEq(getTerms(), otherTerm, termFactory);
     }
 
 }

@@ -60,11 +60,11 @@ public class ImmutabilityTools {
         return (ImmutableTerm) term;
     }
 
-    public static VariableOrGroundTerm convertIntoVariableOrGroundTerm(Term term) {
+    public VariableOrGroundTerm convertIntoVariableOrGroundTerm(Term term) {
         if (term instanceof Variable) {
             return (Variable) term;
         } else if (GroundTermTools.isGroundTerm(term)) {
-            return GroundTermTools.castIntoGroundTerm(term);
+            return GroundTermTools.castIntoGroundTerm(term, termFactory);
         } else {
             throw new IllegalArgumentException("Not a variable nor a ground term: " + term);
         }

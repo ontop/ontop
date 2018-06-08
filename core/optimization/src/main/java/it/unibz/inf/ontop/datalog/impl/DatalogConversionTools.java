@@ -100,7 +100,7 @@ public class DatalogConversionTools {
             else if (isGroundTerm(term)) {
                 Variable newVariable = projectedVariableGenerator.generateNewVariable();
                 newArgument = newVariable;
-                bindingBuilder.put(newVariable, castIntoGroundTerm(term));
+                bindingBuilder.put(newVariable, castIntoGroundTerm(term, termFactory));
             }
             /*
              * Non-ground functional term
