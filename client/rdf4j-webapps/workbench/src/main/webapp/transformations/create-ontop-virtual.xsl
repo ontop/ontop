@@ -91,6 +91,18 @@
 						</td>
 					</tr>
 					<tr>
+						<th>
+							<xsl:value-of select="$ontop-constraintfile.label" />
+						</th>
+						<td>
+							<input type="text" id="constraintFile"
+								   name="constraintFile" size="48" value="" />
+						</td>
+						<td>
+							<xsl:value-of select="$ontop-constraintfilecomment.label" />
+						</td>
+					</tr>
+					<tr>
 						<td></td>
 						<td>
 							<input type="button" value="{$cancel.label}" style="float:right"

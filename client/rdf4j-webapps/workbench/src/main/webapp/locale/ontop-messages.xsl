@@ -10,6 +10,8 @@
 	<variable name="ontop-obdafilecomment.label">Provide the full path to the Mapping file (e.g. .obda, .ttl)</variable>
 	<variable name="ontop-properties.label">Ontop properties file</variable>
 	<variable name="ontop-propertiesfilecomment.label">Provide the full path to the Ontop properties file (e.g. storing connection credentials) </variable>
+	<variable name="ontop-constraintfile.label">Ontop implicit constraint file (optional)</variable>
+	<variable name="ontop-constraintfilecomment.label">Provide the full path to the implicit constraint file</variable>
 
 	<!--<variable name="ontop-existential.label">Existential reasoning (tree-witness rewriting)</variable>-->
 	<!--<variable name="ontop-rewriting.label">Rewriting technique</variable>-->

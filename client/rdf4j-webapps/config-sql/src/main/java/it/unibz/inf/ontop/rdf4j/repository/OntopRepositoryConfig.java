@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 
 import java.io.File;
+import java.util.Optional;
 
 import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
@@ -47,6 +48,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     public final static IRI OBDAFILE;
 
     public final static IRI PROPERTIESFILE;
+    public final static IRI CONSTRAINTFILE;
     
     public final static IRI EXISTENTIAL;
     
@@ -57,6 +59,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         OWLFILE = factory.createIRI(NAMESPACE, "owlFile");
         OBDAFILE = factory.createIRI(NAMESPACE, "obdaFile");
         PROPERTIESFILE =  factory.createIRI(NAMESPACE, "propertiesFile");
+        CONSTRAINTFILE =  factory.createIRI(NAMESPACE, "constraintFile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
     }
 
@@ -64,6 +67,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     private File owlFile;
     private File obdaFile;
     private File propertiesFile;
+    private Optional<File> constraintFile;
 
     /**
      * The repository has to be built by this class
@@ -151,6 +155,18 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 throw new RepositoryConfigException(String.format("The properties file %s is not accessible!",
                         propertiesFile.getAbsolutePath()));
             }
+
+            if (constraintFile.isPresent()) {
+                File file = constraintFile.get();
+                if (!file.exists()) {
+                    throw new RepositoryConfigException(String.format("The implicit key file %s does not exist!",
+                            file.getAbsolutePath()));
+                }
+                if (!file.canRead()) {
+                    throw new RepositoryConfigException(String.format("The implicit key file %s is not accessible!",
+                            file.getAbsolutePath()));
+                }
+            }
         }
         /*
          * Sometimes thrown when there is no access right to the files.
@@ -204,6 +220,8 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                     .ontologyFile(owlFile)
                     .propertyFile(propertiesFile);
 
+            constraintFile.ifPresent(configurationBuilder::basicImplicitConstraintFile);
+
             repository = OntopRepository.defaultRepository(configurationBuilder.build());
 
         }
@@ -237,6 +255,11 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         if (propertiesFile != null) {
             graph.add(implNode, PROPERTIESFILE, vf.createLiteral(propertiesFile.getAbsolutePath()));
         }
+        if (constraintFile != null) {
+            constraintFile
+                    .map(File::getAbsolutePath)
+                    .ifPresent(path -> graph.add(implNode, PROPERTIESFILE, vf.createLiteral(path)));
+        }
       
         return implNode;
     }
@@ -261,6 +284,10 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 
             objectLiteral(graph.filter(implNode, PROPERTIESFILE, null))
                     .ifPresent(lit -> this.propertiesFile = new File(lit.getLabel()));
+
+            this.constraintFile = objectLiteral(graph.filter(implNode, CONSTRAINTFILE, null))
+                    .filter(l -> !l.getLabel().isEmpty())
+                    .map(l -> new File(l.getLabel()));
 
         } catch (Exception e) {
             throw new RepositoryConfigException(e.getMessage(), e);
