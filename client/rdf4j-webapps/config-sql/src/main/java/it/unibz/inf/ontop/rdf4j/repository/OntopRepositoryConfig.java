@@ -258,7 +258,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         if (constraintFile != null) {
             constraintFile
                     .map(File::getAbsolutePath)
-                    .ifPresent(path -> graph.add(implNode, PROPERTIESFILE, vf.createLiteral(path)));
+                    .ifPresent(path -> graph.add(implNode, CONSTRAINTFILE, vf.createLiteral(path)));
         }
       
         return implNode;
