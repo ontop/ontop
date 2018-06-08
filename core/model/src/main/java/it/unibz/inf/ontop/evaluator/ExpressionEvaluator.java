@@ -29,14 +29,12 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.sun.tools.doclint.Entity.theta;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
