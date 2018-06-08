@@ -467,6 +467,7 @@ public class ExpressionEvaluator {
 		return term;
 	}
 
+	@Deprecated
 	private static boolean isXsdString(Predicate predicate) {
 		return (predicate instanceof DatatypePredicate)
 				&& ((DatatypePredicate) predicate).getReturnedType().isA(XSD.STRING);
