@@ -196,8 +196,7 @@ public class DirectMappingEngine {
 							.orElseThrow(() -> new MinorOntopInternalBugException(
 									"Could not infer the RDF type of " + objectFunctionalTerm));
 
-					// TODO: improve the test
-					entity = (termType instanceof RDFDatatype)
+					entity = (termType.isA(typeFactory.getAbstractRDFSLiteral()))
 							? dataFactory.getOWLDataProperty(iri)
 							: dataFactory.getOWLObjectProperty(iri);
 				}

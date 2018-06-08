@@ -312,8 +312,6 @@ public class ExpressionEvaluator {
 			return term;
 
 		boolean isNumeric = optionalTermType
-				.filter(t -> t instanceof RDFDatatype)
-				.map(t -> (RDFDatatype)t)
 				.map(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))
 				.orElse(false);
 
@@ -337,7 +335,7 @@ public class ExpressionEvaluator {
 				// Determined
 				default:
 					return termFactory.getBooleanConstant(typeInference.getTermType()
-							.filter(t -> t instanceof RDFDatatype)
+							.filter(t -> t.isA(typeFactory.getAbstractRDFSLiteral()))
 							.isPresent());
 			}
 		}
