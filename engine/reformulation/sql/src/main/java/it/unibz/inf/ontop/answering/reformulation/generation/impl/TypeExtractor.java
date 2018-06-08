@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -71,7 +72,7 @@ public class TypeExtractor {
                         // Value mapper
                         rule -> rule.getHead().getTerms().stream()
                                 .map(immutabilityTools::convertIntoImmutableTerm)
-                                .map(termTypeInferenceTools::inferType)
+                                .map(t -> t.inferType().getTermType())
                                 .collect(ImmutableCollectors.toList())
                 ));
     }
@@ -243,12 +244,12 @@ public class TypeExtractor {
         }
         else if (term instanceof ImmutableExpression) {
             ImmutableExpression expression = (ImmutableExpression) term;
-            ImmutableList<Optional<TermType>> argumentTypes = expression.getTerms().stream()
+            ImmutableList<TypeInference> argumentTypes = expression.getTerms().stream()
                     .map(t -> getCastTypeFromSubRule(t, bodyDataAtoms, alreadyKnownCastTypes))
-                    .map(Optional::of)
+                    .map(TypeInference::declareTermType)
                     .collect(ImmutableCollectors.toList());
 
-            return expression.getOptionalTermType(argumentTypes)
+            return expression.getOptionalTermType(argumentTypes).getTermType()
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
         }
         else if (term instanceof Constant) {

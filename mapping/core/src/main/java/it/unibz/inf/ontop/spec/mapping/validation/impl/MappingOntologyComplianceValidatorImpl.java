@@ -105,12 +105,15 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
-            return Optional.of(
-                    constructionFunctionalTerm.inferType().getTermType()
-                            .filter(t -> t instanceof RDFTermType)
-                            .map(t -> (RDFTermType)t)
-                            .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                                "Not defined in the root node (expected for a mapping assertion)")));
+
+            Optional<RDFTermType> optionalType = constructionFunctionalTerm.inferType().getTermType()
+                    .filter(t -> t instanceof RDFTermType)
+                    .map(t -> (RDFTermType) t);
+
+            if (!optionalType.isPresent())
+                throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                        "Not defined in the root node (expected for a mapping assertion)");
+            return optionalType;
         }
         else {
             /*

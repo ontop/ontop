@@ -48,7 +48,6 @@ public class MappingDataTypeCompletion {
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
 
     /**
@@ -60,20 +59,17 @@ public class MappingDataTypeCompletion {
      * @param relation2Predicate
      * @param termFactory
      * @param typeFactory
-     * @param termTypeInferenceTools
      * @param immutabilityTools
      */
     public MappingDataTypeCompletion(DBMetadata metadata,
                                      boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
                                      TermFactory termFactory, TypeFactory typeFactory,
-                                     TermTypeInferenceTools termTypeInferenceTools,
                                      ImmutabilityTools immutabilityTools) {
         this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.termTypeInferenceTools = termTypeInferenceTools;
         this.immutabilityTools = immutabilityTools;
     }
 
@@ -146,7 +142,7 @@ public class MappingDataTypeCompletion {
             Predicate functionSymbol = castTerm.getFunctionSymbol();
             if (functionSymbol instanceof OperationPredicate) {
 
-                Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
+                Optional<TermType> inferredType = castTerm.inferType().getTermType();
                 if(inferredType.isPresent()){
                     // delete explicit datatypes of the operands
                     deleteExplicitTypes(term, atom, position);

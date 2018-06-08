@@ -30,7 +30,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
 
     @Inject
@@ -38,14 +37,13 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                                         Mapping2DatalogConverter mapping2DatalogConverter,
                                         OntopMappingSettings settings, Relation2Predicate relation2Predicate,
                                         TermFactory termFactory, TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools) {
+                                        ImmutabilityTools immutabilityTools) {
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.settings = settings;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.termTypeInferenceTools = termTypeInferenceTools;
         this.immutabilityTools = immutabilityTools;
     }
 
@@ -73,7 +71,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,
-                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
+                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, immutabilityTools);
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable

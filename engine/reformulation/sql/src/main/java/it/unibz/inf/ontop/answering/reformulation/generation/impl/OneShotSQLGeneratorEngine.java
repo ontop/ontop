@@ -55,10 +55,11 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -122,6 +123,7 @@ public class OneShotSQLGeneratorEngine {
 	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
 	private final UnionFlattener unionFlattener;
+	private final ImmutabilityTools immutabilityTools;
 
 
 	// the only two mutable (query-dependent) fields
@@ -138,7 +140,8 @@ public class OneShotSQLGeneratorEngine {
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-							  IntermediateQueryFactory iqFactory, AtomFactory atomFactory, UnionFlattener unionFlattener) {
+							  IntermediateQueryFactory iqFactory, AtomFactory atomFactory, UnionFlattener unionFlattener,
+							  ImmutabilityTools immutabilityTools) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -150,6 +153,7 @@ public class OneShotSQLGeneratorEngine {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
+		this.immutabilityTools = immutabilityTools;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -190,7 +194,7 @@ public class OneShotSQLGeneratorEngine {
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
 									  IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-									  UnionFlattener unionFlattener) {
+									  UnionFlattener unionFlattener, ImmutabilityTools immutabilityTools) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -211,6 +215,7 @@ public class OneShotSQLGeneratorEngine {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -268,7 +273,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener);
+                typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener, immutabilityTools);
 	}
 
 	/**
@@ -873,6 +878,9 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
+	/**
+	 * TODO: remove
+	 */
 	private String effectiveBooleanValue(Term term, AliasIndex index) {
 
 		String column = getSQLString(term, index, false);
@@ -894,20 +902,13 @@ public class OneShotSQLGeneratorEngine {
 
 	// return the SQL data type
 	private int getDataType(Term term) {
-
-		/*
-		 * TODO: refactor!
-		 */
 		if (term instanceof Function){
-			Function f = (Function) term;
-			Predicate p = f.getFunctionSymbol();
-			if (p instanceof DatatypePredicate) {
-
-				RDFDatatype type = ((DatatypePredicate) p).getReturnedType();
-				return jdbcTypeMapper.getSQLType(type);
-			}
-			// return varchar for unknown
-			return Types.VARCHAR;
+			Function functionalTerm = (Function) term;
+			return Optional.of((ImmutableFunctionalTerm) immutabilityTools.convertIntoImmutableTerm(functionalTerm))
+					.map(ImmutableFunctionalTerm::inferType)
+					.flatMap(TypeInference::getTermType)
+					.map(jdbcTypeMapper::getSQLType)
+					.orElse(Types.VARCHAR);
 		}
         else if (term instanceof Variable) {
             throw new RuntimeException("Cannot return the SQL type for: " + term);
