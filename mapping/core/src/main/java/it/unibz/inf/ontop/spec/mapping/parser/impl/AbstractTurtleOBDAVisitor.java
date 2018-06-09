@@ -1,12 +1,12 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -95,7 +95,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                     toReturn.add(new FixedString(text.substring(i, m.start())));
                 }
                 String value = m.group(1);
-                if(validateAttributeName(value)) {
+                if (validateAttributeName(value)) {
                     toReturn.add(new ColumnString(value));
                     i = m.end();
                 }
@@ -441,41 +441,37 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Term visitBlank(BlankContext ctx) {
-        if (ctx.BLANK_NODE_FUNCTION() != null){
+        if (ctx.BLANK_NODE_FUNCTION() != null) {
             return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
         }
-        if (ctx.BLANK_NODE_LABEL() != null){
-            return constructConstantBNode (ctx.BLANK_NODE_LABEL().getText());
+        if (ctx.BLANK_NODE_LABEL() != null) {
+            return constructConstantBNode(ctx.BLANK_NODE_LABEL().getText());
         }
         throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
 
     @Override
     public Term visitLanguageTag(LanguageTagContext ctx) {
-        VariableContext vc = ctx.variable();
-        if (vc != null) {
-            return visitVariable(vc);
-        }
+//        VariableContext vc = ctx.variable();
+//        if (vc != null) {
+//            return visitVariable(vc);
+//        }
         return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
     }
 
-//    @Override
-//    public Term visitLiteral(LiteralContext ctx) {
-//        StringLiteralContext slc = ctx.stringLiteral();
-//        if (slc != null) {
-//            Term literal = visitStringLiteral(slc);
-//            LanguageTagContext lc = ctx.languageTag();
-//            //if variable we cannot assign a datatype yet
-//            if (literal instanceof Variable) {
-//                return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
-//            }
-//            if (lc != null) {
-//                return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
-//            }
-//            return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
-//        }
-//        return (Term) visitChildren(ctx);
-//    }
+    @Override
+    public Term visitLiteral(LiteralContext ctx) {
+        LanguageTagContext lc = ctx. languageTag();
+        if (lc != null) {
+            StringLiteralContext slc = ctx.stringLiteral();
+            if (slc == null) {
+                throw new RuntimeException("ANTLR parsing exception: the stringLiteral should be present");
+            }
+            Term literal = visitStringLiteral(slc);
+            return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
+        }
+        return (Term) visitChildren(ctx);
+    }
 
     @Override
     public Term visitStringLiteral(StringLiteralContext ctx) {
