@@ -170,6 +170,13 @@ public class TurtleOBDABaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitTypedLiteral(TurtleOBDAParser.TypedLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -177,21 +184,21 @@ public class TurtleOBDABaseVisitor<T> extends AbstractParseTreeVisitor<T> implem
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStringLiteral(TurtleOBDAParser.StringLiteralContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLitString(TurtleOBDAParser.LitStringContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) { return visitChildren(ctx); }
+	@Override public T visitUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx) { return visitChildren(ctx); }
+	@Override public T visitUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

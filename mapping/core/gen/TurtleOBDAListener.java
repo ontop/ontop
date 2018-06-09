@@ -231,6 +231,16 @@ public interface TurtleOBDAListener extends ParseTreeListener {
 	 */
 	void exitLiteral(TurtleOBDAParser.LiteralContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TurtleOBDAParser#untypedStringLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TurtleOBDAParser#untypedStringLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TurtleOBDAParser#typedLiteral}.
 	 * @param ctx the parse tree
 	 */
@@ -241,35 +251,35 @@ public interface TurtleOBDAListener extends ParseTreeListener {
 	 */
 	void exitTypedLiteral(TurtleOBDAParser.TypedLiteralContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TurtleOBDAParser#stringLiteral}.
+	 * Enter a parse tree produced by {@link TurtleOBDAParser#litString}.
 	 * @param ctx the parse tree
 	 */
-	void enterStringLiteral(TurtleOBDAParser.StringLiteralContext ctx);
+	void enterLitString(TurtleOBDAParser.LitStringContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link TurtleOBDAParser#stringLiteral}.
+	 * Exit a parse tree produced by {@link TurtleOBDAParser#litString}.
 	 * @param ctx the parse tree
 	 */
-	void exitStringLiteral(TurtleOBDAParser.StringLiteralContext ctx);
+	void exitLitString(TurtleOBDAParser.LitStringContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TurtleOBDAParser#numericLiteral}.
+	 * Enter a parse tree produced by {@link TurtleOBDAParser#untypedNumericLiteral}.
 	 * @param ctx the parse tree
 	 */
-	void enterNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx);
+	void enterUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link TurtleOBDAParser#numericLiteral}.
+	 * Exit a parse tree produced by {@link TurtleOBDAParser#untypedNumericLiteral}.
 	 * @param ctx the parse tree
 	 */
-	void exitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx);
+	void exitUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TurtleOBDAParser#booleanLiteral}.
+	 * Enter a parse tree produced by {@link TurtleOBDAParser#untypedBooleanLiteral}.
 	 * @param ctx the parse tree
 	 */
-	void enterBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx);
+	void enterUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link TurtleOBDAParser#booleanLiteral}.
+	 * Exit a parse tree produced by {@link TurtleOBDAParser#untypedBooleanLiteral}.
 	 * @param ctx the parse tree
 	 */
-	void exitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx);
+	void exitUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TurtleOBDAParser#numericUnsigned}.
 	 * @param ctx the parse tree

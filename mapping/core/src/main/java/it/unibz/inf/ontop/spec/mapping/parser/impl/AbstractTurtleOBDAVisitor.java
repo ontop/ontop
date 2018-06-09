@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -460,21 +460,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitLiteral(LiteralContext ctx) {
-        LanguageTagContext lc = ctx. languageTag();
+    public Term visitUntypedStringLiteral(UntypedStringLiteralContext ctx) {
+        LitStringContext lsc = ctx.litString();
+        Term literal = visitLitString(lsc);
+        LanguageTagContext lc = ctx.languageTag();
         if (lc != null) {
-            StringLiteralContext slc = ctx.stringLiteral();
-            if (slc == null) {
-                throw new RuntimeException("ANTLR parsing exception: the stringLiteral should be present");
-            }
-            Term literal = visitStringLiteral(slc);
             return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
         }
-        return (Term) visitChildren(ctx);
+        return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
     }
 
     @Override
-    public Term visitStringLiteral(StringLiteralContext ctx) {
+    public Term visitLitString(LitStringContext ctx) {
         String str = ctx.STRING_LITERAL_QUOTE().getText();
         if (str.contains("{")) {
             return getNestedConcat(str);
@@ -484,7 +481,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Term visitTypedLiteral(TypedLiteralContext ctx) {
-        Term stringValue = visitStringLiteral(ctx.stringLiteral());
+        Term stringValue = visitLitString(ctx.litString());
         String iriRef = visitIri(ctx.iri());
         Optional<COL_TYPE> type = TYPE_FACTORY.getDatatype(iriRef);
         if (type.isPresent()) {
@@ -494,12 +491,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitNumericLiteral(NumericLiteralContext ctx) {
+    public Term visitUntypedNumericLiteral(UntypedNumericLiteralContext ctx) {
         return (Term) visitChildren(ctx);
     }
 
     @Override
-    public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
+    public Term visitUntypedBooleanLiteral(UntypedBooleanLiteralContext ctx) {
         return typeTerm(ctx.BOOLEAN_LITERAL().getText(), COL_TYPE.BOOLEAN);
     }
 

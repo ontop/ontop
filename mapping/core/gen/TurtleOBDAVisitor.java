@@ -144,29 +144,35 @@ public interface TurtleOBDAVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLiteral(TurtleOBDAParser.LiteralContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#untypedStringLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#typedLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTypedLiteral(TurtleOBDAParser.TypedLiteralContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TurtleOBDAParser#stringLiteral}.
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#litString}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStringLiteral(TurtleOBDAParser.StringLiteralContext ctx);
+	T visitLitString(TurtleOBDAParser.LitStringContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TurtleOBDAParser#numericLiteral}.
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#untypedNumericLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx);
+	T visitUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link TurtleOBDAParser#booleanLiteral}.
+	 * Visit a parse tree produced by {@link TurtleOBDAParser#untypedBooleanLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx);
+	T visitUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link TurtleOBDAParser#numericUnsigned}.
 	 * @param ctx the parse tree
