@@ -459,23 +459,23 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         return TERM_FACTORY.getConstantLiteral(ctx.LANGTAG().getText().substring(1).toLowerCase(), COL_TYPE.STRING);
     }
 
-    @Override
-    public Term visitLiteral(LiteralContext ctx) {
-        StringLiteralContext slc = ctx.stringLiteral();
-        if (slc != null) {
-            Term literal = visitStringLiteral(slc);
-            LanguageTagContext lc = ctx.languageTag();
-            //if variable we cannot assign a datatype yet
-            if (literal instanceof Variable) {
-                return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
-            }
-            if (lc != null) {
-                return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
-            }
-            return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
-        }
-        return (Term) visitChildren(ctx);
-    }
+//    @Override
+//    public Term visitLiteral(LiteralContext ctx) {
+//        StringLiteralContext slc = ctx.stringLiteral();
+//        if (slc != null) {
+//            Term literal = visitStringLiteral(slc);
+//            LanguageTagContext lc = ctx.languageTag();
+//            //if variable we cannot assign a datatype yet
+//            if (literal instanceof Variable) {
+//                return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+//            }
+//            if (lc != null) {
+//                return TERM_FACTORY.getTypedTerm(literal, visitLanguageTag(lc));
+//            }
+//            return TERM_FACTORY.getTypedTerm(literal, COL_TYPE.STRING);
+//        }
+//        return (Term) visitChildren(ctx);
+//    }
 
     @Override
     public Term visitStringLiteral(StringLiteralContext ctx) {
