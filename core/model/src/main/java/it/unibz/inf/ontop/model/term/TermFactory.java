@@ -258,4 +258,12 @@ public interface TermFactory {
 	 * NB: a fresh Bnode template is created
 	 */
 	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+
+	/**
+	 * Used when building (a fragment of) the lexical part of an RDF term
+	 * in a PRE-PROCESSED mapping assertion.
+	 *
+	 * This functional term must not appear in the final mapping
+	 */
+	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
 }

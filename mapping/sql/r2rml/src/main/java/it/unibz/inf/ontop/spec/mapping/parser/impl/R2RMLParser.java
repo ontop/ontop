@@ -154,7 +154,9 @@ public class R2RMLParser {
 		if (subj != null) {
 			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
 
-				subjectAtom = termFactory.getIRIFunctionalTerm(termFactory.getVariable(subj));
+				subjectAtom = termFactory.getRDFFunctionalTerm(
+						termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(subj)),
+						termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()));
 
 			}
 			else {
@@ -327,7 +329,7 @@ public class R2RMLParser {
 				col = joinCond + col;
 			}
 
-			objectAtom = termFactory.getVariable(col);
+			objectAtom = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(col));
 
 		}
 
@@ -356,7 +358,7 @@ public class R2RMLParser {
 						value = joinCond + value;
 
 					}
-					objectAtom = termFactory.getVariable(value);
+					objectAtom = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(value));
 				} else {
 					IRI type = om.getTermType();
 
@@ -521,7 +523,7 @@ public class R2RMLParser {
 			String var = trim(string.substring(begin + 1, end));
 
 			// trim for making variable
-			terms.add(termFactory.getVariable(joinCond + (var)));
+			terms.add(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(joinCond + (var))));
 
 			string = string.replace("{\"" + var + "\"}", "[]");
 			string = string.replace("{" + var + "}", "[]");

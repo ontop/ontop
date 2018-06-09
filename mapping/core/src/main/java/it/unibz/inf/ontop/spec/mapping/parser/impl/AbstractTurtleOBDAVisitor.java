@@ -353,14 +353,15 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        return termFactory.getRDFLiteralFunctionalTerm(visitVariable(ctx.variable()), visitLanguageTag(ctx.languageTag()));
+        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
     public ImmutableTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
-        Variable var = visitVariable(ctx.variable());
+        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
         IRI iri = visitIri(ctx.iri());
-        return termFactory.getRDFLiteralFunctionalTerm(var, iri);
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
     }
 
     @Override
@@ -373,10 +374,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Variable visitVariable(VariableContext ctx) {
+    public ImmutableFunctionalTerm visitVariable(VariableContext ctx) {
         String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
         validateAttributeName(variableName);
-        return termFactory.getVariable(variableName);
+        return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
     }
 
     @Override

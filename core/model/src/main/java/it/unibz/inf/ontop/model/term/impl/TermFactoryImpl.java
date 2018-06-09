@@ -421,6 +421,13 @@ public class TermFactoryImpl implements TermFactory {
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getPartiallyDefinedToStringCastFunctionSymbol(),
+				variable);
+	}
+
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);

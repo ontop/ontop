@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 
 import it.unibz.inf.ontop.exception.FatalTypingException;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.EvaluationResult;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeInference;
 
 import java.util.stream.Stream;
@@ -97,12 +94,15 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 					? EvaluationResult.declareIsTrue()
 					: EvaluationResult.declareSameExpression();
 		}
-		else if (otherTerm instanceof Constant) {
-			return EvaluationResult.declareSameExpression();
-		}
-		else {
-			// Functional term
+		else if (otherTerm instanceof ImmutableFunctionalTerm) {
+			// Functional terms are in charge of evaluating other terms
 			return otherTerm.evaluateEq(this);
+		}
+		// Constant
+		else  {
+			return ((Constant) otherTerm).isNull()
+					? EvaluationResult.declareIsNull()
+					: EvaluationResult.declareSameExpression();
 		}
 	}
 

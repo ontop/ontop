@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -122,6 +123,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     @Override
     public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
         return functionSymbol.evaluateEq(getTerms(), otherTerm, termFactory);
+    }
+
+    @Override
+    public ImmutableTerm evaluate() throws FatalTypingException {
+        throw new RuntimeException("TODO: implement ImmutableFunctionalTerm.evaluate()");
     }
 
 }
