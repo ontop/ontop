@@ -304,12 +304,12 @@ public class TurtleSyntaxParserTest {
 	}
 
 	//Test for language tag from db
-//	@Test
-//	public void test_12_1(){
-//		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
-//		TestCase.assertTrue(result);
-//
-//	}
+	@Test
+	public void test_12_1(){
+		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
+		TestCase.assertTrue(result);
+
+	}
 
 	private boolean compareCQIE(String input, int countBody) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap());

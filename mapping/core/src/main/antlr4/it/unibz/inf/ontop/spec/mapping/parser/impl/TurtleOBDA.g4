@@ -150,7 +150,7 @@ variableLiteral
 
 languageTag
   : LANGTAG
-  //| '@' variable
+  | '@' variable
   ;
 
 iri
