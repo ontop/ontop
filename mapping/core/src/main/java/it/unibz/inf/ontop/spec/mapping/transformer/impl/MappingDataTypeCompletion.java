@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.IntStream;
 
-
+@Deprecated
 public class MappingDataTypeCompletion {
 
     private final DBMetadata metadata;
@@ -110,7 +110,7 @@ public class MappingDataTypeCompletion {
                     insertVariableDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
             } else {
-                throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
+                throw new IllegalArgumentException("Unsupported subtype: " + function);
             }
         } else if (term instanceof Variable) {
 
