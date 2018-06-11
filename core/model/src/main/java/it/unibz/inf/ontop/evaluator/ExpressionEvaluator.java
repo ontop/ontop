@@ -49,7 +49,7 @@ public class ExpressionEvaluator {
 	private final TypeFactory typeFactory;
 	private final ValueConstant valueFalse;
 	private final ValueConstant valueTrue;
-	private final ValueConstant valueNull;
+	private final Constant valueNull;
 	private final ImmutableUnificationTools unificationTools;
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
@@ -134,7 +134,7 @@ public class ExpressionEvaluator {
 				return optionalExpression.get();
 			else
 				return optionalBooleanValue
-						.map(termFactory::getBooleanConstant)
+						.map(b -> (Constant) termFactory.getBooleanConstant(b))
 						.orElseGet(termFactory::getNullConstant);
 		}
 	}
@@ -447,8 +447,8 @@ public class ExpressionEvaluator {
 		if (term instanceof ImmutableFunctionalTerm) {
 			return term.inferType().getTermType();
 		}
-		else if (term instanceof Constant) {
-			Constant constant = (Constant) term;
+		else if (term instanceof NonNullConstant) {
+			NonNullConstant constant = (NonNullConstant) term;
 			return Optional.of(constant.getType());
 		}
 		// Variable

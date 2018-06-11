@@ -252,8 +252,8 @@ public class TypeExtractor {
             return expression.getOptionalTermType(argumentTypes).getTermType()
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
         }
-        else if (term instanceof Constant) {
-            return ((Constant) term).getType();
+        else if (term instanceof NonNullConstant) {
+            return ((NonNullConstant) term).getType();
         }
         else if (term instanceof ImmutableFunctionalTerm) {
             Predicate functionSymbol = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
@@ -261,6 +261,7 @@ public class TypeExtractor {
                 return functionSymbol.getExpectedBaseType(0);
         }
 
+        // TODO: what about the NULL constant?
         throw new IllegalStateException("Could not determine the type of " + term);
     }
 

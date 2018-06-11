@@ -23,8 +23,6 @@ public interface TypeFactory {
 
 	ObjectRDFType getBlankNodeType();
 
-	UnboundRDFTermType getUnboundTermType();
-
 	RDFDatatype getUnsupportedDatatype();
 
 	RDFDatatype getAbstractOntopNumericDatatype();

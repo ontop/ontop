@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -45,7 +46,8 @@ public class OptimizationTestingTools {
     public static final DatalogTools DATALOG_TOOLS;
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
     public static final IQConverter IQ_CONVERTER;
-    public static final ValueConstant NULL, TRUE, FALSE;
+    public static final ValueConstant TRUE, FALSE;
+    public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;

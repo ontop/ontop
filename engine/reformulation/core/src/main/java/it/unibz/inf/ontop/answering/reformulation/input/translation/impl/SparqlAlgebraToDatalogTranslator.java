@@ -87,7 +87,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private final DatalogFactory datalogFactory;
     private int predicateIdx = 0;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
-    private final it.unibz.inf.ontop.model.term.ValueConstant valueNull;
+    private final it.unibz.inf.ontop.model.term.Constant valueNull;
     private final ImmutabilityTools immutabilityTools;
 
     /**

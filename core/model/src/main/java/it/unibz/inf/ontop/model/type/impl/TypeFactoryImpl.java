@@ -30,8 +30,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final TermType rootTermType;
 	private final MetaRDFTermType metaRDFTermType;
 	private final RDFTermType rootRDFTermType;
-	@Deprecated
-	private final UnboundRDFTermType unboundRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
@@ -52,7 +50,6 @@ public class TypeFactoryImpl implements TypeFactory {
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
 		metaRDFTermType = MetaRDFTermTypeImpl.createMetaRDFTermType(rootRDFTermType.getAncestry());
-		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
 
 		objectRDFType = AbstractObjectRDFType.createAbstractObjectRDFType(rootRDFTermType.getAncestry());
 		iriTermType = new IRITermType(objectRDFType.getAncestry());
@@ -176,11 +173,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public ObjectRDFType getBlankNodeType() {
 		return blankNodeTermType;
-	}
-
-	@Override
-	public UnboundRDFTermType getUnboundTermType() {
-		return unboundRDFTermType;
 	}
 
 	@Override

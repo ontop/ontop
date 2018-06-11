@@ -26,7 +26,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     final AtomFactory atomFactory;
     final TermFactory termFactory;
     final SubstitutionFactory substitutionFactory;
-    private final ValueConstant nullValue;
+    private final Constant nullValue;
 
     protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {

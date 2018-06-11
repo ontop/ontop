@@ -137,7 +137,7 @@ public interface TermFactory {
 
 	public ValueConstant getBooleanConstant(boolean value);
 
-	ValueConstant getNullConstant();
+	Constant getNullConstant();
 
 	/**
 	 * TODO: explain

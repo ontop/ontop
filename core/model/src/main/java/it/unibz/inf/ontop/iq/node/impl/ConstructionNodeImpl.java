@@ -58,7 +58,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final TermFactory termFactory;
-    private final ValueConstant nullValue;
+    private final Constant nullValue;
     private final ImmutabilityTools immutabilityTools;
     private final ExpressionEvaluator expressionEvaluator;
 

@@ -45,7 +45,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     private static final String LEFT_JOIN_NODE_STR = "LJ";
     private final ImmutabilityTools immutabilityTools;
-    private final ValueConstant valueNull;
+    private final Constant valueNull;
 
     @AssistedInject
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,

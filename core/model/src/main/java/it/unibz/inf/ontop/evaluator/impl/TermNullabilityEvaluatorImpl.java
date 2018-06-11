@@ -23,7 +23,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final DatalogTools datalogTools;
-    private final ValueConstant valueNull;
+    private final Constant valueNull;
     private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject

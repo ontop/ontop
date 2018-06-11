@@ -40,7 +40,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final ValueConstant valueTrue;
 	private final ValueConstant valueFalse;
-	private final ValueConstant valueNull;
+	private final Constant valueNull;
 	private final ValueConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
@@ -55,7 +55,7 @@ public class TermFactoryImpl implements TermFactory {
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
 		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
-		this.valueNull = new ValueConstantImpl("null", typeFactory.getXsdStringDatatype());
+		this.valueNull = new NullConstantImpl();
 		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
@@ -323,7 +323,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ValueConstant getNullConstant() {
+	public Constant getNullConstant() {
 		return valueNull;
 	}
 

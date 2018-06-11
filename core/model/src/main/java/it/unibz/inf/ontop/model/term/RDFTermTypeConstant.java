@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
  * Plays at a "meta-level".
  *
  */
-public interface RDFTermTypeConstant extends Constant {
+public interface RDFTermTypeConstant extends NonNullConstant {
 
     @Override
     MetaRDFTermType getType();
