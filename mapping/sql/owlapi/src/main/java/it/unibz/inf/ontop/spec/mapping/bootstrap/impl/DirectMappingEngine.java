@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -191,7 +192,8 @@ public class DirectMappingEngine {
             	if (objectTerm instanceof ImmutableFunctionalTerm) {
 					ImmutableFunctionalTerm objectFunctionalTerm = (ImmutableFunctionalTerm) objectTerm;
 
-					TermType termType = objectFunctionalTerm.inferType().getTermType()
+					TermType termType = objectFunctionalTerm.inferType()
+							.flatMap(TermTypeInference::getTermType)
 							.filter(t -> t.isA(typeFactory.getAbstractRDFTermType()))
 							.orElseThrow(() -> new MinorOntopInternalBugException(
 									"Could not infer the RDF type of " + objectFunctionalTerm));

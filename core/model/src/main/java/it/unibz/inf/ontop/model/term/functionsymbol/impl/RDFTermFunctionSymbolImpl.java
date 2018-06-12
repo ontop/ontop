@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -30,7 +30,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    public TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
         // TODO: check for NULL values (and throw a FatalTypingException, in test mode)
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
@@ -39,7 +39,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                 .filter(t -> t instanceof RDFTermTypeConstant)
                 .map(t -> (RDFTermTypeConstant) t)
                 .map(RDFTermTypeConstant::getRDFTermType)
-                .map(TypeInference::declareTermType)
-                .orElseGet(TypeInference::declareNotDetermined);
+                .map(TermTypeInference::declareTermType);
     }
 }

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -15,18 +15,18 @@ public class UnifierTermTypeInferenceRule extends AbstractTermTypeInferenceRule 
      * We only infer a type when all the types of the arguments are known.
      */
     @Override
-    protected TypeInference reduceInferredTypes(ImmutableList<TypeInference> argumentTypes) {
+    protected Optional<TermTypeInference> reduceInferredTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
         if (argumentTypes.stream()
-                .map(TypeInference::getTermType)
+                .map(o -> o.flatMap(TermTypeInference::getTermType))
                 .allMatch(Optional::isPresent)) {
             return argumentTypes.stream()
-                    .map(TypeInference::getTermType)
+                    .map(Optional::get)
+                    .map(TermTypeInference::getTermType)
                     .map(Optional::get)
                     .reduce(TermType::getCommonDenominator)
-                    .map(TypeInference::declareTermType)
-                    .orElseGet(TypeInference::declareNotDetermined);
+                    .map(TermTypeInference::declareTermType);
         }
-        return TypeInference.declareNotDetermined();
+        return Optional.empty();
     }
 
 

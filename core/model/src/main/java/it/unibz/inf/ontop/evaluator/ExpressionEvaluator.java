@@ -340,19 +340,19 @@ public class ExpressionEvaluator {
 		ImmutableTerm innerTerm = term.getTerm(0);
 		if (innerTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) innerTerm;
-			TypeInference typeInference = functionalTerm.inferType();
+			Optional<TermTypeInference> optionalTypeInference = functionalTerm.inferType();
 
-			switch (typeInference.getStatus()) {
-				case NOT_DETERMINED:
-					return term;
-				case NON_FATAL_ERROR:
-					return null;
-				// Determined
-				default:
-					return termFactory.getBooleanConstant(typeInference.getTermType()
-							.filter(t -> t.isA(typeFactory.getAbstractRDFSLiteral()))
-							.isPresent());
+			if (optionalTypeInference.isPresent()) {
+				return optionalTypeInference.get()
+						.getTermType()
+						.map(t -> t.isA(typeFactory.getAbstractRDFSLiteral()))
+						.map(termFactory::getBooleanConstant)
+						// Non-fatal error
+						.orElse(null);
 			}
+			// Not determined yet
+			else
+				return term;
 		}
 		else {
 			return term;
@@ -421,35 +421,34 @@ public class ExpressionEvaluator {
 		ImmutableTerm innerTerm = functionalTerm.getTerm(0);
 		if (innerTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm innerFunctionalTerm = (ImmutableFunctionalTerm) innerTerm;
-			TypeInference typeInference = innerFunctionalTerm.inferType();
-			switch (typeInference.getStatus()) {
-				case NOT_DETERMINED:
-					return functionalTerm;
-				case DETERMINED:
-					return typeInference.getTermType()
-							.filter(t -> t instanceof RDFDatatype)
-							.map(t -> ((RDFDatatype) t).getIRI())
-							.map(i -> (ImmutableTerm) termFactory.getConstantIRI(i))
-							// Not a Datatype
-							.orElse(null);
-				case NON_FATAL_ERROR:
-					return null;
+			Optional<TermTypeInference> optionalTypeInference = innerFunctionalTerm.inferType();
+
+			if (optionalTypeInference.isPresent()) {
+				return optionalTypeInference.get().getTermType()
+						.filter(t -> t instanceof RDFDatatype)
+						.map(t -> ((RDFDatatype) t).getIRI())
+						.map(i -> (ImmutableTerm) termFactory.getConstantIRI(i))
+						// Not a Datatype (or a non-fatal error)
+						.orElse(null);
 			}
+			else
+				// Not determined yet
+				return functionalTerm;
 		}
 		// No simplification
 		return functionalTerm;
 	}
 
 	/**
-	 * TODO: return a TypeInference instead
+	 * TODO: return an Optional<TermTypeInference></TermTypeInference> instead
 	 */
 	private Optional<TermType> getTermType(ImmutableTerm term) {
 		if (term instanceof ImmutableFunctionalTerm) {
-			return term.inferType().getTermType();
+			return term.inferType()
+					.flatMap(TermTypeInference::getTermType);
 		}
-		else if (term instanceof NonNullConstant) {
-			NonNullConstant constant = (NonNullConstant) term;
-			return Optional.of(constant.getType());
+		else if (term instanceof Constant) {
+			return ((Constant) term).getOptionalType();
 		}
 		// Variable
 		else {
@@ -479,22 +478,21 @@ public class ExpressionEvaluator {
 		}
 		ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) innerTerm;
 
-		TypeInference typeInference = function.inferType();
-		switch (typeInference.getStatus()) {
-			case NOT_DETERMINED:
-				return term;
-			case NON_FATAL_ERROR:
-				return null;
-			// DETERMINED
-			default:
-				return typeInference.getTermType()
-						.filter(t -> t instanceof RDFDatatype)
-						.map(t -> (RDFDatatype) t)
-						.flatMap(RDFDatatype::getLanguageTag)
-						.map(tag -> termFactory.getRDFLiteralFunctionalTerm(
-								termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING),
-								XSD.STRING))
-						.orElse(null);
+		Optional<TermTypeInference> optionalTypeInference = function.inferType();
+		if (optionalTypeInference.isPresent()) {
+			return optionalTypeInference.get().getTermType()
+					.filter(t -> t instanceof RDFDatatype)
+					.map(t -> (RDFDatatype) t)
+					.flatMap(RDFDatatype::getLanguageTag)
+					.map(tag -> termFactory.getRDFLiteralFunctionalTerm(
+							termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING),
+							XSD.STRING))
+					// Not a langstring or non-fatal error
+					.orElse(null);
+		}
+		// Not determined yet
+		else {
+			return term;
 		}
 	}
 

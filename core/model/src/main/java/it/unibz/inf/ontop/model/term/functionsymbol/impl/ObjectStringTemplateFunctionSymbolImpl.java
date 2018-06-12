@@ -7,10 +7,11 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSymbolImpl
@@ -42,13 +43,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    public TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
         if(terms.stream()
                 .filter(t -> t instanceof Constant)
                 .anyMatch(t -> ((Constant)t).isNull())) {
-            return TypeInference.declareNotDetermined();
+            return Optional.empty();
         }
-        return TypeInference.declareTermType(lexicalType);
+        return Optional.of(TermTypeInference.declareTermType(lexicalType));
     }
 
 }

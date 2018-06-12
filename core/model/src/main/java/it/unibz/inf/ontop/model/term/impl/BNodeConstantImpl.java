@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -84,11 +85,6 @@ public class BNodeConstantImpl implements BNode {
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
-	}
-
-	@Override
-	public TypeInference inferType() {
-		return TypeInference.declareTermType(getType());
 	}
 
 	@Override

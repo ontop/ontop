@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
+
+import java.util.Optional;
 
 /**
  * Functional term that is declared as immutable.
@@ -22,7 +24,7 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
 
     ImmutableSet<Variable> getVariables();
 
-    default TypeInference inferType() throws FatalTypingException {
+    default Optional<TermTypeInference> inferType() throws FatalTypingException {
         FunctionSymbol functionSymbol = getFunctionSymbol();
         return functionSymbol.inferType(getTerms());
     }

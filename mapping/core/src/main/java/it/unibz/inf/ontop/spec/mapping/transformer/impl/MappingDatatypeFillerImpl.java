@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
@@ -52,18 +52,17 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
             throws UnknownDatatypeException {
         NonVariableTerm objectDefinition = extractObjectDefinition(mappingAssertion);
 
-        TypeInference typeInference = objectDefinition.inferType();
+        Optional<TermTypeInference> optionalTypeInference = objectDefinition.inferType();
 
-        switch (typeInference.getStatus()) {
-            case NOT_DETERMINED:
-                return fillMissingDatatype(objectDefinition, mappingAssertion, provenance);
-            case NON_FATAL_ERROR:
+        if (optionalTypeInference.isPresent()) {
+            if (optionalTypeInference.get().isNonFatalError())
                 throw new MinorOntopInternalBugException("A non-fatal error is not expected in a mapping assertion\n"
                         + mappingAssertion);
-            // DETERMINED:
-            default:
-                return mappingAssertion;
+            // Determined
+            return mappingAssertion;
         }
+        else
+            return fillMissingDatatype(objectDefinition, mappingAssertion, provenance);
     }
 
     private NonVariableTerm extractObjectDefinition(IQ mappingAssertion) {

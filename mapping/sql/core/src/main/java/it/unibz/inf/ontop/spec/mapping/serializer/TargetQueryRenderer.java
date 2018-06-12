@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
@@ -177,7 +178,8 @@ public class TargetQueryRenderer {
         if (functionSymbol instanceof RDFTermType) {
             ImmutableTerm lexicalTerm = function.getTerm(0);
 
-            Optional<RDFDatatype> optionalDatatype = function.inferType().getTermType()
+            Optional<RDFDatatype> optionalDatatype = function.inferType()
+                    .flatMap(TermTypeInference::getTermType)
                     .filter(t -> t instanceof RDFDatatype)
                     .map(t -> (RDFDatatype) t);
 

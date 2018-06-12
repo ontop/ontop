@@ -106,7 +106,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
 
-            Optional<RDFTermType> optionalType = constructionFunctionalTerm.inferType().getTermType()
+            Optional<RDFTermType> optionalType = constructionFunctionalTerm.inferType()
+                    .flatMap(TermTypeInference::getTermType)
                     .filter(t -> t instanceof RDFTermType)
                     .map(t -> (RDFTermType) t);
 

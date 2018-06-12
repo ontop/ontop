@@ -9,13 +9,15 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
-import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.model.type.impl.SimpleArgumentValidator;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM_TYPE;
@@ -114,9 +116,9 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     }
 
     @Override
-    public TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
 
-        ImmutableList<TypeInference> argumentTypes = terms.stream()
+        ImmutableList<Optional<TermTypeInference>> argumentTypes = terms.stream()
                 .map(ImmutableTerm::inferType)
                 .collect(ImmutableCollectors.toList());
 
@@ -124,7 +126,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     }
 
     @Override
-    public TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> argumentTypes) {
+    public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
         argumentValidator.validate(argumentTypes);
 
         return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);

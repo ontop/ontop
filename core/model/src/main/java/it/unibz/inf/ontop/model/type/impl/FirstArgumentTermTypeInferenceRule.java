@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -12,7 +11,7 @@ import java.util.Optional;
 public class FirstArgumentTermTypeInferenceRule extends AbstractTermTypeInferenceRule {
 
     @Override
-    protected TypeInference reduceInferredTypes(ImmutableList<TypeInference> argumentTypes) {
+    protected Optional<TermTypeInference> reduceInferredTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
         if (argumentTypes.isEmpty()) {
             throw new IllegalStateException("At least one argument is required by the FirstArgumentTermTypeReasoner");
         }

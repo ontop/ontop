@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.model.term;
 
 import it.unibz.inf.ontop.exception.FatalTypingException;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -16,7 +17,11 @@ public interface ImmutableTerm {
 
     Stream<Variable> getVariableStream();
 
-    TypeInference inferType() throws FatalTypingException;
+    /**
+     * Returns empty when no TermType has been inferred (missing information)
+     * and no non-fatal error has been detected.
+     */
+    Optional<TermTypeInference> inferType() throws FatalTypingException;
 
     EvaluationResult evaluateEq(ImmutableTerm otherTerm);
 }

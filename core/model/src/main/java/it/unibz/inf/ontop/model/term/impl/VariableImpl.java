@@ -23,8 +23,9 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class VariableImpl implements Variable, Comparable<Variable> {
@@ -83,8 +84,8 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	}
 
 	@Override
-	public TypeInference inferType() throws FatalTypingException {
-		return TypeInference.declareNotDetermined();
+	public Optional<TermTypeInference> inferType() throws FatalTypingException {
+		return Optional.empty();
 	}
 
 	@Override

@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,8 @@ public class MappingDataTypeCompletion {
             Predicate functionSymbol = castTerm.getFunctionSymbol();
             if (functionSymbol instanceof OperationPredicate) {
 
-                Optional<TermType> inferredType = castTerm.inferType().getTermType();
+                Optional<TermType> inferredType = castTerm.inferType()
+                        .flatMap(TermTypeInference::getTermType);
                 if(inferredType.isPresent()){
                     // delete explicit datatypes of the operands
                     deleteExplicitTypes(term, atom, position);

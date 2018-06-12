@@ -21,12 +21,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
+
+import java.util.Optional;
 
 /**
  * TODO: to be merged with FunctionSymbol
  */
 public interface OperationPredicate extends FunctionSymbol {
 
-    TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> actualArgumentTypes);
+    Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes);
 }

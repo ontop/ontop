@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.model.type.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -17,11 +17,13 @@ public class FirstTypeIsASecondTypeValidator extends SimpleArgumentValidator {
     }
 
     @Override
-    public void validate(ImmutableList<TypeInference> argumentTypes) {
+    public void validate(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
         super.validate(argumentTypes);
 
-        Optional<TermType> optionalFirstType = argumentTypes.get(0).getTermType();
-        Optional<TermType> optionalSecondType = argumentTypes.get(1).getTermType();
+        Optional<TermType> optionalFirstType = argumentTypes.get(0)
+                .flatMap(TermTypeInference::getTermType);
+        Optional<TermType> optionalSecondType = argumentTypes.get(1)
+                .flatMap(TermTypeInference::getTermType);
 
         if (optionalFirstType.isPresent() && optionalSecondType.isPresent()) {
 

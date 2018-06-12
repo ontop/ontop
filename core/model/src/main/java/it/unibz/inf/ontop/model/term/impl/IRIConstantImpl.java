@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.Stream;
@@ -86,11 +85,6 @@ public class IRIConstantImpl implements IRIConstant {
 	@Override
 	public ObjectRDFType getType() {
 		return type;
-	}
-
-	@Override
-	public TypeInference inferType() {
-		return TypeInference.declareTermType(type);
 	}
 
 	@Override

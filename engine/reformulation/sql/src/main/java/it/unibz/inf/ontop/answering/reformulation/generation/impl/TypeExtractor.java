@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -72,7 +72,7 @@ public class TypeExtractor {
                         // Value mapper
                         rule -> rule.getHead().getTerms().stream()
                                 .map(immutabilityTools::convertIntoImmutableTerm)
-                                .map(t -> t.inferType().getTermType())
+                                .map(t -> t.inferType().flatMap(TermTypeInference::getTermType))
                                 .collect(ImmutableCollectors.toList())
                 ));
     }
@@ -244,12 +244,14 @@ public class TypeExtractor {
         }
         else if (term instanceof ImmutableExpression) {
             ImmutableExpression expression = (ImmutableExpression) term;
-            ImmutableList<TypeInference> argumentTypes = expression.getTerms().stream()
+            ImmutableList<Optional<TermTypeInference>> argumentTypes = expression.getTerms().stream()
                     .map(t -> getCastTypeFromSubRule(t, bodyDataAtoms, alreadyKnownCastTypes))
-                    .map(TypeInference::declareTermType)
+                    .map(TermTypeInference::declareTermType)
+                    .map(Optional::of)
                     .collect(ImmutableCollectors.toList());
 
-            return expression.getOptionalTermType(argumentTypes).getTermType()
+            return expression.inferTermType(argumentTypes)
+                    .flatMap(TermTypeInference::getTermType)
                     .orElseThrow(() -> new IllegalStateException("No type could be inferred for " + term));
         }
         else if (term instanceof NonNullConstant) {

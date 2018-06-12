@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -104,7 +105,7 @@ public class DatatypeInferenceTest {
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .flatMap(t-> t.inferType()
-                        .getTermType()
+                        .flatMap(TermTypeInference::getTermType)
                         .map(Stream::of)
                         .orElseGet(Stream::empty))
                 .filter(t -> t instanceof RDFDatatype)

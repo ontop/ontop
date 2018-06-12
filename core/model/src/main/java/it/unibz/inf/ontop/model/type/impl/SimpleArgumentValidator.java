@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.exception.AbstractTermTypeException;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -20,7 +20,7 @@ public class SimpleArgumentValidator implements ArgumentValidator {
     }
 
     @Override
-    public void validate(ImmutableList<TypeInference> argumentTypes) throws FatalTypingException {
+    public void validate(ImmutableList<Optional<TermTypeInference>> argumentTypes) throws FatalTypingException {
 
         if (expectedBaseTypes.size() != argumentTypes.size()) {
             throw new IllegalArgumentException("Arity mismatch between " + argumentTypes + " and " + expectedBaseTypes);
@@ -31,7 +31,7 @@ public class SimpleArgumentValidator implements ArgumentValidator {
          */
         IntStream.range(0, argumentTypes.size())
                 .forEach(i -> argumentTypes.get(i)
-                        .getTermType()
+                        .flatMap(TermTypeInference::getTermType)
                         .ifPresent(t -> checkTypes(expectedBaseTypes.get(i), t)));
     }
 

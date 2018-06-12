@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ public interface FunctionSymbol extends Predicate {
                                VariableNullability childNullability);
 
 
-    TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
+    Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
 
     default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                 TermFactory termFactory) {

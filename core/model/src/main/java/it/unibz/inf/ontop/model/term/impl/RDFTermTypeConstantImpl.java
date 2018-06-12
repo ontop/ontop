@@ -3,8 +3,9 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
@@ -65,11 +66,6 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
     @Override
     public Term clone() {
         return new RDFTermTypeConstantImpl(rdfTermType, metaType);
-    }
-
-    @Override
-    public TypeInference inferType() {
-        return TypeInference.declareTermType(metaType);
     }
 
     @Override

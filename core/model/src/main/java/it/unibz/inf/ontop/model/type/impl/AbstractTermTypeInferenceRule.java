@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
-import it.unibz.inf.ontop.model.type.TypeInference;
+
+import java.util.Optional;
 
 
 /**
@@ -12,7 +14,7 @@ import it.unibz.inf.ontop.model.type.TypeInference;
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public TypeInference inferTypeFromArgumentTypes(ImmutableList<TypeInference> argumentTypes)
+    public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes)
             throws FatalTypingException {
 
         return postprocessInferredType(reduceInferredTypes(argumentTypes));
@@ -21,13 +23,13 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
     /**
      * Hook, does nothing by default
      */
-    protected TypeInference postprocessInferredType(TypeInference typeInference) {
+    protected Optional<TermTypeInference> postprocessInferredType(Optional<TermTypeInference> typeInference) {
         return typeInference;
     }
 
     /**
      * TODO: find a better name
      */
-    protected abstract TypeInference reduceInferredTypes(ImmutableList<TypeInference> argumentTypes);
+    protected abstract Optional<TermTypeInference> reduceInferredTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes);
 
 }

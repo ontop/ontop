@@ -58,8 +58,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -905,8 +905,8 @@ public class OneShotSQLGeneratorEngine {
 		if (term instanceof Function){
 			Function functionalTerm = (Function) term;
 			return Optional.of((ImmutableFunctionalTerm) immutabilityTools.convertIntoImmutableTerm(functionalTerm))
-					.map(ImmutableFunctionalTerm::inferType)
-					.flatMap(TypeInference::getTermType)
+					.flatMap(ImmutableFunctionalTerm::inferType)
+					.flatMap(TermTypeInference::getTermType)
 					.map(jdbcTypeMapper::getSQLType)
 					.orElse(Types.VARCHAR);
 		}

@@ -5,8 +5,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
+
+import java.util.Optional;
 
 
 public interface ImmutableExpression extends ImmutableFunctionalTerm {
@@ -33,10 +34,10 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
 
     boolean isVar2VarEquality();
 
-    default TypeInference getOptionalTermType(ImmutableList<TypeInference> actualArgumentTypes) {
+    default Optional<TermTypeInference> inferTermType(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) {
         try {
-            OperationPredicate predicate = getFunctionSymbol();
-            return predicate.inferTypeFromArgumentTypes(actualArgumentTypes);
+            BooleanFunctionSymbol functionSymbol = getFunctionSymbol();
+            return functionSymbol.inferTypeFromArgumentTypes(actualArgumentTypes);
         } catch (FatalTypingException e) {
             throw new FatalTypingException(this, e);
         }

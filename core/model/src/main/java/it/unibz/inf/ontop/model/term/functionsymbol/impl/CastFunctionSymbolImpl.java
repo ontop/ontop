@@ -6,9 +6,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.CastFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public abstract class CastFunctionSymbolImpl extends FunctionSymbolImpl implements CastFunctionSymbol {
 
@@ -29,8 +30,8 @@ public abstract class CastFunctionSymbolImpl extends FunctionSymbolImpl implemen
      * TODO: implement it seriously
      */
     @Override
-    public TypeInference inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
         // TODO: check the types of the terms
-        return TypeInference.declareTermType(targetType);
+        return Optional.of(TermTypeInference.declareTermType(targetType));
     }
 }

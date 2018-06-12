@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.model.term.impl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
 
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
@@ -83,11 +82,6 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();
-	}
-
-	@Override
-	public TypeInference inferType() {
-		return TypeInference.declareTermType(getType());
 	}
 
 	@Override

@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.TypeInference;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
+
+import java.util.Optional;
 
 /**
  * Cannot infer COL_TYPE.INTEGER (will put COL_TYPE.DECIMAL instead)
@@ -18,11 +20,10 @@ public class NonIntegerNumericInferenceRule extends NumericTermTypeInferenceRule
     }
 
     @Override
-    protected TypeInference postprocessInferredType(TypeInference typeInference) {
-        return typeInference
-                .getTermType()
+    protected Optional<TermTypeInference> postprocessInferredType(Optional<TermTypeInference> optionalTypeInference) {
+        return optionalTypeInference
+                .flatMap(TermTypeInference::getTermType)
                 .map(t -> t.equals(integerDatatype) ? decimalDatatype : t)
-                .map(TypeInference::declareTermType)
-                .orElseGet(TypeInference::declareNotDetermined);
+                .map(TermTypeInference::declareTermType);
     }
 }
