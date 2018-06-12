@@ -18,11 +18,6 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
     }
 
     @Override
-    public boolean isNull() {
-        return false;
-    }
-
-    @Override
     public MetaRDFTermType getType() {
         return metaType;
     }

@@ -108,11 +108,6 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
-	public boolean isNull() {
-		return false;
-	}
-
-	@Override
 	public ObjectRDFType getType() {
 		return type;
 	}

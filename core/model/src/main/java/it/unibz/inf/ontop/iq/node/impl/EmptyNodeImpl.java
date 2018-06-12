@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
@@ -113,6 +114,11 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
+        return ImmutableSet.of();
     }
 
     @Override

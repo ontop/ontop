@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -111,4 +112,12 @@ public interface IQTree {
      *
      */
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
+
+    /**
+     * The set is empty if the variable is always null.
+     *
+     * Expected to be called on a normalized (for optimization) tree.
+     *
+     */
+    ImmutableSet<TermType> getPossibleTermTypes(Variable variable);
 }

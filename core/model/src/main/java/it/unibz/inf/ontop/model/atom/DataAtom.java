@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 
 /**
  * Immutable data atom that only accepts variables and ground terms as arguments.
@@ -28,4 +29,6 @@ public interface DataAtom<P extends AtomPredicate> {
     ImmutableSet<Variable> getVariables();
 
     boolean containsGroundTerms();
+
+    TermType getTermType(Variable variable);
 }

@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.TermType;
+
+import java.util.Optional;
+
 /**
  * This class defines a type of {@link Term} in which it has a constant
  * value.
@@ -31,5 +35,10 @@ public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 	// TODO: eliminate getValue from this interface
 	
 	public String getValue();
+
+	/**
+	 * Empty if and only if is null.
+	 */
+	Optional<TermType> getOptionalType();
 	
 }

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -48,4 +49,6 @@ public interface NaryOperatorNode extends QueryNode {
             throws QueryNodeTransformationException;
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
+
+    ImmutableSet<TermType> getPossibleTermTypes(Variable variable, ImmutableList<IQTree> children);
 }

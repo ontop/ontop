@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -389,6 +390,16 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     public void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException {
         getOptionalFilterCondition()
                 .ifPresent(e -> checkExpression(e, ImmutableList.of(leftChild, rightChild)));
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, IQTree leftChild, IQTree rightChild) {
+        if (leftChild.getVariables().contains(variable))
+            return leftChild.getPossibleTermTypes(variable);
+        else if (rightChild.getVariables().contains(variable))
+            return rightChild.getPossibleTermTypes(variable);
+        else
+            throw new IllegalArgumentException("Not projected variable " + variable);
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {

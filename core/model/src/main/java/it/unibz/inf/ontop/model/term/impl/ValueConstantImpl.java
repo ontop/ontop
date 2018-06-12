@@ -80,10 +80,6 @@ public class ValueConstantImpl implements ValueConstant {
 		return true;
 	}
 
-	public boolean isNull() {
-		return value.equals("null");
-	}
-
 	@Override
 	public Stream<Variable> getVariableStream() {
 		return Stream.of();

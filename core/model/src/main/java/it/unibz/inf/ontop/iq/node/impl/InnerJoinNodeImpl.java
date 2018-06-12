@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -101,6 +102,20 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .map(IQTree::getPossibleVariableDefinitions)
                 .filter(s -> !s.isEmpty())
                 .reduce(ImmutableSet.of(), this::combineVarDefs);
+    }
+
+    /**
+     * Currently assumes that the tree is normalized (for optimization)
+     *
+     * TODO: consider the joining condition and the definitions coming from several children
+     */
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, ImmutableList<IQTree> children) {
+        return children.stream()
+                .filter(c -> c.getVariables().contains(variable))
+                .map(c -> c.getPossibleTermTypes(variable))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("The variable is not projected: " + variable));
     }
 
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> combineVarDefs(

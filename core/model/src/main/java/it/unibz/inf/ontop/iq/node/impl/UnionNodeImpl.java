@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
@@ -69,6 +70,16 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return children.stream()
                 .flatMap(c -> c.getPossibleVariableDefinitions().stream())
                 .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, ImmutableList<IQTree> children) {
+        if (!projectedVariables.contains(variable))
+            throw new IllegalArgumentException("The variable is not projected by the UNION node");
+
+        return children.stream()
+                .flatMap(c -> c.getPossibleTermTypes(variable).stream())
                 .collect(ImmutableCollectors.toSet());
     }
 

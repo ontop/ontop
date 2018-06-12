@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 
@@ -47,5 +48,10 @@ public abstract class QueryModifierNodeImpl extends QueryNodeImpl implements Que
         return query.getFirstChild(this)
                 .map(c -> c.isVariableNullable(query, variable))
                 .orElseThrow(() -> new InvalidIntermediateQueryException("A query modifier node must have a child"));
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, IQTree child) {
+        return child.getPossibleTermTypes(variable);
     }
 }

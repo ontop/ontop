@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
@@ -127,5 +128,17 @@ public abstract class AbstractDataAtomImpl<P extends AtomPredicate>
             string = sb.toString();
         }
         return string;
+    }
+
+    /**
+     * TODO: should we combine them?
+     */
+    @Override
+    public TermType getTermType(Variable variable) {
+        int firstIndex = getArguments().indexOf(variable);
+        if (firstIndex >= 0)
+            return predicate.getExpectedBaseType(firstIndex);
+        else
+            throw new IllegalArgumentException("The variable is not an argument");
     }
 }

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 
@@ -127,6 +128,14 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+    }
+
+    /**
+     * TODO: should we support it?
+     */
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
+        throw new UnsupportedOperationException("NativeNode does not support term type inference (too late)");
     }
 
     @Override

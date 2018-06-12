@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -130,6 +131,16 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         if (possibleVariableDefinitions == null)
             possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
         return possibleVariableDefinitions;
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
+        if (!getVariables().contains(variable))
+            throw new IllegalArgumentException(
+                    String.format("The variable %s is not projected by\n%s", variable, this));
+
+        // TODO: shall we cache it?
+        return getRootNode().getPossibleTermTypes(variable, getChild());
     }
 
     @Override

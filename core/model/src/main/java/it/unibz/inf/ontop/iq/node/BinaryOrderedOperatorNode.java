@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -56,4 +57,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
      * Only validates the node, not its children
      */
     void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException;
+
+    ImmutableSet<TermType> getPossibleTermTypes(Variable variable, IQTree leftChild, IQTree rightChild);
 }

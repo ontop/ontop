@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeInference;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class NullConstantImpl implements Constant {
@@ -21,6 +23,11 @@ public class NullConstantImpl implements Constant {
     @Override
     public String getValue() {
         return NULL_STRING;
+    }
+
+    @Override
+    public Optional<TermType> getOptionalType() {
+        return Optional.empty();
     }
 
     @Override

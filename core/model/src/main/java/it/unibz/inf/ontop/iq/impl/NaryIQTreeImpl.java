@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -145,5 +146,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         if (variableDefinition == null)
             variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
         return variableDefinition;
+    }
+
+    @Override
+    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
+        if (!getVariables().contains(variable))
+            throw new IllegalArgumentException(String.format("The variable %s is not projected by %s", variable, this));
+
+        return getRootNode().getPossibleTermTypes(variable, getChildren());
     }
 }

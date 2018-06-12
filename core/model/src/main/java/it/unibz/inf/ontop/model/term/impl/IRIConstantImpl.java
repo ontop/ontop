@@ -84,11 +84,6 @@ public class IRIConstantImpl implements IRIConstant {
 	}
 
 	@Override
-	public boolean isNull() {
-		return false;
-	}
-
-	@Override
 	public ObjectRDFType getType() {
 		return type;
 	}
