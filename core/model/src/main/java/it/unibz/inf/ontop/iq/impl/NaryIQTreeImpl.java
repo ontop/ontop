@@ -147,12 +147,4 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
             variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
         return variableDefinition;
     }
-
-    @Override
-    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
-        if (!getVariables().contains(variable))
-            throw new IllegalArgumentException(String.format("The variable %s is not projected by %s", variable, this));
-
-        return getRootNode().getPossibleTermTypes(variable, getChildren());
-    }
 }

@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
@@ -124,10 +123,5 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
-    }
-
-    @Override
-    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
-        throw new IllegalArgumentException("A true node does not project any variable");
     }
 }

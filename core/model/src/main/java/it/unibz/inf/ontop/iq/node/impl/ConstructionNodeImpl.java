@@ -20,11 +20,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol.FunctionalTermNullability;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -440,26 +437,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .map(s -> s.reduceDomainToIntersectionWith(projectedVariables))
                 .map(ImmutableSubstitution::getNonVariableTermFragment)
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
-    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, IQTree child) {
-        if (!projectedVariables.contains(variable))
-            throw new IllegalArgumentException("Non projected variable: " + variable);
-
-        ImmutableTerm substitutedTerm = substitution.apply(variable);
-        if (substitutedTerm instanceof Variable) {
-            return child.getPossibleTermTypes((Variable) substitutedTerm);
-        }
-        else if (substitutedTerm instanceof Constant) {
-            return ((Constant) substitutedTerm).getOptionalType()
-                    .map(ImmutableSet::of)
-                    .orElseGet(ImmutableSet::of);
-        }
-        else {
-            throw new RuntimeException("TODO: continue ConstructionNode.getPossibleTermTypes()");
-        }
-
     }
 
     /**

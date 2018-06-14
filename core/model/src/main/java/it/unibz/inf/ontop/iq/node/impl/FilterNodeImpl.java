@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
@@ -133,14 +132,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return child.getPossibleVariableDefinitions();
-    }
-
-    /**
-     * TODO: refine the type by looking at the joining conditions
-     */
-    @Override
-    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable, IQTree child) {
-        return child.getPossibleTermTypes(variable);
     }
 
     @Override

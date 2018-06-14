@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.node.DataNode;
@@ -77,10 +76,5 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;
-    }
-
-    @Override
-    public ImmutableSet<TermType> getPossibleTermTypes(Variable variable) {
-        return ImmutableSet.of(getProjectionAtom().getTermType(variable));
     }
 }

@@ -440,7 +440,7 @@ public class ExpressionEvaluator {
 	}
 
 	/**
-	 * TODO: return an Optional<TermTypeInference></TermTypeInference> instead
+	 * TODO: return an Optional<TermTypeInference> instead
 	 */
 	private Optional<TermType> getTermType(ImmutableTerm term) {
 		if (term instanceof ImmutableFunctionalTerm) {

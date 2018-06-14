@@ -113,11 +113,4 @@ public interface IQTree {
      */
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
 
-    /**
-     * The set is empty if the variable is always null.
-     *
-     * Expected to be called on a normalized (for optimization) tree.
-     *
-     */
-    ImmutableSet<TermType> getPossibleTermTypes(Variable variable);
 }
