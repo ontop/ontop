@@ -46,6 +46,11 @@ public class NullConstantImpl implements Constant {
     }
 
     @Override
+    public String toString() {
+        return NULL_STRING;
+    }
+
+    @Override
     public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
         return EvaluationResult.declareIsFalse();
     }
