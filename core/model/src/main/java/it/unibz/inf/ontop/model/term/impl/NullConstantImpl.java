@@ -55,8 +55,11 @@ public class NullConstantImpl implements Constant {
         return EvaluationResult.declareIsFalse();
     }
 
+    /**
+     * TODO: get rid of this method and stop this cloning practice
+     */
     @Override
     public Term clone() {
-        return new NullConstantImpl();
+        return this;
     }
 }

@@ -246,11 +246,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             // equal, in which case there the substitution is empty
 
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
-                    || (term1 instanceof ValueConstantImpl)
-                    || (term1 instanceof IRIConstantImpl)
-                    || (term1 instanceof RDFTermTypeConstant)
-                    || (term1 instanceof BNodeConstantImpl)
-                    ) {
+                    || (term1 instanceof Constant)) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
                 // BC: let's accept it, templates for Bnodes should be supported
