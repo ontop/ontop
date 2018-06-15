@@ -52,7 +52,7 @@ public class NullConstantImpl implements Constant {
 
     @Override
     public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
-        return EvaluationResult.declareIsFalse();
+        return EvaluationResult.declareIsNull();
     }
 
     /**

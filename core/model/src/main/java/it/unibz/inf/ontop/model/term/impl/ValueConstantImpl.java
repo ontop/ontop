@@ -93,7 +93,9 @@ public class ValueConstantImpl implements ValueConstant {
 					: EvaluationResult.declareIsNull();
 		}
 		else if (otherTerm instanceof Constant)
-			return EvaluationResult.declareIsFalse();
+			return ((Constant) otherTerm).isNull()
+				? EvaluationResult.declareIsNull()
+				: EvaluationResult.declareIsFalse();
 		else
 			return otherTerm.evaluateEq(this);
 	}

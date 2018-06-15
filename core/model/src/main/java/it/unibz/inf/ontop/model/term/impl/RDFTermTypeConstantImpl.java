@@ -71,6 +71,8 @@ public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
     @Override
     public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
         if (otherTerm instanceof Constant) {
+            if (((Constant) otherTerm).isNull())
+                return EvaluationResult.declareIsNull();
             return equals(otherTerm)
                     ? EvaluationResult.declareIsTrue()
                     : EvaluationResult.declareIsFalse();
