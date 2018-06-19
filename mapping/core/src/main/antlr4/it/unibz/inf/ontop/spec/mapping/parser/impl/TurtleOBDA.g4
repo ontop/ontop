@@ -144,7 +144,8 @@ variableLiteral
   ;
 
 languageTag
-  : LANGTAG | '@' variable
+  : LANGTAG
+  | '@' variable
   ;
 
 iri
@@ -153,28 +154,32 @@ iri
    ;
 
 literal
-  : stringLiteral (languageTag)?
-  | typedLiteral
-  | numericLiteral
-  | booleanLiteral
+  : typedLiteral
+  | untypedStringLiteral
+  | untypedNumericLiteral
+  | untypedBooleanLiteral
+  ;
+
+untypedStringLiteral
+  : litString (languageTag)?
   ;
 
 typedLiteral
-  :  stringLiteral '^^' iri
+  : litString '^^' iri
   ;
 
-stringLiteral
+litString
   : STRING_LITERAL_QUOTE
 //  : STRING_WITH_QUOTE_DOUBLE
   ;
 
-numericLiteral
+untypedNumericLiteral
   : numericUnsigned
   | numericPositive
   | numericNegative
   ;
 
-booleanLiteral
+untypedBooleanLiteral
   : BOOLEAN_LITERAL
   ;
 

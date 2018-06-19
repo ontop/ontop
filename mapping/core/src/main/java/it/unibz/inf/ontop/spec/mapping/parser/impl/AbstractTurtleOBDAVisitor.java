@@ -107,7 +107,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
                     toReturn.add(new FixedString(text.substring(i, m.start())));
                 }
                 String value = m.group(1);
-                if(validateAttributeName(value)) {
+                if (validateAttributeName(value)) {
                     toReturn.add(new ColumnString(value));
                     i = m.end();
                 }
@@ -449,11 +449,11 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Term visitBlank(BlankContext ctx) {
-        if (ctx.BLANK_NODE_FUNCTION() != null){
+        if (ctx.BLANK_NODE_FUNCTION() != null) {
             return constructBnodeFunction(ctx.BLANK_NODE_FUNCTION().getText());
         }
-        if (ctx.BLANK_NODE_LABEL() != null){
-            return constructConstantBNode (ctx.BLANK_NODE_LABEL().getText());
+        if (ctx.BLANK_NODE_LABEL() != null) {
+            return constructConstantBNode(ctx.BLANK_NODE_LABEL().getText());
         }
         throw new IllegalArgumentException("Anonymous blank nodes not supported yet in mapping targets");
     }
@@ -464,25 +464,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public Term visitLiteral(LiteralContext ctx) {
-        StringLiteralContext slc = ctx.stringLiteral();
-        if (slc != null) {
-            Term literal = visitStringLiteral(slc);
-            LanguageTagContext lc = ctx.languageTag();
-            //if variable we cannot assign a datatype yet
-            if (literal instanceof Variable) {
-                return termFactory.getTypedTerm(literal, XSD.STRING);
-            }
-            if (lc != null) {
-                return termFactory.getTypedTerm(literal, visitLanguageTag(lc));
-            }
-            return termFactory.getTypedTerm(literal, XSD.STRING);
+    public Term visitUntypedStringLiteral(UntypedStringLiteralContext ctx) {
+        LitStringContext lsc = ctx.litString();
+        Term literal = visitLitString(lsc);
+        LanguageTagContext lc = ctx.languageTag();
+        if (lc != null) {
+            return termFactory.getTypedTerm(literal, visitLanguageTag(lc));
         }
-        return (Term) visitChildren(ctx);
+        return termFactory.getTypedTerm(literal, XSD.STRING);
     }
 
     @Override
-    public Term visitStringLiteral(StringLiteralContext ctx) {
+    public Term visitLitString(LitStringContext ctx) {
         String str = ctx.STRING_LITERAL_QUOTE().getText();
         if (str.contains("{")) {
             return getNestedConcat(str);
@@ -492,18 +485,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Term visitTypedLiteral(TypedLiteralContext ctx) {
-        Term stringValue = visitStringLiteral(ctx.stringLiteral());
+        Term stringValue = visitLitString(ctx.litString());
         IRI iriRef = visitIri(ctx.iri());
         return termFactory.getTypedTerm(stringValue, iriRef);
     }
 
     @Override
-    public Term visitNumericLiteral(NumericLiteralContext ctx) {
+    public Term visitUntypedNumericLiteral(UntypedNumericLiteralContext ctx) {
         return (Term) visitChildren(ctx);
     }
 
     @Override
-    public Term visitBooleanLiteral(BooleanLiteralContext ctx) {
+    public Term visitUntypedBooleanLiteral(UntypedBooleanLiteralContext ctx) {
         return typeTerm(ctx.BOOLEAN_LITERAL().getText(), XSD.BOOLEAN);
     }
 
