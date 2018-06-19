@@ -19,6 +19,11 @@ public interface FunctionSymbol extends Predicate {
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
 
+    default ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms, boolean isInOptimizationPhase,
+                                   TermFactory termFactory) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
     default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                 TermFactory termFactory) {
         throw new RuntimeException("TODO: implement it");
