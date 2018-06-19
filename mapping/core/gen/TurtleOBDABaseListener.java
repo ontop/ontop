@@ -1,4 +1,4 @@
-// Generated from /home/jcorman/workspace/ontop/mongo/ontop/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
+// Generated from /home/julien/workspace/ontop/ontop/mapping/core/src/main/antlr4/it/unibz/inf/ontop/spec/mapping/parser/impl/TurtleOBDA.g4 by ANTLR 4.7
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -279,6 +279,18 @@ public class TurtleOBDABaseListener implements TurtleOBDAListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUntypedStringLiteral(TurtleOBDAParser.UntypedStringLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTypedLiteral(TurtleOBDAParser.TypedLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -291,37 +303,37 @@ public class TurtleOBDABaseListener implements TurtleOBDAListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStringLiteral(TurtleOBDAParser.StringLiteralContext ctx) { }
+	@Override public void enterLitString(TurtleOBDAParser.LitStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStringLiteral(TurtleOBDAParser.StringLiteralContext ctx) { }
+	@Override public void exitLitString(TurtleOBDAParser.LitStringContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) { }
+	@Override public void enterUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNumericLiteral(TurtleOBDAParser.NumericLiteralContext ctx) { }
+	@Override public void exitUntypedNumericLiteral(TurtleOBDAParser.UntypedNumericLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx) { }
+	@Override public void enterUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBooleanLiteral(TurtleOBDAParser.BooleanLiteralContext ctx) { }
+	@Override public void exitUntypedBooleanLiteral(TurtleOBDAParser.UntypedBooleanLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
