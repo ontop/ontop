@@ -267,19 +267,21 @@ public class QueryMergingExecutorImpl implements QueryMergingExecutor {
             QueryNode nodeToInsert = getNodeToInsert(transformation, treeComponent);
 
             /**
-             * Adds the transformed node to the tree.
+             * Adds the transformed node to the tree if its not empty or there are less then 2 nodes for parent 
              */
-            treeComponent.addChild(transformation.getTransformedParent(),
-                    nodeToInsert,
-                    transformation.getOptionalPosition(), false);
-
-            Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToPropagate =
-                    transformation.getSubstitutionToPropagate();
+            if (!(nodeToInsert instanceof EmptyNode) || (treeComponent.getChildren(transformation.getTransformedParent()).size()<2))
+                treeComponent.addChild(transformation.getTransformedParent(),
+                        nodeToInsert,
+                        transformation.getOptionalPosition(), false);
 
             /**
              * Puts the children into the queue except if the transformed node is unsatisfied
              */
             if (!(nodeToInsert instanceof EmptyNode)) {
+
+                Optional<? extends ImmutableSubstitution<? extends ImmutableTerm>> substitutionToPropagate =
+                        transformation.getSubstitutionToPropagate();
+
                 QueryNode originalNode = transformation.getNodeFromSubQuery();
 
                 renamedSubQuery.getChildren(originalNode)
