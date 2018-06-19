@@ -58,7 +58,8 @@ public class URITemplatesTest {
 
     @Test
     public void testGetUriTemplateString2(){
-        ImmutableFunctionalTerm f1 = TERM_FACTORY.getIRIFunctionalTerm(TERM_FACTORY.getVariable("X"));
+        ImmutableFunctionalTerm f1 = TERM_FACTORY.getIRIFunctionalTerm("{}",
+                ImmutableList.of(TERM_FACTORY.getVariable("X")));
         assertEquals("{X}", URITemplates.getUriTemplateString(f1));
     }
 
