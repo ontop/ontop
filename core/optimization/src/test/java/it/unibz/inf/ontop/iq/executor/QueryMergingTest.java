@@ -799,7 +799,7 @@ public class QueryMergingTest {
     }
 
     @Test
-    public void testEx14() throws EmptyQueryException {
+    public void testEx14() {
 
         /*
          * Original query
@@ -815,9 +815,9 @@ public class QueryMergingTest {
         queryBuilder.init(projectionAtom, rootNode);
         IntensionalDataNode dataNode = IQ_FACTORY.createIntensionalDataNode(
                 ATOM_FACTORY.getIntensionalTripleAtom(
-                        (GroundFunctionalTerm) generateURI1(INT_OF_ONE),
+                        (GroundFunctionalTerm) generateURI1(ONE),
                         P1_IRI,
-                        (GroundFunctionalTerm) generateURI1(INT_OF_ONE)));
+                        (GroundFunctionalTerm) generateURI1(ONE)));
         queryBuilder.addChild(rootNode, dataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
@@ -827,8 +827,8 @@ public class QueryMergingTest {
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        S, generateURI1(INT_OF_ONE),
-                        T, generateURI1(INT_OF_ONE),
+                        S, generateURI1(ONE),
+                        T, generateURI1(ONE),
                         P, generateGroundTerm(P1_IRI))));
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(
