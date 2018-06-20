@@ -141,6 +141,18 @@ public class DenodoBookFederationTest {
         assertEquals(28, nbResults);
     }
 
+    @Test
+    public void test9() {
+        int nbResults = executeQuery("PREFIX : <http://meraka/moss/exampleBooks.owl#>\n" +
+                "\n" +
+                "SELECT ?b ?x {\n" +
+                "  ?b :hasEdition ?e .\n" +
+                "  ?e :editionNumber ?x .\n" +
+                "}" +
+                "ORDER BY ?x");
+        assertEquals(28, nbResults);
+    }
+
     private int executeQuery(String queryString) {
         int i=0;
         try (RepositoryConnection conn = repo.getConnection()) {
