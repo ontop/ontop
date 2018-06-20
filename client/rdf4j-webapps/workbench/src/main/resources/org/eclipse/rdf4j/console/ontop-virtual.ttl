@@ -15,4 +15,5 @@
 	  obda:owlFile "{%owlFile%}";
       obda:obdaFile "{%obdaFile%}";
 	  obda:propertiesFile "{%propertiesFile%}";
+	  obda:constraintFile "{%constraintFile%}";
    ].
