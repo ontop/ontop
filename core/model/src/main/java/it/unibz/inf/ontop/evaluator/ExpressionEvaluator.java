@@ -867,9 +867,9 @@ public class ExpressionEvaluator {
 
 		/* eval2 is not a function */
 		if (eq) {
-			return termFactory.getImmutableFunctionalTerm(EQ, eval1, eval2);
+			return termFactory.getImmutableFunctionalTerm(EQ, teval1, teval2);
 		} else {
-			return termFactory.getImmutableFunctionalTerm(NEQ, eval1, eval2);
+			return termFactory.getImmutableFunctionalTerm(NEQ, teval1, teval2);
 		}
 	}
 
