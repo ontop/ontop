@@ -29,5 +29,5 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
         return functionSymbol.inferType(getTerms());
     }
 
-    ImmutableTerm evaluate(boolean isInOptimizationPhase) throws FatalTypingException;
+    ImmutableTerm evaluate(boolean isInConstructionNodeInOptimizationPhase) throws FatalTypingException;
 }

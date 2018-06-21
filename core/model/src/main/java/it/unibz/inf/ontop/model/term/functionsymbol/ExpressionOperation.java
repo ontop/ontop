@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
@@ -174,6 +175,14 @@ public enum ExpressionOperation implements OperationPredicate {
 				.collect(ImmutableCollectors.toList());
 
 		return inferTypeFromArgumentTypes(argumentTypes);
+	}
+
+	/**
+	 * TODO: implement it seriously after getting rid of this enum
+	 */
+	@Override
+	public ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+		return termFactory.getImmutableFunctionalTerm(this, terms);
 	}
 
 	@Override

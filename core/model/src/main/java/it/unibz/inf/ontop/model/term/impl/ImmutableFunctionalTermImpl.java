@@ -126,8 +126,8 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public ImmutableTerm evaluate(boolean isInOptimizationPhase) throws FatalTypingException {
-        return functionSymbol.evaluate(getTerms(), isInOptimizationPhase, termFactory);
+    public ImmutableTerm evaluate(boolean isInConstructionNodeInOptimizationPhase) throws FatalTypingException {
+        return functionSymbol.evaluate(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory);
     }
 
 }

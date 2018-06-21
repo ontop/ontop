@@ -2,14 +2,15 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
+
     protected FunctionSymbolImpl(@Nonnull String name, int arity,
                                  @Nonnull ImmutableList<TermType> expectedBaseTypes) {
         super(name, arity, expectedBaseTypes);
@@ -26,5 +27,28 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 .filter(a -> a instanceof Variable)
                 .anyMatch(a -> childNullability.isPossiblyNullable((Variable) a));
         return new FunctionalTermNullabilityImpl(isNullable);
+    }
+
+    @Override
+    public ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms,
+                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+
+        ImmutableList<ImmutableTerm> newTerms = terms.stream()
+                .map(t -> (t instanceof ImmutableFunctionalTerm)
+                        ? ((ImmutableFunctionalTerm) t).evaluate(isInConstructionNodeInOptimizationPhase)
+                        : t)
+                .collect(ImmutableCollectors.toList());
+
+        return buildTermAfterEvaluation(newTerms, termFactory);
+    }
+
+    /**
+     * By default, just build a new functional term.
+     *
+     * To be extended for reacting to null values and so on.
+     *
+     */
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 }
