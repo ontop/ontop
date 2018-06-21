@@ -543,7 +543,7 @@ public class ExpressionEvaluator {
 				return termFactory.getImmutableFunctionalTerm(EQ, var, lang);
 			}
 		}
-		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
+		else if (teval1 instanceof ImmutableFunctionalTerm && innerTerm2 instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) teval1;
 			ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) innerTerm2;
 			if(f1.getFunctionSymbol() instanceof OperationPredicate){
