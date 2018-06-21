@@ -394,14 +394,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 case IS_NULL:
                     // TODO: add COALESCE, EXISTS, NOT EXISTS
                     return true;
-                default:
-                    return false;
             }
         }
-        else if (functionSymbol instanceof RDFTermFunctionSymbol) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     protected Optional<ImmutableExpression> convertIntoBooleanExpression(
