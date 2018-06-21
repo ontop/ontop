@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.evaluator;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
@@ -29,6 +30,7 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -615,9 +617,11 @@ public class ExpressionEvaluator {
 		ImmutableTerm innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalInnerTerm = (ImmutableFunctionalTerm) innerTerm;
-			if (functionalInnerTerm.getFunctionSymbol() instanceof RDFTermType) {
+			FunctionSymbol functionSymbol = functionalInnerTerm.getFunctionSymbol();
+			if (functionSymbol instanceof RDFTermType) {
+
 				ImmutableFunctionalTerm isNotNullInnerInnerTerm = termFactory.getImmutableFunctionalTerm(
-						IS_NOT_NULL,
+						isnull ? IS_NULL : IS_NOT_NULL,
 						((ImmutableFunctionalTerm) innerTerm).getTerm(0));
 				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
 			}
@@ -670,32 +674,33 @@ public class ExpressionEvaluator {
 	/**
 	 * TODO: make it stronger (in case someone uses complex sub-terms such as IS_NULL(x) inside the URI template...)
 	 */
-	private ImmutableFunctionalTerm simplifyIsNullorNotNullUriTemplate(ImmutableFunctionalTerm uriTemplate, boolean isNull) {
-		Set<Variable> variables = uriTemplate.getVariables();
+	private ImmutableTerm simplifyIsNullorNotNullUriTemplate(ImmutableFunctionalTerm uriTemplate, boolean isNull) {
+		ImmutableList<? extends ImmutableTerm> terms = uriTemplate.getTerms();
 		if (isNull) {
-			switch (variables.size()) {
+			switch (terms.size()) {
 				case 0:
 					return termFactory.getImmutableFunctionalTerm(IS_NULL, uriTemplate);
 				case 1:
-					return termFactory.getImmutableFunctionalTerm(IS_NULL, variables.iterator().next());
+					return termFactory.getImmutableFunctionalTerm(IS_NULL, terms.get(0));
 				default:
-					return variables.stream()
+					return terms.stream()
 							.reduce(null,
-									(e, v) -> e == null
-											? termFactory.getImmutableFunctionalTerm(IS_NULL, v)
-											: termFactory.getImmutableFunctionalTerm(OR, e, termFactory.getImmutableFunctionalTerm(IS_NULL, v)),
+									(e, t) -> e == null
+											? termFactory.getImmutableFunctionalTerm(IS_NULL, t)
+											: termFactory.getImmutableFunctionalTerm(OR, e, termFactory.getImmutableFunctionalTerm(IS_NULL, t)),
 									(e1, e2) -> e1 == null
 											? e2
 											: (e2 == null) ? e1 : termFactory.getImmutableFunctionalTerm(OR, e1, e2));
 			}
 		}
 		else {
-			if (variables.isEmpty())
+			if (terms.isEmpty())
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, uriTemplate);
 			else
-				return immutabilityTools.foldBooleanExpressions(
-						variables.stream()
-								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
+				return eval(immutabilityTools.foldBooleanExpressions(
+						terms.stream()
+								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
+				).get());
 		}
 	}
 
@@ -721,7 +726,8 @@ public class ExpressionEvaluator {
 
 
 	private ImmutableTerm evalNot(ImmutableFunctionalTerm term) {
-		ImmutableTerm teval = eval(term.getTerm(0));
+		ImmutableTerm initialSubTerm = term.getTerm(0);
+		ImmutableTerm teval = eval(initialSubTerm);
 		if (teval instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
 			FunctionSymbol functionSymbol = f.getFunctionSymbol();
@@ -734,6 +740,15 @@ public class ExpressionEvaluator {
 			} else if (functionSymbol == EQ) {
 				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
 			}
+			else if ((functionSymbol == AND || functionSymbol == OR)) {
+				ImmutableList<ImmutableTerm> negatedArguments = f.getTerms().stream()
+						.map(t -> termFactory.getImmutableFunctionalTerm(NOT, t))
+						.map(this::eval)
+						.collect(ImmutableCollectors.toList());
+				return functionSymbol == AND
+						? termFactory.getImmutableFunctionalTerm(OR, negatedArguments)
+						: termFactory.getImmutableFunctionalTerm(AND, negatedArguments);
+			}
 		} else if (teval instanceof Constant) {
 			if (teval == valueFalse)
 				return valueTrue;
@@ -744,7 +759,9 @@ public class ExpressionEvaluator {
 			// ROMAN (10 Jan 2017): this needs to be revised
 			return teval;
 		}
-		return term;
+		return initialSubTerm.equals(teval)
+				? term
+				: termFactory.getImmutableFunctionalTerm(NOT, teval);
 	}
 
 	private ImmutableTerm evalEqNeq(ImmutableFunctionalTerm term, boolean eq) {
