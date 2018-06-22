@@ -3070,7 +3070,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateApproved">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAA"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.baaDateApproved</sql:column>
         <sql:comment>The date the agreement for the business arrangement area was approved by the Norwegian authorities. (column: baaDateApproved)</sql:comment>
         <sql:datatype>DATETIME (column: baaDateApproved)</sql:datatype>
@@ -3083,7 +3083,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaAreaValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAAArea"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>baaArea.baaAreaPolyDateValidFrom</sql:column>
         <sql:column>bsns_arr_area_area_poly_hst.baaAreaPolyDateValidFrom</sql:column>
         <sql:comment>The date the polygon area is valid from (column: baaAreaPolyDateValidFrom)</sql:comment>
@@ -3097,7 +3097,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaAreaValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAAArea"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>baaArea.baaAreaPolyDateValidTo</sql:column>
         <sql:column>bsns_arr_area_area_poly_hst.baaAreaPolyDateValidTo</sql:column>
         <sql:comment>The date the polygon area is valid to (column: baaAreaPolyDateValidTo)</sql:comment>
@@ -3111,7 +3111,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAALicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area_licensee_hst.baaLicenseeDateValidFrom</sql:column>
         <sql:comment>The date the company&apos;s interest in the business arrangement area is valid from (column: baaLicenseeDateValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: baaLicenseeDateValidFrom)</sql:datatype>
@@ -3124,7 +3124,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAALicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area_licensee_hst.baaLicenseeDateValidTo</sql:column>
         <sql:comment>The date the company&apos;s interest in the business arrangement area is valid to (column: baaLicenseeDateValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: baaLicenseeDateValidTo)</sql:datatype>
@@ -3137,7 +3137,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAA"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.baaDateValidFrom</sql:column>
         <sql:comment>The date the agreement for the business arrangement area is valid from, according to the approval of the Norwegian authorities. (column: baaDateValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: baaDateValidFrom)</sql:datatype>
@@ -3150,7 +3150,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateBaaValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#BAA"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.baaDateValidTo</sql:column>
         <sql:comment>The date the agreement for the business arrangement area is valid to, according to the approval of the Norwegian authorities. (column: baaDateValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: baaDateValidTo)</sql:datatype>
@@ -3163,7 +3163,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldLicenseeFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldLicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_licensee_hst.fldLicenseeFrom</sql:column>
         <sql:datatype>DATETIME (column: fldLicenseeFrom)</sql:datatype>
     </owl:DatatypeProperty>
@@ -3174,7 +3174,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldLicenseeTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldLicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_licensee_hst.fldLicenseeTo</sql:column>
         <sql:datatype>DATETIME (column: fldLicenseeTo)</sql:datatype>
     </owl:DatatypeProperty>
@@ -3185,7 +3185,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOperatorFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldOperator"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_operator_hst.fldOperatorFrom</sql:column>
         <sql:datatype>DATETIME (column: fldOperatorFrom)</sql:datatype>
     </owl:DatatypeProperty>
@@ -3196,7 +3196,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOperatorTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldOperator"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_operator_hst.fldOperatorTo</sql:column>
         <sql:datatype>DATETIME (column: fldOperatorTo)</sql:datatype>
     </owl:DatatypeProperty>
@@ -3206,7 +3206,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOwnerFrom -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOwnerFrom">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_licensee_hst.fldOwnerFrom</sql:column>
         <sql:column>field_owner_hst.fldOwnershipFromDate</sql:column>
         <sql:datatype>DATETIME (column: fldOwnerFrom)</sql:datatype>
@@ -3218,7 +3218,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOwnerTo -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateFieldOwnerTo">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_licensee_hst.fldOwnerTo</sql:column>
         <sql:column>field_owner_hst.fldOwnershipToDate</sql:column>
         <sql:datatype>DATETIME (column: fldOwnerTo)</sql:datatype>
@@ -3231,7 +3231,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateIncludedInField">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#Discovery"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>discovery.dscDateFromInclInField</sql:column>
         <sql:comment>Included in field from date (column: dscDateFromInclInField)</sql:comment>
         <sql:datatype>DATETIME (column: dscDateFromInclInField)</sql:datatype>
@@ -3244,7 +3244,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateInitialStatusTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceStatus"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_phase_hst.prlDateInitialPeriodExpires</sql:column>
         <sql:comment>Expiry date of the initial period of the production licence (column: prlDateInitialPeriodExpires)</sql:comment>
         <sql:datatype>DATETIME (column: prlDateInitialPeriodExpires)</sql:datatype>
@@ -3256,7 +3256,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceAreaValidFrom -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceAreaValidFrom">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_area_poly_hst.prlAreaPolyDateValidFrom</sql:column>
         <sql:column>prlArea.prlAreaPolyDateValidFrom</sql:column>
         <sql:column>prlAreaSplitByBlock.prlAreaPolyDateValidFrom</sql:column>
@@ -3270,7 +3270,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceAreaValidTo -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceAreaValidTo">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_area_poly_hst.prlAreaPolyDateValidTo</sql:column>
         <sql:column>prlArea.prlAreaPolyDateValidTo</sql:column>
         <sql:column>prlAreaSplitByBlock.prlAreaPolyDateValidTo</sql:column>
@@ -3285,7 +3285,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceGranted">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicence"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence.prlDateGranted</sql:column>
         <sql:comment>Date the production licence was granted by the Norwegian authorities. (column: prlDateGranted)</sql:comment>
         <sql:datatype>DATETIME (column: prlDateGranted)</sql:datatype>
@@ -3297,7 +3297,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceValidTo -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenceValidTo">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence.prlDateValidTo</sql:column>
         <sql:column>licence_phase_hst.prlDateValidTo</sql:column>
         <sql:comment>Date the production licence is valid to. (column: prlDateValidTo)</sql:comment>
@@ -3311,7 +3311,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenseeValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceLicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_licensee_hst.prlLicenseeDateValidFrom</sql:column>
         <sql:comment>Date the company&apos;s interest in the production licence is valid from (column: prlLicenseeDateValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: prlLicenseeDateValidFrom)</sql:datatype>
@@ -3324,7 +3324,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateLicenseeValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceLicensee"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_licensee_hst.prlLicenseeDateValidTo</sql:column>
         <sql:comment>Date the company&apos;s interest in the production licence is valid to (column: prlLicenseeDateValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: prlLicenseeDateValidTo)</sql:datatype>
@@ -3337,7 +3337,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateMudMeasured">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#WellboreDrillingMudSample"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_mud.wlbMudDateMeasured</sql:column>
         <sql:comment>Date, during drilling operations, when mud properties are measured and logged. (column: wlbMudDateMeasured)</sql:comment>
         <sql:datatype>DATETIME (column: wlbMudDateMeasured)</sql:datatype>
@@ -3350,7 +3350,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateOilSampleReceived">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#WellboreOilSample"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_oil_sample.wlbOilSampledateReceivedDate</sql:column>
         <sql:comment>Date when the sample was received at the NPD. (column: wlbOilSampledateReceivedDate)</sql:comment>
         <sql:datatype>DATETIME (column: wlbOilSampledateReceivedDate)</sql:datatype>
@@ -3363,7 +3363,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateOilSampleTest">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#WellboreOilSample"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_oil_sample.wlbOilSampleTestDate</sql:column>
         <sql:comment>Test date and time of day. (column: wlbOilSampleTestDate)</sql:comment>
         <sql:datatype>DATETIME (column: wlbOilSampleTestDate)</sql:datatype>
@@ -3375,7 +3375,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateOperatorValidFrom -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateOperatorValidFrom">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_licensee_hst.prlOperDateValidFrom</sql:column>
         <sql:column>licence_oper_hst.prlOperDateValidFrom</sql:column>
         <sql:comment>Date the company&apos;s operatorship is valid from (column: prlOperDateValidFrom)</sql:comment>
@@ -3388,7 +3388,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateOperatorValidTo -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateOperatorValidTo">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_licensee_hst.prlOperDateValidTo</sql:column>
         <sql:column>licence_oper_hst.prlOperDateValidTo</sql:column>
         <sql:comment>Date the company&apos;s operatorship is valid to (column: prlOperDateValidTo)</sql:comment>
@@ -3402,7 +3402,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateProductionStart">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FixedFacility"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>facility_fixed.fclStartupDate</sql:column>
         <sql:comment>The date the facility was set in production. (column: fclStartupDate)</sql:comment>
         <sql:datatype>DATETIME (column: fclStartupDate)</sql:datatype>
@@ -3414,7 +3414,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateResourceEstimate -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateResourceEstimate">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>company_reserves.cmpDateOffResEstDisplay</sql:column>
         <sql:column>discovery_reserves.dscDateOffResEstDisplay</sql:column>
         <sql:column>field_reserves.fldDateOffResEstDisplay</sql:column>
@@ -3433,7 +3433,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateStatusFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldStatus"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_activity_status_hst.fldStatusFromDate</sql:column>
         <sql:comment>Status from date (column: fldStatusFromDate)</sql:comment>
         <sql:datatype>DATETIME (column: fldStatusFromDate)</sql:datatype>
@@ -3446,7 +3446,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateStatusTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#FieldStatus"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>field_activity_status_hst.fldStatusToDate</sql:column>
         <sql:comment>Status to date (column: fldStatusToDate)</sql:comment>
         <sql:datatype>DATETIME (column: fldStatusToDate)</sql:datatype>
@@ -3459,7 +3459,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateStatusValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceStatus"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_phase_hst.prlDatePhaseValidFrom</sql:column>
         <sql:comment>Date the phase is valid from (column: prlDatePhaseValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: prlDatePhaseValidFrom)</sql:datatype>
@@ -3472,7 +3472,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateStatusValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceStatus"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_phase_hst.prlDatePhaseValidTo</sql:column>
         <sql:comment>Date the phase is valid to (column: prlDatePhaseValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: prlDatePhaseValidTo)</sql:datatype>
@@ -3485,7 +3485,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSurveyActualCompleted">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>seis_acquisition.seaDateFinalized</sql:column>
         <sql:comment>Date the seismic acquistion was completed. Completed means departure from the acquisition area. (column: seaDateFinalized)</sql:comment>
         <sql:datatype>DATETIME (column: seaDateFinalized)</sql:datatype>
@@ -3498,7 +3498,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSurveyActualStart">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>seis_acquisition.seaDateStarting</sql:column>
         <sql:comment>Date the seismic acquistion actually started. Started means when the vessel arrives the acquisition area. (column: seaDateStarting)</sql:comment>
         <sql:datatype>DATETIME (column: seaDateStarting)</sql:datatype>
@@ -3511,7 +3511,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSurveyPlannedCompleted">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>seis_acquisition.seaPlanToDate</sql:column>
         <sql:comment>Date when the company has reported that the acquisition shall be finished. (column: seaPlanToDate)</sql:comment>
         <sql:datatype>DATETIME (column: seaPlanToDate)</sql:datatype>
@@ -3524,7 +3524,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSurveyPlannedStart">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurvey"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>seis_acquisition.seaPlanFromDate</sql:column>
         <sql:comment>Date when the company has reported plans to start the acquisition. (column: seaPlanFromDate)</sql:comment>
         <sql:datatype>DATETIME (column: seaPlanFromDate)</sql:datatype>
@@ -3537,7 +3537,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSurveyProgress">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#SeismicSurveyProgress"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>seis_acquisition_progress.seaProgressDate</sql:column>
         <sql:datatype>DATETIME (column: seaProgressDate)</sql:datatype>
     </owl:DatatypeProperty>
@@ -3547,7 +3547,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateSyncNPD -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateSyncNPD">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.dateSyncNPD</sql:column>
         <sql:column>bsns_arr_area_area_poly_hst.dateSyncNPD</sql:column>
         <sql:column>bsns_arr_area_licensee_hst.dateSyncNPD</sql:column>
@@ -3609,7 +3609,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTUFOperatorValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#TUFOperator"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>tuf_operator_hst.tufOperDateValidFrom</sql:column>
         <sql:comment>The date the company&apos;s operatorship is valid from (column: tufOperDateValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: tufOperDateValidFrom)</sql:datatype>
@@ -3622,7 +3622,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTUFOperatorValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#TUFOperator"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>tuf_operator_hst.tufOperDateValidTo</sql:column>
         <sql:comment>The date the company&apos;s operatorship is valid to (column: tufOperDateValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: tufOperDateValidTo)</sql:datatype>
@@ -3635,7 +3635,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTUFOwnerValidFrom">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#TUFOwner"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>tuf_owner_hst.tufOwnerDateValidFrom</sql:column>
         <sql:comment>The date the company&apos;s ownership is valid from (column: tufOwnerDateValidFrom)</sql:comment>
         <sql:datatype>DATETIME (column: tufOwnerDateValidFrom)</sql:datatype>
@@ -3648,7 +3648,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTUFOwnerValidTo">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#TUFOwner"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>tuf_owner_hst.tufOwnerDateValidTo</sql:column>
         <sql:comment>The date the company&apos;s ownership is valid to (column: tufOwnerDateValidTo)</sql:comment>
         <sql:datatype>DATETIME (column: tufOwnerDateValidTo)</sql:datatype>
@@ -3661,7 +3661,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTaskExpiry">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2#ProductionLicenceWorkObligation"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_task.prlTaskExpiryDate</sql:column>
         <sql:comment>Date when the task exprires. (column: prlTaskExpiryDate)</sql:comment>
         <sql:datatype>DATETIME (column: prlTaskExpiryDate)</sql:datatype>
@@ -3673,7 +3673,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateTransferValidFrom -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateTransferValidFrom">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area_transfer_hst.baaTransferDateValidFrom</sql:column>
         <sql:column>licence_transfer_hst.prlTransferDateValidFrom</sql:column>
         <sql:comment>Date the transfer is valid from (column: prlTransferDateValidFrom)</sql:comment>
@@ -3689,7 +3689,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateUpdated -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateUpdated">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.baaDateUpdated</sql:column>
         <sql:column>bsns_arr_area_area_poly_hst.baaAreaPolyDateUpdated</sql:column>
         <sql:column>bsns_arr_area_licensee_hst.baaLicenseeDateUpdated</sql:column>
@@ -3810,7 +3810,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateUpdatedMax -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateUpdatedMax">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>bsns_arr_area.baaDateUpdatedMax</sql:column>
         <sql:column>discovery.dscDateUpdatedMax</sql:column>
         <sql:column>field.fldDateUpdatedMax</sql:column>
@@ -3840,7 +3840,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateWDSSQC -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateWDSSQC">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_development_all.wlbWdssQcdate</sql:column>
         <sql:column>wellbore_exploration_all.wlbWdssQcDate</sql:column>
         <sql:comment>Date the quality control of the wellbore information was completed, so that it can be pulished on internet as a &apos;Well Data Summary Sheet&apos; wellbore with more information available than other wellbores. (column: wlbWdssQcDate)</sql:comment>
@@ -3854,7 +3854,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateWellboreCompletion -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateWellboreCompletion">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_development_all.wlbCompletionDate</sql:column>
         <sql:column>wellbore_exploration_all.wlbCompletionDate</sql:column>
         <sql:column>wellbore_shallow_all.wlbCompletionDate</sql:column>
@@ -3868,7 +3868,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2#dateWellboreEntry -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2#dateWellboreEntry">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>wellbore_development_all.wlbEntryDate</sql:column>
         <sql:column>wellbore_exploration_all.wlbEntryDate</sql:column>
         <sql:column>wellbore_shallow_all.wlbEntryDate</sql:column>
@@ -5837,7 +5837,7 @@
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateAwarded">
         <rdfs:domain rdf:resource="http://sws.ifi.uio.no/vocab/npd-v2-ptl#ProductionLicence"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_licence.ptlDateAwarded</sql:column>
         <sql:datatype>DATETIME (column: ptlDateAwarded)</sql:datatype>
     </owl:DatatypeProperty>
@@ -5847,7 +5847,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateLicenceValidFrom -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateLicenceValidFrom">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_licence.ptlDateValidFrom</sql:column>
         <sql:column>tuf_petreg_licence.ptlDateValidFrom</sql:column>
         <sql:comment>Dato tillatelsen er gyldig fra. (column: ptlDateValidFrom)</sql:comment>
@@ -5860,7 +5860,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateLicenceValidTo -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateLicenceValidTo">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_licence.ptlDateValidTo</sql:column>
         <sql:column>tuf_petreg_licence.ptlDateValidTo</sql:column>
         <sql:comment>Dato tillatelsen er gyldig til. (column: ptlDateValidTo)</sql:comment>
@@ -5873,7 +5873,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateMessageRegistered -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateMessageRegistered">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_message.ptlMessageRegisteredDate</sql:column>
         <sql:column>tuf_petreg_message.ptlMessageRegisteredDate</sql:column>
         <sql:comment>Dato dokumentet er registret i Petroleumsregisteret. (column: ptlMessageRegisteredDate)</sql:comment>
@@ -5886,7 +5886,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateUpdated -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateUpdated">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_licence.ptlDateUpdated</sql:column>
         <sql:column>licence_petreg_licence_licencee.ptlLicenseeDateUpdated</sql:column>
         <sql:column>licence_petreg_licence_oper.ptlOperDateUpdated</sql:column>
@@ -5914,7 +5914,7 @@
     <!-- http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateUpdatedMax -->
 
     <owl:DatatypeProperty rdf:about="http://sws.ifi.uio.no/vocab/npd-v2-ptl#dateUpdatedMax">
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
         <sql:column>licence_petreg_licence.ptlDateUpdatedMax</sql:column>
         <sql:column>tuf_petreg_licence.ptlDateUpdatedMax</sql:column>
         <sql:comment>Dato når noe informasjon om denne Petroleumsregister tillatelsen ble oppdatert sist eller lagt inn for første gang. Datoen vil også bli forandret dersom data i noen av &apos;Undernivåene&apos; blir forandret. (column: ptlDateUpdatedMax)</sql:comment>

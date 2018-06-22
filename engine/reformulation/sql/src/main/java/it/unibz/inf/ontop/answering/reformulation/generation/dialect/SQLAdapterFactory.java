@@ -59,6 +59,9 @@ public class SQLAdapterFactory {
                 return new SAPHANASQLDialectAdapter();
 			case "com.dremio.jdbc.Driver":
 				return new DremioSQLDialectAdapter();
+			case "com.denodo.vdb.jdbcdriver.VDBJDBCDriver":
+			case "com.denodo.vdp.jdbc.Driver":
+				return new DenodoSQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");
