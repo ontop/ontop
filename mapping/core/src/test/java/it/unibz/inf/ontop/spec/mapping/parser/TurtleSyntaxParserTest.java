@@ -159,7 +159,7 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_4_2_1() {
 		final boolean result = parse(":Person-{id} :firstName \"John\"^^rdfs:Literal .");
-		TestCase.assertFalse(result);
+		TestCase.assertTrue(result);
 	}
 
 	@Test
