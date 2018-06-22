@@ -1104,7 +1104,7 @@ public class BindingLiftTest {
 
 
         //construct union
-        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, G, F));
+        UnionNode expectedUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(F0, G, E, F));
         expectedQueryBuilder.addChild(expectedJoinNode, expectedUnionNode);
 
         //construct right side join
@@ -1131,6 +1131,7 @@ public class BindingLiftTest {
 
         ConstructionNode expectedNodeOnRight =IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(F, NULL,
+                        E, NULL,
                         F0, generateIRIString(URI_TEMPLATE_STR_2, C))));
 
         expectedQueryBuilder.addChild(expectedUnionNode, expectedNodeOnRight);
