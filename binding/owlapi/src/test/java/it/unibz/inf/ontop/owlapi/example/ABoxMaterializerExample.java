@@ -40,9 +40,9 @@ public class ABoxMaterializerExample {
 	 * Use the sample database using H2 from
 	 * https://babbage.inf.unibz.it/trac/obdapublic/wiki/InstallingTutorialDatabases
 	 */
-	private static final String OBDA_FILE = "src/main/resources/example/exampleBooks.obda";
-	private static final String PROPERTY_FILE = "src/main/resources/example/exampleBooks.properties";
-	private static final String OUTPUT_FILE = "src/main/resources/example/exampleBooks.txt";
+	private static final String OBDA_FILE = "src/test/resources/example/exampleBooks.obda";
+	private static final String PROPERTY_FILE = "src/test/resources/example/exampleBooks.properties";
+	private static final String OUTPUT_FILE = "src/test/resources/example/exampleBooks.txt";
 
 	
 	public void generateTriples() throws Exception {

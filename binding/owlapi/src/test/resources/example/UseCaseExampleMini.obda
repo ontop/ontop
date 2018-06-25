@@ -9,13 +9,6 @@ xml:		http://www.w3.org/XML/1998/namespace#
 xsd:		http://www.w3.org/2001/XMLSchema#
 rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
-[SourceDeclaration]
-sourceUri	UseCaseDB
-connectionUrl	jdbc:postgresql://obdalin.inf.unibz.it/PublicData
-username	postgres
-password	postgres
-driverClass	org.postgresql.Driver
-
 [MappingDeclaration] @collection [[
 mappingId   Mapping - hasVal
 target		op:{sensor} op:hasVal {value}^^xsd:double .

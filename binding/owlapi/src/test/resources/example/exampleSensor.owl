@@ -44,11 +44,7 @@
         <rdfs:domain rdf:resource="http://www.example.org/Pattern#Sensor"/>
         <rdfs:range rdf:resource="http://www.example.org/Pattern#Component"/>
     </owl:ObjectProperty>
-    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#hasEvent">
-        <rdfs:domain rdf:resource="http://www.example.org/Pattern#Assembly"/>
-        <rdfs:range rdf:resource="http://www.example.org/Pattern#Event"/>
-    </owl:ObjectProperty>    
-    
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -67,10 +63,10 @@
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
-    <owl:ObjectProperty rdf:about="http://www.example.org/Pattern#hasEvent">
+    <owl:DatatypeProperty rdf:about="http://www.example.org/Pattern#hasEvent">
         <rdfs:domain rdf:resource="http://www.example.org/Pattern#Assembly"/>
         <rdfs:range rdf:resource="&xsd;string"/>
-    </owl:ObjectProperty>  
+    </owl:DatatypeProperty>
     
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@ target		:editor/{ed_code}/ a :Editor ; :name {ed_name}^^xsd:string .
 source		select "ed_code", "ed_name" from "tb_editor"
 
 mappingId	cl_Editions
-target		:edition/{ed_code}/ a :Edition ; :dateOfPublication {pub_date}^^xsd:dateTime ; :editionNumber {n_edt}^^xsd:string .
+target		:edition/{ed_code}/ a :Edition ; :dateOfPublication {pub_date}^^xsd:dateTime ; :editionNumber {n_edt}^^xsd:integer .
 source		select "ed_code", "pub_date", "n_edt" from "tb_edition"
 
 mappingId	cl_AudioBook
