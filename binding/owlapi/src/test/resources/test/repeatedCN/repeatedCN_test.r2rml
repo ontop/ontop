@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+:		http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#
+xml:		http://www.w3.org/XML/1998/namespace
+quest:		http://obda.org/quest#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-professor
+target		:professor/{prof_id}/{prof_id} a :Professor .
+source		SELECT prof_id, last_name FROM professors;
+
+]]
+
