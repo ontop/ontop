@@ -42,9 +42,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 public class QuestOWLExample_NoReplace {
 
 
-    final String owlfile = "src/main/resources/example/exampleBooks.owl";
-    final String obdafile = "src/main/resources/example/exampleBooks.obda";
-    final String propertiesfile = "src/main/resources/example/exampleBooks.properties";
+    final String owlfile = "src/test/resources/example/exampleBooks.owl";
+    final String obdafile = "src/test/resources/example/exampleBooks.obda";
+    final String propertiesfile = "src/test/resources/example/exampleBooks.properties";
 
     public void runQuery() throws Exception {
 

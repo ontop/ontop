@@ -41,9 +41,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 public class QuestOWLExample {
 
 
-    final String owlfile = "src/main/resources/example/exampleBooks.owl";
-    final String obdafile = "src/main/resources/example/exampleBooks.obda";
-    final String propertiesfile = "src/main/resources/example/exampleBooks.properties";
+    final String owlfile = "src/test/resources/example/exampleBooks.owl";
+    final String obdafile = "src/test/resources/example/exampleBooks.obda";
+    final String propertiesfile = "src/test/resources/example/exampleBooks.properties";
 
     public void runQuery() throws Exception {
 
@@ -78,8 +78,8 @@ public class QuestOWLExample {
             TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
             int columnSize = rs.getColumnCount();
             while (rs.hasNext()) {
+                final OWLBindingSet bindingSet = rs.next();
                 for (int idx = 1; idx <= columnSize; idx++) {
-                    final OWLBindingSet bindingSet = rs.next();
                     OWLObject binding = bindingSet.getOWLObject(idx);
                     System.out.print(ToStringRenderer.getInstance().getRendering(binding) + ", ");
                 }
