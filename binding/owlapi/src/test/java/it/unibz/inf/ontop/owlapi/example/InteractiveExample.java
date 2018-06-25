@@ -19,11 +19,13 @@ public class InteractiveExample {
      * Please use the pre-bundled H2 server from the above link
      *
      */
-    final String owlfile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql.owl";
-    final String obdafile = "src/main/resources/example/npd-benchmark-1.9/npd-v2-ql-mysql-ontop1.17.obda";
+
+	final String owlfile = "src/test/resources/example/exampleBooks.owl";
+	final String obdafile = "src/test/resources/example/exampleBooks.obda";
+	final String propertyFile = "src/test/resources/example/exampleBooks.properties";
 
     // Exclude from T-Mappings
-    final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+    final String tMappingsConfFile = "src/test/resources/example/tMappingsConf.conf";
 
 	public void runQuery() throws Exception {
 
@@ -35,6 +37,7 @@ public class InteractiveExample {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .propertyFile(propertyFile)
 				.nativeOntopMappingFile(obdafile)
 				.ontologyFile(owlfile)
 				.enableTestMode()
