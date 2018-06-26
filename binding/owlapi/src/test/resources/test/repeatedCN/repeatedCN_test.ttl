@@ -1,4 +1,3 @@
-@base <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#> .
 @prefix : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -10,7 +9,7 @@
 <#Professor> a rr:TriplesMap;
         rr:logicalTable [ rr:tableName "professors" ];
         rr:subjectMap [
-        rr:template ":professor/{prof_id}/{prof_id}";
+        rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/{prof_id}/{prof_id}";
         rr:class :Professor;
         ]
         .
