@@ -63,4 +63,6 @@ public interface TypeFactory {
 	}
 
 	MetaRDFTermType getMetaRDFTermType();
+
+	DBTypeFactory getDBTypeFactory();
 }

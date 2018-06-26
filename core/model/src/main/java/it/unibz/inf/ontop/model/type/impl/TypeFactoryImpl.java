@@ -42,12 +42,16 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype, xsdBase64Datatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
 	private final RDF rdfFactory;
+	private final DBTypeFactory dbTypeFactory;
 
 	@Inject
-	private TypeFactoryImpl() {
+	private TypeFactoryImpl(DBTypeFactory.Factory dbTypeFactoryFactory) {
 		rdfFactory = new SimpleRDF();
 
 		rootTermType = TermTypeImpl.createOriginTermType();
+
+		dbTypeFactory = dbTypeFactoryFactory.createDBFactory(rootTermType);
+
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
 		metaRDFTermType = MetaRDFTermTypeImpl.createMetaRDFTermType(rootRDFTermType.getAncestry());
 
@@ -208,6 +212,11 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public MetaRDFTermType getMetaRDFTermType() {
 		return metaRDFTermType;
+	}
+
+	@Override
+	public DBTypeFactory getDBTypeFactory() {
+		return dbTypeFactory;
 	}
 
 	private RDFDatatype createLangStringDatatype(String languageTagString) {
