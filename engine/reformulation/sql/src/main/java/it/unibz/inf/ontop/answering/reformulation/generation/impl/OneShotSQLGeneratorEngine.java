@@ -155,16 +155,7 @@ public class OneShotSQLGeneratorEngine {
 		this.unionFlattener = unionFlattener;
 		this.immutabilityTools = immutabilityTools;
 
-		String driverURI = settings.getJdbcDriver()
-				.orElseGet(() -> {
-					try {
-						return DriverManager.getDriver(settings.getJdbcUrl()).getClass().getCanonicalName();
-					}
-					catch (SQLException e) {
-						// TODO: find a better exception
-						throw new RuntimeException("Impossible to get the JDBC driver. Reason: " + e.getMessage());
-					}
-				});
+		String driverURI = settings.getJdbcDriver();
 
 		if (!(metadata instanceof RDBMetadata)) {
 			throw new IllegalArgumentException("Not a DBMetadata!");
