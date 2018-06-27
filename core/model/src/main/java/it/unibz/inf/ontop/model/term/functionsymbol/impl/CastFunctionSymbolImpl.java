@@ -26,12 +26,15 @@ public abstract class CastFunctionSymbolImpl extends FunctionSymbolImpl implemen
         return targetType;
     }
 
-    /**
-     * TODO: implement it seriously
-     */
     @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
-        // TODO: check the types of the terms
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(targetType));
+    }
+
+    @Override
+    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
+            throws FatalTypingException {
+        validateSubTermTypes(terms);
+        return inferType(terms);
     }
 }

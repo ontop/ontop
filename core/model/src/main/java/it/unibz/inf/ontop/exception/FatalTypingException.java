@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.model.type.TermType;
  *
  * TODO: refactor the error messages
  */
-public class FatalTypingException extends RuntimeException {
+public class FatalTypingException extends Exception {
     public FatalTypingException(Term term, TermType expectedTermType, TermType actualTermType) {
         super("Incompatible type inferred for " + term + ": expected: " + expectedTermType
                 + ", actual: " + actualTermType);

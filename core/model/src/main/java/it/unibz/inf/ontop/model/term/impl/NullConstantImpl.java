@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -41,7 +40,7 @@ public class NullConstantImpl implements Constant {
     }
 
     @Override
-    public Optional<TermTypeInference> inferType() throws FatalTypingException {
+    public Optional<TermTypeInference> inferType() {
         return Optional.empty();
     }
 

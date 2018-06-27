@@ -168,13 +168,26 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+	public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
 
 		ImmutableList<Optional<TermTypeInference>> argumentTypes = terms.stream()
 				.map(ImmutableTerm::inferType)
 				.collect(ImmutableCollectors.toList());
 
 		return inferTypeFromArgumentTypes(argumentTypes);
+	}
+
+	@Override
+	public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
+			throws FatalTypingException {
+
+		ImmutableList.Builder<Optional<TermTypeInference>> argumentTypeBuilder = ImmutableList.builder();
+
+		for (ImmutableTerm term : terms) {
+			argumentTypeBuilder.add(term.inferAndValidateType());
+		}
+
+		return inferTypeFromArgumentTypesAndCheckForFatalError(argumentTypeBuilder.build());
 	}
 
 	/**
@@ -187,6 +200,17 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	@Override
 	public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
+		try {
+			return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
+		} catch (FatalTypingException e) {
+			// No type could be inferred
+			return Optional.empty();
+		}
+	}
+
+	@Override
+	public Optional<TermTypeInference> inferTypeFromArgumentTypesAndCheckForFatalError(
+			ImmutableList<Optional<TermTypeInference>> argumentTypes) throws FatalTypingException {
 		argumentValidator.validate(argumentTypes);
 
 		return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);

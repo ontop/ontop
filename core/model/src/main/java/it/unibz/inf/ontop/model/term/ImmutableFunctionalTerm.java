@@ -24,10 +24,17 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
 
     ImmutableSet<Variable> getVariables();
 
-    default Optional<TermTypeInference> inferType() throws FatalTypingException {
+    @Override
+    default Optional<TermTypeInference> inferType() {
         FunctionSymbol functionSymbol = getFunctionSymbol();
         return functionSymbol.inferType(getTerms());
     }
 
-    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase) throws FatalTypingException;
+    @Override
+    default Optional<TermTypeInference> inferAndValidateType() throws FatalTypingException {
+        FunctionSymbol functionSymbol = getFunctionSymbol();
+        return functionSymbol.inferAndValidateType(getTerms());
+    }
+
+    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase);
 }

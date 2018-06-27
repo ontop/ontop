@@ -6,6 +6,10 @@ import java.util.Optional;
 
 /**
  * Can have two states: (i) determined or (ii) non fatal error.
+ *
+ * Non-fatal error: corresponds to returning a NULL value.
+ * SPARQL errors are non-fatal errors.
+ *
  */
 public interface TermTypeInference {
 

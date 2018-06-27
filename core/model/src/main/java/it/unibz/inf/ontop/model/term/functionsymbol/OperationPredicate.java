@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
@@ -31,4 +32,7 @@ import java.util.Optional;
 public interface OperationPredicate extends FunctionSymbol {
 
     Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes);
+
+    Optional<TermTypeInference> inferTypeFromArgumentTypesAndCheckForFatalError(
+            ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) throws FatalTypingException;
 }

@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -40,5 +42,9 @@ public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 	 * Empty if and only if is null.
 	 */
 	Optional<TermType> getOptionalType();
-	
+
+	@Override
+	default Optional<TermTypeInference> inferAndValidateType() {
+		return inferType();
+	}
 }
