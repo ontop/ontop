@@ -74,7 +74,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
         }
     }
 
-    /** Inefficient */
+    /** Inefficient*/
     @Override
     public boolean hasBinding(String bindingName) {
         return ontopBindingSet.hasBinding(bindingName);

@@ -25,6 +25,12 @@ public class PostProcessedIriSQLBindingSet extends AbstractOntopBindingSet imple
     @Nullable
     @Override
     public Constant getConstant(int column) throws OntopResultConversionException {
+        final MainTypeLangValues cell = signature.get(column - 1);
+        if (cell.getMainValue() == null) {
+            return null;
+        } else {
+            return constantRetriever.getConstantFromJDBC(cell);
+        }
         throw new RuntimeException("TODO: implement");
     }
 

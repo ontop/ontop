@@ -59,7 +59,9 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     }
 
     @Nullable
-    protected abstract OntopBinding computeBinding(String variableName);
+    protected OntopBinding computeBinding(String variableName) {
+        return computeBinding(columnMap.get(variableName));
+    }
 
     @Override
     public ImmutableList<String> getBindingNames() {
@@ -80,6 +82,7 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
                 variableName2BindingMap.get().get(name):
                 computeBinding(name);
     }
+
 
     public static class UnexpectedTargeTermTypeException extends OntopInternalBugException {
         public UnexpectedTargeTermTypeException(Term term) {

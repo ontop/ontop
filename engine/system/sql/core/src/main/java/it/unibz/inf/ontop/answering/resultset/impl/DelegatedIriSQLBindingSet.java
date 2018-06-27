@@ -66,10 +66,6 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
                 getConstant(columnIndex);
     }
 
-    @Override
-    protected OntopBinding computeBinding(String variableName) {
-        return computeBinding(columnMap.get(variableName));
-    }
 
     private OntopBinding computeBinding(int column) {
         final MainTypeLangValues cell = row.get(column - 1);
