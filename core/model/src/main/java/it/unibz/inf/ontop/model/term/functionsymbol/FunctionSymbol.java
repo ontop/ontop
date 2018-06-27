@@ -19,8 +19,8 @@ public interface FunctionSymbol extends Predicate {
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
 
-    ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
-                                   TermFactory termFactory);
+    ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
+                           TermFactory termFactory);
 
     default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                 TermFactory termFactory) {

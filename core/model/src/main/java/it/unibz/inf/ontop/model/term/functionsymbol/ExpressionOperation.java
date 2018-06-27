@@ -181,7 +181,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	 * TODO: implement it seriously after getting rid of this enum
 	 */
 	@Override
-	public ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
 		return termFactory.getImmutableFunctionalTerm(this, terms);
 	}
 

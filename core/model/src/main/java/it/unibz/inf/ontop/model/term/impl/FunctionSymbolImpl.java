@@ -30,12 +30,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     @Override
-    public ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms,
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
                                   boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? ((ImmutableFunctionalTerm) t).evaluate(isInConstructionNodeInOptimizationPhase)
+                        ? ((ImmutableFunctionalTerm) t).simplify(isInConstructionNodeInOptimizationPhase)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
