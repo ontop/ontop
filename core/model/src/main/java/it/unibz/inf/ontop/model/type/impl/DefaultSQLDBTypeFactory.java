@@ -6,22 +6,27 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.SQLDBTypeFactory;
 import it.unibz.inf.ontop.model.type.TermType;
 
-public class SQLDBTypeFactoryImpl implements SQLDBTypeFactory {
+public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     private final TermType rootTermType;
+    private final DBTermType rootDBType;
+    private final DBTermType stringType, integerType;
 
     @AssistedInject
-    private SQLDBTypeFactoryImpl(@Assisted TermType rootTermType) {
+    private DefaultSQLDBTypeFactory(@Assisted TermType rootTermType) {
         this.rootTermType = rootTermType;
+        this.rootDBType = new DBTermTypeImpl("AbstractDBType", rootTermType.getAncestry(), true);
+        this.stringType = new VarCharTermType(rootDBType.getAncestry());
+        this.integerType = new IntegerDBTermType(rootDBType.getAncestry());
     }
 
     @Override
     public DBTermType getDBStringType() {
-        throw new RuntimeException("TODO: implement it");
+        return stringType;
     }
 
     @Override
     public DBTermType getDBIntegerType() {
-        throw new RuntimeException("TODO: implement it");
+        return integerType;
     }
 }
