@@ -26,6 +26,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -38,10 +39,10 @@ public class TermFactoryImpl implements TermFactory {
 
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
-	private final ValueConstant valueTrue;
-	private final ValueConstant valueFalse;
+	private final RDFLiteralConstant valueTrue;
+	private final RDFLiteralConstant valueFalse;
 	private final Constant valueNull;
-	private final ValueConstant provenanceConstant;
+	private final RDFLiteralConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
@@ -53,10 +54,10 @@ public class TermFactoryImpl implements TermFactory {
 		this.typeFactory = typeFactory;
 		this.functionSymbolFactory = functionSymbolFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-		this.valueTrue = new ValueConstantImpl("true", xsdBoolean);
-		this.valueFalse = new ValueConstantImpl("false", xsdBoolean);
+		this.valueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
+		this.valueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
 		this.valueNull = new NullConstantImpl();
-		this.provenanceConstant = new ValueConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
+		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
@@ -70,18 +71,18 @@ public class TermFactoryImpl implements TermFactory {
 	}
 	
 	@Override
-	public ValueConstant getConstantLiteral(String value) {
-		return new ValueConstantImpl(value, typeFactory.getXsdStringDatatype());
+	public RDFLiteralConstant getRDFLiteralConstant(String value) {
+		return new RDFLiteralConstantImpl(value, typeFactory.getXsdStringDatatype());
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, RDFDatatype type) {
-		return new ValueConstantImpl(value, type);
+	public RDFLiteralConstant getRDFLiteralConstant(String value, RDFDatatype type) {
+		return new RDFLiteralConstantImpl(value, type);
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, IRI type) {
-		return getConstantLiteral(value, typeFactory.getDatatype(type));
+	public RDFLiteralConstant getRDFLiteralConstant(String value, IRI type) {
+		return getRDFLiteralConstant(value, typeFactory.getDatatype(type));
 	}
 
 	@Override
@@ -95,8 +96,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase(), typeFactory);
+	public RDFLiteralConstant getRDFLiteralConstant(String value, String language) {
+		return new RDFLiteralConstantImpl(value, language.toLowerCase(), typeFactory);
 	}
 
 	@Override
@@ -112,6 +113,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI) {
 		return getRDFLiteralFunctionalTerm(lexicalTerm, typeFactory.getDatatype(datatypeIRI));
+	}
+
+	@Override
+	public DBConstant getDBConstant(String value, DBTermType termType) {
+		return new DBConstantImpl(value, termType);
 	}
 
 	@Override
@@ -318,7 +324,7 @@ public class TermFactoryImpl implements TermFactory {
 
 
 	@Override
-	public ValueConstant getBooleanConstant(boolean value) {
+	public RDFLiteralConstant getBooleanConstant(boolean value) {
 		return value ? valueTrue : valueFalse;
 	}
 
@@ -328,7 +334,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ValueConstant getProvenanceSpecialConstant() {
+	public RDFLiteralConstant getProvenanceSpecialConstant() {
 		return provenanceConstant;
 	}
 
@@ -348,7 +354,7 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public GroundFunctionalTerm getIRIFunctionalTerm(IRI iri) {
 		// TODO: build a DB string
-		ValueConstant lexicalConstant = getConstantLiteral(iri.getIRIString());
+		RDFLiteralConstant lexicalConstant = getRDFLiteralConstant(iri.getIRIString());
 
 		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
     }
@@ -375,13 +381,13 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI) {
 		// TODO: use an int-to-string casting function
-		ValueConstant lexicalValue = getConstantLiteral(String.valueOf(encodedIRI));
+		RDFLiteralConstant lexicalValue = getRDFLiteralConstant(String.valueOf(encodedIRI));
 		return getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
-														ImmutableList<ValueConstant> arguments) {
+														ImmutableList<RDFLiteralConstant> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(templateSymbol, arguments);
 		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
 	}
@@ -395,7 +401,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getIRIMutableFunctionalTerm(IRI iri) {
-		ValueConstant lexicalConstant = getConstantLiteral(iri.getIRIString());
+		RDFLiteralConstant lexicalConstant = getRDFLiteralConstant(iri.getIRIString());
 		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
 	}
 

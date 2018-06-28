@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
@@ -542,7 +541,7 @@ public class IQSyntacticEquivalenceCheckerTest {
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getConstantLiteral("John")));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getRDFLiteralConstant("John")));
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
         IntermediateQueryBuilder queryBuilder1 = query.newBuilder();
         queryBuilder1.init(projectionAtom1, constructionNode1);

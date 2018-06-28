@@ -49,8 +49,8 @@ public class ExpressionEvaluator {
 	private final DatalogTools datalogTools;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final ValueConstant valueFalse;
-	private final ValueConstant valueTrue;
+	private final RDFLiteralConstant valueFalse;
+	private final RDFLiteralConstant valueTrue;
 	private final Constant valueNull;
 	private final ImmutableUnificationTools unificationTools;
 	private final ExpressionNormalizer normalizer;
@@ -467,7 +467,7 @@ public class ExpressionEvaluator {
 		// Create a default return constant: blank language with literal type.
 		// TODO: avoid this constant wrapping thing
 		ImmutableFunctionalTerm emptyString = termFactory.getRDFLiteralFunctionalTerm(
-				termFactory.getConstantLiteral("", XSD.STRING), XSD.STRING);
+				termFactory.getRDFLiteralConstant("", XSD.STRING), XSD.STRING);
 
         if (innerTerm instanceof Variable) {
             return term;
@@ -487,7 +487,7 @@ public class ExpressionEvaluator {
 					.map(t -> (RDFDatatype) t)
 					.flatMap(RDFDatatype::getLanguageTag)
 					.map(tag -> termFactory.getRDFLiteralFunctionalTerm(
-							termFactory.getConstantLiteral(tag.getFullString(), XSD.STRING),
+							termFactory.getRDFLiteralConstant(tag.getFullString(), XSD.STRING),
 							XSD.STRING))
 					// Not a langstring or non-fatal error
 					.orElse(null);
@@ -904,7 +904,7 @@ public class ExpressionEvaluator {
 			if (isEqual) {
 				return termFactory.getImmutableFunctionalTerm(EQ, term2, term1);
 			} else {
-				if(term1 instanceof ValueConstant){
+				if(term1 instanceof RDFLiteralConstant){
 					if (isEqual)
 						return termFactory.getImmutableFunctionalTerm(EQ, term1, term2);
 					else
@@ -913,7 +913,7 @@ public class ExpressionEvaluator {
 				return termFactory.getImmutableFunctionalTerm(NEQ, term2, term1);
 			}
 
-		} else if (term2 instanceof ValueConstant) {
+		} else if (term2 instanceof RDFLiteralConstant) {
 
 			if (term1.equals(term2))
 				return termFactory.getBooleanConstant(isEqual);

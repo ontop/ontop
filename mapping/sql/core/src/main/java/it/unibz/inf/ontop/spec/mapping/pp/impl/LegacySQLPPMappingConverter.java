@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -91,9 +91,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(RDF.LANGSTRING.getIRIString())) {
                     // changing the language, its always the second inner term (literal,lang)
                     Term originalLangTag = typedTerm.getTerm(1);
-                    if (originalLangTag instanceof ValueConstant) {
-                        ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = termFactory.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+                    if (originalLangTag instanceof RDFLiteralConstant) {
+                        RDFLiteralConstant originalLangConstant = (RDFLiteralConstant) originalLangTag;
+                        Term normalizedLangTag = termFactory.getRDFLiteralConstant(originalLangConstant.getValue().toLowerCase(),
                                 originalLangConstant.getType());
                         typedTerm.setTerm(1, normalizedLangTag);
                     }

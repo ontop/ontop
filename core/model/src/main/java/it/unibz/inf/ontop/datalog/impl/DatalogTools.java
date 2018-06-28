@@ -7,7 +7,6 @@ import fj.data.List;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -34,7 +33,7 @@ public class DatalogTools {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
-        ValueConstant valueTrue = termFactory.getBooleanConstant(true);
+        RDFLiteralConstant valueTrue = termFactory.getBooleanConstant(true);
         TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
         IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
         IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);

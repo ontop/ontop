@@ -25,14 +25,12 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 /**
  * Provides an interface for storing the value constant.
  */
-public interface ValueConstant extends RDFConstant {
+public interface RDFLiteralConstant extends RDFConstant {
 	
 	/**
-	 * Returns the literal value of this constant.
-	 * 
-	 * @return
+	 * Returns the lexical string of this constant.
 	 */
-	public String getValue();
+	String getValue();
 
 	@Override
 	RDFDatatype getType();

@@ -798,7 +798,7 @@ public class BindWithFunctionsTest {
         try {
             date = df.parse(value);
             Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(termFactory.getConstantLiteral(ts.toString().replace(' ', 'T'), XSD.DATETIME));
+            System.out.println(termFactory.getRDFLiteralConstant(ts.toString().replace(' ', 'T'), XSD.DATETIME));
 
         } catch (ParseException pe) {
 

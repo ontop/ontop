@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.*;
 import org.junit.Test;
 
@@ -43,7 +42,7 @@ public class RedundantJoinFKTest {
     private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F = TERM_FACTORY.getVariable("F");
 
-    private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1", TYPE_FACTORY.getXsdIntegerDatatype());
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
             EQ, B, ONE);

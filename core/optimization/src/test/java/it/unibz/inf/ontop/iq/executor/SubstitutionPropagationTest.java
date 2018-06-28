@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
@@ -50,8 +49,8 @@ public class SubstitutionPropagationTest {
     private static final Variable L = TERM_FACTORY.getVariable("l");
     private static final Variable M = TERM_FACTORY.getVariable("m");
     private static final Variable N = TERM_FACTORY.getVariable("n");
-    private static final ValueConstant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static final ValueConstant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final RDFLiteralConstant ONE = TERM_FACTORY.getRDFLiteralConstant("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final RDFLiteralConstant TWO = TERM_FACTORY.getRDFLiteralConstant("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
     private static final String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
     private static final String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}/{}";
@@ -588,7 +587,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ,
-                X, generateURI1(TERM_FACTORY.getConstantLiteral("two"))));
+                X, generateURI1(TERM_FACTORY.getRDFLiteralConstant("two"))));
         initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),

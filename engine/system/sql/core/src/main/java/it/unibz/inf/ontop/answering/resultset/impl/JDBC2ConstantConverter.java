@@ -134,7 +134,7 @@ public class JDBC2ConstantConverter {
 
             switch (type) {
                 case UNSUPPORTED:
-                    return termFactory.getConstantLiteral(stringValue, typeFactory.getUnsupportedDatatype());
+                    return termFactory.getRDFLiteralConstant(stringValue, typeFactory.getUnsupportedDatatype());
                 case NULL:
                     return null;
 
@@ -163,9 +163,9 @@ public class JDBC2ConstantConverter {
                     // properly.
                     String language = cell.getLangValue();
                     if (language == null || language.trim().equals(""))
-                        return termFactory.getConstantLiteral(stringValue);
+                        return termFactory.getRDFLiteralConstant(stringValue);
                     else
-                        return termFactory.getConstantLiteral(stringValue, language);
+                        return termFactory.getRDFLiteralConstant(stringValue, language);
 
                 case BOOLEAN:
 
@@ -173,47 +173,47 @@ public class JDBC2ConstantConverter {
                     return termFactory.getBooleanConstant(bvalue);
 
                 case DECIMAL:
-                    return termFactory.getConstantLiteral(stringValue, XSD.DECIMAL);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.DECIMAL);
                 case FLOAT:
-                    return termFactory.getConstantLiteral(extractFloatingValue(stringValue), XSD.FLOAT);
+                    return termFactory.getRDFLiteralConstant(extractFloatingValue(stringValue), XSD.FLOAT);
                 case DOUBLE:
-                    return termFactory.getConstantLiteral(extractFloatingValue(stringValue), XSD.DOUBLE);
+                    return termFactory.getRDFLiteralConstant(extractFloatingValue(stringValue), XSD.DOUBLE);
 
                 case INT:
-                    return termFactory.getConstantLiteral(stringValue, XSD.INT);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.INT);
 
                 case LONG:
-                    return termFactory.getConstantLiteral(stringValue, XSD.LONG);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.LONG);
                 case UNSIGNED_INT:
-                    return termFactory.getConstantLiteral(stringValue, XSD.UNSIGNED_INT);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.UNSIGNED_INT);
 
                 case INTEGER:
-                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.INTEGER);
+                    return termFactory.getRDFLiteralConstant(extractIntegerValue(stringValue), XSD.INTEGER);
                 case NEGATIVE_INTEGER:
-                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NEGATIVE_INTEGER);
+                    return termFactory.getRDFLiteralConstant(extractIntegerValue(stringValue), XSD.NEGATIVE_INTEGER);
                 case NON_NEGATIVE_INTEGER:
-                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NON_NEGATIVE_INTEGER);
+                    return termFactory.getRDFLiteralConstant(extractIntegerValue(stringValue), XSD.NON_NEGATIVE_INTEGER);
                 case POSITIVE_INTEGER:
-                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.POSITIVE_INTEGER);
+                    return termFactory.getRDFLiteralConstant(extractIntegerValue(stringValue), XSD.POSITIVE_INTEGER);
                 case NON_POSITIVE_INTEGER:
-                    return termFactory.getConstantLiteral(extractIntegerValue(stringValue), XSD.NON_POSITIVE_INTEGER);
+                    return termFactory.getRDFLiteralConstant(extractIntegerValue(stringValue), XSD.NON_POSITIVE_INTEGER);
 
                 case STRING:
-                    return termFactory.getConstantLiteral(stringValue, XSD.STRING);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.STRING);
                 case DATETIME:
-                    return termFactory.getConstantLiteral(extractDatetimeValue(value), XSD.DATETIME);
+                    return termFactory.getRDFLiteralConstant(extractDatetimeValue(value), XSD.DATETIME);
                 case DATETIME_STAMP:
-                    return termFactory.getConstantLiteral(extractDatetimeValue(value), XSD.DATETIMESTAMP);
+                    return termFactory.getRDFLiteralConstant(extractDatetimeValue(value), XSD.DATETIMESTAMP);
 
                 case DATE:
-                    return termFactory.getConstantLiteral( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)), XSD.DATE);
+                    return termFactory.getRDFLiteralConstant( DateTimeFormatter.ISO_DATE.format(convertToJavaDate(value)), XSD.DATE);
 
                 case TIME:
 
-                    return termFactory.getConstantLiteral(DateTimeFormatter.ISO_TIME.format(convertToTime(value)), XSD.TIME);
+                    return termFactory.getRDFLiteralConstant(DateTimeFormatter.ISO_TIME.format(convertToTime(value)), XSD.TIME);
 
                 case YEAR:
-                    return termFactory.getConstantLiteral(stringValue, XSD.GYEAR);
+                    return termFactory.getRDFLiteralConstant(stringValue, XSD.GYEAR);
                 default:
                     throw new IllegalStateException("Unexpected colType: " + type);
 

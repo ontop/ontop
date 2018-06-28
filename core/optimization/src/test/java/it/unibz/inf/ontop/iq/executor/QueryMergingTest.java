@@ -58,9 +58,9 @@ public class QueryMergingTest {
     private static String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
     private static String URI_TEMPLATE_STR_2 = "http://example.org/ds2/{}";
     private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
-    private static Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant THREE = TERM_FACTORY.getConstantLiteral("3", XSD.INTEGER);
+    private static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant TWO = TERM_FACTORY.getRDFLiteralConstant("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant THREE = TERM_FACTORY.getRDFLiteralConstant("3", XSD.INTEGER);
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE, XSD.INTEGER);
     private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(ONE, XSD.INTEGER);
     private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(TWO, XSD.INTEGER);
@@ -832,8 +832,8 @@ public class QueryMergingTest {
                         P, generateGroundTerm(P1_IRI))));
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_AR2, TERM_FACTORY.getConstantLiteral("2"),
-                TERM_FACTORY.getConstantLiteral("2")));
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, TERM_FACTORY.getRDFLiteralConstant("2"),
+                TERM_FACTORY.getRDFLiteralConstant("2")));
         subQueryBuilder.addChild(subQueryRoot, tableNode);
 
         /*
@@ -1077,7 +1077,7 @@ public class QueryMergingTest {
 
         queryBuilder.init(ANS0_ATOM, rootNode);
         IntensionalDataNode intensionalDataNode = IQ_FACTORY.createIntensionalDataNode(ATOM_FACTORY.getIntensionalTripleAtom(
-                TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER), C3_IRI));
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.INTEGER), C3_IRI));
         queryBuilder.addChild(rootNode, intensionalDataNode);
         IntermediateQuery mainQuery = queryBuilder.build();
 
@@ -1090,7 +1090,7 @@ public class QueryMergingTest {
         DistinctVariableOnlyDataAtom mappingProjectionAtom = ATOM_FACTORY.getDistinctTripleAtom(X, P, O);
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(mappingProjectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER),
+                        X, TERM_FACTORY.getRDFLiteralConstant("1", XSD.INTEGER),
                         P, generateGroundTerm(RDF.TYPE),
                         O, generateGroundTerm(C3_IRI)
                 )));

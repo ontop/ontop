@@ -49,8 +49,8 @@ public class LeftJoinOptimizationTest {
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
-    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1");
+    private final static Constant TWO = TERM_FACTORY.getRDFLiteralConstant("2");
 
     private final static Variable M = TERM_FACTORY.getVariable("m");
     private final static Variable M1 = TERM_FACTORY.getVariable("m1");

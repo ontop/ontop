@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
@@ -35,8 +34,7 @@ public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 	boolean isNull();
 
 	// TODO: eliminate getValue from this interface
-	
-	public String getValue();
+	String getValue();
 
 	/**
 	 * Empty if and only if is null.

@@ -277,14 +277,14 @@ public class R2RMLParser {
 			// create the function object later
 
 			if (lan != null || datatype != null) {
-				ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+				RDFLiteralConstant constantLiteral = termFactory.getRDFLiteralConstant(((Literal) constantObj).getLexicalForm());
 				objectAtom = constantLiteral;
 
 			} else {
 
 				if (constantObj instanceof Literal){
 
-					ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+					RDFLiteralConstant constantLiteral = termFactory.getRDFLiteralConstant(((Literal) constantObj).getLexicalForm());
 					Literal constantLit1 = (Literal) constantObj;
 
 					String lanConstant = om.getLanguageTag();
@@ -514,7 +514,7 @@ public class R2RMLParser {
 				if ((i = getIndexOfCurlyB(str)) > 0){
 					cons = str.substring(0, i);
 					str = str.substring(str.indexOf("}", i)+1, str.length());
-					terms.add(termFactory.getConstantLiteral(cons));
+					terms.add(termFactory.getRDFLiteralConstant(cons));
 				}else{
 					str = str.substring(str.indexOf("}")+1);
 				}
@@ -532,7 +532,7 @@ public class R2RMLParser {
 		if(type == 4){
 			if (!str.equals("")){
 				cons = str;
-				terms.add(termFactory.getConstantLiteral(cons));
+				terms.add(termFactory.getRDFLiteralConstant(cons));
 			}
 		}
 	

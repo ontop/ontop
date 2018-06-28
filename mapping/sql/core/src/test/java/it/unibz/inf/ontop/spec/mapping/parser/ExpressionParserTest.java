@@ -59,7 +59,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("1.0", XSD.DOUBLE), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("1.0", XSD.DOUBLE), translation);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("1", XSD.LONG), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG), translation);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("1", XSD.STRING), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("1", XSD.STRING), translation);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("2016-12-02", XSD.DATE), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("2016-12-02", XSD.DATE), translation);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("15:57:02", XSD.TIME), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("15:57:02", XSD.TIME), translation);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getConstantLiteral("2016-12-02 15:57:02.03", XSD.DATETIMESTAMP), translation);
+        assertEquals(TERM_FACTORY.getRDFLiteralConstant("2016-12-02 15:57:02.03", XSD.DATETIMESTAMP), translation);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 ADD,
                 v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)), translation);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 SUBTRACT,
                 v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)), translation);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 MULTIPLY,
                 v,
-                TERM_FACTORY.getConstantLiteral("2", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("2", XSD.LONG)), translation);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 DIVIDE,
                 v,
-                TERM_FACTORY.getConstantLiteral("2", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("2", XSD.LONG)), translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
@@ -230,7 +230,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 CONCAT,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation);
     }
 
     @Test
@@ -248,9 +248,9 @@ public class ExpressionParserTest {
                 CONCAT,
                 TERM_FACTORY.getFunction(
                         CONCAT,
-                        TERM_FACTORY.getConstantLiteral("A", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("A", XSD.STRING),
                         v),
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation);
     }
 
     @Test
@@ -267,9 +267,9 @@ public class ExpressionParserTest {
                 CONCAT,
                 TERM_FACTORY.getFunction(
                         CONCAT,
-                        TERM_FACTORY.getConstantLiteral("A", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("A", XSD.STRING),
                         v),
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation);
     }
 
     // Boolean expressions are not allowed in the SELECT clause
@@ -290,7 +290,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 EQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -308,7 +308,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 NEQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -326,7 +326,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 NEQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -344,7 +344,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 GT,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG)), translation.get(0));
     }
 
     @Test
@@ -362,7 +362,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 GTE,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG)), translation.get(0));
     }
 
     @Test
@@ -380,7 +380,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 LT,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG)), translation.get(0));
     }
 
     @Test
@@ -398,7 +398,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 LTE,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG)), translation.get(0));
     }
 
     @Test
@@ -416,7 +416,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 EQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -434,7 +434,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 NEQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -452,7 +452,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 NEQ,
                 v,
-                TERM_FACTORY.getConstantLiteral("B", XSD.STRING))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("B", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -470,7 +470,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 GT,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -488,7 +488,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 GTE,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -506,7 +506,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 LT,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -524,7 +524,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
                 LTE,
                 v,
-                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -542,10 +542,10 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(OR,
                 TERM_FACTORY.getFunction(EQ,
                         v,
-                        TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                        TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                 TERM_FACTORY.getFunction(EQ,
                         v,
-                        TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -564,10 +564,10 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getFunction(OR,
                         TERM_FACTORY.getFunction(EQ,
                                 v,
-                                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                         TERM_FACTORY.getFunction(EQ,
                                 v,
-                                TERM_FACTORY.getConstantLiteral("3", XSD.LONG)))), translation.get(0));
+                                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG)))), translation.get(0));
     }
 
     @Ignore
@@ -589,16 +589,16 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getFunction(AND,
                         TERM_FACTORY.getFunction(EQ,
                                 v1,
-                                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                         TERM_FACTORY.getFunction(EQ,
                                 v2,
-                                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))),
+                                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))),
                 TERM_FACTORY.getFunction(EQ,
                         v1,
-                        TERM_FACTORY.getConstantLiteral("2", XSD.LONG)),
+                        TERM_FACTORY.getRDFLiteralConstant("2", XSD.LONG)),
                 TERM_FACTORY.getFunction(EQ,
                         v2,
-                        TERM_FACTORY.getConstantLiteral("4", XSD.LONG))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("4", XSD.LONG))), translation.get(0));
     }
 
 
@@ -648,10 +648,10 @@ public class ExpressionParserTest {
         assertEquals(ImmutableList.of(// FACTORY.getFunction(AND,
                 TERM_FACTORY.getFunction(GTE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                        TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                 TERM_FACTORY.getFunction(LTE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation);
+                        TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation);
     }
 
     @Test
@@ -670,10 +670,10 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getFunction(OR,
                         TERM_FACTORY.getFunction(LT,
                                 v,
-                                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                         TERM_FACTORY.getFunction(GT,
                                 v,
-                                TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                                TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -690,7 +690,7 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(SQL_LIKE,
                 v,
-                TERM_FACTORY.getConstantLiteral("_A%", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("_A%", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -708,7 +708,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(SQL_LIKE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("_A%", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("_A%", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -725,8 +725,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -744,8 +744,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -762,8 +762,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("i", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -781,8 +781,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("i", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -800,8 +800,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -818,8 +818,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -837,8 +837,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("i", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -855,8 +855,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("i", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING)), translation.get(0));
     }
 
 
@@ -874,8 +874,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -892,8 +892,8 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(REGEX,
                 v,
-                TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                TERM_FACTORY.getConstantLiteral("i", XSD.STRING)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING)), translation.get(0));
     }
 
     @Test
@@ -911,8 +911,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -930,8 +930,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(REGEX,
                         v,
-                        TERM_FACTORY.getConstantLiteral("A.*B", XSD.STRING),
-                        TERM_FACTORY.getConstantLiteral("i", XSD.STRING))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("A.*B", XSD.STRING),
+                        TERM_FACTORY.getRDFLiteralConstant("i", XSD.STRING))), translation.get(0));
     }
 
     @Test
@@ -949,10 +949,10 @@ public class ExpressionParserTest {
         assertEquals(ImmutableList.of( //FACTORY.getFunction(AND,
                 TERM_FACTORY.getFunction(GTE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                        TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                 TERM_FACTORY.getFunction(LTE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation);
+                        TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation);
     }
 
     @Test
@@ -970,10 +970,10 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(OR,
                 TERM_FACTORY.getFunction(LT,
                         v,
-                        TERM_FACTORY.getConstantLiteral("1", XSD.LONG)),
+                        TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)),
                 TERM_FACTORY.getFunction(GT,
                         v,
-                        TERM_FACTORY.getConstantLiteral("3", XSD.LONG))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("3", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -990,7 +990,7 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(GTE,
                 v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)), translation.get(0));
     }
 
     @Test
@@ -1008,7 +1008,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(GTE,
                         v,
-                        TERM_FACTORY.getConstantLiteral("1", XSD.LONG))), translation.get(0));
+                        TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG))), translation.get(0));
     }
 
     @Test
@@ -1274,8 +1274,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REGEX, v,
-                TERM_FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
-                TERM_FACTORY.getConstantLiteral("")), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getRDFLiteralConstant("")), translation.get(0));
     }
 
     @Test
@@ -1291,8 +1291,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REGEX, v,
-                TERM_FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
-                TERM_FACTORY.getConstantLiteral("i")), translation.get(0));
+                TERM_FACTORY.getRDFLiteralConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getRDFLiteralConstant("i")), translation.get(0));
     }
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
@@ -1319,9 +1319,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
-                TERM_FACTORY.getConstantLiteral(""),
-                TERM_FACTORY.getConstantLiteral("")), translation);
+                TERM_FACTORY.getRDFLiteralConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getRDFLiteralConstant(""),
+                TERM_FACTORY.getRDFLiteralConstant("")), translation);
     }
 
     @Test
@@ -1337,9 +1337,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
-                TERM_FACTORY.getConstantLiteral(""),
-                TERM_FACTORY.getConstantLiteral("i")), translation);
+                TERM_FACTORY.getRDFLiteralConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getRDFLiteralConstant(""),
+                TERM_FACTORY.getRDFLiteralConstant("i")), translation);
     }
 
     @Test
@@ -1355,9 +1355,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getConstantLiteral("^Ste(v|ph)en$"),
-                TERM_FACTORY.getConstantLiteral(""),
-                TERM_FACTORY.getConstantLiteral("i")), translation);
+                TERM_FACTORY.getRDFLiteralConstant("^Ste(v|ph)en$"),
+                TERM_FACTORY.getRDFLiteralConstant(""),
+                TERM_FACTORY.getRDFLiteralConstant("i")), translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
@@ -1395,9 +1395,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getConstantLiteral("J"),
-                TERM_FACTORY.getConstantLiteral(""),
-                TERM_FACTORY.getConstantLiteral("")), translation);
+                TERM_FACTORY.getRDFLiteralConstant("J"),
+                TERM_FACTORY.getRDFLiteralConstant(""),
+                TERM_FACTORY.getRDFLiteralConstant("")), translation);
     }
 
     @Test
@@ -1413,9 +1413,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getConstantLiteral("J"),
-                TERM_FACTORY.getConstantLiteral("BL"),
-                TERM_FACTORY.getConstantLiteral("")), translation);
+                TERM_FACTORY.getRDFLiteralConstant("J"),
+                TERM_FACTORY.getRDFLiteralConstant("BL"),
+                TERM_FACTORY.getRDFLiteralConstant("")), translation);
     }
 
     @Test(expected = InvalidSelectQueryRuntimeException.class)
@@ -1442,7 +1442,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(SUBSTR2, v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)), translation);
     }
 
     @Test
@@ -1458,8 +1458,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(SUBSTR3, v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG),
-                TERM_FACTORY.getConstantLiteral("2", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG),
+                TERM_FACTORY.getRDFLiteralConstant("2", XSD.LONG)), translation);
     }
 
     @Test (expected = JSQLParserException.class)
@@ -1487,7 +1487,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(SUBSTR2, v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG)), translation);
     }
 
     @Test
@@ -1503,8 +1503,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(SUBSTR3, v,
-                TERM_FACTORY.getConstantLiteral("1", XSD.LONG),
-                TERM_FACTORY.getConstantLiteral("2", XSD.LONG)), translation);
+                TERM_FACTORY.getRDFLiteralConstant("1", XSD.LONG),
+                TERM_FACTORY.getRDFLiteralConstant("2", XSD.LONG)), translation);
     }
 
     @Test

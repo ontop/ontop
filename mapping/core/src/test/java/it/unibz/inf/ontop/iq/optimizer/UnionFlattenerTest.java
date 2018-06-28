@@ -49,7 +49,7 @@ public class UnionFlattenerTest {
     private static String uriTemplate1 = "http://example.org/ds1/{}";
     private static String uriTemplate2 = "http://example.org/ds1/{}{}";
 
-    private final static ValueConstant CONSTANT_STRING = TERM_FACTORY.getConstantLiteral("john");
+    private final static RDFLiteralConstant CONSTANT_STRING = TERM_FACTORY.getRDFLiteralConstant("john");
 
 
     @Test

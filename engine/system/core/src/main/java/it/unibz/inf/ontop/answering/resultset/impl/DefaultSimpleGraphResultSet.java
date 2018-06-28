@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
@@ -135,7 +135,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                         }
                         else {
                             assertion = builder.createDataPropertyAssertion(predicateName,
-                                    subjectConstant, (ValueConstant) objectConstant);
+                                    subjectConstant, (RDFLiteralConstant) objectConstant);
                         }
                     }
                     if (assertion != null)
@@ -195,7 +195,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 constant = termFactory.getConstantIRI(new SimpleRDF().createIRI(vc.getValue().stringValue()));
             }
             else if (vc.getValue() instanceof Literal) {
-                constant = termFactory.getConstantLiteral(vc.getValue().stringValue());
+                constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue());
             }
             else {
                 constant = termFactory.getConstantBNode(vc.getValue().stringValue());

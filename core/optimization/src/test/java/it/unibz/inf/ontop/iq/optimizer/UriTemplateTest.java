@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -91,7 +90,7 @@ public class UriTemplateTest {
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(EQ,
-                        TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getConstantLiteral(URI_TEMPLATE_STR_1_PREFIX), A),
+                        TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getRDFLiteralConstant(URI_TEMPLATE_STR_1_PREFIX), A),
                         C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);

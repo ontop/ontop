@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -623,7 +623,7 @@ public class OWLAPITranslatorOWL2QL {
         public void visit(OWLDataPropertyAssertionAxiom ax) {
             try {
                 IRIConstant c1 = getIndividual(ax.getSubject());
-                ValueConstant c2 = getValueOfLiteral(ax.getObject());
+                RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
                 DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), builder.dataProperties());
 
                 builder.addDataPropertyAssertion(dpe, c1, c2);
@@ -1022,7 +1022,7 @@ public class OWLAPITranslatorOWL2QL {
 
     public DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom ax, OntologyVocabularyCategory<DataPropertyExpression> dataProperties) throws TranslationException, InconsistentOntologyException {
         IRIConstant c1 = getIndividual(ax.getSubject());
-        ValueConstant c2 = getValueOfLiteral(ax.getObject());
+        RDFLiteralConstant c2 = getValueOfLiteral(ax.getObject());
 
         DataPropertyExpression dpe = getPropertyExpression(ax.getProperty(), dataProperties);
         return OntologyBuilderImpl.createDataPropertyAssertion(dpe, c1, c2);
@@ -1085,15 +1085,15 @@ public class OWLAPITranslatorOWL2QL {
         return termFactory.getConstantIRI(rdfFactory.createIRI(ind.asOWLNamedIndividual().getIRI().toString()));
     }
 
-    private ValueConstant getValueOfLiteral(OWLLiteral object) {
+    private RDFLiteralConstant getValueOfLiteral(OWLLiteral object) {
         if (!object.getLang().isEmpty()) {
-            return termFactory.getConstantLiteral(object.getLiteral(), object.getLang());
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), object.getLang());
         }
         else {
             Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(object.getDatatype().getIRI().toString());
             return type.isPresent()
-                ? termFactory.getConstantLiteral(object.getLiteral(), type.get())
-                : termFactory.getConstantLiteral(object.getLiteral());
+                ? termFactory.getRDFLiteralConstant(object.getLiteral(), type.get())
+                : termFactory.getRDFLiteralConstant(object.getLiteral());
         }
     }
 

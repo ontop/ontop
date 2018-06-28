@@ -25,7 +25,7 @@ public class Datalog2IQConversionTest {
 
     private static final Variable X = TERM_FACTORY.getVariable("x");
     private static final Variable Y = TERM_FACTORY.getVariable("y");
-    private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final Constant TWO = TERM_FACTORY.getRDFLiteralConstant("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
     @Test
     public void testHeadConversion() throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {

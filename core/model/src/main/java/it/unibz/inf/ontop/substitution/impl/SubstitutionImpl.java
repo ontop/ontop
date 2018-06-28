@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
-import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
 import it.unibz.inf.ontop.substitution.AppendableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 

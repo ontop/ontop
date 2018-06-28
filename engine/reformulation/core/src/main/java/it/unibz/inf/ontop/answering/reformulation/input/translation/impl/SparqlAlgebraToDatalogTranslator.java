@@ -27,10 +27,7 @@ import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -523,7 +520,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         if (lang.isPresent()) {
             // TODO: use a string lexical type instead
-            return termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(value, typeFactory.getXsdStringDatatype()), lang.get());
+            return termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getRDFLiteralConstant(value, typeFactory.getXsdStringDatatype()), lang.get());
 
         } else {
             RDFDatatype type;
@@ -550,7 +547,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
 
-            Term constant = termFactory.getConstantLiteral(value, type);
+            Term constant = termFactory.getRDFLiteralConstant(value, type);
 
             return termFactory.getRDFLiteralMutableFunctionalTerm(constant, type);
 
@@ -700,10 +697,10 @@ public class SparqlAlgebraToDatalogTranslator {
                     Function f = (Function) term2;
                     if (f.isDataTypeFunction()) {
                         Term functionTerm = f.getTerm(0);
-                        if (functionTerm instanceof it.unibz.inf.ontop.model.term.ValueConstant) {
-                            it.unibz.inf.ontop.model.term.ValueConstant c = (it.unibz.inf.ontop.model.term.ValueConstant) functionTerm;
+                        if (functionTerm instanceof RDFLiteralConstant) {
+                            RDFLiteralConstant c = (RDFLiteralConstant) functionTerm;
                             term2 = termFactory.getFunction(f.getFunctionSymbol(),
-                                    termFactory.getConstantLiteral(c.getValue().toLowerCase(),
+                                    termFactory.getRDFLiteralConstant(c.getValue().toLowerCase(),
                                             c.getType()));
                         }
                     }
@@ -751,7 +748,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
                     Term flags;
                     if (arity == 3)
-                        flags = termFactory.getConstantLiteral("");
+                        flags = termFactory.getRDFLiteralConstant("");
                     else if (arity == 4)
                         flags = terms.get(3);
                     else

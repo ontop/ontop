@@ -224,10 +224,10 @@ public class ExpressionParser {
             Term flags;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getRDFLiteralConstant("");
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getRDFLiteralConstant("i");
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -244,19 +244,19 @@ public class ExpressionParser {
             java.util.function.UnaryOperator<Function> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getRDFLiteralConstant("");
                     not = UnaryOperator.identity();
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getRDFLiteralConstant("i");
                     not = UnaryOperator.identity();
                     break;
                 case NOT_MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getRDFLiteralConstant("");
                     not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getRDFLiteralConstant("i");
                     not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 default:
@@ -769,7 +769,7 @@ public class ExpressionParser {
         }
 
         private void process(String value, IRI datatype) {
-            result = termFactory.getConstantLiteral(value, typeFactory.getDatatype(datatype));
+            result = termFactory.getRDFLiteralConstant(value, typeFactory.getDatatype(datatype));
         }
 
 
@@ -1165,7 +1165,7 @@ public class ExpressionParser {
         switch (terms.size()) {
             case 2:
                 return termFactory.getFunction(
-                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getConstantLiteral(""));
+                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getRDFLiteralConstant(""));
             case 3:
                 // check the flag?
                 return termFactory.getFunction(
@@ -1179,10 +1179,10 @@ public class ExpressionParser {
         switch (terms.size()) {
             case 3:
                 // either Oracle or PostgreSQL, without flags
-                flags = termFactory.getConstantLiteral(""); // the 4th argument is flags
+                flags = termFactory.getRDFLiteralConstant(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType().equals(typeFactory.getDatatype(XSD.STRING))) {
+                if (((RDFLiteralConstant)terms.get(3)).getType().equals(typeFactory.getDatatype(XSD.STRING))) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1192,8 +1192,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(termFactory.getConstantLiteral("1", typeFactory.getDatatype(XSD.LONG)))
-                        || !terms.get(4).equals(termFactory.getConstantLiteral("0", typeFactory.getDatatype(XSD.LONG))))
+                if (!terms.get(3).equals(termFactory.getRDFLiteralConstant("1", typeFactory.getDatatype(XSD.LONG)))
+                        || !terms.get(4).equals(termFactory.getRDFLiteralConstant("0", typeFactory.getDatatype(XSD.LONG))))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx
@@ -1208,12 +1208,12 @@ public class ExpressionParser {
     }
 
     private Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        Term flags = termFactory.getConstantLiteral("");
+        Term flags = termFactory.getRDFLiteralConstant("");
         switch (terms.size()) {
             case 2:
                 return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1),
-                        termFactory.getConstantLiteral(""), flags);
+                        termFactory.getRDFLiteralConstant(""), flags);
             case 3:
                 return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
