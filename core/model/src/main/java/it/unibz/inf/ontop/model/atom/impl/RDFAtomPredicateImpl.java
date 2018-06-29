@@ -86,8 +86,8 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
                     .filter(f -> f.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
                     .filter(f -> f.getTerm(1).equals(iriType))
                     .map(f -> f.getTerm(0))
-                    .filter(t -> t instanceof RDFLiteralConstant)
-                    .map(t -> rdfFactory.createIRI(((RDFLiteralConstant) t).getValue()));
+                    .filter(t -> t instanceof DBConstant)
+                    .map(t -> rdfFactory.createIRI(((DBConstant) t).getValue()));
         }
         return Optional.empty();
     }
