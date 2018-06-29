@@ -51,8 +51,9 @@ public class RDFLiteralConstantImpl implements RDFLiteralConstant {
 
 	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
 		this.value = value;
-		this.termType = typeFactory.getLangTermType(language);
-		this.string = "\"" + value + "@" + language + "\"";
+		String l = language.toLowerCase();
+		this.termType = typeFactory.getLangTermType(l);
+		this.string = "\"" + value + "@" + l + "\"";
 	}
 	
 	@Override

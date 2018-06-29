@@ -42,7 +42,8 @@ public class RedundantJoinFKTest {
     private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F = TERM_FACTORY.getVariable("F");
 
-    private static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static Constant ONE = TERM_FACTORY.getDBConstant("1",
+            TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
             EQ, B, ONE);

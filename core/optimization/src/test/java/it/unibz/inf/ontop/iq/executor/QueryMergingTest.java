@@ -58,9 +58,9 @@ public class QueryMergingTest {
     private static String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
     private static String URI_TEMPLATE_STR_2 = "http://example.org/ds2/{}";
     private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
-    private static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant TWO = TERM_FACTORY.getRDFLiteralConstant("2", TYPE_FACTORY.getXsdIntegerDatatype());
-    private static Constant THREE = TERM_FACTORY.getRDFLiteralConstant("3", XSD.INTEGER);
+    private static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE, XSD.INTEGER);
     private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(ONE, XSD.INTEGER);
     private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(TWO, XSD.INTEGER);
@@ -115,7 +115,7 @@ public class QueryMergingTest {
     }
 
     private GroundFunctionalTerm generateGroundTerm(IRI iri) {
-        return (GroundFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iri);
+        return TERM_FACTORY.getIRIFunctionalTerm(iri);
     }
 
 

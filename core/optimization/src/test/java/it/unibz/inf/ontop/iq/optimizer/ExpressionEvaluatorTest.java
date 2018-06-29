@@ -56,7 +56,7 @@ public class ExpressionEvaluatorTest {
     private final String languageTag =  "en-us";
     // TODO: avoid this language tag wrapping approach
     private final ImmutableFunctionalTerm wrappedLanguageTag = TERM_FACTORY.getRDFLiteralFunctionalTerm(
-            TERM_FACTORY.getRDFLiteralConstant(languageTag, XSD.STRING), XSD.STRING);
+            TERM_FACTORY.getDBStringConstant(languageTag), XSD.STRING);
 
     private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
             LANGMATCHES, EXPR_LANG, wrappedLanguageTag);

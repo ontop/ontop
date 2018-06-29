@@ -413,7 +413,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (str.contains("{")) {
             return getNestedConcat(str);
         }
-        return termFactory.getRDFLiteralConstant(str.substring(1, str.length() - 1), XSD.STRING); // without the double quotes
+        return termFactory.getDBStringConstant(str.substring(1, str.length() - 1)); // without the double quotes
     }
 
     @Override

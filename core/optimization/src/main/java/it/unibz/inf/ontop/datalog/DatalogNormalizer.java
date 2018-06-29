@@ -214,9 +214,9 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = termFactory.getFunctionEQ(termFactory.getRDFLiteralConstant("1",
-					typeFactory.getXsdIntegerDatatype()),
-					termFactory.getRDFLiteralConstant("1", typeFactory.getXsdIntegerDatatype()));
+			DBConstant one = termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType());
+
+			Function trivialEquality = termFactory.getFunctionEQ(one, one);
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}

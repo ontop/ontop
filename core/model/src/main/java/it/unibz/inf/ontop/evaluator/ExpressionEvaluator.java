@@ -904,7 +904,7 @@ public class ExpressionEvaluator {
 			if (isEqual) {
 				return termFactory.getImmutableFunctionalTerm(EQ, term2, term1);
 			} else {
-				if(term1 instanceof RDFLiteralConstant){
+				if(term1 instanceof Constant){
 					if (isEqual)
 						return termFactory.getImmutableFunctionalTerm(EQ, term1, term2);
 					else
@@ -913,7 +913,7 @@ public class ExpressionEvaluator {
 				return termFactory.getImmutableFunctionalTerm(NEQ, term2, term1);
 			}
 
-		} else if (term2 instanceof RDFLiteralConstant) {
+		} else if (term2 instanceof Constant) {
 
 			if (term1.equals(term2))
 				return termFactory.getBooleanConstant(isEqual);
