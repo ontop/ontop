@@ -18,7 +18,8 @@ public class SubstitutionTest {
     private static final Variable X = TERM_FACTORY.getVariable("x");
     private static final Variable Y = TERM_FACTORY.getVariable("y");
     private static final Variable Z = TERM_FACTORY.getVariable("z");
-    private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
+    private static final Constant ONE = TERM_FACTORY.getDBConstant("1",
+            TYPE_FACTORY.getDBTypeFactory().getDBLongType());
 
     @Test
     public void testOrientate1() {

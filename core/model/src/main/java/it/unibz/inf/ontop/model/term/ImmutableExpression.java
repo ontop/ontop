@@ -35,9 +35,15 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
     boolean isVar2VarEquality();
 
     default Optional<TermTypeInference> inferTermType(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) {
+        BooleanFunctionSymbol functionSymbol = getFunctionSymbol();
+        return functionSymbol.inferTypeFromArgumentTypes(actualArgumentTypes);
+    }
+
+    default Optional<TermTypeInference> inferTermTypeAndCheckForFatalError(
+            ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) throws FatalTypingException {
         try {
             BooleanFunctionSymbol functionSymbol = getFunctionSymbol();
-            return functionSymbol.inferTypeFromArgumentTypes(actualArgumentTypes);
+            return functionSymbol.inferTypeFromArgumentTypesAndCheckForFatalError(actualArgumentTypes);
         } catch (FatalTypingException e) {
             throw new FatalTypingException(this, e);
         }

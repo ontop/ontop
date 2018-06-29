@@ -10,11 +10,6 @@ import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -30,16 +25,14 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
     private final Datalog2QueryMappingConverter mappingConverter;
-    private final TermFactory termFactory;
     private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
     private final EQNormalizer eqNormalizer;
 
     @Inject
     private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter,
-                                        TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter,
+                                        SQLPPMapping2DatalogConverter ppMapping2DatalogConverter,
                                         EQNormalizer eqNormalizer) {
         this.mappingConverter = mappingConverter;
-        this.termFactory = termFactory;
         this.ppMapping2DatalogConverter = ppMapping2DatalogConverter;
         this.eqNormalizer = eqNormalizer;
     }
@@ -73,33 +66,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     }
 
     /**
-     * Normalize language tags (make them lower-case) and equalities
-     * (remove them by replacing all equivalent terms with one representative)
+     * Normalize equalities
      */
-
     private void normalizeMapping(ImmutableSet<CQIE> unfoldingProgram) {
-
-        // Normalizing language tags. Making all LOWER CASE
-
-        for (CQIE mapping : unfoldingProgram) {
-            Function head = mapping.getHead();
-            for (Term term : head.getTerms()) {
-                if (!(term instanceof Function))
-                    continue;
-
-                Function typedTerm = (Function) term;
-                if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(RDF.LANGSTRING.getIRIString())) {
-                    // changing the language, its always the second inner term (literal,lang)
-                    Term originalLangTag = typedTerm.getTerm(1);
-                    if (originalLangTag instanceof ValueConstant) {
-                        ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = termFactory.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
-                                originalLangConstant.getType());
-                        typedTerm.setTerm(1, normalizedLangTag);
-                    }
-                }
-            }
-        }
 
         // Normalizing equalities
         for (CQIE cq: unfoldingProgram)

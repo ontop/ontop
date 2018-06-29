@@ -18,10 +18,10 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultOBDAProperties();
-        properties.putAll(loadDefaultQASQLProperties());
+        Properties properties = loadDefaultQASQLProperties();
         properties.putAll(userProperties);
-        return properties;
+
+        return OntopSQLCoreSettingsImpl.loadSQLCoreProperties(properties);
     }
 
     static Properties loadDefaultQASQLProperties() {
@@ -39,7 +39,7 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     }
 
     @Override
-    public Optional<String> getJdbcDriver() {
+    public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
 }

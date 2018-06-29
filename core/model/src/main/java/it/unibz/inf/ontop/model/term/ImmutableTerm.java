@@ -20,8 +20,16 @@ public interface ImmutableTerm {
     /**
      * Returns empty when no TermType has been inferred (missing information)
      * and no non-fatal error has been detected.
+     *
+     * Validation: looks for fatal errors and throws a FatalTypingException when detected.
      */
-    Optional<TermTypeInference> inferType() throws FatalTypingException;
+    Optional<TermTypeInference> inferAndValidateType() throws FatalTypingException;
+
+    /**
+     * Returns empty when no TermType has been inferred (missing information or fatal error)
+     * and no non-fatal error has been detected.
+     */
+    Optional<TermTypeInference> inferType();
 
     EvaluationResult evaluateEq(ImmutableTerm otherTerm);
 }

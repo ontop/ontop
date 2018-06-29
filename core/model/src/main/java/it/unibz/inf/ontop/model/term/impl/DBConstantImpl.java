@@ -1,0 +1,78 @@
+package it.unibz.inf.ontop.model.term.impl;
+
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
+
+import java.util.stream.Stream;
+
+public class DBConstantImpl implements DBConstant {
+    private final String value;
+    private final DBTermType termType;
+
+    public DBConstantImpl(String value, DBTermType termType) {
+        this.value = value;
+        this.termType = termType;
+    }
+
+    @Override
+    public DBTermType getType() {
+        return termType;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean isGround() {
+        return true;
+    }
+
+    @Override
+    public Stream<Variable> getVariableStream() {
+        return Stream.empty();
+    }
+
+    /**
+     * TODO: should we print differently?
+     */
+    @Override
+    public String toString() {
+        return "\"" + value + "\"^^" + termType;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof DBConstant) {
+            DBConstant otherConstant = (DBConstant) other;
+            return otherConstant.getType().equals(termType)
+                    && otherConstant.getValue().equals(value);
+        }
+        else
+            return false;
+    }
+
+    @Override
+    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+        if (otherTerm instanceof Constant) {
+            return ((Constant) otherTerm).isNull()
+                    ? EvaluationResult.declareIsNull()
+                    : equals(otherTerm)
+                        ? EvaluationResult.declareIsTrue()
+                        : EvaluationResult.declareIsFalse();
+        }
+        else
+            return otherTerm.evaluateEq(this);
+    }
+
+    @Override
+    public Term clone() {
+        return new DBConstantImpl(value, termType);
+    }
+}

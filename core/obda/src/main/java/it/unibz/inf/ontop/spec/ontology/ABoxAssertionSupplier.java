@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.ontology;
 
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 
 /*
     creates ABox assertions without checking their vocabulary against an ontology
@@ -48,5 +48,5 @@ public interface ABoxAssertionSupplier {
      * @throws InconsistentOntologyException if dpe is the bottom property ([D4])
      */
 
-    DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException;
+    DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, RDFLiteralConstant v) throws InconsistentOntologyException;
 }

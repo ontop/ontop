@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.si.impl;
 
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -180,17 +180,17 @@ public class RDF4JGraphLoading {
                 else if (object instanceof Literal) {
                     Literal l = (Literal) object;
                     Optional<String> lang = l.getLanguage();
-                    final ValueConstant c2;
+                    final RDFLiteralConstant c2;
                     if (!lang.isPresent()) {
                         IRI datatype = l.getDatatype();
                         RDFDatatype type = (datatype == null)
                                 ? typeFactory.getXsdStringDatatype()
                                 : typeFactory.getOptionalDatatype(rdfFactory.createIRI(datatype.stringValue()))
                                 .orElseGet(typeFactory::getUnsupportedDatatype);
-                        c2 = termFactory.getConstantLiteral(l.getLabel(), type);
+                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), type);
                     }
                     else {
-                        c2 = termFactory.getConstantLiteral(l.getLabel(), lang.get());
+                        c2 = termFactory.getRDFLiteralConstant(l.getLabel(), lang.get());
                     }
                     return builder.createDataPropertyAssertion(predicateName, c, c2);
                 }

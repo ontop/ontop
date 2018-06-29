@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.model.term;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
@@ -135,26 +136,17 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
-	public ValueConstant getBooleanConstant(boolean value);
+	public RDFLiteralConstant getBooleanConstant(boolean value);
 
 	Constant getNullConstant();
 
 	/**
 	 * TODO: explain
 	 */
-	ValueConstant getProvenanceSpecialConstant();
-	
-	/**
-	 * Construct a {@link ValueConstant} object.
-	 * 
-	 * @param value
-	 *            the value of the constant.
-	 * @return the value constant.
-	 */
-	public ValueConstant getConstantLiteral(String value);
+	RDFLiteralConstant getProvenanceSpecialConstant();
 
 	/**
-	 * Construct a {@link ValueConstant} object with a type definition.
+	 * Construct a {@link RDFLiteralConstant} object with a type definition.
 	 * <p>
 	 * Example:
 	 * <p>
@@ -169,13 +161,13 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	ValueConstant getConstantLiteral(String value, RDFDatatype type);
+	RDFLiteralConstant getRDFLiteralConstant(String value, RDFDatatype type);
 
-	ValueConstant getConstantLiteral(String value, IRI type);
+	RDFLiteralConstant getRDFLiteralConstant(String value, IRI type);
 
 
 	/**
-	 * Construct a {@link ValueConstant} object with a language tag.
+	 * Construct a {@link RDFLiteralConstant} object with a language tag.
 	 * <p>
 	 * Example:
 	 * <p>
@@ -189,7 +181,7 @@ public interface TermFactory {
 	 *            the language tag for the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, String language);
+	RDFLiteralConstant getRDFLiteralConstant(String value, String language);
 
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language);
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type);
@@ -198,6 +190,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language);
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type);
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI);
+
+	DBConstant getDBConstant(String value, DBTermType termType);
+	DBConstant getDBStringConstant(String value);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -239,7 +234,7 @@ public interface TermFactory {
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
-												 ImmutableList<ValueConstant> arguments);
+												 ImmutableList<DBConstant> arguments);
 
 	/**
 	 * Temporary

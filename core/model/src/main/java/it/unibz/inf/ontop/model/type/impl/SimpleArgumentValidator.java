@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 
 public class SimpleArgumentValidator implements ArgumentValidator {
@@ -29,16 +28,20 @@ public class SimpleArgumentValidator implements ArgumentValidator {
         /*
          * Checks the argument types
          */
-        IntStream.range(0, argumentTypes.size())
-                .forEach(i -> argumentTypes.get(i)
-                        .flatMap(TermTypeInference::getTermType)
-                        .ifPresent(t -> checkTypes(expectedBaseTypes.get(i), t)));
+        for (int i=0; i < argumentTypes.size(); i++) {
+            Optional<TermType> argumentType = argumentTypes.get(i)
+                    .flatMap(TermTypeInference::getTermType);
+
+            if (argumentType.isPresent()) {
+                checkTypes(expectedBaseTypes.get(i), argumentType.get());
+            }
+        }
     }
 
     /**
      * Can be overloaded
      */
-    protected void checkTypes(TermType expectedBaseType, TermType argumentType) {
+    protected void checkTypes(TermType expectedBaseType, TermType argumentType) throws FatalTypingException {
         if (argumentType.isAbstract())
             throw new AbstractTermTypeException(argumentType);
 

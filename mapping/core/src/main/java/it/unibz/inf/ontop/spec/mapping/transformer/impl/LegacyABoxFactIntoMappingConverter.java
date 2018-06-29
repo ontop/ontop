@@ -10,8 +10,8 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
@@ -126,14 +126,14 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         for (DataPropertyAssertion da : das) {
             // no blank nodes are supported here
             IRIConstant s = (IRIConstant) da.getSubject();
-            ValueConstant o = da.getValue();
+            RDFLiteralConstant o = da.getValue();
             IRI propertyIRI = da.getProperty().getIRI();
 
 
             Function head = o.getType().getLanguageTag()
                     .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
-                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
                     .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
                             termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
@@ -153,15 +153,15 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRI propertyIRI = aa.getProperty().getIRI();
 
             Function head;
-            if (aa.getValue() instanceof ValueConstant) {
+            if (aa.getValue() instanceof RDFLiteralConstant) {
 
-                ValueConstant o = (ValueConstant) aa.getValue();
+                RDFLiteralConstant o = (RDFLiteralConstant) aa.getValue();
 
                 head = o.getType().getLanguageTag()
                         .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                     s.getIRI()),
                                     propertyIRI,
-                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
+                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
                         .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                 s.getIRI()),
                                 propertyIRI,

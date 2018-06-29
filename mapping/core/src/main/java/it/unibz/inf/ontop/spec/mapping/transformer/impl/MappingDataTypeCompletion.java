@@ -123,8 +123,8 @@ public class MappingDataTypeCompletion {
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
-        } else if (term instanceof ValueConstant) {
-            Term newTerm = termFactory.getRDFLiteralMutableFunctionalTerm(term, ((ValueConstant) term).getType());
+        } else if (term instanceof RDFLiteralConstant) {
+            Term newTerm = termFactory.getRDFLiteralMutableFunctionalTerm(term, ((RDFLiteralConstant) term).getType());
             atom.setTerm(position, newTerm);
         } else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
@@ -266,7 +266,7 @@ public class MappingDataTypeCompletion {
                     
                 } else if (t instanceof FunctionalTermImpl) {
                     // NO-OP
-                } else if (t instanceof ValueConstant) {
+                } else if (t instanceof RDFLiteralConstant) {
                     // NO-OP
                 } else if (t instanceof IRIConstant) {
                     // NO-OP

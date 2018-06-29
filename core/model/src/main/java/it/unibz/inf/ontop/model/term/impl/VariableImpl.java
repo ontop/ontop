@@ -84,11 +84,6 @@ public class VariableImpl implements Variable, Comparable<Variable> {
 	}
 
 	@Override
-	public Optional<TermTypeInference> inferType() throws FatalTypingException {
-		return Optional.empty();
-	}
-
-	@Override
 	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
 		if (otherTerm instanceof Variable) {
 			return equals(otherTerm)

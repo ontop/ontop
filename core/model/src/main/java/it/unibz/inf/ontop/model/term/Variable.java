@@ -20,6 +20,10 @@ package it.unibz.inf.ontop.model.term;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.TermTypeInference;
+
+import java.util.Optional;
+
 /**
  * This class defines a type of {@link Term} in which it expresses a quantity
  * that during a calculation is assumed to vary or be capable of varying in
@@ -27,5 +31,15 @@ package it.unibz.inf.ontop.model.term;
  */
 public interface Variable extends NonFunctionalTerm, NonConstantTerm, NonGroundTerm, Comparable<Variable>, Term {
 
-	public String getName();
+	String getName();
+
+	@Override
+	default Optional<TermTypeInference> inferAndValidateType(){
+		return Optional.empty();
+	}
+
+	@Override
+	default Optional<TermTypeInference> inferType(){
+		return Optional.empty();
+	}
 }

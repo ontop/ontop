@@ -58,7 +58,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.substitutionUtilities = substitutionUtilities;
-        ValueConstant valueTrue = termFactory.getBooleanConstant(true);
+        RDFLiteralConstant valueTrue = termFactory.getBooleanConstant(true);
         this.trueEq = termFactory.getFunctionEQ(valueTrue, valueTrue);
         this.datalogFactory = datalogFactory;
         this.datalogTools = datalogTools;

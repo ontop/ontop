@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -46,7 +46,7 @@ public class OptimizationTestingTools {
     public static final DatalogTools DATALOG_TOOLS;
     public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
     public static final IQConverter IQ_CONVERTER;
-    public static final ValueConstant TRUE, FALSE;
+    public static final RDFLiteralConstant TRUE, FALSE;
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;

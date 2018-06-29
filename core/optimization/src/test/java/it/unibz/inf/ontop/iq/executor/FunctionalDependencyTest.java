@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.datalog.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -64,9 +64,9 @@ public class FunctionalDependencyTest {
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
-    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
-    private final static Constant THREE = TERM_FACTORY.getConstantLiteral("3");
+    private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
     private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 

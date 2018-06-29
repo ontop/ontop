@@ -17,7 +17,7 @@ public class FirstTypeIsASecondTypeValidator extends SimpleArgumentValidator {
     }
 
     @Override
-    public void validate(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
+    public void validate(ImmutableList<Optional<TermTypeInference>> argumentTypes) throws FatalTypingException {
         super.validate(argumentTypes);
 
         Optional<TermType> optionalFirstType = argumentTypes.get(0)

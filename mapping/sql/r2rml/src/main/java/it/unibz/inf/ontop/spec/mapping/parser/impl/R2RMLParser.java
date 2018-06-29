@@ -277,14 +277,15 @@ public class R2RMLParser {
 			// create the function object later
 
 			if (lan != null || datatype != null) {
-				ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+				RDFLiteralConstant constantLiteral = termFactory.getRDFLiteralConstant(((Literal) constantObj).getLexicalForm(), XSD.STRING);
 				objectAtom = constantLiteral;
 
 			} else {
 
 				if (constantObj instanceof Literal){
 
-					ValueConstant constantLiteral = termFactory.getConstantLiteral(((Literal) constantObj).getLexicalForm());
+					String lexicalString = ((Literal) constantObj).getLexicalForm();
+					DBConstant lexicalTerm = termFactory.getDBStringConstant(lexicalString);
 					Literal constantLit1 = (Literal) constantObj;
 
 					String lanConstant = om.getLanguageTag();
@@ -293,24 +294,15 @@ public class R2RMLParser {
 					// we check if it is a literal with language tag
 
 					if (lanConstant != null) {
-						objectAtom = termFactory.getRDFLiteralFunctionalTerm(constantLiteral, lanConstant);
+						objectAtom = termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, lanConstant);
 					}
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(datatypeConstant.getIRIString());
-						if (!type.isPresent()) {
-							// throw new RuntimeException("Unsupported datatype: " +
-							// datatype.toString());
-							logger.warn("Unsupported datatype will not be converted: "
-									+ datatypeConstant.toString());
-						} else {
-							objectAtom = termFactory.getRDFLiteralFunctionalTerm(constantLiteral, type.get());
-						}
+						objectAtom = termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeConstant);
 					}
 					else {
-
-						objectAtom = constantLiteral;
+						objectAtom = termFactory.getRDFLiteralConstant(lexicalString, XSD.STRING);
 								 // .RDFS_LITERAL;
 					}
                 } else if (constantObj instanceof IRI){
@@ -514,7 +506,7 @@ public class R2RMLParser {
 				if ((i = getIndexOfCurlyB(str)) > 0){
 					cons = str.substring(0, i);
 					str = str.substring(str.indexOf("}", i)+1, str.length());
-					terms.add(termFactory.getConstantLiteral(cons));
+					terms.add(termFactory.getDBStringConstant(cons));
 				}else{
 					str = str.substring(str.indexOf("}")+1);
 				}
@@ -532,7 +524,7 @@ public class R2RMLParser {
 		if(type == 4){
 			if (!str.equals("")){
 				cons = str;
-				terms.add(termFactory.getConstantLiteral(cons));
+				terms.add(termFactory.getDBStringConstant(cons));
 			}
 		}
 	

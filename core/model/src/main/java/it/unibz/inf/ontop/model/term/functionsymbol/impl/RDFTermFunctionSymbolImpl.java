@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
@@ -30,8 +31,13 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
-        // TODO: check for NULL values (and throw a FatalTypingException, in test mode)
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
+        // TODO: complain if one is null and the one is not nullable
+        if (terms.stream()
+                .filter(t -> t instanceof Constant)
+                .anyMatch(c -> ((Constant) c).isNull()))
+            return Optional.of(TermTypeInference.declareNonFatalError());
+
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
 
@@ -40,5 +46,12 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                 .map(t -> (RDFTermTypeConstant) t)
                 .map(RDFTermTypeConstant::getRDFTermType)
                 .map(TermTypeInference::declareTermType);
+    }
+
+    @Override
+    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
+            throws FatalTypingException {
+        validateSubTermTypes(terms);
+        return inferType(terms);
     }
 }

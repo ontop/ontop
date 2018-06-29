@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -13,7 +12,6 @@ import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 import org.junit.Before;
 import org.junit.Test;
 
