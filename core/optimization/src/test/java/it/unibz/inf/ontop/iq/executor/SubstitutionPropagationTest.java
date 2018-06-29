@@ -587,7 +587,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ,
-                X, generateURI1(TERM_FACTORY.getRDFLiteralConstant("two"))));
+                X, generateURI1(TERM_FACTORY.getDBStringConstant("two"))));
         initialQueryBuilder.addChild(leftJoin, filterNode, RIGHT);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),

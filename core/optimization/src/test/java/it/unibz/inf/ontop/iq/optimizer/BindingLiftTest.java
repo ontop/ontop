@@ -1165,7 +1165,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        RDFLiteralConstant two = TERM_FACTORY.getRDFLiteralConstant("2");
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1190,7 +1190,7 @@ public class BindingLiftTest {
         queryBuilder.addChild(topUnionNode, joinNode);
 
 
-        RDFLiteralConstant three = TERM_FACTORY.getRDFLiteralConstant("3");
+        DBConstant three = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1279,7 +1279,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        RDFLiteralConstant two = TERM_FACTORY.getRDFLiteralConstant("2");
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(

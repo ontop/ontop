@@ -608,7 +608,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private ImmutableTerm createObjectTerm(String column, FunctionSymbol datatype) {
 		ImmutableTerm object;
 		if(column.matches("\"([\\w.]+)?\"")){
-			object = termFactory.getRDFLiteralConstant(column.substring(1, column.length()-1));
+			object = termFactory.getDBStringConstant(column.substring(1, column.length()-1));
 		}
 		else {
 			List<FormatString> columnStrings = parse(column);

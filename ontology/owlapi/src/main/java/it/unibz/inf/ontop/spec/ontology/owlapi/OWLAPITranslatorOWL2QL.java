@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
@@ -1090,10 +1091,10 @@ public class OWLAPITranslatorOWL2QL {
             return termFactory.getRDFLiteralConstant(object.getLiteral(), object.getLang());
         }
         else {
-            Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(object.getDatatype().getIRI().toString());
+            Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
             return type.isPresent()
                 ? termFactory.getRDFLiteralConstant(object.getLiteral(), type.get())
-                : termFactory.getRDFLiteralConstant(object.getLiteral());
+                : termFactory.getRDFLiteralConstant(object.getLiteral(), XSD.STRING);
         }
     }
 

@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -54,7 +55,7 @@ public class CQCUtilitiesTest {
 	Term x = TERM_FACTORY.getVariable("x");
 	Term y = TERM_FACTORY.getVariable("y");
 	Term c1 = TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI("URI1"));
-	Term c2 = TERM_FACTORY.getRDFLiteralConstant("m");
+	Term c2 = TERM_FACTORY.getRDFLiteralConstant("m", XSD.STRING);
 
 	IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
 	IRI propertyR = RDF_FACTORY.createIRI("http://example.com/R");

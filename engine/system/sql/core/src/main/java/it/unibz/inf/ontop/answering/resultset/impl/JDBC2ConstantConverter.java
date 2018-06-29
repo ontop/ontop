@@ -163,7 +163,7 @@ public class JDBC2ConstantConverter {
                     // properly.
                     String language = cell.getLangValue();
                     if (language == null || language.trim().equals(""))
-                        return termFactory.getRDFLiteralConstant(stringValue);
+                        return termFactory.getRDFLiteralConstant(stringValue, XSD.STRING);
                     else
                         return termFactory.getRDFLiteralConstant(stringValue, language);
 

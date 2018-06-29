@@ -133,7 +133,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             Function head = o.getType().getLanguageTag()
                     .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
-                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getRDFLiteralConstant(o.getValue()), lang.getFullString())))
+                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
                     .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
                             propertyIRI,
                             termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
@@ -161,7 +161,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                         .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                     s.getIRI()),
                                     propertyIRI,
-                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getRDFLiteralConstant(o.getValue()), lang.getFullString())))
+                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
                         .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
                                 s.getIRI()),
                                 propertyIRI,

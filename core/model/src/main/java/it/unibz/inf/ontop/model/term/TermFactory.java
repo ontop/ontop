@@ -202,6 +202,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, IRI datatypeIRI);
 
 	DBConstant getDBConstant(String value, DBTermType termType);
+	DBConstant getDBStringConstant(String value);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -243,7 +244,7 @@ public interface TermFactory {
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
-												 ImmutableList<RDFLiteralConstant> arguments);
+												 ImmutableList<DBConstant> arguments);
 
 	/**
 	 * Temporary

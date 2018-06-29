@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
@@ -195,7 +196,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 constant = termFactory.getConstantIRI(new SimpleRDF().createIRI(vc.getValue().stringValue()));
             }
             else if (vc.getValue() instanceof Literal) {
-                constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue());
+                constant = termFactory.getRDFLiteralConstant(vc.getValue().stringValue(), XSD.STRING);
             }
             else {
                 constant = termFactory.getConstantBNode(vc.getValue().stringValue());

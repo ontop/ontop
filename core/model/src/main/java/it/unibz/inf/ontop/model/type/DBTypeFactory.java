@@ -9,6 +9,17 @@ public interface DBTypeFactory {
 
     DBTermType getDBIntegerType();
 
+    DBTermType getDBLongType();
+
+    DBTermType getDBDateType();
+
+    DBTermType getDBTimeType();
+
+    DBTermType getDBDateTimestampType();
+
+    DBTermType getDBDoubleType();
+
+
 
     /**
      * TODO: find a better name

@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 
 import java.util.List;
@@ -120,7 +121,7 @@ public class ThetaGenerationTest extends TestCase {
 
 		
 			Term t1 = TERM_FACTORY.getVariable("x");
-			Term t2 = TERM_FACTORY.getRDFLiteralConstant("y");
+			Term t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
 			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -184,7 +185,7 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_5(){
 
 			Term t2 = TERM_FACTORY.getVariable("x");
-			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y");
+			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
 			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -211,8 +212,8 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_6(){
 
 
-			Term t2 = TERM_FACTORY.getRDFLiteralConstant("y");
-			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y");
+			Term t2 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
+			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
 			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -265,8 +266,8 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_8(){
 
 		try {
-			Term t2 = TERM_FACTORY.getRDFLiteralConstant("x");
-			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y");
+			Term t2 = TERM_FACTORY.getRDFLiteralConstant("x", XSD.STRING);
+			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
 			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -290,7 +291,7 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_9(){
 
 		try {
-			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y");
+			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 			Term t2 = TERM_FACTORY.getVariable("y");
 			List<Term> vars = new Vector<Term>();
 			vars.add(t2);
@@ -501,7 +502,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
@@ -536,7 +537,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -566,7 +567,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
@@ -597,7 +598,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t3);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
@@ -773,7 +774,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
@@ -808,7 +809,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
@@ -838,7 +839,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t1);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
@@ -869,7 +870,7 @@ public class ThetaGenerationTest extends TestCase {
 		vars1.add(t3);
 		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
-		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123");
+		Term t2 = TERM_FACTORY.getRDFLiteralConstant("123", XSD.STRING);
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());

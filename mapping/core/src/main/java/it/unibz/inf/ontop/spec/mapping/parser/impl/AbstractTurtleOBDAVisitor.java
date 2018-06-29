@@ -201,7 +201,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             if (i > 0) {
                 st = str.substring(0, i);
                 st = st.replace("\\\\", "");
-                terms.add(termFactory.getRDFLiteralConstant(st));
+                terms.add(termFactory.getDBStringConstant(st));
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 j = str.indexOf("}");
@@ -213,7 +213,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         if (!str.equals("")) {
             str = str.replace("\\\\", "");
-            terms.add(termFactory.getRDFLiteralConstant(str));
+            terms.add(termFactory.getDBStringConstant(str));
         }
         return terms;
     }

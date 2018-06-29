@@ -58,9 +58,9 @@ public class RedundantSelfJoinTest {
     private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
     private final static Variable P1 = TERM_FACTORY.getVariable("P");
-    private final static Constant ONE = TERM_FACTORY.getRDFLiteralConstant("1");
-    private final static Constant TWO = TERM_FACTORY.getRDFLiteralConstant("2");
-    private final static Constant THREE = TERM_FACTORY.getRDFLiteralConstant("3");
+    private final static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
 
     private final static Variable M = TERM_FACTORY.getVariable("m");
     private final static Variable M1 = TERM_FACTORY.getVariable("m1");
@@ -1265,7 +1265,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testSubstitutionPropagationWithBlockingUnion1() throws EmptyQueryException {
-        Constant constant = TERM_FACTORY.getRDFLiteralConstant("constant");
+        Constant constant = TERM_FACTORY.getDBStringConstant("constant");
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
@@ -1308,7 +1308,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testSubstitutionPropagationWithBlockingUnion2() throws EmptyQueryException {
-        Constant constant = TERM_FACTORY.getRDFLiteralConstant("constant");
+        Constant constant = TERM_FACTORY.getDBStringConstant("constant");
         IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 

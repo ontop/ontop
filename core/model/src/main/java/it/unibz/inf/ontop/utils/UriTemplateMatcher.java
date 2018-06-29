@@ -146,11 +146,10 @@ public class UriTemplateMatcher {
                 (IRIStringTemplateFunctionSymbol)((ImmutableFunctionalTerm) matchingTerm).getFunctionSymbol();
 
         Matcher matcher = pattern.matcher(iri.getIRIString());
-        ImmutableList<RDFLiteralConstant> arguments = IntStream.range(1, matcher.groupCount() + 1)
+        ImmutableList<DBConstant> arguments = IntStream.range(1, matcher.groupCount() + 1)
                 .boxed()
                 .map(matcher::group)
-                // TODO: use a DB string
-                .map(termFactory::getRDFLiteralConstant)
+                .map(termFactory::getDBStringConstant)
                 .collect(ImmutableCollectors.toList());
 
         return termFactory.getIRIFunctionalTerm(matchingFunctionSymbol, arguments);

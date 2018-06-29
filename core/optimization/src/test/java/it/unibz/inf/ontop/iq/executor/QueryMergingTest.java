@@ -824,6 +824,8 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -832,8 +834,7 @@ public class QueryMergingTest {
                         P, generateGroundTerm(P1_IRI))));
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
         ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_AR2, TERM_FACTORY.getRDFLiteralConstant("2"),
-                TERM_FACTORY.getRDFLiteralConstant("2")));
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, two, two));
         subQueryBuilder.addChild(subQueryRoot, tableNode);
 
         /*

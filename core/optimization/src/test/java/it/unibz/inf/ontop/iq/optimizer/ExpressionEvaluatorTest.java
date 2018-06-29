@@ -307,7 +307,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNotNullUri3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI2(TERM_FACTORY.getRDFLiteralConstant("toto"), X));
+                generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
@@ -319,7 +319,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNotNullUri4() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI1(TERM_FACTORY.getRDFLiteralConstant("toto")));
+                generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());
@@ -374,7 +374,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNullUri3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
-                generateURI2(TERM_FACTORY.getRDFLiteralConstant("toto"), X));
+                generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
@@ -386,7 +386,7 @@ public class ExpressionEvaluatorTest {
     @Test
     public void testIsNullUri4() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
-                generateURI1(TERM_FACTORY.getRDFLiteralConstant("toto")));
+                generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();

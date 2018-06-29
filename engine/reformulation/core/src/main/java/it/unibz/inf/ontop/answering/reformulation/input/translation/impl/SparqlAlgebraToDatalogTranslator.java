@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -748,7 +749,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
                     Term flags;
                     if (arity == 3)
-                        flags = termFactory.getRDFLiteralConstant("");
+                        flags = termFactory.getRDFLiteralConstant("", XSD.STRING);
                     else if (arity == 4)
                         flags = terms.get(3);
                     else

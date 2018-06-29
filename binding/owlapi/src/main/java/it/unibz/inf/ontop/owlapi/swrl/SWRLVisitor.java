@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
@@ -284,7 +285,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		else if (literal.isInteger())
 			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), typeFactory.getXsdIntegerDatatype()));
 		else 
-			termFactory.getRDFLiteralConstant(literal.getLiteral());
+			termFactory.getRDFLiteralConstant(literal.getLiteral(), XSD.STRING);
 	}
 
 //	we do not support swrl same as

@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -61,8 +62,8 @@ public class ThetaApplicationTest extends TestCase {
 		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot = (FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 
-		Term t5 = TERM_FACTORY.getRDFLiteralConstant("con");
-		Term t51 = TERM_FACTORY.getRDFLiteralConstant("st");
+		Term t5 = TERM_FACTORY.getRDFLiteralConstant("con", XSD.STRING);
+		Term t51 = TERM_FACTORY.getRDFLiteralConstant("st", XSD.STRING);
 		List<Term> vars5 = new Vector<Term>();
 		vars5.add(t5);
 		vars5.add(t51);
@@ -83,7 +84,7 @@ public class ThetaApplicationTest extends TestCase {
 		Variable t7 = TERM_FACTORY.getVariable("x");
 		Term t6 = TERM_FACTORY.getVariable("t");
 		Variable t8 = TERM_FACTORY.getVariable("z");
-		Term t9 = TERM_FACTORY.getRDFLiteralConstant("elf");
+		Term t9 = TERM_FACTORY.getRDFLiteralConstant("elf", XSD.STRING);
 		Term t10 = TERM_FACTORY.getVariable("x");
 		Variable t11 = TERM_FACTORY.getVariable("y");
 		Term t12 = TERM_FACTORY.getVariable("p");

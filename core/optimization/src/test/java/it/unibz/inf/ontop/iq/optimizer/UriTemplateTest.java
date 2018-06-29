@@ -90,7 +90,7 @@ public class UriTemplateTest {
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(EQ,
-                        TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getRDFLiteralConstant(URI_TEMPLATE_STR_1_PREFIX), A),
+                        TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getDBStringConstant(URI_TEMPLATE_STR_1_PREFIX), A),
                         C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);

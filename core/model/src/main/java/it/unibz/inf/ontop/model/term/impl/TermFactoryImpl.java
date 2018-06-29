@@ -121,6 +121,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public DBConstant getDBStringConstant(String value) {
+		return getDBConstant(value, typeFactory.getDBTypeFactory().getDBStringType());
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language) {
 		return getRDFLiteralFunctionalTerm(lexicalTerm, typeFactory.getLangTermType(language));
 	}
@@ -353,9 +358,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public GroundFunctionalTerm getIRIFunctionalTerm(IRI iri) {
-		// TODO: build a DB string
-		RDFLiteralConstant lexicalConstant = getRDFLiteralConstant(iri.getIRIString());
-
+		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
 		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
     }
 
@@ -381,13 +384,13 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI) {
 		// TODO: use an int-to-string casting function
-		RDFLiteralConstant lexicalValue = getRDFLiteralConstant(String.valueOf(encodedIRI));
+		DBConstant lexicalValue = getDBStringConstant(String.valueOf(encodedIRI));
 		return getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
-														ImmutableList<RDFLiteralConstant> arguments) {
+														ImmutableList<DBConstant> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(templateSymbol, arguments);
 		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
 	}
@@ -401,7 +404,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getIRIMutableFunctionalTerm(IRI iri) {
-		RDFLiteralConstant lexicalConstant = getRDFLiteralConstant(iri.getIRIString());
+		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
 		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
 	}
 
