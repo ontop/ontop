@@ -126,8 +126,8 @@ public class OBDAMappingTransformer {
 
 			if (predf.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
 					ImmutableTerm lexicalTerm = predf.getTerm(0);
-					if (lexicalTerm instanceof RDFLiteralConstant) { //fixed string
-						predUri = rdfFactory.createIRI(((RDFLiteralConstant) lexicalTerm).getValue());
+					if (lexicalTerm instanceof DBConstant) { //fixed string
+						predUri = rdfFactory.createIRI(((DBConstant) lexicalTerm).getValue());
 					}
 					else if (lexicalTerm instanceof Variable) {
 						throw new RuntimeException("TODO: support the OBDA->R2RML conversion for variables (IRIs)");
