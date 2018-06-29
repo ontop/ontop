@@ -54,9 +54,12 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
                                          DBMetadata dbMetadata,
                                          Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
                                          TypeFactory typeFactory) {
-        super(rs, signature.stream()
-                .map(Variable::getName)
-                .collect(ImmutableCollectors.toList()));
+        super(
+                rs,
+                signature.stream()
+                        .map(Variable::getName)
+                        .collect(ImmutableCollectors.toList())
+        );
         this.rootConstructionNode = rootConstructionNode;
         this.columnMap = buildColumnMap();
         this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory);
@@ -73,12 +76,4 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
         }
     }
 
-    private ImmutableMap<String, Integer> buildColumnMap() {
-        AtomicInteger i = new AtomicInteger(0);
-        return signature.stream().sequential()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> i.incrementAndGet()
-                ));
-    }
 }

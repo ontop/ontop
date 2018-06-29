@@ -1,65 +1,54 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
-import javax.annotation.Nullable;
-import java.sql.ResultSet;
+import java.util.stream.Stream;
 
 public class PostProcessedIriSQLBindingSet extends AbstractOntopBindingSet implements OntopBindingSet {
 
-    private final ResultSet rs;
-    private final ConstructionNode constructionNode;
 
-    protected PostProcessedIriSQLBindingSet(ResultSet rs, ImmutableList<String> signature,
-                                            ConstructionNode constructionNode) {
+    private final ImmutableList<String> rawValues;
+    private final SQLConstantRetriever constantRetriever;
+    private final ImmutableSubstitution substitution;
+
+
+    public PostProcessedIriSQLBindingSet(ImmutableList<String> rawValues, ImmutableMap<String, Integer> signature,
+                                         SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
         super(signature);
-        this.rs = rs;
-        this.constructionNode = constructionNode;
+        this.rawValues = rawValues;
+        this.constantRetriever = constantRetriever;
+        this.substitution = substitution;
     }
 
-    @Nullable
-    @Override
-    public Constant getConstant(int column) throws OntopResultConversionException {
-        final MainTypeLangValues cell = signature.get(column - 1);
-        if (cell.getMainValue() == null) {
-            return null;
-        } else {
-            return constantRetriever.getConstantFromJDBC(cell);
+    public Stream<OntopBinding> computeBindings() {
+        ImmutableSubstitution<ImmutableFunctionalTerm> composition = substitution.composeWith(
+                constantRetriever.retrieveAllConstants(rawValues)
+        );
+        return composition
+                .getImmutableMap().entrySet().stream()
+                .map(e -> new OntopBindingImpl(e.getKey(), evaluate(e.getValue())));
+    }
+
+    private RDFConstant evaluate(ImmutableFunctionalTerm term) {
+        ImmutableTerm constant = term.evaluate(false);
+        if (constant instanceof RDFConstant) {
+            return (RDFConstant) constant;
         }
-        throw new RuntimeException("TODO: implement");
+        throw new InvalidTermAsResultException(term);
     }
 
-    @Nullable
-    @Override
-    public Constant getConstant(String var) {
-        throw new RuntimeException("TODO: implement");
+    public static class InvalidTermAsResultException extends OntopInternalBugException {
+        public InvalidTermAsResultException(ImmutableFunctionalTerm term) {
+            super("Term " + term + " does not evaluate to an RDF constant");
+        }
     }
 
-    @Nullable
-    @Override
-    public OntopBinding getBinding(int column) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Nullable
-    @Override
-    protected OntopBinding computeBinding(String variableName) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Nullable
-    @Override
-    public OntopBinding getBinding(String name) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public boolean hasBinding(String bindingName) {
-        throw new RuntimeException("TODO: implement");
-    }
 }

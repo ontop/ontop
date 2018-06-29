@@ -30,15 +30,15 @@ public class DelegatedIriSQLBindingSet extends AbstractOntopBindingSet implement
     @Override
     @Nullable
     public OntopBinding getBinding(int column) {
-        return variableName2BindingMap.isPresent() ?
-                variableName2BindingMap.get().get(signature.get(column - 1)) :
+        return variable2BindingMap.isPresent() ?
+                variable2BindingMap.get().get(signature.get(column - 1)) :
                 computeBinding(column);
     }
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get().containsKey(bindingName):
+        return variable2BindingMap.isPresent()?
+                variable2BindingMap.get().containsKey(bindingName):
                 signature.contains(bindingName) &&
                         row.get(columnMap.get(bindingName) - 1).getMainValue() != null;
     }
