@@ -144,16 +144,6 @@ public interface TermFactory {
 	 * TODO: explain
 	 */
 	RDFLiteralConstant getProvenanceSpecialConstant();
-	
-	/**
-	 * Construct a {@link RDFLiteralConstant} object.
-	 * 
-	 * @param value
-	 *            the value of the constant.
-	 * @return the value constant.
-	 */
-	@Deprecated
-	RDFLiteralConstant getRDFLiteralConstant(String value);
 
 	/**
 	 * Construct a {@link RDFLiteralConstant} object with a type definition.
