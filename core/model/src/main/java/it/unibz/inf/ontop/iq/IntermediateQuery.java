@@ -33,7 +33,7 @@ public interface IntermediateQuery {
 
     Stream<QueryNode> getChildrenStream(QueryNode node);
 
-    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit);
+    Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmit);
 
     Optional<QueryNode> getChild(QueryNode currentNode, BinaryOrderedOperatorNode.ArgumentPosition position);
 
