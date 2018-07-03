@@ -45,15 +45,13 @@ public class BootstrapGenerator {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
-    private final JdbcTypeMapper jdbcTypeMapper;
     private final TargetAtomFactory targetAtomFactory;
     private int currentMappingIndex = 1;
     private final DirectMappingEngine directMappingEngine;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
-                              OWLModelManager owlManager, JdbcTypeMapper jdbcTypeMapper)
+                              OWLModelManager owlManager)
             throws DuplicateMappingException, SQLException {
-        this.jdbcTypeMapper = jdbcTypeMapper;
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
@@ -100,7 +98,7 @@ public class BootstrapGenerator {
                     " Message: " + e.getMessage());
         }
         RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
-                atomFactory, jdbcTypeMapper);
+                atomFactory);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

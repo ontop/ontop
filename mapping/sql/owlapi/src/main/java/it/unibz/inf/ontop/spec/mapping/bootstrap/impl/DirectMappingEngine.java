@@ -93,7 +93,6 @@ public class DirectMappingEngine {
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
 	private final AtomFactory atomFactory;
-	private final JdbcTypeMapper jdbcTypeMapper;
 	private final OntopSQLCredentialSettings settings;
 	private final TargetAtomFactory targetAtomFactory;
 
@@ -116,7 +115,7 @@ public class DirectMappingEngine {
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
 								DatalogFactory datalogFactory, AtomFactory atomFactory,
-								JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
+								TargetAtomFactory targetAtomFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -124,7 +123,6 @@ public class DirectMappingEngine {
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.atomFactory = atomFactory;
-		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.targetAtomFactory = targetAtomFactory;
 	}
 
@@ -248,7 +246,7 @@ public class DirectMappingEngine {
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
-					atomFactory, jdbcTypeMapper);
+					atomFactory);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);

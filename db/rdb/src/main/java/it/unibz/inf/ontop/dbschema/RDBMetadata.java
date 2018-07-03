@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.*;
@@ -33,7 +34,6 @@ public class RDBMetadata extends BasicDBMetadata {
 
 	private static final long serialVersionUID = -806363154890865756L;
 	private int parserViewCounter;
-	private final JdbcTypeMapper jdbcTypeMapper;
 	private final TypeFactory typeFactory;
 
 	/**
@@ -44,11 +44,10 @@ public class RDBMetadata extends BasicDBMetadata {
 	 */
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-				QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, TermFactory termFactory,
+				QuotedIDFactory idfac, AtomFactory atomFactory, TermFactory termFactory,
 				TypeFactory typeFactory, DatalogFactory datalogFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, atomFactory, termFactory,
+		super(driverName, driverVersion, databaseProductName, databaseVersion, atomFactory, termFactory,
 				datalogFactory, idfac);
-		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.typeFactory = typeFactory;
 	}
 
@@ -56,13 +55,12 @@ public class RDBMetadata extends BasicDBMetadata {
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory,
+						int parserViewCounter, AtomFactory atomFactory,
 						TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, tables, relations,
+		super(driverName, driverVersion, databaseProductName, databaseVersion, tables, relations,
 				listOfTables, atomFactory, termFactory, datalogFactory, idfac
 		);
 		this.parserViewCounter = parserViewCounter;
-		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.typeFactory = typeFactory;
 	}
 	
@@ -83,7 +81,7 @@ public class RDBMetadata extends BasicDBMetadata {
 		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 		
-		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getXsdStringDatatype());
+		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getDBTypeFactory().getDBStringType());
 		// UGLY!!
 		add(view, relations);
 		return view;
@@ -94,6 +92,10 @@ public class RDBMetadata extends BasicDBMetadata {
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
 				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getTermFactory(), typeFactory, getDatalogFactory());
+				parserViewCounter, getAtomFactory(), getTermFactory(), typeFactory, getDatalogFactory());
+	}
+
+	public DBTypeFactory getDBTypeFactory() {
+		return typeFactory.getDBTypeFactory();
 	}
 }

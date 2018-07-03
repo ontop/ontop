@@ -218,14 +218,9 @@ public class MappingDataTypeCompletion {
         Attribute attribute = td.getAttribute(ip.pos);
         Optional<RDFDatatype>  type;
         //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
-        if (attribute.getType() == 0){
-
-            type = Optional.empty();
-        }
-        else{
-            // TODO: refactor this (unsafe)!!!
-            type = Optional.of((RDFDatatype) attribute.getTermType());
-        }
+        // TODO: refactor this (unsafe)!!!
+        // TODO: consider the case of a null
+        type = Optional.of((RDFDatatype) attribute.getTermType());
 
         if(defaultDatatypeInferred)
             return type.orElseGet(typeFactory::getXsdStringDatatype) ;

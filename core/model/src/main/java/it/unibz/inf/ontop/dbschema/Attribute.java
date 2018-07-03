@@ -20,9 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-
-import java.sql.Types;
 
 /**
  * Represents an attribute (column) of a database relation (table or view) or a parser view
@@ -38,20 +37,15 @@ public class Attribute {
 	private final QualifiedAttributeID id; // qualified id (table = tableId for database relation
 	                                       //               parser views, however, have properly qualified column names
 	private final int index;
-	private final int type;
-	private final String typeName;
+	private final DBTermType termType;
 	private final boolean canNull;
-	private final TermType termType;
 
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, int type, String typeName, boolean canNull,
-			  TermType termType) {
+	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, DBTermType termType, boolean canNull) {
 		this.table = relation;
 		this.index = index;
 		this.id = id;
-		this.type = type;
-		this.typeName = typeName;
-		this.canNull = canNull;
 		this.termType = termType;
+		this.canNull = canNull;
 	}
 	
 	public QuotedID getID() {
@@ -70,30 +64,30 @@ public class Attribute {
 		return index;
 	}
 	
-	public int getType() {
-		return type;
-	}
+//	public int getType() {
+//		return type;
+//	}
 	
 	public boolean canNull() {
 		return canNull;
 	}
 	
-	/***
-	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
-	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
-	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
-	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this 
-	 * cases.
-	 * 
-	 * @return
-	 */
-	public String getSQLTypeName() {
-		return typeName;
-	}
+//	/***
+//	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
+//	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
+//	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
+//	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this
+//	 * cases.
+//	 *
+//	 * @return
+//	 */
+//	public String getSQLTypeName() {
+//		return typeName;
+//	}
 	
 	@Override
 	public String toString() {
-		return id.getAttribute() + " " + typeName + (!canNull ? " NOT NULL" : "");
+		return id.getAttribute() + " " + termType.getName() + (!canNull ? " NOT NULL" : "");
 	}
 	
 	@Override
@@ -115,7 +109,7 @@ public class Attribute {
 		return id.hashCode();
 	}
 
-	public TermType getTermType() {
+	public DBTermType getTermType() {
 		return termType;
 	}
 }

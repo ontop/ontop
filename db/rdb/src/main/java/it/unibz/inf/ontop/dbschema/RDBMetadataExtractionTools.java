@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,8 +118,7 @@ public class RDBMetadataExtractionTools {
 
 	public static RDBMetadata createMetadata(Connection conn,
 											 TermFactory termFactory, TypeFactory typeFactory,
-											 DatalogFactory datalogFactory, AtomFactory atomFactory,
-											 JdbcTypeMapper jdbcTypeMapper) throws SQLException  {
+											 DatalogFactory datalogFactory, AtomFactory atomFactory) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -170,7 +170,7 @@ public class RDBMetadataExtractionTools {
 		}
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac, jdbcTypeMapper,
+							productName, md.getDatabaseProductVersion(), idfac,
 				atomFactory, termFactory, typeFactory, datalogFactory);
 		
 		return metadata;	
@@ -262,8 +262,10 @@ public class RDBMetadataExtractionTools {
 					boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
 					String typeName = rs.getString("TYPE_NAME");
 					int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
+
+					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(dataType, typeName);
 					
-					currentRelation.addAttribute(attributeId, dataType, typeName, isNullable);
+					currentRelation.addAttribute(attributeId, termType, isNullable);
 				}
 			}
 		}

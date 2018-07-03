@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
 import it.unibz.inf.ontop.spec.dbschema.impl.BasicPreProcessedImplicitRelationalDBConstraintExtractor;
@@ -30,12 +31,14 @@ public class ImplicitDBConstraintsTest {
 		this.md = createDummyMetadata();
 		this.idfac = md.getQuotedIDFactory();
 
+		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
 		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		td.addAttribute(idfac.createAttributeID("KEYNAME"), 0, null, false); // from 1
+		td.addAttribute(idfac.createAttributeID("KEYNAME"), stringType, false); // from 1
 
 		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
-		td2.addAttribute(idfac.createAttributeID("KEY1"), 0, null, false);  // from 1
-		td2.addAttribute(idfac.createAttributeID("KEY2"), 0, null, false);
+		td2.addAttribute(idfac.createAttributeID("KEY1"), stringType, false);  // from 1
+		td2.addAttribute(idfac.createAttributeID("KEY2"), stringType, false);
 	}
 	
 	@Test

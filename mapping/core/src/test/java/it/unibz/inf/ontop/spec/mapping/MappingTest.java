@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -63,28 +64,30 @@ public class MappingTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBIntegerType();
+
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col31"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType, false);
         P3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col41"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType, false);
         P4_PREDICATE = table4Def.getAtomPredicate();
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col51"), Types.INTEGER, null, false);
+        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType, false);
         P5_PREDICATE = table5Def.getAtomPredicate();
 
 
         DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), Types.INTEGER, null, false);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), Types.INTEGER, null, true);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType, false);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType, true);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType, true);
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";

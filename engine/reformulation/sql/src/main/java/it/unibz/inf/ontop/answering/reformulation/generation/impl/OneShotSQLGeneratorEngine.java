@@ -890,6 +890,8 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	// return the SQL data type
+    // TODO: get rid of it
+    @Deprecated
 	private int getDataType(Term term) {
 		if (term instanceof Function){
 			Function functionalTerm = (Function) term;
@@ -1070,17 +1072,7 @@ public class OneShotSQLGeneratorEngine {
 				QuotedID columnId = column0.getAttribute();
 				for (Attribute a : relation.getAttributes()) {
 					if (a.getID().equals(columnId)) {
-						switch (a.getType()) {
-							case Types.VARCHAR:
-							case Types.CHAR:
-							case Types.LONGNVARCHAR:
-							case Types.LONGVARCHAR:
-							case Types.NVARCHAR:
-							case Types.NCHAR:
-								return true;
-							default:
-								return false;
-						}
+						return a.getTermType().isString();
 					}
 				}
 			}

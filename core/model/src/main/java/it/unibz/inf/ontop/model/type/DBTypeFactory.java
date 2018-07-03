@@ -19,6 +19,10 @@ public interface DBTypeFactory {
 
     DBTermType getDBDoubleType();
 
+    /**
+     * BC: TODO: should we keep the typeCode? Still needed?
+     */
+    DBTermType getDBTermType(int typeCode, String typeName);
 
 
     /**

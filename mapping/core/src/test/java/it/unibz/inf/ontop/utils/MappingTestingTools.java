@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -142,8 +143,11 @@ public class MappingTestingTools {
                                                              int tableNumber, int arity) {
         DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 "TABLE" + tableNumber + "AR" + arity));
+
+        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
         for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), Types.VARCHAR, null, false);
+            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringType, false);
         }
         return tableDef.getAtomPredicate();
     }

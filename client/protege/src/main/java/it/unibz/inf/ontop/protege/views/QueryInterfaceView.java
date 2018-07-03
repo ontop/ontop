@@ -328,8 +328,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
 				removeResultTable();
-				// UGLY!!! SQL-specific!
-				return ((SQLExecutableQuery)st.getExecutableQuery(query)).getSQL();
+				// TODO: should we show the SQL query only?
+				return st.getExecutableQuery(query).toString();
 			}
 
 			@Override

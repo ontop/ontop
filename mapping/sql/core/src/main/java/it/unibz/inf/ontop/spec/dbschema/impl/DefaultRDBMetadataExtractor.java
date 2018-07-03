@@ -43,7 +43,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
-    private final JdbcTypeMapper jdbcTypeMapper;
     private final TypeFactory typeFactory;
 
     @Inject
@@ -51,13 +50,12 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                                         PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor,
                                         AtomFactory atomFactory,
                                         TermFactory termFactory, DatalogFactory datalogFactory,
-                                        JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory) {
+                                        TypeFactory typeFactory) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
-        this.jdbcTypeMapper = jdbcTypeMapper;
         this.typeFactory = typeFactory;
     }
 
@@ -66,7 +64,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             throws DBMetadataExtractionException {
         try {
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, termFactory, typeFactory,
-                    datalogFactory, atomFactory, jdbcTypeMapper);
+                    datalogFactory, atomFactory);
             return extract(ppMapping, connection, metadata, constraintFile);
         } catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());

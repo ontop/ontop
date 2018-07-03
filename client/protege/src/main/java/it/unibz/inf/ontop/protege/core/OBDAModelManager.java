@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
@@ -34,7 +33,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -85,7 +83,6 @@ public class OBDAModelManager implements Disposable {
 	private final OWLOntologyManager mmgr;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final JdbcTypeMapper jdbcTypeMapper;
 
 	private QueryController queryController;
 
@@ -144,7 +141,6 @@ public class OBDAModelManager implements Disposable {
 		typeFactory = defaultInjector.getInstance(TypeFactory.class);
 		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
-		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
 		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
@@ -170,7 +166,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, jdbcTypeMapper);
+				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -200,10 +196,6 @@ public class OBDAModelManager implements Disposable {
 
 	public DatalogFactory getDatalogFactory() {
 		return datalogFactory;
-	}
-
-	public JdbcTypeMapper getJdbcTypeMapper() {
-		return jdbcTypeMapper;
 	}
 
 	public TypeFactory getTypeFactory() {

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
@@ -422,22 +423,24 @@ public class SelectQueryParserTest {
         RDBMetadata metadata = createDummyMetadata();
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBIntegerType();
+
         DatabaseRelationDefinition relation1 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, P));
-        relation1.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation1.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
+        relation1.addAttribute(idfac.createAttributeID("A"), integerType, false);
+        relation1.addAttribute(idfac.createAttributeID("B"), integerType, false);
 
         DatabaseRelationDefinition relation2 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, Q));
-        relation2.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation2.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
+        relation2.addAttribute(idfac.createAttributeID("A"), integerType, false);
+        relation2.addAttribute(idfac.createAttributeID("C"), integerType, false);
 
         DatabaseRelationDefinition relation3 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, R));
-        relation3.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("D"), 0, "INT", false);
+        relation3.addAttribute(idfac.createAttributeID("A"), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("B"), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("C"), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("D"), integerType, false);
 
         return metadata;
     }

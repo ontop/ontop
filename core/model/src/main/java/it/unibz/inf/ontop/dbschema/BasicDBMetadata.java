@@ -32,7 +32,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
     private boolean isStillMutable;
-    private final TypeMapper typeMapper;
+
     @Nullable
     private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
@@ -40,14 +40,14 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private final AtomFactory atomFactory;
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, AtomFactory atomFactory, TermFactory termFactory,
+                              AtomFactory atomFactory, TermFactory termFactory,
                               DatalogFactory datalogFactory, QuotedIDFactory idfac) {
-        this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
+        this(driverName, driverVersion, databaseProductName, databaseVersion, new HashMap<>(),
                 new HashMap<>(), new LinkedList<>(), atomFactory, termFactory, datalogFactory, idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
+                              Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
             RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
                               AtomFactory atomFactory, TermFactory termFactory,
                               DatalogFactory datalogFactory, QuotedIDFactory idfac) {
@@ -56,7 +56,6 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
         this.databaseVersion = databaseVersion;
-        this.typeMapper = typeMapper;
         this.idfac = idfac;
         this.tables = tables;
         this.relations = relations;
@@ -80,7 +79,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id, typeMapper);
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
         add(table, tables);
         add(table, relations);
         listOfTables.add(table);
@@ -235,7 +234,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     @Deprecated
     @Override
     public BasicDBMetadata clone() {
-        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
+        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables),
                 atomFactory, getTermFactory(), getDatalogFactory(), idfac
         );

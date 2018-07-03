@@ -14,26 +14,10 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 public class DummyBasicDBMetadata extends BasicDBMetadata {
 
     @Inject
-    private DummyBasicDBMetadata(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+    private DummyBasicDBMetadata(AtomFactory atomFactory, TermFactory termFactory,
                                  DatalogFactory datalogFactory) {
-        super("dummy", null, null, "",
-                new DummyTypeMapper(typeFactory), atomFactory, termFactory, datalogFactory,
+        super("dummy", null, null, "", atomFactory, termFactory, datalogFactory,
                 new QuotedIDFactoryStandardSQL("\"")
         );
-    }
-
-
-    private static class DummyTypeMapper implements TypeMapper {
-
-        private final RDFDatatype defaultType;
-
-        private DummyTypeMapper(TypeFactory typeFactory) {
-            this.defaultType = typeFactory.getXsdStringDatatype();
-        }
-
-        @Override
-        public TermType getTermType(int typeCode, String typeName) {
-            return defaultType;
-        }
     }
 }
