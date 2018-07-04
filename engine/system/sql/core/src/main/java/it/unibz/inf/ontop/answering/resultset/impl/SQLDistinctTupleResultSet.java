@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,17 +40,16 @@ import java.util.*;
  * See test case DistinctResultSetTest
  */
 
-public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet implements TupleResultSet {
+public class SQLDistinctTupleResultSet extends SQLTupleResultSet implements TupleResultSet {
 
     private Set<List<Object>> rowKeys;
 
     public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
-                                     ConstructionNode rootConstructionNode,
-                                     DBMetadata dbMetadata,
-                                     Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
-                                     TypeFactory typeFactory) {
+                                     ConstructionNode constructionNode,
+                                     TermFactory termFactory,
+                                     SubstitutionFactory substitutionFactory) {
 
-        super(rs, signature, rootConstructionNode, dbMetadata, iriDictionary, termFactory, typeFactory);
+        super(rs, signature, constructionNode, termFactory, substitutionFactory);
         rowKeys = new HashSet<>();
     }
 

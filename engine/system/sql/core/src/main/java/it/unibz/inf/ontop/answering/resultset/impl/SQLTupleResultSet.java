@@ -14,16 +14,16 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PostProcessedIriSQLTupleResultSet extends AbstractSQLTupleResultSet implements TupleResultSet {
+public class SQLTupleResultSet extends AbstractSQLTupleResultSet implements TupleResultSet {
 
     private final SQLConstantRetriever constantRetriever;
     private final ImmutableMap<Variable, Integer> var2SQLIndexMap;
     private final ImmutableSubstitution substitution;
 
-    public PostProcessedIriSQLTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
-                                             ConstructionNode constructionNode,
-                                             TermFactory termFactory,
-                                             SubstitutionFactory substitutionFactory) {
+    public SQLTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
+                             ConstructionNode constructionNode,
+                             TermFactory termFactory,
+                             SubstitutionFactory substitutionFactory) {
         super(rs, signature);
         ImmutableSubstitution inputSubstitution = constructionNode.getSubstitution();
         var2SQLIndexMap = computeVar2SQLIndexMap(inputSubstitution);
@@ -32,7 +32,7 @@ public class PostProcessedIriSQLTupleResultSet extends AbstractSQLTupleResultSet
     }
 
     @Override
-    protected PostProcessedIriSQLBindingSet readCurrentRow() throws OntopConnectionException {
+    protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException {
 
         //builder (+loop) in order to throw checked exception
         final ImmutableList.Builder<String> builder = ImmutableList.builder();
@@ -43,7 +43,7 @@ public class PostProcessedIriSQLTupleResultSet extends AbstractSQLTupleResultSet
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }
-        return new PostProcessedIriSQLBindingSet(builder.build(), signature, constantRetriever, substitution);
+        return new SQLOntopBindingSet(builder.build(), signature, constantRetriever, substitution);
     }
 
     private ImmutableSubstitution normalizeSubstitution(ImmutableSubstitution<ImmutableTerm> substitution,

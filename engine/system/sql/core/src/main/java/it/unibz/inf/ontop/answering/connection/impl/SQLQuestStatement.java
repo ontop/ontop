@@ -208,7 +208,7 @@ public class SQLQuestStatement extends QuestStatement {
                 return settings.isDistinctPostProcessingEnabled()
                         ? new SQLDistinctTupleResultSet(set, signature, constructionNode, dbMetadata, iriDictionary,
                         termFactory, typeFactory)
-                        : new DelegatedIriSQLTupleResultSet(set, signature, constructionNode, dbMetadata, iriDictionary,
+                        : new SQLTupleResultSet(set, signature, constructionNode, dbMetadata, iriDictionary,
                         termFactory, typeFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
