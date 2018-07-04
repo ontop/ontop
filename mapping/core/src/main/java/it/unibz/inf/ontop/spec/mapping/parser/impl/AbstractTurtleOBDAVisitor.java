@@ -59,7 +59,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm typeTerm(String text, IRI datatype) {
-        ValueConstant integerConstant = termFactory.getConstantLiteral(text, datatype);
+        RDFLiteralConstant integerConstant = termFactory.getRDFLiteralConstant(text, datatype);
         return termFactory.getRDFLiteralFunctionalTerm(integerConstant, datatype);
     }
 
@@ -201,7 +201,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             if (i > 0) {
                 st = str.substring(0, i);
                 st = st.replace("\\\\", "");
-                terms.add(termFactory.getConstantLiteral(st));
+                terms.add(termFactory.getDBStringConstant(st));
                 str = str.substring(str.indexOf("{", i), str.length());
             } else if (i == 0) {
                 j = str.indexOf("}");
@@ -213,7 +213,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         if (!str.equals("")) {
             str = str.replace("\\\\", "");
-            terms.add(termFactory.getConstantLiteral(str));
+            terms.add(termFactory.getDBStringConstant(str));
         }
         return terms;
     }
@@ -413,7 +413,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (str.contains("{")) {
             return getNestedConcat(str);
         }
-        return termFactory.getConstantLiteral(str.substring(1, str.length() - 1), XSD.STRING); // without the double quotes
+        return termFactory.getDBStringConstant(str.substring(1, str.length() - 1)); // without the double quotes
     }
 
     @Override

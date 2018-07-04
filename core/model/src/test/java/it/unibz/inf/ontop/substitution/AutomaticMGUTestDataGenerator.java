@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
@@ -165,7 +166,7 @@ public class AutomaticMGUTestDataGenerator {
 			Predicate fs = new OntopModelTestPredicate(termstr.substring(0, 1), fuctTerms.size());
 			return TERM_FACTORY.getFunction(fs, fuctTerms);
 		} else if (termstr.charAt(0) == '"') {
-			return TERM_FACTORY.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
+			return TERM_FACTORY.getRDFLiteralConstant(termstr.substring(1, termstr.length() - 1), XSD.STRING);
 		} else if (termstr.charAt(0) == '<') {
 			return TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI(termstr.substring(1, termstr.length() - 1)));
 //		} else if (termstr.equals("#")) {

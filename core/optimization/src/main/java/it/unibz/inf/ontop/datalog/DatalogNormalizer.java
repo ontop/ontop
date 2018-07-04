@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -215,9 +214,9 @@ public class DatalogNormalizer {
 				booleanAtoms += 1;
 		}
 		if (isLeftJoin && booleanAtoms == 0) {
-			Function trivialEquality = termFactory.getFunctionEQ(termFactory.getConstantLiteral("1",
-					typeFactory.getXsdIntegerDatatype()),
-					termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()));
+			DBConstant one = termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType());
+
+			Function trivialEquality = termFactory.getFunctionEQ(one, one);
 			leftJoin.getTerms().add(trivialEquality);
 		}
 	}

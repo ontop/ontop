@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
@@ -265,7 +266,7 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	public void visit(SWRLIndividualArgument node) {
 	
 		//get the id without the quotes <>
-		terms.add(termFactory.getConstantLiteral(node.getIndividual().toStringID(), typeFactory.getXsdStringDatatype()));
+		terms.add(termFactory.getRDFLiteralConstant(node.getIndividual().toStringID(), typeFactory.getXsdStringDatatype()));
 	}
 
 	@Override
@@ -276,15 +277,15 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		if (literal.isBoolean()) 
 			terms.add(termFactory.getBooleanConstant(literal.parseBoolean()));
 		else if(literal.hasLang())
-			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), literal.getLang()));
+			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())
-			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdDoubleDatatype()));
+			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), typeFactory.getXsdDoubleDatatype()));
 		else if (literal.isFloat())
-			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdDecimalDatatype()));
+			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), typeFactory.getXsdDecimalDatatype()));
 		else if (literal.isInteger())
-			terms.add(termFactory.getConstantLiteral(literal.getLiteral(), typeFactory.getXsdIntegerDatatype()));
+			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), typeFactory.getXsdIntegerDatatype()));
 		else 
-			termFactory.getConstantLiteral(literal.getLiteral());
+			termFactory.getRDFLiteralConstant(literal.getLiteral(), XSD.STRING);
 	}
 
 //	we do not support swrl same as

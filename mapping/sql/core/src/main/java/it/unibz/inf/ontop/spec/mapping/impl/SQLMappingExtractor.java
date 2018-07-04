@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -153,26 +152,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
          */
         catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
-        }
-    }
-
-    private Connection createConnection() throws SQLException {
-
-        try {
-            // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
-        } catch (SQLException ex) {
-            // HACKY(xiao): This part is still necessary for Tomcat.
-            // Otherwise, JDBC drivers are not initialized by default.
-            settings.getJdbcDriver().ifPresent(className -> {
-                try {
-                    Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         }
     }
 

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -30,12 +31,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     @Override
-    public ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms,
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
                                   boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? ((ImmutableFunctionalTerm) t).evaluate(isInConstructionNodeInOptimizationPhase)
+                        ? ((ImmutableFunctionalTerm) t).simplify(isInConstructionNodeInOptimizationPhase)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
@@ -50,5 +51,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
+    protected void validateSubTermTypes(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+        for(ImmutableTerm term : terms) {
+            term.inferAndValidateType();
+        }
     }
 }

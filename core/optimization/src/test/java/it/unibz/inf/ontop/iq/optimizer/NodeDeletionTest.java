@@ -4,9 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -33,7 +32,7 @@ public class NodeDeletionTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        ValueConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
+        RDFLiteralConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = TERM_FACTORY.getImmutableExpression(AND, falseValue, falseValue);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(falseCondition);
@@ -69,7 +68,7 @@ public class NodeDeletionTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        ValueConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
+        RDFLiteralConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = TERM_FACTORY.getImmutableExpression(AND, falseValue, falseValue);
 
         LeftJoinNode ljNode = IQ_FACTORY.createLeftJoinNode();
@@ -116,7 +115,7 @@ public class NodeDeletionTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        ValueConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
+        RDFLiteralConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = TERM_FACTORY.getImmutableExpression(AND, falseValue, falseValue);
 
         UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
@@ -182,7 +181,7 @@ public class NodeDeletionTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        ValueConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
+        RDFLiteralConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = TERM_FACTORY.getImmutableExpression(AND, falseValue, falseValue);
 
         UnionNode topUnion = IQ_FACTORY.createUnionNode(projectedVariables);
@@ -246,7 +245,7 @@ public class NodeDeletionTest {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         queryBuilder.init(projectionAtom, rootNode);
 
-        ValueConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
+        RDFLiteralConstant falseValue = TERM_FACTORY.getBooleanConstant(false);
         ImmutableExpression falseCondition = TERM_FACTORY.getImmutableExpression(AND, falseValue, falseValue);
 
         LeftJoinNode ljNode = IQ_FACTORY.createLeftJoinNode();

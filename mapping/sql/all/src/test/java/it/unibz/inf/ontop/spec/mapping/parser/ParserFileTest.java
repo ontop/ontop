@@ -52,7 +52,7 @@ public class ParserFileTest extends TestCase {
 
 	public ParserFileTest() {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
-				.jdbcUrl("fake_url")
+				.jdbcUrl("jdbc:h2:mem:fake")
 				.jdbcUser("fake_user")
 				.jdbcPassword("fake_password")
 				.build();

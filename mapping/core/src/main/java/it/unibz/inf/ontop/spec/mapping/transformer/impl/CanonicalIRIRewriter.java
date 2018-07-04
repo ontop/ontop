@@ -50,9 +50,9 @@ public class CanonicalIRIRewriter {
     private List<CQIE> outputMappings;
 
     // canonical iri -> suffix for variable renaming
-    private Map<ValueConstant, String> canIriVariablesSuffix;
+    private Map<RDFLiteralConstant, String> canIriVariablesSuffix;
 
-    private Map<ValueConstant, CQIE> uriMappingMap;
+    private Map<RDFLiteralConstant, CQIE> uriMappingMap;
 
     private static final Logger log = LoggerFactory.getLogger(CanonicalIRIRewriter.class);
 
@@ -176,10 +176,10 @@ public class CanonicalIRIRewriter {
                 Set<Variable> variables = rule.getReferencedVariables();
 
                 Function headURI = (Function) head.getTerm(0);
-                ValueConstant canonicalIRIName = (ValueConstant) headURI.getTerm(0);
+                RDFLiteralConstant canonicalIRIName = (RDFLiteralConstant) headURI.getTerm(0);
 
                 Function objectTerm = (Function) head.getTerm(2);
-                ValueConstant objectURIName = (ValueConstant) objectTerm.getTerm(0);
+                RDFLiteralConstant objectURIName = (RDFLiteralConstant) objectTerm.getTerm(0);
 
                 //get or assign a suffix for each canonicalIRI
                 String rename = canIriVariablesSuffix.get(canonicalIRIName);

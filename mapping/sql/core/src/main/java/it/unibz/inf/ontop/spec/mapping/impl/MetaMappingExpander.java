@@ -337,8 +337,8 @@ public class MetaMappingExpander {
 				ImmutableTerm typeTerm = func.getTerm(1);
 				// If typeTerm is a variable, we are unsure so we return false
 				if (typeTerm.equals(termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()))
-						&& (lexicalTerm instanceof ValueConstant))
-					return ((ValueConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
+						&& (lexicalTerm instanceof RDFLiteralConstant))
+					return ((RDFLiteralConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
 			}
 		}
 		else if (term instanceof IRIConstant) {
@@ -387,7 +387,7 @@ public class MetaMappingExpander {
 			return values.get(0);
 		}
 		else {
-			String uriTemplate = ((ValueConstant) templateTerm).getValue();
+			String uriTemplate = ((RDFLiteralConstant) templateTerm).getValue();
 			return URITemplates.format(uriTemplate, values);
 		}
 	}

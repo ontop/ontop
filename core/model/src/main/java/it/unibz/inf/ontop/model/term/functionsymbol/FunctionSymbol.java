@@ -17,10 +17,12 @@ public interface FunctionSymbol extends Predicate {
                                VariableNullability childNullability);
 
 
-    Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
+    Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);
 
-    ImmutableTerm evaluate(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
-                                   TermFactory termFactory);
+    Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
+
+    ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
+                           TermFactory termFactory);
 
     default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                 TermFactory termFactory) {

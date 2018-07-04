@@ -42,7 +42,7 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             LT, V, W);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
-            NEQ, X, TERM_FACTORY.getConstantLiteral("a"));
+            NEQ, X, TERM_FACTORY.getDBStringConstant("a"));
 
     @Test
     public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {

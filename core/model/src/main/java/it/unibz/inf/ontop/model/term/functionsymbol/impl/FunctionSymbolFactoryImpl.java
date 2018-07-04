@@ -28,7 +28,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private FunctionSymbolFactoryImpl(TypeFactory typeFactory) {
         this.typeFactory = typeFactory;
         this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
-                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getDBTypeFactory().getDBStringType(),
                 typeFactory.getMetaRDFTermType());
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();

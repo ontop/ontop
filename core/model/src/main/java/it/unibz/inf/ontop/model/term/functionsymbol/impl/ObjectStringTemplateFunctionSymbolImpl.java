@@ -43,7 +43,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
+    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         if(terms.stream()
                 .filter(t -> t instanceof Constant)
                 .anyMatch(t -> ((Constant)t).isNull())) {
@@ -52,4 +52,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return Optional.of(TermTypeInference.declareTermType(lexicalType));
     }
 
+    @Override
+    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
+            throws FatalTypingException {
+        validateSubTermTypes(terms);
+        return inferType(terms);
+    }
 }

@@ -30,8 +30,6 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.LanguageTag;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
@@ -128,8 +126,8 @@ public class OBDAMappingTransformer {
 
 			if (predf.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
 					ImmutableTerm lexicalTerm = predf.getTerm(0);
-					if (lexicalTerm instanceof ValueConstant) { //fixed string
-						predUri = rdfFactory.createIRI(((ValueConstant) lexicalTerm).getValue());
+					if (lexicalTerm instanceof DBConstant) { //fixed string
+						predUri = rdfFactory.createIRI(((DBConstant) lexicalTerm).getValue());
 					}
 					else if (lexicalTerm instanceof Variable) {
 						throw new RuntimeException("TODO: support the OBDA->R2RML conversion for variables (IRIs)");

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -133,6 +133,6 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         if (c instanceof ObjectConstant)
             return translator.translate((ObjectConstant) c);
         else
-            return translator.translate((ValueConstant) c);
+            return translator.translate((RDFLiteralConstant) c);
     }
 }

@@ -67,8 +67,6 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -155,16 +153,7 @@ public class OneShotSQLGeneratorEngine {
 		this.unionFlattener = unionFlattener;
 		this.immutabilityTools = immutabilityTools;
 
-		String driverURI = settings.getJdbcDriver()
-				.orElseGet(() -> {
-					try {
-						return DriverManager.getDriver(settings.getJdbcUrl()).getClass().getCanonicalName();
-					}
-					catch (SQLException e) {
-						// TODO: find a better exception
-						throw new RuntimeException("Impossible to get the JDBC driver. Reason: " + e.getMessage());
-					}
-				});
+		String driverURI = settings.getJdbcDriver();
 
 		if (!(metadata instanceof RDBMetadata)) {
 			throw new IllegalArgumentException("Not a DBMetadata!");
@@ -984,14 +973,14 @@ public class OneShotSQLGeneratorEngine {
 
 		// The first argument determines the form of the result
 		Term term0 = terms.get(0);
-		if (term0 instanceof ValueConstant || term0 instanceof BNode) {
+		if (term0 instanceof RDFLiteralConstant || term0 instanceof BNode) {
 			// An actual template: the first term is a string of the form
 			// http://.../.../ or empty "{}" with placeholders of the form {}
 			// The other terms are variables or constants that should replace
 			// the placeholders. We need to tokenize and form the CONCAT
 			String template = (term0 instanceof BNode)
 					? ((BNode) term0).getName()   // getValue should be removed from Constant
-					: ((ValueConstant) term0).getValue();
+					: ((RDFLiteralConstant) term0).getValue();
 			// strip the template of all quotation marks (dubious step)
 			while (pQuotes.matcher(template).matches()) {
 				template = template.substring(1, template.length() - 1);
@@ -1120,8 +1109,8 @@ public class OneShotSQLGeneratorEngine {
 		if (term == null) {
 			return "";
 		}
-		if (term instanceof ValueConstant) {
-			ValueConstant ct = (ValueConstant) term;
+		if (term instanceof RDFLiteralConstant) {
+			RDFLiteralConstant ct = (RDFLiteralConstant) term;
 			if (hasIRIDictionary()) {
 				if (ct.getType().isA(XSD.STRING)) {
 					int id = getUriid(ct.getValue());
@@ -1340,7 +1329,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @param constant
 	 * @return
 	 */
-	private String getSQLLexicalForm(ValueConstant constant) {
+	private String getSQLLexicalForm(RDFLiteralConstant constant) {
 
 		if (constant.equals(termFactory.getNullConstant())) {
 			// TODO: we should not have to treat NULL as a special case!

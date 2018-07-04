@@ -517,7 +517,7 @@ public class RDBMSSIRepositoryManager {
 		ObjectConstant subject = ax.getSubject();
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
 
-		ValueConstant object = ax.getValue();
+		RDFLiteralConstant object = ax.getValue();
 
 		// ROMAN (28 June 2016): quite fragile because objectType is UNSUPPORTED for SHORT, BYTE, etc.
 		//                       a a workaround, obtain the URI ID first, without triggering an exception here

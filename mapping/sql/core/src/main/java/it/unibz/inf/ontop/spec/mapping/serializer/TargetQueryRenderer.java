@@ -138,7 +138,7 @@ public class TargetQueryRenderer {
             return displayVariable((Variable)term);
         if (term instanceof IRIConstant)
             return displayURIConstant((Constant)term, prefixManager);
-        if (term instanceof ValueConstant)
+        if (term instanceof RDFLiteralConstant)
             return displayValueConstant((Constant)term);
         if (term instanceof BNode)
             return displayBnode((BNode)term);
@@ -150,7 +150,7 @@ public class TargetQueryRenderer {
     }
 
     private static String displayValueConstant(Term term) {
-        return "\"" + ((ValueConstant) term).getValue() + "\"";
+        return "\"" + ((RDFLiteralConstant) term).getValue() + "\"";
     }
 
     private static String displayURIConstant(Term term, PrefixManager prefixManager) {
@@ -246,8 +246,8 @@ public class TargetQueryRenderer {
             sb.append(((Variable) lexicalTerm).getName());
             sb.append("}>");
         }
-        else if (lexicalTerm instanceof ValueConstant) {
-            return "<" + ((ValueConstant) lexicalTerm).getValue() + ">";
+        else if (lexicalTerm instanceof RDFLiteralConstant) {
+            return "<" + ((RDFLiteralConstant) lexicalTerm).getValue() + ">";
         }
         else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
                 && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {

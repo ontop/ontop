@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
-public class ValueConstantImpl implements ValueConstant {
+public class RDFLiteralConstantImpl implements RDFLiteralConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 
@@ -43,24 +43,25 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
+	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
 		this.termType = type;
 		this.string = "\"" + value + "\"";
 	}
 
-	protected ValueConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
+	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
 		this.value = value;
-		this.termType = typeFactory.getLangTermType(language);
-		this.string = "\"" + value + "@" + language + "\"";
+		String l = language.toLowerCase();
+		this.termType = typeFactory.getLangTermType(l);
+		this.string = "\"" + value + "@" + l + "\"";
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof ValueConstantImpl)) {
+		if (obj == null || !(obj instanceof RDFLiteralConstantImpl)) {
 			return false;
 		}
-		ValueConstantImpl value2 = (ValueConstantImpl) obj;
+		RDFLiteralConstantImpl value2 = (RDFLiteralConstantImpl) obj;
 		return this.hashCode() == value2.hashCode();
 	}
 
@@ -70,7 +71,7 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public ValueConstant clone() {
+	public RDFLiteralConstant clone() {
 		return this;
 	}
 
@@ -86,7 +87,7 @@ public class ValueConstantImpl implements ValueConstant {
 
 	@Override
 	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
-		if (otherTerm instanceof ValueConstant) {
+		if (otherTerm instanceof RDFLiteralConstant) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
 					// See https://www.w3.org/TR/sparql11-query/#func-RDFterm-equal

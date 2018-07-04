@@ -10,8 +10,9 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,7 +26,6 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
@@ -44,14 +44,14 @@ public class ExpressionParser {
     private final QuotedIDFactory idfac;
     private final ImmutableMap<QualifiedAttributeID, Term> attributes;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
+    private final DBTypeFactory dbTypeFactory;
 
     public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Term> attributes,
                             TermFactory termFactory, TypeFactory typeFactory) {
         this.idfac = idfac;
         this.attributes = attributes;
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
+        this.dbTypeFactory = typeFactory.getDBTypeFactory();
     }
 
     public Term parseTerm(Expression expression) {
@@ -224,10 +224,10 @@ public class ExpressionParser {
             Term flags;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getDBStringConstant("");
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getDBStringConstant("i");
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -244,19 +244,19 @@ public class ExpressionParser {
             java.util.function.UnaryOperator<Function> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getDBStringConstant("");
                     not = UnaryOperator.identity();
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getDBStringConstant("i");
                     not = UnaryOperator.identity();
                     break;
                 case NOT_MATCH_CASESENSITIVE:
-                    flags = termFactory.getConstantLiteral("");
+                    flags = termFactory.getDBStringConstant("");
                     not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getConstantLiteral("i");
+                    flags = termFactory.getDBStringConstant("i");
                     not = arg -> termFactory.getFunctionNOT(arg);
                     break;
                 default:
@@ -729,12 +729,12 @@ public class ExpressionParser {
 
         @Override
         public void visit(DoubleValue expression) {
-            process(expression.toString(), XSD.DOUBLE);
+            process(expression.toString(), dbTypeFactory.getDBDoubleType());
         }
 
         @Override
         public void visit(LongValue expression) {
-            process(expression.getStringValue(), XSD.LONG);
+            process(expression.getStringValue(), dbTypeFactory.getDBLongType());
         }
 
         @Override
@@ -744,22 +744,22 @@ public class ExpressionParser {
 
         @Override
         public void visit(StringValue expression) {
-            process(expression.getValue(), XSD.STRING);
+            process(expression.getValue(), dbTypeFactory.getDBStringType());
         }
 
         @Override
         public void visit(DateValue expression) {
-            process(expression.getValue().toString(), XSD.DATE);
+            process(expression.getValue().toString(), dbTypeFactory.getDBDateType());
         }
 
         @Override
         public void visit(TimeValue expression) {
-            process(expression.getValue().toString(), XSD.TIME);
+            process(expression.getValue().toString(), dbTypeFactory.getDBTimeType());
         }
 
         @Override
         public void visit(TimestampValue expression) {
-            process(expression.getValue().toString(), XSD.DATETIME);
+            process(expression.getValue().toString(), dbTypeFactory.getDBDateTimestampType());
         }
 
         @Override
@@ -768,8 +768,8 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Temporal INTERVALs are not supported yet", expression);
         }
 
-        private void process(String value, IRI datatype) {
-            result = termFactory.getConstantLiteral(value, typeFactory.getDatatype(datatype));
+        private void process(String value, DBTermType termType) {
+            result = termFactory.getDBConstant(value, termType);
         }
 
 
@@ -1165,7 +1165,7 @@ public class ExpressionParser {
         switch (terms.size()) {
             case 2:
                 return termFactory.getFunction(
-                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getConstantLiteral(""));
+                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getDBStringConstant(""));
             case 3:
                 // check the flag?
                 return termFactory.getFunction(
@@ -1179,10 +1179,10 @@ public class ExpressionParser {
         switch (terms.size()) {
             case 3:
                 // either Oracle or PostgreSQL, without flags
-                flags = termFactory.getConstantLiteral(""); // the 4th argument is flags
+                flags = termFactory.getDBStringConstant(""); // the 4th argument is flags
                 break;
             case 4:
-                if (((ValueConstant)terms.get(3)).getType().equals(typeFactory.getDatatype(XSD.STRING))) {
+                if (((DBConstant)terms.get(3)).getType().equals(dbTypeFactory.getDBStringType())) {
                     // PostgreSQL
                     flags =  terms.get(3);
                     // check that flags is either ig or g
@@ -1192,8 +1192,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(termFactory.getConstantLiteral("1", typeFactory.getDatatype(XSD.LONG)))
-                        || !terms.get(4).equals(termFactory.getConstantLiteral("0", typeFactory.getDatatype(XSD.LONG))))
+                if (!terms.get(3).equals(termFactory.getDBConstant("1", dbTypeFactory.getDBLongType()))
+                        || !terms.get(4).equals(termFactory.getDBConstant("0", dbTypeFactory.getDBLongType())))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx
@@ -1208,12 +1208,12 @@ public class ExpressionParser {
     }
 
     private Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        Term flags = termFactory.getConstantLiteral("");
+        Term flags = termFactory.getDBStringConstant("");
         switch (terms.size()) {
             case 2:
                 return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1),
-                        termFactory.getConstantLiteral(""), flags);
+                        termFactory.getDBStringConstant(""), flags);
             case 3:
                 return termFactory.getFunction(
                         ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
