@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
 
-
+/** Legacy code: this class should not be used **/
 public class JDBC2ConstantConverter {
 
     private final TermFactory termFactory;

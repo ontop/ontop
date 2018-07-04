@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -11,13 +10,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
+public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
-    // ImmutableMap preserves order
-    protected final ImmutableMap<String, Integer> signature;
+
+    final ImmutableList<String> signature;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -29,14 +27,17 @@ public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
     /* Set to false iff the moveCursor() method returned false (at least once) */
     private boolean foundNextElement = true;
 
-    protected AbstractSQLTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
+    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
         this.rs = rs;
-        AtomicInteger i = new AtomicInteger(0);
         this.signature = signature.stream()
-                .collect(ImmutableCollectors.toMap(
-                        s -> s.toString(),
-                        s -> i.getAndIncrement()
-                ));
+                .map(Object::toString)
+                .collect(ImmutableCollectors.toList());
+//        AtomicInteger i = new AtomicInteger(0);
+//        this.signature = signature.stream()
+//                .collect(ImmutableCollectors.toMap(
+//                        Object::toString,
+//                        s -> i.getAndIncrement()
+//                ));
     }
 
     @Override
@@ -55,7 +56,7 @@ public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
 
     @Override
     public ImmutableList<String> getSignature() {
-        return signature.keySet().asList();
+        return signature;
     }
 
 

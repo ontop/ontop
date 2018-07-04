@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -24,16 +25,18 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private static final String NATIVE_STRING = "NATIVE ";
 
     private final ImmutableSet<Variable> variables;
+    private final ImmutableList<Variable> orderedVariables;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
 
     @AssistedInject
-    private NativeNodeImpl(@Assisted ImmutableSet<Variable> variables,
+    private NativeNodeImpl(@Assisted ImmutableList<Variable> variables,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         super(iqTreeTools, iqFactory);
-        this.variables = variables;
+        this.orderedVariables = variables;
+        this.variables = ImmutableSet.copyOf(variables);
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;
     }
@@ -132,5 +135,10 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public String toString() {
         return NATIVE_STRING + variables + "\n" + nativeQueryString;
+    }
+
+    @Override
+    public ImmutableList<Variable> getOrderedVariables() {
+        return orderedVariables;
     }
 }

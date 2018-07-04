@@ -18,8 +18,8 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
     private final ImmutableSubstitution substitution;
 
 
-    public SQLOntopBindingSet(ImmutableList<String> rawValues, ImmutableMap<String, Integer> signature, SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
-        super(signature, rawValues, substitution);
+    SQLOntopBindingSet(ImmutableList<String> rawValues, ImmutableList<String> signature, SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
+        super(signature);
         this.rawValues = rawValues;
         this.constantRetriever = constantRetriever;
         this.substitution = substitution;
@@ -31,12 +31,12 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
                 constantRetriever.retrieveAllConstants(rawValues)
         );
         return composition.getImmutableMap().values().stream()
-                .map(v -> evaluate(v))
+                .map(this::evaluate)
                 .collect(ImmutableCollectors.toList());
     }
 
     private RDFConstant evaluate(ImmutableFunctionalTerm term) {
-        ImmutableTerm constant = term.evaluate(false);
+        ImmutableTerm constant = term.simplify(false);
         if (constant instanceof RDFConstant) {
             return (RDFConstant) constant;
         }
@@ -44,7 +44,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
     }
 
     public static class InvalidTermAsResultException extends OntopInternalBugException {
-        public InvalidTermAsResultException(ImmutableFunctionalTerm term) {
+        InvalidTermAsResultException(ImmutableFunctionalTerm term) {
             super("Term " + term + " does not evaluate to an RDF constant");
         }
     }

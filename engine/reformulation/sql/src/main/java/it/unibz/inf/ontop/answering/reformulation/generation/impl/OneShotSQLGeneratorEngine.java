@@ -343,7 +343,7 @@ public class OneShotSQLGeneratorEngine {
 			resultingQuery = queryString;
 		}
 
-		NativeNode nativeNode = iqFactory.createNativeNode(normalizedSubTree.getVariables(), resultingQuery,
+		NativeNode nativeNode = iqFactory.createNativeNode(ImmutableList.copyOf(normalizedSubTree.getVariables()), resultingQuery,
 				normalizedSubTree.getVariableNullability());
 		UnaryIQTree newTree = iqFactory.createUnaryIQTree(rootNode, nativeNode);
 

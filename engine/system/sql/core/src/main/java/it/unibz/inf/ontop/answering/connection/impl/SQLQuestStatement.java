@@ -8,12 +8,10 @@ import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.resultset.impl.PredefinedBooleanResultSet;
 
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -24,6 +22,7 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -35,23 +34,20 @@ import java.sql.ResultSet;
 public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
-    private final DBMetadata dbMetadata;
-    private final Optional<IRIDictionary> iriDictionary;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
-                             Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
                              InputQueryFactory inputQueryFactory,
                              TermFactory termFactory, TypeFactory typeFactory,
-                             OntopSystemSQLSettings settings) {
+                             SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
-        this.dbMetadata = dbMetadata;
-        this.iriDictionary = iriDictionary;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.substitutionFactory = substitutionFactory;
         this.settings = settings;
     }
 
@@ -202,19 +198,17 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
-            ImmutableList<Variable> signature = extractSignature(executableQuery);
+            ImmutableList<Variable> SQLSignature = extractSQLSignature(executableQuery);
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 return settings.isDistinctPostProcessingEnabled()
-                        ? new SQLDistinctTupleResultSet(set, signature, constructionNode, dbMetadata, iriDictionary,
-                        termFactory, typeFactory)
-                        : new SQLTupleResultSet(set, signature, constructionNode, dbMetadata, iriDictionary,
-                        termFactory, typeFactory);
+                        ? new DistinctJDBCSolutionMappingSet(set, SQLSignature, constructionNode, termFactory, substitutionFactory)
+                        : new JDBCSolutionMappingSet(set, SQLSignature, constructionNode, termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
             }
         } catch (EmptyQueryException e) {
-            return new EmptyTupleResultSet(extractSignature(executableQuery));
+            return new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
         }
     }
 
@@ -226,16 +220,16 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
-            ImmutableList<Variable> signature = extractSignature(executableQuery);
+            ImmutableList<Variable> SQLSignature = extractSQLSignature(executableQuery);
             try {
-                ResultSet set = sqlStatement.executeQuery(sqlQuery);
-                tuples = new DelegatedIriSQLTupleResultSet(set, signature, constructionNode, dbMetadata,
-                        iriDictionary, termFactory, typeFactory);
+                ResultSet rs = sqlStatement.executeQuery(sqlQuery);
+                tuples = new JDBCSolutionMappingSet(rs, SQLSignature, constructionNode,
+                        termFactory, substitutionFactory );
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         } catch (EmptyQueryException e) {
-            tuples = new EmptyTupleResultSet(extractSignature(executableQuery));
+            tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
         }
         return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory);
     }
@@ -272,8 +266,19 @@ public class SQLQuestStatement extends QuestStatement {
                         "The \"executable\" query is not starting with a construction node\n" + executableQuery));
     }
 
-    private ImmutableList<Variable> extractSignature(IQ executableQuery) {
-        return executableQuery.getProjectionAtom().getArguments();
+    private ImmutableList<Variable> extractSQLSignature(IQ executableQuery) throws EmptyQueryException {
+        IQTree tree = executableQuery.getTree();
+        if (tree.isDeclaredAsEmpty()) {
+            throw new EmptyQueryException();
+        }
+        return Optional.of(tree)
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> (NativeNode) n)
+                .map(NativeNode::getOrderedVariables)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
+                             "for an executable query\n" + executableQuery));
     }
 
 }
