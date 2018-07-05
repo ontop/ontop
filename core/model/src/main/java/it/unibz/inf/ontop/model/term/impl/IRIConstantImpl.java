@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Provides a storage to put the URI constant.
  */
-public class IRIConstantImpl implements IRIConstant {
+public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRIConstant {
 
 	private final int identifier;
 	private final IRI iri;

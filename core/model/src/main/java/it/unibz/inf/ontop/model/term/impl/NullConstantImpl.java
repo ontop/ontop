@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NullConstantImpl implements Constant {
+public class NullConstantImpl extends AbstractNonFunctionalTerm implements Constant {
 
     private static final String NULL_STRING = "null";
 

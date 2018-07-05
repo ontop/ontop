@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl implements BNode {
+public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNode {
 
 	private static final long serialVersionUID = 214867118996974157L;
 

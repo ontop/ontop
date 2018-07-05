@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class RDFTermTypeConstantImpl implements RDFTermTypeConstant {
+public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implements RDFTermTypeConstant {
 
     private final RDFTermType rdfTermType;
     private final MetaRDFTermType metaType;

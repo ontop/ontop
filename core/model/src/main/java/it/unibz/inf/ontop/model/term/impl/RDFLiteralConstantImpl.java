@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
-public class RDFLiteralConstantImpl implements RDFLiteralConstant {
+public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements RDFLiteralConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 
