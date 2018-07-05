@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
@@ -11,43 +12,45 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Iterator;
+import java.util.Map;
 
 class SQLConstantRetriever {
 
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableList<DBTermType> termTypes;
-    private final ImmutableList<Variable> SQLSignature;
+    /* maps each variable of the output substitution to the index (in the SQL tuple) of the value used to build it.
+    * indices start at 0 */
+    private final ImmutableMap<Variable, Integer> var2SQLIndex;
 
-    SQLConstantRetriever(ImmutableSubstitution<ImmutableFunctionalTerm> substitution, ImmutableList<Variable> SQLSignature,
+    SQLConstantRetriever(ImmutableSubstitution substitution, ImmutableMap<Variable, Integer> var2SQLIndex,
                          TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.SQLSignature = SQLSignature;
+        this.var2SQLIndex = var2SQLIndex;
         this.termTypes = computeDBTypes(substitution.getImmutableMap().values());
     }
 
 
     ImmutableSubstitution<DBConstant> retrieveAllConstants(ImmutableList<String> rawValues) {
-        Iterator<DBTermType> termsIt = termTypes.iterator();
-        Iterator<String> valuesIt = rawValues.iterator();
+        Iterator<DBTermType> typesIt = termTypes.iterator();
         return substitutionFactory.getSubstitution(
-                SQLSignature.stream()
+                var2SQLIndex.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
-                                v -> v,
-                                v -> termFactory.getDBConstant(
-                                        valuesIt.next(),
-                                        termsIt.next()
+                                Map.Entry::getKey,
+                                e -> termFactory.getDBConstant(
+                                        rawValues.get(e.getValue()),
+                                        typesIt.next()
                                 ))));
     }
 
-    private ImmutableList<DBTermType> computeDBTypes(ImmutableCollection<ImmutableFunctionalTerm> terms) {
-        return SQLSignature.stream()
+    private ImmutableList<DBTermType> computeDBTypes(ImmutableCollection<ImmutableTerm> terms) {
+        return var2SQLIndex.keySet().stream()
                 .map(v -> getRequiredType(v, terms))
                 .collect(ImmutableCollectors.toList());
     }
 
-    private DBTermType getRequiredType(Variable var, ImmutableCollection<ImmutableFunctionalTerm> terms) {
+    private DBTermType getRequiredType(Variable var, ImmutableCollection<ImmutableTerm> terms) {
         ImmutableSet<ImmutableTerm> filteredTerms = terms.stream()
                 .filter(t -> (requires(t, var)))
                 .collect(ImmutableCollectors.toSet());
@@ -67,7 +70,7 @@ class SQLConstantRetriever {
     }
 
     public static class SQLVariableNameException extends OntopInternalBugException {
-        SQLVariableNameException(Variable var, ImmutableCollection<ImmutableFunctionalTerm> terms) {
+        SQLVariableNameException(Variable var, ImmutableCollection<ImmutableTerm> terms) {
             super("Variable " + var + " should be required by exactly one term in " + terms);
         }
     }

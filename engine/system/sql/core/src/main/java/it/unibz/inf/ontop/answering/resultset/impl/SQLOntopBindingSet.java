@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -18,8 +17,9 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
     private final ImmutableSubstitution substitution;
 
 
-    SQLOntopBindingSet(ImmutableList<String> rawValues, ImmutableList<String> signature, SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
-        super(signature);
+    SQLOntopBindingSet(ImmutableList<String> rawValues, ImmutableMap<String, Integer> bindingName2Index,
+                       SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
+        super(bindingName2Index);
         this.rawValues = rawValues;
         this.constantRetriever = constantRetriever;
         this.substitution = substitution;
@@ -27,7 +27,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
 
     @Override
     public ImmutableList<RDFConstant> computeValues() {
-        ImmutableSubstitution<ImmutableFunctionalTerm> composition = substitution.composeWith(
+        ImmutableSubstitution<ImmutableTerm> composition = substitution.composeWith(
                 constantRetriever.retrieveAllConstants(rawValues)
         );
         return composition.getImmutableMap().values().stream()
@@ -35,7 +35,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
                 .collect(ImmutableCollectors.toList());
     }
 
-    private RDFConstant evaluate(ImmutableFunctionalTerm term) {
+    private RDFConstant evaluate(ImmutableTerm term) {
         ImmutableTerm constant = term.simplify(false);
         if (constant instanceof RDFConstant) {
             return (RDFConstant) constant;
@@ -44,7 +44,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
     }
 
     public static class InvalidTermAsResultException extends OntopInternalBugException {
-        InvalidTermAsResultException(ImmutableFunctionalTerm term) {
+        InvalidTermAsResultException(ImmutableTerm term) {
             super("Term " + term + " does not evaluate to an RDF constant");
         }
     }

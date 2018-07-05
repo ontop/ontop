@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -10,12 +11,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
-
-    final ImmutableList<String> signature;
+    protected final ImmutableMap<String, Integer> bindingName2Index;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -29,20 +30,17 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
         this.rs = rs;
-        this.signature = signature.stream()
-                .map(Object::toString)
-                .collect(ImmutableCollectors.toList());
-//        AtomicInteger i = new AtomicInteger(0);
-//        this.signature = signature.stream()
-//                .collect(ImmutableCollectors.toMap(
-//                        Object::toString,
-//                        s -> i.getAndIncrement()
-//                ));
+        AtomicInteger i = new AtomicInteger(0);
+        this.bindingName2Index = signature.stream()
+                .collect(ImmutableCollectors.toMap(
+                        Object::toString,
+                        s -> i.getAndIncrement()
+                ));
     }
 
     @Override
     public int getColumnCount() {
-        return signature.size();
+        return bindingName2Index.keySet().size();
     }
 
     @Override
@@ -56,7 +54,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     @Override
     public ImmutableList<String> getSignature() {
-        return signature;
+        return ImmutableList.copyOf(bindingName2Index.keySet());
     }
 
 

@@ -32,4 +32,6 @@ public interface ImmutableTerm {
     Optional<TermTypeInference> inferType();
 
     EvaluationResult evaluateEq(ImmutableTerm otherTerm);
+
+    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase);
 }

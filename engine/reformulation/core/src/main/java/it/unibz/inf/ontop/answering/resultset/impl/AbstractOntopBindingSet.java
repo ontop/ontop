@@ -18,13 +18,13 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     /* Integer values start at 0 */
     /* (note: ImmutableMap preserves ordering) */
-    private final ImmutableMap<String, Integer> signature;
+    private final ImmutableMap<String, Integer> bindingName2Index;
 
     private Optional<ImmutableList<RDFConstant>> values;
     private Optional<ImmutableList<OntopBinding>> bindings;
 
-    AbstractOntopBindingSet(ImmutableMap<String, Integer> signature) {
-        this.signature = signature;
+    AbstractOntopBindingSet(ImmutableMap<String, Integer> bindingName2Index) {
+        this.bindingName2Index = bindingName2Index;
         this.bindings = Optional.empty();
     }
 
@@ -52,7 +52,7 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     @Override
     public ImmutableList<String> getBindingNames() {
-        return ImmutableList.copyOf(signature.keySet());
+        return ImmutableList.copyOf(bindingName2Index.keySet());
     }
 
     @Nullable
@@ -64,7 +64,7 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     @Nullable
     @Override
     public RDFConstant getConstant(String name) {
-        return getValues().get(signature.get(name));
+        return getValues().get(bindingName2Index.get(name));
     }
 
     @Override
@@ -76,13 +76,13 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     @Override
     public boolean hasBinding(String bindingName) {
-        return signature.containsKey(bindingName);
+        return bindingName2Index.containsKey(bindingName);
     }
 
     @Override
     @Nullable
     public OntopBinding getBinding(String name) {
-        return getBindings().get(signature.get(name));
+        return getBindings().get(bindingName2Index.get(name));
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     private ImmutableList<OntopBinding> computeBindings() {
         Iterator<RDFConstant> it = getValues().iterator();
-        return signature.keySet().stream()
+        return bindingName2Index.keySet().stream()
                 .map(k -> new OntopBindingImpl(
                         k,
                         it.next()

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.resultset.impl;
+package it.unibz.inf.ontop.answering.resultset.legacy;
 
 import javax.annotation.Nullable;
 
