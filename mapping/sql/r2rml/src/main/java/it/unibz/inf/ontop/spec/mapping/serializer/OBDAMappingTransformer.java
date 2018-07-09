@@ -154,8 +154,10 @@ public class OBDAMappingTransformer {
                     //add object declaration to predObj node
                     //term 0 is always the subject, we are interested in term 1
                      object = func.getTerm(1);
-				}
-				else {
+				} else if (predURIString.equals(IriConstants.RDF_TYPE)) {
+					object = func.getTerm(1);
+
+				} else {
 
                     //add object declaration to predObj node
                     //term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
