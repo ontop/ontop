@@ -564,8 +564,8 @@ public class R2RMLParser {
 			// trim for making variable
 			terms.add(TERM_FACTORY.getVariable(joinCond + (var)));
 
-			string = string.replace("{\"" + var + "\"}", "[]");
-			string = string.replace("{" + var + "}", "[]");
+			string = string.replaceFirst("\\{\"" + var + "\"\\}", "[]");
+			string = string.replaceFirst("\\{" + var + "\\}", "[]");
 			
 		}
 		if(type == 4){

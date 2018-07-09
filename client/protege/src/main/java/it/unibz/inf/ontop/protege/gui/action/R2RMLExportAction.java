@@ -80,7 +80,10 @@ public class R2RMLExportAction extends ProtegeAction {
 
                 final JFileChooser fc = new JFileChooser(ontologyDir);
                 final String shortForm = documentIRI.getShortForm();
-                String ontologyName = shortForm.substring(0, shortForm.lastIndexOf("."));
+                int i = shortForm.lastIndexOf(".");
+                String ontologyName = (i < 1)?
+                        shortForm:
+                        shortForm.substring(0, i);
                 fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
                 //fc.setSelectedFile(new File(sourceID + "-mapping.ttl"));
 
