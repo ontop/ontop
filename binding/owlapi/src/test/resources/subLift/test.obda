@@ -8,7 +8,7 @@ rdfs:		http://www.w3.org/2000/01/rdf-schema#
 
 [MappingDeclaration] @collection [[
 mappingId	Person
-target		:person{idPerson} :hasName {name} ; :hasBirthYear {birthYear} ; :hasJob :job{idJob} ; rdfs:label {name} . 
+target		:person{idPerson} :hasJob :job{idJob} ; rdfs:label {name} .
 source		select idPerson, name, birthYear, idJob from Person
 
 mappingId	Job

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.OWLBinding;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
@@ -18,11 +19,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertTrue;
+
+
+/** Reproduces bug #263**/
 
 public class SubLiftTest {
     private static final String CREATE_SCRIPT = "src/test/resources/subLift/create.sql";
@@ -35,7 +38,6 @@ public class SubLiftTest {
     private static final String PASSWORD = "sa";
 
     private Connection conn;
-
 
     @Before
     public void setUp() throws Exception {
@@ -82,7 +84,7 @@ public class SubLiftTest {
                 "VALUES ?instance { <http://www.semanticweb.org/test#person1> }";
 
 
-        int expectedCardinality = 5;
+        int expectedCardinality = 3;
         String sql = execute(query, expectedCardinality);
 
         System.out.println("SQL Query: \n" + sql);
@@ -108,7 +110,6 @@ public class SubLiftTest {
         String sql;
 
         int i = 0;
-        List<String> returnedValues = new ArrayList<>();
         try {
             ExecutableQuery executableQuery = st.getExecutableQuery(query);
             if (!(executableQuery instanceof SQLExecutableQuery))
@@ -117,6 +118,13 @@ public class SubLiftTest {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
+                Iterator<OWLBinding> it = bindingSet.iterator();
+                System.out.println(i);
+                while (it.hasNext()){
+                    OWLBinding b = it.next();
+                    System.out.println("\t"+b.getName() + "\t"+b.getValue());
+
+                }
                 assertTrue(
                         !bindingSet.getBinding("object").getValue().toString().equals("<http://www.semanticweb.org/test#job1>") ||
                     bindingSet.getBinding("objectLabel").getValue().toString().equals("Job 1")
