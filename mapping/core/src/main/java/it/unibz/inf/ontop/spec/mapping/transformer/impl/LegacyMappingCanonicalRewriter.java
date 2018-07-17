@@ -4,11 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalRewriter;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -19,7 +17,7 @@ import java.util.List;
 
 
 @Singleton
-public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter {
+public class LegacyMappingCanonicalRewriter {
 
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
@@ -41,7 +39,6 @@ public class LegacyMappingCanonicalRewriter implements MappingCanonicalRewriter 
         this.immutabilityTools = immutabilityTools;
     }
 
-    @Override
     public Mapping rewrite(Mapping mapping) {
         ImmutableList<CQIE> inputMappingRules = mapping2DatalogConverter.convert(mapping).collect(ImmutableCollectors.toList());
 
