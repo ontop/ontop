@@ -110,8 +110,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     }
 
     private IQ transformAssertionWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
-        IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, 1);
-        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, 3);
+        IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, 0);
+        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, 2);
     }
 
     private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, int iriPosition) {
@@ -128,14 +128,15 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                             replaceProjVars(
                                     assertion.getProjectionAtom().getArguments(),
                                     iriPosition,
-                                    (Variable) intensionalDataNode.getProjectionAtom().getArguments().get(3)
+                                    (Variable) intensionalDataNode.getProjectionAtom().getArguments().get(2)
                             ));
 
             IQ join = intensionalQueryMerger.optimize(iqFactory.createIQ(
                     projAtom,
-                    iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(),
-                            ImmutableList.of(intensionalDataNode)
+                    getIntensionalQueryTree(
+                            assertion,
+                            projAtom,
+                            intensionalDataNode
                     ))).liftBinding();
 
             return join.getTree().isDeclaredAsEmpty() ?
@@ -143,6 +144,17 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                     join;
         }
         return assertion;
+    }
+
+    private IQTree getIntensionalQueryTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(ImmutableSet.copyOf(projAtom.getArguments())),
+                iqFactory.createNaryIQTree(
+                        iqFactory.createInnerJoinNode(),
+                        ImmutableList.of(
+                                assertion.getTree(),
+                                intensionalDataNode
+                        )));
     }
 
     private IntensionalDataNode getIDN(IQ assertion, int iriPosition) {
@@ -155,10 +167,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     }
 
     private Optional<Variable> getReplacedVar(IQ assertion, int iriPosition) {
-        if (iriPosition == 1) {
+        if (iriPosition == 0) {
             return Optional.of(assertion.getProjectionAtom().getTerm(iriPosition));
         }
-        if (iriPosition == 3) {
+        if (iriPosition == 2) {
             if (MappingTools.extractRDFPredicate(assertion).isClass()) {
                 return Optional.empty();
             }
@@ -201,7 +213,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
 
-                ImmutableTerm t = dataNode.getProjectionAtom().getTerm(2);
+                ImmutableTerm t = dataNode.getProjectionAtom().getArguments().get(1);
                 if (t instanceof RDFConstant && ((RDFConstant) t).getValue().equals(Ontop.CANONICAL_IRI)) {
                     return Optional.of(definition);
                 }
