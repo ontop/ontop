@@ -66,7 +66,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     }
 
     @Override
-    public MappingWithProvenance rewrite(MappingWithProvenance mapping) {
+    public MappingWithProvenance transform(MappingWithProvenance mapping) {
 
         // Isolate mapping assertions with canIRI as predicate
         Optional<IQ> canIRIMapping = extractCanIRIMapping(mapping);

@@ -98,7 +98,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        MappingWithProvenance canonizedMapping = canonicalRewriter.rewrite(filledProvMapping);
+        MappingWithProvenance canonizedMapping = canonicalRewriter.transform(filledProvMapping);
 
         validateMapping(optionalOntology, canonizedMapping);
 
