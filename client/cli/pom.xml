@@ -57,6 +57,13 @@
             <artifactId>ontop-system-sql-owlapi</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ontop-endpoint</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.rvesse</groupId>
             <artifactId>airline</artifactId>

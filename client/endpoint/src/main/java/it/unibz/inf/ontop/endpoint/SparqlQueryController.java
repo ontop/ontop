@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.cli;
+package it.unibz.inf.ontop.endpoint;
 
 import java.io.ByteArrayOutputStream;
 
@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -18,14 +19,20 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 public class SparqlQueryController {
 
     private final Repository repository;
+    private final String ontologyFile;
+    private final String mappingFile;
+    private final String propertiesFile;
 
-    public SparqlQueryController() {
 
-        String mappingFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.obda";
-        String ontologyFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.ttl";
-        String propertyFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.properties";
+    public SparqlQueryController(
+            //String ontologyFile, String mappingFile, String propertiesFile
+    ) {
 
-        this.repository = setupVirtualRepository(mappingFile, ontologyFile, propertyFile);
+        this.mappingFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.obda";
+        this.ontologyFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.ttl";
+        this.propertiesFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.properties";
+
+        this.repository = setupVirtualRepository(mappingFile, ontologyFile, propertiesFile);
     }
 
 
