@@ -66,8 +66,7 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 					defaultConfiguration.getTermFactory(),
 					injector.getInstance(TypeFactory.class),
 					injector.getInstance(DatalogFactory.class),
-					defaultConfiguration.getAtomFactory(),
-					injector.getInstance(JdbcTypeMapper.class));
+					defaultConfiguration.getAtomFactory());
 
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
