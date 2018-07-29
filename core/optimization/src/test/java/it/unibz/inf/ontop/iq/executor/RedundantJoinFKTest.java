@@ -64,26 +64,26 @@ public class RedundantJoinFKTest {
         DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
+        Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        Attribute table2Col2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute table2Col2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Col2, pk1));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
-        Attribute pk2 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType, false);
+        Attribute pk2 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute pk3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        Attribute table4Col2 = table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
-        Attribute table4Col3 = table4Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute table4Col2 = table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute table4Col3 = table4Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
 
         table4Def.addForeignKeyConstraint(new ForeignKeyConstraint.Builder(table4Def, table3Def)
                 .add(table4Col2, pk2)

@@ -59,8 +59,8 @@ public class NoNullValuesEnforcerTest {
         DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("A"), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("B"), integerDBType, true);
+        table2Def.addAttribute(idFactory.createAttributeID("A"), integerDBType.getName(), integerDBType, true);
+        table2Def.addAttribute(idFactory.createAttributeID("B"), integerDBType.getName(), integerDBType, true);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         dbMetadata.freeze();

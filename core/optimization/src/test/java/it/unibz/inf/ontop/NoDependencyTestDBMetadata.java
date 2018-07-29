@@ -43,7 +43,7 @@ public class NoDependencyTestDBMetadata {
         DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 "TABLE" + tableNumber + "AR" + arity));
         for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
+            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringDBType.getName(), stringDBType, false);
         }
         return tableDef.getAtomPredicate();
     }

@@ -67,27 +67,27 @@ public class MappingTest {
         DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false);
         P3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false);
         P4_PREDICATE = table4Def.getAtomPredicate();
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType, false);
+        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false);
         P5_PREDICATE = table5Def.getAtomPredicate();
 
 
         DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType, false);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType, true);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType, true);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true);
+        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true);
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";

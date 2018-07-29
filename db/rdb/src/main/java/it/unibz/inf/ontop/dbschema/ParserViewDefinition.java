@@ -55,7 +55,8 @@ public class ParserViewDefinition extends RelationDefinition {
 		int c = 1;
 		for (QuotedID id : attrs) {
 			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, defaultType, true);
+					// TODO: should we use defaultType.getName() instead of null?
+					new QualifiedAttributeID(name, id), c, null, defaultType, true);
 			c++;
 			attributeMapBuilder.put(id, att);
 			attributeBuilder.add(att);

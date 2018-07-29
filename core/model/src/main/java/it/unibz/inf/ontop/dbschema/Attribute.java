@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 
 /**
  * Represents an attribute (column) of a database relation (table or view) or a parser view
@@ -38,11 +37,14 @@ public class Attribute {
 	                                       //               parser views, however, have properly qualified column names
 	private final int index;
 	private final DBTermType termType;
+	private final String typeName;
 	private final boolean canNull;
 
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, DBTermType termType, boolean canNull) {
+	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
+			  DBTermType termType, boolean canNull) {
 		this.table = relation;
 		this.index = index;
+		this.typeName = typeName;
 		this.id = id;
 		this.termType = termType;
 		this.canNull = canNull;
@@ -72,22 +74,22 @@ public class Attribute {
 		return canNull;
 	}
 	
-//	/***
-//	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
-//	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
-//	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
-//	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this
-//	 * cases.
-//	 *
-//	 * @return
-//	 */
-//	public String getSQLTypeName() {
-//		return typeName;
-//	}
+	/***
+	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
+	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
+	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
+	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this
+	 * cases.
+	 *
+	 * @return
+	 */
+	public String getSQLTypeName() {
+		return typeName;
+	}
 	
 	@Override
 	public String toString() {
-		return id.getAttribute() + " " + termType.getName() + (!canNull ? " NOT NULL" : "");
+		return id.getAttribute() + " " + typeName + (!canNull ? " NOT NULL" : "");
 	}
 	
 	@Override

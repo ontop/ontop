@@ -265,7 +265,7 @@ public class RDBMetadataExtractionTools {
 
 					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(dataType, typeName);
 					
-					currentRelation.addAttribute(attributeId, termType, isNullable);
+					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
 				}
 			}
 		}

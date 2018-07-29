@@ -147,7 +147,7 @@ public class MappingTestingTools {
         DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
         for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringType, false);
+            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringType.getName(), stringType, false);
         }
         return tableDef.getAtomPredicate();
     }

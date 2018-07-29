@@ -58,28 +58,28 @@ private static void defMeasTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType().getName(), dbTypeFactory.getDBDateTimestampType(), false);
 	// NB: was numeric
-	tableDefinition.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBStringType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBStringType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
 }
 
 private static void defMessTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBStringType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBStringType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType().getName(), dbTypeFactory.getDBDateTimestampType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
 }
 
 private static void defStaticTable(RDBMetadata dbMetadata, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBStringType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBStringType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+	tableDefinition.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
 }
 private static RDBMetadata getMeta(){
 	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();

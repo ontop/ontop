@@ -43,6 +43,8 @@ public class IQSyntacticEquivalenceCheckerTest {
 
     private static final DBMetadata DB_METADATA;
 
+    private static final String INT_STRING = "INTEGER";
+
     static {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
@@ -51,18 +53,18 @@ public class IQSyntacticEquivalenceCheckerTest {
         DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), INT_STRING, integerDBType, false);
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         dbMetadata.freeze();
