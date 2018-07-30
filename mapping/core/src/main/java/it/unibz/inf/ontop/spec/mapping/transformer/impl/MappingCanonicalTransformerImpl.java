@@ -13,11 +13,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
@@ -27,6 +24,7 @@ import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
@@ -128,7 +126,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                             replaceProjVars(
                                     assertion.getProjectionAtom().getArguments(),
                                     iriPosition,
-                                    (Variable) intensionalDataNode.getProjectionAtom().getArguments().get(2)
+                                    (Variable) getRDFAtomSubject(intensionalDataNode.getProjectionAtom()).get()
                             ));
 
             IQ join = intensionalQueryMerger.optimize(iqFactory.createIQ(
@@ -146,6 +144,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         return assertion;
     }
 
+
     private IQTree getIntensionalQueryTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(ImmutableSet.copyOf(projAtom.getArguments())),
@@ -160,9 +159,9 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private IntensionalDataNode getIDN(IQ assertion, int iriPosition) {
         return iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalTripleAtom(
-                        assertion.getProjectionAtom().getArguments().get(iriPosition),
+                        assertion.getVariableGenerator().generateNewVariable(),
                         Ontop.CANONICAL_IRI,
-                        assertion.getVariableGenerator().generateNewVariable()
+                        assertion.getProjectionAtom().getArguments().get(iriPosition)
                 ));
     }
 
@@ -174,7 +173,12 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             if (MappingTools.extractRDFPredicate(assertion).isClass()) {
                 return Optional.empty();
             }
-            return Optional.of(assertion.getProjectionAtom().getTerm(iriPosition));
+            return Optional.of(
+                    getRDFAtomSubject(assertion.getProjectionAtom())
+                            .filter(t -> t instanceof Variable)
+                            .map(t -> (Variable) t)
+                            .orElseThrow(() -> new UnexpectedTermTypeOrMissingTermException(Variable.class))
+            );
         }
         return Optional.empty();
     }
@@ -212,9 +216,9 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-
-                ImmutableTerm t = dataNode.getProjectionAtom().getArguments().get(1);
-                if (t instanceof RDFConstant && ((RDFConstant) t).getValue().equals(Ontop.CANONICAL_IRI)) {
+                if (getPropertyIRI(dataNode.getProjectionAtom())
+                        .filter(i -> i.equals(Ontop.CANONICAL_IRI))
+                        .isPresent()) {
                     return Optional.of(definition);
                 }
                 throw new UnexpectedPredicateException(dataNode.getProjectionAtom().getPredicate());
@@ -231,5 +235,29 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 super("canonical IRI predicate expected instead of :" + predicate);
             }
         }
+    }
+
+
+    private class UnexpectedTermTypeOrMissingTermException extends OntopInternalBugException {
+        UnexpectedTermTypeOrMissingTermException(Class termType) {
+            super(termType.getName() +" expected");
+        }
+    }
+
+    private static Optional<IRI> getPropertyIRI(DataAtom atom){
+        AtomPredicate atomPredicate = atom.getPredicate();
+
+        return Optional.of(atomPredicate)
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
+    }
+
+    private static Optional<ImmutableTerm> getRDFAtomSubject(DataAtom atom) {
+        AtomPredicate atomPredicate = atom.getPredicate();
+        return Optional.of(atomPredicate)
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .map(p -> p.getSubject(atom.getArguments()));
     }
 }

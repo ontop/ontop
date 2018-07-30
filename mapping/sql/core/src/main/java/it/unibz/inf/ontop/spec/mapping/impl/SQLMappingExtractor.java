@@ -43,7 +43,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
-    private final MappingCanonicalTransformer canonicalRewriter;
+    private final MappingCanonicalTransformer canonicalTransformer;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
@@ -54,7 +54,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
-                                MappingCanonicalTransformer canonicalRewriter, AtomFactory atomFactory, TermFactory termFactory,
+                                MappingCanonicalTransformer canonicalTransformer, AtomFactory atomFactory, TermFactory termFactory,
                                 SubstitutionFactory substitutionFactory,
                                 TypeFactory typeFactory) {
 
@@ -63,7 +63,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
-        this.canonicalRewriter = canonicalRewriter;
+        this.canonicalTransformer = canonicalTransformer;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -98,7 +98,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        MappingWithProvenance canonizedMapping = canonicalRewriter.transform(filledProvMapping);
+        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(filledProvMapping);
 
         validateMapping(optionalOntology, canonizedMapping);
 
@@ -109,7 +109,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
             throws MetaMappingExpansionException {
 
         MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory,
-                substitutionFactory, typeFactory);
+                substitutionFactory);
         final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
         if (expander.hasMappingsToBeExpanded()) {
             try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
