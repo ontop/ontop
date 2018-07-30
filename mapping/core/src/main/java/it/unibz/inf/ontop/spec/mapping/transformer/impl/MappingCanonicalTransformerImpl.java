@@ -28,7 +28,6 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
@@ -41,6 +40,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final OntopMappingSettings settings;
+
+    private enum Position {SUBJECT, PROPERTY, OBJECT}
 
     @Inject
     private MappingCanonicalTransformerImpl(IntermediateQueryFactory iqFactory,
@@ -55,8 +56,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         this.iqFactory = iqFactory;
         this.provenanceMappingFactory = provenanceMappingFactory;
         this.transformerFactory = transformerFactory;
-
-
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
@@ -108,33 +107,37 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     }
 
     private IQ transformAssertionWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
-        IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, 0);
-        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, 2);
+        IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, Position.SUBJECT);
+        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
     }
 
-    private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, int iriPosition) {
+    private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Position pos) {
 
-        Optional<Variable> replacedVar = getReplacedVar(assertion, iriPosition);
+        Optional<Variable> replacedVar = getReplacedVar(assertion, pos);
 
         if (replacedVar.isPresent()) {
 
-            IntensionalDataNode intensionalDataNode = getIDN(assertion, iriPosition);
+            IntensionalDataNode idn = getIDN(assertion, pos);
+            RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom());
 
             DistinctVariableOnlyDataAtom projAtom =
                     atomFactory.getDistinctVariableOnlyDataAtom(
-                            assertion.getProjectionAtom().getPredicate(),
+                            pred,
                             replaceProjVars(
+                                    pred,
                                     assertion.getProjectionAtom().getArguments(),
-                                    iriPosition,
-                                    (Variable) getRDFAtomSubject(intensionalDataNode.getProjectionAtom()).get()
-                            ));
+                                    pos,
+                                    getVarFromRDFAtom(
+                                            idn.getProjectionAtom(),
+                                            Position.SUBJECT
+                                    )));
 
             IQ join = intensionalQueryMerger.optimize(iqFactory.createIQ(
                     projAtom,
                     getIntensionalQueryTree(
                             assertion,
                             projAtom,
-                            intensionalDataNode
+                            idn
                     ))).liftBinding();
 
             return join.getTree().isDeclaredAsEmpty() ?
@@ -143,7 +146,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
         return assertion;
     }
-
 
     private IQTree getIntensionalQueryTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
         return iqFactory.createUnaryIQTree(
@@ -156,41 +158,98 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         )));
     }
 
-    private IntensionalDataNode getIDN(IQ assertion, int iriPosition) {
+    private IntensionalDataNode getIDN(IQ assertion, Position pos) {
         return iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalTripleAtom(
                         assertion.getVariableGenerator().generateNewVariable(),
                         Ontop.CANONICAL_IRI,
-                        assertion.getProjectionAtom().getArguments().get(iriPosition)
+                        getVarFromRDFAtom(assertion.getProjectionAtom(), pos)
                 ));
     }
 
-    private Optional<Variable> getReplacedVar(IQ assertion, int iriPosition) {
-        if (iriPosition == 0) {
-            return Optional.of(assertion.getProjectionAtom().getTerm(iriPosition));
+    private Optional<Variable> getReplacedVar(IQ assertion, Position pos) {
+        switch (pos) {
+            case SUBJECT:
+                return Optional.of(getTermFromRDFAtom(assertion.getProjectionAtom(), pos))
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable) t);
+            case OBJECT:
+                if (MappingTools.extractRDFPredicate(assertion).isClass()) {
+                    return Optional.empty();
+                }
+                return Optional.of(getTermFromRDFAtom(assertion.getProjectionAtom(), pos))
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable) t);
+            default:
+                throw new UnexpectedPositionException(pos);
         }
-        if (iriPosition == 2) {
-            if (MappingTools.extractRDFPredicate(assertion).isClass()) {
-                return Optional.empty();
-            }
-            return Optional.of(
-                    getRDFAtomSubject(assertion.getProjectionAtom())
-                            .filter(t -> t instanceof Variable)
-                            .map(t -> (Variable) t)
-                            .orElseThrow(() -> new UnexpectedTermTypeOrMissingTermException(Variable.class))
-            );
-        }
-        return Optional.empty();
     }
 
-    private ImmutableList<Variable> replaceProjVars(ImmutableList<Variable> arguments, int iriPosition, Variable replacementVar) {
-        AtomicInteger i = new AtomicInteger(0);
-        return arguments.stream()
-                .map(v -> (i.getAndIncrement() == iriPosition) ?
-                        replacementVar :
-                        v
-                )
-                .collect(ImmutableCollectors.toList());
+    private ImmutableList<Variable> replaceProjVars(RDFAtomPredicate pred, ImmutableList<Variable> arguments, Position pos,
+                                                    Variable replacementVar) {
+        switch (pos) {
+            case SUBJECT:
+                return pred.updateSubject(arguments, replacementVar);
+            case OBJECT:
+                return pred.updateObject(arguments, replacementVar);
+            case PROPERTY:
+            default:
+                throw new UnexpectedPositionException(pos);
+        }
+    }
+
+    private Optional<IRI> getPropertyIRI(DataAtom atom) {
+        AtomPredicate atomPredicate = atom.getPredicate();
+
+        return Optional.of(atomPredicate)
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
+    }
+
+    private Variable getVarFromRDFAtom(DataAtom atom, Position position) {
+        return Optional.of(getTermFromRDFAtom(atom, position))
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .orElseThrow(() -> new UnexpectedTermTypeOrMissingTermException(Variable.class));
+    }
+
+    private ImmutableTerm getTermFromRDFAtom(DataAtom atom, Position position) {
+        switch (position) {
+            case SUBJECT:
+                return getRDFAtomPredicate(atom).getSubject(atom.getArguments());
+            case OBJECT:
+                return getRDFAtomPredicate(atom).getObject(atom.getArguments());
+            case PROPERTY:
+                return getRDFAtomPredicate(atom).getProperty(atom.getArguments());
+            default:
+                throw new UnexpectedPositionException(position);
+        }
+    }
+
+    private RDFAtomPredicate getRDFAtomPredicate(DataAtom atom){
+        return Optional.of(atom.getPredicate())
+                .filter(p -> p instanceof RDFAtomPredicate)
+                .map(p -> (RDFAtomPredicate) p)
+                .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
+    }
+
+    private class CanonicalTransformerException extends OntopInternalBugException {
+        CanonicalTransformerException(String text) {
+            super(text);
+        }
+    }
+
+    private class UnexpectedTermTypeOrMissingTermException extends CanonicalTransformerException {
+        UnexpectedTermTypeOrMissingTermException(Class termType) {
+            super(termType.getName() + " expected");
+        }
+    }
+
+    private class UnexpectedPositionException extends CanonicalTransformerException {
+        UnexpectedPositionException(Position pos) {
+            super("Unexpected position: " + pos);
+        }
     }
 
     private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {
@@ -237,27 +296,4 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
     }
 
-
-    private class UnexpectedTermTypeOrMissingTermException extends OntopInternalBugException {
-        UnexpectedTermTypeOrMissingTermException(Class termType) {
-            super(termType.getName() +" expected");
-        }
-    }
-
-    private static Optional<IRI> getPropertyIRI(DataAtom atom){
-        AtomPredicate atomPredicate = atom.getPredicate();
-
-        return Optional.of(atomPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
-    }
-
-    private static Optional<ImmutableTerm> getRDFAtomSubject(DataAtom atom) {
-        AtomPredicate atomPredicate = atom.getPredicate();
-        return Optional.of(atomPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .map(p -> p.getSubject(atom.getArguments()));
-    }
 }
