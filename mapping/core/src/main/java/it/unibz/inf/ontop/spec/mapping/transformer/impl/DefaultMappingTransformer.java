@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class DefaultMappingTransformer implements MappingTransformer {
 
-    private final MappingCanonicalTransformer mappingCanonicalTransformer;
     private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
     private final ABoxFactIntoMappingConverter factConverter;
@@ -25,15 +24,13 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final SpecificationFactory specificationFactory;
 
     @Inject
-    private DefaultMappingTransformer(MappingCanonicalTransformer mappingCanonicalTransformer,
-                                     MappingVariableNameNormalizer mappingNormalizer,
+    private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
                                      MappingSaturator mappingSaturator,
                                      ABoxFactIntoMappingConverter inserter,
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
                                      SpecificationFactory specificationFactory) {
-        this.mappingCanonicalTransformer = mappingCanonicalTransformer;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;

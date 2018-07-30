@@ -77,7 +77,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private Optional<IQ> extractCanIRIMapping(MappingWithProvenance mapping) {
         return queryMerger.mergeDefinitions(
                 mapping.getProvenanceMap().keySet().stream()
-                        .filter(q -> !(MappingTools.extractRDFPredicate(q).getIri().equals(Ontop.CANONICAL_IRI)))
+                        .filter(q -> (MappingTools.extractRDFPredicate(q).getIri().equals(Ontop.CANONICAL_IRI)))
                         .collect(ImmutableCollectors.toList()));
     }
 
@@ -108,7 +108,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
     private IQ transformAssertionWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
         IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, Position.SUBJECT);
-        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
+        IQ canonizedAssertion = canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
+        return intensionalQueryMerger.optimize(canonizedAssertion).liftBinding();
     }
 
     private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Position pos) {
@@ -120,29 +121,34 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             IntensionalDataNode idn = getIDN(assertion, pos);
             RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom());
 
-            DistinctVariableOnlyDataAtom projAtom =
-                    atomFactory.getDistinctVariableOnlyDataAtom(
+            DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+                    pred,
+                    replaceProjVars(
                             pred,
-                            replaceProjVars(
-                                    pred,
-                                    assertion.getProjectionAtom().getArguments(),
-                                    pos,
-                                    getVarFromRDFAtom(
-                                            idn.getProjectionAtom(),
-                                            Position.SUBJECT
-                                    )));
+                            assertion.getProjectionAtom().getArguments(),
+                            pos,
+                            getVarFromRDFAtom(
+                                    idn.getProjectionAtom(),
+                                    Position.SUBJECT
+                            )));
 
-            IQ join = intensionalQueryMerger.optimize(iqFactory.createIQ(
+            IQ join = iqFactory.createIQ(
                     projAtom,
                     getIntensionalQueryTree(
                             assertion,
                             projAtom,
-                            idn
-                    ))).liftBinding();
+                            idn));
 
-            return join.getTree().isDeclaredAsEmpty() ?
+            // Note that we do not return the merged query here, but only the one with intensional data node.
+            // The reason is that the unfolder does not rename all variables in the mapping each time it is called
+            // Therefore recursive calls to the unfolder would generate undesired implicit equalities
+            // TODO: make the unfolder rename the mapping variables
+            return intensionalQueryMerger.optimize(join).liftBinding().getTree().isDeclaredAsEmpty() ?
                     assertion :
                     join;
+//            return join.getTree().isDeclaredAsEmpty() ?
+//                    assertion :
+//                    join;
         }
         return assertion;
     }
