@@ -49,7 +49,13 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
-            <version>2.2.4</version>
+            <version>${rdf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-rio-rdfjson</artifactId>
+            <version>${rdf4j.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

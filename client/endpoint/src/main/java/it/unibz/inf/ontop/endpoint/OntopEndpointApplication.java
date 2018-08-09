@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class OntopEndpointApplication  {
+public class OntopEndpointApplication implements ApplicationRunner  {
 
     public static void main(String[] args) {
         SpringApplication.run(OntopEndpointApplication.class, args);
@@ -18,15 +18,12 @@ public class OntopEndpointApplication  {
     @Bean
     EndpointConfig endpointConfig(@Value("${t}") String owlFile,
                                   @Value("${m}") String mappingFile,
-                                  @Value("${p}") String propertiesFile
-    ) {
+                                  @Value("${p}") String propertiesFile) {
         return new EndpointConfig(owlFile, mappingFile, propertiesFile);
     }
-//
-//    @Override
-//    public void run(ApplicationArguments args) {
-//        args.getOptionNames().forEach(System.out::println);
-//
-//
-//    }
+
+    @Override
+    public void run(ApplicationArguments args) {
+        args.getOptionNames().forEach(System.out::println);
+    }
 }
