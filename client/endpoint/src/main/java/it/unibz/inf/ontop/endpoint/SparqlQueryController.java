@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,28 +20,32 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 public class SparqlQueryController {
 
     private final Repository repository;
-    private final String ontologyFile;
-    private final String mappingFile;
-    private final String propertiesFile;
 
+    @Autowired
+    public SparqlQueryController(EndpointConfig config) {
+        this.repository = setupVirtualRepository(config.getMappingFile(), config.getOntologyFile(), config.getPropertiesFile());
+    }
 
-    public SparqlQueryController(
-            //String ontologyFile, String mappingFile, String propertiesFile
-    ) {
+    private static Repository setupVirtualRepository(String mappings, String ontology, String properties) throws RepositoryException {
+        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(mappings)
+                .ontologyFile(ontology)
+                .propertyFile(properties)
+                .build();
+        OntopRepository repository = OntopRepository.defaultRepository(configuration);
 
-        this.mappingFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.obda";
-        this.ontologyFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.ttl";
-        this.propertiesFile = "/Users/xiao/Documents/ontop-IJCAI-tutorial/obda/university-complete.properties";
+        repository.initialize();
 
-        this.repository = setupVirtualRepository(mappingFile, ontologyFile, propertiesFile);
+        return repository;
     }
 
 
-    @RequestMapping(value = "/sparql", method = {RequestMethod.POST, RequestMethod.GET}, produces = {"application/json"})
+    @RequestMapping(value = "/sparql",
+            method = {RequestMethod.POST, RequestMethod.GET},
+            produces = {"application/json"})
     @ResponseBody
     public String query(
             @RequestParam(value = "query") String query) {
-
         RepositoryConnection connection = repository.getConnection();
         Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
         TupleQuery selectQuery = (TupleQuery) q;
@@ -49,24 +54,5 @@ public class SparqlQueryController {
         selectQuery.evaluate(new SPARQLResultsJSONWriter(bao));
 
         return bao.toString();
-    }
-
-    private static Repository setupVirtualRepository(String mappings, String ontology, String properties) throws RepositoryException {
-        System.out.println(mappings);
-        System.out.println(ontology);
-        System.out.println(properties);
-
-        OntopRepository repository = OntopRepository
-                .defaultRepository(
-                        OntopSQLOWLAPIConfiguration.defaultBuilder()
-                                .nativeOntopMappingFile(mappings)
-                                .ontologyFile(ontology)
-                                .propertyFile(properties)
-                                .build());
-
-        repository.initialize();
-
-        return repository;
-
     }
 }
