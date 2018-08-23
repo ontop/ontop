@@ -108,8 +108,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
     private IQ transformAssertionWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
         IQ assertionWithCanonizedSubject = canonizeWithJoin(assertion, intensionalQueryMerger, Position.SUBJECT);
-        IQ canonizedAssertion = canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
-        return intensionalQueryMerger.optimize(canonizedAssertion).liftBinding();
+        return canonizeWithJoin(assertionWithCanonizedSubject, intensionalQueryMerger, Position.OBJECT);
     }
 
     private IQ canonizeWithJoin(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Position pos) {
@@ -132,23 +131,18 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                                     Position.SUBJECT
                             )));
 
-            IQ join = iqFactory.createIQ(
+            IQ join = intensionalQueryMerger.optimize(
+                    iqFactory.createIQ(
                     projAtom,
                     getIntensionalQueryTree(
                             assertion,
                             projAtom,
-                            idn));
+                            idn
+                    ))).liftBinding();
 
-            // Note that we do not return the merged query here, but only the one with intensional data node.
-            // The reason is that the unfolder does not rename all variables in the mapping each time it is called
-            // Therefore recursive calls to the unfolder would generate undesired implicit equalities
-            // TODO: make the unfolder rename the mapping variables
-            return intensionalQueryMerger.optimize(join).liftBinding().getTree().isDeclaredAsEmpty() ?
+            return join.getTree().isDeclaredAsEmpty() ?
                     assertion :
                     join;
-//            return join.getTree().isDeclaredAsEmpty() ?
-//                    assertion :
-//                    join;
         }
         return assertion;
     }
