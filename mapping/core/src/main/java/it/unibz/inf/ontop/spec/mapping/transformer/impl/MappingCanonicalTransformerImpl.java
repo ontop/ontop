@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -14,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
@@ -66,15 +66,15 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     public MappingWithProvenance transform(MappingWithProvenance mapping) {
 
         // Isolate mapping assertions with canIRI as predicate
-        Optional<IQ> canIRIMapping = extractCanIRIMapping(mapping);
+        Optional<IQ> canIRIDefinition = extractCanIRIDefinition(mapping);
 
         // Transform the remaining mapping assertions
-        return canIRIMapping.isPresent() ?
-                transformMapping(mapping, new IntensionalQueryMerger(canIRIMapping.get())) :
+        return canIRIDefinition.isPresent() ?
+                transformMapping(mapping, new IntensionalQueryMerger(canIRIDefinition.get())) :
                 mapping;
     }
 
-    private Optional<IQ> extractCanIRIMapping(MappingWithProvenance mapping) {
+    private Optional<IQ> extractCanIRIDefinition(MappingWithProvenance mapping) {
         return queryMerger.mergeDefinitions(
                 mapping.getProvenanceMap().keySet().stream()
                         .filter(q -> (MappingTools.extractRDFPredicate(q).getIri().equals(Ontop.CANONICAL_IRI)))
@@ -116,8 +116,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         Optional<Variable> replacedVar = getReplacedVar(assertion, pos);
 
         if (replacedVar.isPresent()) {
-
-            IntensionalDataNode idn = getIDN(assertion, pos);
+            Variable newVariable = createFreshVariable(assertion, intensionalQueryMerger, replacedVar.get());
+            IntensionalDataNode idn = getIDN(replacedVar.get(), newVariable);
             RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom());
 
             DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
@@ -126,30 +126,26 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                             pred,
                             assertion.getProjectionAtom().getArguments(),
                             pos,
-                            getVarFromRDFAtom(
-                                    idn.getProjectionAtom(),
-                                    Position.SUBJECT
-                            )));
+                            newVariable));
 
-            IQ join = intensionalQueryMerger.optimize(
-                    iqFactory.createIQ(
+            IQ intensionalCanonizedQuery = iqFactory.createIQ(
                     projAtom,
-                    getIntensionalQueryTree(
-                            assertion,
-                            projAtom,
-                            idn
-                    ))).liftBinding();
+                    getIntensionalCanonizedTree(assertion, projAtom, idn));
 
-            return join.getTree().isDeclaredAsEmpty() ?
-                    assertion :
-                    join;
+            IQ canonizedQuery = intensionalQueryMerger.optimize(intensionalCanonizedQuery)
+                    .liftBinding();
+
+            return canonizedQuery.getTree().isDeclaredAsEmpty()
+                    // No matching canonical IRI template
+                    ? assertion
+                    : canonizedQuery;
         }
         return assertion;
     }
 
-    private IQTree getIntensionalQueryTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
+    private IQTree getIntensionalCanonizedTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(ImmutableSet.copyOf(projAtom.getArguments())),
+                iqFactory.createConstructionNode(projAtom.getVariables()),
                 iqFactory.createNaryIQTree(
                         iqFactory.createInnerJoinNode(),
                         ImmutableList.of(
@@ -158,28 +154,33 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         )));
     }
 
-    private IntensionalDataNode getIDN(IQ assertion, Position pos) {
+    private Variable createFreshVariable(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
+        VariableGenerator variableGenerator = new VariableGenerator(
+                Sets.union(
+                        assertion.getTree().getKnownVariables(),
+                        intensionalQueryMerger.getKnownVariables()).immutableCopy(),
+                termFactory);
+
+        return variableGenerator.generateNewVariableFromVar(formerVariable);
+    }
+
+    private IntensionalDataNode getIDN(Variable formerVariable, Variable newVariable) {
         return iqFactory.createIntensionalDataNode(
                 atomFactory.getIntensionalTripleAtom(
-                        assertion.getVariableGenerator().generateNewVariable(),
+                        newVariable,
                         Ontop.CANONICAL_IRI,
-                        getVarFromRDFAtom(assertion.getProjectionAtom(), pos)
+                        formerVariable
                 ));
     }
 
     private Optional<Variable> getReplacedVar(IQ assertion, Position pos) {
         switch (pos) {
             case SUBJECT:
-                return Optional.of(getTermFromRDFAtom(assertion.getProjectionAtom(), pos))
-                        .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable) t);
+                return Optional.of(getVarFromRDFAtom(assertion.getProjectionAtom(), pos));
             case OBJECT:
-                if (MappingTools.extractRDFPredicate(assertion).isClass()) {
-                    return Optional.empty();
-                }
-                return Optional.of(getTermFromRDFAtom(assertion.getProjectionAtom(), pos))
-                        .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable) t);
+                return MappingTools.extractRDFPredicate(assertion).isClass()
+                        ? Optional.empty()
+                        : Optional.of(getVarFromRDFAtom(assertion.getProjectionAtom(), pos));
             default:
                 throw new UnexpectedPositionException(pos);
         }
@@ -207,14 +208,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
     }
 
-    private Variable getVarFromRDFAtom(DataAtom atom, Position position) {
-        return Optional.of(getTermFromRDFAtom(atom, position))
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t)
-                .orElseThrow(() -> new UnexpectedTermTypeOrMissingTermException(Variable.class));
-    }
-
-    private ImmutableTerm getTermFromRDFAtom(DataAtom atom, Position position) {
+    private Variable getVarFromRDFAtom(DistinctVariableOnlyDataAtom atom, Position position) {
         switch (position) {
             case SUBJECT:
                 return getRDFAtomPredicate(atom).getSubject(atom.getArguments());
@@ -240,12 +234,6 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
     }
 
-    private class UnexpectedTermTypeOrMissingTermException extends CanonicalTransformerException {
-        UnexpectedTermTypeOrMissingTermException(Class termType) {
-            super(termType.getName() + " expected");
-        }
-    }
-
     private class UnexpectedPositionException extends CanonicalTransformerException {
         UnexpectedPositionException(Position pos) {
             super("Unexpected position: " + pos);
@@ -265,6 +253,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         protected AbstractIntensionalQueryMerger.QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
             VariableGenerator variableGenerator = new VariableGenerator(knownVariables, termFactory);
             return new QueryMergingTransformer(variableGenerator);
+        }
+
+        public ImmutableSet<Variable> getKnownVariables() {
+            return definition.getTree().getKnownVariables();
         }
 
         private class QueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
