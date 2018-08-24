@@ -27,7 +27,9 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertTrue;
 
 
-/** Reproduces bug #263**/
+/**
+ * Reproduces bug #263
+ **/
 
 public class SubLiftTest {
     private static final String CREATE_SCRIPT = "src/test/resources/subLift/create.sql";
@@ -78,7 +80,6 @@ public class SubLiftTest {
                 "PREFIX xml: <http://www.w3.org/XML/1998/namespace>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "SELECT  ?instance ?predicate_object ?instanceLabel ?object ?objectLabel " +
-//                "SELECT  ?instance ?predicate_object ?object ?objectLabel " +
                 "WHERE " +
                 "{ ?instance  ?predicate_object  ?object " +
                 "OPTIONAL " +
@@ -124,17 +125,17 @@ public class SubLiftTest {
                 final OWLBindingSet bindingSet = rs.next();
                 Iterator<OWLBinding> it = bindingSet.iterator();
                 System.out.println(i);
-                while (it.hasNext()){
+                while (it.hasNext()) {
                     OWLBinding b = it.next();
-                    System.out.println(("\t"+b.getName() + "\t"+ stringify(b.getValue())));
+                    System.out.println(("\t" + b.getName() + "\t" + stringify(b.getValue())));
                 }
                 assertTrue(
-                        !stringify(bindingSet.getBinding("object").getValue()). equals("<http://www.semanticweb.org/test#job1>") ||
-                    stringify(bindingSet.getBinding("objectLabel").getValue()).equals("\"Job 1\"^^xsd:string")
+                        !stringify(bindingSet.getBinding("object").getValue()).equals("<http://www.semanticweb.org/test#job1>") ||
+                                stringify(bindingSet.getBinding("objectLabel").getValue()).equals("\"Job 1\"^^xsd:string")
                 );
                 assertTrue(
                         stringify(bindingSet.getBinding("predicate_object").getValue()).equals("<http://www.semanticweb.org/test#hasJob>") ||
-                    bindingSet.getBindingNames().size() == 4
+                                bindingSet.getBindingNames().size() == 4
                 );
                 i++;
             }
