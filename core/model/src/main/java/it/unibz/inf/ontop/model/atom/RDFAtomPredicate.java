@@ -33,4 +33,12 @@ public interface RDFAtomPredicate extends AtomPredicate {
                                                                 T newSubject, T newObject) {
         return updateSPO(originalArguments, newSubject, getProperty(originalArguments), newObject);
     }
+
+    default <T extends ImmutableTerm> ImmutableList<T> updateSubject(ImmutableList<T> originalArguments, T newSubject) {
+        return updateSPO(originalArguments, newSubject, getProperty(originalArguments), getObject(originalArguments));
+    }
+
+    default <T extends ImmutableTerm> ImmutableList<T> updateObject(ImmutableList<T> originalArguments, T newObject) {
+        return updateSPO(originalArguments, getSubject(originalArguments), getProperty(originalArguments), newObject);
+    }
 }
