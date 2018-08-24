@@ -72,9 +72,10 @@ public class BindingLiftTest {
 
     private final Constant ONE = TERM_FACTORY.getConstantLiteral("1", XSD.INTEGER);
 
-    private URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_2PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
-    private URITemplatePredicate URI_0PREDICATE =  TERM_FACTORY.getURITemplatePredicate(1);
+    // TEMPORARY HACK!
+    private URITemplatePredicate URI_PREDICATE =  (URITemplatePredicate) TERM_FACTORY.getImmutableUriTemplate(X, Y).getFunctionSymbol();
+    private URITemplatePredicate URI_2PREDICATE =  (URITemplatePredicate) TERM_FACTORY.getImmutableUriTemplate(X, Y, Z).getFunctionSymbol();
+    private URITemplatePredicate URI_0PREDICATE =  (URITemplatePredicate) TERM_FACTORY.getImmutableUriTemplate(X).getFunctionSymbol();
 
     private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}");

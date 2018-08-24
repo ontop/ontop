@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.*;
@@ -695,7 +694,6 @@ public class PushUpBooleanExpressionOptimizerTest {
 
 
     private static ImmutableFunctionalTerm generateURI(VariableOrGroundTerm... arguments) {
-        URITemplatePredicate uriTemplatePredicate = TERM_FACTORY.getURITemplatePredicate(arguments.length + 1);
         String uriTemplateString = "http://example.org/ds1/";
         for (VariableOrGroundTerm argument : arguments) {
             uriTemplateString = uriTemplateString.toString() + "{}";
@@ -704,6 +702,6 @@ public class PushUpBooleanExpressionOptimizerTest {
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
         builder.add(uriTemplate);
         builder.add(arguments);
-        return TERM_FACTORY.getImmutableFunctionalTerm(uriTemplatePredicate, builder.build());
+        return TERM_FACTORY.getImmutableUriTemplate(builder.build());
     }
 }
