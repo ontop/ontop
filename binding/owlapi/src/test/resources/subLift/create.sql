@@ -17,5 +17,3 @@ CREATE TABLE Person (
 ) DEFAULT CHARSET=utf8;
 
 INSERT INTO Person VALUES (1,'Person 1',1989,1),(2,'Person 2',1970,1),(3,'Person 3',1975,2),(4,'Person 4',1992,3);
-
--- Dump completed on 2018-05-30 12:30:55
