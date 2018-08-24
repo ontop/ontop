@@ -31,10 +31,3 @@ BASE <http://www.semanticweb.org/ontologies/2018/4/mimic/temporal/>
     ?p mt:hasCreatinineLevel ?v .
     ?p rdf:type mt:ICUStayFirstDay .
 }
-
-?p rdf:type mt:ICUPatientDressedArterialLineCatheter :- {
-    ?p rdf:type mt:ICUStay .
-    ALWAYS IN PAST [0, 4D] {
-        ?p rdf:type mt:ArterialLineCatheterDressed .
-    }
-}
