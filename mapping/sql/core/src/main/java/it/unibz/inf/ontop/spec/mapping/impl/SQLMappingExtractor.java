@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -42,6 +43,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
+    private final MappingCanonicalTransformer canonicalTransformer;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
@@ -52,6 +54,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
+                                MappingCanonicalTransformer canonicalTransformer,
                                 AtomFactory atomFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                 TypeFactory typeFactory) {
 
@@ -60,6 +63,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
+        this.canonicalTransformer = canonicalTransformer;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -94,9 +98,11 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, filledProvMapping);
+        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(filledProvMapping);
 
-        return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
+        validateMapping(optionalOntology, canonizedMapping);
+
+        return new MappingAndDBMetadataImpl(canonizedMapping.toRegularMapping(), dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)

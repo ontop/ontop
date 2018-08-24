@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class DefaultMappingTransformer implements MappingTransformer {
 
-    private final MappingCanonicalRewriter mappingCanonicalRewriter;
     private final MappingVariableNameNormalizer mappingNormalizer;
     private final MappingSaturator mappingSaturator;
     private final ABoxFactIntoMappingConverter factConverter;
@@ -25,15 +24,13 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final SpecificationFactory specificationFactory;
 
     @Inject
-    private DefaultMappingTransformer(MappingCanonicalRewriter mappingCanonicalRewriter,
-                                     MappingVariableNameNormalizer mappingNormalizer,
+    private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
                                      MappingSaturator mappingSaturator,
                                      ABoxFactIntoMappingConverter inserter,
                                      MappingMerger mappingMerger,
                                      OntopMappingSettings settings,
                                      MappingSameAsInverseRewriter sameAsInverseRewriter,
                                      SpecificationFactory specificationFactory) {
-        this.mappingCanonicalRewriter = mappingCanonicalRewriter;
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -59,8 +56,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     OBDASpecification createSpecification(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        Mapping canonicalMapping = mappingCanonicalRewriter.rewrite(sameAsOptimizedMapping);
-        Mapping saturatedMapping = mappingSaturator.saturate(canonicalMapping, dbMetadata, tbox);
+        Mapping saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tbox);
