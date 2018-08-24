@@ -44,7 +44,6 @@ public class LeftJoinOptimizationTest {
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
-    private static URITemplatePredicate URI_PREDICATE_ONE_VAR = TERM_FACTORY.getURITemplatePredicate(2);
     private static Constant URI_TEMPLATE_STR_1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
 
     private final static Variable X = TERM_FACTORY.getVariable("x");
@@ -1035,7 +1034,7 @@ public class LeftJoinOptimizationTest {
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE_ONE_VAR, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
 

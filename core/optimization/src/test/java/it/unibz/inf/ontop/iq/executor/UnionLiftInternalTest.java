@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 public class UnionLiftInternalTest {
 
     private static Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
 
     private static AtomPredicate P1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
     private static AtomPredicate P2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
@@ -820,7 +819,7 @@ public class UnionLiftInternalTest {
     }
 
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
 

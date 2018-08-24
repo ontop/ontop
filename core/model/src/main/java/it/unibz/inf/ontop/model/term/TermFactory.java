@@ -239,6 +239,4 @@ public interface TermFactory {
 	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
 
 	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
-
-	URITemplatePredicate getURITemplatePredicate(int arity);
 }
