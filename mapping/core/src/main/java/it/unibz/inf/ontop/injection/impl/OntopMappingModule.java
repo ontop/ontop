@@ -31,7 +31,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bind(OntopMappingSettings.class).toInstance(configuration.getSettings());
         bindFromSettings(MappingVariableNameNormalizer.class);
         bindFromSettings(MappingSaturator.class);
-        bindFromSettings(MappingCanonicalRewriter.class);
+        bindFromSettings(MappingCanonicalTransformer.class);
         bindFromSettings(Datalog2QueryMappingConverter.class);
         bindFromSettings(Mapping2DatalogConverter.class);
         bindFromSettings(ABoxFactIntoMappingConverter.class);

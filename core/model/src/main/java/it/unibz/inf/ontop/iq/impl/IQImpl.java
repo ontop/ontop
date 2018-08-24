@@ -82,7 +82,7 @@ public class IQImpl implements IQ {
         ImmutableSet<Variable> projectedVariables = tree.getVariables();
         if (!projectedVariables.equals(projectionAtom.getVariables())) {
             throw new InvalidIntermediateQueryException("The variables projected by the root node"
-                    +  projectedVariables + " do not match the projection atom " + tree.getVariables());
+                    +  projectedVariables + " do not match the projection atom " + projectionAtom.getVariables());
         }
     }
 
