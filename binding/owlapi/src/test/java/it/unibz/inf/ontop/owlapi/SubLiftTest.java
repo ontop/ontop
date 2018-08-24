@@ -130,12 +130,12 @@ public class SubLiftTest {
                 }
                 assertTrue(
                         !stringify(bindingSet.getBinding("object").getValue()). equals("<http://www.semanticweb.org/test#job1>") ||
-                    stringify(bindingSet.getBinding("objectLabel").getValue()).equals("Job 1^^xsd:string")
+                    stringify(bindingSet.getBinding("objectLabel").getValue()).equals("\"Job 1\"^^xsd:string")
                 );
-//                assertTrue(
-//                        bindingSet.getBinding("predicate_object").getValue().toString().equals("<http://www.semanticweb.org/test#hasJob>") ||
-//                    bindingSet.getBindingNames().size() == 4
-//                );
+                assertTrue(
+                        stringify(bindingSet.getBinding("predicate_object").getValue()).equals("<http://www.semanticweb.org/test#hasJob>") ||
+                    bindingSet.getBindingNames().size() == 4
+                );
                 i++;
             }
             assertTrue(i == expectedCardinality);
