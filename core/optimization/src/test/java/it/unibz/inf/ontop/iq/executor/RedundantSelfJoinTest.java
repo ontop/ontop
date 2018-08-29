@@ -927,7 +927,7 @@ public class RedundantSelfJoinTest {
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, N, N, O));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, O));
         expectedQueryBuilder.addChild(newLJNode, dataNode4, RIGHT);
 
         optimizeAndCompare(query, expectedQueryBuilder.build());
@@ -971,7 +971,7 @@ public class RedundantSelfJoinTest {
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, N, N, O));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, O));
         expectedQueryBuilder.addChild(newLJNode, dataNode4, RIGHT);
 
         optimizeAndCompare(query, expectedQueryBuilder.build());
@@ -1022,12 +1022,12 @@ public class RedundantSelfJoinTest {
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
         ConstructionNode rightConstruction = IQ_FACTORY.createConstructionNode(
-                ImmutableSet.of(N, F0),
+                ImmutableSet.of(M, F0),
                 SUBSTITUTION_FACTORY.getSubstitution(F0, TERM_FACTORY.getProvenanceSpecialConstant()));
         expectedQueryBuilder.addChild(newLJNode, rightConstruction, RIGHT);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, N, N, N));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, M));
         expectedQueryBuilder.addChild(rightConstruction, dataNode4);
 
         optimizeAndCompare(query, expectedQueryBuilder.build());
