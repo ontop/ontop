@@ -26,15 +26,10 @@ import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
+import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
@@ -76,7 +71,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
-	private final ImmutabilityTools immutabilityTools;
+	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final IQConverter iqConverter;
 
 	@AssistedInject
@@ -94,7 +89,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools, IQConverter iqConverter) {
+								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+								IQConverter iqConverter) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -106,7 +102,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
-		this.immutabilityTools = immutabilityTools;
+		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
 		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
@@ -232,11 +228,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				/*
-				 * TODO: USE INJECTION!
-				 */
-				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools)
-						.optimize(intermediateQuery);
+				intermediateQuery = pullUpExpressionOptimizer.optimize(intermediateQuery);
 				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);

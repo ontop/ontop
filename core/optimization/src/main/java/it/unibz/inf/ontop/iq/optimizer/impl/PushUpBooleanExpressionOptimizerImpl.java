@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -56,7 +57,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
  * Then the recipient of e cannot be above n_m.
  * <p>
  */
-
+@Singleton
 public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpressionOptimizer {
 
 
