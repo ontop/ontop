@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -61,6 +62,11 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
 
     private final boolean pushAboveUnions;
     private final ImmutabilityTools immutabilityTools;
+
+    @Inject
+    private PushUpBooleanExpressionOptimizerImpl(ImmutabilityTools immutabilityTools) {
+        this(false, immutabilityTools);
+    }
 
     public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions, ImmutabilityTools immutabilityTools) {
         this.pushAboveUnions = pushAboveUnions;

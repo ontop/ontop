@@ -61,6 +61,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
         bindFromSettings(PushDownBooleanExpressionOptimizer.class);
+        bindFromSettings(PushUpBooleanExpressionOptimizer.class);
 
         // Releases the configuration (enables some GC)
         this.configuration = null;

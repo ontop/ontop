@@ -46,6 +46,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
@@ -121,6 +122,7 @@ public class OneShotSQLGeneratorEngine {
 	private final IQConverter iqConverter;
 	private final UnionFlattener unionFlattener;
 	private final PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer;
+	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 
 
 	// the only two mutable (query-dependent) fields
@@ -137,7 +139,8 @@ public class OneShotSQLGeneratorEngine {
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter, UnionFlattener unionFlattener,
-							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer) {
+							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -148,6 +151,7 @@ public class OneShotSQLGeneratorEngine {
 		this.iqConverter = iqConverter;
 		this.unionFlattener = unionFlattener;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
+		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -187,7 +191,8 @@ public class OneShotSQLGeneratorEngine {
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-									  UnionFlattener unionFlattener, PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer) {
+									  UnionFlattener unionFlattener, PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+									  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -207,6 +212,7 @@ public class OneShotSQLGeneratorEngine {
 		this.iqConverter = iqConverter;
 		this.unionFlattener = unionFlattener;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
+		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -264,7 +270,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, unionFlattener, pushDownExpressionOptimizer);
+                typeFactory, termFactory, iqConverter, unionFlattener, pushDownExpressionOptimizer, pullUpExpressionOptimizer);
 	}
 
 	/**
@@ -336,8 +342,11 @@ public class OneShotSQLGeneratorEngine {
 
 	private IQ normalizeIQ(IntermediateQuery intermediateQuery) {
 
+		// Trick for pushing down expressions under unions:
+		//   - there the context may be concrete enough for evaluations certain expressions
+		//   - useful for dealing with SPARQL EBVs for instance
 		IntermediateQuery pushedDownQuery = pushDownExpressionOptimizer.optimize(intermediateQuery);
-		log.debug("New query after pushing down the boolean expressions: \n" + pushedDownQuery);
+		log.debug("New query after pushing down the boolean expressions (temporary): \n" + pushedDownQuery);
 
 		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(pushedDownQuery));
 		log.debug("New query after flattening the union: \n" + flattenIQ);
@@ -351,7 +360,12 @@ public class OneShotSQLGeneratorEngine {
 			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
 			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
 
-			return iqConverter.convert(queryAfterPullOut);
+			// Pulling up is needed when filtering conditions appear above a data atom on the left
+			// (causes problems to the IQ2DatalogConverter)
+			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(queryAfterPullOut);
+			log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullOut);
+
+			return iqConverter.convert(queryAfterPullUp);
 		} catch (EmptyQueryException e) {
 			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
 		}

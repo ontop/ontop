@@ -235,7 +235,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 				/*
 				 * TODO: USE INJECTION!
 				 */
-				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
+				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools)
+						.optimize(intermediateQuery);
 				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
