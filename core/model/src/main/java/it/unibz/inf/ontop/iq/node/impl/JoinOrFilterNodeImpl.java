@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -188,7 +189,9 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                                 .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
                 ));
 
-        return new ExpressionAndSubstitution(newExpression, normalizedUnifier);
+        return new ExpressionAndSubstitution(newExpression,
+                normalizedUnifier.reduceDomainToIntersectionWith(
+                        Sets.difference(normalizedUnifier.getDomain(), nonLiftableVariables).immutableCopy()));
     }
 
     private ImmutableSubstitution<NonFunctionalTerm> unify(
