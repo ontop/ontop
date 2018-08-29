@@ -24,6 +24,8 @@ import java.util.Optional;
 
 public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
+    private static final String SLICE_STR = "SLICE";
+
     private final long offset;
 
     @Nullable
@@ -163,5 +165,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return getLimit()
                 .map(l -> iqFactory.createSliceNode(offset, l))
                 .orElseGet(() -> iqFactory.createSliceNode(offset));
+    }
+
+    @Override
+    public String toString() {
+        return SLICE_STR
+                + (offset > 0 ? " offset=" + offset : "")
+                + (limit == null ? "" : " limit=" + limit);
     }
 }
