@@ -934,50 +934,7 @@ public class ExpressionEvaluator {
 //					throw new RuntimeException("Unsupported type: " + pred2);
 //				}
 
-				/*
-				 * Evaluate both terms by comparing their datatypes
-				 */
-				if (isXsdString(pred1) && isXsdString(pred2)) { // R: replaced incorrect check
-																		//  pred1 == termFactory.getDataTypePredicateLiteral()
-																		// && pred2 == termFactory.getDataTypePredicateLiteral())
-																	    // which does not work for LANG_STRING
-					/*
-					 * Special code to handle quality of Literals (plain, and
-					 * with language)
-					 */
-					if (f1.getTerms().size() != f2.getTerms().size()) {
-						// case one is with language another without
-						return termFactory.getBooleanConstant(!eq);
-					} 
-					else if (f1.getTerms().size() == 2) {
-						// SIZE == 2
-						// these are literals with languages, we need to
-						// return the evaluation of the values and the
-						// languages case literals without language, its
-						// exactly as normal datatypes.
-						// This is copy paste code
-						if (eq) {
-							Function eqValues = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-							Function eqLang = termFactory.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
-							return evalAnd(eqValues, eqLang);
-						}
-						Function eqValues = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						Function eqLang = termFactory.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
-						return evalOr(eqValues, eqLang);
-					}
-					// case literals without language, its exactly as normal
-					// datatypes
-					// this is copy paste code
-					if (eq) {
-						Function neweq = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, true);
-					} 
-					else {
-						Function neweq = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, false);
-					}
-				} 
-				else if (pred1.equals(pred2)) {
+				if (pred1.equals(pred2)) {
 					if (pred1 instanceof URITemplatePredicate) {
 						return evalUriTemplateEqNeq(f1, f2, eq);
 					} 
