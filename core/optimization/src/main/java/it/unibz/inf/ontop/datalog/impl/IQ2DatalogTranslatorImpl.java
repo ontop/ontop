@@ -148,7 +148,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 					.map(n -> (DistinctNode) n);
 
 			IQTree firstNonSliceDistinctTree = distinctNode
-					.map(n -> ((UnaryIQTree) tree).getChild())
+					.map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
 					.orElse(firstNonSliceTree);
 
 			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctTree)
