@@ -28,9 +28,12 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ public class ExpressionEvaluator {
 	private final UnifierUtilities unifierUtilities;
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
+	private final RDF iriFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
@@ -70,6 +74,7 @@ public class ExpressionEvaluator {
 		this.unifierUtilities = unifierUtilities;
 		this.normalizer = normalizer;
 		this.immutabilityTools = immutabilityTools;
+		this.iriFactory = new SimpleRDF();
 	}
 
 	public static class EvaluationResult {
@@ -543,12 +548,8 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(constantValue);
-		if (type.isPresent()) {
-			Predicate p = termFactory.getRequiredTypePredicate(type.get());
-			return isNumeric(p);
-		}
-		return false;	
+		RDFDatatype type = typeFactory.getDatatype(iriFactory.createIRI(constantValue));
+		return type.isA(OntopInternal.NUMERIC);
 	}
 
 	/*

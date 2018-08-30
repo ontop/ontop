@@ -529,9 +529,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (typeURI == null) {
                 type = typeFactory.getXsdStringDatatype();
             } else {
-                // TODO: support arbitrary datatypes
-                type = typeFactory.getOptionalDatatype(rdfFactory.createIRI(typeURI.stringValue()))
-                        .orElse(null);
+                type = typeFactory.getDatatype(rdfFactory.createIRI(typeURI.stringValue()));
             }
 
             if (type == null)

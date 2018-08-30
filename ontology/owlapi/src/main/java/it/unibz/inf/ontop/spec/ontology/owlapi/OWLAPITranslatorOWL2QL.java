@@ -1090,10 +1090,8 @@ public class OWLAPITranslatorOWL2QL {
             return termFactory.getConstantLiteral(object.getLiteral(), object.getLang());
         }
         else {
-            Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(object.getDatatype().getIRI().toString());
-            return type.isPresent()
-                ? termFactory.getConstantLiteral(object.getLiteral(), type.get())
-                : termFactory.getConstantLiteral(object.getLiteral());
+            RDFDatatype type = typeFactory.getDatatype(rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
+            return termFactory.getConstantLiteral(object.getLiteral(), type);
         }
     }
 
