@@ -185,8 +185,7 @@ public class RDF4JGraphLoading {
                         IRI datatype = l.getDatatype();
                         RDFDatatype type = (datatype == null)
                                 ? typeFactory.getXsdStringDatatype()
-                                : typeFactory.getOptionalDatatype(rdfFactory.createIRI(datatype.stringValue()))
-                                .orElseGet(typeFactory::getUnsupportedDatatype);
+                                : typeFactory.getDatatype(rdfFactory.createIRI(datatype.stringValue()));
                         c2 = termFactory.getConstantLiteral(l.getLabel(), type);
                     }
                     else {
