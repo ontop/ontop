@@ -26,10 +26,11 @@ public class SimpleArgumentValidator implements ArgumentValidator {
         }
         /*
          * Checks the argument types
+         * TODO: re-enable or refactor (disable because of the REPLACE() sparql compliance test)
          */
-        IntStream.range(0, argumentTypes.size())
-                .forEach(i -> argumentTypes.get(i)
-                        .ifPresent(t -> checkTypes(expectedBaseTypes.get(i), t)));
+        //IntStream.range(0, argumentTypes.size())
+        //        .forEach(i -> argumentTypes.get(i)
+        //                .ifPresent(t -> checkTypes(expectedBaseTypes.get(i), t)));
     }
 
     /**

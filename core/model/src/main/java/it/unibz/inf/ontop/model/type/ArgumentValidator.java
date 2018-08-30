@@ -14,13 +14,13 @@ public interface ArgumentValidator {
 
     ImmutableList<TermType> getExpectedBaseArgumentTypes();
 
-    default boolean areCompatible(ImmutableList<Optional<TermType>> argumentTypes) {
-        try {
-            validate(argumentTypes);
-            return true;
-        } catch (IncompatibleTermException e) {
-            return false;
-        }
-    }
+//    default boolean areCompatible(ImmutableList<Optional<TermType>> argumentTypes) {
+//        try {
+//            validate(argumentTypes);
+//            return true;
+//        } catch (IncompatibleTermException e) {
+//            return false;
+//        }
+//    }
 
 }
