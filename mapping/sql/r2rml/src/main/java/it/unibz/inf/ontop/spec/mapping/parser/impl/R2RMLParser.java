@@ -257,7 +257,7 @@ public class R2RMLParser {
 		ObjectMap om = pom.getObjectMap(0);
 
 		String lan = om.getLanguageTag();
-		Object datatype = om.getDatatype();
+		IRI datatype = om.getDatatype();
 
 		// we check if the object map is a constant (can be a iri or a literal)
         // TODO(xiao): toString() is suspicious
@@ -296,15 +296,8 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
-						Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(datatypeConstant.getIRIString());
-						if (!type.isPresent()) {
-							// throw new RuntimeException("Unsupported datatype: " +
-							// datatype.toString());
-							logger.warn("Unsupported datatype will not be converted: "
-									+ datatypeConstant.toString());
-						} else {
-							objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, type.get());
-						}
+						RDFDatatype type = typeFactory.getDatatype(datatypeConstant);
+						objectAtom = termFactory.getImmutableTypedTerm(constantLiteral, type);
 					}
 					else {
 
@@ -389,15 +382,8 @@ public class R2RMLParser {
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(datatype.toString());
-			if (!type.isPresent()) {
-				// throw new RuntimeException("Unsupported datatype: " +
-				// datatype.toString());
-				logger.warn("Unsupported datatype will not be converted: "
-						+ datatype.toString());
-			} else {
-				objectAtom = termFactory.getImmutableTypedTerm(objectAtom, type.get());
-			}
+			RDFDatatype type = typeFactory.getDatatype(datatype);
+			objectAtom = termFactory.getImmutableTypedTerm(objectAtom, type);
 		}
 
 		return objectAtom;

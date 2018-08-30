@@ -29,7 +29,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	private final TermType rootTermType;
 	private final RDFTermType rootRDFTermType;
-	private final UnboundRDFTermType unboundRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
 	private final RDFDatatype rdfsLiteralDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
@@ -49,8 +48,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
-
-		unboundRDFTermType = UnboundRDFTermTypeImpl.createUnboundRDFTermType(rootRDFTermType.getAncestry());
 
 		objectRDFType = AbstractObjectRDFType.createAbstractObjectRDFType(rootRDFTermType.getAncestry());
 		iriTermType = new IRITermType(objectRDFType.getAncestry());
@@ -143,16 +140,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public Optional<RDFDatatype> getOptionalDatatype(String uri) {
-		return getOptionalDatatype(rdfFactory.createIRI(uri));
-	}
-
-	@Override
-	public Optional<RDFDatatype> getOptionalDatatype(IRI iri) {
-		return Optional.ofNullable(datatypeCache.get(iri));
-	}
-
-	@Override
 	public RDFDatatype getLangTermType(String languageTagString) {
 		return langTypeCache
 				.computeIfAbsent(languageTagString.toLowerCase(), this::createLangStringDatatype);
@@ -160,10 +147,10 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	@Override
 	public RDFDatatype getDatatype(IRI iri) {
-		RDFDatatype datatype = datatypeCache.get	(iri);
-		if (datatype == null)
-			throw new RuntimeException("TODO: support arbitrary datatypes such as " + iri);
-		return datatype;
+		return datatypeCache.computeIfAbsent(
+				iri,
+				// Non-predefined datatypes cannot be declared as the child of a concrete datatype
+				i -> createSimpleRDFDatatype(i, rdfsLiteralDatatype.getAncestry()));
 	}
 
 	@Override
@@ -174,11 +161,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public ObjectRDFType getBlankNodeType() {
 		return blankNodeTermType;
-	}
-
-	@Override
-	public UnboundRDFTermType getUnboundTermType() {
-		return unboundRDFTermType;
 	}
 
 	@Override
