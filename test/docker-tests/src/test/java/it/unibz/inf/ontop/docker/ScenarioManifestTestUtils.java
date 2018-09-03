@@ -59,6 +59,10 @@ public class ScenarioManifestTestUtils {
 
 		URL url = ScenarioManifestTestUtils.class.getResource(factory.getMainManifestFile());
 
+		if (url == null)
+			throw new RuntimeException("Could not find the resource file " + factory.getMainManifestFile()
+					+ ".\nPlease make sure resources have been generated");
+
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
 			try {
