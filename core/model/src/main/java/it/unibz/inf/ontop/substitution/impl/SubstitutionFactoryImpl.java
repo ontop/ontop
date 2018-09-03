@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.*;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -19,11 +20,13 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
 
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private SubstitutionFactoryImpl(AtomFactory atomFactory, TermFactory termFactory) {
+    private SubstitutionFactoryImpl(AtomFactory atomFactory, TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -100,7 +103,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 variables)
                 .immutableCopy();
 
-        VariableGenerator newVariableGenerator = new VariableGenerator(knownVariables, termFactory);
+        VariableGenerator newVariableGenerator = coreUtilsFactory.createVariableGenerator(knownVariables);
         return newVariableGenerator.generateNewVariableFromVar(v);
 
 

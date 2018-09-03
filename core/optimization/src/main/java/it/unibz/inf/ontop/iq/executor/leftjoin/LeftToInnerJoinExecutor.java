@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -53,17 +54,19 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private LeftToInnerJoinExecutor(LeftJoinRightChildNormalizationAnalyzer normalizer,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                    ImmutabilityTools immutabilityTools) {
+                                    ImmutabilityTools immutabilityTools, CoreUtilsFactory coreUtilsFactory) {
         this.normalizer = normalizer;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.immutabilityTools = immutabilityTools;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -137,7 +140,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
 
-        VariableGenerator variableGenerator = new VariableGenerator(query.getKnownVariables(), termFactory);
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(query.getKnownVariables());
 
         LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftVariables, leftChildren,
                 rightComponent.dataNode, variableGenerator);

@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
 
@@ -37,6 +38,7 @@ public class OptimizationTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryTransformerFactory TRANSFORMER_FACTORY;
+    public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
     public static final PushDownBooleanExpressionOptimizer PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
@@ -67,6 +69,7 @@ public class OptimizationTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);

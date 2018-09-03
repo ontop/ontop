@@ -20,6 +20,8 @@ import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 
 public class OntopModelModule extends OntopAbstractModule {
@@ -46,6 +48,13 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
+
+        Module utilsModule = buildFactory(
+                ImmutableList.of(
+                        VariableGenerator.class
+                ),
+                CoreUtilsFactory.class);
+        install(utilsModule);
 
         Module iqFactoryModule = buildFactory(ImmutableList.of(
                 IntermediateQueryBuilder.class,
