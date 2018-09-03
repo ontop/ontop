@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.datalog;
 
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,8 +28,8 @@ public class VariableDispatcher {
     /**
      * For a datalog rule
      */
-    public VariableDispatcher(CQIE rule, TermFactory termFactory) {
-        variableGenerator = new LegacyVariableGenerator(rule, termFactory);
+    public VariableDispatcher(CQIE rule, CoreUtilsFactory coreUtilsFactory) {
+        variableGenerator = coreUtilsFactory.createVariableGenerator(rule.getReferencedVariables());
         allocatedVariables = new HashSet<>();
     }
 

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.utils.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -31,17 +30,6 @@ public class LegacyVariableGenerator implements VariableGenerator {
         this.termFactory = termFactory;
         count = 0;
         this.knownVariables = new HashSet<>(knownVariables);
-    }
-
-    /**
-     * Rule-level variable generator.
-     *
-     * TODO: remove it
-     */
-    public LegacyVariableGenerator(CQIE initialRule, TermFactory termFactory) {
-        this.termFactory = termFactory;
-        count = 0;
-        knownVariables = initialRule.getReferencedVariables();
     }
 
     /**

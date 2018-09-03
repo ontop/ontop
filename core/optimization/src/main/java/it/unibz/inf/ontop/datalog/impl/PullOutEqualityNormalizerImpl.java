@@ -11,10 +11,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,19 +45,19 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
     private final Function trueEq;
 
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
     private final DatalogTools datalogTools;
     private final SubstitutionUtilities substitutionUtilities;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private PullOutEqualityNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
+    private PullOutEqualityNormalizerImpl(TermFactory termFactory,
                                           DatalogFactory datalogFactory, DatalogTools datalogTools,
-                                          SubstitutionUtilities substitutionUtilities) {
-        this.substitutionFactory = substitutionFactory;
+                                          SubstitutionUtilities substitutionUtilities, CoreUtilsFactory coreUtilsFactory) {
         this.termFactory = termFactory;
         this.substitutionUtilities = substitutionUtilities;
+        this.coreUtilsFactory = coreUtilsFactory;
         ValueConstant valueTrue = termFactory.getBooleanConstant(true);
         this.trueEq = termFactory.getFunctionEQ(valueTrue, valueTrue);
         this.datalogFactory = datalogFactory;
@@ -75,7 +75,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         CQIE newRule = initialRule.clone();
 
         // Mutable object
-        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule, termFactory);
+        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule, coreUtilsFactory);
 
         /**
          * Result for the top atoms of the rule.
