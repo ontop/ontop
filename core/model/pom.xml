@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-rdf-simple</artifactId>
+            <artifactId>commons-rdf-rdf4j</artifactId>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.antlr</groupId>-->
