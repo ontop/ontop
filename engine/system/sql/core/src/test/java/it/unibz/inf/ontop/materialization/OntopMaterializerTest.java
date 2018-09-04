@@ -51,7 +51,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +74,7 @@ public class OntopMaterializerTest {
 	private static String password = "";
 
 	private final SQLMappingFactory mappingFactory;
-	private final RDF RDFFactory = new SimpleRDF();
+	private final RDF rdfFactory;
 	private final RDFDatatype xsdStringDt;
 
 	private final ImmutableTerm type;
@@ -110,15 +109,16 @@ public class OntopMaterializerTest {
 		typeFactory = injector.getInstance(TypeFactory.class);
 		atomFactory = injector.getInstance(AtomFactory.class);
 		targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
+		rdfFactory = injector.getInstance(RDF.class);
 
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
 		
-		personIRI = RDFFactory.createIRI(PREFIX + "Person");
-		fnIRI = RDFFactory.createIRI(PREFIX + "fn");
-		lnIRI = RDFFactory.createIRI(PREFIX + "ln");
-		ageIRI = RDFFactory.createIRI(PREFIX + "age");
-		hasschoolIRI = RDFFactory.createIRI(PREFIX + "hasschool");
-		schoolIRI = RDFFactory.createIRI(PREFIX + "School");
+		personIRI = rdfFactory.createIRI(PREFIX + "Person");
+		fnIRI = rdfFactory.createIRI(PREFIX + "fn");
+		lnIRI = rdfFactory.createIRI(PREFIX + "ln");
+		ageIRI = rdfFactory.createIRI(PREFIX + "age");
+		hasschoolIRI = rdfFactory.createIRI(PREFIX + "hasschool");
+		schoolIRI = rdfFactory.createIRI(PREFIX + "School");
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 

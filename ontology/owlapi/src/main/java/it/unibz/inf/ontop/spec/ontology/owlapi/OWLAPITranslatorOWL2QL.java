@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -45,10 +44,10 @@ public class OWLAPITranslatorOWL2QL {
     private final RDF rdfFactory;
 
     @Inject
-    private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory) {
+    private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.rdfFactory = new SimpleRDF();
+        this.rdfFactory = rdfFactory;
     }
 
     public static class TranslationException extends Exception {
@@ -73,7 +72,7 @@ public class OWLAPITranslatorOWL2QL {
         Set<OWLOntology> owls = owl.getOWLOntologyManager().getImportsClosure(owl);
         log.debug("Load ontologies called. Translating {} ontologies.", owls.size());
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
         for (OWLOntology o : owls) {
             extractOntoloyVocabulary(o, builder);
         }

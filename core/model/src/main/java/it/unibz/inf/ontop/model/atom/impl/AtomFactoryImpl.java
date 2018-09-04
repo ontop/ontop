@@ -4,16 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.stream.IntStream;
-
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.areVariablesDistinct;
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
 
 
 public class AtomFactoryImpl implements AtomFactory {
@@ -24,20 +20,20 @@ public class AtomFactoryImpl implements AtomFactory {
     private final TypeFactory typeFactory;
 
     @Inject
-    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory) {
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         triplePredicate = new TriplePredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
-                typeFactory.getAbstractRDFTermType()
-        ));
+                typeFactory.getAbstractRDFTermType()),
+                rdfFactory);
         quadPredicate = new QuadPredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
-                typeFactory.getIRITermType()
-        ));
+                typeFactory.getIRITermType()),
+                rdfFactory);
     }
 
     @Override

@@ -26,8 +26,6 @@ import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,8 +44,6 @@ import java.util.Map;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
-	private static final RDF RDF_FACTORY = new SimpleRDF();
-
 	private final String name;
 	
 	private final boolean isTop, isBottom;
@@ -58,10 +54,6 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(OWL.TOP_DATA_PROPERTY);
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(OWL.BOTTOM_DATA_PROPERTY);
 	private final IRI iri;
-
-	DataPropertyExpressionImpl(String name) {
-		this(RDF_FACTORY.createIRI(name));
-	}
 
 	DataPropertyExpressionImpl(IRI iri) {
 		this.name = iri.getIRIString();

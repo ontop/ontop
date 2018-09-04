@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 
 import java.util.*;
@@ -43,8 +42,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final RDF rdfFactory;
 
 	@Inject
-	private TypeFactoryImpl() {
-		rdfFactory = new SimpleRDF();
+	private TypeFactoryImpl(RDF rdfFactory) {
+		this.rdfFactory = rdfFactory;
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());

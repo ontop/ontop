@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -33,19 +34,21 @@ public class SQLQuestStatement extends QuestStatement {
     private final Optional<IRIDictionary> iriDictionary;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
                              Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
                              InputQueryFactory inputQueryFactory,
                              TermFactory termFactory, TypeFactory typeFactory,
-                             OntopSystemSQLSettings settings) {
+                             RDF rdfFactory, OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.dbMetadata = dbMetadata;
         this.iriDictionary = iriDictionary;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.rdfFactory = rdfFactory;
         this.settings = settings;
     }
 
@@ -201,9 +204,9 @@ public class SQLQuestStatement extends QuestStatement {
             java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
             return settings.isDistinctPostProcessingEnabled()
                     ? new SQLDistinctTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary,
-                    termFactory, typeFactory)
+                    termFactory, typeFactory, rdfFactory)
                     : new DelegatedIriSQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata, iriDictionary,
-                    termFactory, typeFactory);
+                    termFactory, typeFactory, rdfFactory);
         } catch (SQLException e) {
             throw new OntopQueryEvaluationException(e);
         }
@@ -226,12 +229,12 @@ public class SQLQuestStatement extends QuestStatement {
             try {
                 ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 tuples = new DelegatedIriSQLTupleResultSet(set, executableQuery.getSignature(), dbMetadata,
-                        iriDictionary, termFactory, typeFactory);
+                        iriDictionary, termFactory, typeFactory, rdfFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
         }
-        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory);
+        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory, rdfFactory);
     }
 
     private SQLExecutableQuery checkAndConvertTargetQuery(ExecutableQuery executableQuery) {

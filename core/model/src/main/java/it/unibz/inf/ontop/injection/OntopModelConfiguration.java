@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -29,6 +30,7 @@ public interface OntopModelConfiguration {
     AtomFactory getAtomFactory();
     TermFactory getTermFactory();
     TypeFactory getTypeFactory();
+    RDF getRdfFactory();
 
     /**
      * Default builder

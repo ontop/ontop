@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +52,7 @@ public class CQCUtilitiesTest {
 
 	Term x = TERM_FACTORY.getVariable("x");
 	Term y = TERM_FACTORY.getVariable("y");
-	Term c1 = TERM_FACTORY.getConstantIRI(new SimpleRDF().createIRI("URI1"));
+	Term c1 = TERM_FACTORY.getConstantIRI(RDF_FACTORY.createIRI("urn:URI1"));
 	Term c2 = TERM_FACTORY.getConstantLiteral("m");
 
 	IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
@@ -428,7 +427,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
-            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             OClass left = builder.declareClass(classA.getIRIString());
             OClass right = builder.declareClass(classC.getIRIString());
             builder.addSubClassOfAxiom(left, right);
@@ -456,7 +455,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             OClass left = builder.declareClass(classA.getIRIString());
             ObjectPropertyExpression pright = builder.declareObjectProperty(propertyR.getIRIString());
 
@@ -485,7 +484,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             OClass left = builder.declareClass(classA.getIRIString());
             ObjectPropertyExpression pright = builder.declareObjectProperty(propertyR.getIRIString()).getInverse();
 
@@ -514,7 +513,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             OClass right = builder.declareClass(classA.getIRIString());
             ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString());
 
@@ -544,7 +543,7 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 
-            OntologyBuilder builder = OntologyBuilderImpl.builder();
+            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             OClass right = builder.declareClass(classA.getIRIString());
             ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString()).getInverse();
 
@@ -594,7 +593,7 @@ public class CQCUtilitiesTest {
 
         // q(x) :- , q(x) :- R(x,y), A(x)
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
         OClass left = builder.declareClass(classA.getIRIString());
         ObjectPropertyExpression pleft = builder.declareObjectProperty(propertyR.getIRIString());
 
