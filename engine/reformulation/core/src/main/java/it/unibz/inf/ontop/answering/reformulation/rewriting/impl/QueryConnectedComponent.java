@@ -205,7 +205,7 @@ public class QueryConnectedComponent {
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
-		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
+		Set<Term> headTerms = new HashSet<>(cqie.getHead().getTerms());
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
@@ -217,15 +217,19 @@ public class QueryConnectedComponent {
 		
 		for (Function atom : cqie.getBody()) {
 			Predicate p = atom.getFunctionSymbol();
-			/*
-			 * TODO: update it! (all the data atoms in a SPARQL query use a RDFAtomPredicate)
-			 */
-			if (atom.isDataFunction() && !(p instanceof RDFAtomPredicate)) { // if DL predicates
+			// TODO: support quads
+			if (atom.isDataFunction() && (p instanceof TriplePredicate)) { // if DL predicates
 				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
 				Term t0 = a.getTerm(0);
-				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
+
+				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
+						.map(immutabilityTools::convertIntoImmutableTerm)
+						.collect(ImmutableCollectors.toList());
+				boolean isClass = ((TriplePredicate) p).getClassIRI(arguments).isPresent();
+
+				if ((!isClass) && !t0.equals(a.getTerm(2))) {
 					// proper DL edge between two distinct terms
-					Term t1 = a.getTerm(1);
+					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
 					Edge edge =  pairs.get(pair); 
 					if (edge == null) {
