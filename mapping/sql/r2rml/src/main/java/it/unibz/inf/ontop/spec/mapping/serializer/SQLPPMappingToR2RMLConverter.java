@@ -28,12 +28,12 @@ import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
@@ -58,17 +58,17 @@ public class SQLPPMappingToR2RMLConverter {
     private List<SQLPPTriplesMap> ppMappingAxioms;
     private PrefixManager prefixmng;
     private OWLOntology ontology;
-    private final TermFactory termFactory;
+    private final RDF rdfFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, TermFactory termFactory) {
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, RDF rdfFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
         this.ontology = ontology;
-        this.termFactory = termFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory);
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory);
         transformer.setOntology(ontology);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
                 .map(a -> transformer.getTriplesMap(a, prefixmng))

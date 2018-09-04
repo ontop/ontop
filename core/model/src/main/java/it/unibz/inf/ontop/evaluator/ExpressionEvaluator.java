@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -59,12 +58,12 @@ public class ExpressionEvaluator {
 	private final UnifierUtilities unifierUtilities;
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
-	private final RDF iriFactory;
+	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								UnifierUtilities unifierUtilities, ExpressionNormalizer normalizer,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -74,7 +73,7 @@ public class ExpressionEvaluator {
 		this.unifierUtilities = unifierUtilities;
 		this.normalizer = normalizer;
 		this.immutabilityTools = immutabilityTools;
-		this.iriFactory = new SimpleRDF();
+		this.rdfFactory = rdfFactory;
 	}
 
 	public static class EvaluationResult {
@@ -548,7 +547,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		RDFDatatype type = typeFactory.getDatatype(iriFactory.createIRI(constantValue));
+		RDFDatatype type = typeFactory.getDatatype(rdfFactory.createIRI(constantValue));
 		return type.isA(OntopInternal.NUMERIC);
 	}
 
@@ -1098,6 +1097,7 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities, normalizer, immutabilityTools);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities, normalizer,
+				immutabilityTools, rdfFactory);
 	}
 }

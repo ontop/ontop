@@ -41,13 +41,11 @@ import it.unibz.inf.ontop.utils.URITemplates;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -62,17 +60,16 @@ public class OBDAMappingTransformer {
 	private Set<OWLObjectProperty> objectProperties;
     private Set<OWLDataProperty> dataProperties;
 
-	private RDF rdfFactory = new SimpleRDF();
+	private final RDF rdfFactory;
     private String baseIRIString;
-	private final TermFactory termFactory;
 
-	OBDAMappingTransformer(TermFactory termFactory) {
-        this("urn:", termFactory);
+	OBDAMappingTransformer(RDF rdfFactory) {
+        this("urn:", rdfFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory) {
+    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory) {
         this.baseIRIString = baseIRIString;
-		this.termFactory = termFactory;
+		this.rdfFactory = rdfFactory;
 	}
 
     /**

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 
 import java.util.*;
 import java.util.function.Function;
@@ -35,14 +36,12 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private static final String DATATYPE_NOT_FOUND = "Datatype not found: ";
     private static final String ANNOTATION_PROPERTY_NOT_FOUND = "AnnotationProperty not found: ";
 
-    private final OntologyCategoryImpl<OClass> classes =
-            new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
-    private final OntologyCategoryImpl<ObjectPropertyExpression> objectProperties =
-            new OntologyCategoryImpl<>(ObjectPropertyExpressionImpl::new, OBJECT_PROPERTY_NOT_FOUND,"");
-    private final OntologyCategoryImpl<DataPropertyExpression> dataProperties =
-            new OntologyCategoryImpl<>(DataPropertyExpressionImpl::new, DATA_PROPERTY_NOT_FOUND,"");
-    private final OntologyCategoryImpl<AnnotationProperty> annotationProperties =
-            new OntologyCategoryImpl<>(AnnotationPropertyImpl::new, ANNOTATION_PROPERTY_NOT_FOUND,"");
+    private final OntologyCategoryImpl<OClass> classes;
+    private final OntologyCategoryImpl<ObjectPropertyExpression> objectProperties;
+    private final OntologyCategoryImpl<DataPropertyExpression> dataProperties;
+    private final OntologyCategoryImpl<AnnotationProperty> annotationProperties;
+
+    private final RDF rdfFactory;
 
     // assertions
 
@@ -51,34 +50,44 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final ImmutableList.Builder<DataPropertyAssertion> dataPropertyAssertions = ImmutableList.builder();
     private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
 
-    private OntologyBuilderImpl() {
+    private OntologyBuilderImpl(RDF rdfFactory) {
+        classes = new OntologyCategoryImpl<>(s -> new ClassImpl(rdfFactory.createIRI(s)),
+                        CLASS_NOT_FOUND,"");
+        objectProperties = new OntologyCategoryImpl<>(s -> new ObjectPropertyExpressionImpl(rdfFactory.createIRI(s)),
+                        OBJECT_PROPERTY_NOT_FOUND,"");
+        dataProperties = new OntologyCategoryImpl<>(s -> new DataPropertyExpressionImpl(rdfFactory.createIRI(s)),
+                DATA_PROPERTY_NOT_FOUND,"");
+        annotationProperties = new OntologyCategoryImpl<>(s -> new AnnotationPropertyImpl(rdfFactory.createIRI(s)),
+                ANNOTATION_PROPERTY_NOT_FOUND,"");
         classes.map.put(OWL.THING.getIRIString(), ClassImpl.owlThing);
         classes.map.put(OWL.NOTHING.getIRIString(), ClassImpl.owlNothing);
         objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlTopObjectProperty);
         objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlBottomObjectProperty);
         dataProperties.map.put(OWL.TOP_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlTopDataProperty);
         dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlBottomDataProperty);
+
+        this.rdfFactory = rdfFactory;
     }
 
-    public static OntologyBuilder builder() {
-        return new OntologyBuilderImpl();
+    public static OntologyBuilder builder(RDF rdfFactory) {
+        return new OntologyBuilderImpl(rdfFactory);
     }
 
-    public static ABoxAssertionSupplier assertionSupplier() {
+    public static ABoxAssertionSupplier assertionSupplier(RDF rdfFactory) {
         return new ABoxAssertionSupplier() {
             @Override
             public ClassAssertion createClassAssertion(String c, ObjectConstant o) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createClassAssertion(new ClassImpl(c), o);
+                return OntologyBuilderImpl.createClassAssertion(new ClassImpl(rdfFactory.createIRI(c)), o);
             }
 
             @Override
             public ObjectPropertyAssertion createObjectPropertyAssertion(String op, ObjectConstant o1, ObjectConstant o2) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createObjectPropertyAssertion(new ObjectPropertyExpressionImpl(op), o1, o2);
+                return OntologyBuilderImpl.createObjectPropertyAssertion(new ObjectPropertyExpressionImpl(rdfFactory.createIRI(op)), o1, o2);
             }
 
             @Override
             public DataPropertyAssertion createDataPropertyAssertion(String dp, ObjectConstant o, ValueConstant v) throws InconsistentOntologyException {
-                return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(dp), o, v);
+                return OntologyBuilderImpl.createDataPropertyAssertion(new DataPropertyExpressionImpl(rdfFactory.createIRI(dp)), o, v);
             }
         };
     }
@@ -546,7 +555,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
     @Override
     public ObjectPropertyExpression createAuxiliaryObjectProperty() {
-        ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(AUXROLEURI + auxCounter);
+        ObjectPropertyExpression ope = new ObjectPropertyExpressionImpl(rdfFactory.createIRI(AUXROLEURI + auxCounter));
         auxCounter++ ;
         auxObjectProperties.add(ope);
         return ope;

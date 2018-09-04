@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -46,6 +45,7 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
@@ -64,7 +64,6 @@ import java.util.stream.Stream;
  *
  */
 public class DirectMappingEngine {
-	;
 
 	public static class DefaultBootstrappingResults implements BootstrappingResults {
 		private final SQLPPMapping ppMapping;
@@ -93,6 +92,7 @@ public class DirectMappingEngine {
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
 	private final AtomFactory atomFactory;
+	private final RDF rdfFactory;
 	private final JdbcTypeMapper jdbcTypeMapper;
 	private final OntopSQLCredentialSettings settings;
 	private final TargetAtomFactory targetAtomFactory;
@@ -116,7 +116,7 @@ public class DirectMappingEngine {
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
 								DatalogFactory datalogFactory, AtomFactory atomFactory,
-								JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
+								RDF rdfFactory, JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -124,6 +124,7 @@ public class DirectMappingEngine {
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.atomFactory = atomFactory;
+		this.rdfFactory = rdfFactory;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.targetAtomFactory = targetAtomFactory;
 	}
@@ -283,7 +284,8 @@ public class DirectMappingEngine {
 	 */
 	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory);
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory,
+				rdfFactory);
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,

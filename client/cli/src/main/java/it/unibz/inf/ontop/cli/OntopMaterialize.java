@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
@@ -140,12 +140,14 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     .ppMapping(ppMapping)
                     .build();
 
+            RDF rdfFactory = configuration.getInjector().getInstance(RDF.class);
+
             int i = 1;
             int numPredicates = predicateMap.size();
             for (Map.Entry<IRI, PredicateType> entry : predicateMap.entrySet()) {
                 IRI predicateIRI = entry.getKey();
                 System.err.println(String.format("Materializing %s (%d/%d)", predicateIRI, i, numPredicates));
-                serializePredicate(materializationConfig, predicateIRI, entry.getValue(), outputFile, format, ontology);
+                serializePredicate(materializationConfig, predicateIRI, entry.getValue(), outputFile, format, ontology, rdfFactory);
                 i++;
             }
 
@@ -179,7 +181,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      */
     private void serializePredicate(OntopSQLOWLAPIConfiguration materializationConfig, IRI predicateIRI,
                                     PredicateType predicateType,
-                                    String outputFile, String format, OWLOntology ontology) throws Exception {
+                                    String outputFile, String format, OWLOntology ontology, RDF rdfFactory) throws Exception {
         final long startTime = System.currentTimeMillis();
 
 
@@ -199,7 +201,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
 
         try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(materializationConfig,
-                ImmutableSet.of(new SimpleRDF().createIRI(predicateIRI.toString())), materializationParams)) {
+                ImmutableSet.of(rdfFactory.createIRI(predicateIRI.toString())), materializationParams)) {
 
             while (graphResultSet.hasNext()) {
                 tripleCount += serializeTripleBatch(ontology, graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);

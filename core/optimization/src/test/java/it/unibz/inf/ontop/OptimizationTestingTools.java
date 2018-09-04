@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Properties;
 
@@ -97,7 +96,7 @@ public class OptimizationTestingTools {
         NULL = TERM_FACTORY.getNullConstant();
         TRUE = TERM_FACTORY.getBooleanConstant(true);
         FALSE = TERM_FACTORY.getBooleanConstant(false);
-        RDF_FACTORY = new SimpleRDF();
+        RDF_FACTORY = injector.getInstance(RDF.class);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
