@@ -22,8 +22,12 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
+
+import java.util.Properties;
 
 public class OptimizationTestingTools {
 
@@ -54,7 +58,12 @@ public class OptimizationTestingTools {
 
     static {
 
+        // TEMPORARY! TODO: remove it!
+        Properties tmpProperties = new Properties();
+        tmpProperties.put(VariableGenerator.class.getCanonicalName(), LegacyVariableGenerator.class.getCanonicalName());
+
         OntopOptimizationConfiguration defaultConfiguration = OntopOptimizationConfiguration.defaultBuilder()
+                .properties(tmpProperties)
                 .enableTestMode()
                 .build();
 
