@@ -549,7 +549,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
     private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<>();
 
-    private static final String AUXROLEURI = "AUX.ROLE";
+    private static final String AUXROLEURI = "urn:AUX.ROLE";
     private int auxCounter = 0;
 
 
