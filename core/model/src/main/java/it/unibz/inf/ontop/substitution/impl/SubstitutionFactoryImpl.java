@@ -104,8 +104,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
                 .immutableCopy();
 
         VariableGenerator newVariableGenerator = coreUtilsFactory.createVariableGenerator(knownVariables);
-        return newVariableGenerator.generateNewVariableFromVar(v);
-
-
+        Variable newVariable = newVariableGenerator.generateNewVariableFromVar(v);
+        variableGenerator.registerAdditionalVariables(ImmutableSet.of(newVariable));
+        return newVariable;
     }
 }
