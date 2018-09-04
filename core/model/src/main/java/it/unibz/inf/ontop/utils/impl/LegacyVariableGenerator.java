@@ -32,18 +32,12 @@ public class LegacyVariableGenerator implements VariableGenerator {
         this.knownVariables = new HashSet<>(knownVariables);
     }
 
-    /**
-     * Declares additional variables as known.
-     */
     public void registerAdditionalVariables(Collection<Variable> additionalVariables) {
         knownVariables.addAll(additionalVariables);
     }
 
-    /**
-     * Generates a new non-conflicting variable from a previous one.
-     * It will reuse its name.
-     */
     public Variable generateNewVariableFromVar(Variable previousVariable) {
+        knownVariables.add(previousVariable);
         Variable newVariable;
         do {
             newVariable = termFactory.getVariable(previousVariable.getName() + SUFFIX_PREFIX + (count++));
@@ -53,9 +47,6 @@ public class LegacyVariableGenerator implements VariableGenerator {
         return newVariable;
     }
 
-    /**
-     * Generates a new variable if a conflict is detected.
-     */
     public Variable generateNewVariableIfConflicting(Variable previousVariable) {
         Variable newVariable = previousVariable;
         while(knownVariables.contains(newVariable)) {
@@ -66,9 +57,6 @@ public class LegacyVariableGenerator implements VariableGenerator {
         return newVariable;
     }
 
-    /**
-     * Generates a new non-conflicting variable.
-     */
     public Variable generateNewVariable() {
         Variable newVariable;
         do {
@@ -79,9 +67,6 @@ public class LegacyVariableGenerator implements VariableGenerator {
         return newVariable;
     }
 
-    /**
-     * Instant snapshot of variable it knows.
-     */
     public ImmutableSet<Variable> getKnownVariables() {
         return ImmutableSet.copyOf(knownVariables);
     }

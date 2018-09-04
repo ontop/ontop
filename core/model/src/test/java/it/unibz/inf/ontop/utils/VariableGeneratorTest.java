@@ -68,6 +68,13 @@ public class VariableGeneratorTest {
 
         Variable v11 = newVariableGenerator.generateNewVariableIfConflicting(v9);
         assertEquals(v9, v11);
+
+        Variable v12 = termFactory.getVariable("myFourthIndependentVariable");
+        Variable v13 = variableGenerator.generateNewVariableFromVar(v12);
+        assertNotEquals(v12, v13);
+        Variable v14 = variableGenerator.generateNewVariableIfConflicting(v12);
+        assertNotEquals(v14, v12);
+        assertNotEquals(v13, v14);
     }
 
 
