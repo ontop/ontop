@@ -52,7 +52,7 @@ public class CQCUtilitiesTest {
 
 	Term x = TERM_FACTORY.getVariable("x");
 	Term y = TERM_FACTORY.getVariable("y");
-	Term c1 = TERM_FACTORY.getConstantIRI(RDF_FACTORY.createIRI("URI1"));
+	Term c1 = TERM_FACTORY.getConstantIRI(RDF_FACTORY.createIRI("urn:URI1"));
 	Term c2 = TERM_FACTORY.getConstantLiteral("m");
 
 	IRI propertyP = RDF_FACTORY.createIRI("http://example.com/P");
