@@ -9,8 +9,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -19,8 +19,8 @@ public class IQImpl implements IQ {
 
     private final DistinctVariableOnlyDataAtom projectionAtom;
     private final IQTree tree;
-    private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     /**
      * Lazy (created on demand)
@@ -30,12 +30,13 @@ public class IQImpl implements IQ {
 
     @AssistedInject
     private IQImpl(@Assisted DistinctVariableOnlyDataAtom projectionAtom, @Assisted IQTree tree,
-                   TermFactory termFactory, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+                   IntermediateQueryFactory iqFactory,
+                   CoreUtilsFactory coreUtilsFactory, OntopModelSettings settings) {
         
         this.projectionAtom = projectionAtom;
         this.tree = tree;
-        this.termFactory = termFactory;
         this.iqFactory = iqFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.variableGenerator = null;
 
         if (settings.isTestModeEnabled())
@@ -56,7 +57,7 @@ public class IQImpl implements IQ {
     @Override
     public synchronized VariableGenerator getVariableGenerator() {
         if (variableGenerator == null)
-            variableGenerator = new VariableGenerator(tree.getKnownVariables(), termFactory);
+            variableGenerator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
         return variableGenerator;
     }
 
