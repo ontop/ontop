@@ -252,7 +252,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public QueryTreeComponent createSnapshot() {
-        return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.clone());
+        return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.createSnapshot());
     }
 
     /**

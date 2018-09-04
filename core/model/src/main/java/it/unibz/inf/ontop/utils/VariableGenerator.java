@@ -11,7 +11,7 @@ import java.util.Collection;
  *
  * The typical scope for variables is the body of a rule.
  */
-public interface VariableGenerator extends Cloneable {
+public interface VariableGenerator {
 
     void registerAdditionalVariables(Collection<Variable> additionalVariables);
 
@@ -23,5 +23,5 @@ public interface VariableGenerator extends Cloneable {
 
     ImmutableSet<Variable> getKnownVariables();
 
-    VariableGenerator clone();
+    VariableGenerator createSnapshot();
 }

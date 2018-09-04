@@ -87,7 +87,7 @@ public class LegacyVariableGenerator implements VariableGenerator {
     }
 
     @Override
-    public VariableGenerator clone() {
+    public VariableGenerator createSnapshot() {
         return new LegacyVariableGenerator(getKnownVariables(), termFactory);
     }
 }
