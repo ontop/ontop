@@ -6,7 +6,10 @@ import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
+import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -14,10 +17,17 @@ import static org.junit.Assert.*;
 
 public class VariableGeneratorTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariableGeneratorTest.class);
+
 
     @Test
     public void testLegacy() {
         testVariableGenerator(LegacyVariableGenerator.class);
+    }
+
+    @Test
+    public void testDefault() {
+        testVariableGenerator(VariableGeneratorImpl.class);
     }
 
     private void testVariableGenerator(Class<? extends VariableGenerator> klass) {
@@ -75,6 +85,12 @@ public class VariableGeneratorTest {
         Variable v14 = variableGenerator.generateNewVariableIfConflicting(v12);
         assertNotEquals(v14, v12);
         assertNotEquals(v13, v14);
+
+        Variable v15 = termFactory.getVariable("myVar15-100");
+        Variable v16 = newVariableGenerator.generateNewVariableFromVar(v15);
+        assertNotEquals(v16, v15);
+
+        LOGGER.debug("Fresh variable derived from " + v15 + ": " + v16);
     }
 
 
