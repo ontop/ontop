@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.si.dag;
 
 
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.junit.Test;
 
 /* 

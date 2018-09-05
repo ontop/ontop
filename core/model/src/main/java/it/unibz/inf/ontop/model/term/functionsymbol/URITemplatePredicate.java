@@ -20,6 +20,5 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  * #L%
  */
 
-public interface URITemplatePredicate extends BuiltinPredicate {
-	// NO-OP
+public interface URITemplatePredicate extends RDFTermConstructionSymbol {
 }

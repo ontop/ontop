@@ -1,30 +1,25 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.iq.node.impl.ImmutableQueryModifiersImpl;
-import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
-import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
+import it.unibz.inf.ontop.datalog.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Types;
-import java.util.Optional;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.DATA_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.IQ_FACTORY;
-import static it.unibz.inf.ontop.OptimizationTestingTools.createQueryBuilder;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -35,50 +30,50 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class FunctionalDependencyTest {
 
-    private final static AtomPredicate TABLE1_PREDICATE;
-    private final static AtomPredicate TABLE2_PREDICATE;
-    private final static AtomPredicate TABLE3_PREDICATE;
-    private final static AtomPredicate TABLE4_PREDICATE;
+    private final static RelationPredicate TABLE1_PREDICATE;
+    private final static RelationPredicate TABLE2_PREDICATE;
+    private final static RelationPredicate TABLE3_PREDICATE;
+    private final static RelationPredicate TABLE4_PREDICATE;
 
-    private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getAtomPredicate("ans1", 2);
-    private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static Variable A = DATA_FACTORY.getVariable("a");
-    private final static Variable B = DATA_FACTORY.getVariable("b");
-    private final static Variable C = DATA_FACTORY.getVariable("c");
-    private final static Variable D = DATA_FACTORY.getVariable("d");
-    private final static Variable E = DATA_FACTORY.getVariable("e");
-    private final static Variable F = DATA_FACTORY.getVariable("f");
-    private final static Variable G = DATA_FACTORY.getVariable("g");
-    private final static Variable H = DATA_FACTORY.getVariable("h");
-    private final static Variable I = DATA_FACTORY.getVariable("i");
-    private final static Variable J = DATA_FACTORY.getVariable("j");
-    private final static Variable K = DATA_FACTORY.getVariable("k");
-    private final static Variable L = DATA_FACTORY.getVariable("l");
-    private final static Variable M = DATA_FACTORY.getVariable("m");
-    private final static Variable N = DATA_FACTORY.getVariable("n");
-    private final static Variable O = DATA_FACTORY.getVariable("o");
-    private final static Variable P = DATA_FACTORY.getVariable("p");
-    private final static Variable Q = DATA_FACTORY.getVariable("q");
-    private final static Variable R = DATA_FACTORY.getVariable("r");
-    private final static Variable S = DATA_FACTORY.getVariable("s");
-    private final static Variable T = DATA_FACTORY.getVariable("t");
-    private final static Variable U = DATA_FACTORY.getVariable("u");
-    private final static Variable V = DATA_FACTORY.getVariable("v");
-    private final static Variable W = DATA_FACTORY.getVariable("w");
-    private final static Variable X = DATA_FACTORY.getVariable("x");
-    private final static Variable Y = DATA_FACTORY.getVariable("y");
-    private final static Variable Z = DATA_FACTORY.getVariable("z");
-    private final static Constant ONE = DATA_FACTORY.getConstantLiteral("1");
-    private final static Constant TWO = DATA_FACTORY.getConstantLiteral("2");
-    private final static Constant THREE = DATA_FACTORY.getConstantLiteral("3");
+    private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
+    private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private final static AtomPredicate ANS1_PREDICATE_AR_3 = ATOM_FACTORY.getRDFAnswerPredicate(3);
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
+    private final static Variable C = TERM_FACTORY.getVariable("c");
+    private final static Variable D = TERM_FACTORY.getVariable("d");
+    private final static Variable E = TERM_FACTORY.getVariable("e");
+    private final static Variable F = TERM_FACTORY.getVariable("f");
+    private final static Variable G = TERM_FACTORY.getVariable("g");
+    private final static Variable H = TERM_FACTORY.getVariable("h");
+    private final static Variable I = TERM_FACTORY.getVariable("i");
+    private final static Variable J = TERM_FACTORY.getVariable("j");
+    private final static Variable K = TERM_FACTORY.getVariable("k");
+    private final static Variable L = TERM_FACTORY.getVariable("l");
+    private final static Variable M = TERM_FACTORY.getVariable("m");
+    private final static Variable N = TERM_FACTORY.getVariable("n");
+    private final static Variable O = TERM_FACTORY.getVariable("o");
+    private final static Variable P = TERM_FACTORY.getVariable("p");
+    private final static Variable Q = TERM_FACTORY.getVariable("q");
+    private final static Variable R = TERM_FACTORY.getVariable("r");
+    private final static Variable S = TERM_FACTORY.getVariable("s");
+    private final static Variable T = TERM_FACTORY.getVariable("t");
+    private final static Variable U = TERM_FACTORY.getVariable("u");
+    private final static Variable V = TERM_FACTORY.getVariable("v");
+    private final static Variable W = TERM_FACTORY.getVariable("w");
+    private final static Variable X = TERM_FACTORY.getVariable("x");
+    private final static Variable Y = TERM_FACTORY.getVariable("y");
+    private final static Variable Z = TERM_FACTORY.getVariable("z");
+    private final static Constant ONE = TERM_FACTORY.getConstantLiteral("1");
+    private final static Constant TWO = TERM_FACTORY.getConstantLiteral("2");
+    private final static Constant THREE = TERM_FACTORY.getConstantLiteral("3");
 
     private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 
     private static final DBMetadata METADATA;
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /*
@@ -97,7 +92,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T1)
                 .addDependent(col4T1)
                 .build());
-        TABLE1_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table1Def);
+        TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -107,7 +102,7 @@ public class FunctionalDependencyTest {
         Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
-        TABLE2_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table2Def);
+        TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
@@ -129,7 +124,7 @@ public class FunctionalDependencyTest {
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
-        TABLE3_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table3Def);
+        TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
@@ -151,7 +146,7 @@ public class FunctionalDependencyTest {
                 .addDependent(col3T4)
                 .addDependent(col4T4)
                 .build());
-        TABLE4_PREDICATE = Relation2Predicate.createAtomPredicateFromRelation(table4Def);
+        TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         dbMetadata.freeze();
         METADATA = dbMetadata;
@@ -160,14 +155,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
@@ -180,12 +177,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, F, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -196,14 +194,16 @@ public class FunctionalDependencyTest {
     public void testRedundantSelfJoin2() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, C));
@@ -216,30 +216,33 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, Z, C));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
+    @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
     @Test
     public void testRedundantSelfJoin3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
-
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, Z, B, C));
@@ -253,10 +256,16 @@ public class FunctionalDependencyTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(Z, Y), Optional.of(DISTINCT_MODIFIER));
+                SUBSTITUTION_FACTORY.getSubstitution(Z, Y));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
+        expectedQueryBuilder.addChild(newRootNode, distinctNode);
 
-        expectedQueryBuilder.addChild(newRootNode, dataNode2);
+        ConstructionNode otherConstructionNode = IQ_FACTORY.createConstructionNode(newRootNode.getChildVariables());
+        expectedQueryBuilder.addChild(distinctNode, otherConstructionNode);
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
+        expectedQueryBuilder.addChild(otherConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -266,14 +275,15 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin4() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
-
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
@@ -286,12 +296,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, X, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -301,14 +312,15 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin5() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
-
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -321,12 +333,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -336,14 +349,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin6() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -360,12 +375,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode4);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -375,14 +391,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin7() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -403,16 +421,17 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        expectedQueryBuilder.addChild(rootNode, joinNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, M, N, K));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -423,14 +442,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin7_1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -451,15 +472,18 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        expectedQueryBuilder.addChild(rootNode, joinNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        expectedQueryBuilder.addChild(joinNode, dataNode4);
+        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, Z));
+        expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -469,14 +493,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin7_2() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -497,17 +523,20 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        expectedQueryBuilder.addChild(rootNode, joinNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, G));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
-        expectedQueryBuilder.addChild(joinNode, dataNode4);
+        ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, G));
+        expectedQueryBuilder.addChild(joinNode, dataNode7);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -517,14 +546,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin7_3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
@@ -545,20 +576,21 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        expectedQueryBuilder.addChild(rootNode, joinNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, E, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
         ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, TWO));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, TWO));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, M, N, K));
         expectedQueryBuilder.addChild(joinNode, dataNode7);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -570,14 +602,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin8() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
@@ -590,12 +624,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, F, G, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -605,14 +640,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin9() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
@@ -625,12 +662,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, Y, F, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -643,14 +681,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testNonRedundantSelfJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
@@ -663,13 +703,17 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, B, C, Y));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, F, G, D));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, F, G, Y));
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -679,14 +723,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testNonRedundantSelfJoin2() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
@@ -699,13 +745,17 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, dataNode1);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, C, F));
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, E, D));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
+
+        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, E, F));
+        expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -715,14 +765,16 @@ public class FunctionalDependencyTest {
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, ONE, B, C));
@@ -736,20 +788,23 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin2() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, B, TWO));
-        queryBuilder.addChild(rootNode, joinNode);
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, B, TWO));
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
@@ -763,20 +818,23 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
     @Test(expected = EmptyQueryException.class)
     public void testRejectedJoin3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, F, TWO));
-        queryBuilder.addChild(rootNode, joinNode);
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, F, TWO));
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, B, D));
@@ -790,20 +848,23 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        query.applyProposal(new InnerJoinOptimizationProposalImpl(joinNode));
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
     @Test
     public void testRedundantSelfJoin1_T3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
@@ -816,12 +877,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -831,14 +893,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin2_T3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
@@ -859,15 +923,19 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        expectedQueryBuilder.addChild(rootNode, joinNode);
+        expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(joinNode, dataNode5);
-        expectedQueryBuilder.addChild(joinNode, dataNode3);
+
+        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, J, K, L, M, T, P));
+        expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -878,14 +946,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin3_T3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
@@ -898,12 +968,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -913,14 +984,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin1_T4() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
@@ -933,12 +1006,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, Y, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, Y, F, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -948,14 +1022,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testRedundantSelfJoin2_T4() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
-        queryBuilder.addChild(rootNode, joinNode);
+        queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
@@ -968,12 +1044,13 @@ public class FunctionalDependencyTest {
         IntermediateQuery query = queryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.init(projectionAtom, distinctNode);
+        expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, Y, D));
 
-        expectedQueryBuilder.addChild(rootNode, dataNode3);
+        expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -983,14 +1060,16 @@ public class FunctionalDependencyTest {
     @Test
     public void testLJNonRedundantSelfJoin1() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(), Optional.of(DISTINCT_MODIFIER));
 
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
-        queryBuilder.init(projectionAtom, rootNode);
+        queryBuilder.init(projectionAtom, distinctNode);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.addChild(distinctNode, topConstructionNode);
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
-        queryBuilder.addChild(rootNode, leftJoinNode);
+        queryBuilder.addChild(topConstructionNode, leftJoinNode);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
@@ -1009,36 +1088,35 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder exceptedBuilder = createQueryBuilder(METADATA);
-        exceptedBuilder.init(projectionAtom, rootNode);
-        exceptedBuilder.addChild(rootNode, leftJoinNode);
-        exceptedBuilder.addChild(leftJoinNode, joinNode, LEFT);
-        exceptedBuilder.addChild(joinNode, dataNode1);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(METADATA);
+        expectedBuilder.init(projectionAtom, distinctNode);
+        expectedBuilder.addChild(distinctNode, topConstructionNode);
+        expectedBuilder.addChild(topConstructionNode, leftJoinNode);
+        expectedBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, B, Z, F));
-        exceptedBuilder.addChild(joinNode, dataNode4);
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, D, Z, Y));
+        expectedBuilder.addChild(joinNode, dataNode4);
 
-        exceptedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
+        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, D, Z, F));
+        expectedBuilder.addChild(joinNode, dataNode5);
 
-        optimizeAndCompare(query, exceptedBuilder.build(), joinNode);
+        expectedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
+
+        optimizeAndCompare(query, expectedBuilder.build(), joinNode);
     }
 
-    private static NodeCentricOptimizationResults<InnerJoinNode> optimizeAndCompare(IntermediateQuery query,
-                                                                                    IntermediateQuery expectedQuery,
-                                                                                    InnerJoinNode joinNode)
+    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
+                                           InnerJoinNode joinNode)
             throws EmptyQueryException {
 
         System.out.println("\nBefore optimization: \n" +  query);
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
-        NodeCentricOptimizationResults<InnerJoinNode> results = query.applyProposal(
-                new InnerJoinOptimizationProposalImpl(joinNode));
+        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        System.out.println("\n After optimization: \n" +  optimizedQuery);
 
-        System.out.println("\n After optimization: \n" +  query);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(query, expectedQuery));
-
-        return results;
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 }

@@ -1,32 +1,32 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.impl.DefaultSubstitutionResults;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.node.DataNode;
-import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
-import it.unibz.inf.ontop.iq.node.SubstitutionResults;
-import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  *
  */
-public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
+public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeImpl implements DataNode<P> {
 
-    private DataAtom atom;
+    private DataAtom<P> atom;
 
-    protected DataNodeImpl(DataAtom atom) {
+    protected DataNodeImpl(DataAtom<P> atom, IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+        super(iqTreeTools, iqFactory);
         this.atom = atom;
     }
 
     @Override
-    public DataAtom getProjectionAtom() {
+    public DataAtom<P> getProjectionAtom() {
         return atom;
     }
 
@@ -44,31 +44,13 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
                 .filter(Variable.class::isInstance)
                 .map(Variable.class::cast)
                 .collect(ImmutableCollectors.toSet());
-
-//        ImmutableSet.Builder<Variable> variableBuilder = ImmutableSet.builder();
-//        for (VariableOrGroundTerm term : atom.getArguments()) {
-//            if (term instanceof Variable)
-//                variableBuilder.add((Variable)term);
-//        }
-//        return variableBuilder.build();
-    }
-
-    protected static <T extends DataNode> SubstitutionResults<T> applySubstitution(
-            T dataNode, ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-
-        DataAtom newAtom = substitution.applyToDataAtom(dataNode.getProjectionAtom());
-        T newNode = (T) dataNode.newAtom(newAtom);
-        return DefaultSubstitutionResults.newNode(newNode, substitution);
     }
 
     @Override
-    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
-    }
-
-    @Override
-    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueChild) {
-        throw new UnsupportedOperationException("A DataNode is not expected to have a child");
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        DataAtom newAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
+        return newAtom(newAtom);
     }
 
     @Override
@@ -84,5 +66,15 @@ public abstract class DataNodeImpl extends QueryNodeImpl implements DataNode {
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getLocallyRequiredVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
     }
 }

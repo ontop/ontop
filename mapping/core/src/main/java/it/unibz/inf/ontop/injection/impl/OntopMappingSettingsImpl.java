@@ -46,4 +46,9 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }
+
+    @Override
+    public boolean isCanIRIComplete() {
+        return getRequiredBoolean(IS_CANONICAL_IRI_COMPLETE);
+    }
 }

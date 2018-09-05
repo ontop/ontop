@@ -4,23 +4,46 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.term.impl.ImmutabilityTools.convertToMutableFunction;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import java.util.stream.IntStream;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
  */
+@Singleton
 public class ImmutableUnificationTools {
+
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutableSubstitutionTools substitutionTools;
+    private final UnifierUtilities unifierUtilities;
+    private final ImmutabilityTools immutabilityTools;
+    private final TypeFactory typeFactory;
+
+    @Inject
+    private ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
+                                      ImmutabilityTools immutabilityTools, TypeFactory typeFactory) {
+        this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.substitutionTools = substitutionTools;
+        this.unifierUtilities = unifierUtilities;
+        this.immutabilityTools = immutabilityTools;
+        this.typeFactory = typeFactory;
+    }
 
     /**
      * TODO: explain
@@ -37,10 +60,15 @@ public class ImmutableUnificationTools {
         private boolean canBeRemoved;
         private Variable leftVariable;
         private ImmutableTerm rightTerm;
+        private final SubstitutionFactory substitutionFactory;
+        private final ImmutableUnificationTools unificationTools;
 
-        private TermPair(Variable variable, ImmutableTerm rightTerm) {
+        private TermPair(Variable variable, ImmutableTerm rightTerm, SubstitutionFactory substitutionFactory,
+                         ImmutableUnificationTools unificationTools) {
             this.leftVariable = variable;
             this.rightTerm = rightTerm;
+            this.substitutionFactory = substitutionFactory;
+            this.unificationTools = unificationTools;
             this.canBeRemoved = false;
         }
 
@@ -73,7 +101,7 @@ public class ImmutableUnificationTools {
             }
             else {
                 Optional<ImmutableSubstitution<ImmutableTerm>> optionalUnifier =
-                        computeDirectedMGU(transformedLeftTerm, transformedRightTerm);
+                        unificationTools.computeDirectedMGU(transformedLeftTerm, transformedRightTerm);
                 if (!optionalUnifier.isPresent()) {
                     throw new UnificationException();
                 }
@@ -84,16 +112,16 @@ public class ImmutableUnificationTools {
                     canBeRemoved = true;
                     leftVariable = null;
                     rightTerm = null;
-                    return convertIntoPairs(optionalUnifier.get());
+                    return unificationTools.convertIntoPairs(optionalUnifier.get());
                 }
             }
         }
 
         public ImmutableSubstitution<ImmutableTerm> getSubstitution() {
             if (canBeRemoved) {
-                return EMPTY_SUBSTITUTION;
+                return substitutionFactory.getSubstitution();
             }
-            return new ImmutableSubstitutionImpl<>(ImmutableMap.of(leftVariable, rightTerm));
+            return substitutionFactory.getSubstitution(ImmutableMap.of(leftVariable, rightTerm));
         }
 
         boolean canBeRemoved() {
@@ -110,27 +138,43 @@ public class ImmutableUnificationTools {
 
     }
 
-
-    private static ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
-    private static String PREDICATE_STR = "pred";
-
     /**
      * TODO: explain
      *
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(convertToMutableFunction(term1), convertToMutableFunction(term2));
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
+        Substitution mutableSubstitution = unifierUtilities.getMGU(immutabilityTools.convertToMutableFunction(term1),
+                immutabilityTools.convertToMutableFunction(term2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
         }
-        return Optional.of(ImmutableSubstitutionTools.convertMutableSubstitution(mutableSubstitution));
+        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution));
     }
 
-    public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
-        Substitution mutableSubstitution = UnifierUtilities.getMGU(
-                convertToMutableFunction(atom1),
-                convertToMutableFunction(atom2));
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
+                                                                                   ImmutableList<T> args2) {
+        if (args1.size() != args2.size())
+            throw new IllegalArgumentException("The two argument lists must have the same size");
+
+        // TODO: avoid use it
+        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size(), typeFactory);
+
+        Substitution mutableSubstitution = unifierUtilities.getMGU(
+                immutabilityTools.convertToMutableFunction(functionSymbol, args1),
+                immutabilityTools.convertToMutableFunction(functionSymbol, args2));
+
+        if (mutableSubstitution == null) {
+            return Optional.empty();
+        }
+        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution))
+                .map(s -> (ImmutableSubstitution<T>)s);
+    }
+
+    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
+        Substitution mutableSubstitution = unifierUtilities.getMGU(
+                immutabilityTools.convertToMutableFunction(atom1),
+                immutabilityTools.convertToMutableFunction(atom2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -143,15 +187,25 @@ public class ImmutableUnificationTools {
             substitutionMapBuilder.put(entry.getKey(), value);
         }
 
-        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = substitutionFactory.getSubstitution(
+                substitutionMapBuilder.build());
         return Optional.of(immutableSubstitution);
 
     }
 
     /**
+     * TODO: make it replace computeMGUS()
+     */
+    public Optional<ImmutableSubstitution<NonFunctionalTerm>> computeMGUS2(ImmutableSubstitution<NonFunctionalTerm> s1,
+                                                                           ImmutableSubstitution<NonFunctionalTerm> s2) {
+        return computeMGUS(s1,s2)
+                .map(u -> (ImmutableSubstitution<NonFunctionalTerm>)(ImmutableSubstitution<?>)u);
+    }
+
+    /**
      * Computes one Most General Unifier (MGU) of (two) substitutions.
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
                                                                              ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
@@ -170,20 +224,15 @@ public class ImmutableUnificationTools {
         ImmutableList<ImmutableTerm> firstArgList = firstArgListBuilder.build();
         ImmutableList<ImmutableTerm> secondArgList = secondArgListBuilder.build();
 
-        Predicate predicate = ATOM_FACTORY.getAtomPredicate(PREDICATE_STR, firstArgList.size());
-
-        ImmutableFunctionalTerm functionalTerm1 = TERM_FACTORY.getImmutableFunctionalTerm(predicate, firstArgList);
-        ImmutableFunctionalTerm functionalTerm2 = TERM_FACTORY.getImmutableFunctionalTerm(predicate, secondArgList);
-
-        return computeMGU(functionalTerm1, functionalTerm2);
+        return computeMGU(firstArgList, secondArgList);
     }
 
-    public static Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGUS(
+    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGUS(
             ImmutableSubstitution<VariableOrGroundTerm> substitution1,
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
         if (optionalMGUS.isPresent()) {
-            return Optional.of(ImmutableSubstitutionTools.convertIntoVariableOrGroundTermSubstitution(
+            return Optional.of(substitutionTools.convertIntoVariableOrGroundTermSubstitution(
                     optionalMGUS.get()));
         }
         else {
@@ -196,7 +245,7 @@ public class ImmutableUnificationTools {
      * Computes a MGU that reuses as much as possible the variables from the target part.
      *
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGU(ImmutableTerm sourceTerm,
                                                                                     ImmutableTerm targetTerm) {
         /*
          * Variable
@@ -211,8 +260,8 @@ public class ImmutableUnificationTools {
             }
 
             ImmutableSubstitution<ImmutableTerm> substitution = sourceVariable.equals(targetTerm)
-                    ? EMPTY_SUBSTITUTION
-                    : new ImmutableSubstitutionImpl<>(ImmutableMap.of(sourceVariable, targetTerm));
+                    ? substitutionFactory.getSubstitution()
+                    : substitutionFactory.getSubstitution(ImmutableMap.of(sourceVariable, targetTerm));
 
             return Optional.of(substitution);
         }
@@ -231,7 +280,7 @@ public class ImmutableUnificationTools {
                     return Optional.empty();
                 }
                 else {
-                    ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
+                    ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
                             ImmutableMap.of(targetVariable, sourceTerm));
                     return Optional.of(substitution);
                 }
@@ -250,12 +299,12 @@ public class ImmutableUnificationTools {
         else if(sourceTerm instanceof Constant) {
             if (targetTerm instanceof Variable) {
                 Variable targetVariable = (Variable) targetTerm;
-                ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
+                ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
                         ImmutableMap.of(targetVariable, sourceTerm));
                 return Optional.of(substitution);
             }
             else if (sourceTerm.equals(targetTerm)) {
-                return Optional.of(EMPTY_SUBSTITUTION);
+                return Optional.of(substitutionFactory.getSubstitution());
             }
             else {
                 return Optional.empty();
@@ -269,7 +318,7 @@ public class ImmutableUnificationTools {
     /**
      * TODO: explain
      */
-    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGUOfTwoFunctionalTerms(
+    private Optional<ImmutableSubstitution<ImmutableTerm>> computeDirectedMGUOfTwoFunctionalTerms(
             ImmutableFunctionalTerm sourceTerm, ImmutableFunctionalTerm targetTerm) {
         /*
          * Function symbol equality
@@ -279,8 +328,8 @@ public class ImmutableUnificationTools {
             return Optional.empty();
         }
 
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceTerm.getArguments();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetTerm.getArguments();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceTerm.getTerms();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetTerm.getTerms();
 
         int childNb = sourceChildren.size();
         if (targetChildren.size() != childNb) {
@@ -316,7 +365,7 @@ public class ImmutableUnificationTools {
      * TODO: explain
      *
      */
-    private static Optional<ImmutableSubstitution<ImmutableTerm>> unifyPairs(ImmutableList<TermPair> originalPairs) {
+    private Optional<ImmutableSubstitution<ImmutableTerm>> unifyPairs(ImmutableList<TermPair> originalPairs) {
 
         /*
          * Some pairs will be removed, some others will be added.
@@ -361,15 +410,15 @@ public class ImmutableUnificationTools {
         }
     }
 
-    private static ImmutableList<TermPair> convertIntoPairs(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    private ImmutableList<TermPair> convertIntoPairs(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList.Builder<TermPair> listBuilder = ImmutableList.builder();
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            listBuilder.add(new TermPair(entry.getKey(), entry.getValue()));
+            listBuilder.add(new TermPair(entry.getKey(), entry.getValue(), substitutionFactory, this));
         }
         return listBuilder.build();
     }
 
-    private static ImmutableSubstitution<ImmutableTerm> convertPairs2Substitution(List<TermPair> pairs)
+    private ImmutableSubstitution<ImmutableTerm> convertPairs2Substitution(List<TermPair> pairs)
             throws UnificationException {
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
         for(TermPair pair : pairs) {
@@ -382,7 +431,26 @@ public class ImmutableUnificationTools {
                 throw new UnificationException();
             }
         }
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.copyOf(substitutionMap));
+        return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
+    }
+
+    /**
+     * TODO: get rid of it about refactoring the unification tools
+     */
+    private static class TemporaryFunctionSymbol extends PredicateImpl {
+
+        private TemporaryFunctionSymbol(int arity, TypeFactory typeFactory) {
+            super("pred", arity, createExpectedBaseTermTypeList(arity, typeFactory));
+        }
+
+        private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity, TypeFactory typeFactory) {
+            TermType rootTermType = typeFactory.getAbstractAtomicTermType();
+
+            return IntStream.range(0, arity)
+                    .boxed()
+                    .map(i -> rootTermType)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
 
 }

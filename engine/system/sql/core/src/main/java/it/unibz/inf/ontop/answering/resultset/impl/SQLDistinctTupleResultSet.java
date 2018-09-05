@@ -25,6 +25,9 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,9 +44,10 @@ public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet imp
 
     public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<String> signature,
                                      DBMetadata dbMetadata,
-                                     Optional<IRIDictionary> iriDictionary) {
+                                     Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
+                                     TypeFactory typeFactory, RDF rdfFactory) {
 
-        super(rs, signature, dbMetadata, iriDictionary);
+        super(rs, signature, dbMetadata, iriDictionary, termFactory, typeFactory, rdfFactory);
         rowKeys = new HashSet<>();
     }
 

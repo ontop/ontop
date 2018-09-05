@@ -164,7 +164,7 @@
     
 
     <owl:NamedIndividual rdf:about="http://it.unibz.inf/obda/ontologies/quest-typing-test.owl#uliteral">
-        <uliteral rdf:datatype="&rdfs;Literal">literal1</uliteral>
+        <uliteral rdf:datatype="&xsd;string">literal1</uliteral>
         <uliteral xml:lang="en">literal2</uliteral>
     </owl:NamedIndividual>
     

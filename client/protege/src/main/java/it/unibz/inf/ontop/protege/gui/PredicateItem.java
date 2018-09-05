@@ -21,19 +21,23 @@ package it.unibz.inf.ontop.protege.gui;
  */
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 public class PredicateItem {
-	
-	private Predicate predicate;
-	private PrefixManager prefixManager;
-	
-	public PredicateItem(Predicate target) {
-		this(target, null);
+
+	public enum PredicateType {
+		DATA_PROPERTY,
+		OBJECT_PROPERTY,
+		CLASS
 	}
 	
-	public PredicateItem(Predicate target, PrefixManager pm) {
-		predicate = target;
+	private IRI iri;
+	private final PredicateType predicateType;
+	private PrefixManager prefixManager;
+	
+	public PredicateItem(IRI iri, PredicateType predicateType, PrefixManager pm) {
+		this.iri = iri;
+		this.predicateType = predicateType;
 		prefixManager = pm;
 	}
 	
@@ -54,24 +58,20 @@ public class PredicateItem {
 		}
 	}
 	
-	public Predicate getSource() {
-		return predicate;
+	public IRI getSource() {
+		return iri;
 	}
 	
 	public String getFullName() {
-		return predicate.getName().toString();
-	}
-	
-	public boolean isClassPredicate() {
-		return predicate.isClass();
+		return iri.getIRIString();
 	}
 	
 	public boolean isDataPropertyPredicate() {
-		return predicate.isDataProperty();
+		return predicateType == PredicateType.DATA_PROPERTY;
 	}
 	
 	public boolean isObjectPropertyPredicate() {
-		return predicate.isObjectProperty();
+		return predicateType == PredicateType.OBJECT_PROPERTY;
 	}
 	
 	public PrefixManager getPrefixManager() {

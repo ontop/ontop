@@ -152,6 +152,19 @@ public class ImmutableCollectors {
                 Collector.Characteristics.UNORDERED);
     }
 
+    public static <T extends Table.Cell<R,C,U>, R, C, U> Collector<T, ? ,ImmutableTable<R,C,U>> toTable() {
+        return Collector.of(
+                // Supplier
+                ImmutableTable::<R,C,U>builder,
+                // Accumulator
+                ImmutableTable.Builder::<R,C,U>put,
+                // Merger
+                (builder1, builder2) -> builder1.putAll(builder2.build()),
+                // Finisher
+                ImmutableTable.Builder::<R,C,U>build,
+                Collector.Characteristics.UNORDERED);
+    }
+
     public static <T, K, U> Collector<T, ? ,ImmutableMultimap<K,U>> toMultimap(Function<? super T, ? extends K> keyMapper,
                                                                      Function<? super T, ? extends U> valueMapper) {
         return Collector.of(

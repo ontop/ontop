@@ -31,6 +31,9 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.RDF;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
@@ -51,22 +54,29 @@ public class SQLConnection implements OntopConnection {
 	private final Optional<IRIDictionary> iriDictionary;
 	private final DBMetadata dbMetadata;
 	private final InputQueryFactory inputQueryFactory;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
 	private final OntopSystemSQLSettings settings;
 
 	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
+	private final RDF rdfFactory;
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
-                         Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
-                         InputQueryFactory inputQueryFactory, OntopSystemSQLSettings settings) {
+						 Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
+						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
+						 RDF rdfFactory, OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
 		this.iriDictionary = iriDictionary;
 		this.dbMetadata = dbMetadata;
 		this.inputQueryFactory = inputQueryFactory;
+		this.termFactory = termFactory;
+		this.typeFactory = typeFactory;
 		this.settings = settings;
+		this.rdfFactory = rdfFactory;
 		this.isClosed = false;
 	}
 	
@@ -89,7 +99,7 @@ public class SQLConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
-					iriDictionary, dbMetadata, inputQueryFactory, settings);
+					iriDictionary, dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}

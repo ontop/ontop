@@ -5,7 +5,8 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 
-public class DistinctVariableOnlyDataAtomImpl extends VariableOnlyDataAtomImpl implements DistinctVariableOnlyDataAtom {
+public class DistinctVariableOnlyDataAtomImpl extends AbstractDataAtomImpl<AtomPredicate>
+        implements DistinctVariableOnlyDataAtom {
 
     protected DistinctVariableOnlyDataAtomImpl(AtomPredicate predicate, ImmutableList<Variable> variables) {
         super(predicate, variables);
@@ -17,5 +18,15 @@ public class DistinctVariableOnlyDataAtomImpl extends VariableOnlyDataAtomImpl i
 
     protected DistinctVariableOnlyDataAtomImpl(AtomPredicate predicate, Variable... variables) {
         super(predicate, variables);
+    }
+
+    @Override
+    public Variable getTerm(int index) {
+        return (Variable) super.getTerm(index);
+    }
+
+    @Override
+    public ImmutableList<Variable> getArguments() {
+        return (ImmutableList<Variable>)super.getArguments();
     }
 }

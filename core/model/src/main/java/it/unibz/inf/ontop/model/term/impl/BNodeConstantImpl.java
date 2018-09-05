@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.model.term.BNode;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.stream.Stream;
 
@@ -36,16 +37,15 @@ public class BNodeConstantImpl implements BNode {
 	private final String name;
 
 	private final int identifier;
+	private final ObjectRDFType type;
 
 	/**
 	 * The default constructor.
-	 * 
-	 * @param uri
-	 *            URI from a term.
 	 */
-	protected BNodeConstantImpl(String name) {
+	protected BNodeConstantImpl(String name, TypeFactory typeFactory) {
 		this.name = name;
 		this.identifier = name.hashCode();
+		this.type = typeFactory.getBlankNodeType();
 	}
 
 	@Override
@@ -92,8 +92,8 @@ public class BNodeConstantImpl implements BNode {
 	}
 
 	@Override
-	public Predicate.COL_TYPE getType() {
-		return Predicate.COL_TYPE.BNODE;
+	public ObjectRDFType getType() {
+		return type;
 	}
 
 }

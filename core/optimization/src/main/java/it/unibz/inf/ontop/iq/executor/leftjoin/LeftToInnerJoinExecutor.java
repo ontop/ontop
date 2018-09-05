@@ -24,6 +24,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -32,8 +34,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IS_NOT_NULL;
@@ -52,14 +52,21 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private final LeftJoinRightChildNormalizationAnalyzer normalizer;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutabilityTools immutabilityTools;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private LeftToInnerJoinExecutor(LeftJoinRightChildNormalizationAnalyzer normalizer,
                                     IntermediateQueryFactory iqFactory,
-                                    TermFactory termFactory) {
+                                    TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                    ImmutabilityTools immutabilityTools, CoreUtilsFactory coreUtilsFactory) {
         this.normalizer = normalizer;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -77,13 +84,13 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         /*
          * Only when the left can be reduced to set of joined data nodes
          */
-        Optional<ImmutableList<DataNode>> optionalLeftDataNodes = extractLeftDataNodes(query, leftChild);
+        Optional<ImmutableList<ExtensionalDataNode>> optionalLeftDataNodes = extractLeftDataNodes(query, leftChild);
         if (optionalLeftDataNodes.isPresent()) {
-            ImmutableList<DataNode> leftDataNodes = optionalLeftDataNodes.get();
+            ImmutableList<ExtensionalDataNode> leftDataNodes = optionalLeftDataNodes.get();
 
-            if (rightChild instanceof DataNode) {
+            if (rightChild instanceof ExtensionalDataNode) {
                 return optimizeRightDataNode(leftJoinNode, query, treeComponent, leftChild, leftDataNodes,
-                        DataNodeAndSubstitution.extract((DataNode) rightChild));
+                        DataNodeAndSubstitution.extract((ExtensionalDataNode) rightChild));
             } else if (rightChild instanceof ConstructionNode) {
 
                 return DataNodeAndSubstitution.extract((ConstructionNode) rightChild, query)
@@ -102,19 +109,21 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
     }
 
-    private Optional<ImmutableList<DataNode>> extractLeftDataNodes(IntermediateQuery query, QueryNode leftNode) {
-        if (leftNode instanceof DataNode)
-            return Optional.of(ImmutableList.of((DataNode)leftNode));
+    private Optional<ImmutableList<ExtensionalDataNode>> extractLeftDataNodes(IntermediateQuery query, QueryNode leftNode) {
+        if (leftNode instanceof ExtensionalDataNode)
+            return Optional.of(ImmutableList.of((ExtensionalDataNode)leftNode));
 
         else if (leftNode instanceof InnerJoinNode) {
             ImmutableList<QueryNode> children = query.getChildren(leftNode);
 
             /*
-             * ONLY if all the children of the join are data nodes
+             * ONLY if all the children of the join are extensional data nodes
+             *
+             * TODO: relax it
              */
-            if (children.stream().allMatch(c -> c instanceof DataNode))
+            if (children.stream().allMatch(c -> c instanceof ExtensionalDataNode))
                 return Optional.of(children.stream()
-                        .map(c -> (DataNode) c)
+                        .map(c -> (ExtensionalDataNode) c)
                         .collect(ImmutableCollectors.toList()));
         }
 
@@ -126,13 +135,15 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                                                 IntermediateQuery query,
                                                                                 QueryTreeComponent treeComponent,
                                                                                 QueryNode leftChild,
-                                                                                ImmutableList<DataNode> leftChildren,
+                                                                                ImmutableList<ExtensionalDataNode> leftChildren,
                                                                                 DataNodeAndSubstitution rightComponent) {
 
-        VariableGenerator variableGenerator = new VariableGenerator(query.getKnownVariables());
+        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
 
-        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftChildren, rightComponent.dataNode,
-                query.getDBMetadata(), variableGenerator);
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(query.getKnownVariables());
+
+        LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftVariables, leftChildren,
+                rightComponent.dataNode, variableGenerator);
 
         if (!analysis.isMatchingAConstraint())
             // No normalization
@@ -140,12 +151,10 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         ImmutableSet<Variable> requiredVariablesAboveLJ = query.getVariablesRequiredByAncestors(leftJoinNode);
 
-        ImmutableSet<Variable> leftVariables = query.getVariables(leftChild);
-
         /*
          * All the conditions that could be assigned to the LJ put together
          */
-        Optional<ImmutableExpression> newLJCondition = ImmutabilityTools.foldBooleanExpressions(Stream.concat(
+        Optional<ImmutableExpression> newLJCondition = immutabilityTools.foldBooleanExpressions(Stream.concat(
                     // Former condition
                     Stream.of(leftJoinNode.getOptionalFilterCondition(),
                             // New condition proposed by the analyser
@@ -162,7 +171,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution = rightComponent.constructionNode
                 .map(ConstructionNode::getSubstitution)
                 .filter(s -> !s.isEmpty())
-                .map(s -> SUBSTITUTION_FACTORY.getSubstitution(s.getImmutableMap().entrySet().stream()
+                .map(s -> substitutionFactory.getSubstitution(s.getImmutableMap().entrySet().stream()
                         .filter(e -> !leftVariables.contains(e.getKey()))
                         .collect(ImmutableCollectors.toMap())))
                 .filter(s -> !s.isEmpty());
@@ -204,7 +213,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                           ImmutableSet<Variable> leftVariables) {
         return substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> leftVariables.contains(e.getKey()) || leftVariables.contains(e.getValue()))
-                .map(e -> TERM_FACTORY.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+                .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
     }
 
     /**
@@ -243,7 +252,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         // --> x will not be affected by the condition
         ImmutableSet<Variable> rightVariablesToUpdate = Optional.of(ljCondition)
                 .filter(c -> c.getFunctionSymbol().equals(IS_NOT_NULL))
-                .map(c -> c.getArguments().get(0))
+                .map(c -> c.getTerms().get(0))
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable) v)
                 .map(specialVariable -> requiredRightVariables.stream()
@@ -272,13 +281,13 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         /*
          * Update the right child
          */
-        InjectiveVar2VarSubstitution localSubstitution = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(newVariableMap);
+        InjectiveVar2VarSubstitution localSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(newVariableMap);
         DataNode newRightChild = rightChild.newAtom(localSubstitution.applyToDataAtom(rightChild.getProjectionAtom()));
         treeComponent.replaceNode(rightChild, newRightChild);
 
         ImmutableExpression newCondition = localSubstitution.applyToBooleanExpression(ljCondition);
 
-        ImmutableSubstitution<ImmutableTerm> conditionalVarSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
+        ImmutableSubstitution<ImmutableTerm> conditionalVarSubstitution = substitutionFactory.getSubstitution(
                 newVariableMap.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
@@ -295,8 +304,13 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         try {
             return query.applyProposal(proposal, true)
-                    .getOptionalNewNode()
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Was not expected to modify the LJ node"));
+                    .getNewNodeOrReplacingChild()
+                    // Is expecting to be a ConstructionNode
+                    .flatMap(query::getFirstChild)
+                    .filter(n -> n instanceof LeftJoinNode)
+                    .map(n -> (LeftJoinNode) n)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to keep the LJ node " +
+                            "under a fresh construction node"));
         } catch (EmptyQueryException e) {
             throw new MinorOntopInternalBugException("This substitution propagation was not expected " +
                     "to make the query be empty");
@@ -313,9 +327,15 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                 normalizedLeftJoin, remainingRightSubstitution);
 
         try {
-            return query.applyProposal(proposal, true)
-                    .getOptionalNewNode()
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Was not expected to modify the LJ node"));
+            NodeCentricOptimizationResults<LeftJoinNode> results = query.applyProposal(proposal, true);
+            return results
+                    .getNewNodeOrReplacingChild()
+                    // The LJ is expected to be the child of a construction node
+                    .flatMap(query::getFirstChild)
+                    .filter(n -> n instanceof LeftJoinNode)
+                    .map(n -> (LeftJoinNode) n)
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to insert a construction node " +
+                            "followed by a LJ"));
         } catch (EmptyQueryException e) {
             throw new MinorOntopInternalBugException("This substitution propagation was not expected " +
                     "to make the query be empty");
@@ -326,7 +346,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                                              IntermediateQuery query,
                                                                              QueryTreeComponent treeComponent,
                                                                              QueryNode leftChild,
-                                                                             ImmutableList<DataNode> leftDataNodes,
+                                                                             ImmutableList<ExtensionalDataNode> leftDataNodes,
                                                                              UnionNode rightChild) {
         // NOT YET IMPLEMENTED --> no optimization YET
         return new NodeCentricOptimizationResultsImpl<>(query, leftJoinNode);
@@ -338,18 +358,18 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static class DataNodeAndSubstitution {
 
-        public final DataNode dataNode;
+        public final ExtensionalDataNode dataNode;
         public final Optional<FilterNode> filterNode;
         public final Optional<ConstructionNode> constructionNode;
 
-        private DataNodeAndSubstitution(DataNode dataNode, Optional<FilterNode> filterNode,
+        private DataNodeAndSubstitution(ExtensionalDataNode dataNode, Optional<FilterNode> filterNode,
                                         Optional<ConstructionNode> constructionNode) {
             this.dataNode = dataNode;
             this.filterNode = filterNode;
             this.constructionNode = constructionNode;
         }
 
-        private DataNodeAndSubstitution(DataNode dataNode) {
+        private DataNodeAndSubstitution(ExtensionalDataNode dataNode) {
             this.dataNode = dataNode;
             this.filterNode = Optional.empty();
             this.constructionNode = Optional.empty();
@@ -357,30 +377,25 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
 
         static Optional<DataNodeAndSubstitution> extract(ConstructionNode rightChild, IntermediateQuery query) {
-            /*
-             * Not supported
-             */
-            if (rightChild.getOptionalModifiers().isPresent())
-                return Optional.empty();
 
             QueryNode grandChild = query.getFirstChild(rightChild).get();
 
-            if (grandChild instanceof DataNode)
-                return Optional.of(new DataNodeAndSubstitution((DataNode) grandChild, Optional.empty(),
+            if (grandChild instanceof ExtensionalDataNode)
+                return Optional.of(new DataNodeAndSubstitution((ExtensionalDataNode) grandChild, Optional.empty(),
                         Optional.of(rightChild)));
             else if (grandChild instanceof FilterNode) {
                 FilterNode filterNode = (FilterNode) grandChild;
 
                 return query.getFirstChild(grandChild)
-                        .filter(n -> n instanceof DataNode)
-                        .map(n -> (DataNode)n)
+                        .filter(n -> n instanceof ExtensionalDataNode)
+                        .map(n -> (ExtensionalDataNode)n)
                         .map(n -> new DataNodeAndSubstitution(n, Optional.of(filterNode), Optional.of(rightChild)));
             }
             else
                 return Optional.empty();
         }
 
-        static DataNodeAndSubstitution extract(DataNode rightChild) {
+        static DataNodeAndSubstitution extract(ExtensionalDataNode rightChild) {
             return new DataNodeAndSubstitution(rightChild);
         }
 

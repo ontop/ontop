@@ -147,9 +147,37 @@ mappingId	Review6
 target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} dc:publisher bsbm-inst:dataFromRatingSite{publisher}/RatingSite{publisher} . 
 source		select nr, product, producer, person, reviewDate, title, text, language, rating1, rating2, rating3, rating4, publisher, publishDate from review
 
-mappingId	Review7
-target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@{language} . 
-source		select nr, product, producer, person, reviewDate, title, text, language, rating1, rating2, rating3, rating4, publisher, publishDate from review
+mappingId	Review7-en
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@en .
+source		select nr, text, language, publisher from review WHERE language = 'en'
+
+mappingId	Review7-ja
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@ja .
+source		select nr, text, language, publisher from review WHERE language = 'ja'
+
+mappingId	Review7-ru
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@ru .
+source		select nr, text, language, publisher from review WHERE language = 'ru'
+
+mappingId	Review7-es
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@es .
+source		select nr, text, language, publisher from review WHERE language = 'es'
+
+mappingId	Review7-zh
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@zh .
+source		select nr, text, language, publisher from review WHERE language = 'zh'
+
+mappingId	Review7-de
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@de .
+source		select nr, text, language, publisher from review WHERE language = 'de'
+
+mappingId	Review7-fr
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@fr .
+source		select nr, text, language, publisher from review WHERE language = 'fr'
+
+mappingId	Review7-ko
+target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} rev:text {text}@ko .
+source		select nr, text, language, publisher from review WHERE language = 'ko'
 
 mappingId	Review8
 target		bsbm-inst:dataFromRatingSite{publisher}/Review{nr} dc:date {publishDate} . 

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -14,7 +15,11 @@ import it.unibz.inf.ontop.iq.tools.VariableCollector;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 
 /**
@@ -30,9 +35,9 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     /**
      * TODO: explain
      */
-    protected DefaultQueryTreeComponent(QueryTree tree) {
+    protected DefaultQueryTreeComponent(QueryTree tree, CoreUtilsFactory coreUtilsFactory) {
         this(tree,
-                new VariableGenerator(
+                coreUtilsFactory.createVariableGenerator(
                         VariableCollector.collectVariables(
                                 tree.getNodesInTopDownOrder())));
     }
@@ -65,11 +70,6 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     @Override
     public ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException {
         return tree.getNodesInTopDownOrder();
-    }
-
-    @Override
-    public ImmutableSet<EmptyNode> getEmptyNodes() {
-        return tree.getEmptyNodes();
     }
 
     @Override
@@ -252,8 +252,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public QueryTreeComponent createSnapshot() {
-        return new DefaultQueryTreeComponent(tree.createSnapshot(), new VariableGenerator(
-                variableGenerator.getKnownVariables()));
+        return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.createSnapshot());
     }
 
     /**
@@ -271,8 +270,41 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     }
 
     @Override
-    public int getVersionNumber() {
+    public UUID getVersionNumber() {
         return tree.getVersionNumber();
+    }
+
+    @Override
+    public QueryNode replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree) {
+        QueryNode iqRoot = replacingSubTree.getRootNode();
+        QueryNode newSubTreeRoot = contains(iqRoot) ? iqRoot.clone() : iqRoot;
+        replaceSubTree(subTreeRoot, newSubTreeRoot);
+
+        insertIQChildren(newSubTreeRoot, replacingSubTree.getChildren());
+        return newSubTreeRoot;
+    }
+
+    /**
+     * Recursive
+     */
+    private void insertIQChildren(QueryNode parentNode, ImmutableList<IQTree> childrenTrees) {
+
+        ImmutableList<QueryNode> newChildren = childrenTrees.stream()
+                .map(IQTree::getRootNode)
+                .map(n -> contains(n) ? n.clone() : n)
+                .collect(ImmutableCollectors.toList());
+
+        if (parentNode instanceof BinaryOrderedOperatorNode) {
+            addChild(parentNode, newChildren.get(0), Optional.of(LEFT), false);
+            addChild(parentNode, newChildren.get(1), Optional.of(RIGHT), false);
+        }
+        else {
+            newChildren
+                    .forEach(c -> addChild(parentNode, c, Optional.empty(),false));
+        }
+
+        IntStream.range(0, childrenTrees.size())
+                .forEach(i -> insertIQChildren(newChildren.get(i), childrenTrees.get(i).getChildren()));
     }
 
 

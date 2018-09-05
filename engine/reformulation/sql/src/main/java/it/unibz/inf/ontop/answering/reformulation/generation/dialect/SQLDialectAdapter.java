@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
  */
 
 
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Collection;

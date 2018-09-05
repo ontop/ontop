@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.answering.resultset;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
-import it.unibz.inf.ontop.answering.resultset.GraphResultSet;
-
-import java.net.URI;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Lazy materialization result set
@@ -38,12 +36,12 @@ public interface MaterializedGraphResultSet extends GraphResultSet<OntopQueryAns
      * May evolve until the materialization completes.
      *
      */
-    ImmutableList<URI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
+    ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
 
     /**
      * RDF predicates/classes that are considered for materialization.
      *
      * NB: It is possible that for some predicate/classes, no RDF triple is produced (empty answer)
      */
-    ImmutableSet<URI> getSelectedVocabulary();
+    ImmutableSet<IRI> getSelectedVocabulary();
 }

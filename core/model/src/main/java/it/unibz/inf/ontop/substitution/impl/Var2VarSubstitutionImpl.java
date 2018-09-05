@@ -4,18 +4,12 @@ import com.google.common.base.Joiner;
 
 import java.util.AbstractMap;
 import java.util.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import fj.data.TreeMap;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
-
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.model.term.GroundTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -37,15 +31,10 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     /**
      * Regular constructor
      */
-    protected Var2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
+    protected Var2VarSubstitutionImpl(Map<Variable, ? extends Variable> substitutionMap, AtomFactory atomFactory,
+                                      TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+        super(atomFactory, termFactory, substitutionFactory);
         this.map = ImmutableMap.copyOf(substitutionMap);
-    }
-
-    /**
-     * Functional Java constructor
-     */
-    public Var2VarSubstitutionImpl(TreeMap<Variable, Variable> substitutionMap) {
-        this.map = ImmutableMap.copyOf(substitutionMap.toMutableMap());
     }
 
     @Override
@@ -61,19 +50,8 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     }
 
     @Override
-    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
-        return new ImmutableSubstitutionImpl<>(ImmutableMap.of());
-    }
-
-    @Override
-    public Optional<ImmutableQueryModifiers> applyToQueryModifiers(ImmutableQueryModifiers immutableQueryModifiers) {
-        ImmutableList.Builder<OrderCondition> orderConditionBuilder = ImmutableList.builder();
-
-        for (OrderCondition orderCondition : immutableQueryModifiers.getSortConditions()) {
-            Variable newVariable = applyToVariable((Variable) orderCondition.getVariable());
-            orderConditionBuilder.add(orderCondition.newVariable(newVariable));
-        }
-        return immutableQueryModifiers.newSortConditions(orderConditionBuilder.build());
+    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
+        return substitutionFactory.getSubstitution();
     }
 
     /**
@@ -84,7 +62,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
             ImmutableSubstitution<T> substitution) {
 
         if (isEmpty()) {
-            return Optional.of(new ImmutableSubstitutionImpl<>(substitution.getImmutableMap()));
+            return Optional.of(substitution);
         }
 
         try {
@@ -96,7 +74,7 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
                             (e1, e2) -> {
                                 throw new NotASubstitutionException();
                             })));
-            return Optional.of(new ImmutableSubstitutionImpl<>(newMap));
+            return Optional.of(substitutionFactory.getSubstitution(newMap));
         } catch (NotASubstitutionException e) {
             return Optional.empty();
         }
@@ -105,11 +83,6 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
     @Override
     public Variable get(Variable var) {
         return map.get(var);
-    }
-
-    @Override
-    public ImmutableMap<Variable, Term> getMap() {
-        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>)map;
     }
 
     @Override
@@ -139,13 +112,21 @@ public class Var2VarSubstitutionImpl extends AbstractImmutableSubstitutionImpl<V
 
     @Override
     protected ImmutableSubstitution<Variable> constructNewSubstitution(ImmutableMap<Variable, Variable> map) {
-        return new Var2VarSubstitutionImpl(map);
+        return substitutionFactory.getVar2VarSubstitution(map);
     }
 
     @Override
     public Var2VarSubstitution composeWithVar2Var(Var2VarSubstitution g) {
-        return new Var2VarSubstitutionImpl(composeRenaming(g)
+        return substitutionFactory.getVar2VarSubstitution(composeRenaming(g)
                 .collect(ImmutableCollectors.toMap()));
+    }
+
+    @Override
+    public NonGroundTerm applyToNonGroundTerm(NonGroundTerm term) {
+        if (term instanceof Variable)
+            return applyToVariable((Variable)term);
+        else
+            return (NonGroundTerm) applyToFunctionalTerm((ImmutableFunctionalTerm) term);
     }
 
     @Override

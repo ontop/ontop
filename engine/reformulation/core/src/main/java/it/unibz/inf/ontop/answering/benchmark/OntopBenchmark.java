@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering.benchmark;
 
 import java.util.List;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.model.term.Function;
@@ -160,7 +160,7 @@ public class OntopBenchmark {
 	int counter = 0;
 	for (Function atom : atoms) {
 	    Predicate predicate = atom.getFunctionSymbol();
-	    if (!(predicate instanceof BuiltinPredicate)) {
+	    if (predicate instanceof AtomPredicate) {
 		counter++;
 	    }
 	}

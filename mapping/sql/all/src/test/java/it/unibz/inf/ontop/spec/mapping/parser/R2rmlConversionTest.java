@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.SQLPPMappingToR2RMLConverter;
+import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,8 @@ public class R2rmlConversionTest {
        }
 
 
-       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, null);
+       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, null,
+               config.getInjector().getInstance(RDF.class));
        return converter.getTripleMaps();
 
 

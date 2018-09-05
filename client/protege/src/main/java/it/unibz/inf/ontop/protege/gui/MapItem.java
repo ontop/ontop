@@ -20,14 +20,16 @@ package it.unibz.inf.ontop.protege.gui;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import org.apache.commons.rdf.api.IRI;
 
 public class MapItem {
 
 	private PredicateItem predicateItem;
 	private String targetMapping = "";
-	private Predicate dataType;
+	private FunctionSymbol dataType;
 
 	public MapItem(PredicateItem predicate) {
 		this.predicateItem = predicate;
@@ -45,7 +47,7 @@ public class MapItem {
 		}
 	}
 	
-	public Predicate getSourcePredicate() {
+	public IRI getPredicateIRI() {
 		return predicateItem.getSource();
 	}
 
@@ -57,17 +59,12 @@ public class MapItem {
 		return targetMapping;
 	}
 	
-	public void setDataType(Predicate type) {
+	public void setDataType(FunctionSymbol type) {
 		dataType = type;
 	}
 
-	public Predicate getDataType() {
+	public FunctionSymbol getDataType() {
 		return dataType;
-	}
-	
-	public boolean isSubjectMap() {
-		// A null predicate is assumed to be a class predicate
-		return (predicateItem == null || predicateItem.isClassPredicate());
 	}
 
 	public boolean isObjectMap() {

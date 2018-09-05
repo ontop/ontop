@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.datalog.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 public class AlgebraOperatorPredicateImpl extends PredicateImpl implements AlgebraOperatorPredicate {
 
-	private static final long serialVersionUID = 9152448029926695852L;
 
 	/**
 	 * Constructs a datatype predicate with one term. This is a usual construct
@@ -34,9 +35,9 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements Algeb
 	 * @param name
 	 *            The predicate name.
 	 */
-	protected AlgebraOperatorPredicateImpl(String name) {
-		// TODO (ROMAN): why does it have arity two but one STRING argument?
-		super(name, 2, new COL_TYPE[] { COL_TYPE.STRING });
+	protected AlgebraOperatorPredicateImpl(String name, TypeFactory typeFactory) {
+		super(name, 2, ImmutableList.of(typeFactory.getAbstractAtomicTermType(),
+				typeFactory.getAbstractAtomicTermType()));
 	}
 
 

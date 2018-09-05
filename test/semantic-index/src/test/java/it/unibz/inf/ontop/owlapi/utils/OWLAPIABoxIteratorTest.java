@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -34,12 +35,14 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR;
+
 public class OWLAPIABoxIteratorTest extends TestCase {
 
 	private ClassifiedTBox tbox;
 	
 	protected void setUp() {
-		OntologyBuilder builder = OntologyBuilderImpl.builder();
+		OntologyBuilder builder = OntologyBuilderImpl.builder(new SimpleRDF());
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
 		builder.declareDataProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
@@ -124,7 +127,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 
 	private int count(Collection<OWLOntology> ontologies) {
 
-        Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ontologies, tbox);
+        Iterator<Assertion> aboxit = new OWLAPIABoxIterator(ontologies, tbox, OWLAPI_TRANSLATOR);
         int count = 0;
         while (aboxit.hasNext()) {
             count += 1;

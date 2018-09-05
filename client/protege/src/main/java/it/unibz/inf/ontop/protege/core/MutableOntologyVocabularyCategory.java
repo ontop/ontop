@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.protege.core;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import org.semanticweb.owlapi.model.IRI;
+import org.apache.commons.rdf.api.IRI;
 
-public interface MutableOntologyVocabularyCategory extends Iterable<Predicate> {
+public interface MutableOntologyVocabularyCategory extends Iterable<IRI> {
 
     /**
      * check whether the entity has been declared
@@ -11,8 +10,7 @@ public interface MutableOntologyVocabularyCategory extends Iterable<Predicate> {
      * @param iri
      * @return
      */
-    // TODO: fix the rest of the code so that contains can take IRI
-    boolean contains(String iri);
+    boolean contains(IRI iri);
 
     /**
      * declare an entity

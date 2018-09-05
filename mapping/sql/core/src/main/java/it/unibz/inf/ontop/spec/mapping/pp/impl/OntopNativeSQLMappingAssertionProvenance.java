@@ -1,16 +1,16 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 
 public class OntopNativeSQLMappingAssertionProvenance implements PPMappingAssertionProvenance {
 
-    private final ImmutableFunctionalTerm targetAtom;
+    private final TargetAtom targetAtom;
     private final SQLPPTriplesMap triplesMap;
 
-    OntopNativeSQLMappingAssertionProvenance(ImmutableFunctionalTerm targetAtom, SQLPPTriplesMap triplesMap) {
+    OntopNativeSQLMappingAssertionProvenance(TargetAtom targetAtom, SQLPPTriplesMap triplesMap) {
         this.targetAtom = targetAtom;
         this.triplesMap = triplesMap;
     }

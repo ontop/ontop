@@ -1,33 +1,26 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.URITemplatePredicateImpl;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
-import static it.unibz.inf.ontop.model.term.TermConstants.FALSE;
-import static it.unibz.inf.ontop.model.term.TermConstants.TRUE;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE.INTEGER;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;
 
@@ -36,123 +29,45 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class ExpressionEvaluatorTest {
 
-    private final AtomPredicate TABLE1_PREDICATE = ATOM_FACTORY.getAtomPredicate("table1", 2);
-    private final AtomPredicate TABLE2_PREDICATE = ATOM_FACTORY.getAtomPredicate("table2", 2);
+    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
+    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
 
-    private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 3);
-    private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getAtomPredicate("ans1", 2);
+    private final Variable X = TERM_FACTORY.getVariable("x");
+    private final Variable Y = TERM_FACTORY.getVariable("y");
+    private final Variable W = TERM_FACTORY.getVariable("w");
+    private final Variable A = TERM_FACTORY.getVariable("a");
+    private final Variable B = TERM_FACTORY.getVariable("b");
+    private final Variable C = TERM_FACTORY.getVariable("c");
+    private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private final Variable X = DATA_FACTORY.getVariable("x");
-    private final Variable Y = DATA_FACTORY.getVariable("y");
-    private final Variable W = DATA_FACTORY.getVariable("w");
-    private final Variable A = DATA_FACTORY.getVariable("a");
-    private final Variable B = DATA_FACTORY.getVariable("b");
-    private final Variable C = DATA_FACTORY.getVariable("c");
-    private final Variable D = DATA_FACTORY.getVariable("d");
+    private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
-    private URITemplatePredicate URI_PREDICATE =  new URITemplatePredicateImpl(2);
-    private URITemplatePredicate URI_PREDICATE2 =  new URITemplatePredicateImpl(3);
-    private Constant URI_TEMPLATE_STR_1 =  DATA_FACTORY.getConstantLiteral("http://example.org/stock/{}");
+    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
+    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D));
 
-    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B));
-    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D));
-    private ExtensionalDataNode EXP_DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, B));
-    private ExtensionalDataNode EXP_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, C, D));
-
-    private final ImmutableExpression EXPR_LANG = DATA_FACTORY.getImmutableExpression(
+    private final ImmutableExpression EXPR_LANG = TERM_FACTORY.getImmutableExpression(
             ExpressionOperation.SPARQL_LANG, W );
 
 
-    private Constant langValueConstant =  DATA_FACTORY.getConstantLiteral("en.us");
-    private ImmutableFunctionalTerm langValue =  generateLiteral(langValueConstant);
+    private final String languageTag =  "en-us";
+    // TODO: avoid this language tag wrapping approach
+    private final ImmutableFunctionalTerm wrappedLanguageTag = TERM_FACTORY.getImmutableTypedTerm(
+            TERM_FACTORY.getConstantLiteral(languageTag, XSD.STRING), XSD.STRING);
 
-    private final ImmutableExpression EXPR_EQ = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.EQ, B, langValueConstant );
+    private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
+            ExpressionOperation.LANGMATCHES, EXPR_LANG, wrappedLanguageTag);
 
-    private final ImmutableExpression EXPR_LANGMATCHES = DATA_FACTORY.getImmutableExpression(
-            ExpressionOperation.LANGMATCHES, EXPR_LANG, langValue);
-
-    /**
-     * test LangMatches matching a  lang function with a constant value
-     * (this case should not happen)
-     * @throws EmptyQueryException
-     */
-    @Test
-    public void testLangLeftNodeVariable() throws EmptyQueryException {
-
-        //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-
-        queryBuilder.init(projectionAtom, rootNode);
-
-        //construct innerjoin
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPR_LANGMATCHES);
-        queryBuilder.addChild(rootNode, joinNode);
-
-        //construct left side join
-        ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,B)));
-        queryBuilder.addChild(joinNode, leftNode);
-
-        queryBuilder.addChild(leftNode, DATA_NODE_1);
-
-        //construct right side join
-        ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D)));
-
-        queryBuilder.addChild(joinNode, rightNode);
-
-        queryBuilder.addChild(rightNode, DATA_NODE_2);
-
-        //build unoptimized query
-        IntermediateQuery unOptimizedQuery = queryBuilder.build();
-        System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
-
-        unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
-
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        //----------------------------------------------------------------------
-        // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
-
-
-        DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
-        ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution( W, generateLangString(B, B), X, generateURI1(A), Y, generateInt(D)));
-
-        expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
-
-        //construct expected innerjoin
-
-        InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(EXPR_EQ);
-        expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
-
-        expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
-
-        expectedQueryBuilder.addChild(expectedJoinNode, EXPECTED_DATA_NODE_2);
-
-        //build expected query
-        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
-        System.out.println("\n Expected query: \n" +  expectedQuery);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-    }
 
     private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, languageTag)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -161,9 +76,11 @@ public class ExpressionEvaluatorTest {
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
-        expectedQueryBuilder.addChild(expectedJoinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B)));
 
-        expectedQueryBuilder.addChild(expectedJoinNode, EXPECTED_DATA_NODE_2);
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D)));
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -174,12 +91,12 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery2() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);;
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(C), Y, generateInt(D), W, generateLangString(B, langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), Y, generateInt(D), W, generateLangString(B, languageTag)));
 
         expectedQueryBuilder.init(expectedProjectionAtom, expectedRootNode);
 
@@ -188,9 +105,12 @@ public class ExpressionEvaluatorTest {
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
-        expectedQueryBuilder.addChild(expectedJoinNode, EXP_DATA_NODE_2);
 
-        expectedQueryBuilder.addChild(expectedJoinNode, EXP_DATA_NODE_1);
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D)));
+
+        expectedQueryBuilder.addChild(expectedJoinNode,
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B)));
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -206,7 +126,7 @@ public class ExpressionEvaluatorTest {
     public void testLangLeftNodeFunction() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -218,7 +138,7 @@ public class ExpressionEvaluatorTest {
 
         //construct left side join
         ConstructionNode leftNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B, languageTag)));
         queryBuilder.addChild(joinNode, leftNode);
 
         queryBuilder.addChild(leftNode, DATA_NODE_1);
@@ -257,7 +177,7 @@ public class ExpressionEvaluatorTest {
     public void testLangRightNode() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -278,7 +198,7 @@ public class ExpressionEvaluatorTest {
 
         //construct right side join
         ConstructionNode rightNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,W),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B,langValueConstant)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI1(A), W, generateLangString(B, languageTag)));
 
 
         queryBuilder.addChild(joinNode, rightNode);
@@ -305,7 +225,7 @@ public class ExpressionEvaluatorTest {
     public void testNonEqualOperatorDistribution() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom
                 (ANS1_ARITY_2_PREDICATE, X ,Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -314,7 +234,7 @@ public class ExpressionEvaluatorTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI2(C,D)));
 
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(DATA_FACTORY.getImmutableExpression(NEQ, X, Y));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, X, Y));
 
         queryBuilder.init(projectionAtom, rootNode);
         queryBuilder.addChild(rootNode, joinNode1);
@@ -338,13 +258,13 @@ public class ExpressionEvaluatorTest {
                 ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A,B), Y, generateURI2(C,D)));
 
-        ImmutableExpression subExpression1 = DATA_FACTORY.getImmutableExpression(NEQ, A, C);
-        ImmutableExpression subExpression2 = DATA_FACTORY.getImmutableExpression(NEQ, B, D);
+        ImmutableExpression subExpression1 = TERM_FACTORY.getImmutableExpression(NEQ, A, C);
+        ImmutableExpression subExpression2 = TERM_FACTORY.getImmutableExpression(NEQ, B, D);
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
-                DATA_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
+                TERM_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
         expectedQueryBuilder.addChild(expectedRootNode, joinNode2);
         expectedQueryBuilder.addChild(joinNode2, DATA_NODE_1);
@@ -360,41 +280,44 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIsNotNullUri1() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI1(X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI1(X));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
     }
 
     @Test
     public void testIsNotNullUri2() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI2(X, Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI2(X, Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
-                ImmutabilityTools.foldBooleanExpressions(
-                        DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X),
-                        DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)).get());
+                IMMUTABILITY_TOOLS.foldBooleanExpressions(
+                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X),
+                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)).get());
     }
 
     @Test
     public void testIsNotNullUri3() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI2(DATA_FACTORY.getConstantLiteral("toto"), X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI2(TERM_FACTORY.getConstantLiteral("toto"), X));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
     }
 
     @Ignore("TODO: optimize this case")
     @Test
     public void testIsNotNullUri4() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI1(DATA_FACTORY.getConstantLiteral("toto")));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI1(TERM_FACTORY.getConstantLiteral("toto")));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());
         assertTrue(result.isEffectiveTrue());
@@ -403,9 +326,9 @@ public class ExpressionEvaluatorTest {
     @Ignore("TODO: support this tricky case")
     @Test
     public void testIsNotNullUriTrickyCase() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI1(DATA_FACTORY.getImmutableExpression(IS_NULL, X)));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
+                generateURI1(TERM_FACTORY.getImmutableExpression(IS_NULL, X)));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
 
         /*
@@ -414,7 +337,7 @@ public class ExpressionEvaluatorTest {
         if (optionalExpression.isPresent()) {
             ImmutableExpression optimizedExpression = optionalExpression.get();
             assertNotEquals("Invalid optimization for " + initialExpression,
-                    optimizedExpression, DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+                    optimizedExpression, TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
             fail("The expression " + initialExpression + " should be evaluated as true");
         }
         else {
@@ -425,41 +348,44 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIsNullUri1() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL, generateURI1(X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI1(X));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NULL, X));
     }
 
     @Test
     public void testIsNullUri2() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL, generateURI2(X, Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI2(X, Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
-                DATA_FACTORY.getImmutableExpression(OR,
-                        DATA_FACTORY.getImmutableExpression(IS_NULL, X),
-                        DATA_FACTORY.getImmutableExpression(IS_NULL, Y)));
+                TERM_FACTORY.getImmutableExpression(OR,
+                        TERM_FACTORY.getImmutableExpression(IS_NULL, X),
+                        TERM_FACTORY.getImmutableExpression(IS_NULL, Y)));
     }
 
     @Test
     public void testIsNullUri3() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL,
-                generateURI2(DATA_FACTORY.getConstantLiteral("toto"), X));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
+                generateURI2(TERM_FACTORY.getConstantLiteral("toto"), X));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), DATA_FACTORY.getImmutableExpression(IS_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NULL, X));
     }
 
     @Ignore("TODO: optimize this case")
     @Test
     public void testIsNullUri4() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(IS_NULL,
-                generateURI1(DATA_FACTORY.getConstantLiteral("toto")));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
+                generateURI1(TERM_FACTORY.getConstantLiteral("toto")));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertFalse(optionalExpression.isPresent());
         assertTrue(result.isEffectiveFalse());
@@ -467,25 +393,27 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIfElseNull1() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                DATA_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableExpression(
                     IF_ELSE_NULL,
-                    DATA_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+                    TERM_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(DATA_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
+        assertEquals(TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
     }
 
     @Test
     public void testIfElseNull2() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                DATA_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableExpression(
                         IF_ELSE_NULL,
-                        DATA_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+                        TERM_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(initialExpression, optionalExpression.get());
@@ -493,45 +421,41 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIfElseNull3() {
-        ImmutableExpression initialExpression = DATA_FACTORY.getImmutableExpression(
+        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                DATA_FACTORY.getImmutableExpression(
+                TERM_FACTORY.getImmutableExpression(
                         IF_ELSE_NULL,
-                        DATA_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
-        ExpressionEvaluator.EvaluationResult result = new ExpressionEvaluator().evaluateExpression(initialExpression);
+                        TERM_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
+        ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
+                .evaluateExpression(initialExpression);
         assertFalse(result.getOptionalExpression().isPresent());
         assertTrue(result.isEffectiveFalse());
     }
 
     private ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
     private ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm var1, Variable var2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE2, URI_TEMPLATE_STR_1, var1, var2);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, var1, var2);
     }
 
-    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, Constant argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LANG_STRING),
-                argument1, argument2);
-    }
-    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.LANG_STRING),
-                argument1, argument2);
+    private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, String languageTag) {
+        return TERM_FACTORY.getImmutableFunctionalTerm(
+                TERM_FACTORY.getRequiredTypePredicate(TYPE_FACTORY.getLangTermType(languageTag)),
+                argument1);
     }
 
 
     private ImmutableFunctionalTerm generateLiteral(Constant argument1) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(Predicate.COL_TYPE.STRING),
+        return TERM_FACTORY.getImmutableFunctionalTerm(
+                TERM_FACTORY.getRequiredTypePredicate(XSD.STRING),
                 argument1);
     }
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
-        return DATA_FACTORY.getImmutableFunctionalTerm(
-                TYPE_FACTORY.getTypePredicate(INTEGER),
+        return TERM_FACTORY.getImmutableFunctionalTerm(
+                TERM_FACTORY.getRequiredTypePredicate(XSD.INTEGER),
                 argument);
     }
 }

@@ -7,14 +7,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableDataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyImmutableSubstitution {
+public interface ImmutableSubstitution<T extends ImmutableTerm> {
 
     ImmutableMap<Variable, T> getImmutableMap();
 
@@ -22,8 +21,9 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableSet<Variable> getDomain();
 
-    @Override
     T get(Variable variable);
+
+    boolean isEmpty();
 
     /**
      * Applies the substitution to an immutable term.
@@ -37,11 +37,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
 
     ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
 
-    /**
-     * Please use applyToFunctionalTerm() instead if you can.
-     */
-    Function applyToMutableFunctionalTerm(Function mutableFunctionalTerm);
-
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
     /**
@@ -52,16 +47,18 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
      */
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
 
-    DistinctVariableDataAtom applyToDistinctVariableDataAtom(DistinctVariableDataAtom dataAtom)
-            throws ConversionException;
+    ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;
 
     /**
-     * Returns "f o g" where f is this substitution
+     * Returns "(g o f)" where g is this substitution.
+     * NB: (g o f)(x) = g(f(x))
      */
-    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> g);
+    ImmutableSubstitution<ImmutableTerm> composeWith(ImmutableSubstitution<? extends ImmutableTerm> f);
+
+    ImmutableSubstitution<T> composeWith2(ImmutableSubstitution<? extends T> f);
 
     /**
      * Because of the optional cannot be overloaded.
@@ -93,12 +90,19 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends LocallyI
     Optional<ImmutableExpression> convertIntoBooleanExpression();
 
     Var2VarSubstitution getVar2VarFragment();
+    ImmutableSubstitution<VariableOrGroundTerm> getVariableOrGroundTermFragment();
+    ImmutableSubstitution<NonGroundFunctionalTerm> getNonGroundFunctionalTermFragment();
+    ImmutableSubstitution<GroundFunctionalTerm> getGroundFunctionalTermFragment();
+    ImmutableSubstitution<NonFunctionalTerm> getNonFunctionalTermFragment();
+    ImmutableSubstitution<ImmutableFunctionalTerm> getFunctionalTermFragment();
+    ImmutableSubstitution<NonVariableTerm> getNonVariableTermFragment();
 
-    ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment();
+    ImmutableSubstitution<GroundTerm> getGroundTermFragment();
 
     /**
      * Reduces the substitution's domain to its intersection with the argument domain
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 
+    ImmutableSubstitution<ImmutableTerm> normalizeValues();
 }

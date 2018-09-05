@@ -26,4 +26,8 @@ public interface HomogeneousQueryNodeTransformer<T1 extends QueryNodeTransformat
     EmptyNode transform(EmptyNode emptyNode);
 
     TrueNode transform(TrueNode trueNode);
+
+    DistinctNode transform(DistinctNode distinctNode) throws T1, T2;
+    SliceNode transform(SliceNode sliceNode) throws T1, T2;
+    OrderByNode transform(OrderByNode orderByNode) throws T1, T2;
 }

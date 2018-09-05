@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.si.impl;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.si.repository.impl.SIRepository;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
@@ -20,7 +21,6 @@ import java.sql.Connection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 
 import static it.unibz.inf.ontop.si.impl.OWLAPIABoxLoading.extractTBox;
 
@@ -38,8 +38,12 @@ public class OntopRDFMaterializerLoading {
             OWLOntology inputOntology = obdaConfiguration.loadInputOntology()
                     .orElseThrow(() -> new IllegalArgumentException("The configuration must provide an ontology"));
 
-            Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(inputOntology);
-            SIRepository repo = new SIRepository(ontology.tbox());
+            OWLAPITranslatorOWL2QL translatorOWL2QL = obdaConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
+
+            Ontology ontology = translatorOWL2QL.translateAndClassify(inputOntology);
+            SIRepository repo = new SIRepository(ontology.tbox(),
+                    obdaConfiguration.getTermFactory(), obdaConfiguration.getTypeFactory(),
+                    obdaConfiguration.getInjector().getInstance(TargetAtomFactory.class));
 
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()

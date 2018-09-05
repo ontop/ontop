@@ -13,7 +13,11 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.impl.StandardExecutorRegistry;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -120,6 +124,26 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     @Override
     public IntermediateQueryFactory getIQFactory() {
         return getInjector().getInstance(IntermediateQueryFactory.class);
+    }
+
+    @Override
+    public AtomFactory getAtomFactory() {
+        return getInjector().getInstance(AtomFactory.class);
+    }
+
+    @Override
+    public TermFactory getTermFactory() {
+        return getInjector().getInstance(TermFactory.class);
+    }
+
+    @Override
+    public TypeFactory getTypeFactory() {
+        return getInjector().getInstance(TypeFactory.class);
+    }
+
+    @Override
+    public RDF getRdfFactory() {
+        return getInjector().getInstance(RDF.class);
     }
 
     @Override

@@ -23,23 +23,23 @@ import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
+import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 /**
@@ -64,6 +64,15 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final JoinLikeOptimizer joinLikeOptimizer;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
+	private final DatalogFactory datalogFactory;
+	private final DatalogNormalizer datalogNormalizer;
+	private final FlattenUnionOptimizer flattenUnionOptimizer;
+	private final EQNormalizer eqNormalizer;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final CQCUtilities cqcUtilities;
+	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
+	private final IQConverter iqConverter;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -74,13 +83,29 @@ public class QuestQueryProcessor implements QueryReformulator {
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
-								InputQueryFactory inputQueryFactory) {
+								InputQueryFactory inputQueryFactory,
+								LinearInclusionDependencyTools inclusionDependencyTools,
+								DatalogFactory datalogFactory,
+								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
+								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
+								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
+								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+								IQConverter iqConverter) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
+		this.datalogFactory = datalogFactory;
+		this.datalogNormalizer = datalogNormalizer;
+		this.flattenUnionOptimizer = flattenUnionOptimizer;
+		this.eqNormalizer = eqNormalizer;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.cqcUtilities = cqcUtilities;
+		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
+		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-		this.sigma = LinearInclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
+		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 
 		this.rewriter = queryRewriter;
 		this.rewriter.setTBox(saturatedTBox, sigma);
@@ -88,7 +113,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
 		if(log.isDebugEnabled()){
-			log.debug("Mapping: \n{}", Joiner.on("\n").join(saturatedMapping.getQueries()));
+			log.debug("Mapping: \n{}", Joiner.on("\n").join(
+					saturatedMapping.getRDFAtomPredicates().stream()
+						.flatMap(p -> saturatedMapping.getQueries(p).stream())
+						.iterator()));
 		}
 
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
@@ -121,22 +149,23 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers());
+		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
 			CQIE rule = query.clone();
 			// TODO: get rid of EQNormalizer
-			EQNormalizer.enforceEqualities(rule);
+			eqNormalizer.enforceEqualities(rule);
 
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
 				topLevelPredicate = rule.getHead().getFunctionSymbol();
 			newprogramEq.appendRule(rule);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq);
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
+				eqNormalizer, unifierUtilities, substitutionUtilities);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = DATALOG_FACTORY.getDatalogProgram(program.getQueryModifiers(), p);
+		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
 
 		return newprogram;
 	}
@@ -160,7 +189,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			DatalogProgram newprogram = preProcess(translation);
 
 			for (CQIE q : newprogram.getRules()) 
-				DatalogNormalizer.unfoldJoinTrees(q);
+				datalogNormalizer.unfoldJoinTrees(q);
 			log.debug("Normalized program: \n{}", newprogram);
 
 			if (newprogram.getRules().size() < 1)
@@ -171,7 +200,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			//final long startTime0 = System.currentTimeMillis();
 			for (CQIE cq : newprogram.getRules())
-				CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
 
 			//rewritingTime = System.currentTimeMillis() - startTime0;
@@ -179,17 +208,19 @@ public class QuestQueryProcessor implements QueryReformulator {
 			//final long startTime = System.currentTimeMillis();
 
 			try {
-				IntermediateQuery intermediateQuery = datalogConverter.convertDatalogProgram(
-						dbMetadata, programAfterRewriting, ImmutableList.of(), executorRegistry);
+				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
 
-				log.debug("Directly translated (SPARQL) intermediate query: \n" + intermediateQuery.toString());
+				log.debug("Directly translated (SPARQL) IQ: \n" + convertedIQ.toString());
 
 				log.debug("Start the unfolding...");
 
-				intermediateQuery = queryUnfolder.optimize(intermediateQuery);
+				IQ unfoldedIQ = queryUnfolder.optimize(convertedIQ);
+				if (unfoldedIQ.getTree().isDeclaredAsEmpty())
+					throw new EmptyQueryException();
+				log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
-				log.debug("Unfolded query: \n" + intermediateQuery.toString());
-
+				// Non-final
+				IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, dbMetadata, executorRegistry);
 
 				//lift bindings and union when it is possible
 				intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
@@ -197,7 +228,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				log.debug("New lifted query: \n" + intermediateQuery.toString());
 
-				intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false).optimize(intermediateQuery);
+				intermediateQuery = pullUpExpressionOptimizer.optimize(intermediateQuery);
 				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
 				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
@@ -208,6 +239,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
 				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
+				intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
+				log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 //				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
 //				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());

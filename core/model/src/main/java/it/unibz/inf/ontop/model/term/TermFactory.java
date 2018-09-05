@@ -22,47 +22,14 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TermFactory {
-
-	/**
-	 * Construct a {@link Predicate} object.
-	 *
-	 * @param uri
-	 *            the name of the predicate (defined as a URI).
-	 * @param arity
-	 *            the number of elements inside the predicate.
-	 * @return a predicate object.
-	 */
-	@Deprecated
-	public Predicate getPredicate(String uri, int arity);
-
-	public Predicate getPredicate(String uri, COL_TYPE[] types);
-
-	public Predicate getObjectPropertyPredicate(String name);
-
-	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
-
-	public Predicate getAnnotationPropertyPredicate(String name);
-
-	/**
-	 * with default type COL_TYPE.LITERAL
-	 * @param name
-	 * @return
-	 */
-	
-	public Predicate getDataPropertyPredicate(String name);
-	
-	public Predicate getClassPredicate(String name);
-
-	public Predicate getOWLSameAsPredicate();
-
-	public Predicate getOBDACanonicalIRI();
 
 	/*
 	 * Built-in function predicates
@@ -110,15 +77,13 @@ public interface TermFactory {
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Predicate functor, ImmutableTerm... terms);
+	public ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
 
-	public ImmutableFunctionalTerm getImmutableFunctionalTerm(Function functionalTerm);
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableTerm... terms);
 
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableTerm... terms);
-
-	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(Predicate functor, ImmutableList<ImmutableTerm> terms);
+	public NonGroundFunctionalTerm getNonGroundFunctionalTerm(FunctionSymbol functor, ImmutableList<ImmutableTerm> terms);
 
 
 	public Expression getExpression(OperationPredicate functor, Term... arguments);
@@ -163,7 +128,7 @@ public interface TermFactory {
 	public Expression getFunctionCast(Term term1, Term term2);
 
 	/**
-	 * Construct a {@link URIConstant} object. This type of term is written as a
+	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification
 	 * (RFC 3986).
 	 * <p>
@@ -181,15 +146,22 @@ public interface TermFactory {
 	 * <p>
 	 * are all well-formed URI strings.
 	 * 
-	 * @param uri
+	 * @param iri
 	 *            the URI.
 	 * @return a URI constant.
 	 */
-	public URIConstant getConstantURI(String uri);
+	public IRIConstant getConstantIRI(IRI iri);
 	
 	public BNode getConstantBNode(String name);
 
 	public ValueConstant getBooleanConstant(boolean value);
+
+	ValueConstant getNullConstant();
+
+	/**
+	 * TODO: explain
+	 */
+	ValueConstant getProvenanceSpecialConstant();
 	
 	/**
 	 * Construct a {@link ValueConstant} object.
@@ -216,7 +188,9 @@ public interface TermFactory {
 	 *            the type of the constant.
 	 * @return the value constant.
 	 */
-	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
+	ValueConstant getConstantLiteral(String value, RDFDatatype type);
+
+	ValueConstant getConstantLiteral(String value, IRI type);
 
 
 	/**
@@ -237,12 +211,12 @@ public interface TermFactory {
 	public ValueConstant getConstantLiteral(String value, String language);
 
 	public Function getTypedTerm(Term value, String language);
-	public Function getTypedTerm(Term value, Term language);
-	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	public Function getTypedTerm(Term value, RDFDatatype type);
+	Function getTypedTerm(Term value, IRI datatype);
 
 	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, String language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, ImmutableTerm language);
-	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, Predicate.COL_TYPE type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, RDFDatatype type);
+	ImmutableFunctionalTerm getImmutableTypedTerm(ImmutableTerm value, IRI datatypeIRI);
 
 	/**
 	 * Construct a {@link Variable} object. The variable name is started by a
@@ -258,4 +232,11 @@ public interface TermFactory {
 	 * @return the variable object.
 	 */
 	public Variable getVariable(String name);
+
+
+	DatatypePredicate getRequiredTypePredicate(RDFDatatype type);
+
+	DatatypePredicate getRequiredTypePredicate(IRI datatypeIri);
+
+	Optional<DatatypePredicate> getOptionalTypePredicate(RDFDatatype type);
 }

@@ -27,19 +27,21 @@ import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
-import it.unibz.inf.ontop.model.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.ontology.ABoxAssertionSupplier;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
 
-import java.util.*;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
@@ -53,11 +55,16 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 
 	// store results in case of describe queries
 	private final boolean storeResults;
+    private final TermFactory termFactory;
+    private final org.apache.commons.rdf.api.RDF rdfFactory;
 
-	public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
-                                       boolean storeResults) throws OntopResultConversionException, OntopConnectionException {
+    public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
+                                       boolean storeResults, TermFactory termFactory,
+                                       org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = tupleResultSet;
 		this.constructTemplate = constructTemplate;
+        this.termFactory = termFactory;
+        this.rdfFactory = rdfFactory;
         Extension ex = constructTemplate.getExtension();
         if (ex != null) {
             extMap = ex.getElements().stream()
@@ -100,7 +107,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
-        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier();
+        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier(rdfFactory);
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
@@ -120,11 +127,11 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
                 String predicateName = predicateConstant.getValue();
                 try {
                     Assertion assertion;
-                    if (predicateName.equals(IriConstants.RDF_TYPE)) {
+                    if (predicateName.equals(RDF.TYPE.getIRIString())) {
                         assertion = builder.createClassAssertion(objectConstant.getValue(), subjectConstant);
                     }
                     else {
-                        if ((objectConstant instanceof URIConstant) || (objectConstant instanceof BNode)) {
+                        if ((objectConstant instanceof IRIConstant) || (objectConstant instanceof BNode)) {
                             assertion = builder.createObjectPropertyAssertion(predicateName,
                                     subjectConstant, (ObjectConstant) objectConstant);
                         }
@@ -187,11 +194,13 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
-                constant = TERM_FACTORY.getConstantURI(vc.getValue().stringValue());
-            } else if (vc.getValue() instanceof Literal) {
-                constant = TERM_FACTORY.getConstantLiteral(vc.getValue().stringValue());
-            } else {
-                constant = TERM_FACTORY.getConstantBNode(vc.getValue().stringValue());
+                constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
+            }
+            else if (vc.getValue() instanceof Literal) {
+                constant = termFactory.getConstantLiteral(vc.getValue().stringValue());
+            }
+            else {
+                constant = termFactory.getConstantBNode(vc.getValue().stringValue());
             }
         } else {
             constant = bindingSet.getConstant(node_name);

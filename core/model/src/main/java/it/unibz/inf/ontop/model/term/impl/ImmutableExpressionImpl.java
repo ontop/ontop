@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.Expression;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
@@ -17,12 +16,8 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         super(functor, terms);
     }
 
-    protected ImmutableExpressionImpl(Expression expression) {
-        super(expression);
-    }
-
     @Override
-    public ImmutableExpression clone() {
+    public ImmutableExpressionImpl clone() {
         return this;
     }
 
@@ -52,7 +47,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
          */
         if (getFunctionSymbol().equals(operator)) {
             ImmutableSet.Builder<ImmutableExpression> setBuilder = ImmutableSet.builder();
-            for (ImmutableTerm subTerm : getArguments()) {
+            for (ImmutableTerm subTerm : getTerms()) {
                 /**
                  * Recursive call
                  */

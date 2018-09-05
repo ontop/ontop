@@ -7,6 +7,9 @@ import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
@@ -18,17 +21,17 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -40,18 +43,31 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
+    private final MappingCanonicalTransformer canonicalTransformer;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final TypeFactory typeFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings) {
+                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
+                                MappingCanonicalTransformer canonicalTransformer, AtomFactory atomFactory, TermFactory termFactory,
+                                SubstitutionFactory substitutionFactory,
+                                TypeFactory typeFactory) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
+        this.canonicalTransformer = canonicalTransformer;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.typeFactory = typeFactory;
     }
 
     /**
@@ -64,7 +80,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, UnknownDatatypeException {
+            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException,
+            InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
         RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
@@ -81,15 +98,18 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
 
-        validateMapping(optionalOntology, filledProvMapping);
+        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(filledProvMapping);
 
-        return new MappingAndDBMetadataImpl(filledProvMapping.toRegularMapping(), dbMetadata);
+        validateMapping(optionalOntology, canonizedMapping);
+
+        return new MappingAndDBMetadataImpl(canonizedMapping.toRegularMapping(), dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
-        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps());
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory,
+                substitutionFactory);
         final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
         if (expander.hasMappingsToBeExpanded()) {
             try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
@@ -138,26 +158,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
          */
         catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
-        }
-    }
-
-    private Connection createConnection() throws SQLException {
-
-        try {
-            // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
-        } catch (SQLException ex) {
-            // HACKY(xiao): This part is still necessary for Tomcat.
-            // Otherwise, JDBC drivers are not initialized by default.
-            settings.getJdbcDriver().ifPresent(className -> {
-                try {
-                    Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            return DriverManager.getConnection(settings.getJdbcUrl(), settings.getJdbcUser(), settings.getJdbcPassword());
         }
     }
 

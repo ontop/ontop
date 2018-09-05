@@ -1,41 +1,59 @@
 package it.unibz.inf.ontop.model.type;
 
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import org.eclipse.rdf4j.model.IRI;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface TypeFactory {
 
-	@Deprecated
-	Optional<COL_TYPE> getDatatype(String uri);
-	
-	COL_TYPE getDatatype(IRI uri);
+	RDFDatatype getLangTermType(String languageTag);
 
-	Optional<COL_TYPE> getInternalType(DatatypePredicate predicate);
-	
-	IRI getDatatypeURI(COL_TYPE type);
+	/**
+	 * Don't call it with langString!
+	 */
+	RDFDatatype getDatatype(IRI iri);
 
-	DatatypePredicate getTypePredicate(COL_TYPE type);
-		
-	boolean isBoolean(Predicate p);
-	
-	boolean isInteger(Predicate p);
-	
-	boolean isFloat(Predicate p);
-	
-//	boolean isLiteral(Predicate p);
-	
-	boolean isString(Predicate p);
-	
-	List<Predicate> getDatatypePredicates();
+	ObjectRDFType getIRITermType();
 
-	TermType getTermType(COL_TYPE type);
-	TermType getTermType(String languageTagString);
-	TermType getTermType(Term languageTagTerm);
+	ObjectRDFType getBlankNodeType();
 
+	RDFDatatype getUnsupportedDatatype();
+
+	RDFDatatype getAbstractOntopNumericDatatype();
+	RDFDatatype getAbstractRDFSLiteral();
+
+	TermType getAbstractAtomicTermType();
+
+	RDFTermType getAbstractRDFTermType();
+
+	ObjectRDFType getAbstractObjectRDFType();
+
+	default RDFDatatype getXsdIntegerDatatype() {
+		return getDatatype(XSD.INTEGER);
+	}
+
+	default RDFDatatype getXsdDecimalDatatype() {
+		return getDatatype(XSD.DECIMAL);
+	}
+
+	default RDFDatatype getXsdStringDatatype() {
+		return getDatatype(XSD.STRING);
+	}
+
+	default RDFDatatype getXsdBooleanDatatype() {
+		return getDatatype(XSD.BOOLEAN);
+	}
+
+	default RDFDatatype getXsdDoubleDatatype() {
+		return getDatatype(XSD.DOUBLE);
+	}
+
+	default RDFDatatype getXsdFloatDatatype() {
+		return getDatatype(XSD.FLOAT);
+	}
+
+	default RDFDatatype getXsdDatetimeDatatype() {
+		return getDatatype(XSD.DATETIME);
+	}
 }

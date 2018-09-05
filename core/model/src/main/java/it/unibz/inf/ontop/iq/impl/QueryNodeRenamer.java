@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -13,11 +15,10 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
 
 /**
  * Renames query nodes according to one renaming substitution.
@@ -26,10 +27,13 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final InjectiveVar2VarSubstitution renamingSubstitution;
+    private final AtomFactory atomFactory;
 
-    public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveVar2VarSubstitution renamingSubstitution) {
+    public QueryNodeRenamer(IntermediateQueryFactory iqFactory, InjectiveVar2VarSubstitution renamingSubstitution,
+                            AtomFactory atomFactory) {
         this.iqFactory = iqFactory;
         this.renamingSubstitution = renamingSubstitution;
+        this.atomFactory = atomFactory;
     }
 
     @Override
@@ -67,9 +71,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     @Override
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
-                renameSubstitution(constructionNode.getSubstitution()),
-                renameOptionalModifiers(constructionNode.getOptionalModifiers())
-                );
+                renameSubstitution(constructionNode.getSubstitution()));
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {
@@ -87,13 +89,25 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return trueNode.clone();
     }
 
-    private Optional<ImmutableQueryModifiers> renameOptionalModifiers(Optional<ImmutableQueryModifiers> optionalModifiers) {
-        if (optionalModifiers.isPresent()) {
-            return renamingSubstitution.applyToQueryModifiers(optionalModifiers.get());
-        }
-        else {
-            return Optional.empty();
-        }
+    @Override
+    public DistinctNode transform(DistinctNode distinctNode) {
+        return iqFactory.createDistinctNode();
+    }
+
+    @Override
+    public SliceNode transform(SliceNode sliceNode) {
+        return sliceNode.clone();
+    }
+
+    @Override
+    public OrderByNode transform(OrderByNode orderByNode) {
+        ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
+                .map(c -> iqFactory.createOrderComparator(
+                        renamingSubstitution.applyToNonGroundTerm(c.getTerm()),
+                        c.isAscending()))
+                .collect(ImmutableCollectors.toList());
+
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     private ImmutableExpression renameBooleanExpression(ImmutableExpression booleanExpression) {
@@ -101,12 +115,12 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     }
 
 
-    private DataAtom renameDataAtom(DataAtom atom) {
+    private DataAtom renameDataAtom(DataAtom<? extends AtomPredicate> atom) {
         ImmutableList.Builder<VariableOrGroundTerm> argListBuilder = ImmutableList.builder();
         for (VariableOrGroundTerm term : atom.getArguments()) {
             argListBuilder.add(renamingSubstitution.applyToTerm(term));
         }
-        return ATOM_FACTORY.getDataAtom(atom.getPredicate(), argListBuilder.build());
+        return atomFactory.getDataAtom(atom.getPredicate(), argListBuilder.build());
     }
 
     private Optional<ImmutableExpression> renameOptionalBooleanExpression(

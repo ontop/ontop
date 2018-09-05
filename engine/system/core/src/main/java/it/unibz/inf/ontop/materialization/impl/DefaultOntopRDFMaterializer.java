@@ -30,28 +30,28 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.OntopSystemFactory;
-import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
-import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
-import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
+import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.exception.*;
+import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemFactory;
+import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 
 /**
@@ -65,24 +65,21 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	private static int FETCH_SIZE = 50000;
 
 	private static final class VocabularyEntry {
-        private final URI name;
+        private final IRI name;
         private final int arity;
 
-        VocabularyEntry(Predicate predicate) {
-            try {
-                this.name = new URI(predicate.getName());
-            }
-            catch (URISyntaxException e) {
-                throw new NonURIPredicateInVocabularyException(predicate.getName());
-            }
-            this.arity = predicate.getArity();
+        VocabularyEntry(IRI predicate, int arity) {
+
+                this.name =predicate;
+
+            	this.arity = arity;
         }
 
         private static final String PROPERTY_QUERY = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
         private static final String CLASS_QUERY = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
         String getQuery() {
-            return String.format((arity == 1) ? CLASS_QUERY : PROPERTY_QUERY, name.toString(), name.toString());
+            return String.format((arity == 1) ? CLASS_QUERY : PROPERTY_QUERY, name.getIRIString(), name.getIRIString());
         }
     }
 
@@ -91,25 +88,25 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableMap<URI, VocabularyEntry> vocabulary = extractVocabulary(obdaSpecification.getSaturatedMapping());
+		ImmutableMap<IRI, VocabularyEntry> vocabulary = extractVocabulary(obdaSpecification.getSaturatedMapping());
 		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
 	@Override
 	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-												  @Nonnull ImmutableSet<URI> selectedVocabulary,
+												  @Nonnull ImmutableSet<IRI> selectedVocabulary,
 												  @Nonnull MaterializationParams params)
 			throws OBDASpecificationException {
 		OBDASpecification obdaSpecification = configuration.loadSpecification();
 
-		ImmutableMap<URI, VocabularyEntry> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedMapping()).entrySet().stream()
+		ImmutableMap<IRI, VocabularyEntry> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedMapping()).entrySet().stream()
                 .filter(e -> selectedVocabulary.contains(e.getKey()))
 				.collect(ImmutableCollectors.toMap());
 
 		return apply(obdaSpecification, vocabularyMap, params, configuration);
 	}
 
-	private MaterializedGraphResultSet apply(OBDASpecification obdaSpecification, ImmutableMap<URI, VocabularyEntry> selectedVocabulary,
+	private MaterializedGraphResultSet apply(OBDASpecification obdaSpecification, ImmutableMap<IRI, VocabularyEntry> selectedVocabulary,
 											 MaterializationParams params, OntopSystemConfiguration configuration) {
 
 		Injector injector = configuration.getInjector();
@@ -120,18 +117,33 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
 	}
 
-	private static ImmutableMap<URI, VocabularyEntry> extractVocabulary(@Nonnull Mapping mapping) {
-
-	    return mapping.getPredicates().stream()
-                .filter(p -> p.getArity() <= 2)
-                .map(p -> new VocabularyEntry(p))
-                .collect(ImmutableCollectors.toMap(e -> e.name, e -> e));
+	/**
+	 * TODO: refactor so as to work with quads
+	 */
+	private static ImmutableMap<IRI, VocabularyEntry> extractVocabulary(@Nonnull Mapping mapping) {
+		return mapping.getRDFAtomPredicates().stream()
+				.filter(p -> p instanceof TriplePredicate)
+				.map(p -> (TriplePredicate) p)
+				.findFirst()
+				.map(p -> extractTripleVocabulary(mapping, p)
+						.collect(ImmutableCollectors.toMap(e -> e.name, e -> e)))
+				.orElseGet(ImmutableMap::of);
     }
+
+    private static Stream<VocabularyEntry> extractTripleVocabulary(Mapping mapping, TriplePredicate triplePredicate) {
+		Stream<VocabularyEntry> vocabularyPropertyStream = mapping.getRDFProperties(triplePredicate).stream()
+				.map(p -> new VocabularyEntry(p, 2));
+
+		Stream<VocabularyEntry> vocabularyClassStream = mapping.getRDFClasses(triplePredicate).stream()
+				.map(p -> new VocabularyEntry(p, 1));
+
+		return Stream.concat(vocabularyClassStream,vocabularyPropertyStream);
+	}
 
 
 	private static class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
-		private final ImmutableMap<URI, VocabularyEntry> vocabulary;
+		private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
 		private final InputQueryFactory inputQueryFactory;
 		private final boolean doStreamResults, canBeIncomplete;
 
@@ -149,10 +161,10 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 //		private Assertion nextAssertion;
 
 		private Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
-		private final List<URI> possiblyIncompleteClassesAndProperties;
+		private final List<IRI> possiblyIncompleteClassesAndProperties;
 
 
-		DefaultMaterializedGraphResultSet(ImmutableMap<URI, VocabularyEntry> vocabulary, MaterializationParams params,
+		DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
 										  OntopQueryEngine queryEngine, InputQueryFactory inputQueryFactory) {
 
 			this.vocabulary = vocabulary;
@@ -178,7 +190,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 		}
 
 		@Override
-		public ImmutableSet<URI> getSelectedVocabulary() {
+		public ImmutableSet<IRI> getSelectedVocabulary() {
 			return vocabulary.keySet();
 		}
 
@@ -279,7 +291,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 			return counter;
 		}
 
-		public ImmutableList<URI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
+		public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
 			return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
 		}
 	}

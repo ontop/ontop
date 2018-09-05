@@ -5,5 +5,5 @@ package it.unibz.inf.ontop.model.term;
  *
  * These terms are immutable.
  */
-public interface NonFunctionalTerm extends ImmutableTerm {
+public interface NonFunctionalTerm extends VariableOrGroundTerm {
 }

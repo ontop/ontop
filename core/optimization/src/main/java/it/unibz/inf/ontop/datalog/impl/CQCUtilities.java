@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.datalog.impl;
  * #L%
  */
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
@@ -43,15 +44,16 @@ import java.util.*;
  */
 public class CQCUtilities {
 
-	public static final Comparator<CQIE> ComparatorCQIE = new Comparator<CQIE>() {
-		@Override
-		public int compare(CQIE o1, CQIE o2) {
-			return o2.getBody().size() - o1.getBody().size();
-		}
-	};
-
 	public static final CQContainmentCheckSyntactic SYNTACTIC_CHECK = new CQContainmentCheckSyntactic();
-	
+	private final SubstitutionUtilities substitutionUtilities;
+	private final UnifierUtilities unifierUtilities;
+
+	@Inject
+	private CQCUtilities(SubstitutionUtilities substitutionUtilities, UnifierUtilities unifierUtilities) {
+		this.substitutionUtilities = substitutionUtilities;
+		this.unifierUtilities = unifierUtilities;
+	}
+
 
 	/***
 	 * Removes queries that are contained syntactically, using the method
@@ -63,7 +65,7 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	
-	public static void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
+	public void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
 
 		{
 			Iterator<CQIE> iterator = queries.iterator();
@@ -100,7 +102,7 @@ public class CQCUtilities {
 		}
 	}
 
-	public static void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
+	public void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
 				
 		// for each atom in query body
 		for (int i = 0; i < atoms.size(); i++) {
@@ -112,13 +114,13 @@ public class CQCUtilities {
 				// try to unify current query body atom with tbox rule body atom
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = UnifierUtilities.getMGU(ruleBody, atom);
+				Substitution theta = unifierUtilities.getMGU(ruleBody, atom);
 				if (theta == null || theta.isEmpty()) {
 					continue;
 				}
 				// if unifiable, apply to head of tbox rule
 				Function copyRuleHead = (Function) rule.getHead().clone();
-				SubstitutionUtilities.applySubstitution(copyRuleHead, theta);
+				substitutionUtilities.applySubstitution(copyRuleHead, theta);
 
 				derivedAtoms.add(copyRuleHead);
 			}
@@ -143,13 +145,13 @@ public class CQCUtilities {
 	 * 
 	 * @param q
 	 */
-	public static void removeRundantAtoms(CQIE q) {
+	public void removeRundantAtoms(CQIE q) {
 		CQIE result = q;
 		for (int i = 0; i < result.getBody().size(); i++) {
 			Function currentAtom = result.getBody().get(i);
 			for (int j = i + 1; j < result.getBody().size(); j++) {
 				Function nextAtom = result.getBody().get(j);
-				Substitution map = UnifierUtilities.getMGU(currentAtom, nextAtom);
+				Substitution map = unifierUtilities.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
 					result = unify(result, i, j);
 				}
@@ -169,21 +171,21 @@ public class CQCUtilities {
      * query produced by the unification of j and i
      * @throws Exception
      */
-    private static CQIE unify(CQIE q, int i, int j) {
+    private CQIE unify(CQIE q, int i, int j) {
 
         Function atom1 = q.getBody().get(i);
         Function atom2 = q.getBody().get(j);
         
-        Substitution mgu = UnifierUtilities.getMGU(atom1, atom2);
+        Substitution mgu = unifierUtilities.getMGU(atom1, atom2);
         if (mgu == null)
             return null;
 
-        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
+        CQIE unifiedQ = substitutionUtilities.applySubstitution(q, mgu);
         unifiedQ.getBody().remove(i);
         unifiedQ.getBody().remove(j - 1);
 
         Function newatom = (Function) atom1.clone();
-        SubstitutionUtilities.applySubstitution(newatom, mgu);
+        substitutionUtilities.applySubstitution(newatom, mgu);
         unifiedQ.getBody().add(i, newatom);
 
         return unifiedQ;

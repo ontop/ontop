@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.owlapi.resultset;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
-import java.net.URI;
+import org.apache.commons.rdf.api.IRI;
 
 public interface MaterializedGraphOWLResultSet extends GraphOWLResultSet {
 
@@ -31,12 +30,12 @@ public interface MaterializedGraphOWLResultSet extends GraphOWLResultSet {
      * May evolve until the materialization completes.
      *
      */
-    ImmutableList<URI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
+    ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar();
 
     /**
      * RDF predicates/classes that are considered for materialization.
      *
      * NB: It is possible that for some predicate/classes, no RDF triple is produced (empty answer)
      */
-    ImmutableSet<URI> getSelectedVocabulary();
+    ImmutableSet<IRI> getSelectedVocabulary();
 }

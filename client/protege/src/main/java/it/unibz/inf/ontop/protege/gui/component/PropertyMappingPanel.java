@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -27,6 +29,7 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
 import it.unibz.inf.ontop.protege.gui.action.EditableCellFocusAction;
+import org.apache.commons.rdf.api.IRI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -43,6 +46,9 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
+
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.DATA_PROPERTY;
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.OBJECT_PROPERTY;
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
@@ -143,11 +149,11 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (Predicate dp : obdaModel.getCurrentVocabulary().dataProperties()) {
-            v.addElement(new PredicateItem(dp, prefixManager));
+        for (IRI dp : obdaModel.getCurrentVocabulary().dataProperties()) {
+            v.addElement(new PredicateItem(dp, PredicateItem.PredicateType.DATA_PROPERTY, prefixManager));
         }
-        for (Predicate op : obdaModel.getCurrentVocabulary().objectProperties()) {
-            v.addElement(new PredicateItem(op, prefixManager));
+        for (IRI op : obdaModel.getCurrentVocabulary().objectProperties()) {
+            v.addElement(new PredicateItem(op, PredicateItem.PredicateType.OBJECT_PROPERTY, prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
         cboPropertyAutoSuggest.setRenderer(new PropertyListCellRenderer());
@@ -381,7 +387,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox();
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			
@@ -487,7 +493,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox();
+			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			
@@ -547,7 +553,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public Object getCellEditorValue() {
 			if (editedItem != null) {
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
-				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
+				editedItem.setDataType((FunctionSymbol) cboDataTypes.getSelectedItem());
 			}
 			return editedItem;
 		}
@@ -569,7 +575,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 		public boolean stopCellEditing() {
 			try { // handling unknown array out of bound exception (?)
 				editedItem.setTargetMapping(txtPropertyTargetMap.getText());
-				editedItem.setDataType((Predicate) cboDataTypes.getSelectedItem());
+				editedItem.setDataType((FunctionSymbol) cboDataTypes.getSelectedItem());
 				if (editedItem.isValid()) { // Validate the entry
 					setNormalBackground(txtPropertyTargetMap);
 				} else {

@@ -1,37 +1,40 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MappingMergingException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.optimizer.MappingIQNormalizer;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingMerger;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class MappingMergerImpl implements MappingMerger {
 
     private final SpecificationFactory specificationFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final MappingIQNormalizer mappingIQNormalizer;
+    private final TermFactory termFactory;
 
     @Inject
     private MappingMergerImpl(SpecificationFactory specificationFactory, UnionBasedQueryMerger queryMerger,
-                              MappingIQNormalizer mappingIQNormalizer) {
+                              TermFactory termFactory) {
         this.specificationFactory = specificationFactory;
         this.queryMerger = queryMerger;
-        this.mappingIQNormalizer = mappingIQNormalizer;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -47,14 +50,11 @@ public class MappingMergerImpl implements MappingMerger {
         }
 
         MappingMetadata metadata = mergeMetadata(mappings);
-        ImmutableMap<AtomPredicate, IntermediateQuery> mappingMap = mergeMappingMaps(mappings);
 
-        // TODO: check that the ExecutorRegistry is identical for all mappings ?
-        return specificationFactory.createMapping(
-                metadata,
-                mappingMap,
-                mappings.iterator().next().getExecutorRegistry()
-        );
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = mergeMappingPropertyTables(mappings);
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = mergeMappingClassTables(mappings);
+
+        return specificationFactory.createMapping(metadata, propertyTable, classTable);
     }
 
     private MappingMetadata mergeMetadata(ImmutableSet<Mapping> mappings) {
@@ -72,7 +72,7 @@ public class MappingMergerImpl implements MappingMerger {
 
         ImmutableMap<String, String> prefixToUri = prefixToUris.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey(),
+                        Map.Entry::getKey,
                         e -> flattenURIList(e.getKey(), e.getValue())
                 ));
         return new SimplePrefixManager(prefixToUri);
@@ -88,46 +88,65 @@ public class MappingMergerImpl implements MappingMerger {
     private UriTemplateMatcher mergeURITemplateMatchers(ImmutableSet<Mapping> mappings) {
         return UriTemplateMatcher.merge(
                 mappings.stream()
-                        .map(m -> m.getMetadata().getUriTemplateMatcher())
+                        .map(m -> m.getMetadata().getUriTemplateMatcher()),
+                termFactory
         );
     }
 
-    private ImmutableMap<AtomPredicate, IntermediateQuery> mergeMappingMaps(ImmutableSet<Mapping> mappings) {
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingPropertyTables(ImmutableSet<Mapping> mappings) {
 
-        ImmutableMap<AtomPredicate, Collection<IntermediateQuery>> atomPredicate2IQs = mappings.stream()
-                .flatMap(m -> getMappingMap(m).entrySet().stream())
-                .collect(ImmutableCollectors.toMultimap())
+        ImmutableMap<Map.Entry<RDFAtomPredicate, IRI>, Collection<IQ>> multiTable = mappings.stream()
+                .flatMap(m -> extractCellStream(m,
+                        p -> m.getRDFProperties(p).stream(),
+                        (p, i) -> m.getRDFPropertyDefinition(p, i).get()))
+                .collect(ImmutableCollectors.toMultimap(
+                        c -> Maps.immutableEntry(c.getRowKey(), c.getColumnKey()),
+                        Table.Cell::getValue))
                 .asMap();
 
-        return atomPredicate2IQs.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> mergeDefinitions(e.getValue())
-                ));
+        return multiTable.entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getKey(),
+                        e.getKey().getValue(),
+                        mergeDefinitions(e.getValue())))
+                .collect(ImmutableCollectors.toTable());
     }
+
+    private Stream<Table.Cell<RDFAtomPredicate, IRI, IQ>> extractCellStream(
+            Mapping m,
+            Function<RDFAtomPredicate, Stream<IRI>> iriExtractor,
+            BiFunction<RDFAtomPredicate, IRI, IQ> iqExtractor) {
+
+        return m.getRDFAtomPredicates().stream()
+                .flatMap(p -> iriExtractor.apply(p)
+                            .map(i -> Tables.immutableCell(p, i, iqExtractor.apply(p, i))));
+    }
+
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingClassTables(ImmutableSet<Mapping> mappings) {
+
+        ImmutableMap<Map.Entry<RDFAtomPredicate, IRI>, Collection<IQ>> multiTable = mappings.stream()
+                .flatMap(m -> extractCellStream(m,
+                        p -> m.getRDFClasses(p).stream(),
+                        (p, i) -> m.getRDFClassDefinition(p, i).get()))
+                .collect(ImmutableCollectors.toMultimap(
+                        c -> Maps.immutableEntry(c.getRowKey(), c.getColumnKey()),
+                        Table.Cell::getValue))
+                .asMap();
+
+        return multiTable.entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getKey(),
+                        e.getKey().getValue(),
+                        mergeDefinitions(e.getValue())))
+                .collect(ImmutableCollectors.toTable());
+    }
+
 
     /**
      * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
      */
-    private IntermediateQuery mergeDefinitions(Collection<IntermediateQuery> queries) {
+    private IQ mergeDefinitions(Collection<IQ> queries) {
         return queryMerger.mergeDefinitions(queries)
-                .map(mappingIQNormalizer::normalize)
                 .orElseThrow(() -> new MappingMergingException("The query should be present"));
-    }
-
-    private ImmutableMap<AtomPredicate, IntermediateQuery> getMappingMap(Mapping mapping) {
-        return mapping.getPredicates().stream()
-                .collect(ImmutableCollectors.toMap(
-                        p -> p,
-                        p -> getDefinition(mapping, p)
-                ));
-    }
-
-    /**
-     * Due to a Java compiler bug (hiding .orElseThrow() in a sub-method does the trick)
-     */
-    private static IntermediateQuery getDefinition(Mapping mapping, AtomPredicate predicate) {
-        return mapping.getDefinition(predicate)
-                .orElseThrow(() -> new MappingMergingException("This atom predicate should have a definition"));
     }
 }

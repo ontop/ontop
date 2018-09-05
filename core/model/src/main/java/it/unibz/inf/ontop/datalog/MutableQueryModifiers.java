@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.datalog;
 
-import it.unibz.inf.ontop.iq.node.QueryModifiers;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.List;

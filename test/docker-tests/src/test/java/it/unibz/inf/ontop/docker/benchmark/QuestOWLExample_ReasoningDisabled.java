@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.benchmark;
 
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -359,14 +358,7 @@ public class QuestOWLExample_ReasoningDisabled {
         this.reasoner.dispose();
     }
 
-    /**
-     * @throws OWLOntologyCreationException
-     * @throws InvalidMappingException
-     * @throws InvalidPredicateDeclarationException
-     * @throws IOException
-     * @throws OWLException
-     */
-    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private OntopOWLConnection createStuff() throws OWLOntologyCreationException, IOException, InvalidMappingException {
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -466,7 +458,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     private List<Long> runQueries(//QuestOWLConnection conn,
-                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, IOException {
+                                  List<String> queries) throws OWLException, InvalidMappingException, IOException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;

@@ -1,19 +1,53 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
+import org.apache.commons.rdf.api.IRI;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class SemanticIndexViewsManager {
+
+	private static final IRI[] SITableToIRI = {
+			XSD.STRING, XSD.INTEGER,
+			XSD.LONG, XSD.DECIMAL, XSD.DOUBLE, XSD.DATETIME,
+			XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER,
+			XSD.NON_NEGATIVE_INTEGER, XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER,
+			XSD.FLOAT, XSD.BOOLEAN, XSD.DATETIMESTAMP};
+
+
+	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
+	private static final int OBJ_TYPE_URI = 0;
+	private static final int OBJ_TYPE_BNode = 1;
 
 	private final Map<SemanticIndexViewID, SemanticIndexView> views = new HashMap<>();
 	
 	private final List<SemanticIndexView> propertyViews = new LinkedList<>();
 	private final List<SemanticIndexView> classViews = new LinkedList<>();
-	
-	public SemanticIndexViewsManager() {
+	private final TypeFactory typeFactory;
+	private final Map<TermType, Integer> colTypetoSITable;
+
+	public SemanticIndexViewsManager(TypeFactory typeFactory) {
+		this.typeFactory = typeFactory;
 		init();
+
+		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
+		colTypetoSITable = new HashMap<>();
+		colTypetoSITable.put(typeFactory.getBlankNodeType(), 1);
+		colTypetoSITable.put(typeFactory.getIRITermType(), 1);
+		// Class SITable has value 0 (skip it)
+		for (int i = 2; i < SITableToIRI.length; i++)
+			colTypetoSITable.put(typeFactory.getDatatype(SITableToIRI[i]), i);
 	}
 
 	public List<SemanticIndexView> getPropertyViews() {
@@ -24,32 +58,38 @@ public class SemanticIndexViewsManager {
 		return Collections.unmodifiableList(classViews);
 	}
 
-	public SemanticIndexView getView(COL_TYPE type) {
+	public SemanticIndexView getView(ObjectRDFType type) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
 		return views.get(viewId);
 	}
 	
-	public SemanticIndexView getView(COL_TYPE type1, COL_TYPE type2) {
+	public SemanticIndexView getView(ObjectRDFType type1, RDFTermType type2) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		/*
+		 * For language tags (need to know the concrete one)
+		 */
+		if (!views.containsKey(viewId))
+			if (type2 instanceof RDFDatatype)
+				initDataProperty(type1, (RDFDatatype) type2);
+			else
+				throw new UnexpectedRDFTermTypeException(type2);
 		return views.get(viewId);
 	}
 	
-	
-	
-	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
-
-	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
-		COL_TYPE.LITERAL, COL_TYPE.LANG_STRING, COL_TYPE.BOOLEAN,
-		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
-		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
-		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
-		COL_TYPE.STRING };
-	
 	private final void init() {
-		
-		for (COL_TYPE type1 : objectTypes) {
 
-			String value =  (type1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+		ImmutableList<ObjectRDFType> objectTypes = ImmutableList.of(typeFactory.getIRITermType(),
+				typeFactory.getBlankNodeType());
+
+
+		IRI[] datatypeIRIs = { XSD.BOOLEAN, XSD.DATETIME, XSD.DATETIMESTAMP, XSD.DECIMAL, XSD.DOUBLE, XSD.INTEGER,
+				XSD.INT, XSD.UNSIGNED_INT, XSD.NEGATIVE_INTEGER, XSD.NON_NEGATIVE_INTEGER,
+				XSD.POSITIVE_INTEGER, XSD.NON_POSITIVE_INTEGER, XSD.FLOAT,  XSD.LONG,
+				XSD.STRING };
+
+		for (ObjectRDFType type1 : objectTypes) {
+
+			String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
 			String filter = "ISBNODE = " + value + " AND ";
 			
 			{
@@ -61,80 +101,72 @@ public class SemanticIndexViewsManager {
 				views.put(view.getId(), view);		
 				classViews.add(view);
 			}
-			
-			
-			for (COL_TYPE type2 : typesAndObjectTypes) {
-				String select, insert;
-				
-				switch (type2) {
-					case OBJECT:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter + "ISBNODE2 = FALSE AND ");
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value + ", FALSE");
-						break;
-					case BNODE:
-						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
-						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
-						break;
-					case LITERAL:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT("LANG IS NULL AND " + filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, NULL, " + value);
-						break;
-					case LANG_STRING:
-						/*
-						 * If the mapping is for something of type Literal we need to add IS
-						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-						 * redundant since we have another stage in Quest where we add IS NOT
-						 * NULL for every variable in the head of a mapping.
-						 */
-						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG IS NOT NULL AND " + filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
-						break;
-					default:
-						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter);
-						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value);
-				}
 
-				SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
-				SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
-				views.put(view.getId(), view);					
-				propertyViews.add(view);
+			for (ObjectRDFType type2 : objectTypes) {
+				initObjectProperty(type1, type2);
 			}
-		}		
+			
+			for (IRI iriType2 : datatypeIRIs) {
+				initDataProperty(type1, typeFactory.getDatatype(iriType2));
+			}
+		}
 	}
-	
-	
-	
-	// view id codes that are stored in DB (starts with 0)
 
-	private static final COL_TYPE[] SITableToCOLTYPE = { 
-		null, // Class SITable 
-		COL_TYPE.OBJECT, COL_TYPE.LITERAL, COL_TYPE.STRING, COL_TYPE.INTEGER,
-		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
-		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
-		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
-		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LANG_STRING
-	};
-	
-	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
-	
-	static {
-		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
-		COLTYPEtoSITable.put(COL_TYPE.BNODE, 1);
-		// Class SITable has value 0 (skip it)
-		for (int i = 1; i < SITableToCOLTYPE.length; i++)
-			COLTYPEtoSITable.put(SITableToCOLTYPE[i], i);
+	private void initDataProperty(ObjectRDFType type1, RDFDatatype type2) {
+		String value =  type1.isBlankNode() ? "TRUE" : "FALSE";
+		String filter = "ISBNODE = " + value + " AND ";
+
+		String select, insert;
+
+		if (type2.getLanguageTag().isPresent()) {
+			/*
+			 * If the mapping is for something of type Literal we need to add IS
+			 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+			 * redundant since we have another stage in Quest where we add IS NOT
+			 * NULL for every variable in the head of a mapping.
+			 */
+			LanguageTag languageTag = type2.getLanguageTag().get();
+			// Hack: use the RDFS Literal table to get the table description
+			RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP
+					.get(RDF.LANGSTRING);
+
+			select = tableDescription.getSELECT("LANG = '" + languageTag.getFullString() +  "' AND " + filter);
+			insert = tableDescription.getINSERT("?, ?, ?, ?, " + value);
+		}
+		else {
+			RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ATTRIBUTE_TABLE_MAP
+					.get(type2.getIRI());
+
+			select = tableDescription.getSELECT(filter);
+			insert = tableDescription.getINSERT("?, ?, ?, " + value);
+		}
+
+		createViews(type1, type2, select, insert);
 	}
-	
-	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
-	private static final int OBJ_TYPE_URI = 0;
-	private static final int OBJ_TYPE_BNode = 1;
-	
-	private static int COLTYPEtoInt(COL_TYPE t) {
-		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+
+	private void initObjectProperty(ObjectRDFType type1, ObjectRDFType type2) {
+		String value1 =  type1.isBlankNode() ? "TRUE" : "FALSE";
+		String value2 =  type2.isBlankNode() ? "TRUE" : "FALSE";
+		String filter = "ISBNODE = " + value1 + " AND ";
+
+		RDBMSSIRepositoryManager.TableDescription tableDescription = RDBMSSIRepositoryManager.ROLE_TABLE;
+
+		String select = tableDescription.getSELECT(filter + "ISBNODE2 = " + value2 + " AND ");
+		String insert = tableDescription.getINSERT("?, ?, ?, " + value1 + ", " + value2);
+
+		createViews(type1, type2, select, insert);
 	}
+
+	private void createViews(ObjectRDFType type1, RDFTermType type2, String select, String insert) {
+		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
+		views.put(view.getId(), view);
+		propertyViews.add(view);
+	}
+
 	
-	private static COL_TYPE IntToCOLTYPE(int t) {
-		return (t == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
+	private static int COLTYPEtoInt(ObjectRDFType t) {
+		return t.isBlankNode()  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
 
 	
@@ -159,10 +191,10 @@ public class SemanticIndexViewsManager {
 					}
 					else {
 						// property view
-						stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
+						stm.setInt(1, colTypetoSITable.get(viewId.getType2()));
 						stm.setInt(2, idx);
 						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
-						stm.setInt(4, COLTYPEtoInt(viewId.getType2()));
+						stm.setInt(4, COLTYPEtoInt((ObjectRDFType) viewId.getType2()));
 					}
 					
 					stm.addBatch();
@@ -172,36 +204,12 @@ public class SemanticIndexViewsManager {
 		}
 	}
 
-	/**
-	 * Restoring the emptiness index from the database
-	 * @throws SQLException 
-	 */
-	
-	public void load(Connection conn) throws SQLException {
-		
-		try (Statement st = conn.createStatement()) {
-			ResultSet res = st.executeQuery(RDBMSSIRepositoryManager.emptinessIndexTable.getSELECT());
-			while (res.next()) {
-				int sitable = res.getInt(1);
-				int type1 = res.getInt(3);
-				int type2 = res.getInt(4);
-				int idx = res.getInt(2);
-				
-				COL_TYPE coltype = SITableToCOLTYPE[sitable];
-				SemanticIndexView view;
-				if (coltype == null) {
-					// class view
-					view = getView(IntToCOLTYPE(type1));
-				}
-				else {
-					// property view
-					if (coltype ==  COL_TYPE.OBJECT)
-						coltype = IntToCOLTYPE(type2);
-					view = getView(IntToCOLTYPE(type1), coltype);
-				}
-				view.addIndex(idx);
-			}
+
+	private static class UnexpectedRDFTermTypeException extends OntopInternalBugException {
+
+		private UnexpectedRDFTermTypeException(RDFTermType termType) {
+			super("Unexpected RDF term type used as property object: " + termType);
 		}
 	}
-		
+
 }

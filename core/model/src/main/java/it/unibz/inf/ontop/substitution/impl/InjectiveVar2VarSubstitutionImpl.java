@@ -3,11 +3,14 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -20,8 +23,9 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
     /**
      * Regular constructor
      */
-    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap) {
-        super(substitutionMap);
+    protected InjectiveVar2VarSubstitutionImpl(Map<Variable, Variable> substitutionMap, AtomFactory atomFactory,
+                                               TermFactory termFactory, SubstitutionFactory substitutionFactory) {
+        super(substitutionMap, atomFactory, termFactory, substitutionFactory);
         isEmpty = substitutionMap.isEmpty();
 
         /**
@@ -55,7 +59,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
                 substitutionMapBuilder.put(convertedVariable, convertedTargetTerm);
         }
 
-        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+        return substitutionFactory.getSubstitution(substitutionMapBuilder.build());
     }
 
     @Override
@@ -68,7 +72,7 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
 
         return Optional.of(newMap)
                 .filter(InjectiveVar2VarSubstitutionImpl::isInjective)
-                .map(map -> (InjectiveVar2VarSubstitution) new InjectiveVar2VarSubstitutionImpl(map));
+                .map(substitutionFactory::getInjectiveVar2VarSubstitution);
     }
 
 

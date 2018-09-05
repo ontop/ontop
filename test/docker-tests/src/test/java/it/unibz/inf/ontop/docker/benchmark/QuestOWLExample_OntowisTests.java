@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.docker.benchmark;
  */
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -214,15 +213,8 @@ public class QuestOWLExample_OntowisTests {
 		}
 		this.reasoner.dispose();
 	}
-
-	/**
-	 * @throws OWLOntologyCreationException
-	 * @throws InvalidMappingException
-	 * @throws InvalidPredicateDeclarationException 
-	 * @throws IOException 
-	 * @throws OWLException
-	 */
-	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
+	
+	private OWLConnection createStuff(boolean manualKeys) throws OWLOntologyCreationException, IOException, InvalidMappingException{
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for

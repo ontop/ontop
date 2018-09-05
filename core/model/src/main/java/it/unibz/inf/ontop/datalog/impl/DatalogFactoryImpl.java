@@ -1,26 +1,40 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
-
+@Singleton
 public class DatalogFactoryImpl implements DatalogFactory {
 
-    private static final DatalogFactory INSTANCE = new DatalogFactoryImpl();
     private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
+    private final AlgebraOperatorPredicate sparqlJoinPredicate;
+    private final AlgebraOperatorPredicate sparqlLeftjoinPredicate;
+    private final AlgebraOperatorPredicate sparqlGroupPredicate;
+    private final AlgebraOperatorPredicate sparqlHavingPredicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
-    private DatalogFactoryImpl() {
+    @Inject
+    private DatalogFactoryImpl(TypeFactory typeFactory, TermFactory termFactory) {
+        sparqlJoinPredicate = new AlgebraOperatorPredicateImpl("Join", typeFactory);
+        sparqlLeftjoinPredicate = new AlgebraOperatorPredicateImpl("LeftJoin", typeFactory);
+        sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group", typeFactory);
+        sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having", typeFactory);
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
     }
 
 
@@ -56,12 +70,12 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2);
+        return termFactory.getFunction(sparqlJoinPredicate, t1, t2);
     }
 
     @Override
     public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_JOIN, t1, t2, joinCondition);
+        return termFactory.getFunction(sparqlJoinPredicate, t1, t2, joinCondition);
     }
 
 
@@ -82,17 +96,42 @@ public class DatalogFactoryImpl implements DatalogFactory {
          */
         optionalCondition.ifPresent(joinTerms::add);
 
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, joinTerms);
+        return termFactory.getFunction(sparqlLeftjoinPredicate, joinTerms);
     }
 
     @Override
     public Function getSPARQLLeftJoin(Term t1, Term t2) {
-        return TERM_FACTORY.getFunction(DatalogAlgebraOperatorPredicates.SPARQL_LEFTJOIN, t1, t2);
+        return termFactory.getFunction(sparqlLeftjoinPredicate, t1, t2);
     }
 
     @Override
-    public String getSubqueryPredicatePrefix() {
-        return SUBQUERY_PRED_PREFIX;
+    public AlgebraOperatorPredicate getSparqlJoinPredicate() {
+        return sparqlJoinPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlLeftJoinPredicate() {
+        return sparqlLeftjoinPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlGroupPredicate() {
+        return sparqlGroupPredicate;
+    }
+
+    @Override
+    public AlgebraOperatorPredicate getSparqlHavingPredicate() {
+        return sparqlHavingPredicate;
+    }
+
+    @Override
+    public AtomPredicate getSubqueryPredicate(String suffix, int arity) {
+        return new DatalogAtomPredicate(SUBQUERY_PRED_PREFIX + suffix, arity, typeFactory);
+    }
+
+    @Override
+    public AtomPredicate getDummyPredicate(int suffix) {
+        return new DatalogAtomPredicate("dummy" + suffix, 0, typeFactory);
     }
 
 
@@ -151,7 +190,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
         Term newTerm;
         if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            newTerm = TERM_FACTORY.getVariable(variable.getName() + "_" + suff);
+            newTerm = termFactory.getVariable(variable.getName() + "_" + suff);
         }
         else if (term instanceof Function) {
             Function functionalTerm = (Function) term;
@@ -162,7 +201,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
                 newInnerTerms.add(getFreshTerm(innerTerm, suff));
             }
             Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-            Function newFunctionalTerm = TERM_FACTORY.getFunction(newFunctionSymbol, newInnerTerms);
+            Function newFunctionalTerm = termFactory.getFunction(newFunctionSymbol, newInnerTerms);
             newTerm = newFunctionalTerm;
         }
         else if (term instanceof Constant) {
@@ -174,7 +213,21 @@ public class DatalogFactoryImpl implements DatalogFactory {
         return newTerm;
     }
 
-    public static DatalogFactory getInstance() {
-        return INSTANCE;
+    /**
+     * Used for intermediate datalog rules
+     */
+    private static class DatalogAtomPredicate extends AtomPredicateImpl {
+
+        private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
+            super(name, arity, createExpectedBaseTypes(arity, typeFactory));
+        }
+
+        private static ImmutableList<TermType> createExpectedBaseTypes( int arity, TypeFactory typeFactory) {
+            TermType rootType = typeFactory.getAbstractAtomicTermType();
+            return IntStream.range(0, arity)
+                    .boxed()
+                    .map(i -> rootType)
+                    .collect(ImmutableCollectors.toList());
+        }
     }
 }

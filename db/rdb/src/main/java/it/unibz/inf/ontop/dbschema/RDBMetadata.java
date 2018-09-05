@@ -22,7 +22,10 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.*;
 
@@ -31,6 +34,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	private static final long serialVersionUID = -806363154890865756L;
 	private int parserViewCounter;
 	private final JdbcTypeMapper jdbcTypeMapper;
+	private final TypeFactory typeFactory;
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -39,23 +43,27 @@ public class RDBMetadata extends BasicDBMetadata {
 	 * DO NOT USE THIS CONSTRUCTOR -- USE MetadataExtractor METHODS INSTEAD
 	 */
 
-	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion, QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
+	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
+				QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, TermFactory termFactory,
+				TypeFactory typeFactory, DatalogFactory datalogFactory) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, atomFactory, termFactory,
+				datalogFactory, idfac);
 		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.typeFactory = typeFactory;
 	}
 
-	@Override
-	public Optional<Predicate.COL_TYPE> getColType(Attribute attribute) {
-		return Optional.of(jdbcTypeMapper.getPredicate(attribute.getType()));
-	}
 
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, tables, relations, listOfTables);
+						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory,
+						TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, tables, relations,
+				listOfTables, atomFactory, termFactory, datalogFactory, idfac
+		);
 		this.parserViewCounter = parserViewCounter;
 		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.typeFactory = typeFactory;
 	}
 	
 	/**
@@ -75,7 +83,7 @@ public class RDBMetadata extends BasicDBMetadata {
 		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 		
-		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql);
+		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getXsdStringDatatype());
 		// UGLY!!
 		add(view, relations);
 		return view;
@@ -85,6 +93,7 @@ public class RDBMetadata extends BasicDBMetadata {
 	@Override
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
-				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()), parserViewCounter, jdbcTypeMapper);
+				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
+				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getTermFactory(), typeFactory, getDatalogFactory());
 	}
 }

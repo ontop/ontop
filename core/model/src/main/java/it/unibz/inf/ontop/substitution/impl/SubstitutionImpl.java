@@ -22,11 +22,15 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.impl.*;
+import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
+import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
+import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
 import it.unibz.inf.ontop.substitution.AppendableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
 
@@ -40,13 +44,19 @@ import java.util.*;
 public class SubstitutionImpl implements AppendableSubstitution {
 
     private final Map<Variable, Term> map;
+    private final SubstitutionUtilities substitutionUtilities;
+    private final TermFactory termFactory;
 
-    public SubstitutionImpl() {
+    public SubstitutionImpl(TermFactory termFactory) {
+        this.termFactory = termFactory;
         this.map = new HashMap<>();
+        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
-    public SubstitutionImpl(Map<Variable, Term> substitutionMap) {
+    public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
+        this.termFactory = termFactory;
         this.map = substitutionMap;
+        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
     @Override
@@ -119,7 +129,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
             return composeFunctions((Function) term1, (Function) term2);
         }
 
-        Substitution s = createUnifier(term1, term2);
+        Substitution s = createUnifier(term1, term2, termFactory);
 
         // Rejected substitution (conflicts)
         if (s == null)
@@ -215,8 +225,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
-            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+            substitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            substitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
         }
 
         return true;
@@ -231,7 +241,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
      * @param term2
      * @return
      */
-    private static Substitution createUnifier(Term term1, Term term2) {
+    private static Substitution createUnifier(Term term1, Term term2, TermFactory termFactory) {
 
         if (!(term1 instanceof Variable) && !(term2 instanceof Variable)) {
 
@@ -240,7 +250,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
                     || (term1 instanceof ValueConstantImpl)
-                    || (term1 instanceof URIConstantImpl)
+                    || (term1 instanceof IRIConstantImpl)
                     || (term1 instanceof BNodeConstantImpl)
                     ) {
 
@@ -248,7 +258,7 @@ public class SubstitutionImpl implements AppendableSubstitution {
                 // BC: let's accept it, templates for Bnodes should be supported
 
                 if (term1.equals(term2))
-                    return new NeutralSubstitution();
+                    return new SubstitutionImpl(termFactory);
                 else
                     return null;
             }
@@ -272,11 +282,11 @@ public class SubstitutionImpl implements AppendableSubstitution {
         // the unifier knows about this
         if  (t2 instanceof Variable) {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
-                return new NeutralSubstitution();
+                return new SubstitutionImpl(termFactory);
             else
                 return new SingletonSubstitution(t1, t2);
         }
-        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
+        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof IRIConstantImpl)) {
             return new SingletonSubstitution(t1, t2);
         }
         else if (t2 instanceof Function) {

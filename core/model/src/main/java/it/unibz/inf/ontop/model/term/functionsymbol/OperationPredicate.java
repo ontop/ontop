@@ -21,15 +21,16 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
+import it.unibz.inf.ontop.exception.IncompatibleTermException;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
-public interface OperationPredicate extends BuiltinPredicate {
-    /**
-     * TODO: generalize
-     */
-    TermTypeInferenceRule getTermTypeInferenceRule();
+public interface OperationPredicate extends FunctionSymbol {
 
-    ImmutableList<Optional<COL_TYPE>> getArgumentTypes();
+
+    Optional<TermType> inferType(ImmutableList<? extends ImmutableTerm> terms) throws IncompatibleTermException;
+
+    Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> actualArgumentTypes);
 }

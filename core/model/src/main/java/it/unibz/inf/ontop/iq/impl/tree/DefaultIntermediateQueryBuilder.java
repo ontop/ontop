@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.impl.IntermediateQueryImpl;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.validation.IntermediateQueryValidator;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 import java.util.Optional;
 
@@ -37,6 +38,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     private final ExecutorRegistry executorRegistry;
     private final IntermediateQueryFactory iqFactory;
     private final IntermediateQueryValidator validator;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final OntopModelSettings settings;
     private DistinctVariableOnlyDataAtom projectionAtom;
     private QueryTree tree;
@@ -44,14 +46,16 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
 
     @AssistedInject
     protected DefaultIntermediateQueryBuilder(@Assisted DBMetadata dbMetadata,
-                                            @Assisted ExecutorRegistry executorRegistry,
-                                            IntermediateQueryFactory iqFactory,
-                                            IntermediateQueryValidator validator,
-                                            OntopModelSettings settings) {
+                                              @Assisted ExecutorRegistry executorRegistry,
+                                              IntermediateQueryFactory iqFactory,
+                                              IntermediateQueryValidator validator,
+                                              CoreUtilsFactory coreUtilsFactory,
+                                              OntopModelSettings settings) {
         this.dbMetadata = dbMetadata;
         this.executorRegistry = executorRegistry;
         this.iqFactory = iqFactory;
         this.validator = validator;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.settings = settings;
         tree = null;
         canEdit = true;
@@ -139,7 +143,7 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
-        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree));
+        IntermediateQuery query = buildQuery(dbMetadata, projectionAtom, new DefaultQueryTreeComponent(tree, coreUtilsFactory));
         canEdit = false;
         return query;
     }
@@ -178,6 +182,11 @@ public class DefaultIntermediateQueryBuilder implements IntermediateQueryBuilder
             throws IntermediateQueryBuilderException {
         checkInitialization();
         return tree.getChildren(node);
+    }
+
+    @Override
+    public boolean contains(QueryNode node) {
+        return tree.contains(node);
     }
 
     @Override

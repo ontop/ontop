@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.iq.executor.substitution.DescendingPropagationTools;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeSubstitutionException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -26,9 +26,6 @@ import it.unibz.inf.ontop.iq.proposal.PullVariableOutOfDataNodeProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 
 import java.util.Optional;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.ATOM_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -66,10 +63,17 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
     }
 
     private final IntermediateQueryFactory iqFactory;
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PullVariableOutOfDataNodeExecutorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
+                                                  TermFactory termFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -99,17 +103,8 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
         QueryNode newNode = propagateUpNewEqualities(treeComponent, focusNodeUpdate.newFocusNode,
                 focusNodeUpdate.newEqualities);
 
-        if (focusNodeUpdate.optionalSubstitution.isPresent()) {
-            try {
-                DescendingPropagationTools.propagateSubstitutionDown(focusNodeUpdate.newFocusNode,
-                        focusNodeUpdate.optionalSubstitution.get(), query, treeComponent);
-            } catch (EmptyQueryException e) {
-                throw new IllegalStateException("EmptyQueryExceptions are not expected when pulling the variables out of data nodes");
-            }
-        }
-
         // return new NodeCentricOptimizationResultsImpl<>(query, focusNodeUpdate.newFocusNode);
-        return new NodeCentricOptimizationResultsImpl(query, query.getNextSibling(newNode),
+        return new NodeCentricOptimizationResultsImpl<>(query, query.getNextSibling(newNode),
                 query.getParent(newNode));
     }
 
@@ -136,7 +131,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
             else if (ancestorNode instanceof FilterNode) {
                 FilterNode originalFilterNode = (FilterNode) ancestorNode;
 
-                ImmutableExpression newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(
+                ImmutableExpression newFilteringCondition = immutabilityTools.foldBooleanExpressions(
                         originalFilterNode.getFilterCondition(), newEqualities).get();
 
                 FilterNode newFilterNode = originalFilterNode.changeFilterCondition(newFilteringCondition);
@@ -171,13 +166,13 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
     /**
      * TODO: explain
      */
-    private static void updateNewJoinLikeNode(QueryTreeComponent treeComponent, JoinLikeNode originalNode,
+    private void updateNewJoinLikeNode(QueryTreeComponent treeComponent, JoinLikeNode originalNode,
                                               ImmutableExpression newEqualities) {
 
         Optional<ImmutableExpression> optionalOriginalFilterCondition = originalNode.getOptionalFilterCondition();
         ImmutableExpression newFilteringCondition;
         if (optionalOriginalFilterCondition.isPresent()) {
-            newFilteringCondition = ImmutabilityTools.foldBooleanExpressions(optionalOriginalFilterCondition.get(),
+            newFilteringCondition = immutabilityTools.foldBooleanExpressions(optionalOriginalFilterCondition.get(),
                     newEqualities).get();
         }
         else {
@@ -277,10 +272,10 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
 
         ImmutableList.Builder<ImmutableExpression> equalityBuilder = ImmutableList.builder();
         for (VariableRenaming renaming : renamingMap.values()) {
-            equalityBuilder.add(TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
+            equalityBuilder.add(termFactory.getImmutableExpression(ExpressionOperation.EQ,
                     renaming.originalVariable, renaming.newVariable));
         }
-        return ImmutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();
+        return immutabilityTools.foldBooleanExpressions(equalityBuilder.build()).get();
     }
 
     /**
@@ -302,44 +297,7 @@ public class PullVariableOutOfDataNodeExecutorImpl implements PullVariableOutOfD
                 newArgumentBuilder.add(formerArguments.get(i));
             }
         }
-        return ATOM_FACTORY.getDataAtom(formerAtom.getPredicate(), newArgumentBuilder.build());
+        return atomFactory.getDataAtom(formerAtom.getPredicate(), newArgumentBuilder.build());
     }
-
-    /**
-     * TODO: explain
-     */
-//    private FocusNodeUpdate generateUpdate4DelimiterCommutativeJoinNode(DelimiterCommutativeJoinNode originalFocusNode,
-//                                                                        ImmutableMap<Integer, VariableRenaming> renamingMap)
-//            throws QueryNodeSubstitutionException {
-//
-//        /**
-//         * Generates an injective substitution to be propagated
-//         */
-//        ImmutableMap.Builder<Variable, Variable> variableBuilder = ImmutableMap.builder();
-//        for (VariableRenaming renaming : renamingMap.values()) {
-//            variableBuilder.put(renaming.originalVariable, renaming.newVariable);
-//        }
-//        InjectiveVar2VarSubstitution substitution = new InjectiveVar2VarSubstitutionImpl(variableBuilder.build());
-//
-//        SubstitutionResults<? extends DelimiterCommutativeJoinNode> substitutionResults =
-//                originalFocusNode.applyDescendingSubstitution(substitution);
-//
-//        Optional<? extends DelimiterCommutativeJoinNode> optionalNewFocusNode = substitutionResults.getOptionalNewNode();
-//        Optional<? extends ImmutableSubstitution<? extends VariableOrGroundTerm>> optionalNewSubstitution =
-//                substitutionResults.getSubstitutionToPropagate();
-//
-//        if (!optionalNewFocusNode.isPresent()) {
-//            throw new IllegalStateException("A DelimiterCommutativeJoinNode should remain needed " +
-//                    "after applying a substitution");
-//        }
-//        else if ((!optionalNewSubstitution.isPresent()) || (!substitution.equals(optionalNewSubstitution.get()))) {
-//            throw new IllegalStateException("This var-2-var substitution is not expected to be changed" +
-//                    "after being applied to a DelimiterCommutativeJoinNode.");
-//        }
-//
-//        return new FocusNodeUpdate(optionalNewFocusNode.get(), Optional.of(substitution),
-//                convertIntoEqualities(renamingMap));
-//    }
-
 
 }

@@ -12,7 +12,10 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +41,9 @@ public class JDBCConnector implements DBConnector {
 
     private final DBMetadata dbMetadata;
     private final InputQueryFactory inputQueryFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
 
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
@@ -45,13 +51,19 @@ public class JDBCConnector implements DBConnector {
                           @Nullable IRIDictionary iriDictionary,
                           JDBCConnectionPool connectionPool,
                           InputQueryFactory inputQueryFactory,
+                          TermFactory termFactory,
+                          TypeFactory typeFactory,
+                          RDF rdfFactory,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
         this.dbMetadata = dbMetadata;
         this.inputQueryFactory = inputQueryFactory;
+        this.termFactory = termFactory;
         this.settings = settings;
         this.iriDictionary = Optional.ofNullable(iriDictionary);
         this.connectionPool = connectionPool;
+        this.typeFactory = typeFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     /**
@@ -113,7 +125,7 @@ public class JDBCConnector implements DBConnector {
     public OntopConnection getConnection() throws OntopConnectionException {
 
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary,
-                dbMetadata, inputQueryFactory, settings);
+                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, settings);
     }
 
 

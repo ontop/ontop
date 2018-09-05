@@ -1,22 +1,33 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.io.IOException;
@@ -26,8 +37,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  *
@@ -63,6 +72,7 @@ public class OBDAModel {
     private final OBDADataSource source;
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
+    private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
 
@@ -71,12 +81,34 @@ public class OBDAModel {
     private final List<OBDAMappingListener> mappingListeners;
 
     private static final OBDADataSourceFactory DS_FACTORY = OBDADataSourceFactoryImpl.getInstance();
+    private final AtomFactory atomFactory;
+    private final TermFactory termFactory;
+    private final TargetAtomFactory targetAtomFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
+    private final JdbcTypeMapper jdbcTypeMapper;
+    private final RDF rdfFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory, PrefixDocumentFormat owlPrefixManager) {
+                     SQLPPMappingFactory ppMappingFactory,
+                     PrefixDocumentFormat owlPrefixManager,
+                     AtomFactory atomFactory, TermFactory termFactory,
+                     TypeFactory typeFactory, DatalogFactory datalogFactory,
+                     TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
+                     JdbcTypeMapper jdbcTypeMapper, RDF rdfFactory) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
+        this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
+        this.owlPrefixManager = owlPrefixManager;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
+        this.targetAtomFactory = targetAtomFactory;
+        this.substitutionFactory = substitutionFactory;
+        this.jdbcTypeMapper = jdbcTypeMapper;
+        this.rdfFactory = rdfFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -96,9 +128,10 @@ public class OBDAModel {
             UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                     triplesMaps.stream()
                             .flatMap(ax -> ax.getTargetAtoms().stream())
-                            .flatMap(atom -> atom.getArguments().stream())
+                            .flatMap(targetAtom -> targetAtom.getSubstitution().getImmutableMap().values().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t));
+                            .map(t -> (ImmutableFunctionalTerm) t),
+                    termFactory);
 
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
@@ -161,28 +194,50 @@ public class OBDAModel {
     }
 
 
-    public int renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
+    public int changePredicateIri(IRI removedPredicateIri, IRI newPredicatIri) {
         AtomicInteger counter = new AtomicInteger();
 
         triplesMapMap = triplesMapMap.entrySet().stream()
                 .collect(collectTriplesMaps(
                         Map.Entry::getKey,
-                        e -> renamePredicate(e.getValue(), removedPredicate, newPredicate, counter)));
+                        e -> changePredicateIri(e.getValue(), removedPredicateIri, newPredicatIri, counter)));
 
         return counter.get();
     }
 
-    private SQLPPTriplesMap renamePredicate(SQLPPTriplesMap formerTriplesMap,
-                                            Predicate removedPredicate, Predicate newPredicate,
-                                            AtomicInteger counter) {
+    private SQLPPTriplesMap changePredicateIri(SQLPPTriplesMap formerTriplesMap,
+                                               IRI removedIRI, IRI newIRI,
+                                               AtomicInteger counter) {
         int formerCount = counter.get();
 
-        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
+        ImmutableList<TargetAtom> newTargetAtoms = formerTriplesMap.getTargetAtoms().stream()
                 .map(a -> {
-                    if (a.getFunctionSymbol().equals(removedPredicate)) {
+                    if (a.getPredicateIRI()
+                            .filter(i -> i.equals(removedIRI))
+                            .isPresent()) {
+
+                        DistinctVariableOnlyDataAtom projectionAtom = a.getProjectionAtom();
+                        RDFAtomPredicate predicate = (RDFAtomPredicate)projectionAtom.getPredicate();
+
+                        boolean isClass = predicate.getClassIRI(a.getSubstitutedTerms())
+                                .isPresent();
+
+                        Variable predicateVariable = isClass
+                                ? predicate.getObject(projectionAtom.getArguments())
+                                : predicate.getProperty(projectionAtom.getArguments());
+
+                        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
+                                a.getSubstitution().getImmutableMap().entrySet().stream()
+                                        .map(e -> e.getKey().equals(predicateVariable)
+                                                ? Maps.immutableEntry(predicateVariable,
+                                                // We build a ground term for the IRI
+                                                (ImmutableTerm) termFactory.getUriTemplate(
+                                                        termFactory.getConstantLiteral(newIRI.getIRIString())))
+                                                : e)
+                                        .collect(ImmutableCollectors.toMap()));
+
                         counter.incrementAndGet();
-                        return  TERM_FACTORY.getImmutableFunctionalTerm(newPredicate,
-                                ImmutableList.copyOf(a.getArguments()));
+                        return  targetAtomFactory.getTargetAtom(projectionAtom, newSubstitution);
                     }
                     return a;
                 })
@@ -206,12 +261,12 @@ public class OBDAModel {
         }
     }
 
-    public void deletePredicate(Predicate removedPredicate) {
+    public void deletePredicateIRI(IRI removedPredicateIRI) {
 
         triplesMapMap = triplesMapMap.values().stream()
-                .filter(m -> mustBePreserved(m, removedPredicate, new AtomicInteger()))
-                .map(m -> updateMapping(m, removedPredicate, new AtomicInteger()))
-               // .map(m -> deletePredicate(m, removedPredicate, counter))
+                .filter(m -> mustBePreserved(m, removedPredicateIRI, new AtomicInteger()))
+                .map(m -> updateMapping(m, removedPredicateIRI, new AtomicInteger()))
+               // .map(m -> deletePredicateIRI(m, removedPredicate, counter))
                 //.filter(Optional::isPresent)
                 //.map(Optional::get)
                 .collect(collectTriplesMaps(
@@ -222,11 +277,11 @@ public class OBDAModel {
 
     }
 
-    private boolean mustBePreserved(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
+    private boolean mustBePreserved(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI,
                                     AtomicInteger counter) {
         int initialCount = counter.get();
 
-        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicate, counter);
+        ImmutableList<TargetAtom> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicateIRI, counter);
 
         if (counter.get() > initialCount) {
             if (newTargetAtoms.isEmpty()) {
@@ -240,10 +295,12 @@ public class OBDAModel {
             return true;
     }
 
-    private ImmutableList<ImmutableFunctionalTerm> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate, AtomicInteger counter) {
+    private ImmutableList<TargetAtom> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI, AtomicInteger counter) {
         return formerTriplesMap.getTargetAtoms().stream()
                 .filter(a -> {
-                    if (a.getFunctionSymbol().equals(removedPredicate)) {
+                    if (a.getPredicateIRI()
+                            .map(i -> i.equals(removedPredicateIRI))
+                            .isPresent()) {
                         counter.incrementAndGet();
                         return false;
                     }
@@ -253,11 +310,11 @@ public class OBDAModel {
     }
 
 
-    private SQLPPTriplesMap updateMapping(SQLPPTriplesMap formerTriplesMap, Predicate removedPredicate,
+    private SQLPPTriplesMap updateMapping(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI,
                                                       AtomicInteger counter) {
         int initialCount = counter.get();
 
-        ImmutableList<ImmutableFunctionalTerm> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicate, counter);
+        ImmutableList<TargetAtom> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicateIRI, counter);
 
         if (counter.get() > initialCount) {
             if (newTargetAtoms.isEmpty()) {
@@ -354,7 +411,7 @@ public class OBDAModel {
         }
     }
 
-    public void updateTargetQueryMapping(String id, ImmutableList<ImmutableFunctionalTerm> targetQuery) {
+    public void updateTargetQueryMapping(String id, ImmutableList<TargetAtom> targetQuery) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(id);
 
         if (formerTriplesMap != null) {
@@ -426,5 +483,33 @@ public class OBDAModel {
                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                 },
                 LinkedHashMap::new);
+    }
+
+    public AtomFactory getAtomFactory() {
+        return atomFactory;
+    }
+
+    public TermFactory getTermFactory() {
+        return termFactory;
+    }
+
+    public TypeFactory getTypeFactory() {
+        return typeFactory;
+    }
+
+    public DatalogFactory getDatalogFactory() {
+        return datalogFactory;
+    }
+
+    public JdbcTypeMapper getJDBCTypeMapper() {
+        return jdbcTypeMapper;
+    }
+
+    public TargetAtomFactory getTargetAtomFactory() {
+        return targetAtomFactory;
+    }
+
+    public RDF getRdfFactory() {
+        return rdfFactory;
     }
 }

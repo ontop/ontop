@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.owlapi.utils;
  */
 
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL.TranslationException;
 import org.semanticweb.owlapi.model.*;
@@ -42,19 +41,24 @@ import java.util.NoSuchElementException;
 public class OWLAPIABoxIterator implements Iterator<Assertion> {
 
 	private final Iterator<OWLOntology> ontologiesIterator;
-	
+
 	private Iterator<OWLAxiom> owlaxiomIterator = null;
 	private Assertion next = null;
 
 	private final ClassifiedTBox tbox;
-    /**
-     * @param ontologies used only for data (ABox)
-     * @param tbox provided the vocabulary for created ABox assertions
-     */
+	private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
-	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ClassifiedTBox tbox) {
+	/**
+	 * @param ontologies used only for data (ABox)
+     * @param tbox provided the vocabulary for created ABox assertions
+	 * @param owlapiTranslator
+	 */
+
+	public OWLAPIABoxIterator(Collection<OWLOntology> ontologies, ClassifiedTBox tbox,
+							  OWLAPITranslatorOWL2QL owlapiTranslator) {
 	    this.tbox = tbox;
 		ontologiesIterator = ontologies.iterator();
+		this.owlapiTranslator = owlapiTranslator;
 		if (ontologiesIterator.hasNext()) 
 			owlaxiomIterator = ontologiesIterator.next().getAxioms().iterator();
 	}
@@ -139,14 +143,14 @@ public class OWLAPIABoxIterator implements Iterator<Assertion> {
 	}
 	
 	private Assertion translate(OWLAxiom axiom) {
-		
+
 		try {
 			if (axiom instanceof OWLClassAssertionAxiom)
-                return OWLAPITranslatorOWL2QL.translate((OWLClassAssertionAxiom)axiom, tbox.classes());
+                return owlapiTranslator.translate((OWLClassAssertionAxiom)axiom, tbox.classes());
 			else if (axiom instanceof OWLObjectPropertyAssertionAxiom)
-                return OWLAPITranslatorOWL2QL.translate((OWLObjectPropertyAssertionAxiom)axiom, tbox.objectProperties());
+                return owlapiTranslator.translate((OWLObjectPropertyAssertionAxiom)axiom, tbox.objectProperties());
 			else if (axiom instanceof OWLDataPropertyAssertionAxiom)
-                return OWLAPITranslatorOWL2QL.translate((OWLDataPropertyAssertionAxiom)axiom, tbox.dataProperties());
+                return owlapiTranslator.translate((OWLDataPropertyAssertionAxiom)axiom, tbox.dataProperties());
 		}
 		catch (TranslationException | InconsistentOntologyException e) {
 			return null;

@@ -1,77 +1,57 @@
 package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.areVariablesDistinct;
-import static it.unibz.inf.ontop.model.atom.impl.DataAtomTools.isVariableOnly;
+import java.util.stream.IntStream;
 
 
 public class AtomFactoryImpl implements AtomFactory {
 
-    private static final AtomFactory INSTANCE = new AtomFactoryImpl();
+    private final TriplePredicate triplePredicate;
+    private final QuadPredicate quadPredicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
 
-    private AtomFactoryImpl() {
-    }
-
-    public static AtomFactory getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(String name, int arity) {
-        return new AtomPredicateImpl(name, arity);
-    }
-
-    @Override
-    public AtomPredicate getAtomPredicate(Predicate datalogPredicate) {
-        return new AtomPredicateImpl(datalogPredicate);
-    }
-
-    @Override
-    public DataAtom getDataAtom(AtomPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        /**
-         * NB: A GroundDataAtom is a DistinctVariableDataAtom
-         */
-        if(areVariablesDistinct(arguments)) {
-            return getDistinctVariableDataAtom(predicate, arguments);
-        }
-        else if (isVariableOnly(arguments)) {
-            return new VariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-        }
-        else {
-            return new DataAtomImpl(predicate, arguments);
-        }
+    @Inject
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory) {
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        triplePredicate = new TriplePredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType()),
+                rdfFactory);
+        quadPredicate = new QuadPredicateImpl(ImmutableList.of(
+                typeFactory.getAbstractObjectRDFType(),
+                typeFactory.getIRITermType(),
+                typeFactory.getAbstractRDFTermType(),
+                typeFactory.getIRITermType()),
+                rdfFactory);
     }
 
     @Override
-    public DataAtom getDataAtom(AtomPredicate predicate, VariableOrGroundTerm... terms) {
+    public AtomPredicate getRDFAnswerPredicate(int arity) {
+        ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
+                .map(i -> typeFactory.getAbstractRDFTermType())
+                .collect(ImmutableCollectors.toList());
+        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, arity, defaultBaseTypes);
+    }
+
+    @Override
+    public <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, ImmutableList<? extends VariableOrGroundTerm> arguments) {
+        return new DataAtomImpl<>(predicate, arguments);
+    }
+
+    @Override
+    public <P extends AtomPredicate> DataAtom<P> getDataAtom(P predicate, VariableOrGroundTerm... terms) {
         return getDataAtom(predicate, ImmutableList.copyOf(terms));
-    }
-
-    @Override
-    public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate,
-                                                                ImmutableList<? extends VariableOrGroundTerm> arguments) {
-        if (isVariableOnly(arguments)) {
-            return new DistinctVariableOnlyDataAtomImpl(predicate, (ImmutableList<Variable>)(ImmutableList<?>)arguments);
-        }
-        else if (GroundTermTools.areGroundTerms(arguments)) {
-            return new GroundDataAtomImpl(predicate, (ImmutableList<GroundTerm>)(ImmutableList<?>)arguments);
-        }
-        else {
-            return new NonGroundDistinctVariableDataAtomImpl(predicate, arguments);
-        }
-    }
-
-    @Override
-    public DistinctVariableDataAtom getDistinctVariableDataAtom(AtomPredicate predicate, VariableOrGroundTerm... arguments) {
-        return getDistinctVariableDataAtom(predicate, ImmutableList.copyOf(arguments));
     }
 
     @Override
@@ -85,28 +65,73 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
-        return getVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
+    public Function getMutableTripleAtom(Term subject, Term property, Term object) {
+        return termFactory.getFunction(triplePredicate, subject, property, object);
     }
 
     @Override
-    public VariableOnlyDataAtom getVariableOnlyDataAtom(AtomPredicate predicate, ImmutableList<Variable> arguments) {
-        if (areVariablesDistinct(arguments)) {
-            return new DistinctVariableOnlyDataAtomImpl(predicate, arguments);
-        }
-        else {
-            return new VariableOnlyDataAtomImpl(predicate, arguments);
-        }
+    public Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object) {
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, propertyIRI, object);
     }
 
     @Override
-    public Function getTripleAtom(Term subject, Term predicate, Term object) {
-        return TERM_FACTORY.getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+    public Function getMutableTripleBodyAtom(Term subject, IRI classIRI) {
+        // At the moment, no distinction between body and head atoms (this will change)
+        return getMutableTripleHeadAtom(subject, classIRI);
     }
 
     @Override
-    public ImmutableFunctionalTerm getImmutableTripleAtom(ImmutableTerm subject, ImmutableTerm predicate,
-                                                          ImmutableTerm object) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
+    public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
+        return getMutableTripleAtom(
+                subject,
+                convertIRIIntoFunction(propertyIRI),
+                object);
+    }
+
+    @Override
+    public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
+        return getMutableTripleAtom(
+                subject,
+                convertIRIIntoFunction(RDF.TYPE),
+                convertIRIIntoFunction(classIRI));
+    }
+
+    private Function convertIRIIntoFunction(IRI iri) {
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    }
+
+    private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
+        return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object) {
+        return getDistinctVariableOnlyDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                            VariableOrGroundTerm object) {
+        return getDataAtom(triplePredicate, subject, property, object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
+                                                            VariableOrGroundTerm object) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, convertIRIIntoGroundFunctionalTerm(propertyIRI), object);
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoGroundFunctionalTerm(classIRI));
+    }
+
+    @Override
+    public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
+                                                            Variable namedGraph) {
+        return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
     }
 }

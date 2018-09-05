@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -32,12 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import junit.framework.TestCase;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
-//import com.hp.hpl.jena.iri.IRIFactory;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 
 public class ThetaGenerationTest extends TestCase {
@@ -62,17 +60,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("x");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,17 +86,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			SingletonSubstitution s0 = s.get(0);
@@ -113,6 +111,10 @@ public class ThetaGenerationTest extends TestCase {
 		}
 	}
 
+	private static AtomPredicate createClassLikePredicate(String name) {
+		return DATALOG_FACTORY.getSubqueryPredicate(name, 1);
+	}
+
 	//A(x),A('y')
 	public void test_3(){
 
@@ -120,17 +122,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			SingletonSubstitution s0 = s.get(0);
@@ -184,17 +186,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getVariable("x");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			SingletonSubstitution s0 = s.get(0);
@@ -212,17 +214,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getConstantLiteral("y");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		
 	}
@@ -266,17 +268,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getConstantLiteral("x");
 			Term t1 = TERM_FACTORY.getConstantLiteral("y");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(null, s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -292,19 +294,19 @@ public class ThetaGenerationTest extends TestCase {
 			Term t2 = TERM_FACTORY.getVariable("y");
 			List<Term> vars = new Vector<Term>();
 			vars.add(t2);
-			Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+			Predicate fs = new OntopModelTestPredicate("p", vars.size());
 			FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(ot);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(null, s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -318,21 +320,21 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -342,21 +344,21 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -376,25 +378,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		Function ot1 = TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -404,25 +406,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(0, s.size());
 	}
 
@@ -432,25 +434,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -467,27 +469,27 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -497,25 +499,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getPredicate("A", 1);
+		Predicate pred1 = new OntopModelTestPredicate("A", 1);
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getPredicate("A", 1);
+		Predicate pred2 = new OntopModelTestPredicate("A", 1);
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -532,27 +534,27 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -562,25 +564,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -593,25 +595,25 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		vars1.add(t3);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot1);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -622,21 +624,21 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("x");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -646,17 +648,17 @@ public class ThetaGenerationTest extends TestCase {
 		Term t = TERM_FACTORY.getVariable("x");
 		List<Term> vars = new Vector<Term>();
 		vars.add(t);
-		Predicate fs = TERM_FACTORY.getPredicate("p", vars.size());
+		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		Function atom1 = TERM_FACTORY.getFunction(pred1, t2);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		Function atom2 = TERM_FACTORY.getFunction(pred2, ot);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -676,25 +678,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("x");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -704,25 +706,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -739,27 +741,27 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getVariable("y");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -769,25 +771,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		SingletonSubstitution sub = s.get(0);
@@ -804,27 +806,27 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		Term t3 = TERM_FACTORY.getVariable("z");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
 		vars2.add(t3);
-		Predicate fs2 = TERM_FACTORY.getPredicate("p", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("p", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -834,25 +836,25 @@ public class ThetaGenerationTest extends TestCase {
 		Term t1 = TERM_FACTORY.getVariable("x");
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -865,25 +867,25 @@ public class ThetaGenerationTest extends TestCase {
 		List<Term> vars1 = new Vector<Term>();
 		vars1.add(t1);
 		vars1.add(t3);
-		Predicate fs1 = TERM_FACTORY.getPredicate("p", vars1.size());
+		Predicate fs1 = new OntopModelTestPredicate("p", vars1.size());
 		FunctionalTermImpl ot1 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs1, vars1);
 		Term t2 = TERM_FACTORY.getConstantLiteral("123");
 		List<Term> vars2 = new Vector<Term>();
 		vars2.add(t2);
-		Predicate fs2 = TERM_FACTORY.getPredicate("q", vars2.size());
+		Predicate fs2 = new OntopModelTestPredicate("q", vars2.size());
 		FunctionalTermImpl ot2 =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs2, vars2);
 
-		Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred1 = createClassLikePredicate("A");
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(ot2);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-		Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+		Predicate pred2 = createClassLikePredicate("A");
 		List<Term> terms2 = new Vector<Term>();
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+		Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -896,17 +898,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("w1");
 			Term t2 = TERM_FACTORY.getVariable("w2");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -923,17 +925,17 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getVariable("x");
 			Term t2 = TERM_FACTORY.getVariable("w1");
 
-			Predicate pred1 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred1 = createClassLikePredicate("A");
 			List<Term> terms1 = new Vector<Term>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
-			Predicate pred2 = TERM_FACTORY.getClassPredicate("A");
+			Predicate pred2 = createClassLikePredicate("A");
 			List<Term> terms2 = new Vector<Term>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<SingletonSubstitution> s = getMGUAsVector(UnifierUtilities.getMGU(atom1, atom2));
+			Vector<SingletonSubstitution> s = getMGUAsVector(UNIFIER_UTILITIES.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();

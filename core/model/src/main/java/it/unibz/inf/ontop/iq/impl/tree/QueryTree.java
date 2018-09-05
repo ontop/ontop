@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -47,8 +48,6 @@ public interface QueryTree {
 
     void insertParent(QueryNode childNode, QueryNode newParentNode, Optional<BinaryOrderedOperatorNode.ArgumentPosition> optionalPosition) throws IllegalTreeUpdateException;
 
-    ImmutableSet<EmptyNode> getEmptyNodes();
-
     ImmutableSet<TrueNode> getTrueNodes();
 
     QueryNode replaceNodeByChild(QueryNode parentNode,
@@ -68,5 +67,5 @@ public interface QueryTree {
 
 
 
-    int getVersionNumber();
+    UUID getVersionNumber();
 }

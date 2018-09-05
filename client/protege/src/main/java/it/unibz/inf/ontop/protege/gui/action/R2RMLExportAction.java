@@ -94,12 +94,12 @@ public class R2RMLExportAction extends ProtegeAction {
 
                     final File file = fc.getSelectedFile();
 
-                    Thread th = new Thread("Bootstrapper Action Thread"){
+                    Thread th = new Thread("R2RML Export Action Thread"){
                         @Override
                         public void run() {
                             try {
                                 OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-                                        "Bootstrapping ontology and mappings...", workspace);
+                                        "Exporting the mapping to R2RML...", workspace);
                                 R2RMLExportThread t = new R2RMLExportThread();
                                 monitor.addProgressListener(t);
                                 monitor.start();
@@ -139,7 +139,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 throws Exception {
 
             SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
-                    modelManager.getActiveOntology());
+                    modelManager.getActiveOntology(), obdaModel.getRdfFactory());
             writer.write(file);
         }
 

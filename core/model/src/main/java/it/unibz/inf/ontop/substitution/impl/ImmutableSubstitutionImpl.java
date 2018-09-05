@@ -3,11 +3,10 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.GroundTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -22,7 +21,10 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     private final ImmutableMap<Variable, T> map;
 
-    protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap) {
+    protected ImmutableSubstitutionImpl(ImmutableMap<Variable, ? extends T> substitutionMap,
+                                        AtomFactory atomFactory, TermFactory termFactory,
+                                        SubstitutionFactory substitutionFactory) {
+        super(atomFactory, termFactory, substitutionFactory);
         this.map = (ImmutableMap<Variable, T>) substitutionMap;
 
         if (substitutionMap.entrySet().stream()
@@ -59,11 +61,6 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
     }
 
     @Override
-    public final ImmutableMap<Variable, Term> getMap() {
-        return (ImmutableMap<Variable, Term>)(ImmutableMap<Variable, ?>) map;
-    }
-
-    @Override
     public ImmutableTerm applyToVariable(Variable variable) {
         if (map.containsKey(variable))
             return map.get(variable);
@@ -78,18 +75,18 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
                         e.getKey(), (Variable) e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new Var2VarSubstitutionImpl(newMap);
+        return substitutionFactory.getVar2VarSubstitution(newMap);
     }
 
     @Override
-    public ImmutableSubstitution<GroundTerm> getVar2GroundTermFragment() {
+    public ImmutableSubstitution<GroundTerm> getGroundTermFragment() {
         ImmutableMap<Variable, GroundTerm> newMap = map.entrySet().stream()
                 .filter(e -> e.getValue() instanceof GroundTerm)
                 .map(e -> (Map.Entry<Variable, GroundTerm>) new AbstractMap.SimpleEntry<>(
                         e.getKey(), (GroundTerm) e.getValue()))
                 .collect(ImmutableCollectors.toMap());
 
-        return new ImmutableSubstitutionImpl<>(newMap);
+        return substitutionFactory.getSubstitution(newMap);
     }
 
     @Override
@@ -99,9 +96,22 @@ public class ImmutableSubstitutionImpl<T extends ImmutableTerm> extends Abstract
 
     @Override
     protected ImmutableSubstitution<T> constructNewSubstitution(ImmutableMap<Variable, T> map) {
-        return new ImmutableSubstitutionImpl<>(map);
+        return substitutionFactory.getSubstitution(map);
     }
 
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ImmutableSubstitution) {
+            return map.equals(((ImmutableSubstitution) o).getImmutableMap());
+        }
+        else
+            return false;
+    }
 
 
 }

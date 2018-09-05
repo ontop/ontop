@@ -22,9 +22,10 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.ValueConstant;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
 public class ValueConstantImpl implements ValueConstant {
@@ -32,9 +33,8 @@ public class ValueConstantImpl implements ValueConstant {
 	private static final long serialVersionUID = 8031338451909170400L;
 
 	private final String value;
-	private final String language;
-	private final Predicate.COL_TYPE type;
 	private final String string;
+	private final RDFDatatype termType;
 
 	/**
 	 * The default constructor.
@@ -44,53 +44,17 @@ public class ValueConstantImpl implements ValueConstant {
 	 * @param type
 	 *            the constant type.
 	 */
-	protected ValueConstantImpl(String value, Predicate.COL_TYPE type) {
+	protected ValueConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
-		this.language = null;
-		this.type = type;
-		this.string = getStringRepresentation();
+		this.termType = type;
+		this.string = "\"" + value + "\"";
 	}
 
-	protected ValueConstantImpl(String value, String language) {
+	protected ValueConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {
 		this.value = value;
-		this.language = language;
-		this.type = COL_TYPE.LANG_STRING;
-		this.string = getStringRepresentation();
+		this.termType = typeFactory.getLangTermType(language);
+		this.string = "\"" + value + "@" + language + "\"";
 	}
-	
-	private String getStringRepresentation() {
-		StringBuilder sb = new StringBuilder();
-		
-		switch (type) {
-			case LITERAL:
-			case STRING:
-            case DATE:
-            case TIME:
-            case YEAR:
-			case DATETIME:
-			case DATETIME_STAMP:
-				sb.append("\"").append(value).append("\""); 
-				break;
-			case INTEGER:
-            case LONG:
-			case DECIMAL:
-			case DOUBLE:
-			case BOOLEAN: 
-				sb.append(value); 
-				break;
-			case LANG_STRING:
-				sb.append("\"").append(value);
-				if (language != null && !language.isEmpty()) {
-					sb.append("@").append(language);
-				}
-				sb.append("\""); 
-				break;
-			default:
-				sb.append(value);
-		}
-		return sb.toString();	
-	}
-
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -127,13 +91,8 @@ public class ValueConstantImpl implements ValueConstant {
 	}
 
 	@Override
-	public String getLanguage() {
-		return language;
-	}
-
-	@Override
-	public Predicate.COL_TYPE getType() {
-		return type;
+	public RDFDatatype getType() {
+		return termType;
 	}
 
 	@Override

@@ -20,33 +20,62 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import java.awt.*;
 import java.util.List;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataTypeComboBox extends JComboBox {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final Predicate[] SUPPORTED_DATATYPES = getQuestDataTypePredicates();
 	
-	public DataTypeComboBox() {
-		super(SUPPORTED_DATATYPES);
+	public DataTypeComboBox(TermFactory termFactory) {
+		super(getQuestDataTypePredicates(termFactory));
 		setRenderer(new DataTypeRenderer());
 		setPreferredSize(new Dimension(130, 23));
 		setSelectedIndex(-1);
 	}
 	
-	private static Predicate[] getQuestDataTypePredicates() {
-		
-		List<Predicate> prediacteList = TYPE_FACTORY.getDatatypePredicates();
+	private static Predicate[] getQuestDataTypePredicates(TermFactory termFactory) {
+
+		// TODO: complete?
+		List<Predicate> prediacteList = Stream.of(
+				XSD.BASE64BINARY,
+				XSD.BOOLEAN,
+				XSD.BYTE,
+				XSD.DATE,
+				XSD.DATETIME,
+				XSD.DATETIMESTAMP,
+				XSD.DECIMAL,
+				XSD.DOUBLE,
+				XSD.FLOAT,
+				XSD.GYEAR,
+				XSD.INT,
+				XSD.INTEGER,
+				XSD.LONG,
+				XSD.NEGATIVE_INTEGER,
+				XSD.NON_NEGATIVE_INTEGER,
+				XSD.NON_POSITIVE_INTEGER,
+				XSD.POSITIVE_INTEGER,
+				XSD.SHORT,
+				XSD.STRING,
+				XSD.TIME,
+				XSD.UNSIGNED_BYTE,
+				XSD.UNSIGNED_INT,
+				XSD.UNSIGNED_LONG,
+				XSD.UNSIGNED_SHORT)
+				.map(termFactory::getRequiredTypePredicate)
+				.collect(Collectors.toList());
+
 		
 		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];
@@ -69,10 +98,10 @@ public class DataTypeComboBox extends JComboBox {
 				if (value instanceof Predicate) {
 					Predicate item = (Predicate) value;
 					String name = item.toString();
-					if (name.contains(IriConstants.NS_XSD)) {
-						name = name.replace(IriConstants.NS_XSD, "xsd:");
-					} else if (name.contains(IriConstants.NS_RDFS)) {
-						name = name.replace(IriConstants.NS_RDFS, "rdfs:");
+					if (name.contains(XSD.PREFIX)) {
+						name = name.replace(XSD.PREFIX, OntopInternal.PREFIX_XSD);
+					} else if (name.contains(RDFS.PREFIX)) {
+						name = name.replace(RDFS.PREFIX, OntopInternal.PREFIX_RDFS);
 					}
 					setText(name);
 					setIcon(IconLoader.getImageIcon("images/datarange.png"));

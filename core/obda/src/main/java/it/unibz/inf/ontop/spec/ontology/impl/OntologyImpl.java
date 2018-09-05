@@ -23,15 +23,15 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.apache.commons.rdf.api.IRI;
 
 
 import java.util.Iterator;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class OntologyImpl implements Ontology {
 
@@ -67,7 +67,7 @@ public class OntologyImpl implements Ontology {
 
 	public static final ImmutableMap<String, Datatype> OWL2QLDatatypes;
 	
-	private static final String xml  = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	private static final String rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
@@ -75,27 +75,27 @@ public class OntologyImpl implements Ontology {
 	static {
 		
 		OWL2QLDatatypes = ImmutableMap.<String, Datatype>builder()
-				.put(xml + "PlainLiteral", new DatatypeImpl( new DatatypePredicateImpl(RDFS.LITERAL.stringValue(), COL_TYPE.LITERAL))) // 	rdf:PlainLiteral
-				.put(xml + "XMLLiteral", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	rdf:XMLLiteral
-				.put(rdfs + "Literal", new DatatypeImpl(new DatatypePredicateImpl(RDFS.LITERAL.stringValue(), COL_TYPE.LITERAL))) //		rdfs:Literal
-				.put(owl + "real", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 			owl:real
-				.put(owl + "rational", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 		owl:rational
-				.put(xsd + "decimal", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DECIMAL))) // 	xsd:decimal
-				.put(xsd + "integer", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.INTEGER))) // 	xsd:integer
-				.put(xsd + "nonNegativeInteger", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.NON_NEGATIVE_INTEGER))) // 	xsd:nonNegativeInteger
-				.put(xsd + "string", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:string
-				.put(xsd + "normalizedString", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:normalizedString
-				.put(xsd + "token", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:token
-				.put(xsd + "Name", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:Name
-				.put(xsd + "NCName", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) //	xsd:NCName
-				.put(xsd + "NMTOKEN", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:NMTOKEN
-				.put(xsd + "hexBinary", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:hexBinary
-				.put(xsd + "base64Binary", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:base64Binary
-				.put(xsd + "anyURI", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.STRING))) // 	xsd:anyURI
-				.put(xsd + "dateTime", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DATETIME))) // 	xsd:dateTime
-				.put(xsd + "dateTimeStamp", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.DATETIME_STAMP))) // 	xsd:dateTimeStamp
-				.put(xsd + "int", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.INT))) // 	TEMPORARY FOR Q9 / FISHMARK
-				.put(xsd + "long", new DatatypeImpl(TYPE_FACTORY.getTypePredicate(COL_TYPE.LONG))) // 	TEMPORARY FOR OntologyTypesTest
+				.put(rdf + "PlainLiteral", new DatatypeImpl(RDF.PLAINLITERAL)) // 	rdf:PlainLiteral
+				.put(rdf + "XMLLiteral", new DatatypeImpl(RDF.XMLLITERAL)) //	rdf:XMLLiteral
+				.put(rdfs + "Literal", new DatatypeImpl(RDFS.LITERAL)) //		rdfs:Literal
+				.put(owl + "real", new DatatypeImpl(OWL.REAL)) // 			owl:real
+				.put(owl + "rational", new DatatypeImpl(OWL.RATIONAL)) // 		owl:rational
+				.put(xsd + "decimal", new DatatypeImpl(XSD.DECIMAL)) // 	xsd:decimal
+				.put(xsd + "integer", new DatatypeImpl(XSD.INTEGER)) // 	xsd:integer
+				.put(xsd + "nonNegativeInteger", new DatatypeImpl(XSD.NON_NEGATIVE_INTEGER)) // 	xsd:nonNegativeInteger
+				.put(xsd + "string", new DatatypeImpl(XSD.STRING)) // 	xsd:string
+				.put(xsd + "normalizedString", new DatatypeImpl(XSD.NORMALIZEDSTRING)) // 	xsd:normalizedString
+				.put(xsd + "token", new DatatypeImpl(XSD.TOKEN)) // 	xsd:token
+				.put(xsd + "Name", new DatatypeImpl(XSD.NAME)) // 	xsd:Name
+				.put(xsd + "NCName", new DatatypeImpl(XSD.NCNAME)) //	xsd:NCName
+				.put(xsd + "NMTOKEN", new DatatypeImpl(XSD.NMTOKEN)) // 	xsd:NMTOKEN
+				.put(xsd + "hexBinary", new DatatypeImpl(XSD.HEXBINARY)) // 	xsd:hexBinary
+				.put(xsd + "base64Binary", new DatatypeImpl(XSD.BASE64BINARY)) // 	xsd:base64Binary
+				.put(xsd + "anyURI", new DatatypeImpl(XSD.ANYURI)) // 	xsd:anyURI
+				.put(xsd + "dateTime", new DatatypeImpl(XSD.DATETIME)) // 	xsd:dateTime
+				.put(xsd + "dateTimeStamp", new DatatypeImpl(XSD.DATETIMESTAMP)) // 	xsd:dateTimeStamp
+				.put(xsd + "int", new DatatypeImpl(XSD.INT)) // 	TEMPORARY FOR Q9 / FISHMARK
+				.put(xsd + "long", new DatatypeImpl(XSD.LONG)) // 	TEMPORARY FOR OntologyTypesTest
 				.build();
 	}
 
@@ -118,12 +118,22 @@ public class OntologyImpl implements Ontology {
             return oc;
         }
 
-        @Override
+		@Override
+		public T get(IRI iri) {
+			return get(iri.getIRIString());
+		}
+
+		@Override
         public boolean contains(String uri) {
             return map.containsKey(uri);
         }
 
-        @Override
+		@Override
+		public boolean contains(IRI iri) {
+			return contains(iri.getIRIString());
+		}
+
+		@Override
         public Iterator<T> iterator() {
             return map.values().iterator();
         }
