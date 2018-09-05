@@ -5,7 +5,7 @@
 <!-- Ontop labels -->
 	<variable name="ontop-owlfile.label">OWL ontology file</variable>
 
-	<variable name="ontop-owlfilecommentvirt.label">Provide the full path to the Ontop Owl file</variable>
+	<variable name="ontop-owlfilecommentvirt.label">Provide the full path to the Ontop Owl file (optional)</variable>
 	<variable name="ontop-obdafile.label">Mapping file</variable>
 	<variable name="ontop-obdafilecomment.label">Provide the full path to the Mapping file (e.g. .obda, .ttl)</variable>
 	<variable name="ontop-properties.label">Ontop properties file</variable>
