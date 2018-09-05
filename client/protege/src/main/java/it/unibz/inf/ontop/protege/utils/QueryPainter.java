@@ -403,18 +403,19 @@ public class QueryPainter {
 
 			if (optionalPredicateIri.isPresent()) {
 				IRI predicateIri = optionalPredicateIri.get();
+				String shortIRIForm = man.getShortForm(predicateIri.getIRIString());
 
 				if (vocabulary.classes().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), clazz);
+					ColorTask task = new ColorTask(shortIRIForm, clazz);
 					tasks.add(task);
 				} else if (vocabulary.objectProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), objectProp);
+					ColorTask task = new ColorTask(shortIRIForm, objectProp);
 					tasks.add(task);
 				} else if (vocabulary.dataProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), dataProp);
+					ColorTask task = new ColorTask(shortIRIForm, dataProp);
 					tasks.add(task);
 				} else if (vocabulary.annotationProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), annotProp);
+					ColorTask task = new ColorTask(shortIRIForm, annotProp);
 					tasks.add(task);
 				}
 			}
