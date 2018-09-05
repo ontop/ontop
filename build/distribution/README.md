@@ -11,19 +11,19 @@ By downloading these packages you are agreeing with them.
 
 ## Main downloads
 
-- `ontop-distribution.zip`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
+- `ontop-dist/`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
 
-- `it.unibz.inf.ontop.protege.jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
+- `ontop-protege/it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
-- `ontop-webapps.zip`: WAR files required to create a Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server .
+- `ontop-webapps/`: WAR files required to create an Ontop SPARQL end-point webapp. Drop this into the webapps folder of your Servlet server.
 
 ## Bundles
 
-- `ontop-protege-bundle.zip` : Protege 5.2 bundled with Ontop and JDBC plugins. This is ready to run package, use the run.sh, run.command or run.bat start scripts.
+- `ontop-protege-bundle-[version].zip` : Protege 5.2 bundled with Ontop and JDBC plugins. This is ready to run package, unzip and use the run.sh or run.bat start scripts.
 
-- `ontop-jetty-bundle.zip` : Jetty 9 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
+- `ontop-jetty/` : Jetty 9 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
 
-- `ontop-tomcat-bundle.zip` : Tomcat 8 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
+- `ontop-tomcat/` : Tomcat 8 + RDF4J workbench + Ontop ready to run a SPARQL end-point.
 
 ## Samples
 
