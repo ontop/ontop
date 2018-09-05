@@ -20,27 +20,21 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.Function;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +52,10 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 
-	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators,
+						   ImmutabilityTools immutabilityTools) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner);
+		this.cache = new QueryConnectedComponentCache(reasoner, immutabilityTools);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -72,8 +67,9 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> generators) {
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner,
+												  Collection<TreeWitnessGenerator> generators, ImmutabilityTools immutabilityTools) {
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators, immutabilityTools);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -364,9 +360,11 @@ public class TreeWitnessSet {
 		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final ClassifiedTBox reasoner;
+		private final ImmutabilityTools immutabilityTools;
 
-		private QueryConnectedComponentCache(ClassifiedTBox reasoner) {
+		private QueryConnectedComponentCache(ClassifiedTBox reasoner, ImmutabilityTools immutabilityTools) {
 			this.reasoner = reasoner;
+			this.immutabilityTools = immutabilityTools;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
@@ -380,14 +378,15 @@ public class TreeWitnessSet {
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
 			Intersection<ClassExpression> subc = new Intersection<>(reasoner.classesDAG());
 			for (Function a : atoms) {
-				 if (a.getArity() != 1) {
-					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
-					 break;
-				 }
-				 
-				 Predicate pred = a.getFunctionSymbol();
-				 if (reasoner.classes().contains(pred.getName()))
-					 subc.intersectWith(reasoner.classes().get(pred.getName()));
+				Optional<IRI> optionalClassIRI = extractClassIRI(a);
+				if (!optionalClassIRI.isPresent()) {
+					subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
+					break;
+				}
+				IRI classIRI = optionalClassIRI.get();
+
+				 if (reasoner.classes().contains(classIRI))
+					 subc.intersectWith(reasoner.classes().get(classIRI));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -421,8 +420,11 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						if (reasoner.objectProperties().contains(a.getFunctionSymbol().getName())) {
-							ObjectPropertyExpression prop = reasoner.objectProperties().get(a.getFunctionSymbol().getName());
+						Optional<IRI> optionalPropertyIRIString = extractPropertyIRI(a);
+						if (optionalPropertyIRIString
+								.filter(i -> reasoner.objectProperties().contains(i))
+								.isPresent()) {
+							ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(prop);
@@ -437,6 +439,34 @@ public class TreeWitnessSet {
 				propertiesCache.put(idx, properties); // edge.getTerms()
 			}
 			return properties;
+		}
+
+		private Optional<IRI> extractPropertyIRI(Function rdfDataAtom) {
+			if (rdfDataAtom.getFunctionSymbol() instanceof RDFAtomPredicate) {
+
+				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getFunctionSymbol();
+
+				ImmutableList<ImmutableTerm> arguments = rdfDataAtom.getTerms().stream()
+						.map(immutabilityTools::convertIntoImmutableTerm)
+						.collect(ImmutableCollectors.toList());
+
+				return rdfAtomPredicate.getPropertyIRI(arguments);
+			}
+			return Optional.empty();
+		}
+
+		private Optional<IRI> extractClassIRI(Function rdfDataAtom) {
+			if (rdfDataAtom.getFunctionSymbol() instanceof RDFAtomPredicate) {
+
+				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getFunctionSymbol();
+
+				ImmutableList<ImmutableTerm> arguments = rdfDataAtom.getTerms().stream()
+						.map(immutabilityTools::convertIntoImmutableTerm)
+						.collect(ImmutableCollectors.toList());
+
+				return rdfAtomPredicate.getClassIRI(arguments);
+			}
+			return Optional.empty();
 		}
 	}
 	

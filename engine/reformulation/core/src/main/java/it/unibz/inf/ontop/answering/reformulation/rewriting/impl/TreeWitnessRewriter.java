@@ -25,7 +25,9 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -41,14 +43,11 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedC
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +171,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		List<CQIE> outputRules = new LinkedList<>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators, immutabilityTools);
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
@@ -194,8 +193,18 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
-				Predicate predicate = a.getFunctionSymbol();
-				twf.add((predicate.getArity() == 1) ? termFactory.getFunction(predicate, r0) : termFactory.getFunction(predicate, r0, r0));
+				if (!(a.getFunctionSymbol() instanceof TriplePredicate))
+					throw new MinorOntopInternalBugException("A triple atom was expected: " + a);
+
+				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(
+						a.getTerms().stream()
+								.map(immutabilityTools::convertIntoImmutableTerm)
+								.collect(ImmutableCollectors.toList()))
+						.isPresent();
+
+				twf.add(isClass
+						? atomFactory.getMutableTripleAtom(r0, a.getTerm(1), a.getTerm(2))
+						: atomFactory.getMutableTripleAtom(r0, a.getTerm(1), r0));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
