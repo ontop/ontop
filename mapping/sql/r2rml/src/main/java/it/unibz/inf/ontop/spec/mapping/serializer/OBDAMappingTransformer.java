@@ -126,13 +126,16 @@ public class OBDAMappingTransformer {
 				}
 
 			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
-			ImmutableFunctionalTerm object = (ImmutableFunctionalTerm) func.getSubstitutedTerm(2);
+
+			ImmutableTerm object = func.getSubstitutedTerm(2);
 
 			//if the class IRI is constant
 			if (predUri.equals(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE)
-					&& object.getFunctionSymbol() instanceof URITemplatePredicate && object.getTerms().size() == 1) {
+					&& object instanceof ImmutableFunctionalTerm
+					&& ((ImmutableFunctionalTerm) object).getFunctionSymbol() instanceof URITemplatePredicate
+					&& ((ImmutableFunctionalTerm) object).getTerms().size() == 1) {
 
-				IRI classIRI = rdfFactory.createIRI(((ValueConstant)(object.getTerm(0))).getValue());
+				IRI classIRI = rdfFactory.createIRI(((ValueConstant)(((ImmutableFunctionalTerm) object).getTerm(0))).getValue());
 					// The term is actually a SubjectMap (class)
 					//add class declaration to subject Map node
 					sm.addClass(classIRI);
@@ -204,7 +207,7 @@ public class OBDAMappingTransformer {
 						}
 					}
 					else if (objectPred instanceof DatatypePredicate) {
-						ImmutableTerm objectTerm = object.getTerm(0);
+						ImmutableTerm objectTerm = o.getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
 
