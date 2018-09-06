@@ -58,10 +58,10 @@ public class QueryFolding {
 	public QueryFolding(QueryConnectedComponentCache cache) {
 		this.cache = cache;
 		properties = cache.getTopProperty(); 
-		roots = new HashSet<QueryConnectedComponent.Loop>();
+		roots = new HashSet<>();
 		internalRootConcepts = cache.getTopClass(); 
-		internalRoots = new HashSet<Term>();
-		internalDomain = new HashSet<Term>();
+		internalRoots = new HashSet<>();
+		internalDomain = new HashSet<>();
 		interior = Collections.emptyList(); // in-place QueryFolding for one-step TreeWitnesses, 
 		                                   //             which have no interior TreeWitnesses
 		status = true;
@@ -70,12 +70,12 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.cache = qf.cache;
 
-		properties = new Intersection<ObjectPropertyExpression>(qf.properties);
-		roots = new HashSet<QueryConnectedComponent.Loop>(qf.roots);
-		internalRootConcepts = new Intersection<ClassExpression>(qf.internalRootConcepts); 
-		internalRoots = new HashSet<Term>(qf.internalRoots);
-		internalDomain = new HashSet<Term>(qf.internalDomain);
-		interior = new LinkedList<TreeWitness>(qf.interior);
+		properties = new Intersection<>(qf.properties);
+		roots = new HashSet<>(qf.roots);
+		internalRootConcepts = new Intersection<>(qf.internalRootConcepts);
+		internalRoots = new HashSet<>(qf.internalRoots);
+		internalDomain = new HashSet<>(qf.internalDomain);
+		interior = new LinkedList<>(qf.interior);
 		status = qf.status;
 	}
 
@@ -122,9 +122,9 @@ public class QueryFolding {
 		properties.setToTop(); 
 		roots.clear(); 
 		internalRootConcepts = new Intersection<ClassExpression>(tw.getRootConcepts()); 
-		internalRoots = new HashSet<Term>(tw.getRoots());
-		internalDomain = new HashSet<Term>(tw.getDomain());
-		interior = new LinkedList<TreeWitness>();
+		internalRoots = new HashSet<>(tw.getRoots());
+		internalDomain = new HashSet<>(tw.getDomain());
+		interior = new LinkedList<>();
 		interior.add(tw);
 		terms = null;
 		status = true;		
@@ -179,7 +179,7 @@ public class QueryFolding {
 
 		Intersection<ClassExpression> rootType = cache.getTopClass();
 
-		Set<Function> rootAtoms = new HashSet<Function>();
+		Set<Function> rootAtoms = new HashSet<>();
 		for (QueryConnectedComponent.Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
