@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -105,10 +106,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
+		ImmutableList<CQIE> s = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
+		this.sigma = new LinearInclusionDependencies(s);
 
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox, sigma);
+		this.rewriter.setTBox(saturatedTBox, s);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 

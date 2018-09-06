@@ -1,15 +1,10 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
@@ -21,6 +16,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,18 +53,20 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies, DatalogFactory datalogFactory,
+	public CQContainmentCheckUnderLIDs(ImmutableList<CQIE> dependencies, DatalogFactory datalogFactory,
 									   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
 									   TermFactory termFactory) {
-		this.dependencies = dependencies;
+	    // index dependencies
+		this.dependencies = new LinearInclusionDependencies(dependencies);
 		this.datalogFactory = datalogFactory;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.termFactory = termFactory;
 	}
-	
-	
-	/**
+
+
+
+    /**
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
@@ -284,4 +282,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		return "(empty)";
 	}
+
+	public LinearInclusionDependencies dependencies() { return dependencies; }
+
 }

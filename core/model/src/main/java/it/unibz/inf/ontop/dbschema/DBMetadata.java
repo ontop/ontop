@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
@@ -45,7 +44,7 @@ public interface DBMetadata extends Serializable {
      * TABLE1.COL1 references TABLE2.COL2 as foreign key then
      * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
      */
-    ImmutableMultimap<AtomPredicate, CQIE> generateFKRules();
+    ImmutableList<CQIE> generateFKRules();
 
     QuotedIDFactory getQuotedIDFactory();
 

@@ -63,8 +63,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private ClassifiedTBox reasoner;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
-	private LinearInclusionDependencies sigma;
-	
+
 	private Collection<TreeWitnessGenerator> generators;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
@@ -91,12 +90,11 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox reasoner, LinearInclusionDependencies sigma) {
+	public void setTBox(ClassifiedTBox reasoner, ImmutableList<CQIE> sigma) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
-		this.sigma = sigma;
-		
+
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory, unifierUtilities,
 				substitutionUtilities, termFactory);
 		
@@ -365,7 +363,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		
 		DatalogProgram output = datalogFactory.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 		for (CQIE cq : output.getRules())
-			cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), dataDependenciesCQC.dependencies());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

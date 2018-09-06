@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 
@@ -23,14 +21,14 @@ public abstract class AbstractDBMetadata implements DBMetadata {
     }
 
     @Override
-    public ImmutableMultimap<AtomPredicate, CQIE> generateFKRules() {
+    public ImmutableList<CQIE> generateFKRules() {
         final boolean printouts = false;
 
         if (printouts)
             System.out.println("===FOREIGN KEY RULES");
         int count = 0;
 
-        ImmutableMultimap.Builder<AtomPredicate, CQIE> multimapBuilder = ImmutableMultimap.builder();
+        ImmutableList.Builder<CQIE> builder = ImmutableList.builder();
 
         Collection<DatabaseRelationDefinition> tableDefs = getDatabaseRelations();
         for (DatabaseRelationDefinition def : tableDefs) {
@@ -61,15 +59,14 @@ public abstract class AbstractDBMetadata implements DBMetadata {
                 Function head = termFactory.getFunction(def2.getAtomPredicate(), terms2);
                 Function body = termFactory.getFunction(def.getAtomPredicate(), terms1);
 
-                CQIE rule = datalogFactory.getCQIE(head, body);
-                multimapBuilder.put(def.getAtomPredicate(), rule);
+                builder.add(datalogFactory.getCQIE(head, body));
                 if (printouts)
                     System.out.println("   FK_" + ++count + " " +  head + " :- " + body);
             }
         }
         if (printouts)
             System.out.println("===END OF FOREIGN KEY RULES");
-        return multimapBuilder.build();
+        return builder.build();
     }
 
     protected TermFactory getTermFactory() {

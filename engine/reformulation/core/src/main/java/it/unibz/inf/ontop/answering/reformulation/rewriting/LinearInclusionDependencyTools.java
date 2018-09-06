@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -32,9 +30,9 @@ public class LinearInclusionDependencyTools {
         this.datalogFactory = datalogFactory;
     }
 
-    public LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
+    public ImmutableList<CQIE> getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
 
-        ImmutableMultimap.Builder<AtomPredicate, CQIE> builder = ImmutableMultimap.builder();
+        ImmutableList.Builder<CQIE> builder = ImmutableList.builder();
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectPropertiesDAG()) {
             for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.objectPropertiesDAG().getSub(propNode)) {
@@ -49,7 +47,7 @@ public class LinearInclusionDependencyTools {
                             continue;
 
                         Function head = translate(prop, variableXname, variableYname);
-                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
+                        builder.add(datalogFactory.getCQIE(head, body));
                     }
                 }
             }
@@ -65,7 +63,7 @@ public class LinearInclusionDependencyTools {
                             continue;
 
                         Function head = translate(prop, variableXname, variableYname);
-                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
+                        builder.add(datalogFactory.getCQIE(head, body));
                     }
                 }
             }
@@ -85,13 +83,13 @@ public class LinearInclusionDependencyTools {
 
                         // use a different variable name in case the body has an existential as well
                         Function head = translate(cla, variableZname);
-                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
+                        builder.add(datalogFactory.getCQIE(head, body));
                     }
                 }
             }
         }
 
-        return new LinearInclusionDependencies(builder.build());
+        return builder.build();
     }
 
     private Function translate(ObjectPropertyExpression property, String x, String y) {
