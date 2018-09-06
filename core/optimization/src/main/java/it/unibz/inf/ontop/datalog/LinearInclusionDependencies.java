@@ -11,7 +11,7 @@ public class LinearInclusionDependencies {
 
 	public LinearInclusionDependencies(ImmutableMultimap<AtomPredicate, CQIE> predicateRuleMap) {
 		rules = predicateRuleMap;
-	}
+
 
 	public ImmutableCollection<CQIE> getRules(AtomPredicate pred) {
 		ImmutableCollection<CQIE> rrs = rules.get(pred);
