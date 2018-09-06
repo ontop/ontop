@@ -26,11 +26,11 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
         this.rdfFactory = rdfFactory;
 
         if (subjectIndex >= expectedBaseTypes.size())
-            throw new IllegalArgumentException("subjectIndex exceeds arity");
+            throw new IllegalArgumentException("subjectIndex exceeds the arity");
         if (propertyIndex >= expectedBaseTypes.size())
             throw new IllegalArgumentException("propertyIndex exceeds the arity");
         if (objectIndex >= expectedBaseTypes.size())
-            throw new IllegalArgumentException("objectIndex exceeds arity");
+            throw new IllegalArgumentException("objectIndex exceeds the arity");
     }
 
     @Override

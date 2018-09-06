@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -135,29 +136,25 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
-		List<Function> genAtoms = new ArrayList<>(concepts.size());
-		
-		for (ClassExpression con : concepts) {
-			log.debug("  BASIC CONCEPT: {}", con);
-			Function atom; 
-			if (con instanceof OClass) {
-				atom = atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
-			}
-			else if (con instanceof ObjectSomeValuesFrom) {
-				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
-				atom = (!some.isInverse())
-						? atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable())
-						: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), some.getIRI(), r0);
-			}
-			else {
-				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable());
-			}
-			genAtoms.add(atom);
-		}
-		return genAtoms;
+	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
+		return TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner).stream()
+				.map(con -> {
+					log.debug("  BASIC CONCEPT: {}", con);
+					if (con instanceof OClass) {
+						return atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
+					}
+					else if (con instanceof ObjectSomeValuesFrom) {
+						ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
+						return (!ope.isInverse())
+								? atomFactory.getMutableTripleBodyAtom(r0, ope.getIRI(), getFreshVariable())
+								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), r0);
+					}
+					else {
+						DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
+						return atomFactory.getMutableTripleBodyAtom(r0, dpe.getIRI(), getFreshVariable());
+					}
+				})
+				.collect(ImmutableCollectors.toList());
 	}
 	
 	
@@ -169,8 +166,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
 		
 		List<CQIE> outputRules = new LinkedList<>();	
-		String headURI = headAtom.getFunctionSymbol().getName();
-		
+
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators, immutabilityTools);
 
 		if (cc.hasNoFreeTerms()) {  
@@ -229,8 +225,9 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			
 			tw.setFormula(twfs);
 		}
-				
-		if (!cc.isDegenerate()) {			
+
+		final String headURI = headAtom.getFunctionSymbol().getName();
+		if (!cc.isDegenerate()) {
 			if (tws.hasConflicts()) { 
 				// there are conflicting tree witnesses
 				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
@@ -341,8 +338,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
-					List<CQIE> list = rewriteCC(cc, ccAtom, edgeDP); 
-					ccDP.appendRule(list);
+					ccDP.appendRule(rewriteCC(cc, ccAtom, edgeDP));
 					ccBody.add(ccAtom);
 				}
 				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));

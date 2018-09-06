@@ -82,21 +82,16 @@ public class DatalogQueryServices {
 	
 	public List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
 		
-		PriorityQueue<CQIE> queue = new PriorityQueue<CQIE>(rules.size(), new Comparator<CQIE> () {
-			@Override
-			public int compare(CQIE arg0, CQIE arg1) {
-				return arg0.getBody().size() - arg1.getBody().size();
-			} 
-			});
+		PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
+				Comparator.comparingInt(cq -> cq.getBody().size()));
 
 		queue.addAll(rules);
 				
-		List<CQIE> output = new LinkedList<CQIE>();
+		List<CQIE> output = new LinkedList<>();
 				
 		while (!queue.isEmpty()) {
 			CQIE query = queue.poll();
-			//log.debug("QUEUE SIZE: " + queue.size() + " QUERY " + query);
-				
+
 			List<Function> body = query.getBody();
 			int chosenAtomIdx = 0;
 			List<CQIE> chosenDefinitions = null;
@@ -124,7 +119,6 @@ public class DatalogQueryServices {
 				String suffix = sb.toString();
 				
 				for (CQIE rule : chosenDefinitions) {				
-					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
 					Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
                             query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
@@ -139,8 +133,6 @@ public class DatalogQueryServices {
 						
 						// REDUCE
 						eqNormalizer.enforceEqualities(newquery);
-						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						cqcUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);
@@ -166,14 +158,8 @@ public class DatalogQueryServices {
 				
 				if (!found) {
 					log.debug("ADDING TO THE RESULT {}", query);
-					
 					output.add(query.clone());			
-					Collections.sort(output, new Comparator<CQIE> () {
-						@Override
-						public int compare(CQIE arg1, CQIE arg0) {
-							return arg1.getBody().size() - arg0.getBody().size();
-						} 
-						});
+					Collections.sort(output, Comparator.comparingInt(cq -> cq.getBody().size()));
 				}
 			}
 		}
