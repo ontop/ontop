@@ -31,7 +31,6 @@ public abstract class AbstractDBMetadata implements DBMetadata {
         int count = 0;
 
         ImmutableMultimap.Builder<AtomPredicate, CQIE> multimapBuilder = ImmutableMultimap.builder();
-        Map<Predicate, AtomPredicate> knownPredicateMap = new HashMap<>();
 
         Collection<DatabaseRelationDefinition> tableDefs = getDatabaseRelations();
         for (DatabaseRelationDefinition def : tableDefs) {
@@ -39,35 +38,25 @@ public abstract class AbstractDBMetadata implements DBMetadata {
 
                 DatabaseRelationDefinition def2 = fks.getReferencedRelation();
 
-                Map<Integer, Integer> positionMatch = new HashMap<>();
-                for (ForeignKeyConstraint.Component comp : fks.getComponents()) {
-                    // Get current table and column (1)
-                    Attribute att1 = comp.getAttribute();
-
-                    // Get referenced table and column (2)
-                    Attribute att2 = comp.getReference();
-
-                    // Get positions of referenced attribute
-                    int pos1 = att1.getIndex();
-                    int pos2 = att2.getIndex();
-                    positionMatch.put(pos1 - 1, pos2 - 1); // indexes start at 1
-                }
-                // Construct CQIE
+                // create variables for the current table
                 int len1 = def.getAttributes().size();
                 List<Term> terms1 = new ArrayList<>(len1);
                 for (int i = 1; i <= len1; i++)
                     terms1.add(termFactory.getVariable("t" + i));
 
-                // Roman: important correction because table2 may not be in the same case
-                // (e.g., it may be all upper-case)
+                // create variables for the referenced table
                 int len2 = def2.getAttributes().size();
                 List<Term> terms2 = new ArrayList<>(len2);
                 for (int i = 1; i <= len2; i++)
                     terms2.add(termFactory.getVariable("p" + i));
 
-                // do the swapping
-                for (Map.Entry<Integer,Integer> swap : positionMatch.entrySet())
-                    terms1.set(swap.getKey(), terms2.get(swap.getValue()));
+                for (ForeignKeyConstraint.Component comp : fks.getComponents()) {
+                    // indexes start at 1
+                    int pos1 = comp.getAttribute().getIndex() - 1; // current column (1)
+                    int pos2 = comp.getReference().getIndex() - 1; // referenced column (2)
+
+                    terms1.set(pos1, terms2.get(pos2));
+                }
 
                 Function head = termFactory.getFunction(def2.getAtomPredicate(), terms2);
                 Function body = termFactory.getFunction(def.getAtomPredicate(), terms1);
