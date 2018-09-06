@@ -82,7 +82,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (CQIE rule : dependencies.getRules((AtomPredicate) fact.getFunctionSymbol())) {
+			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
 				rule = datalogFactory.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
