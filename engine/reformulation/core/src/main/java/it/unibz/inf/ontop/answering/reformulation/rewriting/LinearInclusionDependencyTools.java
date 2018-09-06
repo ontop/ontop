@@ -9,12 +9,17 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.ontology.*;
+import org.apache.commons.rdf.api.IRI;
 
 public class LinearInclusionDependencyTools {
 
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
+
+    private static final String variableXname = "x";
+    private static final String variableYname = "y";
+    private static final String variableZname = "z";
 
     @Inject
     private LinearInclusionDependencyTools(AtomFactory atomFactory, TermFactory termFactory,
@@ -24,7 +29,7 @@ public class LinearInclusionDependencyTools {
         this.datalogFactory = datalogFactory;
     }
 
-    public LinearInclusionDependencies  getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
+    public LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
         LinearInclusionDependencies dependencies = new LinearInclusionDependencies(datalogFactory);
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectPropertiesDAG()) {
@@ -34,13 +39,13 @@ public class LinearInclusionDependencyTools {
                     if (subprop.isInverse())
                         continue;
 
-                    Function body = translate(subprop);
+                    Function body = translate(subprop, variableXname, variableYname);
 
                     for (ObjectPropertyExpression prop : propNode)  {
                         if (prop == subprop)
                             continue;
 
-                        Function head = translate(prop);
+                        Function head = translate(prop, variableXname, variableYname);
                         dependencies.addRule(head, body);
                     }
                 }
@@ -51,13 +56,13 @@ public class LinearInclusionDependencyTools {
             for (Equivalences<DataPropertyExpression> subpropNode : reasoner.dataPropertiesDAG().getSub(propNode)) {
                 for (DataPropertyExpression subprop : subpropNode) {
 
-                    Function body = translate(subprop);
+                    Function body = translate(subprop, variableXname, variableYname);
 
                     for (DataPropertyExpression prop : propNode)  {
                         if (prop == subprop)
                             continue;
 
-                        Function head = translate(prop);
+                        Function head = translate(prop, variableXname, variableYname);
                         dependencies.addRule(head, body);
                     }
                 }
@@ -74,10 +79,10 @@ public class LinearInclusionDependencyTools {
                         continue;
 
                     for (ClassExpression cla : classNode)  {
-                        if (!(cla instanceof OClass) && !(!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))))
+                        if (cla == subclass)
                             continue;
 
-                        if (cla == subclass)
+                        if (!(cla instanceof OClass) && !(!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))))
                             continue;
 
                         // use a different variable name in case the body has an existential as well
@@ -91,52 +96,40 @@ public class LinearInclusionDependencyTools {
         return dependencies;
     }
 
-    private static final String variableXname = "x";
-    private static final String variableYname = "y";
-    private static final String variableZname = "z";
+    private Function translate(ObjectPropertyExpression property, String x, String y) {
+        Variable varX = termFactory.getVariable(x);
+        Variable varY = termFactory.getVariable(y);
 
-    private Function translate(ObjectPropertyExpression property) {
-        final Variable varX = termFactory.getVariable(variableXname);
-        final Variable varY = termFactory.getVariable(variableYname);
-
-        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
         if (property.isInverse())
-            return atomFactory.getMutableTripleAtom(varY, propertyFunction, varX);
+            return atomFactory.getMutableTripleAtom(varY, wrapUpIRI(property.getIRI()), varX);
         else
-            return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
+            return atomFactory.getMutableTripleAtom(varX, wrapUpIRI(property.getIRI()), varY);
     }
 
-    private Function translate(DataPropertyExpression property) {
-        final Variable varX = termFactory.getVariable(variableXname);
-        final Variable varY = termFactory.getVariable(variableYname);
+    private Function translate(DataPropertyExpression property, String x, String y) {
+        Variable varX = termFactory.getVariable(x);
+        Variable varY = termFactory.getVariable(y);
 
-        Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
-        return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
+        return atomFactory.getMutableTripleAtom(varX, wrapUpIRI(property.getIRI()), varY);
     }
 
     private Function translate(ClassExpression description, String existentialVariableName) {
-        final Variable varX = termFactory.getVariable(variableXname);
         if (description instanceof OClass) {
+            final Variable varX = termFactory.getVariable(variableXname);
             OClass klass = (OClass) description;
-            Function classFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(klass.getIRI().getIRIString()));
-            Function rdfTypeFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(RDF.TYPE.getIRIString()));
-            return atomFactory.getMutableTripleAtom(varX, rdfTypeFunction, classFunction);
+            return atomFactory.getMutableTripleAtom(varX, wrapUpIRI(RDF.TYPE), wrapUpIRI(klass.getIRI()));
         }
         else if (description instanceof ObjectSomeValuesFrom) {
-            final Variable varY = termFactory.getVariable(existentialVariableName);
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
-            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
-            if (property.isInverse())
-                return atomFactory.getMutableTripleAtom(varY, propertyFunction, varX);
-            else
-                return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
+            return translate(property, variableXname, existentialVariableName);
         }
         else {
-            assert (description instanceof DataSomeValuesFrom);
-            final Variable varY = termFactory.getVariable(existentialVariableName);
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            Function propertyFunction = termFactory.getUriTemplate(termFactory.getConstantLiteral(property.getIRI().getIRIString()));
-            return atomFactory.getMutableTripleAtom(varX, propertyFunction, varY);
+            return translate(property, variableXname, existentialVariableName);
         }
+    }
+
+    private Function wrapUpIRI(IRI iri) {
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 }
