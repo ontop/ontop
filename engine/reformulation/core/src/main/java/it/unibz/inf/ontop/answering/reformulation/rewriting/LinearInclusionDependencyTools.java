@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -30,10 +33,10 @@ public class LinearInclusionDependencyTools {
     }
 
     public LinearInclusionDependencies getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
-        LinearInclusionDependencies dependencies = new LinearInclusionDependencies(datalogFactory);
+
+        ImmutableMultimap.Builder<AtomPredicate, CQIE> builder = ImmutableMultimap.builder();
 
         for (Equivalences<ObjectPropertyExpression> propNode : reasoner.objectPropertiesDAG()) {
-            // super might be more efficient
             for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.objectPropertiesDAG().getSub(propNode)) {
                 for (ObjectPropertyExpression subprop : subpropNode) {
                     if (subprop.isInverse())
@@ -46,13 +49,12 @@ public class LinearInclusionDependencyTools {
                             continue;
 
                         Function head = translate(prop, variableXname, variableYname);
-                        dependencies.addRule(head, body);
+                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
                     }
                 }
             }
         }
         for (Equivalences<DataPropertyExpression> propNode : reasoner.dataPropertiesDAG()) {
-            // super might be more efficient
             for (Equivalences<DataPropertyExpression> subpropNode : reasoner.dataPropertiesDAG().getSub(propNode)) {
                 for (DataPropertyExpression subprop : subpropNode) {
 
@@ -63,20 +65,16 @@ public class LinearInclusionDependencyTools {
                             continue;
 
                         Function head = translate(prop, variableXname, variableYname);
-                        dependencies.addRule(head, body);
+                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
                     }
                 }
             }
         }
         for (Equivalences<ClassExpression> classNode : reasoner.classesDAG()) {
-            // super might be more efficient
             for (Equivalences<ClassExpression> subclassNode : reasoner.classesDAG().getSub(classNode)) {
                 for (ClassExpression subclass : subclassNode) {
 
                     Function body = translate(subclass, variableYname);
-                    //if (!(subclass instanceof OClass) && !(subclass instanceof PropertySomeRestriction))
-                    if (body == null)
-                        continue;
 
                     for (ClassExpression cla : classNode)  {
                         if (cla == subclass)
@@ -87,13 +85,13 @@ public class LinearInclusionDependencyTools {
 
                         // use a different variable name in case the body has an existential as well
                         Function head = translate(cla, variableZname);
-                        dependencies.addRule(head, body);
+                        builder.put((AtomPredicate) head.getFunctionSymbol(), datalogFactory.getCQIE(head, body));
                     }
                 }
             }
         }
 
-        return dependencies;
+        return new LinearInclusionDependencies(builder.build());
     }
 
     private Function translate(ObjectPropertyExpression property, String x, String y) {

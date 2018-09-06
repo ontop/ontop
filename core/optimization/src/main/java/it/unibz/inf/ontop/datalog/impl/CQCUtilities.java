@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -108,9 +109,9 @@ public class CQCUtilities {
 		for (int i = 0; i < atoms.size(); i++) {
 			Function atom = atoms.get(i);
 
-			Set<Function> derivedAtoms = new HashSet<Function>();
+			Set<Function> derivedAtoms = new HashSet<>();
 			// collect all derived atoms
-			for (CQIE rule : sigma.getRules(atom.getFunctionSymbol())) {
+			for (CQIE rule : sigma.getRules((AtomPredicate) atom.getFunctionSymbol())) {
 				// try to unify current query body atom with tbox rule body atom
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 				Function ruleBody = rule.getBody().get(0);
