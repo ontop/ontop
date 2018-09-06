@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.model.type.TermType;
 import javax.annotation.Nonnull;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
-    protected FunctionSymbolImpl(@Nonnull String name, int arity,
+    protected FunctionSymbolImpl(@Nonnull String name,
                                  @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-        super(name, arity, expectedBaseTypes);
+        super(name, expectedBaseTypes);
     }
 
     /**

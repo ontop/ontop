@@ -35,7 +35,7 @@ public class URITemplatePredicateImpl extends FunctionSymbolImpl implements URIT
 	private final ObjectRDFType type;
 
 	protected URITemplatePredicateImpl(int arity, String suffix, TypeFactory typeFactory) {
-		super(URI_PREFIX  + arity + suffix, arity, IntStream.range(0, arity)
+		super(URI_PREFIX  + arity + suffix, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())

@@ -12,7 +12,7 @@ import java.util.Optional;
 public class TriplePredicateImpl extends RDFAtomPredicateImpl implements TriplePredicate {
 
     protected TriplePredicateImpl(ImmutableList<TermType> expectedBaseTypes, RDF rdfFactory) {
-        super("triple", 3, expectedBaseTypes, 0, 1, 2, rdfFactory);
+        super("triple", expectedBaseTypes, 0, 1, 2, rdfFactory);
     }
 
     @Override

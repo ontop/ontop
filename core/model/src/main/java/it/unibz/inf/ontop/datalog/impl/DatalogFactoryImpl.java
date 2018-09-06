@@ -219,7 +219,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
     private static class DatalogAtomPredicate extends AtomPredicateImpl {
 
         private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
-            super(name, arity, createExpectedBaseTypes(arity, typeFactory));
+            super(name, createExpectedBaseTypes(arity, typeFactory));
         }
 
         private static ImmutableList<TermType> createExpectedBaseTypes( int arity, TypeFactory typeFactory) {
