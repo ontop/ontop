@@ -39,10 +39,8 @@ public class BootstrapGenerator {
     private final OBDAModel activeOBDAModel;
     private final OWLModelManager owlManager;
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-    private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final DatalogFactory datalogFactory;
     private final JdbcTypeMapper jdbcTypeMapper;
     private final TargetAtomFactory targetAtomFactory;
     private final RDF rdfFactory;
@@ -57,10 +55,8 @@ public class BootstrapGenerator {
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
-        atomFactory = obdaModelManager.getAtomFactory();
         termFactory = obdaModelManager.getTermFactory();
         typeFactory = obdaModelManager.getTypeFactory();
-        datalogFactory = obdaModelManager.getDatalogFactory();
         targetAtomFactory = obdaModelManager.getTargetAtomFactory();
         directMappingEngine = configuration.getInjector().getInstance(DirectMappingEngine.class);
         rdfFactory = configuration.getRdfFactory();
@@ -99,8 +95,7 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
-                atomFactory, jdbcTypeMapper);
+        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
