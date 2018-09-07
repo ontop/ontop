@@ -171,7 +171,7 @@ public class RDBMetadataExtractionTools {
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
 							productName, md.getDatabaseProductVersion(), idfac, jdbcTypeMapper,
-				atomFactory, termFactory, typeFactory);
+				atomFactory, typeFactory);
 		
 		return metadata;	
 	}

@@ -17,6 +17,6 @@ public class DummyRDBMetadata extends RDBMetadata {
 
         super("dummy class", null, null, "",
                 new QuotedIDFactoryStandardSQL("\""), jdbcTypeMapper, atomFactory,
-                termFactory, typeFactory);
+                typeFactory);
     }
 }

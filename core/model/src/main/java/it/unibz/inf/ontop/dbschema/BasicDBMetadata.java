@@ -3,12 +3,9 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.impl.AbstractDBMetadata;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -18,7 +15,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
+public class BasicDBMetadata implements DBMetadata {
 
     private final Map<RelationID, DatabaseRelationDefinition> tables;
 
@@ -40,18 +37,17 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     private final AtomFactory atomFactory;
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, AtomFactory atomFactory, TermFactory termFactory,
+                              TypeMapper typeMapper, AtomFactory atomFactory,
                               QuotedIDFactory idfac) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
-                new HashMap<>(), new LinkedList<>(), atomFactory, termFactory, idfac);
+                new HashMap<>(), new LinkedList<>(), atomFactory, idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
                               TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
             RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                              AtomFactory atomFactory, TermFactory termFactory,
+                              AtomFactory atomFactory,
                               QuotedIDFactory idfac) {
-        super(termFactory);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
@@ -237,7 +233,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     public BasicDBMetadata clone() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables),
-                atomFactory, getTermFactory(), idfac);
+                atomFactory, idfac);
     }
 
     protected boolean isStillMutable() {

@@ -16,7 +16,7 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
     @Inject
     private DummyBasicDBMetadata(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory) {
         super("dummy", null, null, "",
-                new DummyTypeMapper(typeFactory), atomFactory, termFactory,
+                new DummyTypeMapper(typeFactory), atomFactory,
                 new QuotedIDFactoryStandardSQL("\"")
         );
     }

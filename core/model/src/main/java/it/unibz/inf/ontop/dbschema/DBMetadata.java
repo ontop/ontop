@@ -39,12 +39,6 @@ public interface DBMetadata extends Serializable {
      */
     ImmutableMultimap<RelationPredicate,ImmutableList<Integer>> getUniqueConstraints();
 
-    /**
-     * generate CQIE rules from foreign key info of db metadata
-     * TABLE1.COL1 references TABLE2.COL2 as foreign key then
-     * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
-     */
-    ImmutableList<LinearInclusionDependency> generateFKRules();
 
     QuotedIDFactory getQuotedIDFactory();
 
