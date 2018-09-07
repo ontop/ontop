@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -410,8 +411,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
             Collection<CQIE> chosenDefinitions = null;
             ListIterator<Function> bodyIterator = body.listIterator();
             while (bodyIterator.hasNext()) {
-                Function currentAtom = bodyIterator.next(); // body.get(i);
-
+                Function currentAtom = bodyIterator.next();
                 Collection<CQIE> definitions = defs.get(currentAtom.getFunctionSymbol());
                 if (!definitions.isEmpty()) {
                     if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
@@ -423,17 +423,14 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
             boolean replaced = false;
             if (chosenDefinitions != null) {
-                int maxlen = 0;
-                Set<Variable> vars = new LinkedHashSet<>();
-                for (Function atom : body) {
+                Collection<Variable> vars = new ArrayList<>();
+                for (Function atom : body)
                     TermUtils.addReferencedVariablesTo(vars, atom);
-                }
-                for (Variable v : vars)
-                    maxlen = Math.max(maxlen, v.getName().length());
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < maxlen; i++)
-                    sb.append('t');
-                String suffix = sb.toString();
+                int maxlen = vars.stream()
+                        .map(v -> v.getName().length())
+                        .max(Integer::compareTo)
+                        .orElse(0);
+                String suffix = Strings.repeat("t", maxlen);
 
                 for (CQIE rule : chosenDefinitions) {
                     Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),

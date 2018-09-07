@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class SPARQLQueryFlattener {
 
-	private static final Logger log = LoggerFactory.getLogger(SPARQLQueryFlattener.class);
-
     /*
      TODO: eliminate both instance variables
      */

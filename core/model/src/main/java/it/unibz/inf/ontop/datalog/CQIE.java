@@ -21,11 +21,9 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 public interface CQIE extends Serializable {
 
