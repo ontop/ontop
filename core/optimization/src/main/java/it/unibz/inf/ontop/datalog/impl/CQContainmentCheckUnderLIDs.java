@@ -2,13 +2,8 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import java.util.*;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.CQContainmentCheck;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -16,7 +11,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +47,9 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(ImmutableList<CQIE> dependencies, DatalogFactory datalogFactory,
-									   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-									   TermFactory termFactory) {
+	public CQContainmentCheckUnderLIDs(ImmutableList<LinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
+                                       UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+                                       TermFactory termFactory) {
 	    // index dependencies
 		this.dependencies = new LinearInclusionDependencies(dependencies);
 		this.datalogFactory = datalogFactory;
@@ -80,8 +74,8 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
-				rule = datalogFactory.getFreshCQIECopy(rule);
+			for (LinearInclusionDependency d : dependencies.getRules(fact.getFunctionSymbol())) {
+				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(d.getHead(), d.getBody()));
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {

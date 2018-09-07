@@ -45,9 +45,8 @@ public class RDBMetadata extends BasicDBMetadata {
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 				QuotedIDFactory idfac, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory, TermFactory termFactory,
-				TypeFactory typeFactory, DatalogFactory datalogFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, atomFactory, termFactory,
-				datalogFactory, idfac);
+				TypeFactory typeFactory) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, atomFactory, termFactory, idfac);
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.typeFactory = typeFactory;
 	}
@@ -57,10 +56,9 @@ public class RDBMetadata extends BasicDBMetadata {
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
 						int parserViewCounter, JdbcTypeMapper jdbcTypeMapper, AtomFactory atomFactory,
-						TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+						TermFactory termFactory, TypeFactory typeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, jdbcTypeMapper, tables, relations,
-				listOfTables, atomFactory, termFactory, datalogFactory, idfac
-		);
+				listOfTables, atomFactory, termFactory, idfac);
 		this.parserViewCounter = parserViewCounter;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.typeFactory = typeFactory;
@@ -94,6 +92,6 @@ public class RDBMetadata extends BasicDBMetadata {
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
 				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getTermFactory(), typeFactory, getDatalogFactory());
+				parserViewCounter, jdbcTypeMapper, getAtomFactory(), getTermFactory(), typeFactory);
 	}
 }

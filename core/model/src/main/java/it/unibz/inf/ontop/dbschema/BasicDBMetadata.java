@@ -41,17 +41,17 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
                               TypeMapper typeMapper, AtomFactory atomFactory, TermFactory termFactory,
-                              DatalogFactory datalogFactory, QuotedIDFactory idfac) {
+                              QuotedIDFactory idfac) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
-                new HashMap<>(), new LinkedList<>(), atomFactory, termFactory, datalogFactory, idfac);
+                new HashMap<>(), new LinkedList<>(), atomFactory, termFactory, idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
                               TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
             RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
                               AtomFactory atomFactory, TermFactory termFactory,
-                              DatalogFactory datalogFactory, QuotedIDFactory idfac) {
-        super(termFactory, datalogFactory);
+                              QuotedIDFactory idfac) {
+        super(termFactory);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
@@ -237,8 +237,7 @@ public class BasicDBMetadata extends AbstractDBMetadata implements DBMetadata {
     public BasicDBMetadata clone() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables),
-                atomFactory, getTermFactory(), getDatalogFactory(), idfac
-        );
+                atomFactory, getTermFactory(), idfac);
     }
 
     protected boolean isStillMutable() {

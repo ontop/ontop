@@ -8,20 +8,17 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class LinearInclusionDependencies {
     
-	private final ImmutableMultimap<Predicate, CQIE> rules;
+	private final ImmutableMultimap<Predicate, LinearInclusionDependency> rules;
 
-	public LinearInclusionDependencies(ImmutableList<CQIE> dependencies) {
+	public LinearInclusionDependencies(ImmutableList<LinearInclusionDependency> dependencies) {
         this.rules = dependencies.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         d -> d.getHead().getFunctionSymbol(),
                         d -> d));
 	}
 
-	public ImmutableCollection<CQIE> getRules(Predicate pred) {
-        ImmutableCollection<CQIE> rrs = rules.get(pred);
-        if (rrs == null)
-            return ImmutableList.of();
-        return rrs;
+	public ImmutableCollection<LinearInclusionDependency> getRules(Predicate pred) {
+        return rules.get(pred);
 	}
 
     @Override

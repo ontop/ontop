@@ -57,7 +57,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        ImmutableList<CQIE> foreignKeyRules = dbMetadata.generateFKRules();
+        ImmutableList<LinearInclusionDependency> foreignKeyRules = dbMetadata.generateFKRules();
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
                 unifierUtilities, substitutionUtilities, termFactory);
 

@@ -22,9 +22,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 /***
@@ -42,7 +41,7 @@ public class DummyRewriter implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox ontology, ImmutableList<CQIE> sigma) {
+	public void setTBox(ClassifiedTBox ontology, ImmutableList<LinearInclusionDependency> sigma) {
 		// NO-OP
 	}
 }

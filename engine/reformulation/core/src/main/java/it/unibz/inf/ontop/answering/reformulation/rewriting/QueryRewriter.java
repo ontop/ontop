@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
@@ -37,5 +37,5 @@ public interface QueryRewriter {
 	 * @param ontology
 	 * @param sigma
 	 */
-	void setTBox(ClassifiedTBox ontology, ImmutableList<CQIE> sigma);
+	void setTBox(ClassifiedTBox ontology, ImmutableList<LinearInclusionDependency> sigma);
 }

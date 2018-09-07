@@ -106,7 +106,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-		ImmutableList<CQIE> s = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
+		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
 		this.sigma = new LinearInclusionDependencies(s);
 
 		this.rewriter = queryRewriter;

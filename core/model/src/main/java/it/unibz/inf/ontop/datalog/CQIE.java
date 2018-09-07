@@ -29,15 +29,13 @@ import java.util.Set;
 
 public interface CQIE extends Serializable {
 
-	public Function getHead();
+	Function getHead();
 
-	public List<Function> getBody();
+	List<Function> getBody();
 
-	public void updateHead(Function head);
+	void updateBody(List<Function> body);
 
-	public void updateBody(List<Function> body);
-
-	public CQIE clone();
+	CQIE clone();
 	
-	public Set<Variable> getReferencedVariables();
+	Set<Variable> getReferencedVariables();
 }
