@@ -11,7 +11,7 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	wkt
-target		:data/zone/{id} geo:asWKT "{geo}"^^geo:wkt .
+target		:data/zone/{id} geo:asWKT "{geo}"^^geo:wktLiteral .
 source		SELECT * FROM piazza
 ]]
 
