@@ -65,26 +65,6 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
     }
 
 
-    /**
-     * High-level method.
-     *
-     * Returns a new normalized rule.
-     */
-    @Override
-    public CQIE normalizeByPullingOutEqualities(final CQIE initialRule) {
-        CQIE newRule = initialRule.clone();
-
-        // Mutable object
-        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule, coreUtilsFactory);
-
-        /**
-         * Result for the top atoms of the rule.
-         */
-        PullOutEqLocalNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), variableDispatcher);
-
-        newRule.updateBody(new ArrayList(result.getAllAtoms().toCollection()));
-        return newRule;
-    }
 
     /**
      * Builds out a ExtractEqNormResult by aggregating the results of atoms at one given level

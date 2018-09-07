@@ -27,8 +27,6 @@ public interface MutableQueryModifiers extends QueryModifiers {
 
     void addOrderCondition(Variable var, int direction);
 
-    void addGroupCondition(Variable var);
-
     boolean hasModifiers();
 
     boolean hasGroup();

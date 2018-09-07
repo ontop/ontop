@@ -17,6 +17,4 @@ public interface QueryModifiers {
     long getLimit();
     long getOffset();
     List<OrderCondition> getSortConditions();
-
-    boolean isIdle();
 }

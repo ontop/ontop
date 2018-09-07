@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.datalog.OrderCondition;
-import it.unibz.inf.ontop.datalog.QueryModifiers;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.ArrayList;
@@ -34,8 +33,8 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	private long limit;
 	private long offset;
 
-	private List<OrderCondition> orderConditions;
-	private List<Variable> groupConditions;
+	private final List<OrderCondition> orderConditions;
+	private final List<Variable> groupConditions;
 	
 	public MutableQueryModifiersImpl() {
 		isDistinct = false;
@@ -43,19 +42,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 		offset = -1;
 		orderConditions = new ArrayList<>();
 		groupConditions = new ArrayList<>();
-	}
-
-	public MutableQueryModifiersImpl(QueryModifiers modifiers) {
-		isDistinct = modifiers.isDistinct();
-		limit = modifiers.getLimit();
-		offset = modifiers.getOffset();
-		orderConditions = new ArrayList<>(modifiers.getSortConditions());
-		if (modifiers instanceof MutableQueryModifiers) {
-			groupConditions = new ArrayList<>(((MutableQueryModifiers) modifiers).getGroupConditions());
-		}
-		else {
-			groupConditions = new ArrayList<>();
-		}
 	}
 
 	@Override
@@ -128,11 +114,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	}
 	
 	@Override
-	public void addGroupCondition(Variable var) {
-		groupConditions.add(var);
-	}
-
-	@Override
 	public List<Variable> getGroupConditions() {
 		return groupConditions;
 	}
@@ -140,11 +121,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	@Override
 	public List<OrderCondition> getSortConditions() {
 		return orderConditions;
-	}
-
-	@Override
-	public boolean isIdle() {
-		return !(hasGroup() || hasOrder() || hasLimit() || hasOffset() || isDistinct());
 	}
 
 	@Override
@@ -205,12 +181,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 		@Override
 		public OrderCondition newVariable(Variable newVariable) {
 			return new OrderConditionImpl(newVariable, direction);
-
-
 		}
-
-
-
-
 	}
 }

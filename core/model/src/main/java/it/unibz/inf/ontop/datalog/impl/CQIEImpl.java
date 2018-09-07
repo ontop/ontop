@@ -143,27 +143,6 @@ public class CQIEImpl implements CQIE, ListListener {
 		return head;
 	}
 
-	public void updateHead(Function head) {
-		this.head = head;
-
-		if (head instanceof ListenableFunction) {
-			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
-			headterms.removeListener(this);
-			headterms.addListener(this);
-			listChanged();
-		}
-		else if (!(head instanceof ImmutableFunctionalTerm)) {
-			throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
-					+ head);
-		}
-	}
-
-	public void updateBody(List<Function> body) {
-		this.body.clear();
-		this.body.addAll(body);
-		// TODO: what about listeners?
-		listChanged();
-	}
 
 	@Override
 	public int hashCode() {

@@ -33,8 +33,6 @@ public interface CQIE extends Serializable {
 
 	List<Function> getBody();
 
-	void updateBody(List<Function> body);
-
 	CQIE clone();
 	
 	Set<Variable> getReferencedVariables();

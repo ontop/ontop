@@ -90,18 +90,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	@Override
-	public void removeRules(Collection<CQIE> rs) {
-		for (CQIE rule : rs) {
-			this.rules.remove(rule);
-
-			Predicate predicate = rule.getHead().getFunctionSymbol();
-			List<CQIE> indexedRules = this.predicateIndex.get(predicate);
-			if (indexedRules != null)
-				indexedRules.remove(rule);
-		}
-	}
-
-	@Override
 	public List<CQIE> getRules() {
 		return Collections.unmodifiableList(rules);
 	}
@@ -130,8 +118,4 @@ public class DatalogProgramImpl implements DatalogProgram {
 		return modifiers;
 	}
 	
-	@Override
-	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
-	}
 }
