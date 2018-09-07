@@ -25,6 +25,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.WKT;
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
 
 
@@ -216,6 +217,8 @@ public class JDBC2ConstantConverter {
 
                 case YEAR:
                     return termFactory.getConstantLiteral(stringValue, XSD.GYEAR);
+                case WKT:
+                    return termFactory.getConstantLiteral(stringValue, WKT.getIri().get());
                 default:
                     throw new IllegalStateException("Unexpected colType: " + type);
 

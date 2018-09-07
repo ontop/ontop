@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.SimpleRDF;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,7 +35,8 @@ public enum COL_TYPE {
     NON_POSITIVE_INTEGER(18, "NON_POSITIVE_INTEGER", XSD.NON_POSITIVE_INTEGER),
     INT(19, "INT", XSD.INT),
     UNSIGNED_INT(20, "UNSIGNED_INT", XSD.UNSIGNED_INT),
-    DATETIME_STAMP(21, "DATETIME_STAMP", XSD.DATETIMESTAMP);
+    DATETIME_STAMP(21, "DATETIME_STAMP", XSD.DATETIMESTAMP),
+    WKT(22, "WKT", new SimpleRDF().createIRI("http://www.opengis.net/ont/geosparql#wkt"));
 
     private static final ImmutableMap<Integer, COL_TYPE> CODE_TO_TYPE_MAP;
     private static final ImmutableMap<IRI, COL_TYPE> IRI_TO_COL_TYPE_MAP;
