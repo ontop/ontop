@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.model.term.Function;
@@ -30,14 +30,9 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.PriorityQueue;
+import java.util.*;
 
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -80,7 +75,7 @@ public class DatalogQueryServices {
 		
 	}
 	
-	public List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
+	public List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
 		
 		PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
 				Comparator.comparingInt(cq -> cq.getBody().size()));
@@ -94,13 +89,13 @@ public class DatalogQueryServices {
 
 			List<Function> body = query.getBody();
 			int chosenAtomIdx = 0;
-			List<CQIE> chosenDefinitions = null;
+			Collection<CQIE> chosenDefinitions = null;
 			ListIterator<Function> bodyIterator = body.listIterator();
 			while (bodyIterator.hasNext()) {
 				Function currentAtom = bodyIterator.next(); // body.get(i);	
 
-				List<CQIE> definitions = defs.getRules(currentAtom.getFunctionSymbol());
-				if ((definitions != null) && (definitions.size() != 0)) {
+				Collection<CQIE> definitions = defs.get(currentAtom.getFunctionSymbol());
+				if (!definitions.isEmpty()) {
 					if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
 						chosenDefinitions = definitions;
 						chosenAtomIdx = bodyIterator.previousIndex();
