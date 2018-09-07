@@ -35,7 +35,7 @@ public class DatatypePredicateImpl extends FunctionSymbolImpl implements Datatyp
 	private final RDFDatatype returnedType;
 
 	protected DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
-		super(returnedType.toString(), 1, ImmutableList.of(argumentType));
+		super(returnedType.toString(), ImmutableList.of(argumentType));
 		this.returnedType = returnedType;
 	}
 	

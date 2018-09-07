@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
@@ -39,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TreeWitnessSet {
-	private final List<TreeWitness> tws = new LinkedList<TreeWitness>();
+	private final List<TreeWitness> tws = new LinkedList<>();
 	private final QueryConnectedComponent cc;
 	private final Collection<TreeWitnessGenerator> allTWgenerators;
 	private final QueryConnectedComponentCache cache; 
@@ -107,7 +106,7 @@ public class TreeWitnessSet {
 		}		
 		
 		if (!tws.isEmpty()) {
-			mergeable = new ArrayList<TreeWitness>();
+			mergeable = new ArrayList<>();
 			Queue<TreeWitness> working = new LinkedList<TreeWitness>();
 
 			for (TreeWitness tw : tws) 
@@ -116,8 +115,8 @@ public class TreeWitnessSet {
 					mergeable.add(tw);
 				}
 			
-			delta = new LinkedList<TreeWitness>();
-			twsCache = new HashMap<TreeWitness.TermCover, TreeWitness>();
+			delta = new LinkedList<>();
+			twsCache = new HashMap<>();
 
 			while (!working.isEmpty()) {
 				while (!working.isEmpty()) {
@@ -250,7 +249,7 @@ public class TreeWitnessSet {
 				continue;
 			
 			if (twg == null) 
-				twg = new LinkedList<TreeWitnessGenerator>();
+				twg = new LinkedList<>();
 			twg.add(g);
 			log.debug("        OK");
 		}
@@ -265,7 +264,7 @@ public class TreeWitnessSet {
 		private boolean isInNext[];
 		private boolean atNextPosition = true;
 		private boolean finished = false;
-		private Collection<TreeWitness> nextSet = new LinkedList<TreeWitness>();
+		private Collection<TreeWitness> nextSet = new LinkedList<>();
 
 		private CompatibleTreeWitnessSetIterator(int len) {
 			isInNext = new boolean[len];
@@ -503,7 +502,7 @@ public class TreeWitnessSet {
 	
 
 	public Set<TreeWitnessGenerator> getGeneratorsOfDetachedCC() {		
-		Set<TreeWitnessGenerator> generators = new HashSet<TreeWitnessGenerator>();
+		Set<TreeWitnessGenerator> generators = new HashSet<>();
 		
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
 			Intersection<ClassExpression> subc = cache.getSubConcepts(cc.getLoop().getAtoms());
@@ -543,7 +542,7 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				Set<ClassExpression> subc = new HashSet<ClassExpression>();		
+				Set<ClassExpression> subc = new HashSet<>();
 				for (TreeWitnessGenerator twg : generators) 
 					subc.addAll(twg.getSubConcepts());
 				

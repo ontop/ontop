@@ -41,7 +41,7 @@ public class AtomFactoryImpl implements AtomFactory {
         ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
                 .map(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
-        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, arity, defaultBaseTypes);
+        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, defaultBaseTypes);
     }
 
     @Override

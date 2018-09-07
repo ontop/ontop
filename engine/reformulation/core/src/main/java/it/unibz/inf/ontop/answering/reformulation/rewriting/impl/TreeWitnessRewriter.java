@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -135,29 +136,25 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
-		List<Function> genAtoms = new ArrayList<>(concepts.size());
-		
-		for (ClassExpression con : concepts) {
-			log.debug("  BASIC CONCEPT: {}", con);
-			Function atom; 
-			if (con instanceof OClass) {
-				atom = atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
-			}
-			else if (con instanceof ObjectSomeValuesFrom) {
-				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
-				atom = (!some.isInverse())
-						? atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable())
-						: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), some.getIRI(), r0);
-			}
-			else {
-				DataPropertyExpression some = ((DataSomeValuesFrom)con).getProperty();
-				atom = atomFactory.getMutableTripleBodyAtom(r0, some.getIRI(), getFreshVariable());
-			}
-			genAtoms.add(atom);
-		}
-		return genAtoms;
+	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
+		return TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner).stream()
+				.map(con -> {
+					log.debug("  BASIC CONCEPT: {}", con);
+					if (con instanceof OClass) {
+						return atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
+					}
+					else if (con instanceof ObjectSomeValuesFrom) {
+						ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
+						return (!ope.isInverse())
+								? atomFactory.getMutableTripleBodyAtom(r0, ope.getIRI(), getFreshVariable())
+								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), r0);
+					}
+					else {
+						DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
+						return atomFactory.getMutableTripleBodyAtom(r0, dpe.getIRI(), getFreshVariable());
+					}
+				})
+				.collect(ImmutableCollectors.toList());
 	}
 	
 	
@@ -169,8 +166,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
 		
 		List<CQIE> outputRules = new LinkedList<>();	
-		String headURI = headAtom.getFunctionSymbol().getName();
-		
+
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators, immutabilityTools);
 
 		if (cc.hasNoFreeTerms()) {  
@@ -183,7 +179,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
 		for (TreeWitness tw : tws.getTWs()) {
 			log.debug("TREE WITNESS: {}", tw);		
-			List<Function> twf = new LinkedList<Function>(); 
+			List<Function> twf = new LinkedList<>();
 			
 			// equality atoms
 			Iterator<Term> i = tw.getRoots().iterator();
@@ -216,10 +212,10 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 //					break;
 //				}
 
-			List<List<Function>> twfs = new ArrayList<List<Function>>(subsumes ? 1 : genAtoms.size());			
+			List<List<Function>> twfs = new ArrayList<>(subsumes ? 1 : genAtoms.size());
 //			if (!subsumes) {
 				for (Function a : genAtoms) {				
-					LinkedList<Function> twfa = new LinkedList<Function>(twf);
+					LinkedList<Function> twfa = new LinkedList<>(twf);
 					twfa.add(a); // 
 					twfs.add(twfa);
 				}
@@ -229,8 +225,9 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			
 			tw.setFormula(twfs);
 		}
-				
-		if (!cc.isDegenerate()) {			
+
+		final String headURI = headAtom.getFunctionSymbol().getName();
+		if (!cc.isDegenerate()) {
 			if (tws.hasConflicts()) { 
 				// there are conflicting tree witnesses
 				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
@@ -266,7 +263,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			else {
 				// no conflicting tree witnesses
 				// use polynomial tree witness rewriting by treating each edge independently 
-				LinkedList<Function> mainbody = new LinkedList<Function>(); 		
+				LinkedList<Function> mainbody = new LinkedList<>();
 				for (Edge edge : cc.getEdges()) {
 					log.debug("EDGE {}", edge);
 					
@@ -279,7 +276,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.add(edgeAtom);				
 								
-								LinkedList<Function> edgeAtoms = new LinkedList<Function>(); 
+								LinkedList<Function> edgeAtoms = new LinkedList<>();
 								edgeAtoms.addAll(edge.getAtoms());
 								edgeDP.appendRule(datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
@@ -297,7 +294,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		}
 		else {
 			// degenerate connected component
-			LinkedList<Function> loopbody = new LinkedList<Function>();
+			LinkedList<Function> loopbody = new LinkedList<>();
 			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
 			if (loop != null)
@@ -326,7 +323,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		
 			if (ccs.size() == 1) {
 				QueryConnectedComponent cc = ccs.iterator().next();
-				log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
+				log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 				outputRules.addAll(rewriteCC(cc, cqieAtom, edgeDP)); 				
@@ -335,14 +332,13 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 				if (ccDP == null)
 					ccDP = datalogFactory.getDatalogProgram();
 				String cqieURI = cqieAtom.getFunctionSymbol().getName();
-				List<Function> ccBody = new ArrayList<Function>(ccs.size());
+				List<Function> ccBody = new ArrayList<>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
-					log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
+					log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
-					List<CQIE> list = rewriteCC(cc, ccAtom, edgeDP); 
-					ccDP.appendRule(list);
+					ccDP.appendRule(rewriteCC(cc, ccAtom, edgeDP));
 					ccBody.add(ccAtom);
 				}
 				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));

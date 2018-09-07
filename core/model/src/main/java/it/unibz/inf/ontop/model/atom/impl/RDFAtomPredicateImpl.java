@@ -16,20 +16,21 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
     private final int objectIndex;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
 
-    protected RDFAtomPredicateImpl(String name, int arity, ImmutableList<TermType> expectedBaseTypes,
+    protected RDFAtomPredicateImpl(String name, ImmutableList<TermType> expectedBaseTypes,
                                    int subjectIndex, int propertyIndex, int objectIndex,
                                    org.apache.commons.rdf.api.RDF rdfFactory) {
-        super(name, arity, expectedBaseTypes);
+        super(name, expectedBaseTypes);
         this.subjectIndex = subjectIndex;
         this.propertyIndex = propertyIndex;
         this.objectIndex = objectIndex;
         this.rdfFactory = rdfFactory;
 
-        if (propertyIndex >= arity)
-            throw new IllegalArgumentException("propertyIndex must be inferior to arity");
-        if (objectIndex >= arity)
-            throw new IllegalArgumentException("objectIndex must be inferior to arity");
-
+        if (subjectIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("subjectIndex exceeds the arity");
+        if (propertyIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("propertyIndex exceeds the arity");
+        if (objectIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("objectIndex exceeds the arity");
     }
 
     @Override

@@ -14,7 +14,7 @@ public class QuadPredicateImpl extends RDFAtomPredicateImpl implements QuadPredi
     private static int NAMED_GRAPH_INDEX = 3;
 
     protected QuadPredicateImpl(ImmutableList<TermType> expectedBaseTypes, RDF rdfFactory) {
-        super("triple", 4, expectedBaseTypes,0, 1, 2, rdfFactory);
+        super("triple", expectedBaseTypes,0, 1, 2, rdfFactory);
     }
 
     @Override
