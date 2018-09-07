@@ -32,7 +32,4 @@ public interface EventGeneratingList<E> extends List<E> {
 	void addListener(ListListener listener);
 
 	void removeListener(ListListener listener);
-
-	void riseListChanged();
-
 }

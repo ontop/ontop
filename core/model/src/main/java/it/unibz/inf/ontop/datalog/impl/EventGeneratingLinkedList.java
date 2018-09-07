@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.datalog.impl;
  */
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import it.unibz.inf.ontop.datalog.EventGeneratingList;
@@ -41,6 +42,12 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 	private final LinkedList<ListListener> listeners = new LinkedList<>();
 
 	private static Logger log = LoggerFactory.getLogger(EventGeneratingLinkedList.class);
+
+	public EventGeneratingLinkedList() { }
+
+	public EventGeneratingLinkedList(Collection<E> c) { super(c); }
+
+	public EventGeneratingLinkedList(E[] c) { Collections.addAll(this, c); }
 
 	/* (non-Javadoc)
 	 * @see it.unibz.inf.obda.utils.EventGeneratingList#addListener(it.unibz.inf.obda.utils.ListListener)
@@ -119,11 +126,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 		return r;
 	}
 
-	/* (non-Javadoc)
-	 * @see it.unibz.inf.obda.utils.EventGeneratingList#riseListChanged()
-	 */
-	@Override
-	public void riseListChanged() {
+	private void riseListChanged() {
 		for (ListListener listener : listeners) {
 			try {
 				listener.listChanged();
