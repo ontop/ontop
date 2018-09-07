@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.datalog;
 
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -29,7 +32,11 @@ public class VariableDispatcher {
      * For a datalog rule
      */
     public VariableDispatcher(CQIE rule, CoreUtilsFactory coreUtilsFactory) {
-        variableGenerator = coreUtilsFactory.createVariableGenerator(rule.getReferencedVariables());
+        Set<Variable> vars = new LinkedHashSet<>();
+        for (Function atom : rule.getBody()) {
+            TermUtils.addReferencedVariablesTo(vars, atom);
+        }
+        variableGenerator = coreUtilsFactory.createVariableGenerator(vars);
         allocatedVariables = new HashSet<>();
     }
 

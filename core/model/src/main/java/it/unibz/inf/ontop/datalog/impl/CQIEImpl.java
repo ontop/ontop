@@ -21,20 +21,15 @@ package it.unibz.inf.ontop.datalog.impl;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.ListenableFunction;
 
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.datalog.EventGeneratingList;
 import it.unibz.inf.ontop.datalog.ListListener;
 
@@ -190,14 +185,5 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void listChanged() {
 		rehash = true;
 		string = null;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		Set<Variable> vars = new LinkedHashSet<>();
-		for (Function atom : body) {
-			TermUtils.addReferencedVariablesTo(vars, atom);
-		}
-		return vars;
 	}
 }
