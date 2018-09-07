@@ -59,6 +59,12 @@ public class DatalogProgramImpl implements DatalogProgram {
 		predicateIndex = new HashMap<>();
 	}
 
+	protected DatalogProgramImpl(MutableQueryModifiers modifiers) {
+		this.modifiers = modifiers.clone();
+		rules = new LinkedList<>();
+		predicateIndex = new HashMap<>();
+	}
+
 	@Override
 	public void appendRule(CQIE rule) {
 		if (rule == null) {

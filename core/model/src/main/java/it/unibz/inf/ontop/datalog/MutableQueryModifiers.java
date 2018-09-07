@@ -16,10 +16,7 @@ public interface MutableQueryModifiers extends QueryModifiers {
 
     MutableQueryModifiers clone();
 
-    void copy(MutableQueryModifiers other);
-
     void setDistinct();
-
 
     void setLimit(long limit);
 
@@ -30,5 +27,4 @@ public interface MutableQueryModifiers extends QueryModifiers {
     boolean hasModifiers();
 
     boolean hasGroup();
-    List<Variable> getGroupConditions();
 }

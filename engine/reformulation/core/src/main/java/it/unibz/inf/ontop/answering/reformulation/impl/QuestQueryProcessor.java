@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
@@ -12,7 +11,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
@@ -103,10 +101,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.cqcUtilities = cqcUtilities;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
-		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox);
+
+		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
@@ -295,7 +292,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		DatalogProgram program = translateAndPreProcess(query);
 		DatalogProgram rewriting = rewriter.rewrite(program);
-		return DatalogProgramRenderer.encode(rewriting);
+		return Joiner.on("\n").join(rewriting.getRules());
 	}
 
 	@Override

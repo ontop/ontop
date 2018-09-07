@@ -58,15 +58,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	}
 
 	@Override
-	public void copy(MutableQueryModifiers other) {
-		isDistinct = other.isDistinct();
-		limit = other.getLimit();
-		offset = other.getOffset();
-		orderConditions.addAll(other.getSortConditions());
-		groupConditions.addAll(other.getGroupConditions());
-	}
-
-	@Override
 	public void setDistinct() {
 		isDistinct = true;
 	}
@@ -76,7 +67,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 		return isDistinct;
 	}
 	
-
 	@Override
 	public void setLimit(long limit) {
 		this.limit = limit;
@@ -111,11 +101,6 @@ public class MutableQueryModifiersImpl implements MutableQueryModifiers {
 	public void addOrderCondition(Variable var, int direction) {
 		OrderCondition condition = new OrderConditionImpl(var, direction);
 		orderConditions.add(condition);
-	}
-	
-	@Override
-	public List<Variable> getGroupConditions() {
-		return groupConditions;
 	}
 	
 	@Override
