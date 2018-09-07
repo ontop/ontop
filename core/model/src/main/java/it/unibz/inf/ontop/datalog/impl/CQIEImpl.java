@@ -62,7 +62,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
 		if (body != null) {
-			EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<Function>();
+			EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<>();
 			eventbody.addAll(body);				
 			this.body = eventbody;
 

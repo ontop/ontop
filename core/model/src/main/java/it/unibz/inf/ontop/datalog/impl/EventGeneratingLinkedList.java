@@ -38,7 +38,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 
 	private static final long serialVersionUID = 893780365770320662L;
 	
-	LinkedList<ListListener> listeners = new LinkedList<ListListener>();
+	private final LinkedList<ListListener> listeners = new LinkedList<>();
 
 	private static Logger log = LoggerFactory.getLogger(EventGeneratingLinkedList.class);
 
@@ -127,7 +127,8 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 		for (ListListener listener : listeners) {
 			try {
 				listener.listChanged();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				log.error(e.toString(), e);
 			}
 		}

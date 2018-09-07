@@ -299,7 +299,7 @@ public class OneShotSQLGeneratorEngine {
 		isDistinct = queryModifiers.hasModifiers() && queryModifiers.isDistinct();
 		isOrderBy = queryModifiers.hasModifiers() && !queryModifiers.getSortConditions().isEmpty();
 
-		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram);
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram.getRules());
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
