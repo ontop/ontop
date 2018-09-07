@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -443,7 +444,7 @@ public class CQCUtilitiesTest {
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
 
-			ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+			ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 					SUBSTITUTION_UTILITIES, TERM_FACTORY);
@@ -472,7 +473,7 @@ public class CQCUtilitiesTest {
 					TERM_FACTORY.getVariable("y"), propertyR, TERM_FACTORY.getVariable("z"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+			ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 					SUBSTITUTION_UTILITIES, TERM_FACTORY);
@@ -501,7 +502,7 @@ public class CQCUtilitiesTest {
 					TERM_FACTORY.getVariable("z"), propertyR, TERM_FACTORY.getVariable("y"));
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+			ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 			
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 					SUBSTITUTION_UTILITIES, TERM_FACTORY);
@@ -530,7 +531,7 @@ public class CQCUtilitiesTest {
 			Function body2 = ATOM_FACTORY.getMutableTripleBodyAtom(TERM_FACTORY.getVariable("z"), classA);
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+			ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 					SUBSTITUTION_UTILITIES, TERM_FACTORY);
@@ -560,7 +561,7 @@ public class CQCUtilitiesTest {
 			Function body2 = ATOM_FACTORY.getMutableTripleBodyAtom(TERM_FACTORY.getVariable("z"), classA);
 			CQIE query2 = DATALOG_FACTORY.getCQIE(head2, body2);
 
-			ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+			ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 
 			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 					SUBSTITUTION_UTILITIES, TERM_FACTORY);
@@ -619,7 +620,7 @@ public class CQCUtilitiesTest {
         body = new LinkedList<>();
         CQIE query2 = DATALOG_FACTORY.getCQIE(head, body);
 
-		ImmutableList<CQIE> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
+		ImmutableList<LinearInclusionDependency> dep = INCLUSION_DEPENDENCY_TOOLS.getABoxDependencies(sigma, false);
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep, DATALOG_FACTORY, UNIFIER_UTILITIES,
 				SUBSTITUTION_UTILITIES, TERM_FACTORY);
 				
