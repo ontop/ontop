@@ -45,7 +45,7 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 
 	public EventGeneratingLinkedList() { }
 
-	public EventGeneratingLinkedList(Collection<E> c) { super(c); }
+	public EventGeneratingLinkedList(Collection<E> c) { addAll(c); }
 
 	public EventGeneratingLinkedList(E[] c) { Collections.addAll(this, c); }
 
