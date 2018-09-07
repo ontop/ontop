@@ -360,8 +360,11 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
 			outputRules = datalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null) {
+			    Multimap<Predicate, CQIE> ccDP2 = ArrayListMultimap.create();
 			    for (Predicate p : ccDP.keys())
-                    ccDP.replaceValues(p, datalogQueryServices.plugInDefinitions(ccDP.get(p), edgeDP));
+			        for (CQIE cq : datalogQueryServices.plugInDefinitions(ccDP.get(p), edgeDP))
+                        ccDP2.put(p, cq);
+			    ccDP = ccDP2;
             }
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
