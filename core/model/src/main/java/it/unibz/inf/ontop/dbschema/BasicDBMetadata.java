@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,19 +31,16 @@ public class BasicDBMetadata implements DBMetadata {
     private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
-    private final AtomFactory atomFactory;
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, AtomFactory atomFactory,
-                              QuotedIDFactory idfac) {
+                              TypeMapper typeMapper, QuotedIDFactory idfac) {
         this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
-                new HashMap<>(), new LinkedList<>(), atomFactory, idfac);
+                new HashMap<>(), new LinkedList<>(), idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
                               TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
             RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                              AtomFactory atomFactory,
                               QuotedIDFactory idfac) {
         this.driverName = driverName;
         this.driverVersion = driverVersion;
@@ -57,7 +51,6 @@ public class BasicDBMetadata implements DBMetadata {
         this.tables = tables;
         this.relations = relations;
         this.listOfTables = listOfTables;
-        this.atomFactory = atomFactory;
         this.isStillMutable = true;
         this.uniqueConstraints = null;
     }
@@ -181,7 +174,6 @@ public class BasicDBMetadata implements DBMetadata {
     }
 
     private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
-        Map<Predicate, AtomPredicate> predicateCache = new HashMap<>();
 
         return getDatabaseRelations().stream()
                 .flatMap(this::extractUniqueConstraintsFromRelation)
@@ -232,16 +224,11 @@ public class BasicDBMetadata implements DBMetadata {
     @Override
     public BasicDBMetadata clone() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
-                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables),
-                atomFactory, idfac);
+                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
     }
 
     protected boolean isStillMutable() {
         return isStillMutable;
-    }
-
-    protected AtomFactory getAtomFactory() {
-        return atomFactory;
     }
 
     @Override

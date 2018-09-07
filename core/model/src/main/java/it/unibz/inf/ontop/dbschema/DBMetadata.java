@@ -76,11 +76,13 @@ public interface DBMetadata extends Serializable {
      * Temporary solution to enable DBMetadata merging
      *
      */
+    @Deprecated
     ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables();
 
     /**
      * Temporary solution to enable DBMetadata merging
      *
      */
+    @Deprecated
     ImmutableMap<RelationID, RelationDefinition> copyRelations();
 }
