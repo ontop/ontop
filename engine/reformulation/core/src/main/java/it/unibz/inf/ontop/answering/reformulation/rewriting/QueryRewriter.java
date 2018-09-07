@@ -20,10 +20,11 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 public interface QueryRewriter {
@@ -35,7 +36,8 @@ public interface QueryRewriter {
 	 * use to compute any reformulation.
 	 * 
 	 * @param ontology
-	 * @param sigma
 	 */
-	void setTBox(ClassifiedTBox ontology, ImmutableList<LinearInclusionDependency> sigma);
+	void setTBox(ClassifiedTBox ontology);
+
+	ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma();
 }

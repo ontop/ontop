@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -20,7 +21,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final LinearInclusionDependencies dependencies;
+	private final ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies;
 	private final DatalogFactory datalogFactory;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
@@ -51,7 +52,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
                                        UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
                                        TermFactory termFactory) {
 	    // index dependencies
-		this.dependencies = new LinearInclusionDependencies(dependencies);
+		this.dependencies = LinearInclusionDependency.toMultimap(dependencies);
 		this.datalogFactory = datalogFactory;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
@@ -74,7 +75,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (LinearInclusionDependency d : dependencies.getRules(fact.getFunctionSymbol())) {
+			for (LinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
 				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(d.getHead(), d.getBody()));
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
@@ -277,6 +278,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return "(empty)";
 	}
 
-	public LinearInclusionDependencies dependencies() { return dependencies; }
+	public ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies() { return dependencies; }
 
 }

@@ -21,9 +21,11 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 /***
@@ -41,7 +43,13 @@ public class DummyRewriter implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox ontology, ImmutableList<LinearInclusionDependency> sigma) {
+	public void setTBox(ClassifiedTBox ontology) {
 		// NO-OP
 	}
+
+	@Override
+	public ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma() {
+		return ImmutableMultimap.of();
+	}
+
 }

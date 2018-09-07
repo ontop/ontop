@@ -20,12 +20,13 @@ package it.unibz.inf.ontop.datalog.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -157,7 +158,7 @@ public class CQCUtilities {
         return unifiedQ;
     }
 
-	public void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies dependencies) {
+	public void optimizeQueryWithSigmaRules(List<Function> atoms, ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies) {
 
 		// for each atom in query body
 		for (int i = 0; i < atoms.size(); i++) {
@@ -165,9 +166,8 @@ public class CQCUtilities {
 
 			Set<Function> derivedAtoms = new HashSet<>();
 			// collect all derived atoms
-			for (LinearInclusionDependency rule : dependencies.getRules(atom.getFunctionSymbol())) {
+			for (LinearInclusionDependency rule : dependencies.get(atom.getFunctionSymbol())) {
 				// try to unify current query body atom with tbox rule body atom
-				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
 				Function ruleBody = rule.getBody();
 				Substitution theta = unifierUtilities.getMGU(ruleBody, atom);
 				if (theta == null || theta.isEmpty()) {

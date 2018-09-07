@@ -21,8 +21,10 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -60,6 +62,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private ClassifiedTBox reasoner;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
+	private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
 
 	private Collection<TreeWitnessGenerator> generators;
 	private final AtomFactory atomFactory;
@@ -70,12 +73,13 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
+	private final LinearInclusionDependencyTools inclusionDependencyTools;
 
 	@Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
 								DatalogQueryServices datalogQueryServices, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools inclusionDependencyTools) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -84,15 +88,19 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
+		this.inclusionDependencyTools = inclusionDependencyTools;
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox reasoner, ImmutableList<LinearInclusionDependency> sigma) {
+	public void setTBox(ClassifiedTBox reasoner) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
 
-		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory, unifierUtilities,
+		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+		sigma = LinearInclusionDependency.toMultimap(s);
+
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(s, datalogFactory, unifierUtilities,
 				substitutionUtilities, termFactory);
 		
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
@@ -109,7 +117,11 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	}
 	
 	
-	
+	@Override
+    public ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma() {
+	    return sigma;
+    }
+
 	/*
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.ExecutableQuery;
@@ -17,7 +18,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -49,7 +49,6 @@ import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryRewriter rewriter;
-	private final LinearInclusionDependencies sigma;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -85,7 +84,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
-								LinearInclusionDependencyTools inclusionDependencyTools,
 								DatalogFactory datalogFactory,
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
@@ -106,11 +104,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
-		this.sigma = new LinearInclusionDependencies(s);
 
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox, s);
+		this.rewriter.setTBox(saturatedTBox);
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
@@ -201,7 +197,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			log.debug("Start the rewriting process...");
 
 			for (CQIE cq : newprogram.getRules())
-				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), rewriter.getSigma());
 			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
 
 			try {
