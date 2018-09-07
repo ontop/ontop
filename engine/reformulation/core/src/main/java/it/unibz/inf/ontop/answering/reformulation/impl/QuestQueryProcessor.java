@@ -183,19 +183,23 @@ public class QuestQueryProcessor implements QueryReformulator {
 			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 			DatalogProgram newprogram = preProcess(translation);
 
-			for (CQIE q : newprogram.getRules()) 
+			List<CQIE> cqs = newprogram.getRules();
+
+			for (CQIE q : cqs)
 				datalogNormalizer.unfoldJoinTrees(q);
 			log.debug("Normalized program: \n{}", newprogram);
 
-			if (newprogram.getRules().size() < 1)
+			if (cqs.isEmpty())
 				throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 						"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 			log.debug("Start the rewriting process...");
 
-			for (CQIE cq : newprogram.getRules())
+			for (CQIE cq : cqs)
 				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), rewriter.getSigma());
-			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
+			
+			DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(newprogram.getQueryModifiers());
+			programAfterRewriting.appendRule(rewriter.rewrite(cqs));
 
 			try {
 				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
@@ -291,8 +295,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		DatalogProgram program = translateAndPreProcess(query);
-		DatalogProgram rewriting = rewriter.rewrite(program);
-		return Joiner.on("\n").join(rewriting.getRules());
+		List<CQIE> rewriting = rewriter.rewrite(program.getRules());
+		return Joiner.on("\n").join(rewriting);
 	}
 
 	@Override

@@ -317,7 +317,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private double time = 0;
 	
 	@Override
-	public DatalogProgram rewrite(DatalogProgram dp) {
+	public List<CQIE> rewrite(List<CQIE> ucq) {
 		
 		double startime = System.currentTimeMillis();
 
@@ -325,7 +325,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		Multimap<Predicate, CQIE> ccDP = null;
 		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
 
-		for (CQIE cqie : dp.getRules()) {
+		for (CQIE cqie : ucq) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
 					atomFactory, immutabilityTools);
 			Function cqieAtom = cqie.getHead();
@@ -377,15 +377,14 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		if (outputRules.size() > 1) 
 			cqcUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = datalogFactory.getDatalogProgram(dp.getQueryModifiers(), outputRules);
-		for (CQIE cq : output.getRules())
+		for (CQIE cq : outputRules)
             cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), dataDependenciesCQC.dependencies());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", output);
-		return output;
+		log.debug("Final rewriting:\n{}", outputRules);
+		return outputRules;
 	}
 }

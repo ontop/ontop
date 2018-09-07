@@ -20,13 +20,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+
+import java.util.List;
 
 /***
  * A query rewriter that does nothing on the given query.
@@ -38,7 +39,7 @@ public class DummyRewriter implements QueryRewriter {
 
 	
 	@Override
-	public DatalogProgram rewrite(DatalogProgram input) {
+	public List<CQIE> rewrite(List<CQIE> input) {
 		return input;
 	}
 
