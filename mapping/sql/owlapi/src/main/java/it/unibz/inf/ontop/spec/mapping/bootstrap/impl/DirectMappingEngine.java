@@ -23,11 +23,9 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -90,8 +88,6 @@ public class DirectMappingEngine {
 	private final SQLPPMappingFactory ppMappingFactory;
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
-	private final DatalogFactory datalogFactory;
-	private final AtomFactory atomFactory;
 	private final RDF rdfFactory;
 	private final JdbcTypeMapper jdbcTypeMapper;
 	private final OntopSQLCredentialSettings settings;
@@ -115,15 +111,12 @@ public class DirectMappingEngine {
 	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
-								DatalogFactory datalogFactory, AtomFactory atomFactory,
 								RDF rdfFactory, JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
-		this.datalogFactory = datalogFactory;
-		this.atomFactory = atomFactory;
 		this.rdfFactory = rdfFactory;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.targetAtomFactory = targetAtomFactory;
@@ -248,8 +241,7 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
-					atomFactory, jdbcTypeMapper);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);
