@@ -79,7 +79,7 @@ public class SPARQLQueryFlattener {
 	public List<CQIE> flatten(CQIE topLevelRule) {
 
         List<CQIE> workingSet = new LinkedList<>();
-		workingSet.add(topLevelRule);
+		workingSet.add(topLevelRule.clone());
 
 		ListIterator<CQIE> iterator = workingSet.listIterator();
 		while (iterator.hasNext()) {
