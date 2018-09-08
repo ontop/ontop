@@ -79,7 +79,7 @@ public class SPARQLQueryFlattener {
 	public List<CQIE> flatten(CQIE topLevelRule) {
 
         List<CQIE> workingSet = new LinkedList<>();
-		workingSet.add(topLevelRule.clone());
+		workingSet.add(topLevelRule);
 
 		ListIterator<CQIE> iterator = workingSet.listIterator();
 		while (iterator.hasNext()) {
@@ -268,7 +268,7 @@ public class SPARQLQueryFlattener {
         for (CQIE candidateRule : definitions) {
             CQIE freshRule = datalogFactory.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
-            Substitution mgu = unifierUtilities.getMGU(freshRule.getHead(), (Function) atom.clone());
+            Substitution mgu = unifierUtilities.getMGU(freshRule.getHead(), atom);
             if (mgu == null) {
                 continue; // Failed attempt
             }
