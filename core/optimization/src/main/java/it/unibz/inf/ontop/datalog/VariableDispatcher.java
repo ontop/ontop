@@ -22,30 +22,14 @@ import java.util.Set;
  */
 public class VariableDispatcher {
 
-    private final VariableGenerator variableGenerator;
+    private VariableGenerator variableGenerator;
     /**
      * Keeps track of allocated variables to not allocate them twice.
      */
-    private final Set<Variable> allocatedVariables;
+    private Set<Variable> allocatedVariables;
 
-    /**
-     * For a datalog rule
-     */
-    public VariableDispatcher(CQIE rule, CoreUtilsFactory coreUtilsFactory) {
-        Set<Variable> vars = new LinkedHashSet<>();
-        for (Function atom : rule.getBody()) {
-            TermUtils.addReferencedVariablesTo(vars, atom);
-        }
-        variableGenerator = coreUtilsFactory.createVariableGenerator(vars);
-        allocatedVariables = new HashSet<>();
-    }
+    public VariableDispatcher(int i) {
 
-    /**
-     * Please make sure you cannot use the other constructors!
-     */
-    public VariableDispatcher(CoreUtilsFactory coreUtilsFactory) {
-        variableGenerator = coreUtilsFactory.createVariableGenerator(new HashSet<>());
-        allocatedVariables = new HashSet<>();
     }
 
     /**
