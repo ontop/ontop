@@ -85,7 +85,7 @@ public class SPARQLQueryFlattener {
 		while (iterator.hasNext()) {
 			CQIE rule = iterator.next(); 
 
-			List<CQIE> result = computePartialEvaluation(rule.getBody(), rule, new Stack<Integer>());
+			List<CQIE> result = computePartialEvaluation(rule.getBody(), rule, new Stack<>());
             if (!result.isEmpty()) {
 				// one more step in the partial evaluation was computed, we need to
 				// remove the old query and add the result instead. Each of the new
@@ -268,7 +268,7 @@ public class SPARQLQueryFlattener {
         for (CQIE candidateRule : definitions) {
             CQIE freshRule = datalogFactory.getFreshCQIECopy(candidateRule);
             // IMPORTANT: getMGU changes arguments
-            Substitution mgu = unifierUtilities.getMGU(freshRule.getHead(), atom);
+            Substitution mgu = unifierUtilities.getMGU(freshRule.getHead(), (Function) atom.clone());
             if (mgu == null) {
                 continue; // Failed attempt
             }

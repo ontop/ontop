@@ -138,22 +138,15 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
-			// TODO: fix cloning
-			CQIE rule = query.clone();
-			// TODO: get rid of EQNormalizer
-			eqNormalizer.enforceEqualities(rule);
-
-			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
-				topLevelPredicate = rule.getHead().getFunctionSymbol();
-			newprogramEq.appendRule(rule);
+			if (query.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
+				topLevelPredicate = query.getHead().getFunctionSymbol();
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(program, datalogFactory,
 				eqNormalizer, unifierUtilities, substitutionUtilities);
-		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+		List<CQIE> p = fl.flatten(program.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
 
 
