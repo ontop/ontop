@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SPARQLQueryFlattener {
 
@@ -23,16 +21,14 @@ public class SPARQLQueryFlattener {
     private final List<Predicate> irreducible = new LinkedList<>();
 	private final DatalogProgram program;
 	private final DatalogFactory datalogFactory;
-	private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 
 	public SPARQLQueryFlattener(DatalogProgram program, DatalogFactory datalogFactory,
-								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
+								UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities) {
 		this.program = program;
 		this.datalogFactory = datalogFactory;
-		this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 	}
@@ -111,12 +107,6 @@ public class SPARQLQueryFlattener {
             irreducible.clear();
 		}
 		
-		// We need to enforce equality again, because at this point it is 
-		//  possible that there is still some EQ(...) 
-		for (CQIE query : workingSet) {
-			eqNormalizer.enforceEqualities(query);
-		}
-
 		return workingSet;
 	}
 
