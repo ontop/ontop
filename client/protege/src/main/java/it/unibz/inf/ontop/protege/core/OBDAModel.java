@@ -299,7 +299,7 @@ public class OBDAModel {
         return formerTriplesMap.getTargetAtoms().stream()
                 .filter(a -> {
                     if (a.getPredicateIRI()
-                            .map(i -> i.equals(removedPredicateIRI))
+                            .filter(i -> i.equals(removedPredicateIRI))
                             .isPresent()) {
                         counter.incrementAndGet();
                         return false;
