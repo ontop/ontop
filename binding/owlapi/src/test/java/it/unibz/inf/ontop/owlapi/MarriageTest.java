@@ -178,6 +178,73 @@ public class MarriageTest {
 		assertEquals(2, count);
 	}
 
+	@Test
+	public void testPersonConstructOffset() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void testPersonConstructLimitOffset1() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 3\n" +
+				"LIMIT 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(0, count);
+	}
+
+	@Test
+	public void testPersonConstructLimitOffset2() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 2\n" +
+				"LIMIT 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(1, count);
+	}
+
+	@Test
+	public void testPersonConstructOrderByLimit() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"ORDER BY ?x\n" +
+				"LIMIT 2";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
         // Now we are ready for querying
