@@ -24,43 +24,45 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
 public class MarriageTest {
 
-	private Connection conn;
-
 	private static final String ONTOLOGY_FILE = "src/test/resources/marriage/marriage.ttl";
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
     private static final String CREATE_DB_FILE = "src/test/resources/marriage/create-db.sql";
-    private static final String DROP_DB_FILE = "src/test/resources/marriage/drop-db.sql";
 	private static final String JDBC_URL = "jdbc:h2:mem:questjunitdb";
 	private static final String JDBC_USER = "sa";
 	private static final String JDBC_PASSWORD = "";
+	private static final Logger LOGGER = LoggerFactory.getLogger(MarriageTest.class);
+
+	private static Connection CONNECTION;
+	private static OntopOWLReasoner REASONER;
 
 
-    @Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void setUp() throws Exception {
 
-		conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+		CONNECTION = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 
-
-		Statement st = conn.createStatement();
+		Statement st = CONNECTION.createStatement();
 
 		FileReader reader = new FileReader(CREATE_DB_FILE);
 		BufferedReader in = new BufferedReader(reader);
@@ -73,34 +75,25 @@ public class MarriageTest {
 		in.close();
 
 		st.executeUpdate(bf.toString());
-		conn.commit();
+		CONNECTION.commit();
+
+		OntopOWLFactory owlFactory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(OBDA_FILE)
+				.ontologyFile(ONTOLOGY_FILE)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
+				.enableTestMode()
+				.build();
+
+		REASONER = owlFactory.createReasoner(config);
 	}
 
-	@After
-	public void tearDown() throws Exception {
-
-		  dropTables();
-			conn.close();
-
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader(DROP_DB_FILE);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+	@AfterClass
+	public static void tearDown() throws Exception {
+		REASONER.dispose();
+		CONNECTION.close();
 	}
 
 
@@ -154,22 +147,41 @@ public class MarriageTest {
 		checkReturnedValues(queryBind, expectedValues);
 	}
 
+	@Test
+	public void testPersonConstruct() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}";
+
+		int count = runConstructQuery(query);
+		assertEquals(3, count);
+	}
+
+	@Test
+	public void testPersonConstructLimit() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"LIMIT 2";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(OBDA_FILE)
-				.ontologyFile(ONTOLOGY_FILE)
-				.jdbcUrl(JDBC_URL)
-				.jdbcUser(JDBC_USER)
-				.jdbcPassword(JDBC_PASSWORD)
-				.enableTestMode()
-				.build();
-		OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-
         // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
+        OWLConnection conn = REASONER.getConnection();
         OWLStatement st = conn.createStatement();
 
         Set<String> returnedValues = new HashSet<>();
@@ -183,12 +195,24 @@ public class MarriageTest {
             }
         } finally {
             conn.close();
-            reasoner.dispose();
         }
         assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
                 returnedValues.equals(expectedValues));
-
     }
+
+    private int runConstructQuery(String constructQuery) throws Exception {
+		int count = 0;
+		try (OWLConnection conn = REASONER.getConnection();
+			 OWLStatement st = conn.createStatement()) {
+			GraphOWLResultSet rs = st.executeConstructQuery(constructQuery);
+			while (rs.hasNext()) {
+				OWLAxiom axiom = rs.next();
+				LOGGER.debug(axiom.toString());
+				count++;
+			}
+		}
+		return count;
+	}
 
 
 }
