@@ -20,7 +20,10 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
@@ -37,20 +40,29 @@ import java.util.List;
  */
 public class DummyRewriter implements QueryRewriter {
 
-	
-	@Override
+    private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
+    private LinearInclusionDependencyTools inclusionDependencyTools;
+
+    @Inject
+    private DummyRewriter(LinearInclusionDependencyTools inclusionDependencyTools) {
+       this.inclusionDependencyTools = inclusionDependencyTools;
+    }
+
+
+    @Override
 	public List<CQIE> rewrite(List<CQIE> input) {
 		return input;
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox ontology) {
-		// NO-OP
+	public void setTBox(ClassifiedTBox reasoner) {
+        ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+        sigma = LinearInclusionDependency.toMultimap(s);
 	}
 
 	@Override
 	public ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma() {
-		return ImmutableMultimap.of();
+		return sigma;
 	}
 
 }

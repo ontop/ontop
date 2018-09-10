@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -31,7 +30,6 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
@@ -134,7 +132,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		if(settings.isSameAsInMappingsEnabled()){
 			program = sameAsRewriter.getSameAsRewriting(program);
-			log.debug("Datalog program after SameAs rewriting \n" + program);
+			log.debug("Datalog program after SameAs rewriting \n{}", program);
 		}
 
 		log.debug("Replacing equivalences...");
