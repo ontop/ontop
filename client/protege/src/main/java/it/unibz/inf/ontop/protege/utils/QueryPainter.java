@@ -177,7 +177,8 @@ public class QueryPainter {
 		TargetQueryParser textParser = new TurtleOBDASQLParser(
 		        apic.getMutablePrefixManager().getPrefixMap(),
                 apic.getTermFactory(),
-				apic.getTargetAtomFactory());
+				apic.getTargetAtomFactory(),
+				apic.getRdfFactory());
 		ImmutableList<TargetAtom> query = textParser.parse(text);
 
 		if (query == null) {
@@ -402,18 +403,19 @@ public class QueryPainter {
 
 			if (optionalPredicateIri.isPresent()) {
 				IRI predicateIri = optionalPredicateIri.get();
+				String shortIRIForm = man.getShortForm(predicateIri.getIRIString());
 
 				if (vocabulary.classes().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), clazz);
+					ColorTask task = new ColorTask(shortIRIForm, clazz);
 					tasks.add(task);
 				} else if (vocabulary.objectProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), objectProp);
+					ColorTask task = new ColorTask(shortIRIForm, objectProp);
 					tasks.add(task);
 				} else if (vocabulary.dataProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), dataProp);
+					ColorTask task = new ColorTask(shortIRIForm, dataProp);
 					tasks.add(task);
 				} else if (vocabulary.annotationProperties().contains(predicateIri)) {
-					ColorTask task = new ColorTask(predicateIri.getIRIString(), annotProp);
+					ColorTask task = new ColorTask(shortIRIForm, annotProp);
 					tasks.add(task);
 				}
 			}
@@ -452,7 +454,7 @@ public class QueryPainter {
 	private ImmutableList<TargetAtom> parse(String query, PrefixManager man) {
 		try {
             TargetQueryParser textParser = new TurtleOBDASQLParser(man.getPrefixMap(),
-					apic.getTermFactory(), apic.getTargetAtomFactory());
+					apic.getTermFactory(), apic.getTargetAtomFactory(), apic.getRdfFactory());
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
 			parsingException = e;

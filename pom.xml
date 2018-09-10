@@ -3,7 +3,7 @@
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.0-beta-2</version>
+    <version>3.0.0-beta-3-SNAPSHOT</version>
 
     <name>ontop</name>
     <url>http://ontop.inf.unibz.it/</url>
@@ -31,7 +31,7 @@
         <connection>scm:git:git@github.com:ontop/ontop.git</connection>
         <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
         <url>git@github.com:ontop/ontop.git</url>
-      <tag>ontop-3.0.0-beta-2</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
@@ -401,6 +401,12 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-rdf-simple</artifactId>
+                <version>${commons-rdf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-rdf4j</artifactId>
                 <version>${commons-rdf.version}</version>
             </dependency>
 

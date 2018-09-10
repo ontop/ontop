@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,10 +90,9 @@ public class MappingTest {
 
         DB_METADATA = dbMetadata;
 
-        SimpleRDF iriFactory = new SimpleRDF();
-        PROP_1 = iriFactory.createIRI("http://example.org/voc#Prop1");
-        PROP_2 = iriFactory.createIRI("http://example.org/voc#Prop2");
-        CLASS_1 = iriFactory.createIRI("http://example.org/voc#Class1");
+        PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
+        PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");
+        CLASS_1 = RDF_FACTORY.createIRI("http://example.org/voc#Class1");
     }
 
     @Test

@@ -17,14 +17,16 @@ public class AtomFactoryImpl implements AtomFactory {
 
     private final TriplePredicate triplePredicate;
     private final QuadPredicate quadPredicate;
-    private final ImmutabilityTools immutabilityTools;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, ImmutabilityTools immutabilityTools) {
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory,
+                            ImmutabilityTools immutabilityTools) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.immutabilityTools = immutabilityTools;
 
         RDFTermTypeConstant iriType = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 
@@ -32,14 +34,13 @@ public class AtomFactoryImpl implements AtomFactory {
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType()),
-                iriType);
+                iriType, rdfFactory);
         quadPredicate = new QuadPredicateImpl(ImmutableList.of(
                 typeFactory.getAbstractObjectRDFType(),
                 typeFactory.getIRITermType(),
                 typeFactory.getAbstractRDFTermType(),
                 typeFactory.getIRITermType()),
-                iriType);
-        this.immutabilityTools = immutabilityTools;
+                iriType, rdfFactory);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class AtomFactoryImpl implements AtomFactory {
         ImmutableList<TermType> defaultBaseTypes = IntStream.range(0, arity).boxed()
                 .map(i -> typeFactory.getAbstractRDFTermType())
                 .collect(ImmutableCollectors.toList());
-        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, arity, defaultBaseTypes);
+        return new AtomPredicateImpl(PredicateConstants.ONTOP_QUERY, defaultBaseTypes);
     }
 
     @Override
@@ -108,7 +109,7 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
-        return (GroundFunctionalTerm) termFactory.getIRIFunctionalTerm(iri);
+        return termFactory.getIRIFunctionalTerm(iri);
     }
 
     @Override

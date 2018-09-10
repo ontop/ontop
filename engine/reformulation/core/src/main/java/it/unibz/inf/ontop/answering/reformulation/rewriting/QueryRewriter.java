@@ -20,21 +20,21 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+
+import java.util.List;
 
 public interface QueryRewriter {
 
-	DatalogProgram rewrite(DatalogProgram input) throws OntopReformulationException;
+	List<CQIE> rewrite(List<CQIE> input) throws OntopReformulationException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 
 	 * use to compute any reformulation.
 	 * 
 	 * @param ontology
-	 * @param sigma
 	 */
-	void setTBox(ClassifiedTBox ontology, LinearInclusionDependencies sigma);
+	void setTBox(ClassifiedTBox ontology);
 }

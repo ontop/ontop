@@ -21,23 +21,15 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 public interface CQIE extends Serializable {
 
-	public Function getHead();
+	Function getHead();
 
-	public List<Function> getBody();
+	List<Function> getBody();
 
-	public void updateHead(Function head);
-
-	public void updateBody(List<Function> body);
-
-	public CQIE clone();
-	
-	public Set<Variable> getReferencedVariables();
+	CQIE clone();
 }

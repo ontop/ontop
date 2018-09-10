@@ -39,7 +39,6 @@ import it.unibz.inf.ontop.utils.IRIPrefixes;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.search.EntitySearcher;
@@ -59,21 +58,18 @@ public class OBDAMappingTransformer {
 	private Set<OWLObjectProperty> objectProperties;
     private Set<OWLDataProperty> dataProperties;
 
-	private RDF rdfFactory = new SimpleRDF();
+	private final RDF rdfFactory;
     private String baseIRIString;
-	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
 	private final RDFTermTypeConstant iriTypeConstant;
 
-	OBDAMappingTransformer(TermFactory termFactory, TypeFactory typeFactory) {
-        this("urn:", termFactory, typeFactory);
+	OBDAMappingTransformer(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
+        this("urn:", termFactory, typeFactory, rdfFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory, TypeFactory typeFactory) {
+    OBDAMappingTransformer(String baseIRIString, TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
         this.baseIRIString = baseIRIString;
-		this.termFactory = termFactory;
-		this.typeFactory = typeFactory;
 		this.iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
+		this.rdfFactory = rdfFactory;
 	}
 
     /**
@@ -140,7 +136,7 @@ public class OBDAMappingTransformer {
 				}
 
 			//term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
-			ImmutableFunctionalTerm object = (ImmutableFunctionalTerm) func.getSubstitutedTerm(2);
+            ImmutableTerm object = func.getSubstitutedTerm(2);
 
 			Optional<IRI> objectClassIRI = rdfAtomPredicate.getClassIRI(func.getSubstitutedTerms());
 

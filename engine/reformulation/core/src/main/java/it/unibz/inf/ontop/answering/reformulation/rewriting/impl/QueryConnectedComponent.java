@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -124,10 +123,10 @@ public class QueryConnectedComponent {
 	
 	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms,
 																Term seed) {
-		Set<Term> ccTerms = new HashSet<Term>((allLoops.size() * 2) / 3);
-		List<Edge> ccEdges = new ArrayList<Edge>(pairs.size());
-		List<Function> ccNonDLAtoms = new LinkedList<Function>();
-		List<Loop> ccLoops = new ArrayList<Loop>(allLoops.size());
+		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
+		List<Edge> ccEdges = new ArrayList<>(pairs.size());
+		List<Function> ccNonDLAtoms = new LinkedList<>();
+		List<Loop> ccLoops = new ArrayList<>(allLoops.size());
 		
 		ccTerms.add(seed);
 		Loop seedLoop = allLoops.get(seed);
@@ -205,27 +204,31 @@ public class QueryConnectedComponent {
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
-		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
+		Set<Term> headTerms = new HashSet<>(cqie.getHead().getTerms());
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
-		Map<TermPair, Edge> pairs = new HashMap<TermPair, Edge>();
-		Map<Term, Loop> allLoops = new HashMap<Term, Loop>();
-		List<Function> nonDLAtoms = new LinkedList<Function>();
+		Map<TermPair, Edge> pairs = new HashMap<>();
+		Map<Term, Loop> allLoops = new HashMap<>();
+		List<Function> nonDLAtoms = new LinkedList<>();
 		
 		for (Function atom : cqie.getBody()) {
 			Predicate p = atom.getFunctionSymbol();
-			/*
-			 * TODO: update it! (all the data atoms in a SPARQL query use a RDFAtomPredicate)
-			 */
-			if (atom.isDataFunction() && !(p instanceof RDFAtomPredicate)) { // if DL predicates
+			// TODO: support quads
+			if (atom.isDataFunction() && (p instanceof TriplePredicate)) { // if DL predicates
 				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
 				Term t0 = a.getTerm(0);
-				if (a.getArity() == 2 && !t0.equals(a.getTerm(1))) {
+
+				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
+						.map(immutabilityTools::convertIntoImmutableTerm)
+						.collect(ImmutableCollectors.toList());
+				boolean isClass = ((TriplePredicate) p).getClassIRI(arguments).isPresent();
+
+				if ((!isClass) && !t0.equals(a.getTerm(2))) {
 					// proper DL edge between two distinct terms
-					Term t1 = a.getTerm(1);
+					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
 					Edge edge =  pairs.get(pair); 
 					if (edge == null) {
@@ -361,7 +364,7 @@ public class QueryConnectedComponent {
 		public Loop(Term term, boolean isExistentialVariable) {
 			this.term = term;
 			this.isExistentialVariable = isExistentialVariable;
-			this.atoms = new ArrayList<Function>(10);
+			this.atoms = new ArrayList<>(10);
 		}
 		
 		public Term getTerm() {
@@ -409,7 +412,7 @@ public class QueryConnectedComponent {
 		private final List<Function> bAtoms;
 		
 		public Edge(Loop l0, Loop l1) {
-			this.bAtoms = new ArrayList<Function>(10);
+			this.bAtoms = new ArrayList<>(10);
 			this.l0 = l0;
 			this.l1 = l1;
 		}
@@ -435,7 +438,7 @@ public class QueryConnectedComponent {
 		}
 		
 		public List<Function> getAtoms() {
-			List<Function> allAtoms = new ArrayList<Function>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
+			List<Function> allAtoms = new ArrayList<>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
 			allAtoms.addAll(bAtoms);
 			allAtoms.addAll(l0.atoms);
 			allAtoms.addAll(l1.atoms);

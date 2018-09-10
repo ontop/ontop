@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.iq.impl.tree;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition;
@@ -35,11 +35,11 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
     /**
      * TODO: explain
      */
-    protected DefaultQueryTreeComponent(QueryTree tree, TermFactory termFactory) {
+    protected DefaultQueryTreeComponent(QueryTree tree, CoreUtilsFactory coreUtilsFactory) {
         this(tree,
-                new VariableGenerator(
+                coreUtilsFactory.createVariableGenerator(
                         VariableCollector.collectVariables(
-                                tree.getNodesInTopDownOrder()), termFactory));
+                                tree.getNodesInTopDownOrder())));
     }
 
     private DefaultQueryTreeComponent(QueryTree tree, VariableGenerator variableGenerator) {
@@ -252,7 +252,7 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
 
     @Override
     public QueryTreeComponent createSnapshot() {
-        return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.clone());
+        return new DefaultQueryTreeComponent(tree.createSnapshot(), variableGenerator.createSnapshot());
     }
 
     /**

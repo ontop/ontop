@@ -6,16 +6,12 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -42,14 +38,12 @@ public class OWLAPITranslatorOWL2QL {
 	private static final boolean nestedQualifiedExistentials = true; // TEMPORARY FIX
 
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
 
     @Inject
-    private OWLAPITranslatorOWL2QL(TermFactory termFactory, TypeFactory typeFactory) {
+    private OWLAPITranslatorOWL2QL(TermFactory termFactory, RDF rdfFactory) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
-        this.rdfFactory = new SimpleRDF();
+        this.rdfFactory = rdfFactory;
     }
 
     public static class TranslationException extends Exception {
@@ -74,7 +68,7 @@ public class OWLAPITranslatorOWL2QL {
         Set<OWLOntology> owls = owl.getOWLOntologyManager().getImportsClosure(owl);
         log.debug("Load ontologies called. Translating {} ontologies.", owls.size());
 
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
         for (OWLOntology o : owls) {
             extractOntoloyVocabulary(o, builder);
         }
@@ -1091,10 +1085,7 @@ public class OWLAPITranslatorOWL2QL {
             return termFactory.getRDFLiteralConstant(object.getLiteral(), object.getLang());
         }
         else {
-            Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
-            return type.isPresent()
-                ? termFactory.getRDFLiteralConstant(object.getLiteral(), type.get())
-                : termFactory.getRDFLiteralConstant(object.getLiteral(), XSD.STRING);
+            return termFactory.getRDFLiteralConstant(object.getLiteral(), rdfFactory.createIRI(object.getDatatype().getIRI().toString()));
         }
     }
 

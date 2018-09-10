@@ -20,11 +20,13 @@ package it.unibz.inf.ontop.datalog.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.CQContainmentCheck;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -102,41 +104,6 @@ public class CQCUtilities {
 		}
 	}
 
-	public void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
-				
-		// for each atom in query body
-		for (int i = 0; i < atoms.size(); i++) {
-			Function atom = atoms.get(i);
-
-			Set<Function> derivedAtoms = new HashSet<Function>();
-			// collect all derived atoms
-			for (CQIE rule : sigma.getRules(atom.getFunctionSymbol())) {
-				// try to unify current query body atom with tbox rule body atom
-				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
-				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = unifierUtilities.getMGU(ruleBody, atom);
-				if (theta == null || theta.isEmpty()) {
-					continue;
-				}
-				// if unifiable, apply to head of tbox rule
-				Function copyRuleHead = (Function) rule.getHead().clone();
-				substitutionUtilities.applySubstitution(copyRuleHead, theta);
-
-				derivedAtoms.add(copyRuleHead);
-			}
-
-			Iterator<Function> iterator = atoms.iterator();
-			while (iterator.hasNext()) {
-				Function current = iterator.next();
-				if (current == atom)   // if they are not the SAME element
-					continue;
-				
-				if (derivedAtoms.contains(current)) 
-					iterator.remove();
-			}
-		}
-	}	
-
 	/***
 	 * Removes all atoms that are redundant w.r.t to query containment.This is
 	 * done by going through all unifiable atoms, attempting to unify them. If
@@ -191,6 +158,39 @@ public class CQCUtilities {
         return unifiedQ;
     }
 
-	
-	
+	public void optimizeQueryWithSigmaRules(List<Function> atoms, ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies) {
+
+		// for each atom in query body
+		for (int i = 0; i < atoms.size(); i++) {
+			Function atom = atoms.get(i);
+
+			Set<Function> derivedAtoms = new HashSet<>();
+			// collect all derived atoms
+			for (LinearInclusionDependency rule : dependencies.get(atom.getFunctionSymbol())) {
+				// try to unify current query body atom with tbox rule body atom
+				Function ruleBody = rule.getBody();
+				Substitution theta = unifierUtilities.getMGU(ruleBody, atom);
+				if (theta == null || theta.isEmpty()) {
+					continue;
+				}
+				// if unifiable, apply to head of tbox rule
+				Function copyRuleHead = (Function) rule.getHead().clone();
+				substitutionUtilities.applySubstitution(copyRuleHead, theta);
+
+				derivedAtoms.add(copyRuleHead);
+			}
+
+			Iterator<Function> iterator = atoms.iterator();
+			while (iterator.hasNext()) {
+				Function current = iterator.next();
+				if (current == atom)   // if they are not the SAME element
+					continue;
+
+				if (derivedAtoms.contains(current))
+					iterator.remove();
+			}
+		}
+	}
+
+
 }

@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
@@ -61,18 +62,20 @@ public class SQLPPMappingToR2RMLConverter {
     private OWLOntology ontology;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
 
     public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, TermFactory termFactory,
-                                        TypeFactory typeFactory) {
+                                        TypeFactory typeFactory, RDF rdfFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
         this.ontology = ontology;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory, typeFactory);
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory, typeFactory, rdfFactory);
         transformer.setOntology(ontology);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
                 .map(a -> transformer.getTriplesMap(a, prefixmng))

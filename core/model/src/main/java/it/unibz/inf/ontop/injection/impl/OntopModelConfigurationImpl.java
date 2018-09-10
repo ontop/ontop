@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -138,6 +139,11 @@ public class OntopModelConfigurationImpl implements OntopModelConfiguration {
     @Override
     public TypeFactory getTypeFactory() {
         return getInjector().getInstance(TypeFactory.class);
+    }
+
+    @Override
+    public RDF getRdfFactory() {
+        return getInjector().getInstance(RDF.class);
     }
 
     @Override

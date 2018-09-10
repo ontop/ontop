@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -36,9 +35,8 @@ public class IntermediateQueryToDatalogTranslatorTest {
 
     static {
         String prefix = "http://example.com/voc#";
-        SimpleRDF rdfFactory = new SimpleRDF();
-        C1_IRI = rdfFactory.createIRI(prefix + "C1");
-        C2_IRI = rdfFactory.createIRI(prefix + "C2");
+        C1_IRI = RDF_FACTORY.createIRI(prefix + "C1");
+        C2_IRI = RDF_FACTORY.createIRI(prefix + "C2");
         SUBQUERY1_DATALOG_PREDICATE = DATALOG_FACTORY.getSubqueryPredicate("1", 1);
 
     }

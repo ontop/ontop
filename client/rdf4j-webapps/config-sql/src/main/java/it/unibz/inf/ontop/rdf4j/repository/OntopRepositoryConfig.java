@@ -64,7 +64,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     }
 
     private String name;
-    private File owlFile;
+    private Optional<File> owlFile;
     private File obdaFile;
     private File propertiesFile;
     private Optional<File> constraintFile;
@@ -113,16 +113,17 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             /*
              * Ontology file
              */
-            if (owlFile == null) {
-                throw new RepositoryConfigException("No OWL file specified for repository creation!");
-            }
-            if ((!owlFile.exists())) {
+            if (owlFile
+                    .filter(f -> !f.exists())
+                    .isPresent()) {
                 throw new RepositoryConfigException(String.format("The OWL file %s does not exist!",
-                        owlFile.getAbsolutePath()));
+                        owlFile.get().getAbsolutePath()));
             }
-            if (!owlFile.canRead()) {
+            if (owlFile
+                    .filter(f -> !f.canRead())
+                    .isPresent()) {
                 throw new RepositoryConfigException(String.format("The OWL file %s is not accessible!",
-                        owlFile.getAbsolutePath()));
+                        owlFile.get().getAbsolutePath()));
             }
 
             /*
@@ -216,8 +217,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 configurationBuilder.nativeOntopMappingFile(obdaFile);
             }
 
+            owlFile.ifPresent(configurationBuilder::ontologyFile);
+
             configurationBuilder
-                    .ontologyFile(owlFile)
                     .propertyFile(propertiesFile);
 
             constraintFile.ifPresent(configurationBuilder::basicImplicitConstraintFile);
@@ -247,7 +249,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 //            graph.add(implNode, REPO_ID, vf.createLiteral(name));
 //        }
         if (owlFile != null) {
-            graph.add(implNode, OWLFILE, vf.createLiteral(owlFile.getAbsolutePath()));
+            owlFile
+                    .map(File::getAbsolutePath)
+                    .ifPresent(path -> graph.add(implNode, OWLFILE, vf.createLiteral(path)));
         }
         if (obdaFile != null) {
             graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
@@ -260,7 +264,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                     .map(File::getAbsolutePath)
                     .ifPresent(path -> graph.add(implNode, CONSTRAINTFILE, vf.createLiteral(path)));
         }
-      
+
         return implNode;
     }
 
@@ -276,8 +280,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             objectLiteral(graph.filter(implNode, REPOSITORYTYPE, null))
                     .ifPresent(lit -> setType(lit.getLabel()));
 
-            objectLiteral(graph.filter(implNode, OWLFILE, null))
-                    .ifPresent(lit -> this.owlFile = new File(lit.getLabel()));
+            this.owlFile = objectLiteral(graph.filter(implNode, OWLFILE, null))
+                    .filter(l -> !l.getLabel().isEmpty())
+                    .map(l -> new File(l.getLabel()));
 
             objectLiteral(graph.filter(implNode, OBDAFILE, null))
                     .ifPresent(lit -> this.obdaFile = new File(lit.getLabel()));

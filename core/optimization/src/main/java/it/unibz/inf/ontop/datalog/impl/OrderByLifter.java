@@ -17,10 +17,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Lifts the ORDER BY above the highest construction node, AS REQUIRED by our Datalog data structure
@@ -41,12 +38,12 @@ public class OrderByLifter {
 
     public IQTree liftOrderBy(IQTree iqTree) {
 
-        List<QueryModifierNode> ancestors = new ArrayList<>();
+        Stack<QueryModifierNode> ancestors = new Stack<>();
 
         // Non-final
         IQTree parentTree = iqTree;
         while ((parentTree.getRootNode() instanceof QueryModifierNode)) {
-            ancestors.add((QueryModifierNode) parentTree.getRootNode());
+            ancestors.push((QueryModifierNode) parentTree.getRootNode());
             parentTree = ((UnaryIQTree)parentTree).getChild();
         }
 
@@ -66,8 +63,8 @@ public class OrderByLifter {
 
                 // Non-final
                 IQTree newTree = orderByTree;
-                for (QueryModifierNode modifierNode : ancestors) {
-                    newTree = iqFactory.createUnaryIQTree(modifierNode, newTree);
+                while (!ancestors.isEmpty()) {
+                    newTree = iqFactory.createUnaryIQTree(ancestors.pop(), newTree);
                 }
                 return newTree;
             }

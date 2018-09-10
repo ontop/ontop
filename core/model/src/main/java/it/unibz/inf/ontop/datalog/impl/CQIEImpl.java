@@ -21,20 +21,15 @@ package it.unibz.inf.ontop.datalog.impl;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.ListenableFunction;
 
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.datalog.EventGeneratingList;
 import it.unibz.inf.ontop.datalog.ListListener;
 
@@ -57,63 +52,44 @@ public class CQIEImpl implements CQIE, ListListener {
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
 
-	// TODO Remove isBoolean from the signature and from any method
-	protected CQIEImpl(Function head, List<Function> body) {		
+	protected CQIEImpl(Function head, List<Function> body) {
 		// The syntax for CQ may contain no body, thus, this condition will
 		// check whether the construction of the link list is possible or not.
 		if (body != null) {
-			EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<Function>();
-			eventbody.addAll(body);				
-			this.body = eventbody;
-
-			registerListeners(eventbody);
+            this.body = new EventGeneratingLinkedList<>(body);
+			registerListeners(this.body);
 			// TODO possible memory leak!!! we should also de-register when objects are removed
 		}
+		setHead(head);
+	}
 
+	protected CQIEImpl(Function head, Function[] body) {
+		// The syntax for CQ may contain no body, thus, this condition will
+		// check whether the construction of the link list is possible or not.
+		if (body != null) {
+			this.body = new EventGeneratingLinkedList<>(body);
+			registerListeners(this.body);
+			// TODO possible memory leak!!! we should also de-register when objects are removed
+		}
+		setHead(head);
+	}
+
+	private void setHead(Function head) {
 		// The syntax for CQ may also contain no head, thus, this condition
 		// will check whether we can look for the head terms or not.
 		if (head != null) {
 			this.head = head;
-			subscribeHeadTerms(head);
-		}
-	}
 
-	private void subscribeHeadTerms(Function head) {
-		if (head instanceof ListenableFunction) {
-			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
-			headterms.addListener(this);
-		}
-		else if (!(head instanceof ImmutableFunctionalTerm)) {
-			throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
-					+ head);
-		}
-	}
-
-	// TODO Remove isBoolean from the signature and from any method
-		protected CQIEImpl(Function head, Function[] body) {
-			
-			
-
-			// The syntax for CQ may contain no body, thus, this condition will
-			// check whether the construction of the link list is possible or not.
-			if (body != null) {
-				EventGeneratingList<Function> eventbody = new EventGeneratingLinkedList<Function>();
-				Collections.addAll(eventbody, body);
-				this.body = eventbody;
-
-				registerListeners(eventbody);
-				// TODO possible memory leak!!! we should also de-register when objects are removed
+			if (head instanceof ListenableFunction) {
+				EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
+				headterms.addListener(this);
 			}
-
-			// The syntax for CQ may also contain no head, thus, this condition
-			// will check whether we can look for the head terms or not.
-			if (head != null) {
-				this.head = head;
-				subscribeHeadTerms(head);
+			else if (!(head instanceof ImmutableFunctionalTerm)) {
+				throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
+						+ head);
 			}
 		}
-		
-		
+	}
 
 	private void registerListeners(EventGeneratingList<? extends Term> functions) {
 
@@ -135,35 +111,12 @@ public class CQIEImpl implements CQIE, ListListener {
 		}
 	}
 
-	public List<Function> getBody() {
-		return body;
-	}
+	@Override
+	public List<Function> getBody() { return body; }
 
-	public Function getHead() {
-		return head;
-	}
+	@Override
+	public Function getHead() { return head; }
 
-	public void updateHead(Function head) {
-		this.head = head;
-
-		if (head instanceof ListenableFunction) {
-			EventGeneratingList<Term> headterms = ((ListenableFunction)head).getTerms();
-			headterms.removeListener(this);
-			headterms.addListener(this);
-			listChanged();
-		}
-		else if (!(head instanceof ImmutableFunctionalTerm)) {
-			throw new RuntimeException("Unknown type of function: not listenable nor immutable:  "
-					+ head);
-		}
-	}
-
-	public void updateBody(List<Function> body) {
-		this.body.clear();
-		this.body.addAll(body);
-		// TODO: what about listeners?
-		listChanged();
-	}
 
 	@Override
 	public int hashCode() {
@@ -184,8 +137,6 @@ public class CQIEImpl implements CQIE, ListListener {
 			sb.append(SPACE);
 			sb.append(INV_IMPLIES);
 			sb.append(SPACE);
-			
-			
 
 			Iterator<Function> bit = body.iterator();
 			while (bit.hasNext()) {
@@ -205,7 +156,7 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public CQIEImpl clone() {
 		Function copyHead = (Function)head.clone();
-		List<Function> copyBody = new ArrayList<Function>(body.size() + 10);
+		List<Function> copyBody = new ArrayList<>(body.size() + 10);
 
 		for (Function atom : body) {
 			if (atom != null) {
@@ -234,14 +185,5 @@ public class CQIEImpl implements CQIE, ListListener {
 	public void listChanged() {
 		rehash = true;
 		string = null;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body) {
-			TermUtils.addReferencedVariablesTo(vars, atom);
-			}
-		return vars;
 	}
 }

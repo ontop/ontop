@@ -440,7 +440,7 @@ public class ImmutableUnificationTools {
     private static class TemporaryFunctionSymbol extends PredicateImpl {
 
         private TemporaryFunctionSymbol(int arity, TypeFactory typeFactory) {
-            super("pred", arity, createExpectedBaseTermTypeList(arity, typeFactory));
+            super("pred", createExpectedBaseTermTypeList(arity, typeFactory));
         }
 
         private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity, TypeFactory typeFactory) {

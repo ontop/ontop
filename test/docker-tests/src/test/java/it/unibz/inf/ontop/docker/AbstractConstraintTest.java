@@ -72,16 +72,12 @@ public abstract class AbstractConstraintTest extends TestCase {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-			AtomFactory atomFactory = defaultConfiguration.getAtomFactory();
-			TermFactory termFactory = defaultConfiguration.getTermFactory();
 			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 			Injector injector = defaultConfiguration.getInjector();
-			DatalogFactory datalogFactory = injector.getInstance(DatalogFactory.class);
 			JdbcTypeMapper jdbcTypeMapper = injector.getInstance(JdbcTypeMapper.class);
 
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, termFactory, typeFactory, datalogFactory,
-					atomFactory, jdbcTypeMapper);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

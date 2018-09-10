@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import org.apache.commons.rdf.api.RDF;
 
 /**
  *
@@ -30,6 +31,7 @@ public class OntopModelTestingTools {
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
     public static final IQConverter IQ_CONVERTER;
+    public static final RDF RDF_FACTORY;
 
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -48,6 +50,7 @@ public class OntopModelTestingTools {
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
+        RDF_FACTORY = injector.getInstance(RDF.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
 

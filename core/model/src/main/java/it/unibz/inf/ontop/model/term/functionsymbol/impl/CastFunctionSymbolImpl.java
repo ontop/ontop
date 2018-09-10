@@ -17,7 +17,7 @@ public abstract class CastFunctionSymbolImpl extends FunctionSymbolImpl implemen
 
     protected CastFunctionSymbolImpl(@Nonnull String name, @Nonnull TermType expectedBaseType,
                                      TermType targetType) {
-        super(name, 1, ImmutableList.of(expectedBaseType));
+        super(name, ImmutableList.of(expectedBaseType));
         this.targetType = targetType;
     }
 

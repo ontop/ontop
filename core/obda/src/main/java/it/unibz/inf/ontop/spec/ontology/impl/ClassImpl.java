@@ -24,11 +24,8 @@ import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.OClass;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 public class ClassImpl implements OClass {
-
-	private static final RDF RDF_FACTORY = new SimpleRDF();
 
 	private final IRI iri;
 	private final String name;
@@ -37,8 +34,8 @@ public class ClassImpl implements OClass {
     public static final OClass owlThing = new ClassImpl(OWL.THING);
     public static final OClass owlNothing = new ClassImpl(OWL.NOTHING);
 
-	ClassImpl(String name) {
-		this(RDF_FACTORY.createIRI(name));
+	ClassImpl(String name, RDF rdfFactory) {
+		this(rdfFactory.createIRI(name));
 	}
 
 	ClassImpl(IRI iri) {

@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import junit.framework.TestCase;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -41,7 +42,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 	private ClassifiedTBox tbox;
 	
 	protected void setUp() {
-		OntologyBuilder builder = OntologyBuilderImpl.builder();
+		OntologyBuilder builder = OntologyBuilderImpl.builder(new SimpleRDF());
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#P");
 		builder.declareObjectProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#R");
 		builder.declareDataProperty("http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#age");
