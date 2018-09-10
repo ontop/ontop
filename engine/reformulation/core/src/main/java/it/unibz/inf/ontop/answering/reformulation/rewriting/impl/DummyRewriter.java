@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDepen
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
+import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
@@ -41,28 +42,29 @@ import java.util.List;
 public class DummyRewriter implements QueryRewriter {
 
     private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
-    private LinearInclusionDependencyTools inclusionDependencyTools;
+    private final CQCUtilities cqcUtilities;
+    private final LinearInclusionDependencyTools inclusionDependencyTools;
 
     @Inject
-    private DummyRewriter(LinearInclusionDependencyTools inclusionDependencyTools) {
-       this.inclusionDependencyTools = inclusionDependencyTools;
+    private DummyRewriter(CQCUtilities cqcUtilities, LinearInclusionDependencyTools inclusionDependencyTools) {
+        this.cqcUtilities = cqcUtilities;
+        this.inclusionDependencyTools = inclusionDependencyTools;
     }
 
 
     @Override
 	public List<CQIE> rewrite(List<CQIE> input) {
-		return input;
+
+        for (CQIE cq : input)
+            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+
+        return input;
 	}
 
 	@Override
 	public void setTBox(ClassifiedTBox reasoner) {
         ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
         sigma = LinearInclusionDependency.toMultimap(s);
-	}
-
-	@Override
-	public ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma() {
-		return sigma;
 	}
 
 }

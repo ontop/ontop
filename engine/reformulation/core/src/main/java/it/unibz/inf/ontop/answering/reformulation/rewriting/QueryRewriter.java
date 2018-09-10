@@ -40,6 +40,4 @@ public interface QueryRewriter {
 	 * @param ontology
 	 */
 	void setTBox(ClassifiedTBox ontology);
-
-	ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma();
 }

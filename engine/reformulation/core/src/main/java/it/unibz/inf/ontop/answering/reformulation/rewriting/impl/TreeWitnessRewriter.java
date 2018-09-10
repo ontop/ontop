@@ -67,7 +67,6 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private ClassifiedTBox reasoner;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
-	private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
 
 	private Collection<TreeWitnessGenerator> generators;
 	private final AtomFactory atomFactory;
@@ -103,8 +102,6 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.reasoner = reasoner;
 
 		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
-		sigma = LinearInclusionDependency.toMultimap(s);
-
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(s, datalogFactory, unifierUtilities,
 				substitutionUtilities, termFactory);
 		
@@ -122,11 +119,6 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	}
 	
 	
-	@Override
-    public ImmutableMultimap<Predicate, LinearInclusionDependency> getSigma() {
-	    return sigma;
-    }
-
 	/*
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */

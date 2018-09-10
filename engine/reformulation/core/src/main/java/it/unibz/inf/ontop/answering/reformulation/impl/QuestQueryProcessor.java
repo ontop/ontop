@@ -185,11 +185,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			log.debug("Start the rewriting process...");
 
-			for (CQIE cq : newprogram.getRules())
-				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), rewriter.getSigma());
-
-			DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(newprogram.getQueryModifiers());
-			programAfterRewriting.appendRule(rewriter.rewrite(newprogram.getRules()));
+			DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(
+					newprogram.getQueryModifiers(),
+					rewriter.rewrite(newprogram.getRules()));
 
 			try {
 				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
