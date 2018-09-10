@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
@@ -20,7 +19,6 @@ import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -32,7 +30,6 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
@@ -48,7 +45,6 @@ import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 public class QuestQueryProcessor implements QueryReformulator {
 
 	private final QueryRewriter rewriter;
-	private final LinearInclusionDependencies sigma;
 	private final NativeQueryGenerator datasourceQueryGenerator;
 	private final QueryCache queryCache;
 
@@ -84,7 +80,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
-								LinearInclusionDependencyTools inclusionDependencyTools,
 								DatalogFactory datalogFactory,
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
@@ -104,11 +99,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.cqcUtilities = cqcUtilities;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
-		ClassifiedTBox saturatedTBox = obdaSpecification.getSaturatedTBox();
-		this.sigma = inclusionDependencyTools.getABoxDependencies(saturatedTBox, true);
-
 		this.rewriter = queryRewriter;
-		this.rewriter.setTBox(saturatedTBox, sigma);
+
+		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
@@ -132,20 +125,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
-	
-	private DatalogProgram translateAndPreProcess(InputQuery inputQuery)
-			throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
-		InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
-		return preProcess(translation);
-	}
 
-	private DatalogProgram preProcess(InternalSparqlQuery translation) {
+	private DatalogProgram preProcess(InternalSparqlQuery translation) throws OntopInvalidInputQueryException {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
 		if(settings.isSameAsInMappingsEnabled()){
 			program = sameAsRewriter.getSameAsRewriting(program);
-			log.debug("Datalog program after SameAs rewriting \n" + program);
+			log.debug("Datalog program after SameAs rewriting \n{}", program);
 		}
 
 		log.debug("Replacing equivalences...");
@@ -154,7 +141,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
 			CQIE rule = query.clone();
-			// TODO: get rid of EQNormalizer
+			// TODO: get rid of EQNormalizer (can't be removed at the moment)
 			eqNormalizer.enforceEqualities(rule);
 
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
@@ -163,17 +150,25 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 
 		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
-				eqNormalizer, unifierUtilities, substitutionUtilities);
+				unifierUtilities, substitutionUtilities);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
+
+		for (CQIE q : newprogram.getRules()) {
+			// We need to enforce equality again, because at this point it is
+			//  possible that there is still some EQ(...)
+			eqNormalizer.enforceEqualities(q);
+			datalogNormalizer.unfoldJoinTrees(q);
+		}
+		log.debug("Normalized program: \n{}", newprogram);
+
+		if (newprogram.getRules().isEmpty())
+			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
+					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
 		return newprogram;
 	}
 	
-
-	public void clearNativeQueryCache() {
-		queryCache.clear();
-	}
 
 
 	@Override
@@ -188,19 +183,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 			DatalogProgram newprogram = preProcess(translation);
 
-			for (CQIE q : newprogram.getRules()) 
-				datalogNormalizer.unfoldJoinTrees(q);
-			log.debug("Normalized program: \n{}", newprogram);
-
-			if (newprogram.getRules().size() < 1)
-				throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
-						"This is not possible for any SELECT query (other queries are not supported by the translator).");
-
 			log.debug("Start the rewriting process...");
 
-			for (CQIE cq : newprogram.getRules())
-				cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
-			DatalogProgram programAfterRewriting = rewriter.rewrite(newprogram);
+			DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(
+					newprogram.getQueryModifiers(),
+					rewriter.rewrite(newprogram.getRules()));
 
 			try {
 				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
@@ -295,9 +282,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 */
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		DatalogProgram program = translateAndPreProcess(query);
-		DatalogProgram rewriting = rewriter.rewrite(program);
-		return DatalogProgramRenderer.encode(rewriting);
+		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
+		DatalogProgram program = preProcess(translation);
+		List<CQIE> rewriting = rewriter.rewrite(program.getRules());
+		return Joiner.on("\n").join(rewriting);
 	}
 
 	@Override

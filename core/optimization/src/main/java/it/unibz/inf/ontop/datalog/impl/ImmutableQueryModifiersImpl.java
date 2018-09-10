@@ -267,9 +267,4 @@ public class ImmutableQueryModifiersImpl implements ImmutableQueryModifiers {
                 subQuerysortConditions :
                 parentquerySortConditions;
     }
-
-    @Override
-    public boolean isIdle() {
-        return !(hasOrder() || hasLimit() || hasOffset() || isDistinct());
-    }
 }

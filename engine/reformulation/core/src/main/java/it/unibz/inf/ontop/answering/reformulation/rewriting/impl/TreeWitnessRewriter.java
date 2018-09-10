@@ -20,12 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
@@ -35,10 +38,10 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
@@ -46,6 +49,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.
 
 import java.util.*;
 
+import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -63,41 +67,42 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
 	private ClassifiedTBox reasoner;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
-	private LinearInclusionDependencies sigma;
-	
+
 	private Collection<TreeWitnessGenerator> generators;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
-	private final DatalogQueryServices datalogQueryServices;
+    private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
+	private final LinearInclusionDependencyTools inclusionDependencyTools;
 
 	@Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-								DatalogQueryServices datalogQueryServices, UnifierUtilities unifierUtilities,
+                                EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools inclusionDependencyTools) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
-		this.datalogQueryServices = datalogQueryServices;
+        this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
+		this.inclusionDependencyTools = inclusionDependencyTools;
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox reasoner, LinearInclusionDependencies sigma) {
+	public void setTBox(ClassifiedTBox reasoner) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
-		this.sigma = sigma;
-		
-		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma, datalogFactory, unifierUtilities,
+
+		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(s, datalogFactory, unifierUtilities,
 				substitutionUtilities, termFactory);
 		
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
@@ -112,7 +117,6 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		time += tm;
 		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));		
 	}
-	
 	
 	
 	/*
@@ -163,7 +167,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
+	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Predicate, CQIE> edgeDP) {
 		
 		List<CQIE> outputRules = new LinkedList<>();	
 
@@ -251,10 +255,10 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 						}
 					}
 					for (TreeWitness tw : compatibleTWs) {
-						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
+						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : tw.getFormula())
-							edgeDP.appendRule(datalogFactory.getCQIE(twAtom, twfa));
+							edgeDP.put(twAtom.getFunctionSymbol(), datalogFactory.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAll(cc.getNonDLAtoms());					
 					outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
@@ -273,16 +277,16 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 							if (edgeAtom == null) {
 								//IRI atomURI = edge.getBAtoms().iterator().next().getIRI().getName();
 								edgeAtom = getHeadAtom(headURI, 
-										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
+										"_EDGE_" + (edgeDP.size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.add(edgeAtom);				
 								
 								LinkedList<Function> edgeAtoms = new LinkedList<>();
 								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.appendRule(datalogFactory.getCQIE(edgeAtom, edgeAtoms));
+								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
-								edgeDP.appendRule(datalogFactory.getCQIE(edgeAtom, twfa));
+								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, twfa));
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
@@ -308,15 +312,15 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private double time = 0;
 	
 	@Override
-	public DatalogProgram rewrite(DatalogProgram dp) {
+	public List<CQIE> rewrite(List<CQIE> ucq) {
 		
 		double startime = System.currentTimeMillis();
 
 		List<CQIE> outputRules = new LinkedList<>();
-		DatalogProgram ccDP = null;
-		DatalogProgram edgeDP = datalogFactory.getDatalogProgram();
+		Multimap<Predicate, CQIE> ccDP = null;
+		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
 
-		for (CQIE cqie : dp.getRules()) {
+		for (CQIE cqie : ucq) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
 					atomFactory, immutabilityTools);
 			Function cqieAtom = cqie.getHead();
@@ -330,15 +334,16 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			}
 			else {
 				if (ccDP == null)
-					ccDP = datalogFactory.getDatalogProgram();
+					ccDP = ArrayListMultimap.create();
 				String cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
 					log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
-					ccDP.appendRule(rewriteCC(cc, ccAtom, edgeDP));
+					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.size() + 1), cc.getFreeVariables());
+					for (CQIE cq : rewriteCC(cc, ccAtom, edgeDP))
+					    ccDP.put(cq.getHead().getFunctionSymbol(), cq);
 					ccBody.add(ccAtom);
 				}
 				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));
@@ -346,16 +351,20 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		}
 		
 		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
-		if (!edgeDP.getRules().isEmpty()) {
+		if (!edgeDP.isEmpty()) {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
-			outputRules = datalogQueryServices.plugInDefinitions(outputRules, edgeDP);
-			if (ccDP != null)
-				ccDP = datalogFactory.getDatalogProgram(dp.getQueryModifiers(),
-						datalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
+			outputRules = plugInDefinitions(outputRules, edgeDP);
+			if (ccDP != null) {
+			    Multimap<Predicate, CQIE> ccDP2 = ArrayListMultimap.create();
+			    for (Predicate p : ccDP.keys())
+			        for (CQIE cq : plugInDefinitions(ccDP.get(p), edgeDP))
+                        ccDP2.put(p, cq);
+			    ccDP = ccDP2;
+            }
 			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
 		if (ccDP != null) {
-			outputRules = datalogQueryServices.plugInDefinitions(outputRules, ccDP);
+			outputRules = plugInDefinitions(outputRules, ccDP);
 			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
 		}
 	
@@ -363,15 +372,120 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		if (outputRules.size() > 1) 
 			cqcUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = datalogFactory.getDatalogProgram(dp.getQueryModifiers(), outputRules);
-		for (CQIE cq : output.getRules())
-			cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+		for (CQIE cq : outputRules)
+            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), dataDependenciesCQC.dependencies());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", output);
-		return output;
+		log.debug("Final rewriting:\n{}", outputRules);
+		return outputRules;
 	}
+
+
+
+
+    public List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
+
+        PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
+                Comparator.comparingInt(cq -> cq.getBody().size()));
+
+        queue.addAll(rules);
+
+        List<CQIE> output = new LinkedList<>();
+
+        while (!queue.isEmpty()) {
+            CQIE query = queue.poll();
+
+            List<Function> body = query.getBody();
+            int chosenAtomIdx = 0;
+            Collection<CQIE> chosenDefinitions = null;
+            ListIterator<Function> bodyIterator = body.listIterator();
+            while (bodyIterator.hasNext()) {
+                Function currentAtom = bodyIterator.next();
+                Collection<CQIE> definitions = defs.get(currentAtom.getFunctionSymbol());
+                if (!definitions.isEmpty()) {
+                    if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
+                        chosenDefinitions = definitions;
+                        chosenAtomIdx = bodyIterator.previousIndex();
+                    }
+                }
+            }
+
+            boolean replaced = false;
+            if (chosenDefinitions != null) {
+                Collection<Variable> vars = new ArrayList<>();
+                for (Function atom : body)
+                    TermUtils.addReferencedVariablesTo(vars, atom);
+                int maxlen = vars.stream()
+                        .map(v -> v.getName().length())
+                        .max(Integer::compareTo)
+                        .orElse(0);
+                String suffix = Strings.repeat("t", maxlen);
+
+                for (CQIE rule : chosenDefinitions) {
+                    Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
+                            query.getBody().get(chosenAtomIdx));
+                    if (mgu != null) {
+                        CQIE newquery = query.clone();
+                        List<Function> newbody = newquery.getBody();
+                        newbody.remove(chosenAtomIdx);
+                        for (Function a : rule.getBody())
+                            newbody.add(getFreshAtom(a, suffix));
+
+                        // newquery contains only cloned atoms, so it is safe to unify "in-place"
+                        substitutionUtilities.applySubstitution(newquery, mgu, false);
+
+                        // REDUCE
+                        eqNormalizer.enforceEqualities(newquery);
+                        cqcUtilities.removeRundantAtoms(newquery);
+
+                        queue.add(newquery);
+                        replaced = true;
+                    }
+
+                }
+            }
+            if (!replaced) {
+                boolean found = false;
+                ListIterator<CQIE> i = output.listIterator();
+                while (i.hasNext()) {
+                    CQIE q2 = i.next();
+                    if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query, q2)) {
+                        found = true;
+                        break;
+                    }
+                    else if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, query)) {
+                        i.remove();
+                        log.debug("   PRUNED {} BY {}", q2, query);
+                    }
+                }
+
+                if (!found) {
+                    log.debug("ADDING TO THE RESULT {}", query);
+                    output.add(query.clone());
+                    Collections.sort(output, Comparator.comparingInt(cq -> cq.getBody().size()));
+                }
+            }
+        }
+
+        return output;
+    }
+
+
+    private Function getFreshAtom(Function a, String suffix) {
+        List<Term> termscopy = new ArrayList<>(a.getArity());
+
+        for (Term t : a.getTerms()) {
+            if (t instanceof Variable) {
+                Variable v = (Variable)t;
+                termscopy.add(termFactory.getVariable(v.getName() + suffix));
+            }
+            else
+                termscopy.add(t.clone());
+        }
+        return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
+    }
+
 }

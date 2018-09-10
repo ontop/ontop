@@ -29,10 +29,5 @@ import it.unibz.inf.ontop.model.term.Function;
  */
 public interface PullOutEqualityNormalizer {
 
-    /**
-     * Returns a normalized rule.
-     */
-    CQIE normalizeByPullingOutEqualities(CQIE initialRule);
-
     P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms);
 }
