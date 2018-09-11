@@ -80,7 +80,6 @@ public class MetaMappingExpander {
 	private static final Logger log = LoggerFactory.getLogger(MetaMappingExpander.class);
 	
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
 	private final ImmutableList<Expansion> mappingsToBeExpanded;
@@ -99,9 +98,8 @@ public class MetaMappingExpander {
 		}
 	}
 
-	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, AtomFactory atomFactory, TermFactory termFactory,
+	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, TermFactory termFactory,
 							   SubstitutionFactory substitutionFactory) {
-		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
 

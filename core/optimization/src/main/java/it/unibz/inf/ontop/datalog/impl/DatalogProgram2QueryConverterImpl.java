@@ -87,9 +87,9 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
         List<Predicate> topDownPredicates = Lists.reverse(dependencyGraph.getPredicatesInBottomUp());
 
-        if (topDownPredicates.size() == 0) {
+        if (topDownPredicates.isEmpty())
             throw new EmptyQueryException();
-        }
+
 
         Predicate rootPredicate = topDownPredicates.get(0);
         if (tablePredicates.contains(rootPredicate))
@@ -109,8 +109,8 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         /*
          * Rules (sub-queries)
          */
-        for (int i=1; i < topDownPredicates.size() ; i++) {
-            Predicate datalogAtomPredicate  = topDownPredicates.get(i);
+        for (int j = 1; j < topDownPredicates.size() ; j++) {
+            Predicate datalogAtomPredicate  = topDownPredicates.get(j);
             Optional<IQ> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
@@ -128,8 +128,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     /**
      * TODO: explain and comment
      */
-    @Override
-    public Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
+    private Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
                                                   Multimap<Predicate, CQIE> datalogRuleIndex,
                                                   Collection<Predicate> tablePredicates,
                                                   Optional<ImmutableQueryModifiers> optionalModifiers)

@@ -63,11 +63,11 @@ import java.util.Map.Entry;
 
 public class QueryConnectedComponent {
 
-	private List<Term> variables; 	
-	private List<Loop> quantifiedVariables;   
-	private List<Term> freeVariables;
+	private final List<Term> variables;
+	private final List<Loop> quantifiedVariables;
+	private final List<Term> freeVariables;
 	
-	private final List<Edge> edges;  // a connect component contains a list of edges 
+	private final List<Edge> edges;  // a connected component contains a list of edges
 	private final Loop loop;  //                                   or a loop if it is degenerate 
 	
 	private final List<Function> nonDLAtoms;
@@ -89,9 +89,9 @@ public class QueryConnectedComponent {
 
 		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null; 
 				
-		quantifiedVariables = new ArrayList<Loop>(terms.size());
-		variables = new ArrayList<Term>(terms.size());
-		freeVariables = new ArrayList<Term>(terms.size());
+		quantifiedVariables = new ArrayList<>(terms.size());
+		variables = new ArrayList<>(terms.size());
+		freeVariables = new ArrayList<>(terms.size());
 		noFreeTerms = true;
 		
 		for (Loop l: terms) {
@@ -140,7 +140,6 @@ public class QueryConnectedComponent {
 		while (expanded) {
 			expanded = false;
 			Iterator<Entry<TermPair, Edge>> i = pairs.entrySet().iterator();
-			//i = pairs.entrySet().iterator();
 			while (i.hasNext()) {
 				Edge edge = i.next().getValue();
 				Term t0 = edge.getTerm0();
