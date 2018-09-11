@@ -67,7 +67,7 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	
-	public void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
+	public static void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
 
 		{
 			Iterator<CQIE> iterator = queries.iterator();
@@ -104,34 +104,7 @@ public class CQCUtilities {
 		}
 	}
 
-	/***
-	 * Removes all atoms that are redundant w.r.t to query containment.This is
-	 * done by going through all unifiable atoms, attempting to unify them. If
-	 * they unify with a MGU that is empty, then one of the atoms is redundant.
-	 * 
-	 * 
-	 * @param q
-	 */
-	public void removeRundantAtoms(CQIE q) {
-		CQIE result = q;
-		for (int i = 0; i < result.getBody().size(); i++) {
-			Function atom1 = result.getBody().get(i);
-			for (int j = i + 1; j < result.getBody().size(); j++) {
-				Function atom2 = result.getBody().get(j);
-				Substitution mgu = unifierUtilities.getMGU(atom1, atom2);
-				if (mgu != null && !mgu.isEmpty()) {
-					result = substitutionUtilities.applySubstitution(q, mgu);
-					result.getBody().remove(i);
-					result.getBody().remove(j - 1);
 
-					Function newatom = (Function) atom1.clone();
-					substitutionUtilities.applySubstitution(newatom, mgu);
-					result.getBody().add(i, newatom);
-				}
-			}
-		}
-	}
-	
 
 	public void optimizeQueryWithSigmaRules(List<Function> atoms, ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies) {
 
