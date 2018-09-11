@@ -7,9 +7,7 @@ import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
@@ -45,18 +43,15 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
-    private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final TypeFactory typeFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
-                                MappingCanonicalTransformer canonicalTransformer, AtomFactory atomFactory, TermFactory termFactory,
-                                SubstitutionFactory substitutionFactory,
-                                TypeFactory typeFactory) {
+                                MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
+                                SubstitutionFactory substitutionFactory) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
@@ -64,10 +59,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
         this.canonicalTransformer = canonicalTransformer;
-        this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
     }
 
     /**
@@ -135,9 +128,9 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     /**
      * Makes use of the DB connection
      */
-    private RDBMetadata extractDBMetadata(final SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
+    private RDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
                                           OBDASpecInput specInput)
-            throws DBMetadataExtractionException, MetaMappingExpansionException {
+            throws DBMetadataExtractionException {
 
         boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
 

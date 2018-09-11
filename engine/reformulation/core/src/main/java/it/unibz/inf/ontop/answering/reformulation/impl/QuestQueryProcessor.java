@@ -141,9 +141,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		for (CQIE query : program.getRules()) {
 			// TODO: fix cloning
 			CQIE rule = query.clone();
-			// TODO: get rid of EQNormalizer (can't be removed at the moment)
-			eqNormalizer.enforceEqualities(rule);
-
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
 				topLevelPredicate = rule.getHead().getFunctionSymbol();
 			newprogramEq.appendRule(rule);
@@ -153,12 +150,13 @@ public class QuestQueryProcessor implements QueryReformulator {
 				unifierUtilities, substitutionUtilities);
 		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
 		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
+		System.out.println("UNF: " + p);
 
 		for (CQIE q : newprogram.getRules()) {
+			datalogNormalizer.unfoldJoinTrees(q);
 			// We need to enforce equality again, because at this point it is
 			//  possible that there is still some EQ(...)
 			eqNormalizer.enforceEqualities(q);
-			datalogNormalizer.unfoldJoinTrees(q);
 		}
 		log.debug("Normalized program: \n{}", newprogram);
 
