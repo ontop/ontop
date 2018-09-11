@@ -108,7 +108,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
-        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), atomFactory, termFactory,
+        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), termFactory,
                 substitutionFactory);
         final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
         if (expander.hasMappingsToBeExpanded()) {
