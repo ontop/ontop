@@ -25,7 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+
+import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 @RestController
 public class SparqlQueryController {
@@ -57,7 +59,7 @@ public class SparqlQueryController {
     )
     @ResponseBody
     public HttpEntity query_get(
-            @RequestHeader("Accept") String accept,
+            @RequestHeader(ACCEPT) String accept,
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri) {
@@ -67,10 +69,10 @@ public class SparqlQueryController {
 
     @RequestMapping(value = "/sparql",
             method = RequestMethod.POST,
-            consumes = "application/x-www-form-urlencoded")
+            consumes = APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
     public HttpEntity query_post_URL_encoded(
-            @RequestHeader("Accept") String accept,
+            @RequestHeader(ACCEPT) String accept,
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri) {
@@ -82,7 +84,7 @@ public class SparqlQueryController {
             consumes = "application/sparql-query")
     @ResponseBody
     public HttpEntity query_post_directly(
-            @RequestHeader("Accept") String accept,
+            @RequestHeader(ACCEPT) String accept,
             @RequestBody String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri) {
