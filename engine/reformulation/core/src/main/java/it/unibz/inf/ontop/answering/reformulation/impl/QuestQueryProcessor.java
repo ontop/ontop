@@ -148,9 +148,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
 		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
-			// TODO: fix cloning
 			CQIE rule = query.clone();
-			// TODO: get rid of EQNormalizer (can't be removed at the moment)
+			// EQNormalizer cannot be removed because it is used in NULL propagation in OPTIONAL
 			eqNormalizer.enforceEqualities(rule);
 
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))

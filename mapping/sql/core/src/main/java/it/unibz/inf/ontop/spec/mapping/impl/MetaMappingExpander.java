@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -57,7 +56,6 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +80,6 @@ public class MetaMappingExpander {
 	private static final Logger log = LoggerFactory.getLogger(MetaMappingExpander.class);
 	
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
 	private final ImmutableList<Expansion> mappingsToBeExpanded;
@@ -103,13 +100,13 @@ public class MetaMappingExpander {
 		}
 	}
 
-	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, AtomFactory atomFactory, TermFactory termFactory,
-							   SubstitutionFactory substitutionFactory, TypeFactory typeFactory) {
-		this.atomFactory = atomFactory;
+	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, TermFactory termFactory,
+							   SubstitutionFactory substitutionFactory, TypeFactory typeFactory,
+							   org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
-		this.rdfFactory = new SimpleRDF();
 		this.typeFactory = typeFactory;
+		this.rdfFactory = rdfFactory;
 
 		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();

@@ -67,7 +67,7 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	
-	public void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
+	public static void removeContainedQueries(List<CQIE> queries, CQContainmentCheck containment) {
 
 		{
 			Iterator<CQIE> iterator = queries.iterator();
@@ -104,59 +104,7 @@ public class CQCUtilities {
 		}
 	}
 
-	/***
-	 * Removes all atoms that are redundant w.r.t to query containment.This is
-	 * done by going through all unifiable atoms, attempting to unify them. If
-	 * they unify with a MGU that is empty, then one of the atoms is redundant.
-	 * 
-	 * 
-	 * @param q
-	 */
-	public void removeRundantAtoms(CQIE q) {
-		CQIE result = q;
-		for (int i = 0; i < result.getBody().size(); i++) {
-			Function currentAtom = result.getBody().get(i);
-			for (int j = i + 1; j < result.getBody().size(); j++) {
-				Function nextAtom = result.getBody().get(j);
-				Substitution map = unifierUtilities.getMGU(currentAtom, nextAtom);
-				if (map != null && map.isEmpty()) {
-					result = unify(result, i, j);
-				}
-			}
-		}
-	}
-	
-    /**
-     * Unifies two atoms in a conjunctive query returning a new conjunctive
-     * query. To to this we calculate the MGU for atoms, duplicate the query q
-     * into q', remove i and j from q', apply the mgu to q', and
-     *
-     * @param q
-     * @param i
-     * @param j (j > i)
-     * @return null if the two atoms are not unifiable, else a new conjunctive
-     * query produced by the unification of j and i
-     * @throws Exception
-     */
-    private CQIE unify(CQIE q, int i, int j) {
 
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        
-        Substitution mgu = unifierUtilities.getMGU(atom1, atom2);
-        if (mgu == null)
-            return null;
-
-        CQIE unifiedQ = substitutionUtilities.applySubstitution(q, mgu);
-        unifiedQ.getBody().remove(i);
-        unifiedQ.getBody().remove(j - 1);
-
-        Function newatom = (Function) atom1.clone();
-        substitutionUtilities.applySubstitution(newatom, mgu);
-        unifiedQ.getBody().add(i, newatom);
-
-        return unifiedQ;
-    }
 
 	public void optimizeQueryWithSigmaRules(List<Function> atoms, ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies) {
 

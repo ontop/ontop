@@ -370,7 +370,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	
 		// extra CQC 
 		if (outputRules.size() > 1) 
-			cqcUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
+			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
 		for (CQIE cq : outputRules)
             cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), dataDependenciesCQC.dependencies());
@@ -439,7 +439,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 
                         // REDUCE
                         eqNormalizer.enforceEqualities(newquery);
-                        cqcUtilities.removeRundantAtoms(newquery);
+                        removeRundantAtoms(newquery);
 
                         queue.add(newquery);
                         replaced = true;
@@ -473,6 +473,16 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
         return output;
     }
 
+    private void removeRundantAtoms(CQIE q) {
+	    // TODO: use sets instead
+	    for (int i = 0; i < q.getBody().size(); i++)
+	        for (int j = i + 1; j < q.getBody().size(); j++) {
+	            if (q.getBody().get(i).equals(q.getBody().get(j))) {
+                    q.getBody().remove(j);
+                    j--;
+                }
+            }
+    }
 
     private Function getFreshAtom(Function a, String suffix) {
         List<Term> termscopy = new ArrayList<>(a.getArity());

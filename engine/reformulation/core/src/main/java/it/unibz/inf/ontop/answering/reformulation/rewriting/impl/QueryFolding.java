@@ -121,7 +121,7 @@ public class QueryFolding {
 	public void newQueryFolding(TreeWitness tw) {
 		properties.setToTop(); 
 		roots.clear(); 
-		internalRootConcepts = new Intersection<ClassExpression>(tw.getRootConcepts()); 
+		internalRootConcepts = new Intersection<>(tw.getRootConcepts());
 		internalRoots = new HashSet<>(tw.getRoots());
 		internalDomain = new HashSet<>(tw.getDomain());
 		interior = new LinkedList<>();
