@@ -30,7 +30,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
         private final VariableGenerator variableGenerator;
 
         private TreeTransformer(VariableGenerator variableGenerator) {
-            super(iqFactory);
+            super(UnionFlattenerImpl.this.iqFactory);
             this.variableGenerator = variableGenerator;
         }
 
