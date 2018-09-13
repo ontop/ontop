@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  */
 public abstract class DefaultRecursiveIQTransformer implements IQTransformer{
 
-    private final IntermediateQueryFactory iqFactory;
+    protected final IntermediateQueryFactory iqFactory;
 
     protected DefaultRecursiveIQTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
