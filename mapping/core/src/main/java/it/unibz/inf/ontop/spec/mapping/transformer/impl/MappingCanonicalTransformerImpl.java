@@ -244,7 +244,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private final IQ definition;
 
         IntensionalQueryMerger(IQ definition) {
-            super(iqFactory);
+            super(MappingCanonicalTransformerImpl.this.iqFactory);
             this.definition = definition;
         }
 
@@ -261,7 +261,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private class QueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, iqFactory, substitutionFactory, transformerFactory);
+                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, transformerFactory);
             }
 
             @Override
