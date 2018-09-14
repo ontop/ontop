@@ -24,7 +24,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -107,25 +106,18 @@ public class URITemplates {
      * <p>
      * For instance:
      * <pre>
-     * RDF(http://example.org/{}/{}/{}(X, Y, X), IRI) -> "http://example.org/{X}/{Y}/{X}"
+     * http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"
      * </pre>
      *
-     * @param iriFunctionalTerm URI Function
+     * @param lexicalFunctionalTerm URI Function
      * @return a URI template with variable names inside the placeholders
      */
-    public static String getUriTemplateString(ImmutableFunctionalTerm iriFunctionalTerm) {
-        if (!(iriFunctionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol))
-            throw new IllegalArgumentException("Not an RDFTermFunctionSymbol: " + iriFunctionalTerm);
+    public static String getUriTemplateString(ImmutableFunctionalTerm lexicalFunctionalTerm) {
 
-        ImmutableTerm lexicalTerm = iriFunctionalTerm.getTerm(0);
-
-        if (!((lexicalTerm instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol)))
+        if (!(lexicalFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol))
             throw new IllegalArgumentException(
                     "The lexical term was expected to have a IRIStringTemplateFunctionSymbol: "
-                            + lexicalTerm);
-
-        ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+                            + lexicalFunctionalTerm);
 
         final String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
         ImmutableList<? extends ImmutableTerm> subTerms = lexicalFunctionalTerm.getTerms();

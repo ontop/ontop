@@ -28,8 +28,6 @@ import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -41,7 +39,6 @@ import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
-import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,26 +56,21 @@ public class SQLPPMappingToR2RMLConverter {
 
     private List<SQLPPTriplesMap> ppMappingAxioms;
     private PrefixManager prefixmng;
-    private OWLOntology ontology;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, TermFactory termFactory,
-                                        TypeFactory typeFactory, RDF rdfFactory) {
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, RDF rdfFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
-        this.ontology = ontology;
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
     }
 
+    /**
+     * TODO: remove the splitting logic, not needed anymore.
+     */
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer(termFactory, typeFactory, rdfFactory);
-        transformer.setOntology(ontology);
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
-                .map(a -> transformer.getTriplesMap(a, prefixmng))
+                .flatMap(a -> transformer.getTriplesMaps(a, prefixmng))
                 .collect(Collectors.toList());
     }
 
