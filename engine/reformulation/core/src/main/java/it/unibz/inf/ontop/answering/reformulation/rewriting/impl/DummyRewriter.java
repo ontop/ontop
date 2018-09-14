@@ -26,8 +26,12 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.DatalogProgram;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
@@ -44,21 +48,28 @@ public class DummyRewriter implements QueryRewriter {
     private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
     private final CQCUtilities cqcUtilities;
     private final LinearInclusionDependencyTools inclusionDependencyTools;
+    private final DatalogProgram2QueryConverter datalogConverter;
+
 
     @Inject
-    private DummyRewriter(CQCUtilities cqcUtilities, LinearInclusionDependencyTools inclusionDependencyTools) {
+    private DummyRewriter(CQCUtilities cqcUtilities,
+                          LinearInclusionDependencyTools inclusionDependencyTools,
+                          DatalogProgram2QueryConverter datalogConverter) {
         this.cqcUtilities = cqcUtilities;
         this.inclusionDependencyTools = inclusionDependencyTools;
+        this.datalogConverter = datalogConverter;
     }
 
 
     @Override
-	public List<CQIE> rewrite(List<CQIE> input) {
+	public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
 
-        for (CQIE cq : input)
+        for (CQIE cq : program.getRules())
             cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
 
-        return input;
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(program, ImmutableList.of());
+
+        return convertedIQ;
 	}
 
 	@Override

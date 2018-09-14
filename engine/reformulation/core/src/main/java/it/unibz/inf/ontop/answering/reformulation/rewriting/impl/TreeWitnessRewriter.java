@@ -23,13 +23,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -78,12 +79,14 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
 	private final LinearInclusionDependencyTools inclusionDependencyTools;
+    private final DatalogProgram2QueryConverter datalogConverter;
 
 	@Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
 								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools inclusionDependencyTools) {
+								ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools inclusionDependencyTools,
+                                DatalogProgram2QueryConverter datalogConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -93,6 +96,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
 		this.inclusionDependencyTools = inclusionDependencyTools;
+        this.datalogConverter = datalogConverter;
 	}
 
 	@Override
@@ -312,7 +316,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private double time = 0;
 	
 	@Override
-	public List<CQIE> rewrite(List<CQIE> ucq) {
+    public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
 
@@ -320,7 +324,7 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		Multimap<Predicate, CQIE> ccDP = null;
 		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
 
-		for (CQIE cqie : ucq) {
+		for (CQIE cqie : program.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
 					atomFactory, immutabilityTools);
 			Function cqieAtom = cqie.getHead();
@@ -380,13 +384,17 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
 		log.debug("Final rewriting:\n{}", outputRules);
-		return outputRules;
+
+		DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
+
+        return convertedIQ;
 	}
 
 
 
 
-    public List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
+    private List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
 
         PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
                 Comparator.comparingInt(cq -> cq.getBody().size()));

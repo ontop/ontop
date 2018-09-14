@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
@@ -35,6 +34,7 @@ import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
@@ -54,7 +54,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
-	private final DatalogProgram2QueryConverter datalogConverter;
 	private final OntopReformulationSettings settings;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
@@ -66,7 +65,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
-	private final CQCUtilities cqcUtilities;
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final IQConverter iqConverter;
 
@@ -75,7 +73,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
 								BindingLiftOptimizer bindingLiftOptimizer, OntopReformulationSettings settings,
-								DatalogProgram2QueryConverter datalogConverter,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
@@ -83,7 +80,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								DatalogFactory datalogFactory,
 								DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
-								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
+								SubstitutionUtilities substitutionUtilities,
 								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
 								IQConverter iqConverter) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
@@ -96,7 +93,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
-		this.cqcUtilities = cqcUtilities;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		this.rewriter = queryRewriter;
@@ -121,7 +117,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;
-		this.datalogConverter = datalogConverter;
 
 		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
@@ -182,14 +177,25 @@ public class QuestQueryProcessor implements QueryReformulator {
 			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 			DatalogProgram newprogram = preProcess(translation);
 
-			log.debug("Start the rewriting process...");
-
-			DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(
-					newprogram.getQueryModifiers(),
-					rewriter.rewrite(newprogram.getRules()));
 
 			try {
-				IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
+				log.debug("Start the rewriting process...");
+
+				IQ convertedIQ =  rewriter.rewrite(newprogram);
+
+				/*
+				OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+				Injector injector = defaultConfiguration.getInjector();
+				IntermediateQueryFactory fac = injector.getInstance(IntermediateQueryFactory.class);
+				convertedIQ = fac.createIQ(convertedIQ.getProjectionAtom(),
+						convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(fac) {
+							@Override
+							protected ImmutableList<IQTree> transformBGP(ImmutableList<IQTree> triplePatterns) {
+								System.out.println("@BGP: " + triplePatterns);
+								return triplePatterns;
+							}
+				}));
+				*/
 
 				log.debug("Directly translated (SPARQL) IQ: \n" + convertedIQ.toString());
 
@@ -283,8 +289,14 @@ public class QuestQueryProcessor implements QueryReformulator {
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
 		DatalogProgram program = preProcess(translation);
-		List<CQIE> rewriting = rewriter.rewrite(program.getRules());
-		return Joiner.on("\n").join(rewriting);
+		try {
+			IQ rewriting = rewriter.rewrite(program);
+			return rewriting.toString();
+		}
+		catch (EmptyQueryException e) {
+			e.printStackTrace();
+		}
+		return "EMPTY REWRITING";
 	}
 
 	@Override
