@@ -34,7 +34,15 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTra
         if (!currentBGP.isEmpty())
             builderChildren.addAll(transformBGP(currentBGP));
 
-        return iqFactory.createNaryIQTree(rootNode, builderChildren.build());
+        ImmutableList<IQTree> result = builderChildren.build();
+        switch (result.size()) {
+            case 0:
+                throw new IllegalStateException("All triple patterns of BGP have been eliminated by Sigma-LIDs");
+            case 1:
+                return result.get(0);
+            default:
+                return iqFactory.createNaryIQTree(rootNode, result);
+        }
     }
 
     protected abstract ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);

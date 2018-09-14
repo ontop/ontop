@@ -32,28 +32,27 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
 /***
- * A query rewriter that does nothing on the given query.
+ * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
  *
  */
 public class DummyRewriter implements QueryRewriter {
 
     private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
+
     private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
     private final DatalogProgram2QueryConverter datalogConverter;
     private final ImmutableUnificationTools immutableUnificationTools;
     private final IntermediateQueryFactory iqFactory;
 
-
     @Inject
-    private DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
+    protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                           DatalogProgram2QueryConverter datalogConverter,
                           ImmutableUnificationTools immutableUnificationTools,
                           IntermediateQueryFactory iqFactory) {
@@ -63,6 +62,10 @@ public class DummyRewriter implements QueryRewriter {
         this.iqFactory = iqFactory;
     }
 
+    @Override
+    public void setTBox(ClassifiedTBox reasoner) {
+        sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+    }
 
     @Override
 	public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
@@ -72,47 +75,33 @@ public class DummyRewriter implements QueryRewriter {
         return iqFactory.createIQ(convertedIQ.getProjectionAtom(), convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
-                return optimizeQueryWithSigmaRules(triplePatterns, sigma);
+
+                // optimise with Sigma ABox dependencies
+                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
+                // this loop has to remain sequential (no streams)
+                for (int i = 0; i < list.size(); i++) {
+                    ImmutableSet<DataAtom> derived = getDerivedAtoms(list.get(i).getProjectionAtom(), sigma);
+                    if (!derived.isEmpty()) {
+                        for (int j = 0; j < list.size(); j++)
+                            if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
+                                list.remove(j);
+                                j--;
+                            }
+                    }
+                }
+                return ImmutableList.copyOf(list);
             }
         }));
 	}
 
-	@Override
-	public void setTBox(ClassifiedTBox reasoner) {
-        sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
-	}
-
-
-    private ImmutableList<IntensionalDataNode> optimizeQueryWithSigmaRules(ImmutableList<IntensionalDataNode> bgp, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
-
-        ArrayList<IntensionalDataNode> list = new ArrayList<>(bgp);
-
-        // for each atom in query body
-        for (int i = 0; i < list.size(); i++) {
-            IntensionalDataNode tp = list.get(i);
-            ImmutableSet<DataAtom<AtomPredicate>> derived = getDerivedAtoms(tp, dependencies);
-
-            for (int j = 0; j < list.size(); j++)
-                if (i != j && derived.contains(tp.getProjectionAtom())) {
-                    System.out.println("LID2: " + tp + " IN " + list);
-                    list.remove(j);
-                    j--;
-                }
-        }
-
-        return ImmutableList.copyOf(list);
-    }
-
-    private ImmutableSet<DataAtom<AtomPredicate>> getDerivedAtoms(IntensionalDataNode tp, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
-        ImmutableSet.Builder<DataAtom<AtomPredicate>> derived = ImmutableSet.builder();
-        // collect all derived atoms
-        for (ImmutableLinearInclusionDependency<AtomPredicate> lid : dependencies) {
-            // try to unify current query body atom with tbox rule body atom
-            Optional<ImmutableSubstitution<VariableOrGroundTerm>> theta
-                    = immutableUnificationTools.computeAtomMGU(lid.getBody(), tp.getProjectionAtom());
-            theta.ifPresent(t -> { if (!t.isEmpty()) derived.add(t.applyToDataAtom(lid.getHead())); });
-        }
-        return derived.build();
+    private ImmutableSet<DataAtom> getDerivedAtoms(DataAtom atom, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
+        return dependencies.stream()
+                .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
+                        .filter(theta -> !theta.isEmpty())
+                        .map(theta -> theta.applyToDataAtom(dependency.getHead())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toSet());
     }
 
 }

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckSyntactic;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -334,13 +335,13 @@ public class CQCUtilitiesTest {
 
 		CQIE q3 = DATALOG_FACTORY.getCQIE(head, body);
 
-		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q2));
+		assertTrue(new CQContainmentCheckSyntactic().isContainedIn(q1, q2));
 
-		assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q1, q3));
+		assertTrue(new CQContainmentCheckSyntactic().isContainedIn(q1, q3));
 
-		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q2, q1));
+		assertFalse(new CQContainmentCheckSyntactic().isContainedIn(q2, q1));
 
-		assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(q3, q1));
+		assertFalse(new CQContainmentCheckSyntactic().isContainedIn(q3, q1));
 
 	}
 
@@ -387,7 +388,7 @@ public class CQCUtilitiesTest {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, new CQContainmentCheckSyntactic());
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -395,7 +396,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, new CQContainmentCheckSyntactic());
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -403,7 +404,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, new CQContainmentCheckSyntactic());
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -413,7 +414,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		CQC_UTILITIES.removeContainedQueries(queries, CQC_UTILITIES.SYNTACTIC_CHECK);
+		CQC_UTILITIES.removeContainedQueries(queries, new CQContainmentCheckSyntactic());
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -627,9 +628,9 @@ public class CQCUtilitiesTest {
 
         assertFalse(cqc.isContainedIn(query2, query1));
 
-        assertTrue(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
+        assertTrue(new CQContainmentCheckSyntactic().isContainedIn(query1, query2)); // ROMAN: changed from False
         
-        assertFalse(CQC_UTILITIES.SYNTACTIC_CHECK.isContainedIn(query2, query1));
+        assertFalse(new CQContainmentCheckSyntactic().isContainedIn(query2, query1));
     }
 
 	private static class FakeTestPredicate extends PredicateImpl {
