@@ -413,7 +413,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory, rdfFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, typeFactory, targetAtomFactory, rdfFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

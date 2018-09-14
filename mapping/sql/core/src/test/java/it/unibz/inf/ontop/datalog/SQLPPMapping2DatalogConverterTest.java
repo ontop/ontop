@@ -99,7 +99,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
 		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), TERM_FACTORY,
-				TARGET_ATOM_FACTORY, RDF_FACTORY);
+				TYPE_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);

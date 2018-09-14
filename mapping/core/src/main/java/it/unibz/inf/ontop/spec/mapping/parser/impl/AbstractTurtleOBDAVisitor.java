@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -41,9 +43,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     protected String error = "";
     private final TermFactory termFactory;
     private final RDF rdfFactory;
+    private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
+                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+        this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
@@ -321,7 +326,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         VariableContext vc = ctx.variable();
         if (vc != null) {
-            return visitVariable(vc);
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc));
         }
         BlankContext bc = ctx.blank();
         if (bc != null) {
@@ -332,7 +337,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitObject(ObjectContext ctx) {
-        return (ImmutableTerm) visit(ctx.children.iterator().next());
+        ImmutableTerm term = (ImmutableTerm) visit(ctx.children.iterator().next());
+        return (term instanceof Variable)
+                ? termFactory.getRDFLiteralFunctionalTerm(
+                        termFactory.getPartiallyDefinedToStringCast((Variable) term),
+                    // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                    // --> The concrete datatype be inferred afterwards
+                            RDFS.LITERAL)
+                : term;
     }
 
     @Override
@@ -351,15 +363,20 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
+    public ImmutableFunctionalTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
-        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
+    public ImmutableFunctionalTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
         IRI iri = visitIri(ctx.iri());
+        //if (typeFactory.getDatatype(iri).isAbstract())
+        //    // TODO: throw a better exception (invalid input)
+        //    throw new IllegalArgumentException("The datatype of a literal must not be abstract: " + iri);
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
     }
 
@@ -373,10 +390,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableFunctionalTerm visitVariable(VariableContext ctx) {
+    public Variable visitVariable(VariableContext ctx) {
         String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
         validateAttributeName(variableName);
-        return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
+        return termFactory.getVariable(variableName);
     }
 
     @Override

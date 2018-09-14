@@ -54,13 +54,19 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         Optional<TermTypeInference> optionalTypeInference = objectDefinition.inferType();
 
-        if (optionalTypeInference.isPresent()) {
-            if (optionalTypeInference.get().isNonFatalError())
-                throw new MinorOntopInternalBugException("A non-fatal error is not expected in a mapping assertion\n"
+        if (optionalTypeInference
+                .filter(TermTypeInference::isNonFatalError)
+                .isPresent())
+            throw new MinorOntopInternalBugException("A non-fatal error is not expected in a mapping assertion\n"
                         + mappingAssertion);
-            // Determined
+        /*
+         * If the datatype is abstract --> we consider it as missing
+         */
+        if (optionalTypeInference
+                .flatMap(TermTypeInference::getTermType)
+                .filter(t -> !t.isAbstract())
+                .isPresent())
             return mappingAssertion;
-        }
         else
             return fillMissingDatatype(objectDefinition, mappingAssertion, provenance);
     }

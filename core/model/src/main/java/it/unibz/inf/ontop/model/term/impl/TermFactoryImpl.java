@@ -359,7 +359,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable) {
-		return getRDFFunctionalTerm(variable, iriTypeConstant);
+		return getRDFFunctionalTerm(getPartiallyDefinedToStringCast(variable), iriTypeConstant);
 	}
 
 	@Override

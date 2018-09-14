@@ -318,7 +318,7 @@ public class TurtleSyntaxParserTest {
 
 	private boolean compareCQIE(String input, int countBody) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
-                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
+                TERM_FACTORY, TYPE_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
 		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
@@ -335,7 +335,7 @@ public class TurtleSyntaxParserTest {
 
 	private boolean parse(String input) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
-                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
+                TERM_FACTORY, TYPE_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
 
 		ImmutableList<TargetAtom> mapping;
 		try {
