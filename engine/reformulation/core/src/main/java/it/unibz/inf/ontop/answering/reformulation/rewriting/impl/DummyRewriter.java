@@ -26,10 +26,8 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -43,14 +41,11 @@ import java.util.*;
 
 /***
  * A query rewriter that does nothing on the given query.
- * 
- * @author mariano
  *
  */
 public class DummyRewriter implements QueryRewriter {
 
     private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
-    private final CQCUtilities cqcUtilities;
     private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
     private final DatalogProgram2QueryConverter datalogConverter;
     private final ImmutableUnificationTools immutableUnificationTools;
@@ -58,11 +53,10 @@ public class DummyRewriter implements QueryRewriter {
 
 
     @Inject
-    private DummyRewriter(CQCUtilities cqcUtilities,
-                          ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
+    private DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                           DatalogProgram2QueryConverter datalogConverter,
-                          ImmutableUnificationTools immutableUnificationTools, IntermediateQueryFactory iqFactory) {
-        this.cqcUtilities = cqcUtilities;
+                          ImmutableUnificationTools immutableUnificationTools,
+                          IntermediateQueryFactory iqFactory) {
         this.inclusionDependencyTools = inclusionDependencyTools;
         this.datalogConverter = datalogConverter;
         this.immutableUnificationTools = immutableUnificationTools;
@@ -100,7 +94,7 @@ public class DummyRewriter implements QueryRewriter {
 
             for (int j = 0; j < list.size(); j++)
                 if (i != j && derived.contains(tp.getProjectionAtom())) {
-                    System.out.println("LID: " + tp + " IN " + list);
+                    System.out.println("LID2: " + tp + " IN " + list);
                     list.remove(j);
                     j--;
                 }
@@ -109,7 +103,7 @@ public class DummyRewriter implements QueryRewriter {
         return ImmutableList.copyOf(list);
     }
 
-    ImmutableSet<DataAtom<AtomPredicate>> getDerivedAtoms(IntensionalDataNode tp, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
+    private ImmutableSet<DataAtom<AtomPredicate>> getDerivedAtoms(IntensionalDataNode tp, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
         ImmutableSet.Builder<DataAtom<AtomPredicate>> derived = ImmutableSet.builder();
         // collect all derived atoms
         for (ImmutableLinearInclusionDependency<AtomPredicate> lid : dependencies) {
