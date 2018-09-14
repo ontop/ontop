@@ -17,25 +17,25 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTra
 
     @Override
     public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList.Builder<IQTree> builderBGP = ImmutableList.builder(),
-                builderChildren = ImmutableList.builder();
+        ImmutableList.Builder<IntensionalDataNode> builderBGP = ImmutableList.builder();
+        ImmutableList.Builder<IQTree> builderChildren = ImmutableList.builder();
         for (IQTree child : children) {
             if (child.getRootNode() instanceof IntensionalDataNode) {
-                builderBGP.add(child);
+                builderBGP.add((IntensionalDataNode)child);
             }
             else {
-                ImmutableList<IQTree> currentBGP = builderBGP.build();
+                ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
                 if (!currentBGP.isEmpty())
                     builderChildren.addAll(transformBGP(currentBGP));
                 builderChildren.add(child);
             }
         }
-        ImmutableList<IQTree> currentBGP = builderBGP.build();
+        ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
         if (!currentBGP.isEmpty())
             builderChildren.addAll(transformBGP(currentBGP));
 
         return iqFactory.createNaryIQTree(rootNode, builderChildren.build());
     }
 
-    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IQTree> triplePatterns);
+    protected abstract ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);
 }
