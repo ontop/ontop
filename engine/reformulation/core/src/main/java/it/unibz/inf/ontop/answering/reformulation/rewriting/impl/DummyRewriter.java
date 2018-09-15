@@ -89,7 +89,7 @@ public class DummyRewriter implements QueryRewriter {
                             }
                     }
                 }
-                if (program.toString().contains("?country_name"))
+                if (program.toString().contains("country_name"))
                     System.out.println("WAS " + triplePatterns + " NOW " + list);
                 return ImmutableList.copyOf(list);
             }

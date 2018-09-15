@@ -27,7 +27,7 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTra
                 ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
                 if (!currentBGP.isEmpty())
                     builderChildren.addAll(transformBGP(currentBGP));
-                builderChildren.add(child);
+                builderChildren.add(child.acceptTransformer(this));
             }
         }
         ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
