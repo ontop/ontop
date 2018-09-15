@@ -99,7 +99,7 @@ public class DummyRewriter implements QueryRewriter {
             }
         }));
         if (f) {
-            System.out.println(r);
+            System.out.println("RES: " + r + " FROM " + convertedIQ);
             f = false;
         }
         return r;
