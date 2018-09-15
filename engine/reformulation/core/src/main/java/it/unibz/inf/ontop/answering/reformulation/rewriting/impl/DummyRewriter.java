@@ -67,12 +67,14 @@ public class DummyRewriter implements QueryRewriter {
         sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
     }
 
+    private static boolean f = false;
+
     @Override
 	public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
 
         IQ convertedIQ =  datalogConverter.convertDatalogProgram(program, ImmutableList.of());
 
-        return iqFactory.createIQ(convertedIQ.getProjectionAtom(), convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+        IQ r = iqFactory.createIQ(convertedIQ.getProjectionAtom(), convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
@@ -89,11 +91,18 @@ public class DummyRewriter implements QueryRewriter {
                             }
                     }
                 }
-                if (program.toString().contains("country_name"))
+                if (program.toString().contains("country_name")) {
                     System.out.println("WAS " + triplePatterns + " NOW " + list + " IN " + program);
+                    f = true;
+                }
                 return ImmutableList.copyOf(list);
             }
         }));
+        if (f) {
+            System.out.println(r);
+            f = false;
+        }
+        return r;
 	}
 
     private ImmutableSet<DataAtom> getDerivedAtoms(DataAtom atom, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
