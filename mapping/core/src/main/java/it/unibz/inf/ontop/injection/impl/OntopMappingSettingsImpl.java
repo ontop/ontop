@@ -43,6 +43,11 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     @Override
+    public boolean areAbstractDatatypesToleratedInMapping() {
+        return getRequiredBoolean(TOLERATE_ABSTRACT_DATATYPE);
+    }
+
+    @Override
     public boolean isOntologyAnnotationQueryingEnabled() {
         return getRequiredBoolean(QUERY_ONTOLOGY_ANNOTATIONS);
     }

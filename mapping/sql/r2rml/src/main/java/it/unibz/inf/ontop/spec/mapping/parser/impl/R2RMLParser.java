@@ -24,10 +24,13 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.*;
 import org.eclipse.rdf4j.model.Resource;
@@ -46,6 +49,7 @@ public class R2RMLParser {
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final OntopMappingSQLSettings settings;
 	private final RDF rdfFactory;
 
 	/**
@@ -53,9 +57,11 @@ public class R2RMLParser {
 	 * @param termFactory
 	 * @param typeFactory
 	 */
-	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
+	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
+					   OntopMappingSQLSettings settings) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
+		this.settings = settings;
 		mapManager = RDF4JR2RMLMappingManager.getInstance();
 		classPredicates = new ArrayList<>();
 		joinPredObjNodes = new ArrayList<>();
@@ -225,7 +231,7 @@ public class R2RMLParser {
 
 	}
 
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom) {
+	public ImmutableTerm getObjectAtom(PredicateObjectMap pom) throws InvalidR2RMLMappingException {
 		return getObjectAtom(pom, "");
 	}
 
@@ -250,7 +256,7 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) {
+	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) throws InvalidR2RMLMappingException {
 		ImmutableTerm objectAtom = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
@@ -298,11 +304,16 @@ public class R2RMLParser {
 
 					// we check if it is a typed literal
 					else if (datatypeConstant != null) {
+						if ((!settings.areAbstractDatatypesToleratedInMapping())
+							&& typeFactory.getDatatype(datatypeConstant).isAbstract())
+							throw new InvalidR2RMLMappingException("Abstract datatype "
+									+datatypeConstant  + " detected in the mapping assertion.\nSet the property "
+									+ OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
 						objectAtom = termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeConstant);
 					}
 					else {
-						objectAtom = termFactory.getRDFLiteralConstant(lexicalString, XSD.STRING);
-								 // .RDFS_LITERAL;
+						// Use RDFS.LITERAL when the datatype is not specified (-> to be inferred)
+						objectAtom = termFactory.getRDFLiteralConstant(lexicalString, RDFS.LITERAL);
 					}
                 } else if (constantObj instanceof IRI){
                     objectAtom = termFactory.getIRIFunctionalTerm((IRI) constantObj);

@@ -32,6 +32,7 @@ import eu.optique.r2rml.api.model.RefObjectMap;
 import eu.optique.r2rml.api.model.TriplesMap;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -76,9 +77,10 @@ public class R2RMLManager {
 	 * @param targetAtomFactory
 	 */
 	public R2RMLManager(String file, TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory)
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory,
+						OntopMappingSQLSettings settings)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file), termFactory, typeFactory, targetAtomFactory, rdfFactory);
+		this(new File(file), termFactory, typeFactory, targetAtomFactory, rdfFactory, settings);
 	}
 	
 	/**
@@ -90,7 +92,8 @@ public class R2RMLManager {
 	 * @param rdfFactory
 	 */
 	public R2RMLManager(File file, TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory)
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory,
+						OntopMappingSQLSettings settings)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
@@ -105,7 +108,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			this.myModel = new RDF4J().asGraph(model);
-			r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory);
+			r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory, settings);
 		} catch (IOException e) {
 			throw new MappingIOException(e);
 		}
@@ -120,12 +123,13 @@ public class R2RMLManager {
 	 * @param targetAtomFactory
 	 */
 	public R2RMLManager(Graph model, TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory){
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory,
+						OntopMappingSQLSettings settings){
 		myModel = model;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.targetAtomFactory = targetAtomFactory;
-		r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory);
+		r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory, settings);
 	}
 	
 	/**

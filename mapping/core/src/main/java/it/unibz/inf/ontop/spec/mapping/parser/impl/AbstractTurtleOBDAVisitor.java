@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -22,6 +23,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Stateful! See currentSubject.
+ */
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
     // Column placeholder pattern
@@ -45,13 +49,16 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     private final RDF rdfFactory;
     private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final OntopMappingSettings settings;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
-                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+    protected AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
+                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory,
+                                     OntopMappingSettings settings) {
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
+        this.settings = settings;
     }
 
     public String getError() {
@@ -374,9 +381,13 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
                 visitVariable(ctx.variable()));
         IRI iri = visitIri(ctx.iri());
-        //if (typeFactory.getDatatype(iri).isAbstract())
-        //    // TODO: throw a better exception (invalid input)
-        //    throw new IllegalArgumentException("The datatype of a literal must not be abstract: " + iri);
+
+        if ((!settings.areAbstractDatatypesToleratedInMapping())
+            && typeFactory.getDatatype(iri).isAbstract())
+            // TODO: throw a better exception (invalid input)
+            throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                    + iri + "\nSet the property "
+                    + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
     }
 
