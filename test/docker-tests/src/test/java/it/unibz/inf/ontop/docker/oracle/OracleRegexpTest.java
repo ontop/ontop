@@ -54,6 +54,12 @@ public class OracleRegexpTest extends AbstractVirtualModeTest {
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("country")	 ;
 			retval = ind1.toString();
+			System.out.println(retval);
+			while (rs.hasNext()) {
+				final OWLBindingSet bindingSet0 = rs.next();
+				OWLIndividual ind0 = bindingSet0.getOWLIndividual("country")	 ;
+				System.out.println(ind0);
+			}
 		} else {
 			assertFalse(rs.hasNext());
 			retval = "";
