@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog.impl;
+package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 /*
  * #%L

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
