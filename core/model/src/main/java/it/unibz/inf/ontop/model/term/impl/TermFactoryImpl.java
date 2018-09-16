@@ -358,8 +358,9 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
-	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable) {
-		return getRDFFunctionalTerm(getPartiallyDefinedToStringCast(variable), iriTypeConstant);
+	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean castToString) {
+		ImmutableTerm lexicalTerm = castToString ? getPartiallyDefinedToStringCast(variable) : variable;
+		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
 	}
 
 	@Override

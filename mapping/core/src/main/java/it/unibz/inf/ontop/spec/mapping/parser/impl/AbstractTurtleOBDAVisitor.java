@@ -88,7 +88,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getIRIFunctionalTerm(column);
+                toReturn = termFactory.getIRIFunctionalTerm(column, true);
             }
         } else {
             StringBuilder sb = new StringBuilder();
@@ -333,7 +333,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         VariableContext vc = ctx.variable();
         if (vc != null) {
-            return termFactory.getIRIFunctionalTerm(visitVariable(vc));
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
         }
         BlankContext bc = ctx.blank();
         if (bc != null) {

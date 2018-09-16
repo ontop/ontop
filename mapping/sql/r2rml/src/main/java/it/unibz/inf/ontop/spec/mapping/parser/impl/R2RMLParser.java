@@ -379,7 +379,7 @@ public class R2RMLParser {
 			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
 					// Cast to Variable added. TODO: check
-					objectAtom = termFactory.getIRIFunctionalTerm((Variable) objectAtom);
+					objectAtom = termFactory.getIRIFunctionalTerm((Variable) objectAtom, true);
 				}
 			}
 

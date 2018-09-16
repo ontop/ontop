@@ -218,7 +218,7 @@ public interface TermFactory {
 	 */
 	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
 
-	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable);
+	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean castToString);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
