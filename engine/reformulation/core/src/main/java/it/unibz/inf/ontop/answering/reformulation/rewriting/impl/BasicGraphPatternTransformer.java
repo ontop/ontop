@@ -39,7 +39,11 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTra
             case 0:
                 throw new IllegalStateException("All triple patterns of BGP have been eliminated by Sigma-LIDs");
             case 1:
-                return result.get(0);
+                if (rootNode.getOptionalFilterCondition().isPresent())
+                    return iqFactory.createUnaryIQTree(
+                            iqFactory.createFilterNode(rootNode.getOptionalFilterCondition().get()),
+                            result.get(0));
+                else return result.get(0);
             default:
                 return iqFactory.createNaryIQTree(rootNode, result);
         }
