@@ -80,13 +80,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
 	private final LinearInclusionDependencyTools mutableInclusionDependencyTools;
+    private final DatalogProgram2QueryConverter datalogConverter;
+    private final IQ2DatalogTranslator iqConverter;
 
-	@Inject
+    @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
                                 SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools mutableInclusionDependencyTools,
-                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools, DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory, ImmutableUnificationTools immutableUnificationTools) {
+                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools, DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory, ImmutableUnificationTools immutableUnificationTools, DatalogProgram2QueryConverter datalogConverter1, IQ2DatalogTranslator iqConverter) {
         super(inclusionDependencyTools, datalogConverter, immutableUnificationTools, iqFactory);
 
         this.atomFactory = atomFactory;
@@ -97,6 +99,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
 		this.mutableInclusionDependencyTools = mutableInclusionDependencyTools;
+        this.datalogConverter = datalogConverter1;
+        this.iqConverter = iqConverter;
     }
 
 	@Override
@@ -367,19 +371,24 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 			outputRules = plugInDefinitions(outputRules, ccDP);
 			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
 		}
-	
+
+        DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
+
+        DatalogProgram result = iqConverter.translate(convertedIQ);
+        List<CQIE> list = new LinkedList<>(result.getRules());
+
 		// extra CQC 
 		if (outputRules.size() > 1) 
-			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
+			CQCUtilities.removeContainedQueries(list, dataDependenciesCQC);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", outputRules);
+		log.debug("Final rewriting:\n{}", list);
 
-		DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
-		return super.rewrite(programAfterRewriting);
+		return super.rewrite(datalogFactory.getDatalogProgram(program.getQueryModifiers(), list));
 	}
 
 

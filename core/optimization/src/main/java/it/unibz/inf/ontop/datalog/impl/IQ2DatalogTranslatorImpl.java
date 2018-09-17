@@ -38,8 +38,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -74,9 +72,6 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
             this.optionalChildNode = optionalChildNode;
         }
 	}
-
-
-	private static final Logger LOG = LoggerFactory.getLogger(IQ2DatalogTranslatorImpl.class);
 
 	// Incremented
 	private int subQueryCounter;
