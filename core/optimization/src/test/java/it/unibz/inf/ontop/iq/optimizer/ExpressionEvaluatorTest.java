@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
@@ -41,8 +40,6 @@ public class ExpressionEvaluatorTest {
     private final Variable C = TERM_FACTORY.getVariable("c");
     private final Variable D = TERM_FACTORY.getVariable("d");
 
-    private URITemplatePredicate URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
-    private URITemplatePredicate URI_PREDICATE2 =  TERM_FACTORY.getURITemplatePredicate(3);
     private Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/stock/{}");
 
     private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
@@ -432,11 +429,11 @@ public class ExpressionEvaluatorTest {
     }
 
     private ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
     private ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm var1, Variable var2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE2, URI_TEMPLATE_STR_1, var1, var2);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, var1, var2);
     }
 
     private ImmutableFunctionalTerm generateLangString(VariableOrGroundTerm argument1, String languageTag) {

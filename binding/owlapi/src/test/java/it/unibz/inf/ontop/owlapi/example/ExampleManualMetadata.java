@@ -19,9 +19,9 @@ import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
  *
  */
 public class ExampleManualMetadata {
-	final String owlfile = "src/main/resources/example/exampleSensor.owl";
-	final String obdafile = "src/main/resources/example/UseCaseExampleMini.obda";
-	final String propertyfile = "src/main/resources/example/UseCaseExampleMini.properties";
+	final String owlfile = "src/test/resources/example/exampleSensor.owl";
+	final String obdafile = "src/test/resources/example/UseCaseExampleMini.obda";
+	final String propertyfile = "src/test/resources/example/UseCaseExampleMini.properties";
 	private OWLStatement qst = null;
 	private OntopQueryEngine queryEngine;
 

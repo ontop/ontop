@@ -58,15 +58,11 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 			properties.load(pStream);
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
-
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 			Injector injector = defaultConfiguration.getInjector();
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn,
-					defaultConfiguration.getTermFactory(),
 					injector.getInstance(TypeFactory.class),
-					injector.getInstance(DatalogFactory.class),
-					defaultConfiguration.getAtomFactory(),
 					injector.getInstance(JdbcTypeMapper.class));
 
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

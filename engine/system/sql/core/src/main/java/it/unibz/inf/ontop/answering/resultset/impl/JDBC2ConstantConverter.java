@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.commons.rdf.api.RDF;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,6 +25,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.WKT;
 import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
 
 
@@ -32,6 +33,7 @@ public class JDBC2ConstantConverter {
 
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
 
     enum System {ORACLE, MSSQL, DEFAULT}
 
@@ -96,10 +98,11 @@ public class JDBC2ConstantConverter {
 
 
     public JDBC2ConstantConverter(DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary,
-                                  TermFactory termFactory, TypeFactory typeFactory) {
+                                  TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
         this.iriDictionary = iriDictionary.orElse(null);
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.rdfFactory = rdfFactory;
         String vendor = dbMetadata.getDriverName();
         systemDB = identifySystem(vendor);
         this.bnodeCounter = new AtomicInteger();
@@ -148,7 +151,7 @@ public class JDBC2ConstantConverter {
                             // we leave realValue as it is.
                         }
                     }
-                    return termFactory.getConstantIRI(new SimpleRDF().createIRI(stringValue.trim()));
+                    return termFactory.getConstantIRI(rdfFactory.createIRI(stringValue.trim()));
 
                 case BNODE:
                     String scopedLabel = this.bnodeMap.get(stringValue);
@@ -214,6 +217,8 @@ public class JDBC2ConstantConverter {
 
                 case YEAR:
                     return termFactory.getConstantLiteral(stringValue, XSD.GYEAR);
+                case WKT:
+                    return termFactory.getConstantLiteral(stringValue, WKT.getIri().get());
                 default:
                     throw new IllegalStateException("Unexpected colType: " + type);
 

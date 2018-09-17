@@ -22,5 +22,5 @@ package it.unibz.inf.ontop.datalog;
 
 public interface ListListener {
 	
-	public void listChanged();
+	void listChanged();
 }

@@ -459,7 +459,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
-                    return arguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)
+                    return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm)
                             && arguments.stream().anyMatch(rightVariables::contains);
                 })
                 .collect(ImmutableCollectors.toSet());

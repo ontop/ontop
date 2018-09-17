@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -29,15 +30,15 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
 
     @Inject
     private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                                      TermFactory termFactory, QueryTransformerFactory transformerFactory) {
+                                      CoreUtilsFactory coreUtilsFactory, QueryTransformerFactory transformerFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
     }
 
@@ -69,7 +70,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();
 
-        VariableGenerator variableGenerator = new VariableGenerator(firstDefinition.getTree().getKnownVariables(), termFactory);
+        VariableGenerator variableGenerator =  coreUtilsFactory.createVariableGenerator(firstDefinition.getTree().getKnownVariables());
 
         Stream<IQTree> renamedDefinitions = predicateDefinitions.stream()
                 .skip(1)

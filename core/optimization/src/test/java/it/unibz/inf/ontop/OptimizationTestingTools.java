@@ -25,8 +25,12 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
+
+import java.util.Properties;
 
 public class OptimizationTestingTools {
 
@@ -41,7 +45,9 @@ public class OptimizationTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryTransformerFactory TRANSFORMER_FACTORY;
+    public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final PullOutVariableOptimizer PULL_OUT_VARIABLE_OPTIMIZER;
+    public static final PushDownBooleanExpressionOptimizer PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
@@ -91,7 +97,12 @@ public class OptimizationTestingTools {
 
     static {
 
+        // TEMPORARY! TODO: remove it!
+        Properties tmpProperties = new Properties();
+        tmpProperties.put(VariableGenerator.class.getCanonicalName(), LegacyVariableGenerator.class.getCanonicalName());
+
         OntopOptimizationConfiguration defaultConfiguration = OntopOptimizationConfiguration.defaultBuilder()
+                .properties(tmpProperties)
                 .enableTestMode()
                 .build();
 
@@ -106,9 +117,11 @@ public class OptimizationTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
+        PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER = injector.getInstance(PushDownBooleanExpressionOptimizer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
@@ -123,7 +136,7 @@ public class OptimizationTestingTools {
         NULL = TERM_FACTORY.getNullConstant();
         TRUE = TERM_FACTORY.getBooleanConstant(true);
         FALSE = TERM_FACTORY.getBooleanConstant(false);
-        RDF_FACTORY = new SimpleRDF();
+        RDF_FACTORY = injector.getInstance(RDF.class);
 
         X = TERM_FACTORY.getVariable("x");
         Y = TERM_FACTORY.getVariable("y");

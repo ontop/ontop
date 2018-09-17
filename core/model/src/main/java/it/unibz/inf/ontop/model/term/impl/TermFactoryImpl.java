@@ -34,6 +34,9 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.vocabulary.RDF.LANGSTRING;
 
@@ -48,6 +51,8 @@ public class TermFactoryImpl implements TermFactory {
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFDatatype, DatatypePredicate> type2FunctionSymbolMap;
 	private final boolean isTestModeEnabled;
+	private final AtomicInteger templateCounter;
+	private final Map<String, String> templateSuffix;
 
 	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory, OntopModelSettings settings) {
@@ -61,6 +66,8 @@ public class TermFactoryImpl implements TermFactory {
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.type2FunctionSymbolMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
+		this.templateCounter = new AtomicInteger();
+		this.templateSuffix = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -232,31 +239,30 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		FunctionSymbol uriPred = getURITemplatePredicate(terms.length);
-		return getFunction(uriPred, terms);		
+		return getUriTemplate(Arrays.asList(terms));
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableTerm... terms) {
-		FunctionSymbol pred = getURITemplatePredicate(terms.length);
-		return getImmutableFunctionalTerm(pred, terms);
+		return getImmutableUriTemplate(ImmutableList.copyOf(terms));
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getImmutableUriTemplate(ImmutableList<ImmutableTerm> terms) {
-		FunctionSymbol pred = getURITemplatePredicate(terms.size());
+		FunctionSymbol pred = getURITemplatePredicate(terms);
 		return getImmutableFunctionalTerm(pred, terms);
 	}
 
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
-		FunctionSymbol uriPred = getURITemplatePredicate(terms.size());
+		FunctionSymbol uriPred = getURITemplatePredicate(terms.size(), terms);
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public Function getUriTemplateForDatatype(String type) {
-		return getFunction(getURITemplatePredicate(1), getConstantLiteral(type));
+		ValueConstant term = getConstantLiteral(type);
+		return getFunction(getURITemplatePredicate(ImmutableList.of(term)), term);
 	}
 	
 	@Override
@@ -420,9 +426,30 @@ public class TermFactoryImpl implements TermFactory {
 							.orElseGet(() -> new DatatypePredicateImpl(type, type))));
 	}
 
-	@Override
-	public URITemplatePredicate getURITemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity, typeFactory);
+	private URITemplatePredicate getURITemplatePredicate(int arity, List<? extends Term> terms) {
+		String suffix = computeSuffix(terms.stream()
+				.findFirst()
+				.filter(t -> t instanceof Constant)
+				.map(t -> (Constant) t));
+
+		return new URITemplatePredicateImpl(arity, suffix, typeFactory);
+	}
+
+	private String computeSuffix(Optional<Constant> optionalConstant) {
+		return optionalConstant
+				.map(Constant::getValue)
+				.filter(v -> v.contains("{}"))
+				.map(v -> templateSuffix.computeIfAbsent(v,
+						k -> "T" + templateCounter.incrementAndGet()))
+				.orElse("");
+	}
+
+	private URITemplatePredicate getURITemplatePredicate(ImmutableList<? extends ImmutableTerm> terms) {
+		String suffix = computeSuffix(terms.stream()
+				.findFirst()
+				.filter(t -> t instanceof Constant)
+				.map(t -> (Constant) t));
+		return new URITemplatePredicateImpl(terms.size(), suffix, typeFactory);
 	}
 
 	private static class NoConstructionFunctionException extends OntopInternalBugException {

@@ -229,6 +229,7 @@ public class FunctionalDependencyTest {
         optimizeAndCompare(query, expectedQuery, joinNode);
     }
 
+    @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
     @Test
     public void testRedundantSelfJoin3() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,

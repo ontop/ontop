@@ -54,9 +54,6 @@ public class SubstitutionPropagationTest {
     private static final ValueConstant ONE = TERM_FACTORY.getConstantLiteral("1", TYPE_FACTORY.getXsdIntegerDatatype());
     private static final ValueConstant TWO = TERM_FACTORY.getConstantLiteral("2", TYPE_FACTORY.getXsdIntegerDatatype());
 
-
-    private static final URITemplatePredicate URI1_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
-    private static final URITemplatePredicate URI2_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(3);
     private static final Constant URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
     private static final Constant URI_TEMPLATE_STR_2 =  TERM_FACTORY.getConstantLiteral("http://example.org/ds2/{}/{}");
 
@@ -1302,11 +1299,11 @@ public class SubstitutionPropagationTest {
 
 
     private static ImmutableFunctionalTerm generateURI1(ImmutableTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI1_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
     private static ImmutableFunctionalTerm generateURI2(ImmutableTerm argument1, ImmutableTerm argument2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI2_PREDICATE, URI_TEMPLATE_STR_2, argument1, argument2);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_2, argument1, argument2);
     }
     
     private static ExtensionalDataNode buildExtensionalDataNode(RelationPredicate predicate, VariableOrGroundTerm... arguments) {

@@ -16,12 +16,6 @@ public interface DatalogProgram2QueryConverter {
                              Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, EmptyQueryException;
 
-    Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
-                                           Multimap<Predicate, CQIE> datalogRuleIndex,
-                                           Collection<Predicate> tablePredicates,
-                                           Optional<ImmutableQueryModifiers> optionalModifiers)
-            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException;
-
     Optional<IQ> convertDatalogDefinitions(Collection<CQIE> atomDefinitions,
                                            Collection<Predicate> tablePredicates,
                                            Optional<ImmutableQueryModifiers> optionalModifiers)

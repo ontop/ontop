@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private final ImmutabilityTools immutabilityTools;
     private final ExpressionEvaluator expressionEvaluator;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -73,7 +76,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
                                  ExpressionEvaluator expressionEvaluator, OntopModelSettings settings,
-                                 AscendingSubstitutionNormalizer substitutionNormalizer) {
+                                 AscendingSubstitutionNormalizer substitutionNormalizer,
+                                 CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
@@ -87,6 +91,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.iqFactory = iqFactory;
         this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
@@ -136,7 +141,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator,
-                                 AscendingSubstitutionNormalizer substitutionNormalizer) {
+                                 AscendingSubstitutionNormalizer substitutionNormalizer,
+                                 CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -152,6 +158,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
         this.substitutionNormalizer = substitutionNormalizer;
+        this.coreUtilsFactory = coreUtilsFactory;
 
         validateNode();
     }
@@ -238,9 +245,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     public VariableNullability getVariableNullability(IQTree child) {
         VariableNullability childNullability = child.getVariableNullability();
 
-        VariableGenerator variableGenerator = new VariableGenerator(
-                Sets.union(projectedVariables, child.getVariables()).immutableCopy(),
-                termFactory);
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(projectedVariables, child.getVariables()).immutableCopy());
 
         /*
          * The substitutions are split by nesting level

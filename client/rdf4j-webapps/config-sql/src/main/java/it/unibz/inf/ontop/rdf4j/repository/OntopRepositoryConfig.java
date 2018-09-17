@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 
 import java.io.File;
+import java.util.Optional;
 
 import static org.eclipse.rdf4j.model.util.Models.objectLiteral;
 import static org.eclipse.rdf4j.repository.config.RepositoryConfigSchema.REPOSITORYID;
@@ -47,6 +48,7 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
     public final static IRI OBDAFILE;
 
     public final static IRI PROPERTIESFILE;
+    public final static IRI CONSTRAINTFILE;
     
     public final static IRI EXISTENTIAL;
     
@@ -57,13 +59,15 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         OWLFILE = factory.createIRI(NAMESPACE, "owlFile");
         OBDAFILE = factory.createIRI(NAMESPACE, "obdaFile");
         PROPERTIESFILE =  factory.createIRI(NAMESPACE, "propertiesFile");
+        CONSTRAINTFILE =  factory.createIRI(NAMESPACE, "constraintFile");
         EXISTENTIAL = factory.createIRI(NAMESPACE, "existential");
     }
 
     private String name;
-    private File owlFile;
+    private Optional<File> owlFile;
     private File obdaFile;
     private File propertiesFile;
+    private Optional<File> constraintFile;
 
     /**
      * The repository has to be built by this class
@@ -109,16 +113,17 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             /*
              * Ontology file
              */
-            if (owlFile == null) {
-                throw new RepositoryConfigException("No OWL file specified for repository creation!");
-            }
-            if ((!owlFile.exists())) {
+            if (owlFile
+                    .filter(f -> !f.exists())
+                    .isPresent()) {
                 throw new RepositoryConfigException(String.format("The OWL file %s does not exist!",
-                        owlFile.getAbsolutePath()));
+                        owlFile.get().getAbsolutePath()));
             }
-            if (!owlFile.canRead()) {
+            if (owlFile
+                    .filter(f -> !f.canRead())
+                    .isPresent()) {
                 throw new RepositoryConfigException(String.format("The OWL file %s is not accessible!",
-                        owlFile.getAbsolutePath()));
+                        owlFile.get().getAbsolutePath()));
             }
 
             /*
@@ -150,6 +155,18 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             if (!propertiesFile.canRead()) {
                 throw new RepositoryConfigException(String.format("The properties file %s is not accessible!",
                         propertiesFile.getAbsolutePath()));
+            }
+
+            if (constraintFile.isPresent()) {
+                File file = constraintFile.get();
+                if (!file.exists()) {
+                    throw new RepositoryConfigException(String.format("The implicit key file %s does not exist!",
+                            file.getAbsolutePath()));
+                }
+                if (!file.canRead()) {
+                    throw new RepositoryConfigException(String.format("The implicit key file %s is not accessible!",
+                            file.getAbsolutePath()));
+                }
             }
         }
         /*
@@ -200,9 +217,12 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
                 configurationBuilder.nativeOntopMappingFile(obdaFile);
             }
 
+            owlFile.ifPresent(configurationBuilder::ontologyFile);
+
             configurationBuilder
-                    .ontologyFile(owlFile)
                     .propertyFile(propertiesFile);
+
+            constraintFile.ifPresent(configurationBuilder::basicImplicitConstraintFile);
 
             repository = OntopRepository.defaultRepository(configurationBuilder.build());
 
@@ -229,7 +249,9 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
 //            graph.add(implNode, REPO_ID, vf.createLiteral(name));
 //        }
         if (owlFile != null) {
-            graph.add(implNode, OWLFILE, vf.createLiteral(owlFile.getAbsolutePath()));
+            owlFile
+                    .map(File::getAbsolutePath)
+                    .ifPresent(path -> graph.add(implNode, OWLFILE, vf.createLiteral(path)));
         }
         if (obdaFile != null) {
             graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
@@ -237,7 +259,12 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
         if (propertiesFile != null) {
             graph.add(implNode, PROPERTIESFILE, vf.createLiteral(propertiesFile.getAbsolutePath()));
         }
-      
+        if (constraintFile != null) {
+            constraintFile
+                    .map(File::getAbsolutePath)
+                    .ifPresent(path -> graph.add(implNode, CONSTRAINTFILE, vf.createLiteral(path)));
+        }
+
         return implNode;
     }
 
@@ -253,14 +280,19 @@ public class OntopRepositoryConfig extends AbstractRepositoryImplConfig {
             objectLiteral(graph.filter(implNode, REPOSITORYTYPE, null))
                     .ifPresent(lit -> setType(lit.getLabel()));
 
-            objectLiteral(graph.filter(implNode, OWLFILE, null))
-                    .ifPresent(lit -> this.owlFile = new File(lit.getLabel()));
+            this.owlFile = objectLiteral(graph.filter(implNode, OWLFILE, null))
+                    .filter(l -> !l.getLabel().isEmpty())
+                    .map(l -> new File(l.getLabel()));
 
             objectLiteral(graph.filter(implNode, OBDAFILE, null))
                     .ifPresent(lit -> this.obdaFile = new File(lit.getLabel()));
 
             objectLiteral(graph.filter(implNode, PROPERTIESFILE, null))
                     .ifPresent(lit -> this.propertiesFile = new File(lit.getLabel()));
+
+            this.constraintFile = objectLiteral(graph.filter(implNode, CONSTRAINTFILE, null))
+                    .filter(l -> !l.getLabel().isEmpty())
+                    .map(l -> new File(l.getLabel()));
 
         } catch (Exception e) {
             throw new RepositoryConfigException(e.getMessage(), e);

@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,15 +47,15 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 	private final DatalogFactory datalogFactory;
-	private final SimpleRDF rdfFactory;
+	private final RDF rdfFactory;
 
 	public SWRLVisitor(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-					   DatalogFactory datalogFactory){
+					   DatalogFactory datalogFactory, RDF rdfFactory){
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogFactory = datalogFactory;
-		this.rdfFactory = new SimpleRDF();
+		this.rdfFactory = rdfFactory;
 
 		facts = new HashSet<CQIE>();
 		

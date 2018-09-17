@@ -27,12 +27,9 @@ import java.util.List;
  *
  * @param <E>
  */
-public interface EventGeneratingList<E> extends List<E>{
+public interface EventGeneratingList<E> extends List<E> {
 
-	public abstract void addListener(ListListener listener);
+	void addListener(ListListener listener);
 
-	public abstract void removeListener(ListListener listener);
-
-	public abstract void riseListChanged();
-
+	void removeListener(ListListener listener);
 }

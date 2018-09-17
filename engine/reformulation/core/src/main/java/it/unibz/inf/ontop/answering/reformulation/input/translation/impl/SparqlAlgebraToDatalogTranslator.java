@@ -40,7 +40,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
@@ -98,7 +97,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
                                      @Nullable IRIDictionary iriDictionary,
                                      AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-                                     DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools) {
+                                     DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools,
+                                     org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
@@ -108,7 +108,7 @@ public class SparqlAlgebraToDatalogTranslator {
         this.immutabilityTools = immutabilityTools;
 
         this.program = this.datalogFactory.getDatalogProgram();
-        this.rdfFactory = new SimpleRDF();
+        this.rdfFactory = rdfFactory;
         this.valueNull = termFactory.getNullConstant();
     }
 
@@ -529,9 +529,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (typeURI == null) {
                 type = typeFactory.getXsdStringDatatype();
             } else {
-                // TODO: support arbitrary datatypes
-                type = typeFactory.getOptionalDatatype(rdfFactory.createIRI(typeURI.stringValue()))
-                        .orElse(null);
+                type = typeFactory.getDatatype(rdfFactory.createIRI(typeURI.stringValue()));
             }
 
             if (type == null)

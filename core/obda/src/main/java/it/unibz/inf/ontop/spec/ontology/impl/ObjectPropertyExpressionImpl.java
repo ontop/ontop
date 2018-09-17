@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification
@@ -51,21 +49,9 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	private final ObjectSomeValuesFromImpl domain;
 	
 	private final boolean isTop, isBottom;
-
-	private static final RDF RDF_FACTORY = new SimpleRDF();
 	
 	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(OWL.TOP_OBJECT_PROPERTY);
 	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(OWL.BOTTOM_OBJECT_PROPERTY);
-
-	/**
-	 * general constructor 
-	 * 
-	 * @param name
-	 */
-
-	ObjectPropertyExpressionImpl(String name) {
-		this(RDF_FACTORY.createIRI(name));
-	}
 
 	ObjectPropertyExpressionImpl(IRI iri) {
 		this.iri = iri;

@@ -40,7 +40,6 @@ import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -809,9 +808,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTermFactory(),
-					obdaModel.getTypeFactory(), obdaModel.getDatalogFactory(), obdaModel.getAtomFactory(),
-					jdbcTypeMapper);
+			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory(), jdbcTypeMapper);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {

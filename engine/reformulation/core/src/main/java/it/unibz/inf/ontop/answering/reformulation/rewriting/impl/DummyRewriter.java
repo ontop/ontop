@@ -20,10 +20,18 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
+import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+
+import java.util.List;
 
 /***
  * A query rewriter that does nothing on the given query.
@@ -33,14 +41,30 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
  */
 public class DummyRewriter implements QueryRewriter {
 
-	
-	@Override
-	public DatalogProgram rewrite(DatalogProgram input) {
-		return input;
+    private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
+    private final CQCUtilities cqcUtilities;
+    private final LinearInclusionDependencyTools inclusionDependencyTools;
+
+    @Inject
+    private DummyRewriter(CQCUtilities cqcUtilities, LinearInclusionDependencyTools inclusionDependencyTools) {
+        this.cqcUtilities = cqcUtilities;
+        this.inclusionDependencyTools = inclusionDependencyTools;
+    }
+
+
+    @Override
+	public List<CQIE> rewrite(List<CQIE> input) {
+
+        for (CQIE cq : input)
+            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+
+        return input;
 	}
 
 	@Override
-	public void setTBox(ClassifiedTBox ontology, LinearInclusionDependencies sigma) {
-		// NO-OP		
+	public void setTBox(ClassifiedTBox reasoner) {
+        ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+        sigma = LinearInclusionDependency.toMultimap(s);
 	}
+
 }

@@ -18,12 +18,10 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +55,6 @@ public class MappingTest {
 
     private final static Variable Y = TERM_FACTORY.getVariable("company");
 
-    private static final URITemplatePredicate URI_PREDICATE;
     private static final Constant URI_TEMPLATE_STR_1;
 
     private static final IRI PROP_1, PROP_2, CLASS_1;
@@ -90,15 +87,13 @@ public class MappingTest {
         tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), Types.INTEGER, null, true);
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
-        URI_PREDICATE =  TERM_FACTORY.getURITemplatePredicate(2);
         URI_TEMPLATE_STR_1 =  TERM_FACTORY.getConstantLiteral("http://example.org/person/{}");
 
         DB_METADATA = dbMetadata;
 
-        SimpleRDF iriFactory = new SimpleRDF();
-        PROP_1 = iriFactory.createIRI("http://example.org/voc#Prop1");
-        PROP_2 = iriFactory.createIRI("http://example.org/voc#Prop2");
-        CLASS_1 = iriFactory.createIRI("http://example.org/voc#Class1");
+        PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
+        PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");
+        CLASS_1 = RDF_FACTORY.createIRI("http://example.org/voc#Class1");
     }
 
     @Test
@@ -221,7 +216,7 @@ public class MappingTest {
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(URI_PREDICATE, URI_TEMPLATE_STR_1, argument);
+        return TERM_FACTORY.getImmutableUriTemplate(URI_TEMPLATE_STR_1, argument);
     }
 
     /**

@@ -34,10 +34,13 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
     @Override
     public IQ optimize(IQ query) {
-        IQTree tree = query.getTree();
-        QueryMergingTransformer transformer = createTransformer(tree.getKnownVariables());
-        IQTree newTree = query.getTree().acceptTransformer(transformer);
+        IQTree newTree = optimize(query.getTree());
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    }
+
+    private IQTree optimize(IQTree tree) {
+        QueryMergingTransformer transformer = createTransformer(tree.getKnownVariables());
+        return tree.acceptTransformer(transformer);
     }
 
     protected abstract QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables);
@@ -101,7 +104,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
             return renamedIQ.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
-                    .normalizeForOptimization(renamedIQ.getVariableGenerator());
+                    .normalizeForOptimization(variableGenerator);
         }
 
         private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,

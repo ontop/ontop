@@ -38,7 +38,7 @@ public class BNodePredicateImpl extends FunctionSymbolImpl implements BNodePredi
 	private final ObjectRDFType type;
 
 	protected BNodePredicateImpl(int arity, TypeFactory typeFactory) {
-		super(QUEST_BNODE, arity, IntStream.range(0, arity)
+		super(QUEST_BNODE, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())

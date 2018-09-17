@@ -107,8 +107,9 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
      *
      */
     private boolean isLiftable(ImmutableTerm value) {
-        if (value instanceof VariableOrGroundTerm)
-            return true;
+        // TODO: re-enable it
+//        if (value instanceof VariableOrGroundTerm)
+//            return true;
         // TODO: support injective functions
         return false;
     }

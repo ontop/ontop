@@ -35,7 +35,6 @@ import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.InconsistentOntologyException;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -57,12 +56,15 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
 	// store results in case of describe queries
 	private final boolean storeResults;
     private final TermFactory termFactory;
+    private final org.apache.commons.rdf.api.RDF rdfFactory;
 
-	public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
-                                       boolean storeResults, TermFactory termFactory) throws OntopResultConversionException, OntopConnectionException {
+    public DefaultSimpleGraphResultSet(TupleResultSet tupleResultSet, ConstructTemplate constructTemplate,
+                                       boolean storeResults, TermFactory termFactory,
+                                       org.apache.commons.rdf.api.RDF rdfFactory) throws OntopResultConversionException, OntopConnectionException {
 		this.tupleResultSet = tupleResultSet;
 		this.constructTemplate = constructTemplate;
         this.termFactory = termFactory;
+        this.rdfFactory = rdfFactory;
         Extension ex = constructTemplate.getExtension();
         if (ex != null) {
             extMap = ex.getElements().stream()
@@ -105,7 +107,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
             throws OntopResultConversionException, OntopConnectionException {
 
         List<Assertion> tripleAssertions = new ArrayList<>();
-        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier();
+        ABoxAssertionSupplier builder = OntologyBuilderImpl.assertionSupplier(rdfFactory);
 
         for (ProjectionElemList peList : constructTemplate.getProjectionElemList()) {
             int size = peList.getElements().size();
@@ -192,7 +194,7 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
         if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
             org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
-                constant = termFactory.getConstantIRI(new SimpleRDF().createIRI(vc.getValue().stringValue()));
+                constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
             }
             else if (vc.getValue() instanceof Literal) {
                 constant = termFactory.getConstantLiteral(vc.getValue().stringValue());

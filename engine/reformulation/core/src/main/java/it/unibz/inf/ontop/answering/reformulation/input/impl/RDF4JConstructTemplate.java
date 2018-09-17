@@ -22,25 +22,32 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.input.ConstructTemplate;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 class RDF4JConstructTemplate implements ConstructTemplate {
-    private TupleExpr projection = null;
-	private TupleExpr extension = null;
+    private final TupleExpr projection;
+	private final TupleExpr extension;
 
 	RDF4JConstructTemplate(ParsedQuery pq) {
-		TupleExpr sesameAlgebra = pq.getTupleExpr();
-		Reduced r = (Reduced) sesameAlgebra;
-		projection = r.getArg();
-		TupleExpr texpr;
-		if (projection instanceof MultiProjection) {
-			texpr = ((MultiProjection) projection).getArg();
-		} else {
-			texpr = ((Projection) projection).getArg();
-		}
-		if (texpr!= null && texpr instanceof Extension)
-			extension = texpr;
+		TupleExpr topExpression = pq.getTupleExpr();
+
+		// NB: the slice is not relevant for the construct template
+		// (will be taken into account in the SELECT query fragment)
+		Slice slice = (topExpression instanceof Slice) ? (Slice) topExpression : null;
+
+		TupleExpr firstNonSliceExpression = (slice == null) ? topExpression : slice.getArg();
+
+		if (!(firstNonSliceExpression instanceof Reduced))
+			// TODO: throw a better exception?
+			throw new MinorOntopInternalBugException("Was expecting a Reduced instead of: " + firstNonSliceExpression);
+
+		projection = ((Reduced) firstNonSliceExpression).getArg();
+		TupleExpr texpr = (projection instanceof MultiProjection)
+				? ((MultiProjection) projection).getArg()
+				: ((Projection) projection).getArg();
+		extension = (texpr!= null && texpr instanceof Extension) ? texpr : null;
 	}
 
 

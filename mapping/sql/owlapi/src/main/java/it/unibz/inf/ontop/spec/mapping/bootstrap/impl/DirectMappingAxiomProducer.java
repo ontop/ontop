@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -31,9 +30,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.*;
 
@@ -43,14 +40,15 @@ public class DirectMappingAxiomProducer {
 	private final String baseIRI;
 
 	private final TermFactory termFactory;
-	private final SimpleRDF rdfFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
 	private final TargetAtomFactory targetAtomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
+									  org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		this.targetAtomFactory = targetAtomFactory;
-		this.rdfFactory = new SimpleRDF();
+		this.rdfFactory = rdfFactory;
 	}
 
 

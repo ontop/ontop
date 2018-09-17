@@ -38,8 +38,8 @@ public class URITemplatePredicateImpl extends FunctionSymbolImpl implements URIT
 	private static final String URI_PREFIX = "URI";
 	private final ObjectRDFType type;
 
-	protected URITemplatePredicateImpl(int arity, TypeFactory typeFactory) {
-		super(URI_PREFIX  + arity, arity, IntStream.range(0, arity)
+	protected URITemplatePredicateImpl(int arity, String suffix, TypeFactory typeFactory) {
+		super(URI_PREFIX  + arity + suffix, IntStream.range(0, arity)
 				.boxed()
 				// TODO: require strings
 				.map(i -> typeFactory.getAbstractAtomicTermType())

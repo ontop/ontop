@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
@@ -44,6 +43,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +87,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final SpecificationFactory specificationFactory;
     private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final RDF rdfFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
@@ -94,11 +95,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
-                                     TargetAtomFactory targetAtomFactory) {
+                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
         this.targetAtomFactory = targetAtomFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     /**
@@ -407,7 +409,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory, rdfFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

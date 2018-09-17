@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,10 +49,11 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
 
     public DelegatedIriSQLTupleResultSet(ResultSet rs, ImmutableList<String> signature, DBMetadata dbMetadata,
                                          Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
-                                         TypeFactory typeFactory) {
+                                         TypeFactory typeFactory, RDF rdfFactory) {
         super(rs, signature);
         this.columnMap = buildColumnMap();
-        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory);
+        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory,
+                rdfFactory);
     }
 
     @Override

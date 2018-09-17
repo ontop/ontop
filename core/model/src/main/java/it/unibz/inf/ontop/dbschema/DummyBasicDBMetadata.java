@@ -14,11 +14,9 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 public class DummyBasicDBMetadata extends BasicDBMetadata {
 
     @Inject
-    private DummyBasicDBMetadata(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-                                 DatalogFactory datalogFactory) {
+    private DummyBasicDBMetadata(TypeFactory typeFactory) {
         super("dummy", null, null, "",
-                new DummyTypeMapper(typeFactory), atomFactory, termFactory, datalogFactory,
-                new QuotedIDFactoryStandardSQL("\"")
+                new DummyTypeMapper(typeFactory), new QuotedIDFactoryStandardSQL("\"")
         );
     }
 

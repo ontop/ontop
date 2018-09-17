@@ -28,9 +28,11 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.NumericRDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.OntopInternal;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import org.apache.commons.rdf.api.RDF;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -56,11 +58,12 @@ public class ExpressionEvaluator {
 	private final UnifierUtilities unifierUtilities;
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
+	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								UnifierUtilities unifierUtilities, ExpressionNormalizer normalizer,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -70,6 +73,7 @@ public class ExpressionEvaluator {
 		this.unifierUtilities = unifierUtilities;
 		this.normalizer = normalizer;
 		this.immutabilityTools = immutabilityTools;
+		this.rdfFactory = rdfFactory;
 	}
 
 	public static class EvaluationResult {
@@ -543,12 +547,8 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(constantValue);
-		if (type.isPresent()) {
-			Predicate p = termFactory.getRequiredTypePredicate(type.get());
-			return isNumeric(p);
-		}
-		return false;	
+		RDFDatatype type = typeFactory.getDatatype(rdfFactory.createIRI(constantValue));
+		return type.isA(OntopInternal.NUMERIC);
 	}
 
 	/*
@@ -934,50 +934,7 @@ public class ExpressionEvaluator {
 //					throw new RuntimeException("Unsupported type: " + pred2);
 //				}
 
-				/*
-				 * Evaluate both terms by comparing their datatypes
-				 */
-				if (isXsdString(pred1) && isXsdString(pred2)) { // R: replaced incorrect check
-																		//  pred1 == termFactory.getDataTypePredicateLiteral()
-																		// && pred2 == termFactory.getDataTypePredicateLiteral())
-																	    // which does not work for LANG_STRING
-					/*
-					 * Special code to handle quality of Literals (plain, and
-					 * with language)
-					 */
-					if (f1.getTerms().size() != f2.getTerms().size()) {
-						// case one is with language another without
-						return termFactory.getBooleanConstant(!eq);
-					} 
-					else if (f1.getTerms().size() == 2) {
-						// SIZE == 2
-						// these are literals with languages, we need to
-						// return the evaluation of the values and the
-						// languages case literals without language, its
-						// exactly as normal datatypes.
-						// This is copy paste code
-						if (eq) {
-							Function eqValues = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-							Function eqLang = termFactory.getFunctionEQ(f1.getTerm(1), f2.getTerm(1));
-							return evalAnd(eqValues, eqLang);
-						}
-						Function eqValues = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						Function eqLang = termFactory.getFunctionNEQ(f1.getTerm(1), f2.getTerm(1));
-						return evalOr(eqValues, eqLang);
-					}
-					// case literals without language, its exactly as normal
-					// datatypes
-					// this is copy paste code
-					if (eq) {
-						Function neweq = termFactory.getFunctionEQ(f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, true);
-					} 
-					else {
-						Function neweq = termFactory.getFunctionNEQ(f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, false);
-					}
-				} 
-				else if (pred1.equals(pred2)) {
+				if (pred1.equals(pred2)) {
 					if (pred1 instanceof URITemplatePredicate) {
 						return evalUriTemplateEqNeq(f1, f2, eq);
 					} 
@@ -1140,6 +1097,7 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities, normalizer, immutabilityTools);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unifierUtilities, normalizer,
+				immutabilityTools, rdfFactory);
 	}
 }

@@ -3,8 +3,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import java.io.Serializable;
@@ -40,12 +39,6 @@ public interface DBMetadata extends Serializable {
      */
     ImmutableMultimap<RelationPredicate,ImmutableList<Integer>> getUniqueConstraints();
 
-    /**
-     * generate CQIE rules from foreign key info of db metadata
-     * TABLE1.COL1 references TABLE2.COL2 as foreign key then
-     * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
-     */
-    ImmutableMultimap<AtomPredicate, CQIE> generateFKRules();
 
     QuotedIDFactory getQuotedIDFactory();
 
@@ -83,11 +76,13 @@ public interface DBMetadata extends Serializable {
      * Temporary solution to enable DBMetadata merging
      *
      */
+    @Deprecated
     ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables();
 
     /**
      * Temporary solution to enable DBMetadata merging
      *
      */
+    @Deprecated
     ImmutableMap<RelationID, RelationDefinition> copyRelations();
 }
