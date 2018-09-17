@@ -51,10 +51,7 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
-import it.unibz.inf.ontop.model.type.ObjectRDFType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -1288,12 +1285,32 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
+		/*
+		 * TODO: make sure that SPARQL_LANG are eliminated earlier on
+		 */
 		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
-			Variable var = (Variable) function.getTerm(0);
-			Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
-			if (!lang.isPresent())
-				throw new RuntimeException("Cannot find LANG column for " + var);
-			return lang.get().getSQLRendering();
+
+			Term subTerm = function.getTerm(0);
+			if (subTerm instanceof Variable) {
+				Variable var = (Variable) subTerm;
+				Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
+				if (!lang.isPresent())
+					throw new RuntimeException("Cannot find LANG column for " + var);
+				return lang.get().getSQLRendering();
+			}
+			else {
+				// Temporary fix
+				LanguageTag langTag = Optional.of(subTerm)
+						.filter(t -> t instanceof Function)
+						.map(t -> ((Function) t).getFunctionSymbol())
+						.filter(f -> f instanceof DatatypePredicate)
+						.map(f -> ((DatatypePredicate) f).getReturnedType())
+						.flatMap(RDFDatatype::getLanguageTag)
+						.orElseThrow(() -> new RuntimeException("Cannot extract the language tag from "
+								+ subTerm));
+
+				return  sqladapter.getSQLLexicalFormString(langTag.getFullString());
+			}
 		}
 		/**
 		 * TODO: replace by a switch
