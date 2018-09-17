@@ -1290,18 +1290,27 @@ public class OneShotSQLGeneratorEngine {
 		 */
 		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
 
-			// Temporary fix
-			LanguageTag langTag = Optional.of(function.getTerm(0))
-					.filter(t -> t instanceof Function)
-					.map(t -> ((Function) t).getFunctionSymbol())
-					.filter(f -> f instanceof DatatypePredicate)
-					.map(f -> ((DatatypePredicate) f).getReturnedType())
-					.flatMap(RDFDatatype::getLanguageTag)
-					.orElseThrow(() -> new RuntimeException("Cannot extract the language tag from "
-							+ function.getTerm(0)));
+			Term subTerm = function.getTerm(0);
+			if (subTerm instanceof Variable) {
+				Variable var = (Variable) subTerm;
+				Optional<QualifiedAttributeID> lang = index.getLangColumn(var);
+				if (!lang.isPresent())
+					throw new RuntimeException("Cannot find LANG column for " + var);
+				return lang.get().getSQLRendering();
+			}
+			else {
+				// Temporary fix
+				LanguageTag langTag = Optional.of(subTerm)
+						.filter(t -> t instanceof Function)
+						.map(t -> ((Function) t).getFunctionSymbol())
+						.filter(f -> f instanceof DatatypePredicate)
+						.map(f -> ((DatatypePredicate) f).getReturnedType())
+						.flatMap(RDFDatatype::getLanguageTag)
+						.orElseThrow(() -> new RuntimeException("Cannot extract the language tag from "
+								+ subTerm));
 
-			return  sqladapter.getSQLLexicalFormString(langTag.getFullString());
-
+				return  sqladapter.getSQLLexicalFormString(langTag.getFullString());
+			}
 		}
 		/**
 		 * TODO: replace by a switch
