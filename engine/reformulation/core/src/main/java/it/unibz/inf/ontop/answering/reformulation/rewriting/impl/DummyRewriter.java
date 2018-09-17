@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
@@ -48,17 +47,14 @@ public class DummyRewriter implements QueryRewriter {
 
     private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
     private final DatalogProgram2QueryConverter datalogConverter;
-    private final ImmutableUnificationTools immutableUnificationTools;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
-                          DatalogProgram2QueryConverter datalogConverter,
-                          ImmutableUnificationTools immutableUnificationTools,
-                          IntermediateQueryFactory iqFactory) {
+                            DatalogProgram2QueryConverter datalogConverter,
+                            ImmutableUnificationTools immutableUnificationTools, IntermediateQueryFactory iqFactory) {
         this.inclusionDependencyTools = inclusionDependencyTools;
         this.datalogConverter = datalogConverter;
-        this.immutableUnificationTools = immutableUnificationTools;
         this.iqFactory = iqFactory;
     }
 
@@ -80,7 +76,7 @@ public class DummyRewriter implements QueryRewriter {
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    ImmutableSet<DataAtom> derived = getDerivedAtoms(list.get(i).getProjectionAtom(), sigma);
+                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(list.get(i).getProjectionAtom(), sigma);
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
                             if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
@@ -94,14 +90,5 @@ public class DummyRewriter implements QueryRewriter {
         }));
 	}
 
-    private ImmutableSet<DataAtom> getDerivedAtoms(DataAtom atom, ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
-        return dependencies.stream()
-                .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
-                        .filter(theta -> !theta.isEmpty())
-                        .map(theta -> theta.applyToDataAtom(dependency.getHead())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableCollectors.toSet());
-    }
 
 }

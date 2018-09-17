@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.ImmutableLinearInclusionDependency;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -9,19 +11,25 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Optional;
 
 public class ImmutableLinearInclusionDependenciesTools {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
+    private final ImmutableUnificationTools immutableUnificationTools;
 
     private static final String variableXname = "x";
     private static final String variableYname = "y";
     private static final String variableZname = "z";
 
     @Inject
-    private ImmutableLinearInclusionDependenciesTools(AtomFactory atomFactory, TermFactory termFactory) {
+    private ImmutableLinearInclusionDependenciesTools(AtomFactory atomFactory, TermFactory termFactory, ImmutableUnificationTools immutableUnificationTools) {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
+        this.immutableUnificationTools = immutableUnificationTools;
     }
 
     public ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
@@ -107,4 +115,25 @@ public class ImmutableLinearInclusionDependenciesTools {
             return translate(property, variableXname, existentialVariableName);
         }
     }
+
+    /**
+     * This method is used to chase foreign key constraint rule in which the rule
+     * has only one atom in the body.
+     *
+     * IMPORTANT: each rule is applied only ONCE to the atom
+     *
+     * @param atom
+     * @return set of atoms
+     */
+
+    public ImmutableSet<DataAtom> chaseAtom(DataAtom atom, ImmutableCollection<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
+        return dependencies.stream()
+                .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
+                        .filter(theta -> !theta.isEmpty())
+                        .map(theta -> theta.applyToDataAtom(dependency.getHead())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ImmutableCollectors.toSet());
+    }
+
 }

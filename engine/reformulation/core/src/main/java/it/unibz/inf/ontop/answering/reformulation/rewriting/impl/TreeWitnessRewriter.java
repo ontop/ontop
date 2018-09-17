@@ -88,7 +88,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
                                 SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools mutableInclusionDependencyTools,
-                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools, DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory, ImmutableUnificationTools immutableUnificationTools, DatalogProgram2QueryConverter datalogConverter1, IQ2DatalogTranslator iqConverter) {
+                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
+								DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory,
+								ImmutableUnificationTools immutableUnificationTools,
+								DatalogProgram2QueryConverter datalogConverter1, IQ2DatalogTranslator iqConverter) {
         super(inclusionDependencyTools, datalogConverter, immutableUnificationTools, iqFactory);
 
         this.atomFactory = atomFactory;
