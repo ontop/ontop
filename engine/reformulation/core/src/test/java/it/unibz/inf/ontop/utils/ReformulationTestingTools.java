@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableHomomorphismUtilities;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -33,7 +32,6 @@ public class ReformulationTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
-    public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final ImmutableHomomorphismUtilities HOMOMORPHISM_UTILITIES;
@@ -58,7 +56,6 @@ public class ReformulationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        INCLUSION_DEPENDENCY_TOOLS = injector.getInstance(LinearInclusionDependencyTools.class);
         HOMOMORPHISM_UTILITIES = injector.getInstance(ImmutableHomomorphismUtilities.class);
         IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);
 

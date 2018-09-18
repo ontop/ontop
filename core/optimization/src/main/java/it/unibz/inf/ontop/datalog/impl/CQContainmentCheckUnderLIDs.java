@@ -27,23 +27,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	private final SubstitutionUtilities substitutionUtilities;
 	private final TermFactory termFactory;
 
-	/***
-	 * Constructs a CQC utility using the given query. If Sigma is not null and
-	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
-	 * @param datalogFactory
-	 * @param unifierUtilities
-	 * @param substitutionUtilities
-	 * @param termFactory
-	 */
-	public CQContainmentCheckUnderLIDs(DatalogFactory datalogFactory, UnifierUtilities unifierUtilities,
-									   SubstitutionUtilities substitutionUtilities, TermFactory termFactory) {
-		this.datalogFactory = datalogFactory;
-		this.unifierUtilities = unifierUtilities;
-		this.substitutionUtilities = substitutionUtilities;
-		this.termFactory = termFactory;
-		dependencies = null;
-	}
-
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies

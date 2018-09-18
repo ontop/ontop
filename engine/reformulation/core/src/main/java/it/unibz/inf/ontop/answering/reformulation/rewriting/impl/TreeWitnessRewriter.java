@@ -23,13 +23,11 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckSyntactic;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -40,14 +38,12 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
@@ -118,14 +114,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = reasoner;
 		super.setTBox(reasoner);
 
-		ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> incs = inclusionDependencyTools.getABoxDependencies(reasoner, true);
-        ImmutableMultimap<AtomPredicate, ImmutableLinearInclusionDependency<AtomPredicate>> dependencies = incs.stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        d -> d.getHead().getPredicate(),
-                        d -> d));
-
         containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(
-                dependencies,
+                inclusionDependencyTools.getABoxDependencies(reasoner, true),
                 homomorphismUtilities,
                 inclusionDependencyTools);
 

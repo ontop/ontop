@@ -20,13 +20,13 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
 
     private final Map<ImmutableList<DataAtom>, ImmutableMultimap<AtomPredicate, DataAtom>> chaseCache = new HashMap<>();
 
-    private final ImmutableMultimap<AtomPredicate, ImmutableLinearInclusionDependency<AtomPredicate>> dependencies;
+    private final ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies;
 
     private final ImmutableHomomorphismUtilities homomorphismUtilities;
     private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
 
     @Inject
-    public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableMultimap<AtomPredicate, ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
+    public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
                                                 ImmutableHomomorphismUtilities homomorphismUtilities,
                                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools) {
         this.dependencies = dependencies;
@@ -69,13 +69,11 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
                         ? atoms.stream()
                         : Sets.union(ImmutableSet.copyOf(atoms),
                             atoms.stream()
-                                .flatMap(a -> inclusionDependencyTools.chaseAtom(a, dependencies.get(a.getPredicate())).stream())
+                                .flatMap(a -> inclusionDependencyTools.chaseAtom(a, dependencies).stream())
                                 .collect(ImmutableCollectors.toSet())).stream())
                     .collect(ImmutableCollectors.toMultimap(DataAtom::getPredicate, Function.identity()));
             chaseCache.put(atoms, result);
         }
         return result;
     }
-
-
 }
