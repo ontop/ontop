@@ -18,6 +18,12 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
      */
     boolean isDefaultDatatypeInferred();
 
+    /**
+     * If false, throws an exception is an abstract datatype is used for a literal in a mapping assertion.
+     * If true, abstract datatypes will be replaced by concrete ones.
+     */
+    boolean areAbstractDatatypesToleratedInMapping();
+
 
     /**
      * Let S be the data source, and if M is a set of mapping assertions, let M(S) be the graph derived by applying M to S (without ontology).
@@ -44,6 +50,7 @@ public interface OntopMappingSettings extends OntopOBDASettings, OntopOptimizati
     String QUERY_ONTOLOGY_ANNOTATIONS = "ontop.queryOntologyAnnotation";
     String COMPLETE_PROVIDED_METADATA = "ontop.completeProvidedMetadata";
     String INFER_DEFAULT_DATATYPE = "ontop.inferDefaultDatatype";
+    String TOLERATE_ABSTRACT_DATATYPE = "ontop.tolerateAbstractDatatype";
     String IS_CANONICAL_IRI_COMPLETE = "ontop.isCanonicalIRIComplete";
 
 

@@ -68,16 +68,6 @@
           <groupId>eu.optique-project</groupId>
           <artifactId>r2rml-api-jena-binding</artifactId>
       </dependency>
-
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-		</dependency>
-
   </dependencies>
 
 </project>

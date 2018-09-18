@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -48,6 +45,7 @@ public class MappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -103,6 +101,7 @@ public class MappingTestingTools {
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
+        TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
