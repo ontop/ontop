@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -114,6 +115,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
         return transformer.transformOrderBy(tree, this, child);
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
+        return visitor.visitOrderBy(this, child);
     }
 
     @Override
