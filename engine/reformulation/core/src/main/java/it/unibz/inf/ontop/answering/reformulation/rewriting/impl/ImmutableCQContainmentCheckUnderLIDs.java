@@ -26,11 +26,18 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
     private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
 
     @Inject
-    public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableMultimap<AtomPredicate,
-                                                ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
+    public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableMultimap<AtomPredicate, ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
                                                 ImmutableHomomorphismUtilities homomorphismUtilities,
                                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools) {
         this.dependencies = dependencies;
+        this.homomorphismUtilities = homomorphismUtilities;
+        this.inclusionDependencyTools = inclusionDependencyTools;
+    }
+
+    @Inject
+    public ImmutableCQContainmentCheckUnderLIDs(ImmutableHomomorphismUtilities homomorphismUtilities,
+                                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools) {
+        this.dependencies = null;
         this.homomorphismUtilities = homomorphismUtilities;
         this.inclusionDependencyTools = inclusionDependencyTools;
     }

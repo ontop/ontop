@@ -129,7 +129,6 @@ public class ImmutableLinearInclusionDependenciesTools {
     public ImmutableSet<DataAtom> chaseAtom(DataAtom atom, ImmutableCollection<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
         return dependencies.stream()
                 .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
-                        .filter(theta -> !theta.isEmpty())
                         .map(theta -> theta.applyToDataAtom(dependency.getHead())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

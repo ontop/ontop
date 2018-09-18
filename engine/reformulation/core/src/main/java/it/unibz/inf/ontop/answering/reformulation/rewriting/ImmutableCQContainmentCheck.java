@@ -40,7 +40,6 @@ public interface ImmutableCQContainmentCheck {
                     if (query2 == query)
                         break;
                     if (isContainedIn(query, query2)) {
-                        System.out.println("Q " + query + " IS REMOVED BECAUSE OF " + query2);
                         iterator.remove();
                         break;
                     }
@@ -59,7 +58,6 @@ public interface ImmutableCQContainmentCheck {
                         break;
                     if (isContainedIn(query, query2)) {
                         iterator.remove();
-                        System.out.println("Q " + query + " IS REMOVED BECAUSE OF " + query2);
                         break;
                     }
                 }
