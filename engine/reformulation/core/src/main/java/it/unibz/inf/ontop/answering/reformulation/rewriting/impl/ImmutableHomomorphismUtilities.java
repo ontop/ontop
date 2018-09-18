@@ -1,43 +1,32 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.*;
 
 public class ImmutableHomomorphismUtilities {
 
-    private final SubstitutionFactory substitutionFactory;
-
     @Inject
-    public ImmutableHomomorphismUtilities(SubstitutionFactory substitutionFactory) {
-        this.substitutionFactory = substitutionFactory;
+    public ImmutableHomomorphismUtilities() {
     }
 
     private boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
 
-        int arity = from.getArity();
-        if ((arity != to.getArity()) || !from.getPredicate().equals(to.getPredicate()))
-            return false;
-
-        for (int i = 0; i < arity; i++) {
-            boolean result = extendHomomorphism(map, from.getTerm(i), to.getTerm(i));
-            // if we cannot find a match, terminate the process and return false
-            if (!result)
-                return false;
-        }
-        return true;
+        return from.getPredicate().equals(to.getPredicate())
+                && extendHomomorphism(map, from.getArguments(), to.getArguments());
     }
 
     public boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
         int arity = from.size();
+        if (arity != to.size())
+            return false;
+
         for (int i = 0; i < arity; i++) {
             boolean result = extendHomomorphism(map, from.get(i), to.get(i));
             // if we cannot find a match, terminate the process and return false
@@ -49,18 +38,11 @@ public class ImmutableHomomorphismUtilities {
 
     public boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, VariableOrGroundTerm from, VariableOrGroundTerm to) {
         if (from instanceof Variable) {
-            // ignore if the substitution already has the same value
-            if (from.equals(to))
-                return true;
-
-            VariableOrGroundTerm t = map.get(from);
-            // add if there is no value yet
-            if (t == null) {
-                map.put((Variable) from, to);
-                return true;
+            VariableOrGroundTerm t = map.put((Variable) from, to);
+            if (t != null && !t.equals(to)) {
+                // if there was a different value there
+                return false;
             }
-            // otherwise
-            return false;
         }
         else if (from instanceof Constant) {
             // constants must match
@@ -74,8 +56,7 @@ public class ImmutableHomomorphismUtilities {
 
             GroundFunctionalTerm fromF = (GroundFunctionalTerm)from;
             GroundFunctionalTerm toF = (GroundFunctionalTerm)to;
-            if ((fromF.getArity() != toF.getArity()) ||
-                    !(fromF.getFunctionSymbol().equals(toF.getFunctionSymbol())))
+            if (!fromF.getFunctionSymbol().equals(toF.getFunctionSymbol()))
                 return false;
 
             return extendHomomorphism(map, fromF.getTerms(), toF.getTerms());
@@ -92,11 +73,11 @@ public class ImmutableHomomorphismUtilities {
      * @return
      */
 
-    public Optional<ImmutableSubstitution> computeSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableMultimap<AtomPredicate, DataAtom> to) {
+    public boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableMultimap<AtomPredicate, DataAtom> to) {
 
         int fromSize = from.size();
         if (fromSize == 0)
-            return Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(map)));
+            return true; // Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(map)));
 
         Map<Variable, VariableOrGroundTerm> currentSubstitution = map;
 
@@ -129,7 +110,7 @@ public class ImmutableHomomorphismUtilities {
                 if (choiceMade) {
                     // we reached the last atom
                     if (currentAtomIdx == fromSize - 1)
-                        return Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(s1)));
+                        return true; // Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(s1)));
 
                     // otherwise, save the partial homomorphism
                     sbStack.push(currentSubstitution);
@@ -148,7 +129,7 @@ public class ImmutableHomomorphismUtilities {
         }
 
         // checked all possible substitutions and have not found anything
-        return Optional.empty();
+        return false; // Optional.empty();
     }
 
 }

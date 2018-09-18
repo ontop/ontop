@@ -45,9 +45,9 @@ public class DummyRewriter implements QueryRewriter {
 
     private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
 
-    private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
-    private final DatalogProgram2QueryConverter datalogConverter;
-    private final IntermediateQueryFactory iqFactory;
+    protected final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
+    protected final DatalogProgram2QueryConverter datalogConverter;
+    protected final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
