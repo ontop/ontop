@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 
 import java.util.*;
@@ -45,8 +44,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final DBTypeFactory dbTypeFactory;
 
 	@Inject
-	private TypeFactoryImpl(DBTypeFactory.Factory dbTypeFactoryFactory) {
-		rdfFactory = new SimpleRDF();
+	private TypeFactoryImpl(DBTypeFactory.Factory dbTypeFactoryFactory, RDF rdfFactory) {
+		this.rdfFactory = rdfFactory;
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 
@@ -146,16 +145,6 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public Optional<RDFDatatype> getOptionalDatatype(String uri) {
-		return getOptionalDatatype(rdfFactory.createIRI(uri));
-	}
-
-	@Override
-	public Optional<RDFDatatype> getOptionalDatatype(IRI iri) {
-		return Optional.ofNullable(datatypeCache.get(iri));
-	}
-
-	@Override
 	public RDFDatatype getLangTermType(String languageTagString) {
 		return langTypeCache
 				.computeIfAbsent(languageTagString.toLowerCase(), this::createLangStringDatatype);
@@ -163,10 +152,10 @@ public class TypeFactoryImpl implements TypeFactory {
 
 	@Override
 	public RDFDatatype getDatatype(IRI iri) {
-		RDFDatatype datatype = datatypeCache.get	(iri);
-		if (datatype == null)
-			throw new RuntimeException("TODO: support arbitrary datatypes such as " + iri);
-		return datatype;
+		return datatypeCache.computeIfAbsent(
+				iri,
+				// Non-predefined datatypes cannot be declared as the child of a concrete datatype
+				i -> createSimpleRDFDatatype(i, rdfsLiteralDatatype.getAncestry()));
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private final Constant nullValue;
     private final ImmutabilityTools immutabilityTools;
     private final ExpressionEvaluator expressionEvaluator;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -69,7 +71,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
-                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings) {
+                                 ExpressionEvaluator expressionEvaluator, CoreUtilsFactory coreUtilsFactory, OntopModelSettings settings) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
@@ -83,6 +85,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.iqFactory = iqFactory;
         this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         if (settings.isTestModeEnabled())
@@ -130,7 +133,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator) {
+                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator,
+                                 CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -145,6 +149,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.substitutionFactory = substitutionFactory;
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
+        this.coreUtilsFactory = coreUtilsFactory;
 
         validateNode();
     }
@@ -231,9 +236,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     public VariableNullability getVariableNullability(IQTree child) {
         VariableNullability childNullability = child.getVariableNullability();
 
-        VariableGenerator variableGenerator = new VariableGenerator(
-                Sets.union(projectedVariables, child.getVariables()).immutableCopy(),
-                termFactory);
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
+                Sets.union(projectedVariables, child.getVariables()).immutableCopy());
 
         /*
          * The substitutions are split by nesting level

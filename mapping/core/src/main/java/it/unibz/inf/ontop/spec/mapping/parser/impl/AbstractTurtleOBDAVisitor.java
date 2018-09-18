@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,9 +43,9 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     private final RDF rdfFactory;
     private final TargetAtomFactory targetAtomFactory;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
+    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
         this.targetAtomFactory = targetAtomFactory;
-        this.rdfFactory = new SimpleRDF();
+        this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
     }
 

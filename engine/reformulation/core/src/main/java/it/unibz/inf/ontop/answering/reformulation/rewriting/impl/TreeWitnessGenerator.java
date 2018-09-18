@@ -56,7 +56,7 @@ public class TreeWitnessGenerator {
 
 	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
 		
-		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<ClassExpression, TreeWitnessGenerator>();				
+		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<>();
 
 		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
 		// TODO: improve the algorithm
@@ -89,7 +89,7 @@ public class TreeWitnessGenerator {
 	
 	
 	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
-		Set<ClassExpression> concepts = new HashSet<ClassExpression>();
+		Set<ClassExpression> concepts = new HashSet<>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
 

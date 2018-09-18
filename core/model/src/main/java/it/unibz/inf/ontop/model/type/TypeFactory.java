@@ -7,11 +7,6 @@ import java.util.Optional;
 
 public interface TypeFactory {
 
-	@Deprecated
-	Optional<RDFDatatype> getOptionalDatatype(String uri);
-
-	Optional<RDFDatatype> getOptionalDatatype(IRI iri);
-
 	RDFDatatype getLangTermType(String languageTag);
 
 	/**

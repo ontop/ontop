@@ -15,10 +15,10 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.ArrayList;
@@ -34,21 +34,22 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
-    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
                                               UnionBasedQueryMerger queryMerger,
                                               DatalogRule2QueryConverter datalogRuleConverter,
-                                              TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                              SubstitutionFactory substitutionFactory,
+                                              CoreUtilsFactory coreUtilsFactory,
                                               QueryTransformerFactory transformerFactory) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
-        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
     }
 
@@ -86,9 +87,9 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
         List<Predicate> topDownPredicates = Lists.reverse(dependencyGraph.getPredicatesInBottomUp());
 
-        if (topDownPredicates.size() == 0) {
+        if (topDownPredicates.isEmpty())
             throw new EmptyQueryException();
-        }
+
 
         Predicate rootPredicate = topDownPredicates.get(0);
         if (tablePredicates.contains(rootPredicate))
@@ -108,8 +109,8 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         /*
          * Rules (sub-queries)
          */
-        for (int i=1; i < topDownPredicates.size() ; i++) {
-            Predicate datalogAtomPredicate  = topDownPredicates.get(i);
+        for (int j = 1; j < topDownPredicates.size() ; j++) {
+            Predicate datalogAtomPredicate  = topDownPredicates.get(j);
             Optional<IQ> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate,
                     ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
@@ -127,8 +128,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     /**
      * TODO: explain and comment
      */
-    @Override
-    public Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
+    private Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
                                                   Multimap<Predicate, CQIE> datalogRuleIndex,
                                                   Collection<Predicate> tablePredicates,
                                                   Optional<ImmutableQueryModifiers> optionalModifiers)
@@ -190,7 +190,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
         @Override
         protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-            return new DatalogQueryMergingTransformer(new VariableGenerator(knownVariables, termFactory));
+            return new DatalogQueryMergingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables));
         }
 
         private class DatalogQueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {

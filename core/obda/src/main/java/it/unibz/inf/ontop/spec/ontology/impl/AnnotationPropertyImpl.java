@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 import it.unibz.inf.ontop.spec.ontology.AnnotationProperty;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 /**
  * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
@@ -40,9 +39,9 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	private final String name;
 	private IRI iri;
 
-	AnnotationPropertyImpl(String name) {
-		this.name = name;
-		this.iri = new SimpleRDF().createIRI(name);
+	AnnotationPropertyImpl(IRI iri) {
+		this.name = iri.getIRIString();
+		this.iri = iri;
 	}
 
 	@Override

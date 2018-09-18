@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 import java.io.IOException;
@@ -86,13 +87,15 @@ public class OBDAModel {
     private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
+    private final RDF rdfFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
                      SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory, DatalogFactory datalogFactory,
-                     TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory) {
+                     TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
+                     RDF rdfFactory) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
@@ -103,6 +106,7 @@ public class OBDAModel {
         this.datalogFactory = datalogFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
+        this.rdfFactory = rdfFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -292,7 +296,7 @@ public class OBDAModel {
         return formerTriplesMap.getTargetAtoms().stream()
                 .filter(a -> {
                     if (a.getPredicateIRI()
-                            .map(i -> i.equals(removedPredicateIRI))
+                            .filter(i -> i.equals(removedPredicateIRI))
                             .isPresent()) {
                         counter.incrementAndGet();
                         return false;
@@ -496,5 +500,9 @@ public class OBDAModel {
 
     public TargetAtomFactory getTargetAtomFactory() {
         return targetAtomFactory;
+    }
+
+    public RDF getRdfFactory() {
+        return rdfFactory;
     }
 }

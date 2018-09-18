@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.sql.Types;
 import java.util.stream.Stream;
@@ -46,6 +45,7 @@ public class MappingTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
+    public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -67,7 +67,6 @@ public class MappingTestingTools {
     public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
     public static final IQConverter IQ_CONVERTER;
-    public static final RDF RDF_FACTORY;
 
 
     public static final RelationPredicate TABLE1_AR2;
@@ -103,12 +102,11 @@ public class MappingTestingTools {
         UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
+        RDF_FACTORY = injector.getInstance(RDF.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
         EMPTY_MAPPING_METADATA = MAPPING_FACTORY.createMetadata(EMPTY_PREFIX_MANAGER, EMPTY_URI_TEMPLATE_MATCHER);
-
-        RDF_FACTORY = new SimpleRDF();
 
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

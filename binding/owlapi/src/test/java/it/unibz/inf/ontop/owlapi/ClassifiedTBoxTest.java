@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +27,7 @@ public class ClassifiedTBoxTest {
         ClassifiedTBox ontology = OWL2QLTranslatorTest.loadOntologyFromFileAndClassify("src/test/resources/ontology/ontology_with_top.owl");
         Equivalences<ClassExpression> top = ontology.classesDAG().getVertex(ClassImpl.owlThing);
         assertEquals(3, top.getMembers().size());
-        OntologyBuilder builder = OntologyBuilderImpl.builder();
+        OntologyBuilder builder = OntologyBuilderImpl.builder(new SimpleRDF());
         OClass percorso = builder.declareClass("http://my.org/navi#Percorso");
         OClass linee = builder.declareClass("http://my.org/navi#LineeDiPercorso");
         assertEquals(ImmutableSet.of(ClassImpl.owlThing, percorso, linee), top.getMembers());

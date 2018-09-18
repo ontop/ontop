@@ -1,14 +1,17 @@
 package it.unibz.inf.ontop.cli;
 
+import com.github.rvesse.airline.Cli;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static it.unibz.inf.ontop.cli.Ontop.getOntopCommandCLI;
 
 public class OntopOBDAToR2RMLTest {
 
     @Test
     public void testOntopHelp (){
         String[] argv = {"help", "mapping", "to-r2rml"};
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     @Ignore("avoids overwriting exampleBooks.ttl")
@@ -18,7 +21,7 @@ public class OntopOBDAToR2RMLTest {
                 "-i", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
 
@@ -30,7 +33,7 @@ public class OntopOBDAToR2RMLTest {
                 "-t", "src/test/resources/books/exampleBooks.owl",
                 "-o", "src/test/resources/output/templateExample.r2rml"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     @Test
@@ -40,7 +43,7 @@ public class OntopOBDAToR2RMLTest {
                 "-t", "src/test/resources/mapping-northwind.owl",
                 "-o", "src/test/resources/output/mapping-northwind.r2rml"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     @Test
@@ -49,7 +52,7 @@ public class OntopOBDAToR2RMLTest {
                 "-i", "src/test/resources/books/exampleBooks.obda",
                 "-o", "src/test/resources/output/exampleBooks.r2rml"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     @Test
@@ -59,8 +62,15 @@ public class OntopOBDAToR2RMLTest {
                 "-t", "src/test/resources/oreda_bootstrapped_ontology.owl",
                 "-o", "src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
+
+    private void runCommand(String[] args) {
+        Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
+
+        OntopCommand command = ontopCommandCLI.parse(args);
+        command.run();
+    }
 
 }

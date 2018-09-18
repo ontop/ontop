@@ -104,7 +104,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
             return renamedIQ.getTree()
                     .applyDescendingSubstitution(descendingSubstitution, Optional.empty())
-                    .liftBinding(renamedIQ.getVariableGenerator());
+                    .liftBinding(variableGenerator);
         }
 
         private ImmutableSubstitution<VariableOrGroundTerm> extractSubstitution(DistinctVariableOnlyDataAtom sourceAtom,

@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.Optional;
 
@@ -17,23 +16,24 @@ public abstract class RDFAtomPredicateImpl extends AtomPredicateImpl implements 
     private final int propertyIndex;
     private final int objectIndex;
     private final RDFTermTypeConstant iriType;
-    private final SimpleRDF rdfFactory;
+    private final org.apache.commons.rdf.api.RDF rdfFactory;
 
-    protected RDFAtomPredicateImpl(String name, int arity, ImmutableList<TermType> expectedBaseTypes,
+    protected RDFAtomPredicateImpl(String name, ImmutableList<TermType> expectedBaseTypes,
                                    int subjectIndex, int propertyIndex, int objectIndex,
-                                   RDFTermTypeConstant iriType) {
-        super(name, arity, expectedBaseTypes);
+                                   RDFTermTypeConstant iriType, org.apache.commons.rdf.api.RDF rdfFactory) {
+        super(name, expectedBaseTypes);
         this.subjectIndex = subjectIndex;
         this.propertyIndex = propertyIndex;
         this.objectIndex = objectIndex;
+        this.rdfFactory = rdfFactory;
         this.iriType = iriType;
-        this.rdfFactory = new SimpleRDF();
 
-        if (propertyIndex >= arity)
-            throw new IllegalArgumentException("propertyIndex must be inferior to arity");
-        if (objectIndex >= arity)
-            throw new IllegalArgumentException("objectIndex must be inferior to arity");
-
+        if (subjectIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("subjectIndex exceeds the arity");
+        if (propertyIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("propertyIndex exceeds the arity");
+        if (objectIndex >= expectedBaseTypes.size())
+            throw new IllegalArgumentException("objectIndex exceeds the arity");
     }
 
     @Override

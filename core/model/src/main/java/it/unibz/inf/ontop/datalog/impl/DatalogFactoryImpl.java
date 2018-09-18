@@ -55,16 +55,14 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Override
     public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers) {
-        DatalogProgram p = new DatalogProgramImpl();
-        p.getQueryModifiers().copy(modifiers);
+        DatalogProgram p = new DatalogProgramImpl(modifiers);
         return p;
     }
 
     @Override
     public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers, Collection<CQIE> rules) {
-        DatalogProgram p = new DatalogProgramImpl();
+        DatalogProgram p = new DatalogProgramImpl(modifiers);
         p.appendRule(rules);
-        p.getQueryModifiers().copy(modifiers);
         return p;
     }
 
@@ -219,7 +217,7 @@ public class DatalogFactoryImpl implements DatalogFactory {
     private static class DatalogAtomPredicate extends AtomPredicateImpl {
 
         private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
-            super(name, arity, createExpectedBaseTypes(arity, typeFactory));
+            super(name, createExpectedBaseTypes(arity, typeFactory));
         }
 
         private static ImmutableList<TermType> createExpectedBaseTypes( int arity, TypeFactory typeFactory) {

@@ -22,9 +22,6 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
@@ -117,8 +114,7 @@ public class RDBMetadataExtractionTools {
 	 */
 
 	public static RDBMetadata createMetadata(Connection conn,
-											 TermFactory termFactory, TypeFactory typeFactory,
-											 DatalogFactory datalogFactory, AtomFactory atomFactory) throws SQLException  {
+											 TypeFactory typeFactory) throws SQLException  {
 		
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -170,8 +166,7 @@ public class RDBMetadataExtractionTools {
 		}
 		
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac,
-				atomFactory, termFactory, typeFactory, datalogFactory);
+							productName, md.getDatabaseProductVersion(), idfac, typeFactory);
 		
 		return metadata;	
 	}
@@ -264,7 +259,7 @@ public class RDBMetadataExtractionTools {
 					int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
 
 					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(dataType, typeName);
-					
+
 					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
 				}
 			}

@@ -44,7 +44,6 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSeriali
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.querymanager.*;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -95,7 +94,7 @@ public class OBDAModelManager implements Disposable {
 	private final OntopConfigurationManager configurationManager;
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
-	private final RDF rdfFactory = new SimpleRDF();
+	private final RDF rdfFactory;
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -142,6 +141,7 @@ public class OBDAModelManager implements Disposable {
 		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
+		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
 
@@ -166,7 +166,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory);
+				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, rdfFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

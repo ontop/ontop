@@ -76,9 +76,9 @@ public class R2RMLManager {
 	 * @param targetAtomFactory
 	 */
 	public R2RMLManager(String file, TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory)
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory)
 			throws RDFParseException, MappingIOException, RDFHandlerException {
-		this(new File(file), termFactory, typeFactory, targetAtomFactory);
+		this(new File(file), termFactory, typeFactory, targetAtomFactory, rdfFactory);
 	}
 	
 	/**
@@ -87,9 +87,10 @@ public class R2RMLManager {
 	 * @param termFactory
 	 * @param typeFactory
 	 * @param targetAtomFactory
+	 * @param rdfFactory
 	 */
-	public R2RMLManager(File file,TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory)
+	public R2RMLManager(File file, TermFactory termFactory, TypeFactory typeFactory,
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory)
 			throws MappingIOException, RDFParseException, RDFHandlerException {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
@@ -104,7 +105,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			this.myModel = new RDF4J().asGraph(model);
-			r2rmlParser = new R2RMLParser(termFactory, this.typeFactory);
+			r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory);
 		} catch (IOException e) {
 			throw new MappingIOException(e);
 		}
@@ -119,12 +120,12 @@ public class R2RMLManager {
 	 * @param targetAtomFactory
 	 */
 	public R2RMLManager(Graph model, TermFactory termFactory, TypeFactory typeFactory,
-						TargetAtomFactory targetAtomFactory){
+						TargetAtomFactory targetAtomFactory, org.apache.commons.rdf.api.RDF rdfFactory){
 		myModel = model;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.targetAtomFactory = targetAtomFactory;
-		r2rmlParser = new R2RMLParser(termFactory, this.typeFactory);
+		r2rmlParser = new R2RMLParser(termFactory, this.typeFactory, rdfFactory);
 	}
 	
 	/**

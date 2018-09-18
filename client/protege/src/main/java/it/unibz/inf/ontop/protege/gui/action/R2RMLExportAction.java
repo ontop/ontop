@@ -80,7 +80,10 @@ public class R2RMLExportAction extends ProtegeAction {
 
                 final JFileChooser fc = new JFileChooser(ontologyDir);
                 final String shortForm = documentIRI.getShortForm();
-                String ontologyName = shortForm.substring(0, shortForm.lastIndexOf("."));
+                int i = shortForm.lastIndexOf(".");
+                String ontologyName = (i < 1)?
+                        shortForm:
+                        shortForm.substring(0, i);
                 fc.setSelectedFile(new File(ontologyName + "-mapping.ttl"));
                 //fc.setSelectedFile(new File(sourceID + "-mapping.ttl"));
 
@@ -91,12 +94,12 @@ public class R2RMLExportAction extends ProtegeAction {
 
                     final File file = fc.getSelectedFile();
 
-                    Thread th = new Thread("Bootstrapper Action Thread"){
+                    Thread th = new Thread("R2RML Export Action Thread"){
                         @Override
                         public void run() {
                             try {
                                 OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-                                        "Bootstrapping ontology and mappings...", workspace);
+                                        "Exporting the mapping to R2RML...", workspace);
                                 R2RMLExportThread t = new R2RMLExportThread();
                                 monitor.addProgressListener(t);
                                 monitor.start();
@@ -136,7 +139,8 @@ public class R2RMLExportAction extends ProtegeAction {
                 throws Exception {
 
             SQLPPMappingToR2RMLConverter writer = new SQLPPMappingToR2RMLConverter(obdaModel.generatePPMapping(),
-                    modelManager.getActiveOntology(), obdaModel.getTermFactory(), obdaModel.getTypeFactory());
+                    modelManager.getActiveOntology(), obdaModel.getTermFactory(), obdaModel.getTypeFactory(),
+                    obdaModel.getRdfFactory());
             writer.write(file);
         }
 

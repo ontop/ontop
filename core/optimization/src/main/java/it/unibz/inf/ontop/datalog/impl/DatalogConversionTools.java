@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -26,18 +27,21 @@ public class DatalogConversionTools {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutabilityTools immutabilityTools;
-    private final TermFactory termFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final TermFactory termFactory;
 
     @Inject
     private DatalogConversionTools(AtomFactory atomFactory, SubstitutionFactory substitutionFactory,
-                                   ImmutabilityTools immutabilityTools, TermFactory termFactory,
-                                   TargetAtomFactory targetAtomFactory) {
+                                   ImmutabilityTools immutabilityTools,
+                                   CoreUtilsFactory coreUtilsFactory, TargetAtomFactory targetAtomFactory,
+                                   TermFactory termFactory) {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.immutabilityTools = immutabilityTools;
-        this.termFactory = termFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.targetAtomFactory = targetAtomFactory;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -77,7 +81,7 @@ public class DatalogConversionTools {
          *
          * Creates allBindings entries if needed (in case of constant of a functional term)
          */
-        VariableGenerator projectedVariableGenerator = new VariableGenerator(ImmutableSet.of(), termFactory);
+        VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
         for (Term term : datalogDataAtom.getTerms()) {
             Variable newArgument;
 

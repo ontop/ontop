@@ -17,6 +17,8 @@ import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -48,10 +50,13 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
                                IQConverter iqConverter, UnionFlattener unionFlattener, IntermediateQueryFactory iqFactory,
-                               AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+                               AtomFactory atomFactory, ImmutabilityTools immutabilityTools,
+                               PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+                               PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate,
-                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener, immutabilityTools);
+                datalogNormalizer, datalogFactory, typeFactory, termFactory, iqConverter, iqFactory, atomFactory,
+                unionFlattener, immutabilityTools, pushDownExpressionOptimizer, pullUpExpressionOptimizer);
     }
 
     @Override

@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
@@ -36,16 +37,19 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final RDF rdfFactory;
 
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
-                               TermFactory termFactory, TypeFactory typeFactory, TargetAtomFactory targetAtomFactory) {
+                               TermFactory termFactory, TypeFactory typeFactory, TargetAtomFactory targetAtomFactory,
+                               RDF rdfFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
+        this.rdfFactory = rdfFactory;
     }
 
 
@@ -53,7 +57,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
 
         try {
-            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, termFactory, typeFactory, targetAtomFactory);
+            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, termFactory, typeFactory, targetAtomFactory, rdfFactory);
             return parse(r2rmlManager);
         } catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
@@ -70,7 +74,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     @Override
     public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, termFactory, typeFactory, targetAtomFactory);
+        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, termFactory, typeFactory, targetAtomFactory, rdfFactory);
         return parse(r2rmlManager);
     }
 

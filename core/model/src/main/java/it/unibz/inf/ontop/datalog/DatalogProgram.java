@@ -28,13 +28,11 @@ import java.util.List;
 
 public interface DatalogProgram extends Serializable {
 
-	public List<CQIE> getRules();
+	List<CQIE> getRules();
 
-	public void appendRule(CQIE rule);
+	void appendRule(CQIE rule);
 
-	public void appendRule(Collection<CQIE> rule);
-
-	public void removeRules(Collection<CQIE> rule);
+	void appendRule(Collection<CQIE> rule);
 
 	/***
 	 * Returns all the rules that have the given predicate in their heads
@@ -42,12 +40,10 @@ public interface DatalogProgram extends Serializable {
 	 * @param headPredicate
 	 * @return
 	 */
-	public List<CQIE> getRules(Predicate headPredicate);
+	List<CQIE> getRules(Predicate headPredicate);
 
-	public MutableQueryModifiers getQueryModifiers();
+	MutableQueryModifiers getQueryModifiers();
 
-	public boolean hasModifiers();
-		
-	public DatalogProgram clone();
+	DatalogProgram clone();
 
 }

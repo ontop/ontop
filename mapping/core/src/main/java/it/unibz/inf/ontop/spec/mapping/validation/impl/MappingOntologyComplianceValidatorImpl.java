@@ -206,10 +206,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             if(declaredDatatype.getIRI().equals(RDFS.LITERAL)){
                 break;
             }
-            // TODO: throw a better exception
-            RDFDatatype declaredTermType = typeFactory.getOptionalDatatype(declaredDatatype.getIRI())
-                    .orElseThrow(() -> new RuntimeException("Unsupported datatype declared in the ontology: "
-                            + declaredDatatype + " used for " + predicateIRI));
+
+            RDFDatatype declaredTermType = typeFactory.getDatatype(declaredDatatype.getIRI());
 
             if (!tripleObjectType.isA(declaredTermType)) {
 

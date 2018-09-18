@@ -15,13 +15,13 @@ import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
@@ -35,10 +35,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provenanceMappingFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final OntopMappingSettings settings;
 
     private enum Position {SUBJECT, PROPERTY, OBJECT}
@@ -47,16 +47,16 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private MappingCanonicalTransformerImpl(IntermediateQueryFactory iqFactory,
                                             ProvenanceMappingFactory provenanceMappingFactory,
                                             QueryTransformerFactory transformerFactory,
-                                            TermFactory termFactory,
                                             SubstitutionFactory substitutionFactory,
                                             AtomFactory atomFactory,
+                                            CoreUtilsFactory coreUtilsFactory,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
+        this.coreUtilsFactory = coreUtilsFactory;
         this.settings = settings;
         this.iqFactory = iqFactory;
         this.provenanceMappingFactory = provenanceMappingFactory;
         this.transformerFactory = transformerFactory;
-        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
         this.queryMerger = queryMerger;
@@ -155,11 +155,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     }
 
     private Variable createFreshVariable(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
-        VariableGenerator variableGenerator = new VariableGenerator(
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(
                         assertion.getTree().getKnownVariables(),
-                        intensionalQueryMerger.getKnownVariables()).immutableCopy(),
-                termFactory);
+                        intensionalQueryMerger.getKnownVariables()).immutableCopy());
 
         return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
@@ -251,7 +250,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
         @Override
         protected AbstractIntensionalQueryMerger.QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-            VariableGenerator variableGenerator = new VariableGenerator(knownVariables, termFactory);
+            VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(knownVariables);
             return new QueryMergingTransformer(variableGenerator);
         }
 

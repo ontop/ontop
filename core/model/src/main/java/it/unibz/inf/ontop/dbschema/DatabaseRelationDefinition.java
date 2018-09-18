@@ -88,7 +88,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	/**
 	 * gets attribute with the specified position
 	 * 
-	 * @param index is position <em>staring at 1</em>
+	 * @param index is position <em>starting at 1</em>
 	 * @return attribute at the position
 	 */
 	@Override

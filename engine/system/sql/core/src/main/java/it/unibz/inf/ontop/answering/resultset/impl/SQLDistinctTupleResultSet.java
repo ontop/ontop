@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -47,9 +48,9 @@ public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet imp
                                      ConstructionNode rootConstructionNode,
                                      DBMetadata dbMetadata,
                                      Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
-                                     TypeFactory typeFactory) {
+                                     TypeFactory typeFactory, RDF rdfFactory) {
 
-        super(rs, signature, rootConstructionNode, dbMetadata, iriDictionary, termFactory, typeFactory);
+        super(rs, signature, rootConstructionNode, dbMetadata, iriDictionary, termFactory, typeFactory, rdfFactory);
         rowKeys = new HashSet<>();
     }
 

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import javax.annotation.Nullable;
@@ -30,6 +31,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final RDF rdfFactory;
 
     /**
      * TODO: use Guice and retrieve the IRIDictionary by injection (not assisted, nullable)
@@ -39,7 +41,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
                                          @Nullable IRIDictionary iriDictionary,
                                          AtomFactory atomFactory, TermFactory termFactory,
                                          TypeFactory typeFactory, DatalogFactory datalogFactory,
-                                         ImmutabilityTools immutabilityTools) {
+                                         ImmutabilityTools immutabilityTools, RDF rdfFactory) {
 
         this.uriTemplateMatcher = uriTemplateMatcher;
         this.iriDictionary = iriDictionary;
@@ -48,6 +50,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
+        this.rdfFactory = rdfFactory;
     }
 
 
@@ -57,7 +60,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
 
         SparqlAlgebraToDatalogTranslator mutableTranslator =
                 new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary, atomFactory, termFactory,
-                        typeFactory, datalogFactory, immutabilityTools);
+                        typeFactory, datalogFactory, immutabilityTools, rdfFactory);
 
         return mutableTranslator.translate(inputParsedQuery);
     }

@@ -22,9 +22,6 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -44,10 +41,8 @@ public class RDBMetadata extends BasicDBMetadata {
 	 */
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-				QuotedIDFactory idfac, AtomFactory atomFactory, TermFactory termFactory,
-				TypeFactory typeFactory, DatalogFactory datalogFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, atomFactory, termFactory,
-				datalogFactory, idfac);
+				QuotedIDFactory idfac, TypeFactory typeFactory) {
+		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
 		this.typeFactory = typeFactory;
 	}
 
@@ -55,11 +50,9 @@ public class RDBMetadata extends BasicDBMetadata {
 	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
 						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, AtomFactory atomFactory,
-						TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+						int parserViewCounter, TypeFactory typeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, tables, relations,
-				listOfTables, atomFactory, termFactory, datalogFactory, idfac
-		);
+				listOfTables, idfac);
 		this.parserViewCounter = parserViewCounter;
 		this.typeFactory = typeFactory;
 	}
@@ -92,10 +85,10 @@ public class RDBMetadata extends BasicDBMetadata {
 	public RDBMetadata clone() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
 				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-				parserViewCounter, getAtomFactory(), getTermFactory(), typeFactory, getDatalogFactory());
+				parserViewCounter, typeFactory);
 	}
 
-	public DBTypeFactory getDBTypeFactory() {
+    public DBTypeFactory getDBTypeFactory() {
 		return typeFactory.getDBTypeFactory();
-	}
+    }
 }
