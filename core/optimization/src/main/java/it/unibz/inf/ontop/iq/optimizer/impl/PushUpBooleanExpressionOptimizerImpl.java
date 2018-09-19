@@ -88,7 +88,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
 
     private IntermediateQuery pushUpFromSubtree(QueryNode subtreeRoot, IntermediateQuery query) throws EmptyQueryException {
 
-        if (subtreeRoot instanceof CommutativeJoinOrFilterNode) {
+        if (subtreeRoot instanceof CommutativeJoinOrFilterNode && subtreeRoot != query.getRootNode()) {
             Optional<PushUpBooleanExpressionProposal> proposal = makeNodeCentricProposal((CommutativeJoinOrFilterNode) subtreeRoot, query);
             if (proposal.isPresent()) {
                 PushUpBooleanExpressionResults optimizationResults = (PushUpBooleanExpressionResults) query.applyProposal(proposal.get());
