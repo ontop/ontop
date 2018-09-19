@@ -28,7 +28,7 @@ import java.util.*;
  */
 public class SameAsRewriterImpl implements SameAsRewriter{
 
-    private final MappingSameAsPredicateExtractor predicateExtractor;
+    private final MappingSameAsPredicateExtractor predicateExtractor = new MappingSameAsPredicateExtractor();
     private final Mapping saturatedMapping;
     private int bnode; //count for bnode created in sameAsmap
     private int rules;
@@ -41,10 +41,9 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private MappingSameAsPredicateExtractor.SameAsTargets targetPredicates;
 
     @AssistedInject
-    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor,
+    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping,
                                AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                ImmutabilityTools immutabilityTools) {
-        this.predicateExtractor = predicateExtractor;
         this.saturatedMapping = saturatedMapping;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
