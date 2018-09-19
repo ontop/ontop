@@ -144,24 +144,18 @@ public class QuestQueryProcessor implements QueryReformulator {
 			newprogramEq.appendRule(rule);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
-				unifierUtilities, substitutionUtilities);
-		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
+		//SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
+		//		unifierUtilities, substitutionUtilities);
+		//List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+		//DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
 
-		for (CQIE q : newprogram.getRules()) {
-			// We need to enforce equality again, because at this point it is
-			//  possible that there is still some EQ(...)
-			//eqNormalizer.enforceEqualities(q);
-			//datalogNormalizer.unfoldJoinTrees(q);
-		}
-		log.debug("Normalized program: \n{}", newprogram);
+		//log.debug("Normalized program: \n{}", newprogram);
 
-		if (newprogram.getRules().isEmpty())
+		if (newprogramEq.getRules().isEmpty())
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogram, ImmutableList.of());
+        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
     }
 	
 
