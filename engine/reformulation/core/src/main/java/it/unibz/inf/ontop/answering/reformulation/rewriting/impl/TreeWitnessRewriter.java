@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckSyntactic;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -53,7 +52,6 @@ import java.util.*;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -72,8 +70,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private ClassifiedTBox reasoner;
 	private Collection<TreeWitnessGenerator> generators;
 	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
-
-	private final CQContainmentCheck SYNTACTIC_CHECK = new CQContainmentCheckSyntactic();
 
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
@@ -526,11 +522,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 ListIterator<CQIE> i = output.listIterator();
                 while (i.hasNext()) {
                     CQIE q2 = i.next();
-                    if (SYNTACTIC_CHECK.isContainedIn(query, q2)) {
+                    if (isContainedIn(query, q2)) {
                         found = true;
                         break;
                     }
-                    else if (SYNTACTIC_CHECK.isContainedIn(q2, query)) {
+                    else if (isContainedIn(q2, query)) {
                         i.remove();
                         log.debug("   PRUNED {} BY {}", q2, query);
                     }
@@ -570,6 +566,23 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 termscopy.add(t.clone());
         }
         return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
+    }
+
+    /**
+     * Check if query cq1 is contained in cq2, syntactically. That is, if the
+     * head of cq1 and cq2 are equal according to toString().equals and each
+     * atom in cq2 is also in the body of cq1 (also by means of toString().equals().
+     */
+
+    private static boolean isContainedIn(CQIE cq1, CQIE cq2) {
+        if (!cq2.getHead().equals(cq1.getHead()))
+            return false;
+
+        for (Function atom : cq2.getBody())
+            if (!cq1.getBody().contains(atom))
+                return false;
+
+        return true;
     }
 
 }
