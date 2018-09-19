@@ -79,7 +79,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final IQ2DatalogTranslator iqConverter;
-    private final DatalogNormalizer datalogNormalizer;
     private final DatalogProgram2QueryConverter datalogConverter;
 
     @Inject
@@ -90,8 +89,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
-                                IQ2DatalogTranslator iqConverter,
-                                DatalogNormalizer datalogNormalizer) {
+                                IQ2DatalogTranslator iqConverter) {
         super(inclusionDependencyTools, iqFactory);
 
         this.atomFactory = atomFactory;
@@ -102,7 +100,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.iqConverter = iqConverter;
-        this.datalogNormalizer = datalogNormalizer;
         this.datalogConverter = datalogConverter;
     }
 
@@ -322,9 +319,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		double startime = System.currentTimeMillis();
 
 		DatalogProgram program = iqConverter.translate(query);
-        for (CQIE q : program.getRules()) {
-            datalogNormalizer.unfoldJoinTrees(q);
-        }
 
 		List<CQIE> outputRules = new LinkedList<>();
 		Multimap<Predicate, CQIE> ccDP = null;

@@ -290,7 +290,6 @@ public class OneShotSQLGeneratorEngine {
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		for (CQIE cq : queryProgram.getRules()) {
-			datalogNormalizer.foldJoinTrees(cq);
 			datalogNormalizer.addMinimalEqualityToLeftJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
