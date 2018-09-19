@@ -34,7 +34,6 @@ public class ReformulationTestingTools {
     public static final SpecificationFactory MAPPING_FACTORY;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
-    public static final ImmutableHomomorphismUtilities HOMOMORPHISM_UTILITIES;
     public static final ImmutableLinearInclusionDependenciesTools IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
@@ -56,7 +55,6 @@ public class ReformulationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        HOMOMORPHISM_UTILITIES = injector.getInstance(ImmutableHomomorphismUtilities.class);
         IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

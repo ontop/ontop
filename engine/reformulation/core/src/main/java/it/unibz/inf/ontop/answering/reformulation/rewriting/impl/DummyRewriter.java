@@ -59,6 +59,10 @@ public class DummyRewriter implements QueryRewriter {
         sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
     }
 
+    protected ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> getSigma() {
+        return sigma;
+    }
+
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
 

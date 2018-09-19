@@ -79,7 +79,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final IQ2DatalogTranslator iqConverter;
-    private final ImmutableHomomorphismUtilities homomorphismUtilities;
     private final DatalogNormalizer datalogNormalizer;
     private final DatalogProgram2QueryConverter datalogConverter;
 
@@ -92,7 +91,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
                                 IQ2DatalogTranslator iqConverter,
-                                ImmutableHomomorphismUtilities homomorphismUtilities,
                                 DatalogNormalizer datalogNormalizer) {
         super(inclusionDependencyTools, iqFactory);
 
@@ -104,7 +102,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.iqConverter = iqConverter;
-        this.homomorphismUtilities = homomorphismUtilities;
         this.datalogNormalizer = datalogNormalizer;
         this.datalogConverter = datalogConverter;
     }
@@ -116,10 +113,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = reasoner;
 		super.setTBox(reasoner);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(
-                inclusionDependencyTools.getABoxDependencies(reasoner, true),
-                homomorphismUtilities,
-                inclusionDependencyTools);
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma(), inclusionDependencyTools);
 
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
 		

@@ -10,12 +10,12 @@ import java.util.*;
 public class ImmutableHomomorphismUtilities {
 
 
-    private boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
+    private static boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
         return from.getPredicate().equals(to.getPredicate())
                 && extendHomomorphism(map, from.getArguments(), to.getArguments());
     }
 
-    public boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
+    public static boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
         int arity = from.size();
         if (arity != to.size())
             return false;
@@ -28,7 +28,7 @@ public class ImmutableHomomorphismUtilities {
         return true;
     }
 
-    private boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, VariableOrGroundTerm from, VariableOrGroundTerm to) {
+    private static boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, VariableOrGroundTerm from, VariableOrGroundTerm to) {
         if (from instanceof Variable) {
             VariableOrGroundTerm t = map.put((Variable) from, to);
             if (t != null && !t.equals(to)) {
@@ -65,7 +65,7 @@ public class ImmutableHomomorphismUtilities {
      * @return
      */
 
-    public boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
+    public static boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
 
         int fromSize = from.size();
         if (fromSize == 0)
