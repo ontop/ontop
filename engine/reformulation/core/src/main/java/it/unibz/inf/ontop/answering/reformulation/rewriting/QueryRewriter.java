@@ -20,17 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
-import it.unibz.inf.ontop.datalog.DatalogProgram;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
-import java.util.List;
 
 public interface QueryRewriter {
 
-	IQ rewrite(DatalogProgram program) throws OntopReformulationException, EmptyQueryException;
+	IQ rewrite(IQ query) throws OntopReformulationException, EmptyQueryException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 

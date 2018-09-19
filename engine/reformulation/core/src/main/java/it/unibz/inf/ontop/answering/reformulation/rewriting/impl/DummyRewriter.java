@@ -64,11 +64,9 @@ public class DummyRewriter implements QueryRewriter {
     }
 
     @Override
-	public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
+	public IQ rewrite(IQ query) throws EmptyQueryException {
 
-        IQ convertedIQ =  datalogConverter.convertDatalogProgram(program, ImmutableList.of());
-
-        return iqFactory.createIQ(convertedIQ.getProjectionAtom(), convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
@@ -89,6 +87,4 @@ public class DummyRewriter implements QueryRewriter {
             }
         }));
 	}
-
-
 }

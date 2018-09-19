@@ -84,6 +84,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private final ImmutabilityTools immutabilityTools;
     private final IQ2DatalogTranslator iqConverter;
     private final ImmutableHomomorphismUtilities homomorphismUtilities;
+    private final DatalogNormalizer datalogNormalizer;
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
@@ -93,7 +94,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                                 DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory,
                                 ImmutableUnificationTools immutableUnificationTools,
-                                IQ2DatalogTranslator iqConverter, ImmutableHomomorphismUtilities homomorphismUtilities) {
+                                IQ2DatalogTranslator iqConverter, ImmutableHomomorphismUtilities homomorphismUtilities, DatalogNormalizer datalogNormalizer) {
         super(inclusionDependencyTools, datalogConverter, immutableUnificationTools, iqFactory);
 
         this.atomFactory = atomFactory;
@@ -105,6 +106,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.immutabilityTools = immutabilityTools;
         this.iqConverter = iqConverter;
         this.homomorphismUtilities = homomorphismUtilities;
+        this.datalogNormalizer = datalogNormalizer;
     }
 
 	@Override
@@ -321,9 +323,14 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private double time = 0;
 	
 	@Override
-    public IQ rewrite(DatalogProgram program) throws EmptyQueryException {
+    public IQ rewrite(IQ query) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
+
+		DatalogProgram program = iqConverter.translate(query);
+        for (CQIE q : program.getRules()) {
+            datalogNormalizer.unfoldJoinTrees(q);
+        }
 
 		List<CQIE> outputRules = new LinkedList<>();
 		Multimap<Predicate, CQIE> ccDP = null;
@@ -437,15 +444,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             }
         });
 
-        DatalogProgram result = iqConverter.translate(iqFactory.createIQ(convertedIQ.getProjectionAtom(), optimisedTree));
+        IQ result = iqFactory.createIQ(convertedIQ.getProjectionAtom(), optimisedTree);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", optimisedTree);
+		log.debug("Final rewriting:\n{}", result);
 
-		return super.rewrite(datalogFactory.getDatalogProgram(program.getQueryModifiers(), result.getRules()));
+		return super.rewrite(result);
 	}
 
 
