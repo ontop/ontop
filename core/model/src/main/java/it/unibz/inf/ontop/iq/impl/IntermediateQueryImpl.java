@@ -104,9 +104,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     @Override
-    public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmmit) {
+    public Stream<QueryNode> getOtherChildrenStream(QueryNode parent, QueryNode childToOmit) {
         return treeComponent.getChildrenStream(parent)
-                .filter(c -> c != childToOmmit);
+                .filter(c -> c != childToOmit);
     }
 
     /**

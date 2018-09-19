@@ -1191,7 +1191,7 @@ public class QueryMergingTest {
 
         @Override
         protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-            VariableGenerator variableGenerator = new VariableGenerator(knownVariables, TERM_FACTORY);
+            VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(knownVariables);
             return new BasicQueryMergingTransformer(variableGenerator);
         }
 

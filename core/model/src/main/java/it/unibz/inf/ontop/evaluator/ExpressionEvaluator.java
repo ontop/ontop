@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,11 +57,12 @@ public class ExpressionEvaluator {
 	private final ExpressionNormalizer normalizer;
 	private final ImmutabilityTools immutabilityTools;
 	private final RDFTermTypeConstant iriConstant, bnodeConstant;
+	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								ImmutableUnificationTools unificationTools, ExpressionNormalizer normalizer,
-								ImmutabilityTools immutabilityTools) {
+								ImmutabilityTools immutabilityTools, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -72,6 +74,7 @@ public class ExpressionEvaluator {
 		this.immutabilityTools = immutabilityTools;
 		this.iriConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType());
+		this.rdfFactory = rdfFactory;
 	}
 
 	public static class EvaluationResult {
@@ -1010,6 +1013,6 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, immutabilityTools);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, immutabilityTools, rdfFactory);
 	}
 }

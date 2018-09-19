@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.protege.gui.component;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
@@ -47,8 +45,6 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
 
-import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.DATA_PROPERTY;
-import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.OBJECT_PROPERTY;
 
 public class PropertyMappingPanel extends javax.swing.JPanel {
 
@@ -387,7 +383,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
+			cboDataTypes = new DataTypeComboBox();
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			
@@ -493,7 +489,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 			pnlPropertyName = new JPanel();
 			pnlPropertyUriTemplate = new JPanel();
 			lblPropertyName = new JLabel();
-			cboDataTypes = new DataTypeComboBox(obdaModel.getTermFactory());
+			cboDataTypes = new DataTypeComboBox();
 			lblMapIcon = new JLabel();
 			txtPropertyTargetMap = new JTextField();
 			

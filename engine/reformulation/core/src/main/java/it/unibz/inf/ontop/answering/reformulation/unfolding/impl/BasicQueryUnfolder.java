@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -32,25 +33,25 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final TermFactory termFactory;
     private final UnionBasedQueryMerger queryMerger;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               TermFactory termFactory, UnionBasedQueryMerger queryMerger) {
+                               UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory) {
         super(iqFactory);
         this.mapping = mapping;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.transformerFactory = transformerFactory;
-        this.termFactory = termFactory;
         this.queryMerger = queryMerger;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
     protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        return new BasicQueryUnfoldingTransformer(new VariableGenerator(knownVariables, termFactory));
+        return new BasicQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables));
     }
 
     protected class BasicQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {

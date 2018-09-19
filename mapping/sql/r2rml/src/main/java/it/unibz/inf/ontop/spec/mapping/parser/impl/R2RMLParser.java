@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.*;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.eclipse.rdf4j.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,20 +46,20 @@ public class R2RMLParser {
 	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final SimpleRDF rdfFactory;
+	private final RDF rdfFactory;
 
 	/**
 	 * empty constructor
 	 * @param termFactory
 	 * @param typeFactory
 	 */
-	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory) {
+	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		mapManager = RDF4JR2RMLMappingManager.getInstance();
 		classPredicates = new ArrayList<>();
 		joinPredObjNodes = new ArrayList<>();
-		rdfFactory = new SimpleRDF();
+		this.rdfFactory = rdfFactory;
 	}
 
 	/**
@@ -259,7 +258,7 @@ public class R2RMLParser {
 		ObjectMap om = pom.getObjectMap(0);
 
 		String lan = om.getLanguageTag();
-		Object datatype = om.getDatatype();
+		IRI datatype = om.getDatatype();
 
 		// we check if the object map is a constant (can be a iri or a literal)
         // TODO(xiao): toString() is suspicious
@@ -383,15 +382,8 @@ public class R2RMLParser {
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			Optional<RDFDatatype> type = typeFactory.getOptionalDatatype(datatype.toString());
-			if (!type.isPresent()) {
-				// throw new RuntimeException("Unsupported datatype: " +
-				// datatype.toString());
-				logger.warn("Unsupported datatype will not be converted: "
-						+ datatype.toString());
-			} else {
-				objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, type.get());
-			}
+			RDFDatatype type = typeFactory.getDatatype(datatype);
+			objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, datatype);
 		}
 
 		return objectAtom;
@@ -517,8 +509,8 @@ public class R2RMLParser {
 			// trim for making variable
 			terms.add(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(joinCond + (var))));
 
-			string = string.replace("{\"" + var + "\"}", "[]");
-			string = string.replace("{" + var + "}", "[]");
+			string = string.replaceFirst("\\{\"" + var + "\"\\}", "[]");
+			string = string.replaceFirst("\\{" + var + "\\}", "[]");
 			
 		}
 		if(type == 4){

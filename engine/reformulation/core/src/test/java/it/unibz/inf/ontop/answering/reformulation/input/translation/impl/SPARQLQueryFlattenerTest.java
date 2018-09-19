@@ -37,7 +37,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
-                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
+                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS, RDF_FACTORY);
 
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
@@ -61,7 +61,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
-                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
+                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS, RDF_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -86,7 +86,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
-                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
+                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS, RDF_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }
@@ -106,7 +106,7 @@ public class SPARQLQueryFlattenerTest {
 
         SparqlAlgebraToDatalogTranslator translator = new SparqlAlgebraToDatalogTranslator(
                 UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY), null, ATOM_FACTORY, TERM_FACTORY,
-                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS);
+                TYPE_FACTORY, DATALOG_FACTORY, IMMUTABILITY_TOOLS, RDF_FACTORY);
         InternalSparqlQuery program = translator.translate(pq);
         System.out.println(program);
     }

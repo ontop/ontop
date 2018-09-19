@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.apache.commons.rdf.api.RDF;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
@@ -61,12 +62,13 @@ public class SQLConnection implements OntopConnection {
 
 	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
+	private final RDF rdfFactory;
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
 						 Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
-						 SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
+						 RDF rdfFactory, SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
@@ -77,6 +79,7 @@ public class SQLConnection implements OntopConnection {
 		this.typeFactory = typeFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.settings = settings;
+		this.rdfFactory = rdfFactory;
 		this.isClosed = false;
 	}
 	
@@ -99,7 +102,7 @@ public class SQLConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
-					inputQueryFactory, termFactory, typeFactory, substitutionFactory, settings);
+					inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}

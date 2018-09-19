@@ -31,16 +31,14 @@ public class PredicateImpl implements Predicate {
 
 	private final ImmutableList<TermType> expectedBaseTypes;
 
-	private int arity = -1;
-	private String name = null;
-	private int identifier = -1;
+	private final int arity;
+	private final String name;
+	private final int identifier;
 
-	protected PredicateImpl(@Nonnull String name, int arity, @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-		if (expectedBaseTypes.size() != arity)
-			throw new IllegalArgumentException("expectedBaseTypes.size() must be equal to the arity");
+	protected PredicateImpl(@Nonnull String name, @Nonnull ImmutableList<TermType> expectedBaseTypes) {
 		this.name = name;
 		this.identifier = name.hashCode();
-		this.arity = arity;
+		this.arity = expectedBaseTypes.size();
 		this.expectedBaseTypes = expectedBaseTypes;
 	}
 

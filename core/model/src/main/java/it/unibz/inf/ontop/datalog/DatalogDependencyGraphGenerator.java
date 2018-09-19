@@ -11,7 +11,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -42,76 +41,32 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
  */
 public class DatalogDependencyGraphGenerator {
 
-	private DirectedGraph<Predicate, DefaultEdge> predicateDependencyGraph = new DefaultDirectedGraph<Predicate, DefaultEdge>(
-			DefaultEdge.class);
+	private final DirectedGraph<Predicate, DefaultEdge> predicateDependencyGraph
+			= new DefaultDirectedGraph<>(DefaultEdge.class);
 
-	private DirectedGraph<CQIE, DefaultEdge> ruleDependencyGraph = new DefaultDirectedGraph<CQIE, DefaultEdge>(
-			DefaultEdge.class);
+	private final DirectedGraph<CQIE, DefaultEdge> ruleDependencyGraph
+            = new DefaultDirectedGraph<>(DefaultEdge.class);
 
 	/***
 	 * Map of predicate to the rules defining it
 	 */
-	private Multimap<Predicate, CQIE> ruleIndex = ArrayListMultimap.create();
+	private final Multimap<Predicate, CQIE> ruleIndex = ArrayListMultimap.create();
 
-	private Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = ArrayListMultimap.create();
+	private final Multimap<Predicate, CQIE> ruleIndexByBodyPredicate = ArrayListMultimap.create();
 	
 	
 	/**
 	 * the predicates in the datalog program without definition
 	 */
-	private List<Predicate> extensionalPredicates = new ArrayList<Predicate>();
+	private final List<Predicate> extensionalPredicates = new ArrayList<>();
 	
 	/**
 	 * Bottom-up Ordered List of predicates
 	 */
-	private List<Predicate> predicatesInBottomUp = new ArrayList<Predicate>();
+	private final List<Predicate> predicatesInBottomUp = new ArrayList<>();
 	
 	
-	public DirectedGraph<Predicate, DefaultEdge> getPredicateDependencyGraph() {
-		return predicateDependencyGraph;
-	}
 
-	public DirectedGraph<CQIE, DefaultEdge> getRuleDependencyGraph() {
-		return ruleDependencyGraph;
-	}
-	
-	/**
-	 * Gives you the predicate that is defined using <code>pred</code> 
-	 * @param pred 
-	 * @return
-	 */
-	public List<Predicate> getFatherPredicates(Predicate pred){
-		Set<DefaultEdge> fatherEdges = predicateDependencyGraph.incomingEdgesOf(pred);
-		
-		List<Predicate>	fathers = new LinkedList<Predicate>();
-		
-		for (DefaultEdge fatherEdge: fatherEdges){
-			Predicate father = predicateDependencyGraph.getEdgeSource(fatherEdge);
-			fathers.add(father);
-		}
-		 //= fatherEdges.iterator().next();
-		
-		return fathers;
-	}
-	
-	/**
-	 * Gives all the rules that depends on the input <code>rule</code> 
-	 * @param rule 
-	 * @return
-	 */
-	public List<CQIE> getFatherRules(CQIE rule){
-		Set<DefaultEdge> fatherEdges = ruleDependencyGraph.incomingEdgesOf(rule);
-		
-		
-		List<CQIE> fatherRules = Lists.newArrayListWithCapacity(fatherEdges.size());
-		
-		for(DefaultEdge edge : fatherEdges){
-			fatherRules.add(ruleDependencyGraph.getEdgeSource(edge));
-		}
-		
-		return fatherRules;
-	}
-	
 	public Multimap<Predicate, CQIE> getRuleIndex() {
 		return ruleIndex;
 	}
@@ -120,28 +75,20 @@ public class DatalogDependencyGraphGenerator {
 		return extensionalPredicates;
 	}
 	
-	
-
-	public DatalogDependencyGraphGenerator(DatalogProgram program) {
-		this(program.getRules());
-	}
-
 
 	public DatalogDependencyGraphGenerator(List<CQIE> program) {
-		for (CQIE rule : program) {
 
+		for (CQIE rule : program) {
 			updateRuleIndexes(rule);
-			
 			updatePredicateDependencyGraph(rule);
 		}
 
 		generateRuleDependencyGraph(program);
-		
 		generateOrderedDepGraph();
 
 		/**
 		 * 
-		 * Intuitively, the extenion predicates in the datalog program without
+		 * Intuitively, the extensional predicates in the datalog program without
 		 * definitions 
 		 * 
 		 * <pre>
@@ -150,7 +97,6 @@ public class DatalogDependencyGraphGenerator {
 		 */
 		extensionalPredicates.addAll(predicateDependencyGraph.vertexSet());
 		extensionalPredicates.removeAll(ruleIndex.keySet());
-
 	}
 	
 	/**
@@ -159,9 +105,7 @@ public class DatalogDependencyGraphGenerator {
 	 */
 	private void updateRuleIndexes(CQIE rule) {
 		Function head = rule.getHead();
-		
 		ruleIndex.put(head.getFunctionSymbol(), rule);
-		
 		updateRuleIndexByBodyPredicate(rule);
 	}
 
@@ -192,74 +136,8 @@ public class DatalogDependencyGraphGenerator {
 	
 	
 	
-	/**
-	 * Removes the old indexes given by a rule.
-	 * 
-	 * @param rule
-	 */
-	public void removeOldRuleIndexByBodyPredicate(CQIE rule) {
-		for (Function bodyAtom : rule.getBody()) {
 
-			if (bodyAtom.isDataFunction()) {
-				Predicate functionSymbol = bodyAtom.getFunctionSymbol();
-				if (ruleIndexByBodyPredicate.containsEntry(functionSymbol, rule)){
-					ruleIndexByBodyPredicate.remove(functionSymbol, rule);
-				}
-			} else if (bodyAtom.isAlgebraFunction() || bodyAtom.isOperation()) {
-				removeRuleIndexByBodyPredicate_traverseBodyAtom(rule, bodyAtom);
-				// BC: should we reintroduce arithmetic functions?//}
-				// else if (bodyAtom.isArithmeticFunction() || bodyAtom.isDataTypeFunction()){
-			} else if (bodyAtom.isDataTypeFunction()){
-				continue;
-			} else {
-				throw new IllegalStateException("Unknown Function");
-			}
-		}
-	}
 
-	
-	
-	/**
-	 * 
-	 * This is a helper method for {@link #removeRuleIndexByBodyPredicate}.
-	 * 
-	 * This method traverses in an atom, and removes the predicates  in the
-	 * bodyIndex
-	 * @param rule 
-	 * 
-	 * 
-	 * @param bodyAtom
-	 */
-	private void removeRuleIndexByBodyPredicate_traverseBodyAtom(
-			CQIE rule, Function bodyAtom) {
-
-		Queue<Term> queueInAtom = new LinkedList<Term>();
-
-		queueInAtom.add(bodyAtom);
-		while (!queueInAtom.isEmpty()) {
-			Term queueHead = queueInAtom.poll();
-			if (queueHead instanceof Function) {
-				Function funcRoot = (Function) queueHead;
-				
-				if (funcRoot.isOperation()
-						|| funcRoot.isDataTypeFunction() || funcRoot.isAlgebraFunction()) {
-					for (Term term : funcRoot.getTerms()) {
-						queueInAtom.add(term);
-					}
-				}  else if (funcRoot.isDataFunction()) {
-					ruleIndexByBodyPredicate.remove(funcRoot.getFunctionSymbol(), rule);
-				}
-			} else {
-				// NO-OP
-			}
-
-		}
-
-	}	
-	
-	
-	
-	
 	
 	/**
 	 * 
@@ -275,7 +153,7 @@ public class DatalogDependencyGraphGenerator {
 	private void updateRuleIndexByBodyPredicate_traverseBodyAtom(
 			CQIE rule, Function bodyAtom) {
 
-		Queue<Term> queueInAtom = new LinkedList<Term>();
+		Queue<Term> queueInAtom = new LinkedList<>();
 
 		queueInAtom.add(bodyAtom);
 		while (!queueInAtom.isEmpty()) {
@@ -328,46 +206,6 @@ public class DatalogDependencyGraphGenerator {
 			}
 		}
 	}
-	
-	/**
-	 * It removes all rules of a given predicate from the <code>ruleIndex</code>.
-	 * Be careful. This method may cause a mismatch between the graph and the indexes.
-	 * @return 
-	 */
-	public void removeAllPredicateFromRuleIndex(Predicate pred) {
-		
-		ruleIndex.removeAll(pred);
-		
-	}
-	
-	/**
-	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code>
-	 * Be careful. This method may cause a mismatch between the graph and the indexes.
-	 * @param pred
-	 * @param rule
-	 */
-	public void removeRuleFromRuleIndex(Predicate pred, CQIE rule) {
-		if (ruleIndex.containsEntry(pred, rule)){
-			ruleIndex.remove(pred, rule);
-		}
-	}
-	
-
-	
-	/**
-	 * Adds a rule to the <code>ruleIndex</code>
-	 * Be careful. This method may cause a mismatch between the graph and the indexes.
-	 * @return 
-	 */
-	public void addRuleToRuleIndex(Predicate pred, CQIE rule) {
-		if (!ruleIndex.containsEntry(pred, rule)){
-			ruleIndex.put(pred, rule);
-		}
-	}
-	
-	
-	
-	
 
 	
 	/**
@@ -382,7 +220,7 @@ public class DatalogDependencyGraphGenerator {
 	 */
 	private void updatePredicateDependencyGraph(CQIE rule) {
 
-		List<Predicate> dependencyList = new LinkedList<Predicate>();
+		List<Predicate> dependencyList = new LinkedList<>();
 
 		for (Function bodyAtom : rule.getBody()) {
 
@@ -463,9 +301,7 @@ public class DatalogDependencyGraphGenerator {
 			} else {
 				// NO-OP
 			}
-
 		}
-
 	}
 	
 	/**
@@ -476,43 +312,5 @@ public class DatalogDependencyGraphGenerator {
 	public List<Predicate> getPredicatesInBottomUp() {
 		return predicatesInBottomUp;
 	}
-
-	/**
-	 * @return the ruleIndexByBodyPredicate
-	 */
-	public Multimap<Predicate, CQIE> getRuleIndexByBodyPredicate() {
-		return ruleIndexByBodyPredicate;
-	}
-	
-
-	/**
-	 * Adds a rule to the <code>ruleIndexByBodyPredicate</code>
-	 * Be careful. This method may cause a missmatch between the graph and the indexes.
-	 * @return 
-	 */
-	public void addRuleToBodyIndex(Predicate pred, CQIE rule) {
-		if (!ruleIndexByBodyPredicate.containsEntry(pred, rule)){
-			ruleIndexByBodyPredicate.put(pred, rule);		
-		}
-	}
-
-	
-	
-	/**
-	 * It removes a single given rule <code>rule<code> mapped to the predicate <code>pred</code> from <code>ruleIndexByBodyPredicate</code>
-	 * Be careful. This method may cause a mismatch between the graph and the indexes.
-	 * @param pred
-	 * @param rule
-	 */
-	public void removeRuleFromBodyIndex(Predicate pred, CQIE rule) {
-		if (ruleIndexByBodyPredicate.containsKey(pred)){
-			ruleIndexByBodyPredicate.remove(pred, rule);
-		}else {
-			System.err.println("No Such Key as"+pred);
-		}
-	}
-	
-
-
 
 }

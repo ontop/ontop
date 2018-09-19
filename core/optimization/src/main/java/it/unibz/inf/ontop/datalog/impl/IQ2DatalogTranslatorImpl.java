@@ -156,7 +156,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 					.map(n -> (DistinctNode) n);
 
 			IQTree firstNonSliceDistinctTree = distinctNode
-					.map(n -> ((UnaryIQTree) tree).getChild())
+					.map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
 					.orElse(firstNonSliceTree);
 
 			Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctTree)
@@ -475,8 +475,9 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 		while(tree.getRootNode() instanceof QueryModifierNode){
 			tree = ((UnaryIQTree)tree).getChild();
 		}
+		ImmutableSet<Variable> projectedVariables = tree.getVariables();
 		return splitRootUnion(tree)
-				.map(this::enforceRootCn)
+				.map(t -> enforceRootCn(t, projectedVariables))
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -486,13 +487,23 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 				Stream.of(tree);
 	}
 
-	private IQTree enforceRootCn(IQTree tree) {
-		return (tree.getRootNode() instanceof ConstructionNode)?
-				tree:
-				iqFactory.createUnaryIQTree(
-						iqFactory.createConstructionNode(tree.getVariables()),
-						tree
-				);
+	private IQTree enforceRootCn(IQTree tree, ImmutableSet<Variable> projectedVariables) {
+		if (tree.getRootNode() instanceof ConstructionNode) {
+			ConstructionNode currentRootNode = (ConstructionNode) tree.getRootNode();
+
+			if (currentRootNode.getVariables().equals(projectedVariables))
+				return tree;
+
+			ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
+					currentRootNode.getSubstitution()
+							.reduceDomainToIntersectionWith(projectedVariables));
+
+			return iqFactory.createUnaryIQTree(newRootNode, ((UnaryIQTree) tree).getChild());
+		}
+		else
+			return 	iqFactory.createUnaryIQTree(
+					iqFactory.createConstructionNode(projectedVariables),
+					tree);
 	}
 
 	/**

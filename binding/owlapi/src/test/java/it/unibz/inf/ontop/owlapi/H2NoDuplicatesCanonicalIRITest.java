@@ -21,13 +21,10 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.CanonicalIRIRewriter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 
 /***
  * Test use of canonical iri in h2 simple database on wellbores
- * @see CanonicalIRIRewriter
  */
 public class H2NoDuplicatesCanonicalIRITest {
 

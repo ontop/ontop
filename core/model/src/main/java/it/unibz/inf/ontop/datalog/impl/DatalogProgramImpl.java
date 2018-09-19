@@ -59,6 +59,12 @@ public class DatalogProgramImpl implements DatalogProgram {
 		predicateIndex = new HashMap<>();
 	}
 
+	protected DatalogProgramImpl(MutableQueryModifiers modifiers) {
+		this.modifiers = modifiers.clone();
+		rules = new LinkedList<>();
+		predicateIndex = new HashMap<>();
+	}
+
 	@Override
 	public void appendRule(CQIE rule) {
 		if (rule == null) {
@@ -86,18 +92,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 	public void appendRule(Collection<CQIE> rules) {
 		for (CQIE rule : rules) {
 			appendRule(rule);
-		}
-	}
-
-	@Override
-	public void removeRules(Collection<CQIE> rs) {
-		for (CQIE rule : rs) {
-			this.rules.remove(rule);
-
-			Predicate predicate = rule.getHead().getFunctionSymbol();
-			List<CQIE> indexedRules = this.predicateIndex.get(predicate);
-			if (indexedRules != null)
-				indexedRules.remove(rule);
 		}
 	}
 
@@ -130,8 +124,4 @@ public class DatalogProgramImpl implements DatalogProgram {
 		return modifiers;
 	}
 	
-	@Override
-	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
-	}
 }

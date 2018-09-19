@@ -44,6 +44,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final RDF rdfFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
@@ -95,12 +97,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
                                      TypeFactory typeFactory,
-                                     TargetAtomFactory targetAtomFactory) {
+                                     TargetAtomFactory targetAtomFactory,
+                                     RDF rdfFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     /**
@@ -409,7 +413,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private List<TargetQueryParser> createParsers(Map<String, String> prefixes) {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
-        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory));
+        parsers.add(new TurtleOBDASQLParser(prefixes, termFactory, targetAtomFactory, rdfFactory));
         return ImmutableList.copyOf(parsers);
     }
 }

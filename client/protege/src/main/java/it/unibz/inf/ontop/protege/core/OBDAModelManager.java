@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.utils.DialogUtils;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
@@ -46,7 +45,6 @@ import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSeriali
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.querymanager.*;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.ui.util.UIUtil;
@@ -98,7 +96,7 @@ public class OBDAModelManager implements Disposable {
 	private final OntopConfigurationManager configurationManager;
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
-	private final RDF rdfFactory = new SimpleRDF();
+	private final RDF rdfFactory;
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -146,6 +144,7 @@ public class OBDAModelManager implements Disposable {
 		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 		jdbcTypeMapper = defaultInjector.getInstance(JdbcTypeMapper.class);
 		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
+		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
 
@@ -170,7 +169,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, jdbcTypeMapper);
+				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, jdbcTypeMapper, rdfFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

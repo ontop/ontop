@@ -18,7 +18,7 @@ import java.util.Optional;
 public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermFunctionSymbol {
 
     protected RDFTermFunctionSymbolImpl(TermType lexicalType, MetaRDFTermType typeTermType) {
-        super("RDF", 2, ImmutableList.of(lexicalType, typeTermType));
+        super("RDF", ImmutableList.of(lexicalType, typeTermType));
     }
 
     /**

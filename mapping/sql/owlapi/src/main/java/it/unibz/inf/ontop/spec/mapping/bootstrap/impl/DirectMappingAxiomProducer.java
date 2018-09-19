@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.simple.SimpleRDF;
 
 import java.util.*;
 
@@ -42,14 +41,15 @@ public class DirectMappingAxiomProducer {
 	private final String baseIRI;
 
 	private final TermFactory termFactory;
-	private final SimpleRDF rdfFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
 	private final TargetAtomFactory targetAtomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory) {
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
+									  org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		this.targetAtomFactory = targetAtomFactory;
-		this.rdfFactory = new SimpleRDF();
+		this.rdfFactory = rdfFactory;
 	}
 
 

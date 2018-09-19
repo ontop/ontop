@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
 import java.sql.ResultSet;
@@ -36,17 +37,20 @@ public class SQLQuestStatement extends QuestStatement {
     private final Statement sqlStatement;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final RDF rdfFactory;
     private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
                              InputQueryFactory inputQueryFactory,
                              TermFactory termFactory, TypeFactory typeFactory,
-                             SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
+                             RDF rdfFactory, SubstitutionFactory substitutionFactory,
+                             OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.rdfFactory = rdfFactory;
         this.substitutionFactory = substitutionFactory;
         this.settings = settings;
     }
@@ -231,7 +235,7 @@ public class SQLQuestStatement extends QuestStatement {
         } catch (EmptyQueryException e) {
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
         }
-        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory);
+        return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory, rdfFactory);
     }
 
     private String extractSQLQuery(IQ executableQuery) throws EmptyQueryException, OntopInternalBugException {

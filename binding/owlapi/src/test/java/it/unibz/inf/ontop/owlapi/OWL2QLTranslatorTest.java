@@ -6,6 +6,8 @@ import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -32,7 +34,9 @@ public class OWL2QLTranslatorTest {
 
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
-	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
+	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
+
+	private final RDF rdfFactory = new SimpleRDF();
 	
 	@Test
 	public void test_R1_2() throws Exception {
@@ -401,7 +405,7 @@ public class OWL2QLTranslatorTest {
 
     @Test
 	public void test_R6() {
-		OntologyBuilder builder = OntologyBuilderImpl.builder();
+		OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
 		
 		ObjectPropertyExpression top = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
 		ObjectPropertyExpression topInv = top.getInverse();

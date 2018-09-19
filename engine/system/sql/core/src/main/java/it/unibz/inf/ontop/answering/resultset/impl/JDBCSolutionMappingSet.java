@@ -136,7 +136,7 @@ public class JDBCSolutionMappingSet extends AbstractTupleResultSet implements Tu
 
     private ImmutableTerm normalizeTerm(ImmutableTerm term, ImmutableMap<Variable, Iterator<Variable>> aliasIterators) {
         return substitutionFactory.getSubstitution(
-                term.getVariableStream()
+                term.getVariableStream().distinct()
                         .collect(ImmutableCollectors.toMap(
                                 v -> v,
                                 v -> aliasIterators.get(v).next())

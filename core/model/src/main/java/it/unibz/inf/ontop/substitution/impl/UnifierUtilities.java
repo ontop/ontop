@@ -50,44 +50,10 @@ import it.unibz.inf.ontop.substitution.Substitution;
 public class UnifierUtilities {
 
     private final TermFactory termFactory;
-    private final SubstitutionUtilities substitutionUtilities;
 
     @Inject
     public UnifierUtilities(TermFactory termFactory) {
         this.termFactory = termFactory;
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
-    }
-
-    /**
-     * Unifies two atoms in a conjunctive query returning a new conjunctive
-     * query. To to this we calculate the MGU for atoms, duplicate the query q
-     * into q', remove i and j from q', apply the mgu to q', and
-     *
-     * @param q
-     * @param i
-     * @param j (j > i)
-     * @return null if the two atoms are not unifiable, else a new conjunctive
-     * query produced by the unification of j and i
-     * @throws Exception
-     */
-    public CQIE unify(CQIE q, int i, int j) {
-
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        
-        Substitution mgu = getMGU(atom1, atom2);
-        if (mgu == null)
-            return null;
-
-        CQIE unifiedQ = substitutionUtilities.applySubstitution(q, mgu);
-        unifiedQ.getBody().remove(i);
-        unifiedQ.getBody().remove(j - 1);
-
-        Function newatom = (Function) atom1.clone();
-        substitutionUtilities.applySubstitution(newatom, mgu);
-        unifiedQ.getBody().add(i, newatom);
-
-        return unifiedQ;
     }
 
 

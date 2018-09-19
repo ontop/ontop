@@ -12,7 +12,7 @@ public class RelationPredicateImpl extends AtomPredicateImpl implements Relation
     private final RelationDefinition relation;
 
     protected RelationPredicateImpl(RelationDefinition relation) {
-        super(extractPredicateName(relation), relation.getAttributes().size(), extractTypes(relation));
+        super(extractPredicateName(relation), extractTypes(relation));
         this.relation = relation;
     }
 
