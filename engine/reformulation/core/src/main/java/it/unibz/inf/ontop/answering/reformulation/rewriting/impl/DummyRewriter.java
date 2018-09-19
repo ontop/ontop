@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 
 import java.util.*;
 
@@ -46,15 +45,12 @@ public class DummyRewriter implements QueryRewriter {
     private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
 
     protected final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
-    protected final DatalogProgram2QueryConverter datalogConverter;
     protected final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
-                            DatalogProgram2QueryConverter datalogConverter,
-                            ImmutableUnificationTools immutableUnificationTools, IntermediateQueryFactory iqFactory) {
+                            IntermediateQueryFactory iqFactory) {
         this.inclusionDependencyTools = inclusionDependencyTools;
-        this.datalogConverter = datalogConverter;
         this.iqFactory = iqFactory;
     }
 

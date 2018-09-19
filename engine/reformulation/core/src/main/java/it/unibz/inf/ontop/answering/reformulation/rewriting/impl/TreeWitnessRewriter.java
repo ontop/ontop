@@ -85,6 +85,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     private final IQ2DatalogTranslator iqConverter;
     private final ImmutableHomomorphismUtilities homomorphismUtilities;
     private final DatalogNormalizer datalogNormalizer;
+    private final DatalogProgram2QueryConverter datalogConverter;
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
@@ -92,10 +93,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools,
                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
-                                DatalogProgram2QueryConverter datalogConverter, IntermediateQueryFactory iqFactory,
-                                ImmutableUnificationTools immutableUnificationTools,
-                                IQ2DatalogTranslator iqConverter, ImmutableHomomorphismUtilities homomorphismUtilities, DatalogNormalizer datalogNormalizer) {
-        super(inclusionDependencyTools, datalogConverter, immutableUnificationTools, iqFactory);
+                                DatalogProgram2QueryConverter datalogConverter,
+                                IntermediateQueryFactory iqFactory,
+                                IQ2DatalogTranslator iqConverter,
+                                ImmutableHomomorphismUtilities homomorphismUtilities,
+                                DatalogNormalizer datalogNormalizer) {
+        super(inclusionDependencyTools, iqFactory);
 
         this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
@@ -107,6 +110,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         this.iqConverter = iqConverter;
         this.homomorphismUtilities = homomorphismUtilities;
         this.datalogNormalizer = datalogNormalizer;
+        this.datalogConverter = datalogConverter;
     }
 
 	@Override

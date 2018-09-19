@@ -122,7 +122,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
 
-	private DatalogProgram preProcess(InternalSparqlQuery translation) throws OntopInvalidInputQueryException {
+	private IQ preProcess(InternalSparqlQuery translation) throws OntopInvalidInputQueryException, EmptyQueryException {
 		DatalogProgram program = translation.getProgram();
 		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -152,8 +152,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 		for (CQIE q : newprogram.getRules()) {
 			// We need to enforce equality again, because at this point it is
 			//  possible that there is still some EQ(...)
-			eqNormalizer.enforceEqualities(q);
-			datalogNormalizer.unfoldJoinTrees(q);
+			//eqNormalizer.enforceEqualities(q);
+			//datalogNormalizer.unfoldJoinTrees(q);
 		}
 		log.debug("Normalized program: \n{}", newprogram);
 
@@ -161,8 +161,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-		return newprogram;
-	}
+        return  datalogConverter.convertDatalogProgram(newprogram, ImmutableList.of());
+    }
 	
 
 
@@ -175,63 +175,46 @@ public class QuestQueryProcessor implements QueryReformulator {
 			return cachedQuery;
 
 		try {
-			InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
-			DatalogProgram newprogram = preProcess(translation);
+            InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
+
+            try {
+
+                IQ converetedIQ = preProcess(translation);
+
+                log.debug("Start the rewriting process...");
+                IQ rewrittenIQ = rewriter.rewrite(converetedIQ);
+
+                log.debug("Directly translated (SPARQL) IQ: \n" + rewrittenIQ.toString());
+
+                log.debug("Start the unfolding...");
+
+                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
+                if (unfoldedIQ.getTree().isDeclaredAsEmpty())
+                    throw new EmptyQueryException();
+                log.debug("Unfolded query: \n" + unfoldedIQ.toString());
+
+                // Non-final
+                IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, dbMetadata, executorRegistry);
+
+                //lift bindings and union when it is possible
+                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+                log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
+
+                log.debug("New lifted query: \n" + intermediateQuery.toString());
+
+                intermediateQuery = pullUpExpressionOptimizer.optimize(intermediateQuery);
+                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+
+                intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
+
+                log.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
 
-			try {
-				log.debug("Start the rewriting process...");
+                intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+                log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
 
-
-				IQ converetedIQ =  datalogConverter.convertDatalogProgram(newprogram, ImmutableList.of());
-
-				IQ rewrittenIQ =  rewriter.rewrite(converetedIQ);
-
-				/*
-				OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-				Injector injector = defaultConfiguration.getInjector();
-				IntermediateQueryFactory fac = injector.getInstance(IntermediateQueryFactory.class);
-				convertedIQ = fac.createIQ(convertedIQ.getProjectionAtom(),
-						convertedIQ.getTree().acceptTransformer(new BasicGraphPatternTransformer(fac) {
-							@Override
-							protected ImmutableList<IQTree> transformBGP(ImmutableList<IQTree> triplePatterns) {
-								System.out.println("@BGP: " + triplePatterns);
-								return triplePatterns;
-							}
-				}));
-				*/
-
-				log.debug("Directly translated (SPARQL) IQ: \n" + rewrittenIQ.toString());
-
-				log.debug("Start the unfolding...");
-
-				IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
-				if (unfoldedIQ.getTree().isDeclaredAsEmpty())
-					throw new EmptyQueryException();
-				log.debug("Unfolded query: \n" + unfoldedIQ.toString());
-
-				// Non-final
-				IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, dbMetadata, executorRegistry);
-
-				//lift bindings and union when it is possible
-				intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
-				log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
-
-				log.debug("New lifted query: \n" + intermediateQuery.toString());
-
-				intermediateQuery = pullUpExpressionOptimizer.optimize(intermediateQuery);
-				log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
-
-				intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
-
-				log.debug("After projection shrinking: \n" + intermediateQuery.toString());
-
-
-				intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
-				log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
-
-				intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
-				log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
+                intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
+                log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 //				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
 //				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
@@ -240,29 +223,25 @@ public class QuestQueryProcessor implements QueryReformulator {
 //				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
 //				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
-				ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
-						ImmutableList.copyOf(translation.getSignature()));
-				queryCache.put(inputQuery, executableQuery);
-				return executableQuery;
+                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
+                        ImmutableList.copyOf(translation.getSignature()));
+                queryCache.put(inputQuery, executableQuery);
+                return executableQuery;
 
-			}
-			/**
-			 * No solution.
-			 */
-			catch (EmptyQueryException e) {
-				ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-						ImmutableList.copyOf(translation.getSignature()));
+            }
+            catch (EmptyQueryException e) {
+                // No solution.
+                ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
+                        ImmutableList.copyOf(translation.getSignature()));
 
-				log.debug("Empty query --> no solution.");
-				queryCache.put(inputQuery, emptyQuery);
-				return emptyQuery;
-			}
-
-			//unfoldingTime = System.currentTimeMillis() - startTime;
-		}
-		catch (OntopReformulationException e) {
-			throw e;
-		}
+                log.debug("Empty query --> no solution.");
+                queryCache.put(inputQuery, emptyQuery);
+                return emptyQuery;
+            }
+            catch (OntopReformulationException e) {
+                throw e;
+            }
+        }
 		/*
 		 * Bug: should normally not be reached
 		 * TODO: remove it
@@ -292,9 +271,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
-		DatalogProgram program = preProcess(translation);
 		try {
-            IQ converetedIQ =  datalogConverter.convertDatalogProgram(program, ImmutableList.of());
+            IQ converetedIQ = preProcess(translation);
 			IQ rewrittenIQ = rewriter.rewrite(converetedIQ);
 			return rewrittenIQ.toString();
 		}
