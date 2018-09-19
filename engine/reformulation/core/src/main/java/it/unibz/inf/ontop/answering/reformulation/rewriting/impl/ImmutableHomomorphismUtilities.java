@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -10,12 +9,8 @@ import java.util.*;
 
 public class ImmutableHomomorphismUtilities {
 
-    @Inject
-    public ImmutableHomomorphismUtilities() {
-    }
 
     private boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
-
         return from.getPredicate().equals(to.getPredicate())
                 && extendHomomorphism(map, from.getArguments(), to.getArguments());
     }
@@ -26,15 +21,14 @@ public class ImmutableHomomorphismUtilities {
             return false;
 
         for (int i = 0; i < arity; i++) {
-            boolean result = extendHomomorphism(map, from.get(i), to.get(i));
             // if we cannot find a match, terminate the process and return false
-            if (!result)
+            if (!extendHomomorphism(map, from.get(i), to.get(i)))
                 return false;
         }
         return true;
     }
 
-    public boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, VariableOrGroundTerm from, VariableOrGroundTerm to) {
+    private boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, VariableOrGroundTerm from, VariableOrGroundTerm to) {
         if (from instanceof Variable) {
             VariableOrGroundTerm t = map.put((Variable) from, to);
             if (t != null && !t.equals(to)) {
