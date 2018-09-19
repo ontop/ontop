@@ -611,16 +611,16 @@ public class RDBMetadataExtractionTools {
 		RelationID id = relation.getID();
 		// extracting unique
 		try (ResultSet rs = md.getIndexInfo(null, id.getSchemaName(), id.getTableName(), true, true)) {
-            extractUnqiueAttributes(relation, idfac, rs);
+            extractUniqueAttributes(relation, idfac, rs);
         } catch (Exception e){
 		    // Workaround for MySQL-connector >= 8.0
             try (ResultSet rs = md.getIndexInfo(id.getSchemaName(),null, id.getTableName(), true, true)) {
-                extractUnqiueAttributes(relation, idfac, rs);
+                extractUniqueAttributes(relation, idfac, rs);
             }
         }
 	}
 
-    private static void extractUnqiueAttributes(DatabaseRelationDefinition relation, QuotedIDFactory idfac, ResultSet rs) throws SQLException {
+    private static void extractUniqueAttributes(DatabaseRelationDefinition relation, QuotedIDFactory idfac, ResultSet rs) throws SQLException {
         UniqueConstraint.Builder builder = null;
         String currentName = null;
         while (rs.next()) {
