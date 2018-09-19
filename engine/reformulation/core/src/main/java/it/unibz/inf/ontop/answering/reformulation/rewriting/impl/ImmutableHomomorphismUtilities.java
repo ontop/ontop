@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.*;
 
@@ -73,7 +71,7 @@ public class ImmutableHomomorphismUtilities {
      * @return
      */
 
-    public boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableMultimap<AtomPredicate, DataAtom> to) {
+    public boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
 
         int fromSize = from.size();
         if (fromSize == 0)
@@ -97,7 +95,7 @@ public class ImmutableHomomorphismUtilities {
                 // initializing the stack
                 choices = new Stack<>();
                 // add all choices for the current predicate symbol
-                choices.addAll(to.get(currentAtom.getPredicate()));
+                choices.addAll(to);
                 choicesMap.add(currentAtomIdx, choices);
             }
             else
@@ -122,7 +120,7 @@ public class ImmutableHomomorphismUtilities {
             if (!choiceMade) {
                 // backtracking
                 // restore all choices for the current predicate symbol
-                choices.addAll(to.get(currentAtom.getPredicate()));
+                choices.addAll(to);
                 currentSubstitution = sbStack.pop();   // restore the partial homomorphism
                 currentAtomIdx--;   // move to the previous atom
             }
