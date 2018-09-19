@@ -336,21 +336,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		try {
 			// TODO Handle this such that there is a listener checking the progress of the execution
 			Thread queryRunnerThread = new Thread(() -> {
-                SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
+				String queryString = queryTextPane.getText();
                 OBDADataQueryAction<?> action = null;
-				if (query.isEmpty()){
+				if (queryString.isEmpty()){
 					JOptionPane.showMessageDialog(QueryInterfacePanel.this, "Query editor cannot be empty.");
-				} else if (query.isSelectQuery() ) {
+				} else if (SPARQLQueryUtility.isSelectQuery(queryString)) {
 					action = QueryInterfacePanel.this.getExecuteSelectAction();
-				} else if (query.isAskQuery()){
+				} else if (SPARQLQueryUtility.isAskQuery(queryString)){
 					action = QueryInterfacePanel.this.getExecuteAskAction();
-                } else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
+                } else if ((SPARQLQueryUtility.isConstructQuery(queryString) || SPARQLQueryUtility.isDescribeQuery(queryString)) ){
                     action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
                 } else {
                     JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
                 }
 				if(action!=null) {
-					action.run(query.getQueryString());
+					action.run(queryString);
 					execTime = action.getExecutionTime();
 					do {
 						int rows = action.getNumberOfRows();
