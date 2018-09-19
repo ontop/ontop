@@ -135,7 +135,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		for (CQIE query : program.getRules()) {
 			CQIE rule = query.clone();
 			// EQNormalizer cannot be removed because it is used in NULL propagation in OPTIONAL
-			eqNormalizer.enforceEqualities(rule);
+			//eqNormalizer.enforceEqualities(rule);
 
 			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
 				topLevelPredicate = rule.getHead().getFunctionSymbol();
