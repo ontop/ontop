@@ -22,7 +22,6 @@ import java.util.ArrayList;
  */
 public class DatalogTools {
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
 
     private final Expression TRUE_EQ;
@@ -32,9 +31,8 @@ public class DatalogTools {
     private final  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT;
 
     @Inject
-    private DatalogTools(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+    private DatalogTools(TermFactory termFactory, DatalogFactory datalogFactory) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         ValueConstant valueTrue = termFactory.getBooleanConstant(true);
         TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
@@ -101,67 +99,6 @@ public class DatalogTools {
 
     public Expression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
         return foldBooleanConditions(List.iterableList(booleanAtoms));
-    }
-
-    /**
-     * Folds a list of data/composite atoms and joining conditions into a JOIN(...) with a 3-arity.
-     *
-     */
-    public Function foldJoin(List<Function> dataOrCompositeAtoms, Function joiningCondition) {
-        int length = dataOrCompositeAtoms.length();
-        if (length < 2) {
-            throw new IllegalArgumentException("At least two atoms should be given");
-        }
-
-        Function firstAtom = dataOrCompositeAtoms.head();
-        Function secondAtom = foldJoin(dataOrCompositeAtoms.tail());
-
-        return datalogFactory.getSPARQLJoin(firstAtom, secondAtom, joiningCondition);
-    }
-
-    /**
-     * Folds a list of data/composite atoms into a JOIN (if necessary)
-     * by adding EQ(t,t) as a joining condition.
-     */
-    private Function foldJoin(List<Function> dataOrCompositeAtoms) {
-        int length = dataOrCompositeAtoms.length();
-        if (length == 1)
-            return dataOrCompositeAtoms.head();
-        else if (length == 0)
-            throw new IllegalArgumentException("At least one atom should be given.");
-        else {
-            Function firstAtom = dataOrCompositeAtoms.head();
-            /**
-             * Folds the data/composite atom list into a JOIN(JOIN(...)) meta-atom.
-             */
-            return dataOrCompositeAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
-                @Override
-                public Function f(Function firstAtom, Function secondAtom) {
-                    return datalogFactory.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
-                }
-            }, firstAtom);
-        }
-    }
-
-    /**
-     * Practical criterion for detecting a real join: having more data/composite atoms.
-     *
-     * May produces some false negatives for crazy abusive nested joins of boolean atoms (using JOIN instead of AND).
-     */
-    public boolean isRealJoin(List<Function> subAtoms) {
-        //TODO: reuse a shared static filter fct object.
-        List<Function> dataAndCompositeAtoms = subAtoms.filter(atom -> isDataOrLeftJoinOrJoinAtom(atom));
-
-        return dataAndCompositeAtoms.length() > 1;
-    }
-
-    public Function constructNewFunction(List<Function> subAtoms, Predicate functionSymbol) {
-        List<Term> subTerms = (List<Term>)(List<?>) subAtoms;
-        return constructNewFunction(functionSymbol, subTerms);
-    }
-
-    public Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
-        return termFactory.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
     }
 
     private static boolean isXsdBoolean(Predicate predicate) {

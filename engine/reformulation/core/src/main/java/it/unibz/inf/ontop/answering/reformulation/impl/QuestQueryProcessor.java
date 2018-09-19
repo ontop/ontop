@@ -59,7 +59,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
 	private final DatalogFactory datalogFactory;
-	private final DatalogNormalizer datalogNormalizer;
 	private final FlattenUnionOptimizer flattenUnionOptimizer;
 	private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
@@ -78,7 +77,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                                 JoinLikeOptimizer joinLikeOptimizer,
                                 InputQueryFactory inputQueryFactory,
                                 DatalogFactory datalogFactory,
-                                DatalogNormalizer datalogNormalizer, FlattenUnionOptimizer flattenUnionOptimizer,
+                                FlattenUnionOptimizer flattenUnionOptimizer,
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
                                 SubstitutionUtilities substitutionUtilities,
                                 PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
@@ -88,7 +87,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
 		this.datalogFactory = datalogFactory;
-		this.datalogNormalizer = datalogNormalizer;
 		this.flattenUnionOptimizer = flattenUnionOptimizer;
 		this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
@@ -144,18 +142,17 @@ public class QuestQueryProcessor implements QueryReformulator {
 			newprogramEq.appendRule(rule);
 		}
 
-		//SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
-		//		unifierUtilities, substitutionUtilities);
-		//List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		//DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
+		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
+				unifierUtilities, substitutionUtilities);
+		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
+		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
+		log.debug("Normalized program: \n{}", newprogram);
 
-		//log.debug("Normalized program: \n{}", newprogram);
-
-		if (newprogramEq.getRules().isEmpty())
+		if (newprogram.getRules().isEmpty())
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
+        return  datalogConverter.convertDatalogProgram(newprogram, ImmutableList.of());
     }
 	
 
