@@ -26,17 +26,10 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import static it.unibz.inf.ontop.model.atom.PredicateConstants.ONTOP_QUERY;
 
 /**
  * TODO: rename it QueryTranslatorImpl ?
@@ -61,8 +54,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final DatalogFactory datalogFactory;
 	private final FlattenUnionOptimizer flattenUnionOptimizer;
 	private final EQNormalizer eqNormalizer;
-	private final UnifierUtilities unifierUtilities;
-	private final SubstitutionUtilities substitutionUtilities;
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final IQConverter iqConverter;
     private final DatalogProgram2QueryConverter datalogConverter;
@@ -78,8 +69,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                                 InputQueryFactory inputQueryFactory,
                                 DatalogFactory datalogFactory,
                                 FlattenUnionOptimizer flattenUnionOptimizer,
-                                EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
-                                SubstitutionUtilities substitutionUtilities,
+                                EQNormalizer eqNormalizer,
                                 PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
                                 IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
@@ -89,8 +79,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.datalogFactory = datalogFactory;
 		this.flattenUnionOptimizer = flattenUnionOptimizer;
 		this.eqNormalizer = eqNormalizer;
-		this.unifierUtilities = unifierUtilities;
-		this.substitutionUtilities = substitutionUtilities;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		this.rewriter = queryRewriter;
@@ -131,28 +119,18 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		log.debug("Replacing equivalences...");
 		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
-		Predicate topLevelPredicate = null;
 		for (CQIE query : program.getRules()) {
 			CQIE rule = query.clone();
 			// EQNormalizer cannot be removed because it is used in NULL propagation in OPTIONAL
 			eqNormalizer.enforceEqualities(rule);
-
-			if (rule.getHead().getFunctionSymbol().getName().equals(ONTOP_QUERY))
-				topLevelPredicate = rule.getHead().getFunctionSymbol();
 			newprogramEq.appendRule(rule);
 		}
 
-		SPARQLQueryFlattener fl = new SPARQLQueryFlattener(newprogramEq, datalogFactory,
-				unifierUtilities, substitutionUtilities);
-		List<CQIE> p = fl.flatten(newprogramEq.getRules(topLevelPredicate).get(0));
-		DatalogProgram newprogram = datalogFactory.getDatalogProgram(program.getQueryModifiers(), p);
-		log.debug("Normalized program: \n{}", newprogram);
-
-		if (newprogram.getRules().isEmpty())
+		if (newprogramEq.getRules().isEmpty())
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogram, ImmutableList.of());
+        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
     }
 	
 
