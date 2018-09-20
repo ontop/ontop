@@ -379,14 +379,14 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
          */
         if ((newChildRoot instanceof UnionNode)
                 && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
-            UnionNode unionNode = (UnionNode) newChildRoot;
             ImmutableList<IQTree> grandChildren = newChild.getChildren();
 
             ImmutableList<IQTree> newChildren = grandChildren.stream()
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
                     .collect(ImmutableCollectors.toList());
 
-            return iqFactory.createNaryIQTree(unionNode, newChildren);
+            UnionNode newUnionNode = iqFactory.createUnionNode(getVariables());
+            return iqFactory.createNaryIQTree(newUnionNode, newChildren);
         }
         return iqFactory.createUnaryIQTree(this, newChild);
     }
