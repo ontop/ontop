@@ -18,9 +18,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.PartiallyDefinedCastFunctionSymbol;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
@@ -39,17 +37,20 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
     private final UniqueTermTypeExtractor typeExtractor;
 
     @Inject
     private MappingDatatypeFillerImpl(ProvenanceMappingFactory mappingFactory, OntopMappingSettings settings,
                                       TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                      IntermediateQueryFactory iqFactory, UniqueTermTypeExtractor typeExtractor) {
+                                      TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
+                                      UniqueTermTypeExtractor typeExtractor) {
         this.mappingFactory = mappingFactory;
         this.settings = settings;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.typeFactory = typeFactory;
         this.iqFactory = iqFactory;
         this.typeExtractor = typeExtractor;
     }
@@ -156,7 +157,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
                 Stream.concat(
                         topSubstitution.getImmutableMap().entrySet().stream()
-                                .filter(e -> e.getKey().equals(objectVariable)),
+                                .filter(e -> !e.getKey().equals(objectVariable)),
                         Stream.of(Maps.immutableEntry(objectVariable, objectDefinition)))
                         .collect(ImmutableCollectors.toMap()));
 
@@ -176,7 +177,36 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         ImmutableTerm uncastObjectLexicalTerm = uncast(objectLexicalTerm);
         Optional<TermType> optionalType = typeExtractor.extractUniqueTermType(uncastObjectLexicalTerm, subTree);
 
-        throw new RuntimeException("TODO: deduce the RDF datatype from the DB type");
+        if (optionalType
+                .filter(t -> !(t instanceof DBTermType))
+                .isPresent()) {
+            throw new MinorOntopInternalBugException("Was expecting to get a DBTermType, not a "
+                    + optionalType.get().getClass());
+        }
+
+        if ((!settings.isDefaultDatatypeInferred())
+                && (!optionalType.isPresent())) {
+            throw new UnknownDatatypeException(
+                    String.format("Could not infer the type of %s and the option \"%s\" is disabled.\n" +
+                                    "Mapping assertion:\n%s",
+                            uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE, provenance));
+        }
+
+        Optional<RDFDatatype> optionalRDFDatatype = optionalType
+                .map(t -> (DBTermType) t)
+                .flatMap(DBTermType::getNaturalRDFDatatype);
+
+        if ((!settings.isDefaultDatatypeInferred())
+                && (!optionalRDFDatatype.isPresent())) {
+            throw new UnknownDatatypeException(
+                    String.format("Could infer the type %s for %s, " +
+                                    "but this type is not mapped to an RDF datatype " +
+                                    "and the option \"%s\" is disabled.\nMapping assertion:\n%s",
+                            optionalType.get(), uncastObjectLexicalTerm, OntopMappingSettings.INFER_DEFAULT_DATATYPE, provenance));
+        }
+
+        return optionalRDFDatatype
+                .orElseGet(typeFactory::getXsdStringDatatype);
     }
 
     /**
