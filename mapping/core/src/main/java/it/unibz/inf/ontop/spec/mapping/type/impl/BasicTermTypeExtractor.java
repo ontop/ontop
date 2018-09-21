@@ -21,10 +21,10 @@ import it.unibz.inf.ontop.spec.mapping.type.TermTypeExtractor;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class LazyTermTypeExtractor implements TermTypeExtractor {
+public class BasicTermTypeExtractor implements TermTypeExtractor {
 
     @Inject
-    private LazyTermTypeExtractor() {
+    private BasicTermTypeExtractor() {
     }
 
     @Override

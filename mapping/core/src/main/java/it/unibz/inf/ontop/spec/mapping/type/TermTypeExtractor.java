@@ -11,5 +11,8 @@ import java.util.Optional;
  */
 public interface TermTypeExtractor {
 
+    /**
+     * Assume th
+     */
     Optional<TermType> extractType(ImmutableTerm term, IQTree subTree);
 }
