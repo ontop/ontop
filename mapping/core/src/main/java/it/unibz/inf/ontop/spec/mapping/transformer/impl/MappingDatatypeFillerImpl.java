@@ -24,7 +24,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
-import it.unibz.inf.ontop.spec.mapping.type.TermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -40,12 +40,12 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final TermTypeExtractor typeExtractor;
+    private final UniqueTermTypeExtractor typeExtractor;
 
     @Inject
     private MappingDatatypeFillerImpl(ProvenanceMappingFactory mappingFactory, OntopMappingSettings settings,
                                       TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                      IntermediateQueryFactory iqFactory, TermTypeExtractor typeExtractor) {
+                                      IntermediateQueryFactory iqFactory, UniqueTermTypeExtractor typeExtractor) {
         this.mappingFactory = mappingFactory;
         this.settings = settings;
         this.termFactory = termFactory;
@@ -174,7 +174,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         // Only if partially cast
         ImmutableTerm uncastObjectLexicalTerm = uncast(objectLexicalTerm);
-        Optional<TermType> optionalType = typeExtractor.extractType(uncastObjectLexicalTerm, subTree);
+        Optional<TermType> optionalType = typeExtractor.extractUniqueTermType(uncastObjectLexicalTerm, subTree);
 
         throw new RuntimeException("TODO: deduce the RDF datatype from the DB type");
     }

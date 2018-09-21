@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.datalog.QueryUnionSplitter;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.type.TermTypeExtractor;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
@@ -44,7 +43,6 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingOntologyComplianceValidator.class);
         bindFromSettings(MappingSameAsInverseRewriter.class);
         bindFromSettings(QueryUnionSplitter.class);
-        bindFromSettings(TermTypeExtractor.class);
 
         Module factoryModule = buildFactory(ImmutableList.of(MappingWithProvenance.class),
                 ProvenanceMappingFactory.class);

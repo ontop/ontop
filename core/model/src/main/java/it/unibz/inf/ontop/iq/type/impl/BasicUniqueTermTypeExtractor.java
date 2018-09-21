@@ -1,9 +1,11 @@
-package it.unibz.inf.ontop.spec.mapping.type.impl;
+package it.unibz.inf.ontop.iq.type.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.exception.NonUniqueTermTypeException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -16,19 +18,20 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.spec.mapping.type.TermTypeExtractor;
+import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class BasicTermTypeExtractor implements TermTypeExtractor {
+public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
     @Inject
-    private BasicTermTypeExtractor() {
+    private BasicUniqueTermTypeExtractor() {
     }
 
     @Override
-    public Optional<TermType> extractType(ImmutableTerm term, IQTree subTree) {
+    public Optional<TermType> extractUniqueTermType(ImmutableTerm term, IQTree subTree) {
         return (term instanceof Variable)
                 ? extractTypeFromVariable((Variable)term, subTree)
                 : extractType((NonVariableTerm) term);
@@ -43,10 +46,11 @@ public class BasicTermTypeExtractor implements TermTypeExtractor {
      *    - ground terms
      *    - non ground functional terms that are able to define their target type independently
      *      of the children variable types
+     *
+     * TODO: should we detected multiple term types?
      */
     private Optional<TermType> extractType(NonVariableTerm nonVariableTerm) {
         return nonVariableTerm.inferType()
-                // TODO: shall we care here about non fatal error?
                 .flatMap(TermTypeInference::getTermType);
     }
 
@@ -54,9 +58,9 @@ public class BasicTermTypeExtractor implements TermTypeExtractor {
     protected static class TermTypeVariableVisitor implements IQVisitor<Optional<TermType>> {
 
         protected final Variable variable;
-        protected final TermTypeExtractor typeExtractor;
+        protected final UniqueTermTypeExtractor typeExtractor;
 
-        protected TermTypeVariableVisitor(Variable variable, TermTypeExtractor typeExtractor) {
+        protected TermTypeVariableVisitor(Variable variable, UniqueTermTypeExtractor typeExtractor) {
             this.variable = variable;
             this.typeExtractor = typeExtractor;
         }
@@ -104,7 +108,7 @@ public class BasicTermTypeExtractor implements TermTypeExtractor {
 
         @Override
         public Optional<TermType> visitConstruction(ConstructionNode rootNode, IQTree child) {
-            return typeExtractor.extractType(rootNode.getSubstitution().apply(variable), child);
+            return typeExtractor.extractUniqueTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
         @Override
@@ -130,18 +134,32 @@ public class BasicTermTypeExtractor implements TermTypeExtractor {
         }
 
         /**
-         * TODO: implement seriously
+         * Only consider the right child for right-specific variables
          */
         @Override
         public Optional<TermType> visitLeftJoin(LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return Optional.empty();
+            if (leftChild.getVariables().contains(variable)) {
+                return leftChild.acceptVisitor(this);
+            }
+            else if (rightChild.getVariables().contains(variable)) {
+                return rightChild.acceptVisitor(this);
+            }
+            else
+                return Optional.empty();
         }
 
         @Override
-        public Optional<TermType> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
+        public Optional<TermType> visitNonStandardBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
+                                                                           IQTree leftChild, IQTree rightChild) {
             return Optional.empty();
         }
 
+        /**
+         * Returns the first type found for a variable.
+         *
+         * If multiple types could have been found -> not matching -> will be later eliminated
+         *
+         */
         @Override
         public Optional<TermType> visitInnerJoin(InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
@@ -150,12 +168,20 @@ public class BasicTermTypeExtractor implements TermTypeExtractor {
                     .orElse(Optional.empty());
         }
 
-        /**
-         * TODO: implement seriously
-         */
         @Override
         public Optional<TermType> visitUnion(UnionNode rootNode, ImmutableList<IQTree> children) {
-            return Optional.empty();
+            ImmutableSet<TermType> termTypes = children.stream()
+                    .map(c -> c.acceptVisitor(this))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(ImmutableCollectors.toSet());
+
+            if (termTypes.size() > 1)
+                throw new NonUniqueTermTypeException(String.format("Multiple term types found for %s: %s",
+                        variable, termTypes));
+
+            return termTypes.stream()
+                    .findAny();
         }
 
         @Override
