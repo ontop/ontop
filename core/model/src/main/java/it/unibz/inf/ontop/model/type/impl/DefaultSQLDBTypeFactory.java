@@ -6,6 +6,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.SQLDBTypeFactory;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +20,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String VARCHAR_STR = "VARCHAR";
     protected static final String INTEGER_STR = "INTEGER";
     protected static final String BIGINT_STR = "BIGINT";
-    protected static final String DOUBLE_STR = "DOUBLE";
+    protected static final String DOUBLE_STR = "DOUBLE PRECISION";
     protected static final String DATE_STR = "DATE";
     protected static final String TIME_STR = "TIME";
     protected static final String TIMESTAMP_STR = "TIMESTAMP";
@@ -38,8 +40,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     private final ImmutableMap<DefaultTypeCode, String> defaultTypeCodeMap;
 
     @AssistedInject
-    private DefaultSQLDBTypeFactory(@Assisted TermType rootTermType) {
-        this(createDefaultSQLTypeMap(rootTermType), ImmutableMap.copyOf(createDefaultSQLCodeMap()));
+    private DefaultSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
+        this(createDefaultSQLTypeMap(rootTermType, typeFactory), ImmutableMap.copyOf(createDefaultSQLCodeMap()));
     }
 
     protected DefaultSQLDBTypeFactory(Map<String, DBTermType> typeMap,
@@ -51,17 +53,18 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     /**
      * Returns a mutable map so that it can be modified by sub-classes
      */
-    protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType) {
+    protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
         DBTermType rootDBType = new NonStringNonNumberDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
 
+        // TODO: complete
         return Stream.of(rootDBType,
-                    new StringDBTermType(VARCHAR_STR, rootDBType.getAncestry()),
-                    new NumberDBTermType(INTEGER_STR, rootDBType.getAncestry(), false),
-                    new NumberDBTermType(BIGINT_STR, rootDBType.getAncestry(), false),
-                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), false),
-                    new NonStringNonNumberDBTermType(DATE_STR, rootDBType.getAncestry(), false),
-                    new NonStringNonNumberDBTermType(TIME_STR, rootTermType.getAncestry(), false),
-                    new NonStringNonNumberDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), false))
+                    new StringDBTermType(VARCHAR_STR, rootDBType.getAncestry(), typeFactory.getXsdStringDatatype()),
+                    new NumberDBTermType(INTEGER_STR, rootDBType.getAncestry(), typeFactory.getXsdIntegerDatatype()),
+                    new NumberDBTermType(BIGINT_STR, rootDBType.getAncestry(), typeFactory.getXsdIntegerDatatype()),
+                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), typeFactory.getXsdDoubleDatatype()),
+                    new NonStringNonNumberDBTermType(DATE_STR, rootDBType.getAncestry(), typeFactory.getDatatype(XSD.DATE)),
+                    new NonStringNonNumberDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
+                    new NonStringNonNumberDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
                 .collect(Collectors.toMap(
                         DBTermType::getName,
                         t -> t));

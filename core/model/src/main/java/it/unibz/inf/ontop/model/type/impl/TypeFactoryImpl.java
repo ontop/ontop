@@ -49,8 +49,6 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		rootTermType = TermTypeImpl.createOriginTermType();
 
-		dbTypeFactory = dbTypeFactoryFactory.createDBFactory(rootTermType);
-
 		rootRDFTermType = RDFTermTypeImpl.createRDFTermRoot(rootTermType.getAncestry());
 		metaRDFTermType = MetaRDFTermTypeImpl.createMetaRDFTermType(rootRDFTermType.getAncestry());
 
@@ -138,6 +136,8 @@ public class TypeFactoryImpl implements TypeFactory {
 
 		xsdBase64Datatype = createSimpleRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
 		registerDatatype(xsdBase64Datatype);
+
+		dbTypeFactory = dbTypeFactoryFactory.createDBFactory(rootTermType, this);
 	}
 
 	private void registerDatatype(RDFDatatype datatype) {

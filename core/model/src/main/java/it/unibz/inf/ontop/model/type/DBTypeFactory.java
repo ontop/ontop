@@ -31,6 +31,6 @@ public interface DBTypeFactory {
      * To be called ONLY by the TypeFactory
      */
     interface Factory {
-        DBTypeFactory createDBFactory(TermType rootTermType);
+        DBTypeFactory createDBFactory(TermType rootTermType, TypeFactory typeFactory);
     }
 }

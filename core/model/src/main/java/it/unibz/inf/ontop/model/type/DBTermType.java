@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
+import java.util.Optional;
+
 /**
  * For all sorts of DBs (SQL, MongoDB, etc.)
  */
@@ -11,4 +13,6 @@ public interface DBTermType extends TermType {
      * Returns true if it is a character or string DB type.
      */
     boolean isString();
+
+    Optional<RDFDatatype> getNaturalRDFDatatype();
 }
