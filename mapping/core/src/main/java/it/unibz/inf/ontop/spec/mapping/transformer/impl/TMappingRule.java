@@ -31,7 +31,6 @@ public class TMappingRule {
 	private final CQContainmentCheckUnderLIDs cqc;
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
-	private final EQNormalizer eqNormalizer;
 	private final boolean isClass;
 
 
@@ -55,11 +54,10 @@ public class TMappingRule {
 	 */
 	
 	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
-						TermFactory termFactory, EQNormalizer eqNormalizer, boolean isClass) {
+						TermFactory termFactory, boolean isClass) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.eqNormalizer = eqNormalizer;
 		this.isClass = isClass;
 
 		List<Function> filters = new ArrayList<>(body.size());
@@ -112,14 +110,13 @@ public class TMappingRule {
 	}
 	
 	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms, DatalogFactory datalogFactory,
-				 TermFactory termFactory, EQNormalizer eqNormalizer) {
+				 TermFactory termFactory) {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
 		this.filterAtoms = filterAtoms;
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.eqNormalizer = eqNormalizer;
 		this.isClass = baseRule.isClass();
 
 		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
@@ -128,11 +125,10 @@ public class TMappingRule {
 	
 	
 	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory,
-				 EQNormalizer eqNormalizer, boolean isClass) {
+				 boolean isClass) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.eqNormalizer = eqNormalizer;
 		this.isClass = isClass;
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));
@@ -187,9 +183,7 @@ public class TMappingRule {
 		else
 			combinedBody = databaseAtoms;
 		
-		CQIE cq = datalogFactory.getCQIE(head, combinedBody);
-		//eqNormalizer.enforceEqualities(cq);
-		return cq;
+		return datalogFactory.getCQIE(head, combinedBody);
 	}
 	
 	/***

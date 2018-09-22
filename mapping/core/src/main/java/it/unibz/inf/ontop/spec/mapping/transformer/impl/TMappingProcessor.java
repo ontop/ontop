@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.EQNormalizer;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -37,7 +34,6 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
@@ -71,8 +67,7 @@ public class TMappingProcessor {
 				Function newHead = rule.isClass()
 						? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
 						: atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
-				TMappingRule newRule = new TMappingRule(newHead, rule, datalogFactory, termFactory, eqNormalizer,
-						rule.isClass());
+				TMappingRule newRule = new TMappingRule(newHead, rule, datalogFactory, termFactory, rule.isClass());
 				copy.rules.add(newRule);
 			}
 			return copy;
@@ -138,15 +133,6 @@ public class TMappingProcessor {
 				return;
 			}
 		
-			if (noCQC) {
-				for (TMappingRule r : rules)
-					if (r.equals(newRule))
-						return;
-				
-				rules.add(newRule);
-				return;
-			}
-			
 			Iterator<TMappingRule> mappingIterator = rules.iterator();
 			while (mappingIterator.hasNext()) {
 
@@ -225,7 +211,7 @@ public class TMappingProcessor {
 					
 	                mappingIterator.remove();
 	                
-					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory, eqNormalizer);
+					newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory);
 
 					break;
 				}				
@@ -253,26 +239,25 @@ public class TMappingProcessor {
 	// end of the inner class
 
 
-	private static final boolean noCQC = false;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
 	private final SubstitutionUtilities substitutionUtilities;
-	private final EQNormalizer eqNormalizer;
 	private final ImmutabilityTools immutabilityTools;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
+    private final Mapping2DatalogConverter mapping2DatalogConverter;
 
 	@Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-                              SubstitutionUtilities substitutionUtilities, EQNormalizer eqNormalizer,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter) {
+                              SubstitutionUtilities substitutionUtilities,
+                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, Mapping2DatalogConverter mapping2DatalogConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.substitutionUtilities = substitutionUtilities;
-		this.eqNormalizer = eqNormalizer;
 		this.immutabilityTools = immutabilityTools;
         this.datalog2MappingConverter = datalog2MappingConverter;
+        this.mapping2DatalogConverter = mapping2DatalogConverter;
     }
 
 	/**
@@ -319,7 +304,7 @@ public class TMappingProcessor {
 								: atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
 
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, eqNormalizer, false);
+								termFactory, false);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -374,7 +359,7 @@ public class TMappingProcessor {
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate,
 								terms.get(2));
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, eqNormalizer, false);
+								termFactory, false);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -390,14 +375,18 @@ public class TMappingProcessor {
 	
 	/**
 	 * constructs the TMappings using DAG
-	 * @param originalMappings
+	 * @param mapping
 	 * @param reasoner
 	 * @return
 	 */
 
-	public Mapping getTMappings(List<CQIE> originalMappings, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, MappingMetadata metadata) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 
-		if (excludeFromTMappings == null)
+        ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
+                .collect(ImmutableCollectors.toList());
+
+
+        if (excludeFromTMappings == null)
 			throw new NullPointerException("excludeFromTMappings");
 		
 		Map<IRI, TMappingIndexEntry> mappingIndex = new HashMap<>();
@@ -410,26 +399,14 @@ public class TMappingProcessor {
 		 * list.
 		 */
 
-		for (CQIE mapping : originalMappings) {
+		for (CQIE m : initialMappingRules) {
 
-			if (!noCQC)
-				mapping = cqc.removeRedundantAtoms(mapping);
-			else {
-				int c = 0;
-				for (Function a : mapping.getBody()) 
-					if (a.getFunctionSymbol() instanceof AtomPredicate)
-						c++;
-				
-				if (c == 1)
-					CQContainmentCheckUnderLIDs.oneAtomQs++;
-				else if (c == 2)
-					CQContainmentCheckUnderLIDs.twoAtomQs++;
-			}
+		    m = cqc.removeRedundantAtoms(m);
 
-			RDFPredicate predicate = extractRDFPredicate(mapping);
+			RDFPredicate predicate = extractRDFPredicate(m);
 			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc, datalogFactory, termFactory,
-					eqNormalizer, predicate.isClass);
+			TMappingRule rule = new TMappingRule(m.getHead(), m.getBody(), cqc, datalogFactory, termFactory,
+					predicate.isClass);
 
 			IRI ruleIndex = predicate.iri;
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
@@ -510,7 +487,7 @@ public class TMappingProcessor {
 						List<Term> terms = childmapping.getHeadTerms();
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(arg), currentPredicate);
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, eqNormalizer, true);
+								termFactory, true);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -526,8 +503,8 @@ public class TMappingProcessor {
 
 		List<CQIE> tmappingsProgram0 = new LinkedList<>();
 		for (Entry<IRI, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
-			for (TMappingRule mapping : entry.getValue()) {
-				CQIE cq = mapping.asCQIE();
+			for (TMappingRule m : entry.getValue()) {
+				CQIE cq = m.asCQIE();
 				tmappingsProgram0.add(cq);
 			}
 		}
@@ -542,7 +519,7 @@ public class TMappingProcessor {
 		        .collect(ImmutableCollectors.toList());
 
 
-		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, metadata);
+		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
 
 	private RDFPredicate extractRDFPredicate(CQIE mappingAssertion) {

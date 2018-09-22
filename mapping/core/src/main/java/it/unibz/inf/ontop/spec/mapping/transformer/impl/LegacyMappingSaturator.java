@@ -30,7 +30,6 @@ import java.util.List;
 public class LegacyMappingSaturator implements MappingSaturator {
 
     private final TMappingExclusionConfig tMappingExclusionConfig;
-    private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final TermFactory termFactory;
     private final TMappingProcessor tMappingProcessor;
     private final DatalogFactory datalogFactory;
@@ -44,7 +43,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
                                    TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
         this.datalogFactory = datalogFactory;
@@ -65,10 +63,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
                 unifierUtilities, substitutionUtilities, termFactory);
 
-        ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
-                .collect(ImmutableCollectors.toList());
-
-        return tMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig, mapping.getMetadata());
+        return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig);
     }
 
 

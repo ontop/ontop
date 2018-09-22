@@ -13,13 +13,9 @@ import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CQContainmentCheckUnderLIDs {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CQContainmentCheckUnderLIDs.class);
-	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
 	private final ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies;
@@ -154,10 +150,6 @@ public class CQContainmentCheckUnderLIDs {
 		return indexedQ1.computeHomomorphism(q2);
 	}	
 
-	static int redundantCounter = 0;
-	public static int twoAtomQs = 0;
-	public static int oneAtomQs = 0;
-	
 	public CQIE removeRedundantAtoms(CQIE query) {
 		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
 		
@@ -172,7 +164,6 @@ public class CQContainmentCheckUnderLIDs {
 			}
 
 		if (databaseAtoms.size() < 2) {
-			oneAtomQs++;
 			return query;
 		}
 		
@@ -183,14 +174,12 @@ public class CQContainmentCheckUnderLIDs {
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
 			if (checkRedundant(db, groundTerms, atomToBeRemoved)) {
-				LOGGER.warn("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
 				i--;
 			}
 		}
 		
-		twoAtomQs++;
 		return query;
 	}
 	
@@ -210,7 +199,6 @@ public class CQContainmentCheckUnderLIDs {
 		CQIE q0 = datalogFactory.getCQIE(db.getHead(), atomsToLeave);
 		// if db is homomorphically embeddable into q0
 		if (computeHomomorphsim(q0, db) != null) {
-			oneAtomQs++;
 			return true;
 		}
 		return false;
