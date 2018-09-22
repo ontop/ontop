@@ -71,7 +71,7 @@ public class TMappingRule {
 			}
 			else {
 				// database atom, we need to replace all constants by filters
-				databaseAtoms.add(replaceConstants(atom, filters));			
+				databaseAtoms.add(replaceConstants(atom, filters));
 			}
 		}
 		if (filters.isEmpty()) 
@@ -188,7 +188,7 @@ public class TMappingRule {
 			combinedBody = databaseAtoms;
 		
 		CQIE cq = datalogFactory.getCQIE(head, combinedBody);
-		eqNormalizer.enforceEqualities(cq);
+		//eqNormalizer.enforceEqualities(cq);
 		return cq;
 	}
 	
