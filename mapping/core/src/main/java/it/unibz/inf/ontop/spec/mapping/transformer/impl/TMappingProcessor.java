@@ -41,7 +41,6 @@ import it.unibz.inf.ontop.spec.ontology.OClass;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -58,17 +57,22 @@ public class TMappingProcessor {
 	private class TMappingIndexEntry  {
 		private final List<TMappingRule> rules = new LinkedList<>();
 
-		public TMappingIndexEntry copyOf(IRI newPredicate) {
-			TMappingIndexEntry copy = new TMappingIndexEntry();
-			for (TMappingRule rule : rules) {
+        public TMappingIndexEntry() {
+        }
+
+		public TMappingIndexEntry(ImmutableList<TMappingRule> rules) {
+		    rules.forEach(r -> mergeMappingsWithCQC(r));
+        }
+
+        public TMappingIndexEntry(TMappingIndexEntry original, IRI newPredicate) {
+			for (TMappingRule rule : original.rules) {
 				List<Term> headTerms = rule.getHeadTerms();
 				Function newHead = rule.isClass()
 						? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
 						: atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
 				TMappingRule newRule = new TMappingRule(newHead, rule, rule.isClass(), datalogFactory, termFactory);
-				copy.rules.add(newRule);
+				rules.add(newRule);
 			}
-			return copy;
 		}
 
 		public ImmutableList<TMappingRule> getRules() {
@@ -294,8 +298,7 @@ public class TMappingProcessor {
 
 			RDFPredicate predicate = extractRDFPredicate(m);
 			
-			TMappingRule rule = new TMappingRule(m.getHead(), m.getBody(), cqc, datalogFactory, termFactory,
-					predicate.isClass);
+			TMappingRule rule = new TMappingRule(m.getHead(), m.getBody(), predicate.isClass, cqc, datalogFactory, termFactory);
 
 			IRI ruleIndex = predicate.iri;
             originalMappingIndexBuilder.put(ruleIndex, rule);
@@ -311,15 +314,6 @@ public class TMappingProcessor {
 
 		ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = originalMappingIndexBuilder.build();
 
-		/*
-		 * We start with the property mappings, since class t-mappings require
-		 * that these are already processed. 
-		 * Processing mappings for all Properties
-		 *
-		 * We process the mappings for the descendants of the current node,
-		 * adding them to the list of mappings of the current node as defined in
-		 * the TMappings specification.
-		 */
 
         for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
             ObjectPropertyExpression representative = propertySet.getRepresentative();
@@ -329,15 +323,15 @@ public class TMappingProcessor {
             if (excludeFromTMappings.contains(representative))
                 continue;
 
-            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry();
-            reasoner.objectPropertiesDAG().getSub(propertySet).stream()
-                    .flatMap(descendants -> descendants.getMembers().stream())
-                    .flatMap(child -> getRulesFromSubObjectProperties(representative.getIRI(), child, originalMappingIndex))
-                    .forEach(newmapping -> currentNodeMappings.mergeMappingsWithCQC(newmapping));
+            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+                reasoner.objectPropertiesDAG().getSub(propertySet).stream()
+                        .flatMap(descendants -> descendants.getMembers().stream())
+                        .flatMap(child -> getRulesFromSubObjectProperties(representative.getIRI(), child, originalMappingIndex))
+                        .collect(ImmutableCollectors.toList()));
 
             for (ObjectPropertyExpression equivProperty : propertySet)
                 if (!equivProperty.isInverse())
-                    setMappings(mappingIndex, equivProperty.getIRI(), currentNodeMappings);
+                    mappingIndex.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
         } // object properties loop ended
 
         for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
@@ -346,14 +340,14 @@ public class TMappingProcessor {
             if (excludeFromTMappings.contains(representative))
                 continue;
 
-            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry();
-            reasoner.dataPropertiesDAG().getSub(propertySet).stream()
-                    .flatMap(descendants -> descendants.getMembers().stream())
-                    .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex))
-                    .forEach(newmapping -> currentNodeMappings.mergeMappingsWithCQC(newmapping));
+            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+                reasoner.dataPropertiesDAG().getSub(propertySet).stream()
+                        .flatMap(descendants -> descendants.getMembers().stream())
+                        .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex))
+                        .collect(ImmutableCollectors.toList()));
 
             for (DataPropertyExpression equivProperty : propertySet)
-                setMappings(mappingIndex, equivProperty.getIRI(), currentNodeMappings);
+                mappingIndex.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
         } // data properties loop ended
 
 		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
@@ -364,15 +358,15 @@ public class TMappingProcessor {
 			if (excludeFromTMappings.contains(representative))
 				continue;
 
-			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry();
-            reasoner.classesDAG().getSub(classSet).stream()
-                    .flatMap(descendants -> descendants.getMembers().stream())
-                    .flatMap(child -> getRulesFromSubclasses(representative.getIRI(), child, originalMappingIndex))
-                    .forEach(newmapping -> currentNodeMappings.mergeMappingsWithCQC(newmapping));
+			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+                reasoner.classesDAG().getSub(classSet).stream()
+                        .flatMap(descendants -> descendants.getMembers().stream())
+                        .flatMap(child -> getRulesFromSubclasses(representative.getIRI(), child, originalMappingIndex))
+                        .collect(ImmutableCollectors.toList()));
 
 			for (ClassExpression equiv : classSet)
 				if (equiv instanceof OClass)
-					setMappings(mappingIndex, ((OClass) equiv).getIRI(), currentNodeMappings);
+                    mappingIndex.put(((OClass) equiv).getIRI(), new TMappingIndexEntry(currentNodeMappings, ((OClass) equiv).getIRI()));
 		} // class loop end
 
 		ImmutableList<CQIE> tmappingsProgram = mappingIndex.values().stream()
@@ -450,10 +444,6 @@ public class TMappingProcessor {
 
 	}
 
-
-	private static void setMappings(Map<IRI, TMappingIndexEntry> mappingIndex, IRI predicate, TMappingIndexEntry mapping) {
-		mappingIndex.put(predicate, mapping.copyOf(predicate));
-	}
 
 
 	private static class RDFPredicate {
