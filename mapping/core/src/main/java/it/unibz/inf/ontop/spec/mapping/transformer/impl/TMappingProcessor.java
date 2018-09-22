@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -50,8 +49,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 public class TMappingProcessor {
 
@@ -244,19 +241,23 @@ public class TMappingProcessor {
 	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
-    private final Mapping2DatalogConverter mapping2DatalogConverter;
+    private final QueryUnionSplitter unionSplitter;
+    private final IQ2DatalogTranslator iq2DatalogTranslator;
+    private final UnionFlattener unionNormalizer;
 
 	@Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                               SubstitutionUtilities substitutionUtilities,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, Mapping2DatalogConverter mapping2DatalogConverter) {
+                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.datalog2MappingConverter = datalog2MappingConverter;
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
+        this.unionSplitter = unionSplitter;
+        this.iq2DatalogTranslator = iq2DatalogTranslator;
+        this.unionNormalizer = unionNormalizer;
     }
 
 	/**
@@ -266,7 +267,7 @@ public class TMappingProcessor {
 	 * @param dag
 	 */
 	private void getObjectTMappings(Map<IRI, TMappingIndexEntry> mappingIndex,
-			Map<IRI, List<TMappingRule>> originalMappings,
+                                    ImmutableMultimap<IRI, TMappingRule> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag,
 			TMappingExclusionConfig excludeFromTMappings) {
 
@@ -292,11 +293,7 @@ public class TMappingProcessor {
 					 * predicate and, if the child is inverse and the current is
 					 * positive, it will also invert the terms in the head
 					 */
-					List<TMappingRule> childmappings = originalMappings.get(childproperty.getIRI());
-					if (childmappings == null)
-						continue;
-					
-					for (TMappingRule childmapping : childmappings) {
+					for (TMappingRule childmapping : originalMappings.get(childproperty.getIRI())) {
 						List<Term> terms = childmapping.getHeadTerms();
 						Function newMappingHead = !childproperty.isInverse()
 								? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
@@ -324,7 +321,7 @@ public class TMappingProcessor {
 	 * @param dag
 	 */
 	private void getDataTMappings(Map<IRI, TMappingIndexEntry> mappingIndex,
-			Map<IRI, List<TMappingRule>> originalMappings,
+                                  ImmutableMultimap<IRI, TMappingRule> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag,
 			TMappingExclusionConfig excludeFromTMappings) {
 		
@@ -347,11 +344,7 @@ public class TMappingProcessor {
 					 * predicate and, if the child is inverse and the current is
 					 * positive, it will also invert the terms in the head
 					 */
-					List<TMappingRule> childmappings = originalMappings.get(childproperty.getIRI());
-					if (childmappings == null)
-						continue;
-
-					for (TMappingRule childmapping : childmappings) {
+					for (TMappingRule childmapping : originalMappings.get(childproperty.getIRI())) {
 						List<Term> terms = childmapping.getHeadTerms();
 
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate,
@@ -379,24 +372,25 @@ public class TMappingProcessor {
 
 	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 
-        ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
-                .collect(ImmutableCollectors.toList());
-
-
         if (excludeFromTMappings == null)
 			throw new NullPointerException("excludeFromTMappings");
 		
 		Map<IRI, TMappingIndexEntry> mappingIndex = new HashMap<>();
 
-		Map<IRI, List<TMappingRule>> originalMappingIndex = new HashMap<>();
+		ImmutableMultimap.Builder<IRI, TMappingRule> originalMappingIndexBuilder = ImmutableMultimap.builder();
 		
 		/***
 		 * Creates an index of all mappings based on the predicate of the head of
 		 * the mapping. The returned map can be used for fast access to the mapping
 		 * list.
 		 */
+        ImmutableSet<CQIE> initialMappingRules = mapping.getRDFAtomPredicates().stream()
+                .flatMap(p -> mapping.getQueries(p).stream())
+                .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
+                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                .collect(ImmutableCollectors.toSet());
 
-		for (CQIE m : initialMappingRules) {
+        for (CQIE m : initialMappingRules) {
 
 		    m = cqc.removeRedundantAtoms(m);
 
@@ -406,17 +400,14 @@ public class TMappingProcessor {
 					predicate.isClass);
 
 			IRI ruleIndex = predicate.iri;
-			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
-			if (ms == null) {
-				ms = new LinkedList<>();
-				originalMappingIndex.put(ruleIndex, ms);
-			}
-			ms.add(rule);
-						
+            originalMappingIndexBuilder.put(ruleIndex, rule);
+
+            // probably required for vocabulary terms that are not in the ontology
 			TMappingIndexEntry set = getMappings(mappingIndex, ruleIndex);
 			set.mergeMappingsWithCQC(rule);
 		}
 
+		ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = originalMappingIndexBuilder.build();
 
 		/*
 		 * We start with the property mappings, since class t-mappings require
@@ -476,11 +467,7 @@ public class TMappingProcessor {
 						arg = 0; // can never be an inverse
 					} 
 					
-					List<TMappingRule> childmappings = originalMappingIndex.get(childPredicate);
-					if (childmappings == null)
-						continue;
-					
-					for (TMappingRule childmapping : childmappings) {
+					for (TMappingRule childmapping : originalMappingIndex.get(childPredicate)) {
 						List<Term> terms = childmapping.getHeadTerms();
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(arg), currentPredicate);
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, true, datalogFactory, termFactory);
