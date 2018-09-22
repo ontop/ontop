@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
@@ -35,6 +36,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
@@ -52,6 +55,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 public class TMappingProcessor {
 
@@ -256,18 +260,20 @@ public class TMappingProcessor {
 	private final SubstitutionUtilities substitutionUtilities;
 	private final EQNormalizer eqNormalizer;
 	private final ImmutabilityTools immutabilityTools;
+    private final Datalog2QueryMappingConverter datalog2MappingConverter;
 
 	@Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-							  SubstitutionUtilities substitutionUtilities, EQNormalizer eqNormalizer,
-							  ImmutabilityTools immutabilityTools) {
+                              SubstitutionUtilities substitutionUtilities, EQNormalizer eqNormalizer,
+                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.substitutionUtilities = substitutionUtilities;
 		this.eqNormalizer = eqNormalizer;
 		this.immutabilityTools = immutabilityTools;
-	}
+        this.datalog2MappingConverter = datalog2MappingConverter;
+    }
 
 	/**
 	 * constructs the TMappings for object properties using DAG
@@ -389,13 +395,8 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public List<CQIE> getTMappings(List<CQIE> originalMappings, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+	public Mapping getTMappings(List<CQIE> originalMappings, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, MappingMetadata metadata) {
 
-		final boolean printouts = false;
-		
-		if (printouts)
-			System.out.println("ORIGINAL MAPPING SIZE: " + originalMappings.size());
-		
 		if (excludeFromTMappings == null)
 			throw new NullPointerException("excludeFromTMappings");
 		
@@ -408,12 +409,8 @@ public class TMappingProcessor {
 		 * the mapping. The returned map can be used for fast access to the mapping
 		 * list.
 		 */
-		
-		//CQContainmentCheckUnderLIDs cqc0 = new CQContainmentCheckUnderLIDs(null);
 
-		if (printouts)
-			System.out.println("===CHECKING REDUNDANCY: " + cqc);
-		for (CQIE mapping : originalMappings) {	
+		for (CQIE mapping : originalMappings) {
 
 			if (!noCQC)
 				mapping = cqc.removeRedundantAtoms(mapping);
@@ -445,9 +442,7 @@ public class TMappingProcessor {
 			TMappingIndexEntry set = getMappings(mappingIndex, ruleIndex);
 			set.mergeMappingsWithCQC(rule);
 		}
-		if (printouts)
-			System.out.println("===END OF CHECKING REDUNDANCY: " + CQContainmentCheckUnderLIDs.oneAtomQs + "/" + CQContainmentCheckUnderLIDs.twoAtomQs);
-		
+
 
 		/*
 		 * We start with the property mappings, since class t-mappings require
@@ -527,57 +522,26 @@ public class TMappingProcessor {
 					setMappings(mappingIndex, ((OClass) equiv).getIRI(), currentNodeMappings);
 			}
 		}
-		
 
-		List<CQIE> tmappingsProgram = new LinkedList<>();
+
+		List<CQIE> tmappingsProgram0 = new LinkedList<>();
 		for (Entry<IRI, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
 			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
-				tmappingsProgram.add(cq);
+				tmappingsProgram0.add(cq);
 			}
 		}
 
-		List<CQIE> nonOntologyRules = originalMappingIndex.entrySet().stream()
+		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
+		        tmappingsProgram0.stream(),
+                originalMappingIndex.entrySet().stream()
 				.filter(e -> !mappingIndex.containsKey(e.getKey()))
 				.flatMap(e -> e.getValue().stream())
-				.map(m -> m.asCQIE())
+				.map(m -> m.asCQIE()))
 				.collect(ImmutableCollectors.toList());
 
-		tmappingsProgram.addAll(nonOntologyRules);
 
-		if (printouts) {
-			Map<Integer, Set<IRI>> frequences = new HashMap<>();
-			for (Entry<IRI, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
-				if (!entry.getValue().rules.isEmpty()) {
-					Set<IRI> freq = frequences.get(entry.getValue().rules.size());
-					if (freq == null) {
-						freq = new HashSet<>();
-						frequences.put(entry.getValue().rules.size(), freq);
-					}
-					freq.add(entry.getKey());
-				}
-			}
-			System.out.println("T-MAPPING SIZE: " + tmappingsProgram.size());
-			List<Integer> sorted = new ArrayList<>(frequences.keySet());
-			Collections.sort(sorted);
-			for (Integer idx : sorted) {
-				for (IRI p : frequences.get(idx)) {
-					TMappingIndexEntry e = 	mappingIndex.get(p);
-					System.out.println(p + " " + e.rules.size());
-					for (TMappingRule r : e.rules) 
-						System.out.println("    " + r.asCQIE());
-				}
-			}
-			int total = 0;
-			for (Integer idx: sorted) {
-				System.out.println("   " + idx + ": " +  frequences.get(idx).size() + " " + frequences.get(idx));
-				total += frequences.get(idx).size();
-			}
-			System.out.println("NUMBER OF PREDICATES: " + total);
-			System.out.println("TMAP " + tmappingsProgram);
-		}
-				
-		return tmappingsProgram;
+		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, metadata);
 	}
 
 	private RDFPredicate extractRDFPredicate(CQIE mappingAssertion) {

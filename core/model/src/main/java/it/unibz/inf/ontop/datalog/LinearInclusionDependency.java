@@ -1,10 +1,6 @@
 package it.unibz.inf.ontop.datalog;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class LinearInclusionDependency {
     private final Function head, body;
