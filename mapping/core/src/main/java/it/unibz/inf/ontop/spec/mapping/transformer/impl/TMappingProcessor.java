@@ -48,7 +48,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TMappingProcessor {
@@ -347,27 +346,24 @@ public class TMappingProcessor {
                 // newRule into the currentRule
                 // Here we can merge conditions of the new query with the one we have just found
                 // new map always has just one set of filters  !!
-                ImmutableList<Function> newconditions = newRule.getConditions().get(0).stream()
+                ImmutableList<Function> newf = newRule.getConditions().get(0).stream()
                         .map(atom -> applySubstitution(atom, fromNewRule))
                         .collect(ImmutableCollectors.toList());
 
-                ImmutableList.Builder<ImmutableList<Function>> filterAtoms = ImmutableList.builder();
+                // if each of the existing conditions in one of the filter groups
+                // is found in the new filter then the new filter is redundant
+                if (currentRule.getConditions().stream().anyMatch(f -> newf.containsAll(f)))
+                    return;
 
-                for (ImmutableList<Function> econd : currentRule.getConditions()) {
-                    // if each of the existing conditions is found then the new condition is redundant
-                    if (newconditions.containsAll(econd))
-                        return;
-
-                    // if each of the new conditions is found among econd then the old condition is redundant
-                    if (!econd.containsAll(newconditions))
-                        filterAtoms.add(econd);  // no need to clone
-                }
-
-                filterAtoms.add(newconditions);
-                newRule = new TMappingRule(currentRule, filterAtoms.build());
-
+                // REPLACE THE CURRENT RULE
                 mappingIterator.remove();
-                break;
+                rules.add(new TMappingRule(currentRule,
+                        Stream.concat(currentRule.getConditions().stream()
+                                // if each of the new conditions is found among econd then the old condition is redundant
+                                .filter(f -> !f.containsAll(newf)), // no need to clone
+                        Stream.of(newf))
+                        .collect(ImmutableCollectors.toList())));
+                return;
             }
         }
         rules.add(newRule);

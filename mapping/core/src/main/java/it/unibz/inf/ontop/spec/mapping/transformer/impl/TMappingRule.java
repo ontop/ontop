@@ -8,10 +8,8 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,7 +57,9 @@ public class TMappingRule {
 
 		ImmutableList.Builder<Function> filters = ImmutableList.builder();
 		ImmutableList.Builder<Function> dbs = ImmutableList.builder();
-		
+
+        Map<Constant, Variable> valueMap = new HashMap<>();
+
 		for (Function atom : body) {
 			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
 				Function clone = (Function)atom.clone();
@@ -67,12 +67,12 @@ public class TMappingRule {
 			}
 			else {
 				// database atom, we need to replace all constants by filters
-				dbs.add(replaceConstants(atom, filters));
+				dbs.add(replaceConstants(atom, filters, valueMap));
 			}
 		}
         this.databaseAtoms = dbs.build();
 
-        this.head = replaceConstants(head, filters);
+        this.head = replaceConstants(head, filters, valueMap);
 
 		ImmutableList<Function> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
@@ -81,9 +81,7 @@ public class TMappingRule {
 	}
 
 	
-	private final Map<Constant, Variable> valueMap = new HashMap<>();
-	
-	private Function replaceConstants(Function a, ImmutableList.Builder<Function> filters) {
+	private Function replaceConstants(Function a, ImmutableList.Builder<Function> filters, Map<Constant, Variable> valueMap) {
 		Function atom = (Function)a.clone();
 		
 		for (int i = 0; i < atom.getTerms().size(); i++) {
