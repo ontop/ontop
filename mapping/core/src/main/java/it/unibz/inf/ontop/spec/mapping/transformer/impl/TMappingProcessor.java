@@ -54,35 +54,6 @@ public class TMappingProcessor {
 
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
 
-	private class TMappingIndexEntry  {
-		private final ImmutableList<TMappingRule> ir;
-
-		public TMappingIndexEntry(Collection<TMappingRule> rules) {
-		    List<TMappingRule> temp = new LinkedList<>();
-		    for (TMappingRule r : rules)
-		        mergeMappingsWithCQC(temp, r);
-		    ir = ImmutableList.copyOf(temp);
-        }
-
-        public TMappingIndexEntry(TMappingIndexEntry original, IRI newPredicate, boolean isClass) {
-		    ir = original.ir.stream()
-                    .map(rule -> {
-                                List<Term> headTerms = rule.getHeadTerms();
-                                Function newHead = isClass
-                                        ? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
-                                        : atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
-                                return new TMappingRule(newHead, rule, datalogFactory, termFactory);
-                            })
-                    .collect(ImmutableCollectors.toList());
-		}
-
-		public ImmutableList<TMappingRule> getRules() {
-			return ir;
-		}
-	}
-
-	// end of the inner class
-
 
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
@@ -118,68 +89,45 @@ public class TMappingProcessor {
 
 	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
 
-        if (excludeFromTMappings == null)
-			throw new NullPointerException("excludeFromTMappings");
-		
-		ImmutableMultimap.Builder<IRI, TMappingRule> originalMappingIndexBuilder = ImmutableMultimap.builder();
-		
-		/***
-		 * Creates an index of all mappings based on the predicate of the head of
-		 * the mapping. The returned map can be used for fast access to the mapping
-		 * list.
-		 */
-        ImmutableSet<CQIE> initialMappingRules = mapping.getRDFAtomPredicates().stream()
+		// Creates an index of all mappings based on the predicate of the head of
+		// the mapping. The returned map can be used for fast access to the mapping list.
+        ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .collect(ImmutableCollectors.toSet());
+                .map(m -> cqc.removeRedundantAtoms(m))
+                .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
+                        m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory)));
 
-        for (CQIE m : initialMappingRules) {
-
-		    m = cqc.removeRedundantAtoms(m);
-
-			TMappingRule rule = new TMappingRule(m.getHead(), m.getBody(), cqc, datalogFactory, termFactory);
-
-            originalMappingIndexBuilder.put(extractRDFPredicate(m.getHead()), rule);
-		}
-
-		ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = originalMappingIndexBuilder.build();
-
-        ImmutableMap.Builder<IRI, TMappingIndexEntry> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<IRI, ImmutableList<TMappingRule>> builder = ImmutableMap.builder();
 
         for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
             ObjectPropertyExpression representative = propertySet.getRepresentative();
-            if (representative.isInverse())
+            if (representative.isInverse() || excludeFromTMappings.contains(representative))
                 continue;
 
-            if (excludeFromTMappings.contains(representative))
-                continue;
-
-            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
                 reasoner.objectPropertiesDAG().getSub(propertySet).stream()
                         .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubObjectProperties(representative.getIRI(), child, originalMappingIndex))
-                        .collect(ImmutableCollectors.toList()));
+                        .flatMap(child -> getRulesFromSubObjectProperties(representative.getIRI(), child, originalMappingIndex)), cqc);
 
-            for (ObjectPropertyExpression equivProperty : propertySet)
-                if (!equivProperty.isInverse())
-                    builder.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI(), false));
+            propertySet.getMembers().stream()
+                    .filter(p -> !p.isInverse())
+                    .forEach(p -> builder.put(p.getIRI(), getTMappingIndexEntry(currentNodeMappings, p.getIRI(), false)));
         } // object properties loop ended
 
         for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
             DataPropertyExpression representative = propertySet.getRepresentative();
-
             if (excludeFromTMappings.contains(representative))
                 continue;
 
-            TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
                 reasoner.dataPropertiesDAG().getSub(propertySet).stream()
                         .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex))
-                        .collect(ImmutableCollectors.toList()));
+                        .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex)), cqc);
 
-            for (DataPropertyExpression equivProperty : propertySet)
-                builder.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI(), false));
+            propertySet.getMembers().stream()
+                    .forEach(p -> builder.put(p.getIRI(), getTMappingIndexEntry(currentNodeMappings, p.getIRI(), false)));
         } // data properties loop ended
 
 		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
@@ -190,26 +138,26 @@ public class TMappingProcessor {
 			if (excludeFromTMappings.contains(representative))
 				continue;
 
-			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(
+            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
                 reasoner.classesDAG().getSub(classSet).stream()
                         .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubclasses(representative.getIRI(), child, originalMappingIndex))
-                        .collect(ImmutableCollectors.toList()));
+                        .flatMap(child -> getRulesFromSubclasses(representative.getIRI(), child, originalMappingIndex)), cqc);
 
-			for (ClassExpression equiv : classSet)
-				if (equiv instanceof OClass)
-                    builder.put(((OClass) equiv).getIRI(), new TMappingIndexEntry(currentNodeMappings, ((OClass) equiv).getIRI(), true));
+            classSet.getMembers().stream()
+                    .filter(c -> c instanceof OClass)
+                    .map(c -> ((OClass)c))
+                    .forEach(c -> builder.put(c.getIRI(), getTMappingIndexEntry(currentNodeMappings, c.getIRI(), true)));
 		} // class loop end
 
-        ImmutableMap<IRI, TMappingIndexEntry> index = builder.build();
+        ImmutableMap<IRI, ImmutableList<TMappingRule>> index = builder.build();
 
 		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
                 index.values().stream(),
                 originalMappingIndex.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         .filter(e -> !index.containsKey(e.getKey()))
-                        .map(e -> new TMappingIndexEntry(e.getValue())))
-                .flatMap(m -> m.getRules().stream())
+                        .map(e -> getTMappingIndexEntry(e.getValue().stream(), cqc)))
+                .flatMap(m -> m.stream())
                 .map(m -> m.asCQIE())
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
@@ -239,7 +187,7 @@ public class TMappingProcessor {
                 .map(childmapping -> {
                     Function newMappingHead = atomFactory.getMutableTripleHeadAtom(
                             childmapping.getHeadTerms().get(arg), currentPredicate);
-                    return new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+                    return new TMappingRule(newMappingHead, childmapping);
                 });
     }
 
@@ -251,7 +199,7 @@ public class TMappingProcessor {
                             ? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
                             : atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
 
-                    return new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+                    return new TMappingRule(newMappingHead, childmapping);
                 });
     }
 
@@ -260,7 +208,7 @@ public class TMappingProcessor {
                 .map(childmapping -> {
                     List<Term> terms = childmapping.getHeadTerms();
                     Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2));
-                    return new TMappingRule(newMappingHead, childmapping, datalogFactory, termFactory);
+                    return new TMappingRule(newMappingHead, childmapping);
                 });
     }
 
@@ -279,6 +227,27 @@ public class TMappingProcessor {
 						.orElseThrow(() -> new MinorOntopInternalBugException("Could not extract a predicate IRI from " + headAtom)));
 	}
 
+
+    private ImmutableList<TMappingRule> getTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate, boolean isClass) {
+        return original.stream()
+                .map(rule -> {
+                    List<Term> headTerms = rule.getHeadTerms();
+                    Function newHead = isClass
+                            ? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
+                            : atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
+                    return new TMappingRule(newHead, rule);
+                })
+                .collect(ImmutableCollectors.toList());
+    }
+
+
+    private ImmutableList<TMappingRule> getTMappingIndexEntry(Stream<TMappingRule> stream, CQContainmentCheckUnderLIDs cqc) {
+        ImmutableList<TMappingRule> rs = stream.collect(ImmutableCollectors.toList());
+        List<TMappingRule> rules = new ArrayList<>(rs.size());
+        for (TMappingRule newRule : rs)
+            mergeMappingsWithCQC(rules, newRule, cqc);
+        return ImmutableList.copyOf(rules);
+    }
 
     /***
      *
@@ -327,7 +296,8 @@ public class TMappingProcessor {
      * <p/>
      *
      */
-    private void mergeMappingsWithCQC(List<TMappingRule> rules, TMappingRule newRule) {
+
+    private void mergeMappingsWithCQC(List<TMappingRule> rules, TMappingRule newRule, CQContainmentCheckUnderLIDs cqc) {
 
         // Facts are just added
         if (newRule.isFact()) {
@@ -345,7 +315,7 @@ public class TMappingProcessor {
 
             boolean couldIgnore = false;
 
-            Substitution toNewRule = newRule.computeHomomorphsim(currentRule);
+            Substitution toNewRule = newRule.computeHomomorphsim(currentRule, cqc);
             if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
                 if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
                     couldIgnore = true;
@@ -356,7 +326,7 @@ public class TMappingProcessor {
                 }
             }
 
-            Substitution fromNewRule = currentRule.computeHomomorphsim(newRule);
+            Substitution fromNewRule = currentRule.computeHomomorphsim(newRule, cqc);
             if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {
                 // The existing query is more specific than the new query, so we
                 // need to add the new query and remove the old
@@ -413,7 +383,7 @@ public class TMappingProcessor {
 
                 mappingIterator.remove();
 
-                newRule = new TMappingRule(currentRule, filterAtoms, datalogFactory, termFactory);
+                newRule = new TMappingRule(currentRule, filterAtoms);
 
                 break;
             }

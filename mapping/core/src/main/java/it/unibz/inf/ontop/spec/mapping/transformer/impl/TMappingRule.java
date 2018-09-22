@@ -28,8 +28,6 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;
 
-	private final CQContainmentCheckUnderLIDs cqc;
-
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
 
@@ -52,11 +50,11 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
-						TermFactory termFactory) {
+	public TMappingRule(Function head, List<Function> body, DatalogFactory datalogFactory, TermFactory termFactory) {
+        this.datalogFactory = datalogFactory;
+        this.termFactory = termFactory;
+
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
-		this.datalogFactory = datalogFactory;
-		this.termFactory = termFactory;
 
 		List<Function> filters = new ArrayList<>(body.size());
 		
@@ -77,7 +75,6 @@ public class TMappingRule {
 		
 		this.head = replaceConstants(head, filters);
 		this.stripped = this.datalogFactory.getCQIE(this.head, databaseAtoms);
-		this.cqc = cqc;
 	}
 
 	
@@ -107,32 +104,31 @@ public class TMappingRule {
 		return atom;
 	}
 	
-	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms, DatalogFactory datalogFactory,
-				 TermFactory termFactory) {
+	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms) {
+        this.datalogFactory = baseRule.datalogFactory;
+        this.termFactory = baseRule.termFactory;
+
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
 		this.filterAtoms = filterAtoms;
-		this.datalogFactory = datalogFactory;
-		this.termFactory = termFactory;
 
-		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
-		this.cqc = baseRule.cqc;
+		this.stripped = datalogFactory.getCQIE(head, databaseAtoms);
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory) {
+	TMappingRule(Function head, TMappingRule baseRule) {
+        this.datalogFactory = baseRule.datalogFactory;
+        this.termFactory = baseRule.termFactory;
+
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
-		this.datalogFactory = datalogFactory;
-		this.termFactory = termFactory;
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));
 		
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)head.clone();
 		
-		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
-		this.cqc = baseRule.cqc;
+		this.stripped = datalogFactory.getCQIE(head, databaseAtoms);
 	}
 	
 	
@@ -150,11 +146,7 @@ public class TMappingRule {
 		return head;
 	}
 	
-	public boolean isConditionsEmpty() {
-		return filterAtoms.isEmpty();
-	}
-	
-	public Substitution computeHomomorphsim(TMappingRule other) {
+	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
 		return cqc.computeHomomorphsim(stripped, other.stripped);
 	}
 	
