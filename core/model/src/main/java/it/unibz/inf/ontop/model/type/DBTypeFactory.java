@@ -20,6 +20,11 @@ public interface DBTypeFactory {
     DBTermType getDBDoubleType();
 
     /**
+     * Returns an abstract type
+     */
+    DBTermType getAbstractRootDBType();
+
+    /**
      * BC: TODO: should we keep the typeCode? Still needed?
      */
     DBTermType getDBTermType(int typeCode, String typeName);

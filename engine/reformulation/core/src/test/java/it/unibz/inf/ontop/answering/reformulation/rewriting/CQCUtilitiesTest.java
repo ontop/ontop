@@ -27,11 +27,9 @@ import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 import static org.junit.Assert.assertFalse;
@@ -635,16 +632,7 @@ public class CQCUtilitiesTest {
 
 	private static class FakeTestPredicate extends PredicateImpl {
 		protected FakeTestPredicate(@Nonnull String name, int arity) {
-			super(name, createExpectedBaseTermTypeList(arity));
-		}
-
-		private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity) {
-			TermType rootTermType = TYPE_FACTORY.getAbstractAtomicTermType();
-
-			return IntStream.range(0, arity)
-					.boxed()
-					.map(i -> rootTermType)
-					.collect(ImmutableCollectors.toList());
+			super(name, arity);
 		}
 	}
 }

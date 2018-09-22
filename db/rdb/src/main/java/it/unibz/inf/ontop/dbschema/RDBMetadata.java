@@ -74,7 +74,7 @@ public class RDBMetadata extends BasicDBMetadata {
 		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 		
-		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getDBTypeFactory().getDBStringType());
+		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getDBTypeFactory());
 		// UGLY!!
 		add(view, relations);
 		return view;

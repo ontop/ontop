@@ -21,6 +21,11 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * Represents an attribute (column) of a database relation (table or view) or a parser view
@@ -36,18 +41,39 @@ public class Attribute {
 	private final QualifiedAttributeID id; // qualified id (table = tableId for database relation
 	                                       //               parser views, however, have properly qualified column names
 	private final int index;
+	@Nullable
 	private final DBTermType termType;
 	private final String typeName;
 	private final boolean canNull;
+	@Nullable
+	private final DBTermType abstractDBType;
 
+	/**
+	 * With a term type
+	 */
 	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
-			  DBTermType termType, boolean canNull) {
+			  @Nonnull DBTermType termType, boolean canNull) {
 		this.table = relation;
 		this.index = index;
 		this.typeName = typeName;
 		this.id = id;
 		this.termType = termType;
 		this.canNull = canNull;
+		this.abstractDBType = null;
+	}
+
+	/**
+	 * Without a term type
+	 */
+	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
+			  boolean canNull, DBTypeFactory dbTypeFactory) {
+		this.table = relation;
+		this.index = index;
+		this.typeName = typeName;
+		this.id = id;
+		this.termType = null;
+		this.canNull = canNull;
+		abstractDBType = dbTypeFactory.getAbstractRootDBType();
 	}
 	
 	public QuotedID getID() {
@@ -111,7 +137,20 @@ public class Attribute {
 		return id.hashCode();
 	}
 
-	public DBTermType getTermType() {
-		return termType;
+	/**
+	 * Returns the precise term type (if defined)
+	 */
+	public Optional<DBTermType> getTermType() {
+		return Optional.ofNullable(termType);
+	}
+
+	/**
+	 * May be an abstract term type if no precise term type is defined.
+	 *
+	 * Intended to be used for VALIDATION ONLY, not for type inference.
+	 */
+	public DBTermType getBaseTypeForValidation() {
+		return getTermType()
+				.orElse(abstractDBType);
 	}
 }

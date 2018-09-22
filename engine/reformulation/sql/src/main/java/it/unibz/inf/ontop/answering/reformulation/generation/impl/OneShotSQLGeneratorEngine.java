@@ -1090,7 +1090,11 @@ public class OneShotSQLGeneratorEngine {
 				QuotedID columnId = column0.getAttribute();
 				for (Attribute a : relation.getAttributes()) {
 					if (a.getID().equals(columnId)) {
-						return a.getTermType().isString();
+						// TODO: check if it is ok to treat non-typed columns as string
+						// (was the previous behavior)
+						return !a.getTermType()
+								.filter(t -> !t.isString())
+								.isPresent();
 					}
 				}
 			}

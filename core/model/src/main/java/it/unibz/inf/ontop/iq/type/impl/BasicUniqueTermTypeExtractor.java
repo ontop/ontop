@@ -82,7 +82,8 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
                     .boxed()
                     .map(i -> relationDefinition.getAttribute(i + 1))
                     .map(Attribute::getTermType)
-                    .map(t -> (TermType) t)
+                    .filter(Optional::isPresent)
+                    .map(o -> (TermType) o.get())
                     .findAny();
         }
 

@@ -12,7 +12,7 @@ public class RelationPredicateImpl extends AtomPredicateImpl implements Relation
     private final RelationDefinition relation;
 
     protected RelationPredicateImpl(RelationDefinition relation) {
-        super(extractPredicateName(relation), extractTypes(relation));
+        super(extractPredicateName(relation), extractBaseTypes(relation));
         this.relation = relation;
     }
 
@@ -26,9 +26,9 @@ public class RelationPredicateImpl extends AtomPredicateImpl implements Relation
         return name;
     }
 
-    private static ImmutableList<TermType> extractTypes(RelationDefinition relation) {
+    private static ImmutableList<TermType> extractBaseTypes(RelationDefinition relation) {
         return relation.getAttributes().stream()
-                .map(Attribute::getTermType)
+                .map(Attribute::getBaseTypeForValidation)
                 .collect(ImmutableCollectors.toList());
     }
 

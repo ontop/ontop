@@ -26,8 +26,10 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
@@ -133,10 +135,14 @@ public class DirectMappingAxiomProducer {
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
-			// TODO: revisit this
-			RDFDatatype type = (RDFDatatype) att.getTermType();
+			// TODO: check having a default datatype is ok
+			IRI typeIRI = att.getTermType()
+					.flatMap(DBTermType::getNaturalRDFDatatype)
+					.map(RDFDatatype::getIRI)
+					.orElse(XSD.STRING);
+
 			Variable objV = termFactory.getVariable(att.getID().getName());
-			ImmutableTerm obj = termFactory.getRDFLiteralFunctionalTerm(objV, type);
+			ImmutableTerm obj = termFactory.getRDFLiteralFunctionalTerm(objV, typeIRI);
 			
 			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
 		}

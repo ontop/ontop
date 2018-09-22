@@ -137,4 +137,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     public DBTermType getDBDoubleType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.DOUBLE));
     }
+
+    @Override
+    public DBTermType getAbstractRootDBType() {
+        return sqlTypeMap.get(ABSTRACT_DB_TYPE_STR);
+    }
 }
