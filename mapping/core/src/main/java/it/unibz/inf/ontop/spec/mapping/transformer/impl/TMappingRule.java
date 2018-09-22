@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.ArrayList;
@@ -27,9 +26,9 @@ public class TMappingRule {
 	private final List<Function> databaseAtoms;	
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
-	private final List<List<Function>> filterAtoms;	  
+	private final List<List<Function>> filterAtoms;
+
 	private final CQContainmentCheckUnderLIDs cqc;
-	private final boolean isClass;
 
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
@@ -53,12 +52,11 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, boolean isClass, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
 						TermFactory termFactory) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.isClass = isClass;
 
 		List<Function> filters = new ArrayList<>(body.size());
 		
@@ -117,18 +115,16 @@ public class TMappingRule {
 		this.filterAtoms = filterAtoms;
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.isClass = baseRule.isClass();
 
 		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule, boolean isClass, DatalogFactory datalogFactory, TermFactory termFactory) {
+	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
-		this.isClass = isClass;
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));
 		
@@ -243,9 +239,5 @@ public class TMappingRule {
 	@Override 
 	public String toString() {
 		return head + " <- " + databaseAtoms + " AND " + filterAtoms;
-	}
-
-	public boolean isClass() {
-		return isClass;
 	}
 }
