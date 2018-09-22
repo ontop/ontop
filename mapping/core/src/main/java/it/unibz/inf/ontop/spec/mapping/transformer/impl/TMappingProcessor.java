@@ -57,7 +57,7 @@ public class TMappingProcessor {
 
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
 
-	private class TMappingIndexEntry implements Iterable<TMappingRule> {
+	private class TMappingIndexEntry  {
 		private final List<TMappingRule> rules = new LinkedList<>();
 
 		public TMappingIndexEntry copyOf(IRI newPredicate) {
@@ -67,15 +67,14 @@ public class TMappingProcessor {
 				Function newHead = rule.isClass()
 						? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
 						: atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
-				TMappingRule newRule = new TMappingRule(newHead, rule, datalogFactory, termFactory, rule.isClass());
+				TMappingRule newRule = new TMappingRule(newHead, rule, rule.isClass(), datalogFactory, termFactory);
 				copy.rules.add(newRule);
 			}
 			return copy;
 		}
 
-		@Override
-		public Iterator<TMappingRule> iterator() {
-			return rules.iterator();
+		public ImmutableList<TMappingRule> getRules() {
+			return ImmutableList.copyOf(rules);
 		}
 
 		/***
@@ -303,8 +302,7 @@ public class TMappingProcessor {
 								? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
 								: atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
 
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, false);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, false, datalogFactory, termFactory);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -358,8 +356,7 @@ public class TMappingProcessor {
 
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate,
 								terms.get(2));
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, false);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, false, datalogFactory, termFactory);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -486,8 +483,7 @@ public class TMappingProcessor {
 					for (TMappingRule childmapping : childmappings) {
 						List<Term> terms = childmapping.getHeadTerms();
 						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(arg), currentPredicate);
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, datalogFactory,
-								termFactory, true);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, true, datalogFactory, termFactory);
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -500,21 +496,17 @@ public class TMappingProcessor {
 			}
 		}
 
+		System.out.println("EXTRAS: " + originalMappingIndex.entrySet().stream()
+                .filter(e -> !mappingIndex.containsKey(e.getKey()))
+        .map(e -> e.getKey()).collect(ImmutableCollectors.toList()));
 
-		List<CQIE> tmappingsProgram0 = new LinkedList<>();
-		for (Entry<IRI, TMappingIndexEntry> entry : mappingIndex.entrySet()) {
-			for (TMappingRule m : entry.getValue()) {
-				CQIE cq = m.asCQIE();
-				tmappingsProgram0.add(cq);
-			}
-		}
-
-		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
-		        tmappingsProgram0.stream(),
-                originalMappingIndex.entrySet().stream()
-				.filter(e -> !mappingIndex.containsKey(e.getKey()))
-				.flatMap(e -> e.getValue().stream())
-				.map(m -> m.asCQIE()))
+		ImmutableList<CQIE> tmappingsProgram =
+                Stream.concat(originalMappingIndex.entrySet().stream()
+				                .filter(e -> !mappingIndex.containsKey(e.getKey()))
+				                .flatMap(e -> e.getValue().stream()),
+                        mappingIndex.values().stream()
+                                .flatMap(m -> m.getRules().stream()))
+				.map(m -> m.asCQIE())
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
 
@@ -557,7 +549,7 @@ public class TMappingProcessor {
 	}
 
 
-	private class RDFPredicate {
+	private static class RDFPredicate {
 		private final boolean isClass;
 		private final IRI iri;
 

@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /***
- * Splits a given {@link mapping} into builtin predicates ({@link conditions})
- * and all other atoms ({@link stripped}), which are checked for containment 
+ * Splits a given mapping into builtin predicates (conditions)
+ * and all other atoms (stripped), which are checked for containment
  * by the TMapping construction algorithm.
  */
 
@@ -29,13 +29,13 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;	  
 	private final CQContainmentCheckUnderLIDs cqc;
-	private final DatalogFactory datalogFactory;
-	private final TermFactory termFactory;
 	private final boolean isClass;
 
+	private final DatalogFactory datalogFactory;
+	private final TermFactory termFactory;
 
 	/***
-	 * Given a mappings in {@link currentMapping}, this method will
+	 * Given a mappings in currentMapping, this method will
 	 * return a new mappings in which no constants appear in the body of
 	 * database predicates. This is done by replacing the constant occurrence
 	 * with a fresh variable, and adding a new equality condition to the body of
@@ -124,8 +124,7 @@ public class TMappingRule {
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory,
-				 boolean isClass) {
+	TMappingRule(Function head, TMappingRule baseRule, boolean isClass, DatalogFactory datalogFactory, TermFactory termFactory) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
 		this.datalogFactory = datalogFactory;
 		this.termFactory = termFactory;
