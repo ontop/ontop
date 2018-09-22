@@ -38,7 +38,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
-                                   Mapping2DatalogConverter mapping2DatalogConverter,
                                    TermFactory termFactory,
                                    TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities) {

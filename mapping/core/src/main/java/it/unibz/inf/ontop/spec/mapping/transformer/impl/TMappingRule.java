@@ -141,11 +141,6 @@ public class TMappingRule {
 		return newlist;
 	}
 	
-	@Deprecated // TEST ONLY
-	Function getHead() {
-		return head;
-	}
-	
 	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
 		return cqc.computeHomomorphsim(stripped, other.stripped);
 	}
@@ -200,17 +195,15 @@ public class TMappingRule {
 		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
 	}
 	
-	public List<Term> getHeadTerms() {
-		return head.getTerms();
+    public Function getHead() {
+        return head;
+    }
+
+    public List<Function> getDatabaseAtoms() {
+		return databaseAtoms;
 	}
 	
-	public int databaseAtomsSize() {
-		return databaseAtoms.size();
-	}
-	
-	public List<List<Function>> getConditions() {
-		return filterAtoms;
-	}
+	public List<List<Function>> getConditions() { return filterAtoms; }
 	
 	@Override
 	public int hashCode() {

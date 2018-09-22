@@ -151,11 +151,6 @@ public class TMappingProcessor {
 
         ImmutableMap<IRI, ImmutableList<TMappingRule>> index = builder.build();
 
-		if (originalMappingIndex.asMap().entrySet().stream()
-                .anyMatch(e -> !index.containsKey(e.getKey())))
-		    System.out.println("EXTRAS: " + (originalMappingIndex.asMap().entrySet().stream()
-                    .filter(e -> !index.containsKey(e.getKey())).collect(ImmutableCollectors.toList())));
-
 		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
                 index.values().stream(),
                 originalMappingIndex.asMap().entrySet().stream()
@@ -191,7 +186,7 @@ public class TMappingProcessor {
         return originalMappingIndex.get(childPredicate).stream()
                 .map(childmapping -> {
                     Function newMappingHead = atomFactory.getMutableTripleHeadAtom(
-                            childmapping.getHeadTerms().get(arg), currentPredicate);
+                            childmapping.getHead().getTerm(arg), currentPredicate);
                     return new TMappingRule(newMappingHead, childmapping);
                 });
     }
@@ -199,7 +194,7 @@ public class TMappingProcessor {
     private Stream<TMappingRule> getRulesFromSubObjectProperties(IRI currentPredicate, ObjectPropertyExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
         return originalMappingIndex.get(child.getIRI()).stream()
                 .map(childmapping -> {
-                    List<Term> terms = childmapping.getHeadTerms();
+                    List<Term> terms = childmapping.getHead().getTerms();
                     Function newMappingHead = !child.isInverse()
                             ? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
                             : atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
@@ -211,7 +206,7 @@ public class TMappingProcessor {
     private Stream<TMappingRule> getRulesFromSubDataProperties(IRI currentPredicate, DataPropertyExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
         return originalMappingIndex.get(child.getIRI()).stream()
                 .map(childmapping -> {
-                    List<Term> terms = childmapping.getHeadTerms();
+                    List<Term> terms = childmapping.getHead().getTerms();
                     Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2));
                     return new TMappingRule(newMappingHead, childmapping);
                 });
@@ -236,14 +231,14 @@ public class TMappingProcessor {
     private ImmutableList<TMappingRule> getPropertyTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
         return original.stream()
                 .map(rule -> new TMappingRule(
-                        atomFactory.getMutableTripleHeadAtom(rule.getHeadTerms().get(0), newPredicate, rule.getHeadTerms().get(2)), rule))
+                        atomFactory.getMutableTripleHeadAtom(rule.getHead().getTerm(0), newPredicate, rule.getHead().getTerm(2)), rule))
                 .collect(ImmutableCollectors.toList());
     }
 
     private ImmutableList<TMappingRule> getClassTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
         return original.stream()
                 .map(rule -> new TMappingRule(
-                        atomFactory.getMutableTripleHeadAtom(rule.getHeadTerms().get(0), newPredicate), rule))
+                        atomFactory.getMutableTripleHeadAtom(rule.getHead().getTerm(0), newPredicate), rule))
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -324,7 +319,7 @@ public class TMappingProcessor {
 
             Substitution toNewRule = newRule.computeHomomorphsim(currentRule, cqc);
             if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
-                if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
+                if (newRule.getDatabaseAtoms().size() < currentRule.getDatabaseAtoms().size()) {
                     couldIgnore = true;
                 }
                 else {
