@@ -538,7 +538,8 @@ public class TMappingProcessor {
 				.filter(e -> !mappingIndex.containsKey(e.getKey()))
 				.flatMap(e -> e.getValue().stream())
 				.map(m -> m.asCQIE()))
-				.collect(ImmutableCollectors.toList());
+				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
+		        .collect(ImmutableCollectors.toList());
 
 
 		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, metadata);
