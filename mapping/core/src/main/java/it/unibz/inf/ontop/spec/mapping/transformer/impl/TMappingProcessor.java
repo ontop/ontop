@@ -496,9 +496,12 @@ public class TMappingProcessor {
 			}
 		}
 
-		System.out.println("EXTRAS: " + originalMappingIndex.entrySet().stream()
-                .filter(e -> !mappingIndex.containsKey(e.getKey()))
-        .map(e -> e.getKey()).collect(ImmutableCollectors.toList()));
+		if (originalMappingIndex.entrySet().stream()
+                .anyMatch(e -> !mappingIndex.containsKey(e.getKey())))
+		    System.out.println("EXTRAS: " + originalMappingIndex.entrySet().stream()
+                    .filter(e -> !mappingIndex.containsKey(e.getKey()))
+                    .map(e -> e.getKey())
+                    .collect(ImmutableCollectors.toList()));
 
 		ImmutableList<CQIE> tmappingsProgram =
                 Stream.concat(originalMappingIndex.entrySet().stream()
