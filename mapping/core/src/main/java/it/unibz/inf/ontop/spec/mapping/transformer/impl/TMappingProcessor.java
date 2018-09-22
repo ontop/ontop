@@ -496,23 +496,11 @@ public class TMappingProcessor {
 			}
 		}
 
-		if (originalMappingIndex.entrySet().stream()
-                .anyMatch(e -> !mappingIndex.containsKey(e.getKey())))
-		    System.out.println("EXTRAS: " + originalMappingIndex.entrySet().stream()
-                    .filter(e -> !mappingIndex.containsKey(e.getKey()))
-                    .map(e -> e.getKey())
-                    .collect(ImmutableCollectors.toList()));
-
-		ImmutableList<CQIE> tmappingsProgram =
-                Stream.concat(originalMappingIndex.entrySet().stream()
-				                .filter(e -> !mappingIndex.containsKey(e.getKey()))
-				                .flatMap(e -> e.getValue().stream()),
-                        mappingIndex.values().stream()
-                                .flatMap(m -> m.getRules().stream()))
+		ImmutableList<CQIE> tmappingsProgram = mappingIndex.values().stream()
+                .flatMap(m -> m.getRules().stream())
 				.map(m -> m.asCQIE())
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
-
 
 		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
