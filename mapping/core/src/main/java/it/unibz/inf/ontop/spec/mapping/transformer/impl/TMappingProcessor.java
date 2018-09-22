@@ -49,6 +49,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class TMappingProcessor {
 
@@ -441,40 +442,10 @@ public class TMappingProcessor {
 			IRI currentPredicate = representative.getIRI();
 			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(); //getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<ClassExpression> descendants : reasoner.classesDAG().getSub(classSet)) {
-				for (ClassExpression childDescription : descendants) {
-
-                    /* adding the mappings of the children as own mappings, the new
-					 * mappings. There are three cases, when the child is a named
-					 * class, or when it is an \exists P or \exists \inv P. 
-					 */
-					
-					final int arg;
-					final IRI childPredicate;
-					if (childDescription instanceof OClass) {
-						childPredicate = ((OClass) childDescription).getIRI();
-						arg = 0;
-					}
-					else if (childDescription instanceof ObjectSomeValuesFrom) {
-						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
-						childPredicate = some.getIRI();
-						arg = some.isInverse() ? 2 : 0;
-					} 
-					else {
-						assert (childDescription instanceof DataSomeValuesFrom);
-						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
-						childPredicate = some.getIRI();
-						arg = 0; // can never be an inverse
-					} 
-					
-					for (TMappingRule childmapping : originalMappingIndex.get(childPredicate)) {
-						List<Term> terms = childmapping.getHeadTerms();
-						Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(arg), currentPredicate);
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping, true, datalogFactory, termFactory);
-						currentNodeMappings.mergeMappingsWithCQC(newmapping);
-					}
-				}
-			}
+            reasoner.classesDAG().getSub(classSet).stream()
+                    .flatMap(descendants -> descendants.getMembers().stream())
+                    .flatMap(child -> getRulesFromSubclasses(currentPredicate, child, originalMappingIndex))
+                    .forEach(newmapping -> currentNodeMappings.mergeMappingsWithCQC(newmapping));
 
 			/* Setting up mappings for the equivalent classes */
 			for (ClassExpression equiv : classSet) {
@@ -491,6 +462,33 @@ public class TMappingProcessor {
 
 		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
+
+	private Stream<TMappingRule> getRulesFromSubclasses(IRI currentPredicate, ClassExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
+        final int arg;
+        final IRI childPredicate;
+        if (child instanceof OClass) {
+            childPredicate = ((OClass) child).getIRI();
+            arg = 0;
+        }
+        else if (child instanceof ObjectSomeValuesFrom) {
+            ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
+            childPredicate = some.getIRI();
+            arg = some.isInverse() ? 2 : 0;
+        }
+        else {
+            DataPropertyExpression some = ((DataSomeValuesFrom) child).getProperty();
+            childPredicate = some.getIRI();
+            arg = 0; // can never be an inverse
+        }
+
+        return originalMappingIndex.get(childPredicate).stream()
+                .map(childmapping -> {
+                        Function newMappingHead = atomFactory.getMutableTripleHeadAtom(
+                                childmapping.getHeadTerms().get(arg), currentPredicate);
+                        return new TMappingRule(newMappingHead, childmapping, true,
+                                datalogFactory, termFactory);
+                });
+    }
 
 	private RDFPredicate extractRDFPredicate(CQIE mappingAssertion) {
 		Function headAtom = mappingAssertion.getHead();
