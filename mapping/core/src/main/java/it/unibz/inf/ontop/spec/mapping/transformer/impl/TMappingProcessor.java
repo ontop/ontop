@@ -314,6 +314,7 @@ public class TMappingProcessor {
 
 		ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = originalMappingIndexBuilder.build();
 
+        ImmutableMap.Builder<IRI, TMappingIndexEntry> builder = ImmutableMap.builder();
 
         for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
             ObjectPropertyExpression representative = propertySet.getRepresentative();
@@ -331,7 +332,7 @@ public class TMappingProcessor {
 
             for (ObjectPropertyExpression equivProperty : propertySet)
                 if (!equivProperty.isInverse())
-                    mappingIndex.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
+                    builder.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
         } // object properties loop ended
 
         for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
@@ -347,7 +348,7 @@ public class TMappingProcessor {
                         .collect(ImmutableCollectors.toList()));
 
             for (DataPropertyExpression equivProperty : propertySet)
-                mappingIndex.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
+                builder.put(equivProperty.getIRI(), new TMappingIndexEntry(currentNodeMappings, equivProperty.getIRI()));
         } // data properties loop ended
 
 		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
@@ -366,12 +367,19 @@ public class TMappingProcessor {
 
 			for (ClassExpression equiv : classSet)
 				if (equiv instanceof OClass)
-                    mappingIndex.put(((OClass) equiv).getIRI(), new TMappingIndexEntry(currentNodeMappings, ((OClass) equiv).getIRI()));
+                    builder.put(((OClass) equiv).getIRI(), new TMappingIndexEntry(currentNodeMappings, ((OClass) equiv).getIRI()));
 		} // class loop end
 
-		ImmutableList<CQIE> tmappingsProgram = mappingIndex.values().stream()
-                .flatMap(m -> m.getRules().stream())
-				.map(m -> m.asCQIE())
+        ImmutableMap<IRI, TMappingIndexEntry> index = builder.build();
+
+		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
+                index.values().stream()
+                        .flatMap(m -> m.getRules().stream())
+				        .map(m -> m.asCQIE()),
+                mappingIndex.entrySet().stream()
+                        .filter(e -> !index.containsKey(e.getKey()))
+                        .flatMap(e -> e.getValue().getRules().stream())
+                        .map(m -> m.asCQIE()))
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
 
