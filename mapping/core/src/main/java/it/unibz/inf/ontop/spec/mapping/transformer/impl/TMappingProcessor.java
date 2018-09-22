@@ -60,7 +60,7 @@ public class TMappingProcessor {
         public TMappingIndexEntry() {
         }
 
-		public TMappingIndexEntry(ImmutableList<TMappingRule> rules) {
+		public TMappingIndexEntry(Collection<TMappingRule> rules) {
 		    rules.forEach(r -> mergeMappingsWithCQC(r));
         }
 
@@ -376,9 +376,10 @@ public class TMappingProcessor {
                 index.values().stream()
                         .flatMap(m -> m.getRules().stream())
 				        .map(m -> m.asCQIE()),
-                mappingIndex.entrySet().stream()
+                originalMappingIndex.asMap().entrySet().stream()
                         .filter(e -> !index.containsKey(e.getKey()))
-                        .flatMap(e -> e.getValue().getRules().stream())
+                        .map(e -> new TMappingIndexEntry(e.getValue()))
+                        .flatMap(m -> m.getRules().stream())
                         .map(m -> m.asCQIE()))
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
