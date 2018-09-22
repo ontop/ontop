@@ -283,7 +283,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			IRI currentPredicate = representative.getIRI();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(); // getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ObjectPropertyExpression> descendants : dag.getSub(propertySet)) {
 				for(ObjectPropertyExpression childproperty : descendants) {
@@ -333,7 +333,7 @@ public class TMappingProcessor {
 			}
 			/* Getting the current node mappings */
 			IRI currentPredicate = representative.getIRI();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
+			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(); // getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
 				for(DataPropertyExpression childproperty : descendants) {
@@ -403,7 +403,7 @@ public class TMappingProcessor {
             originalMappingIndexBuilder.put(ruleIndex, rule);
 
             // probably required for vocabulary terms that are not in the ontology
-			TMappingIndexEntry set = getMappings(mappingIndex, ruleIndex);
+			TMappingIndexEntry set = getMappings0(mappingIndex, ruleIndex);
 			set.mergeMappingsWithCQC(rule);
 		}
 
@@ -439,7 +439,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			IRI currentPredicate = representative.getIRI();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
+			TMappingIndexEntry currentNodeMappings = new TMappingIndexEntry(); //getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<ClassExpression> descendants : reasoner.classesDAG().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
@@ -512,7 +512,7 @@ public class TMappingProcessor {
 	}
 
 
-	private TMappingIndexEntry getMappings(Map<IRI, TMappingIndexEntry> mappingIndex, IRI current) {
+	private TMappingIndexEntry getMappings0(Map<IRI, TMappingIndexEntry> mappingIndex, IRI current) {
 		
 		TMappingIndexEntry currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {
