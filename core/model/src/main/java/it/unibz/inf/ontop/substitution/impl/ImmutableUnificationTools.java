@@ -10,15 +10,11 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * Tools for new-gen immutable unifying substitutions.
@@ -26,23 +22,19 @@ import java.util.stream.IntStream;
 @Singleton
 public class ImmutableUnificationTools {
 
-    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
     private final ImmutabilityTools immutabilityTools;
-    private final TypeFactory typeFactory;
 
     @Inject
-    private ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory,
+    private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
                                       ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
-                                      ImmutabilityTools immutabilityTools, TypeFactory typeFactory) {
-        this.termFactory = termFactory;
+                                      ImmutabilityTools immutabilityTools) {
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
         this.immutabilityTools = immutabilityTools;
-        this.typeFactory = typeFactory;
     }
 
     /**
@@ -158,7 +150,7 @@ public class ImmutableUnificationTools {
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
         // TODO: avoid use it
-        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size(), typeFactory);
+        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size());
 
         Substitution mutableSubstitution = unifierUtilities.getMGU(
                 immutabilityTools.convertToMutableFunction(functionSymbol, args1),
@@ -439,17 +431,8 @@ public class ImmutableUnificationTools {
      */
     private static class TemporaryFunctionSymbol extends PredicateImpl {
 
-        private TemporaryFunctionSymbol(int arity, TypeFactory typeFactory) {
-            super("pred", createExpectedBaseTermTypeList(arity, typeFactory));
-        }
-
-        private static ImmutableList<TermType> createExpectedBaseTermTypeList(int arity, TypeFactory typeFactory) {
-            TermType rootTermType = typeFactory.getAbstractAtomicTermType();
-
-            return IntStream.range(0, arity)
-                    .boxed()
-                    .map(i -> rootTermType)
-                    .collect(ImmutableCollectors.toList());
+        private TemporaryFunctionSymbol(int arity) {
+            super("pred", arity);
         }
     }
 

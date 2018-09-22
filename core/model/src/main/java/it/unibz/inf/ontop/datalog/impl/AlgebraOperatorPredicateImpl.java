@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.datalog.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
 public class AlgebraOperatorPredicateImpl extends PredicateImpl implements AlgebraOperatorPredicate {
 
@@ -35,9 +33,8 @@ public class AlgebraOperatorPredicateImpl extends PredicateImpl implements Algeb
 	 * @param name
 	 *            The predicate name.
 	 */
-	protected AlgebraOperatorPredicateImpl(String name, TypeFactory typeFactory) {
-		super(name,  ImmutableList.of(typeFactory.getAbstractAtomicTermType(),
-				typeFactory.getAbstractAtomicTermType()));
+	protected AlgebraOperatorPredicateImpl(String name) {
+		super(name,  2);
 	}
 
 

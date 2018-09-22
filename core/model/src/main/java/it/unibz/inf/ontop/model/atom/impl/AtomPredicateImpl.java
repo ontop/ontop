@@ -11,6 +11,6 @@ import it.unibz.inf.ontop.model.type.TermType;
 public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
 
     protected AtomPredicateImpl(String name, ImmutableList<TermType> expectedBaseTypes) {
-        super(name, expectedBaseTypes);
+        super(name, expectedBaseTypes.size());
     }
 }
