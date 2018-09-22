@@ -1,11 +1,14 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,10 +26,10 @@ import java.util.Map;
 public class TMappingRule {
 	
 	private final Function head;
-	private final List<Function> databaseAtoms;	
+	private final ImmutableList<Function> databaseAtoms;
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
-	private final List<List<Function>> filterAtoms;
+	private final ImmutableList<ImmutableList<Function>> filterAtoms;
 
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
@@ -54,9 +57,8 @@ public class TMappingRule {
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
 
-		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
-
-		List<Function> filters = new ArrayList<>(body.size());
+		ImmutableList.Builder<Function> filters = ImmutableList.builder();
+		ImmutableList.Builder<Function> dbs = ImmutableList.builder();
 		
 		for (Function atom : body) {
 			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
@@ -65,23 +67,23 @@ public class TMappingRule {
 			}
 			else {
 				// database atom, we need to replace all constants by filters
-				databaseAtoms.add(replaceConstants(atom, filters));
+				dbs.add(replaceConstants(atom, filters));
 			}
 		}
-		if (filters.isEmpty()) 
-			this.filterAtoms = Collections.emptyList();
-		else 
-			this.filterAtoms = Collections.singletonList(filters);
+        this.databaseAtoms = dbs.build();
+
+        this.head = replaceConstants(head, filters);
+
+		ImmutableList<Function> f = filters.build();
+		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
 		
-		this.head = replaceConstants(head, filters);
 		this.stripped = this.datalogFactory.getCQIE(this.head, databaseAtoms);
 	}
 
 	
-	private int freshVarCount = 0;
 	private final Map<Constant, Variable> valueMap = new HashMap<>();
 	
-	private Function replaceConstants(Function a, List<Function> filters) {
+	private Function replaceConstants(Function a, ImmutableList.Builder<Function> filters) {
 		Function atom = (Function)a.clone();
 		
 		for (int i = 0; i < atom.getTerms().size(); i++) {
@@ -92,8 +94,7 @@ public class TMappingRule {
 				Constant c = (Constant)term;
 				Variable var = valueMap.get(c);
 				if (var == null) {
-					freshVarCount++;
-					var = termFactory.getVariable("?FreshVar" + freshVarCount);
+					var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
 					valueMap.put(c, var);
 					filters.add(termFactory.getFunctionEQ(var, c));
 				}
@@ -104,11 +105,13 @@ public class TMappingRule {
 		return atom;
 	}
 	
-	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms) {
+	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<Function>> filterAtoms) {
         this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
 
-		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
+		this.databaseAtoms = baseRule.databaseAtoms.stream()
+                .map(atom -> (Function)atom.clone())
+                .collect(ImmutableCollectors.toList());
 		this.head = (Function)baseRule.head.clone();
 
 		this.filterAtoms = filterAtoms;
@@ -121,25 +124,20 @@ public class TMappingRule {
         this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
 
-		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
-		for (List<Function> baseList: baseRule.filterAtoms)
-			filterAtoms.add(cloneList(baseList));
-		
-		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
+		this.databaseAtoms = baseRule.databaseAtoms.stream()
+                .map(atom -> (Function)atom.clone())
+                .collect(ImmutableCollectors.toList());
 		this.head = (Function)head.clone();
-		
-		this.stripped = datalogFactory.getCQIE(head, databaseAtoms);
+
+        this.filterAtoms = baseRule.filterAtoms.stream()
+                .map(list -> list.stream()
+                        .map(atom -> (Function)atom.clone())
+                        .collect(ImmutableCollectors.toList()))
+                .collect(ImmutableCollectors.toList());
+
+        this.stripped = datalogFactory.getCQIE(this.head, databaseAtoms);
 	}
 	
-	
-	public static List<Function> cloneList(List<Function> list) {
-		List<Function> newlist = new ArrayList<>(list.size());
-		for (Function atom : list) {
-			Function clone = (Function)atom.clone();
-			newlist.add(clone);	
-		}
-		return newlist;
-	}
 	
 	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
 		return cqc.computeHomomorphsim(stripped, other.stripped);
@@ -151,7 +149,7 @@ public class TMappingRule {
 			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
 			combinedBody.addAll(databaseAtoms);
 			
-			Iterator<List<Function>> iterOR = filterAtoms.iterator();
+			Iterator<ImmutableList<Function>> iterOR = filterAtoms.iterator();
 			List<Function> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
 			Function mergedConditions = getMergedByAND(list);
 			while (iterOR.hasNext()) {
@@ -199,11 +197,11 @@ public class TMappingRule {
         return head;
     }
 
-    public List<Function> getDatabaseAtoms() {
+    public ImmutableList<Function> getDatabaseAtoms() {
 		return databaseAtoms;
 	}
 	
-	public List<List<Function>> getConditions() { return filterAtoms; }
+	public ImmutableList<ImmutableList<Function>> getConditions() { return filterAtoms; }
 	
 	@Override
 	public int hashCode() {

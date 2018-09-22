@@ -48,6 +48,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TMappingProcessor {
@@ -344,49 +345,28 @@ public class TMappingProcessor {
             if ((toNewRule != null) && (fromNewRule != null)) {
                 // We found an equivalence, we will try to merge the conditions of
                 // newRule into the currentRule
-                //System.err.println("\n" + newRule + "\n v \n" + currentRule + "\n");
-
-                // Here we can merge conditions of the new query with the one we have
-                // just found
+                // Here we can merge conditions of the new query with the one we have just found
                 // new map always has just one set of filters  !!
-                List<Function> newconditions = TMappingRule.cloneList(newRule.getConditions().get(0));
-                for (Function f : newconditions)
-                    substitutionUtilities.applySubstitution(f, fromNewRule);
+                ImmutableList<Function> newconditions = newRule.getConditions().get(0).stream()
+                        .map(atom -> applySubstitution(atom, fromNewRule))
+                        .collect(ImmutableCollectors.toList());
 
-                List<List<Function>> existingconditions = currentRule.getConditions();
-                List<List<Function>> filterAtoms = new ArrayList<>(existingconditions.size() + 1);
+                ImmutableList.Builder<ImmutableList<Function>> filterAtoms = ImmutableList.builder();
 
-                for (List<Function> econd : existingconditions) {
-                    boolean found2 = true;
-                    for (Function ec : econd)
-                        if (!newconditions.contains(ec)) {
-                            found2 = false;
-                            break;
-                        }
+                for (ImmutableList<Function> econd : currentRule.getConditions()) {
                     // if each of the existing conditions is found then the new condition is redundant
-                    if (found2)
+                    if (newconditions.containsAll(econd))
                         return;
 
-                    boolean found = true;
-                    for (Function nc : newconditions)
-                        if (!econd.contains(nc)) {
-                            found = false;
-                            break;
-                        }
                     // if each of the new conditions is found among econd then the old condition is redundant
-                    if (found) {
-                        //System.err.println(econd + " contains " + newconditions);
-                    }
-                    else
-                        filterAtoms.add(TMappingRule.cloneList(econd));
+                    if (!econd.containsAll(newconditions))
+                        filterAtoms.add(econd);  // no need to clone
                 }
 
                 filterAtoms.add(newconditions);
+                newRule = new TMappingRule(currentRule, filterAtoms.build());
 
                 mappingIterator.remove();
-
-                newRule = new TMappingRule(currentRule, filterAtoms);
-
                 break;
             }
         }
@@ -399,14 +379,14 @@ public class TMappingProcessor {
         if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)
             return false;
 
-        List<Function> conjucntion1 = rule1.getConditions().get(0);
-        List<Function> conjunction2 = TMappingRule.cloneList(rule2.getConditions().get(0));
-        for (Function f : conjunction2)  {
-            substitutionUtilities.applySubstitution(f, toRule1);
-            if (!conjucntion1.contains(f))
-                return false;
-        }
-        return true;
+        return rule2.getConditions().get(0).stream()
+                .map(atom -> applySubstitution(atom, toRule1))
+                .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
     }
 
+    private Function applySubstitution(Function atom, Substitution sub) {
+        Function clone = (Function)atom.clone();
+        substitutionUtilities.applySubstitution(clone, sub);
+        return clone;
+    }
 }
