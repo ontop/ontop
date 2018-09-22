@@ -113,7 +113,7 @@ public class TMappingProcessor {
 
             propertySet.getMembers().stream()
                     .filter(p -> !p.isInverse())
-                    .forEach(p -> builder.put(p.getIRI(), getTMappingIndexEntry(currentNodeMappings, p.getIRI(), false)));
+                    .forEach(p -> builder.put(p.getIRI(), getPropertyTMappingIndexEntry(currentNodeMappings, p.getIRI())));
         } // object properties loop ended
 
         for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
@@ -127,7 +127,7 @@ public class TMappingProcessor {
                         .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex)), cqc);
 
             propertySet.getMembers().stream()
-                    .forEach(p -> builder.put(p.getIRI(), getTMappingIndexEntry(currentNodeMappings, p.getIRI(), false)));
+                    .forEach(p -> builder.put(p.getIRI(), getPropertyTMappingIndexEntry(currentNodeMappings, p.getIRI())));
         } // data properties loop ended
 
 		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
@@ -145,11 +145,16 @@ public class TMappingProcessor {
 
             classSet.getMembers().stream()
                     .filter(c -> c instanceof OClass)
-                    .map(c -> ((OClass)c))
-                    .forEach(c -> builder.put(c.getIRI(), getTMappingIndexEntry(currentNodeMappings, c.getIRI(), true)));
+                    .map(c -> (OClass)c)
+                    .forEach(c -> builder.put(c.getIRI(), getClassTMappingIndexEntry(currentNodeMappings, c.getIRI())));
 		} // class loop end
 
         ImmutableMap<IRI, ImmutableList<TMappingRule>> index = builder.build();
+
+		if (originalMappingIndex.asMap().entrySet().stream()
+                .anyMatch(e -> !index.containsKey(e.getKey())))
+		    System.out.println((originalMappingIndex.asMap().entrySet().stream()
+                    .filter(e -> !index.containsKey(e.getKey())).collect(ImmutableCollectors.toList())));
 
 		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
                 index.values().stream(),
@@ -228,15 +233,17 @@ public class TMappingProcessor {
 	}
 
 
-    private ImmutableList<TMappingRule> getTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate, boolean isClass) {
+    private ImmutableList<TMappingRule> getPropertyTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
         return original.stream()
-                .map(rule -> {
-                    List<Term> headTerms = rule.getHeadTerms();
-                    Function newHead = isClass
-                            ? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate)
-                            : atomFactory.getMutableTripleHeadAtom(headTerms.get(0), newPredicate, headTerms.get(2));
-                    return new TMappingRule(newHead, rule);
-                })
+                .map(rule -> new TMappingRule(
+                        atomFactory.getMutableTripleHeadAtom(rule.getHeadTerms().get(0), newPredicate, rule.getHeadTerms().get(2)), rule))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private ImmutableList<TMappingRule> getClassTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
+        return original.stream()
+                .map(rule -> new TMappingRule(
+                        atomFactory.getMutableTripleHeadAtom(rule.getHeadTerms().get(0), newPredicate), rule))
                 .collect(ImmutableCollectors.toList());
     }
 
