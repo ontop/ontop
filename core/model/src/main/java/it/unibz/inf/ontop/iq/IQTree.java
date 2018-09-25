@@ -21,6 +21,9 @@ public interface IQTree {
 
     ImmutableList<IQTree> getChildren();
 
+    /**
+     * Variables projected by the tree
+     */
     ImmutableSet<Variable> getVariables();
 
     IQTree acceptTransformer(IQTransformer transformer);
@@ -61,6 +64,9 @@ public interface IQTree {
      */
     IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution);
 
+    /**
+     * Variables present in the tree
+     */
     ImmutableSet<Variable> getKnownVariables();
 
     /**
