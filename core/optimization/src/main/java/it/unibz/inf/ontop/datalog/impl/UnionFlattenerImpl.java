@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -25,7 +25,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
 
-    private class TreeTransformer extends DefaultRecursiveIQTransformer {
+    private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
 
