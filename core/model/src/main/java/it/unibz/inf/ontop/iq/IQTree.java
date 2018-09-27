@@ -5,13 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Optional;
 
 
@@ -26,7 +24,7 @@ public interface IQTree {
      */
     ImmutableSet<Variable> getVariables();
 
-    IQTree acceptTransformer(IQTransformer transformer);
+    IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
 
     IQTree liftBinding(VariableGenerator variableGenerator);
 
