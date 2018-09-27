@@ -43,7 +43,7 @@ public class ChaseTools {
 
 
     public ImmutableSet<DataAtom> chaseAllAtoms(ImmutableList<DataAtom> atoms, Optional<?extends ImmutableCollection<ImmutableLinearInclusionDependency<AtomPredicate>>> dependencies) {
-            return (dependencies.isPresent()
+            return (!dependencies.isPresent()
                     ? atoms.stream()
                     : Stream.concat(atoms.stream(),
                     atoms.stream()
