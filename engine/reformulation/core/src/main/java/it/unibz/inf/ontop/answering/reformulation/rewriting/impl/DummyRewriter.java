@@ -77,6 +77,7 @@ public class DummyRewriter implements QueryRewriter {
                     ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(list.get(i).getProjectionAtom(), sigma);
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
+                            // TODO: careful with variables that occur only in atom j
                             if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
                                 list.remove(j);
                                 j--;

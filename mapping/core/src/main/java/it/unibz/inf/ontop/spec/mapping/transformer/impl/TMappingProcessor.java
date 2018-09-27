@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -79,6 +80,7 @@ public class TMappingProcessor {
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
     }
+
 
 	/**
 	 * constructs the TMappings using DAG
