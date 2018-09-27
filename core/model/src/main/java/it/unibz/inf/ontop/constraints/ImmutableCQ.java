@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting;
+package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.DataAtom;

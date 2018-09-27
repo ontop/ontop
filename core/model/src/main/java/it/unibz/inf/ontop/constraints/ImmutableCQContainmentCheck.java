@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting;
+package it.unibz.inf.ontop.constraints;
 
 import java.util.Iterator;
 import java.util.List;

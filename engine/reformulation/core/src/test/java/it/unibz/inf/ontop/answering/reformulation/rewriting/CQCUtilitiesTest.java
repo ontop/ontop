@@ -21,8 +21,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableCQSyntacticContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQSyntacticContainmentCheck;
+import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
@@ -107,7 +108,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, m)));
 
-		ImmutableCQContainmentCheckUnderLIDs cqcu = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+		ImmutableCQContainmentCheckUnderLIDs cqcu = new ImmutableCQContainmentCheckUnderLIDs(CHASE_TOOLS);
 
 		assertTrue(cqcu.isContainedIn(q6, q5));
 		assertTrue(cqcu.isContainedIn(q5, q6));
@@ -222,7 +223,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 			
 			assertTrue(cqc.isContainedIn(q1, q2));
 			assertFalse(cqc.isContainedIn(q2, q1));
@@ -241,7 +242,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 			
 			assertTrue(cqc.isContainedIn(q1, q2));
 			assertFalse(cqc.isContainedIn(q2, q1));
@@ -260,7 +261,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
 			assertTrue(cqc.isContainedIn(q1, q2));
 			assertFalse(cqc.isContainedIn(q2, q1));
@@ -279,7 +280,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 			
 			assertTrue(cqc.isContainedIn(q1, q2));
 			assertFalse(cqc.isContainedIn(q2, q1));
@@ -298,7 +299,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 			
 			assertTrue(cqc.isContainedIn(q1, q2));
 			assertFalse(cqc.isContainedIn(q2, q1));
@@ -321,7 +322,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -344,7 +345,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -367,7 +368,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -386,7 +387,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -409,7 +410,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -432,7 +433,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));
@@ -455,7 +456,7 @@ public class CQCUtilitiesTest {
             ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
                     ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS);
+            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox, false), CHASE_TOOLS);
 
             assertTrue(cqc.isContainedIn(q1, q2));
             assertFalse(cqc.isContainedIn(q2, q1));

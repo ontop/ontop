@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableHomomorphismUtilities;
+import it.unibz.inf.ontop.constraints.ChaseTools;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
@@ -38,6 +38,7 @@ public class ReformulationTestingTools {
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
+    public static final ChaseTools CHASE_TOOLS;
 
     public static final RDF RDF_FACTORY;
 
@@ -60,6 +61,7 @@ public class ReformulationTestingTools {
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
+        CHASE_TOOLS = injector.getInstance(ChaseTools.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();

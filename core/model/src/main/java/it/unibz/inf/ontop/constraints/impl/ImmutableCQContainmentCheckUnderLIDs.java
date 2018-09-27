@@ -1,40 +1,35 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
+package it.unibz.inf.ontop.constraints.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQContainmentCheck;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
-import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.constraints.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainmentCheck {
 
     private final Map<ImmutableList<DataAtom>, ImmutableSet<DataAtom>> chaseCache = new HashMap<>();
 
-    private final ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies;
+    private final Optional<ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>>> dependencies;
 
-    private final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
+    private final ChaseTools chaseTools;
 
     @Inject
     public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
-                                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools) {
-        this.dependencies = dependencies;
-        this.inclusionDependencyTools = inclusionDependencyTools;
+                                                ChaseTools chaseTools) {
+        this.dependencies = Optional.of(dependencies);
+        this.chaseTools = chaseTools;
     }
 
     @Inject
-    public ImmutableCQContainmentCheckUnderLIDs(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools) {
-        this.dependencies = null;
-        this.inclusionDependencyTools = inclusionDependencyTools;
+    public ImmutableCQContainmentCheckUnderLIDs(ChaseTools chaseTools) {
+        this.dependencies = Optional.empty();
+        this.chaseTools = chaseTools;
     }
 
     @Override
@@ -50,12 +45,7 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
     private ImmutableSet<DataAtom> getChase(ImmutableList<DataAtom> atoms) {
         ImmutableSet<DataAtom> result = chaseCache.get(atoms);
         if (result == null) {
-            result = ((dependencies == null)
-                        ? atoms.stream()
-                        : Stream.concat(atoms.stream(),
-                                atoms.stream()
-                                    .flatMap(a -> inclusionDependencyTools.chaseAtom(a, dependencies).stream())))
-                    .collect(ImmutableCollectors.toSet());
+            result = chaseTools.chaseAllAtoms(atoms, dependencies);
             chaseCache.put(atoms, result);
         }
         return result;

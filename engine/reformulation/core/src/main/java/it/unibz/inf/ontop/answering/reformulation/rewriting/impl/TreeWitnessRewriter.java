@@ -26,8 +26,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
+import it.unibz.inf.ontop.constraints.ChaseTools;
+import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -89,8 +91,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
+                                ChaseTools chaseTools,
                                 IQ2DatalogTranslator iqConverter) {
-        super(inclusionDependencyTools, iqFactory);
+        super(inclusionDependencyTools, chaseTools, iqFactory);
 
         this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
@@ -110,7 +113,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = reasoner;
 		super.setTBox(reasoner);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma(), inclusionDependencyTools);
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma(), chaseTools);
 
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
 		

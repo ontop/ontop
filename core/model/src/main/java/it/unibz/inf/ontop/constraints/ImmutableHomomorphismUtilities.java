@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
+package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

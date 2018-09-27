@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.constraints;
 
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;

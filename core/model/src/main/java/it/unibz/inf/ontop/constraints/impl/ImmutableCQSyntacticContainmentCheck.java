@@ -1,7 +1,7 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
+package it.unibz.inf.ontop.constraints.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.ImmutableCQ;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 
 public class ImmutableCQSyntacticContainmentCheck implements ImmutableCQContainmentCheck {
 
