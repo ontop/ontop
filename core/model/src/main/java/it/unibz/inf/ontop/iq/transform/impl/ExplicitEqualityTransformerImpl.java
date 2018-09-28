@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -38,10 +40,11 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     private final VariableGenerator variableGenerator;
     private final SubstitutionFactory substitutionFactory;
 
-    public ExplicitEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
+    @AssistedInject
+    public ExplicitEqualityTransformerImpl(@Assisted VariableGenerator variableGenerator,
+                                           IntermediateQueryFactory iqFactory,
                                            AtomFactory atomFactory,
                                            TermFactory termFactory,
-                                           VariableGenerator variableGenerator,
                                            SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;

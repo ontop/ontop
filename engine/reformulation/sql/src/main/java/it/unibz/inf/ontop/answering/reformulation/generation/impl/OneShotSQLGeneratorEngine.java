@@ -340,7 +340,7 @@ public class OneShotSQLGeneratorEngine {
 	private IQ normalizeIQ(IntermediateQuery intermediateQuery) {
 
 		// Trick for pushing down expressions under unions:
-		//   - there the context may be concrete enough for evaluations certain expressions
+		//   - there the context may be concrete enough for evaluating certain expressions
 		//   - useful for dealing with SPARQL EBVs for instance
 		IntermediateQuery pushedDownQuery = pushDownExpressionOptimizer.optimize(intermediateQuery);
 		log.debug("New query after pushing down the boolean expressions (temporary): \n" + pushedDownQuery);
