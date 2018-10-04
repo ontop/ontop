@@ -82,27 +82,19 @@ public class ImmutableHomomorphismUtilities {
 
     public static boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
 
-        if (from.isEmpty())
-            return true;
-
         // stack of states
         Stack<State> stack = new Stack<>();
-        State state = new State(map, new ArrayDeque<>(to));
+        State state = new State(map, to);
         ListIterator<DataAtom> iterator = from.listIterator();
-
-        while (true) {
+        while (iterator.hasNext()) {
             DataAtom currentAtom = iterator.next();
 
             while (!state.remainingAtomChoices.isEmpty()) {
                 Map<Variable, VariableOrGroundTerm> ext = getSomeHomomorphicExtension(state.homomorphism, currentAtom, state.remainingAtomChoices.remove());
                 if (ext != null) {
-                    // we reached the last atom
-                    if (!iterator.hasNext())
-                        return true;
-
                     stack.push(state);
                     // otherwise, save the partial homomorphism
-                    state = new State(ext, new ArrayDeque<>(to));
+                    state = new State(ext, to);
                     break;
                 }
             }
@@ -115,5 +107,7 @@ public class ImmutableHomomorphismUtilities {
                 iterator.previous();
             }
         }
+        // we reached the last atom
+        return true;
     }
 }
