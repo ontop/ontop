@@ -51,15 +51,6 @@ public class ImmutableHomomorphismUtilities {
         return true;
     }
 
-    private static Map<Variable, VariableOrGroundTerm> getSomeHomomorphicExtension(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
-        if (!from.getPredicate().equals(to.getPredicate()))
-            return null;
-
-        Map<Variable, VariableOrGroundTerm> extension = new HashMap<>(map);
-        return extendHomomorphism(extension, from.getArguments(), to.getArguments())
-                ? extension
-                : null;
-    }
 
     private static final class State {
         final Map<Variable, VariableOrGroundTerm> homomorphism;
@@ -89,22 +80,26 @@ public class ImmutableHomomorphismUtilities {
             return true;
 
         State state = new State(iterator.next(), map, to);
-        Stack<State> stack = new Stack<>();
+        Deque<State> stack = new ArrayDeque<>();
         while (true) {
             DataAtom candidate = state.remainingAtomChoices.poll();
             if (candidate != null) {
-                Map<Variable, VariableOrGroundTerm> ext = getSomeHomomorphicExtension(state.homomorphism, state.currentAtom, candidate);
-                if (ext != null) {
-                    if (!iterator.hasNext())  // reached the last atom
-                        return true;
+                if (state.currentAtom.getPredicate().equals(candidate.getPredicate())) {
+                    // create a copy because extendHomomorphism changes its first argument
+                    Map<Variable, VariableOrGroundTerm> ext = new HashMap<>(state.homomorphism);
+                    if (extendHomomorphism(ext, state.currentAtom.getArguments(), candidate.getArguments())) {
+                        if (!iterator.hasNext())  // reached the last atom
+                            return true;
 
-                    // save the partial homomorphism for the next iteration
-                    stack.push(state);
-                    state = new State(iterator.next(), ext, to);
+                        // save the partial homomorphism for the next iteration
+                        stack.push(state);
+                        state = new State(iterator.next(), ext, to);
+                    }
+
                 }
             }
             else {
-                if (stack.empty())  // checked all possible substitutions and found no match
+                if (stack.isEmpty())  // checked all possible substitutions and found no match
                     return false;
 
                 // backtracking: restore the state and move back
