@@ -35,6 +35,7 @@ public class ChaseTools {
     public ImmutableSet<DataAtom> chaseAtom(DataAtom atom, ImmutableCollection<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
         return dependencies.stream()
                 .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
+                        // TODO: generate fresh labelled nulls
                         .map(theta -> theta.applyToDataAtom(dependency.getHead())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

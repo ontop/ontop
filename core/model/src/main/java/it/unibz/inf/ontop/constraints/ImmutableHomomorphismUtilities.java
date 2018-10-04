@@ -10,11 +10,6 @@ import java.util.*;
 public class ImmutableHomomorphismUtilities {
 
 
-    private static boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
-        return from.getPredicate().equals(to.getPredicate())
-                && extendHomomorphism(map, from.getArguments(), to.getArguments());
-    }
-
     public static boolean extendHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
         int arity = from.size();
         if (arity != to.size())
@@ -56,6 +51,26 @@ public class ImmutableHomomorphismUtilities {
         return true;
     }
 
+    private static Map<Variable, VariableOrGroundTerm> getSomeHomomorphicExtension(Map<Variable, VariableOrGroundTerm> map, DataAtom from, DataAtom to) {
+        if (!from.getPredicate().equals(to.getPredicate()))
+            return null;
+
+        Map<Variable, VariableOrGroundTerm> extension = new HashMap<>(map);
+        return extendHomomorphism(extension, from.getArguments(), to.getArguments())
+                ? extension
+                : null;
+    }
+
+    private static final class State {
+        final Map<Variable, VariableOrGroundTerm> homomorphism;
+        final Queue<DataAtom> remainingAtomChoices;
+
+        State(Map<Variable, VariableOrGroundTerm> homomorphism, Collection<DataAtom> choices) {
+            this.homomorphism = homomorphism;
+            this.remainingAtomChoices = new ArrayDeque<>(choices);
+        }
+    }
+
     /**
      * Extends a given substitution that maps each atom in {@code from} to match at least one atom in {@code to}
      *
@@ -67,61 +82,38 @@ public class ImmutableHomomorphismUtilities {
 
     public static boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
 
-        int fromSize = from.size();
-        if (fromSize == 0)
-            return true; // Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(map)));
+        if (from.isEmpty())
+            return true;
 
-        Map<Variable, VariableOrGroundTerm> currentSubstitution = map;
+        // stack of states
+        Stack<State> stack = new Stack<>();
+        State state = new State(map, new ArrayDeque<>(to));
+        ListIterator<DataAtom> iterator = from.listIterator();
 
-        // stack of partial homomorphisms
-        Stack<Map<Variable, VariableOrGroundTerm>> sbStack = new Stack<>();
-        sbStack.push(currentSubstitution);
-        // set the capacity to reduce memory re-allocations
-        List<Stack<DataAtom>> choicesMap = new ArrayList<>(fromSize);
+        while (true) {
+            DataAtom currentAtom = iterator.next();
 
-        int currentAtomIdx = 0;
-        while (currentAtomIdx >= 0) {
-            DataAtom currentAtom = from.get(currentAtomIdx);
-
-            Stack<DataAtom> choices;
-            if (currentAtomIdx >= choicesMap.size()) {
-                // we have never reached this atom (this is lazy initialization)
-                // initializing the stack
-                choices = new Stack<>();
-                // add all choices for the current predicate symbol
-                choices.addAll(to);
-                choicesMap.add(currentAtomIdx, choices);
-            }
-            else
-                choices = choicesMap.get(currentAtomIdx);
-
-            boolean choiceMade = false;
-            while (!choices.isEmpty()) {
-                Map<Variable, VariableOrGroundTerm> s1 = new HashMap<>(currentSubstitution); // clone!
-                choiceMade = extendHomomorphism(s1, currentAtom, choices.pop());
-                if (choiceMade) {
+            while (!state.remainingAtomChoices.isEmpty()) {
+                Map<Variable, VariableOrGroundTerm> ext = getSomeHomomorphicExtension(state.homomorphism, currentAtom, state.remainingAtomChoices.remove());
+                if (ext != null) {
                     // we reached the last atom
-                    if (currentAtomIdx == fromSize - 1)
-                        return true; // Optional.of(substitutionFactory.getSubstitution(ImmutableMap.copyOf(s1)));
+                    if (!iterator.hasNext())
+                        return true;
 
+                    stack.push(state);
                     // otherwise, save the partial homomorphism
-                    sbStack.push(currentSubstitution);
-                    currentSubstitution = s1;
-                    currentAtomIdx++;  // move to the next atom
+                    state = new State(ext, new ArrayDeque<>(to));
                     break;
                 }
             }
-            if (!choiceMade) {
-                // backtracking
-                // restore all choices for the current predicate symbol
-                choices.addAll(to);
-                currentSubstitution = sbStack.pop();   // restore the partial homomorphism
-                currentAtomIdx--;   // move to the previous atom
+            if (state.remainingAtomChoices.isEmpty()) {
+                // checked all possible substitutions and have not found anything
+                if (stack.empty())
+                    return false;
+                // backtracking: restore the state and move back
+                state = stack.pop();
+                iterator.previous();
             }
         }
-
-        // checked all possible substitutions and have not found anything
-        return false; // Optional.empty();
     }
-
 }
