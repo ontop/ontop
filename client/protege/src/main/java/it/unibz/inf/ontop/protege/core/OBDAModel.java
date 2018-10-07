@@ -21,6 +21,8 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
+import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -466,5 +468,13 @@ public class OBDAModel {
 
     public JdbcTypeMapper getJDBCTypeMapper() {
         return jdbcTypeMapper;
+    }
+
+    public String getRenderedTargetQuery(ImmutableList<ImmutableFunctionalTerm> targetQuery) {
+        return TargetQueryRenderer.encode(targetQuery, prefixManager);
+    }
+
+    public String getRenderedSourceQuery(OBDASQLQuery sourceQuery) {
+        return SourceQueryRenderer.encode(sourceQuery);
     }
 }

@@ -54,7 +54,7 @@ import java.util.HashMap;
  * $s1 :p1 $o1; :p2 $o2, $o3 .
  * </pre>
  */
-class TurtleWriter {
+public class TurtleWriter {
 
 	private HashMap<String, ArrayList<String>> subjectToPredicates = new HashMap<String, ArrayList<String>>();
 	private HashMap<String, ArrayList<String>> predicateToObjects = new HashMap<String, ArrayList<String>>();
@@ -69,7 +69,7 @@ class TurtleWriter {
 	 * @param object
 	 *            The object term of the Function.
 	 */
-	void put(String subject, String predicate, String object) {
+	public void put(String subject, String predicate, String object) {
 		// Subject to Predicates map
 		ArrayList<String> predicateList = subjectToPredicates.get(subject);
 		if (predicateList == null) {
@@ -103,7 +103,7 @@ class TurtleWriter {
 	 * 
 	 * @return The Turtle short representation.
 	 */
-	String print() {
+	public String print() {
 		StringBuilder sb = new StringBuilder();
 		for (String subject : subjectToPredicates.keySet()) {
 			sb.append(subject);

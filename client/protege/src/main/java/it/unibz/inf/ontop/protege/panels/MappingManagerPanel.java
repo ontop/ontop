@@ -221,9 +221,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		dialog.setTitle("Edit Mapping");
 		dialog.setModal(true);
 
-		NewMappingDialogPanel panel = new NewMappingDialogPanel(apic, dialog, selectedSource);
-		panel.setMapping(mapping);
-		dialog.setContentPane(panel);
+		dialog.setContentPane(new NewMappingDialogPanel(apic, dialog, selectedSource, mapping));
 		dialog.setSize(600, 500);
 		dialog.setLocationRelativeTo(this);
 		dialog.setVisible(true);
