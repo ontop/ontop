@@ -20,14 +20,8 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 
 import javax.swing.*;
 import javax.swing.text.Style;
@@ -36,8 +30,6 @@ import javax.swing.text.StyledDocument;
 import java.awt.*;
 
 public class OBDAMappingListRenderer implements ListCellRenderer {
-
-	private PrefixManager prefixManager;
 	
 	private JTextPane mapTextPane;
 	private JTextPane trgQueryTextPane;
@@ -72,10 +64,11 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private JPanel mainPanel;
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
+	private OBDAModel obdaModel;
 
 	public OBDAMappingListRenderer(OBDAModel obdaModel) {
 
-		prefixManager = obdaModel.getMutablePrefixManager();
+		this.obdaModel = obdaModel;
 
 		trgQueryTextPane = new JTextPane();
 		painter = new QueryPainter(obdaModel, trgQueryTextPane);
@@ -314,8 +307,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 		preferredWidth = list.getParent().getParent().getWidth();
 
 		minTextHeight = this.plainFontHeight + 6;
-		Component c = prepareRenderer((SQLPPTriplesMap) value, isSelected);
-		return c;
+		return prepareRenderer((SQLPPTriplesMap) value, isSelected);
 	}
 
 	private Component prepareRenderer(SQLPPTriplesMap value, boolean isSelected) {
@@ -366,13 +358,9 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	}
 
 	private void prepareTextPanes(SQLPPTriplesMap value, boolean selected) {
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = value.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
- 		trgQueryTextPane.setText(trgQuery);
+ 		trgQueryTextPane.setText(obdaModel.getRenderedTargetQuery(value.getTargetAtoms()));
 
- 		OBDASQLQuery sourceQuery = (OBDASQLQuery) value.getSourceQuery();
-		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
-		srcQueryTextPane.setText(srcQuery);
+		srcQueryTextPane.setText(obdaModel.getRenderedSourceQuery(value.getSourceQuery()));
 		
 		mapTextPane.setText(value.getId());
 

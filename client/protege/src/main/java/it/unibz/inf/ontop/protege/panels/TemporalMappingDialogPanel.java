@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.panels;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,16 +20,11 @@ package it.unibz.inf.ontop.protege.panels;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.protege.core.TemporalOBDAModel;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,63 +45,72 @@ public class TemporalMappingDialogPanel extends JPanel {
     private final TemporalOBDAModel obdaModel;
     private final JDialog parent;
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private JButton btnTestQuery;
+    private JButton cmdCancel;
+    private JButton cmdInsertMapping;
+    private JScrollPane scrQueryResult;
+    private JTable tblQueryResult;
+    private JTextField txtMappingID;
+    private JTextPane txtSourceQuery;
+    private JTextPane txtTargetQuery;
+    private JTextField txtInterval;
+    private SQLPPTemporalTriplesMap mapping;
 
     TemporalMappingDialogPanel(TemporalOBDAModel obdaModel, JDialog parent) {
 
-		DialogUtils.installEscapeCloseOperation(parent);
-		this.obdaModel = obdaModel;
-		this.parent = parent;
+        DialogUtils.installEscapeCloseOperation(parent);
+        this.obdaModel = obdaModel;
+        this.parent = parent;
 
-		initComponents();
+        initComponents();
 
-		cmdInsertMapping.addActionListener(e -> insertMapping());
+        cmdInsertMapping.addActionListener(e -> insertMapping());
 
-		txtTargetQuery.addKeyListener(new TabKeyListener());
-		txtSourceQuery.addKeyListener(new TabKeyListener());
-		tblQueryResult.setFocusable(false);
+        txtTargetQuery.addKeyListener(new TabKeyListener());
+        txtSourceQuery.addKeyListener(new TabKeyListener());
+        tblQueryResult.setFocusable(false);
 
-		txtTargetQuery.addKeyListener(new CTRLEnterKeyListener());
-		txtSourceQuery.addKeyListener(new CTRLEnterKeyListener());
-		txtMappingID.addKeyListener(new CTRLEnterKeyListener());
+        txtTargetQuery.addKeyListener(new CTRLEnterKeyListener());
+        txtSourceQuery.addKeyListener(new CTRLEnterKeyListener());
+        txtMappingID.addKeyListener(new CTRLEnterKeyListener());
 
         btnTestQuery.setFocusable(true);
         Vector<Component> order = new Vector<>(8);
-		order.add(this.txtMappingID);
-		order.add(this.txtTargetQuery);
-		order.add(this.txtInterval);
-		order.add(this.txtSourceQuery);
+        order.add(this.txtMappingID);
+        order.add(this.txtTargetQuery);
+        order.add(this.txtInterval);
+        order.add(this.txtSourceQuery);
         order.add(this.btnTestQuery);
-		order.add(this.cmdInsertMapping);
-		order.add(this.cmdCancel);
-		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
-	}
+        order.add(this.cmdInsertMapping);
+        order.add(this.cmdCancel);
+        this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
+    }
 
-	private void insertMapping() {
-		releaseResultset();
+    private void insertMapping() {
+        releaseResultset();
 
-		final String targetQueryString = txtTargetQuery.getText();
-		final String sourceQueryString = txtSourceQuery.getText();
-		final String mappingId = txtMappingID.getText().trim();
-		final String interval = txtInterval.getText().trim();
+        final String targetQueryString = txtTargetQuery.getText();
+        final String sourceQueryString = txtSourceQuery.getText();
+        final String mappingId = txtMappingID.getText().trim();
+        final String interval = txtInterval.getText().trim();
 
-		if (mappingId.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (targetQueryString.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (sourceQueryString.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		if (interval.isEmpty()) {
-			JOptionPane.showMessageDialog(this, "ERROR: The interval cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+        if (mappingId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The ID cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (targetQueryString.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (sourceQueryString.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (interval.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "ERROR: The interval cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         try {
             if (obdaModel.insertMapping(mapping, mappingId, targetQueryString, sourceQueryString, interval)) {
                 parent.setVisible(false);
@@ -159,26 +163,6 @@ public class TemporalMappingDialogPanel extends JPanel {
         releaseResultset();
     }
 
-    private class CTRLEnterKeyListener implements KeyListener {
-        @Override
-        public void keyTyped(KeyEvent e) {
-            // NO-OP
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
-                insertMapping();
-            } else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
-                testQueryActionPerformed();
-            }
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-        }
-    }
-
     private void initComponents() {
         GridBagConstraints gridBagConstraints;
 
@@ -198,7 +182,7 @@ public class TemporalMappingDialogPanel extends JPanel {
         JSplitPane splitSQL = new JSplitPane();
         JPanel pnlSourceQueryEditor = new JPanel();
         JLabel lblInterval = new JLabel();
-		txtInterval = new JTextField();
+        txtInterval = new JTextField();
         JLabel lblSourceQuery = new JLabel();
         JScrollPane scrSourceQuery = new JScrollPane();
         txtSourceQuery = new JTextPane();
@@ -219,10 +203,10 @@ public class TemporalMappingDialogPanel extends JPanel {
         gridBagConstraints.insets = new Insets(8, 10, 8, 0);
         add(lblMappingID, gridBagConstraints);
 
-		lblInterval.setText("Interval:");
-		lblInterval.setFocusable(false);
-		gridBagConstraints.gridy = 1;
-		add(lblInterval, gridBagConstraints);
+        lblInterval.setText("Interval:");
+        lblInterval.setFocusable(false);
+        gridBagConstraints.gridy = 1;
+        add(lblInterval, gridBagConstraints);
 
         btnTestQuery.setIcon(IconLoader.getImageIcon("images/execute.png"));
         btnTestQuery.setMnemonic('t');
@@ -281,7 +265,7 @@ public class TemporalMappingDialogPanel extends JPanel {
         gridBagConstraints.insets = new Insets(8, 0, 8, 10);
         add(txtMappingID, gridBagConstraints);
 
-		gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 1;
         add(txtInterval, gridBagConstraints);
 
         splitTargetSource.setBorder(null);
@@ -365,39 +349,83 @@ public class TemporalMappingDialogPanel extends JPanel {
         getAccessibleContext().setAccessibleName("Mapping editor");
     }
 
-    private JButton cmdCancel;
-    private JButton cmdInsertMapping;
+    public void setID(String id) {
+        this.txtMappingID.setText(id);
+    }
 
-	private class ExecuteSQLQueryAction implements OBDAProgressListener {
+    @Override
+    public void finalize() {
+        releaseResultset();
+    }
+
+    /***
+     * Sets the current mapping to the input. Note, if the current mapping is
+     * set, this means that this dialog is "updating" a mapping, and not
+     * creating a new one.
+     */
+    public void setMapping(SQLPPTemporalTriplesMap mapping) {
+        this.mapping = mapping;
+
+        cmdInsertMapping.setText("Update");
+        txtMappingID.setText(mapping.getId());
+
+        txtSourceQuery.setText(obdaModel.getRenderedSourceQuery(mapping.getSourceQuery()));
+
+        txtTargetQuery.setText(obdaModel.getRenderedTargetQuery(mapping.getTargetAtoms()));
+
+        txtInterval.setText(mapping.getTemporalMappingInterval().toString());
+    }
+
+    private class CTRLEnterKeyListener implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent e) {
+            // NO-OP
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (cmdInsertMapping.isEnabled() && (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_ENTER)) {
+                insertMapping();
+            } else if ((e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_T)) {
+                testQueryActionPerformed();
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+    }
+
+    private class ExecuteSQLQueryAction implements OBDAProgressListener {
 
         final CountDownLatch latch;
-		Thread thread = null;
-		ResultSet result = null;
         final Statement statement = null;
-		private boolean isCancelled = false;
-		private boolean errorShown = false;
+        Thread thread = null;
+        ResultSet result = null;
+        private boolean isCancelled = false;
+        private boolean errorShown = false;
 
 
-		private ExecuteSQLQueryAction(CountDownLatch latch) {
-			this.latch = latch;
-		}
+        private ExecuteSQLQueryAction(CountDownLatch latch) {
+            this.latch = latch;
+        }
 
-		@Override
-		public void actionCanceled() throws SQLException {
-			this.isCancelled = true;
-			if (thread != null) {
-				thread.interrupt();
-			}
-			if (statement != null && !statement.isClosed()) {
-				statement.close();
-			}
-			result = null;
-			latch.countDown();
-		}
+        @Override
+        public void actionCanceled() throws SQLException {
+            this.isCancelled = true;
+            if (thread != null) {
+                thread.interrupt();
+            }
+            if (statement != null && !statement.isClosed()) {
+                statement.close();
+            }
+            result = null;
+            latch.countDown();
+        }
 
         ResultSet getResult() {
-			return result;
-		}
+            return result;
+        }
 
         void run() {
             thread = new Thread(() -> {
@@ -419,56 +447,17 @@ public class TemporalMappingDialogPanel extends JPanel {
                     errorShown = true;
                 }
             });
-			thread.start();
-		}
+            thread.start();
+        }
 
-		@Override
-		public boolean isCancelled() {
-			return this.isCancelled;
-		}
+        @Override
+        public boolean isCancelled() {
+            return this.isCancelled;
+        }
 
-		@Override
-		public boolean isErrorShown() {
-			return this.errorShown;
-		}
-	}
-    private JScrollPane scrQueryResult;
-    private JTable tblQueryResult;
-    private JTextField txtMappingID;
-    private JTextPane txtSourceQuery;
-    private JTextPane txtTargetQuery;
-    private JTextField txtInterval;
-
-	private SQLPPTemporalTriplesMap mapping;
-
-	public void setID(String id) {
-		this.txtMappingID.setText(id);
-	}
-
-	@Override
-	public void finalize() {
-		releaseResultset();
-	}
-
-	/***
-	 * Sets the current mapping to the input. Note, if the current mapping is
-	 * set, this means that this dialog is "updating" a mapping, and not
-	 * creating a new one.
-	 */
-	public void setMapping(SQLPPTemporalTriplesMap mapping) {
-		this.mapping = mapping;
-
-		cmdInsertMapping.setText("Update");
-		txtMappingID.setText(mapping.getId());
-
-		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
-		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
-		txtSourceQuery.setText(srcQuery);
-
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
-        String trgQuery = TargetQueryRenderer.encode(targetQuery, obdaModel.getMutablePrefixManager());
-		txtTargetQuery.setText(trgQuery);
-
-		txtInterval.setText(mapping.getTemporalMappingInterval().toString());
-	}
+        @Override
+        public boolean isErrorShown() {
+            return this.errorShown;
+        }
+    }
 }

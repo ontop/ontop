@@ -358,7 +358,7 @@ public class TemporalRuleEditorPanel extends JPanel implements EditorPanel {
                     ruleListModel.setElementAt(parsedRule, ruleIndex);
                 }
                 return true;
-        }
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Error while inserting rule: " + e.getMessage() + " is already taken");

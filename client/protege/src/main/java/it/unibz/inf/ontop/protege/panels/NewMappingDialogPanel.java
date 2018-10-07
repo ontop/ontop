@@ -32,15 +32,12 @@ import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
-import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,10 +68,13 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private JDialog parent;
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
-	private PrefixManager prefixManager;
-
 	/** Logger */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, SQLPPTriplesMap mapping) {
+		this(obdaModel, parent, dataSource);
+		setMapping(mapping);
+	}
 
 	/**
 	 * Create the dialog for inserting a new mapping.
@@ -85,8 +85,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		this.obdaModel = obdaModel;
 		this.parent = parent;
 		this.dataSource = dataSource;
-
-		prefixManager = obdaModel.getMutablePrefixManager();
 
 		initComponents();
 
@@ -617,18 +615,14 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	 * set, this means that this dialog is "updating" a mapping, and not
 	 * creating a new one.
 	 */
-	public void setMapping(SQLPPTriplesMap mapping) {
+	private void setMapping(SQLPPTriplesMap mapping) {
 		this.mapping = mapping;
 
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDASQLQuery sourceQuery = (OBDASQLQuery) mapping.getSourceQuery();
-		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
-		txtSourceQuery.setText(srcQuery);
+		txtSourceQuery.setText(obdaModel.getRenderedSourceQuery(mapping.getSourceQuery()));
 
-		ImmutableList<ImmutableFunctionalTerm> targetQuery = mapping.getTargetAtoms();
-		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
-		txtTargetQuery.setText(trgQuery);
+		txtTargetQuery.setText(obdaModel.getRenderedTargetQuery(mapping.getTargetAtoms()));
 	}
 }

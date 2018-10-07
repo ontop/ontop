@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.exception.InvalidMappingTemporalExceptionwithIndicator.*;
 
@@ -477,7 +476,7 @@ public class OntopNativeTemporalMappingParser implements TemporalMappingParser {
 
     private ImmutableList<ImmutableFunctionalTerm> appendTemporalComponents(ImmutableList<ImmutableFunctionalTerm> targetQuery, TemporalMappingInterval intervalQuery ){
         List <ImmutableFunctionalTerm> newList = new ArrayList<>();
-        for (ImmutableFunctionalTerm f : targetQuery){
+        for (ImmutableFunctionalTerm f : targetQuery) {
             List<ImmutableTerm> newArglist = new ArrayList<>(f.getArguments());
             newArglist.add(intervalQuery.isBeginInclusive());
             newArglist.add(intervalQuery.getBegin());

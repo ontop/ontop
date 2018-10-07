@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
@@ -27,6 +26,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.TemporalMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.TemporalTargetQueryRenderer;
 import it.unibz.inf.ontop.temporal.mapping.IntervalQueryParser;
 import it.unibz.inf.ontop.temporal.mapping.SQLPPTemporalTriplesMap;
 import it.unibz.inf.ontop.temporal.mapping.TemporalMappingInterval;
@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -105,9 +104,7 @@ public class TemporalOBDAModel extends OBDAModel {
     }
 
     DatalogMTLProgram getDatalogMTLProgram() {
-        Map<String, String> prefixMap = Maps.newHashMap();
-        prefixManager.getPrefixMap().forEach(prefixMap::put);
-        return DatalogMTLFactoryImpl.getInstance().createProgram(prefixMap, base, ruleList);
+        return DatalogMTLFactoryImpl.getInstance().createProgram(prefixManager.getPrefixMap(), base, ruleList);
     }
 
     void setDatalogMTLProgram(DatalogMTLProgram datalogMTLProgram) {
@@ -121,9 +118,7 @@ public class TemporalOBDAModel extends OBDAModel {
         //TODO prefixes and base are added, must think about if one rule parsing is needed
         StringBuilder header = new StringBuilder();
         PrefixManager prefixManager = getMutablePrefixManager();
-        prefixManager.getPrefixMap().forEach((key, value) -> {
-            header.append("PREFIX ").append(key).append("\t<").append(value).append(">\n");
-        });
+        prefixManager.getPrefixMap().forEach((key, value) -> header.append("PREFIX ").append(key).append("\t<").append(value).append(">\n"));
         header.append("BASE <").append(getNamespace()).append(">\n");
         LOGGER.info("Parsing rule:\n" + header + "\n" + rule + "\n");
         return DATALOG_MTL_SYNTAX_PARSER.parse(header + "\n" + rule).getRules().get(0);
@@ -131,8 +126,9 @@ public class TemporalOBDAModel extends OBDAModel {
 
     public String dmtlRuleToString(DatalogMTLRule datalogMTLRule) {
         String ruleString = datalogMTLRule.toString();
-        for (Map.Entry<String, String> prefixEntry : prefixManager.getPrefixMap().entrySet()) {
-            ruleString = ruleString.replaceAll(prefixEntry.getValue(), prefixEntry.getKey());
+        List<String> prefixes = prefixManager.getNamespaceList();
+        for (String prefixEntry : prefixes) {
+            ruleString = ruleString.replaceAll(prefixEntry, prefixManager.getPrefix(prefixEntry));
         }
         return ruleString;
     }
@@ -185,4 +181,10 @@ public class TemporalOBDAModel extends OBDAModel {
         //}
         throw new NullPointerException("targetQuery is null");
     }
+
+    @Override
+    public String getRenderedTargetQuery(ImmutableList<ImmutableFunctionalTerm> targetQuery) {
+        return TemporalTargetQueryRenderer.encode(targetQuery, prefixManager);
+    }
+
 }

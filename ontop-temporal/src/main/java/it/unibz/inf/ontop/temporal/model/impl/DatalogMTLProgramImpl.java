@@ -12,7 +12,7 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
     private final List<DatalogMTLRule> rules;
     private String base;
 
-    Map<String, String> prefixes;
+    private Map<String, String> prefixes;
 
     public DatalogMTLProgramImpl(Map<String, String> prefixes, String base, List<DatalogMTLRule> rules) {
         this.prefixes = prefixes;
@@ -56,8 +56,16 @@ public class DatalogMTLProgramImpl implements DatalogMTLProgram {
         StringBuilder stringBuilder = new StringBuilder();
         prefixes.forEach((key, value) -> stringBuilder.append("PREFIX ").append(key).append("\t<").append(value).append(">\n"));
         String renderedRules = render();
-        for(Map.Entry<String, String> prefixEntry:prefixes.entrySet()){
-            renderedRules = renderedRules.replaceAll(prefixEntry.getValue(), prefixEntry.getKey());
+        ArrayList<String> prefixList = new ArrayList<>(prefixes.values());
+        prefixList.sort(Collections.reverseOrder());
+        for(String uri : prefixList) {
+            Optional<Map.Entry<String, String>> prefix =
+                    prefixes.entrySet().stream().filter(v ->
+                            v.getValue().equals(uri)).findFirst();
+            if(prefix.isPresent()){
+                Map.Entry<String, String> entry = prefix.get();
+                renderedRules = renderedRules.replaceAll(entry.getValue(), entry.getKey());
+            }
         }
         stringBuilder.append(renderedRules);
         return stringBuilder.toString();
