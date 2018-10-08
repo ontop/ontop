@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import java.text.DecimalFormatSymbols;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.rdf.api.RDF;
 
@@ -251,12 +252,11 @@ public class JDBC2ConstantConverter {
         BigDecimal bigDecimal;
         try {
             bigDecimal = new BigDecimal (stringValue);
-
         }
         catch (NumberFormatException e){
             return stringValue;
         }
-        DecimalFormat formatter = new DecimalFormat("0.0E0");
+        DecimalFormat formatter = new DecimalFormat("0.0E0", new DecimalFormatSymbols(Locale.ENGLISH));
         formatter.setRoundingMode(RoundingMode.UNNECESSARY);
         formatter.setMaximumFractionDigits((bigDecimal.scale() > 0) ? bigDecimal.precision() -1 : bigDecimal.precision() -1 + bigDecimal.scale() *-1);
         return  formatter.format(bigDecimal);
