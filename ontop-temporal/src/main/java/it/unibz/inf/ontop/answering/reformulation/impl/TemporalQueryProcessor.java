@@ -29,7 +29,10 @@ import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.ProjectionShrinkingOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.PushUpBooleanExpressionOptimizerImpl;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -74,6 +77,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
     private final DBMetadata dbMetadata;
     private final DBMetadata temporalDBMetadata;
     private final JoinLikeOptimizer joinLikeOptimizer;
+    private final FlattenUnionOptimizer flattenUnionOptimizer;
     private final InputQueryTranslator inputQueryTranslator;
     private final InputQueryFactory inputQueryFactory;
     private final DatalogFactory datalogFactory;
@@ -100,7 +104,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
                                    JoinLikeOptimizer joinLikeOptimizer,
                                    InputQueryFactory inputQueryFactory,
                                    LinearInclusionDependencyTools inclusionDependencyTools,
-                                   AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+                                   AtomFactory atomFactory, TermFactory termFactory, FlattenUnionOptimizer flattenUnionOptimizer, DatalogFactory datalogFactory,
                                    DatalogNormalizer datalogNormalizer, EQNormalizer eqNormalizer,
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
                                    CQCUtilities cqcUtilities, ImmutabilityTools immutabilityTools, RuleUnfolder ruleUnfolder,
@@ -110,6 +114,7 @@ public class TemporalQueryProcessor implements QueryReformulator {
         this.settings = settings;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.inputQueryFactory = inputQueryFactory;
+        this.flattenUnionOptimizer = flattenUnionOptimizer;
         this.datalogFactory = datalogFactory;
         this.datalogNormalizer = datalogNormalizer;
         this.eqNormalizer = eqNormalizer;
@@ -237,9 +242,21 @@ public class TemporalQueryProcessor implements QueryReformulator {
 
                 log.debug("Unfolded query: \n" + intermediateQuery.toString());
 
-                //intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
+                log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
 
-                //log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
+                intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
+                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+
+                intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
+                log.debug("After projection shrinking: \n" + intermediateQuery.toString());
+
+
+                intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+                log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
+
+                intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
+                log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
 //                intermediateQuery = tcEliminator.removeRedundantTemporalCoalesces(intermediateQuery,temporalDBMetadata, temporalSaturatedMapping.getExecutorRegistry());
 //

@@ -41,6 +41,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
     private final RuleUnfolder ruleUnfolder;
     private final ImmutabilityTools immutabilityTools;
     private final JoinLikeOptimizer joinLikeOptimizer;
+    private final FlattenUnionOptimizer flattenUnionOptimizer;
     private final TemporalIntermediateQueryFactory TIQFactory;
     private PushUpBooleanExpressionOptimizer pushUpBooleanExpressionOptimizer;
     private ProjectionShrinkingOptimizer projectionShrinkingOptimizer;
@@ -57,7 +58,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                                          RuleUnfolder ruleUnfolder,
                                          ImmutabilityTools immutabilityTools,
                                          JoinLikeOptimizer joinLikeOptimizer,
-                                         TemporalIntermediateQueryFactory tiqFactory,
+                                         FlattenUnionOptimizer flattenUnionOptimizer, TemporalIntermediateQueryFactory tiqFactory,
                                          PullOutVariableOptimizer pullOutVariableOptimizer, BindingLiftOptimizer bindingLiftOptimizer,
                                          TemporalSpecificationFactory specificationFactory,
                                          TermFactory termFactory,
@@ -65,6 +66,7 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
         this.dMTLConverter = dMTLConverter;
         this.ruleUnfolder = ruleUnfolder;
         this.immutabilityTools = immutabilityTools;
+        this.flattenUnionOptimizer = flattenUnionOptimizer;
         TIQFactory = tiqFactory;
         this.pullOutVariableOptimizer = pullOutVariableOptimizer;
         this.bindingLiftOptimizer = bindingLiftOptimizer;
@@ -102,6 +104,20 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         log.debug("Unfolded temporal rule : \n" + iq.toString());
                         iq = bindingLiftOptimizer.optimize(iq);
                         log.debug("Binding lift optimizer (temporal rule) : \n" + iq.toString());
+
+                        intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
+                        log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+
+                        intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
+                        log.debug("After projection shrinking: \n" + intermediateQuery.toString());
+
+
+                        intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
+                        log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
+
+                        intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
+                        log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
+
                         //iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
                         //log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);

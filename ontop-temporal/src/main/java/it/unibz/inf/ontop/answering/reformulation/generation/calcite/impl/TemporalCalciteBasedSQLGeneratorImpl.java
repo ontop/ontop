@@ -669,7 +669,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                 case QUEST_CAST:
                     assert args.size() == 2;
                     // TODO use the right type for casting
-                    return relBuilder.cast(args.get(0), SqlTypeName.CHAR);
+                    return relBuilder.cast(args.get(0), SqlTypeName.VARCHAR);
                 case AVG:
                     return relBuilder.call(SqlStdOperatorTable.AVG, args);
                 case SUM:
@@ -971,7 +971,7 @@ public class TemporalCalciteBasedSQLGeneratorImpl implements TemporalCalciteBase
                         RexNode repl = termToRexNode(currentTerm, 1);
                         // TODO: replaces for IRI-safe version of string
                         if (repl.getType().getFamily() != SqlTypeFamily.CHARACTER) {
-                            repl = relBuilder.cast(repl, SqlTypeName.CHAR);
+                            repl = relBuilder.cast(repl, SqlTypeName.VARCHAR);
                         }
 
                         vex.add(repl);

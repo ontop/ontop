@@ -35,24 +35,27 @@ mappingId	urn:Map-PureHypercholesterolemia
 target		:Diagnosis/{icd9_code} a :PureHypercholesterolemia .
 source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '2720'
 
+mappingId	urn:Map-Sepsis
+target		:Diagnosis/{icd9_code} a :Sepsis .
+source		SELECT "d_icd_diagnoses"."icd9_code" FROM "public"."d_icd_diagnoses" WHERE "d_icd_diagnoses"."icd9_code" = '99591'
+
 mappingId	urn:Map-DiagnosedWithAcidosis
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+target		:Patient/{subject_id} :diagnosedWith :Diagnosis/{icd9_code} .
 source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2762'
 
 mappingId	urn:Map-DiagnosedWithOtherAndUnspecifiedHyperlipidemia
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+target		:Patient/{subject_id} :diagnosedWith :Diagnosis/{icd9_code} .
 source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2724'
 
 mappingId	urn:Map-DiagnosedWithPureHypercholesterolemia
-target		:Patient/{subject_id} :hasBeenDiagnosedWith :Diagnosis/{icd9_code} . 
+target		:Patient/{subject_id} :diagnosedWith :Diagnosis/{icd9_code} .
 source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '2720'
 
 mappingId	urn:Map-DiagnosedWithSepsis
-target		:Diagnosis/{subject_id}/{hadm_id}/{icd9_code} :icd9Code "995.91"^^xsd:string ; :icd9Class <http://purl.bioontology.org/ontology/ICD9CM/995.91> . 
-source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."hadm_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '99591'
+target		:Patient/{subject_id} :diagnosedWith :Diagnosis/{icd9_code} .
+source		SELECT "diagnoses_icd"."subject_id", "diagnoses_icd"."icd9_code" FROM "public"."diagnoses_icd" WHERE "diagnoses_icd"."icd9_code" = '99591'
 
 mappingId	urn:Map-icdLabel
-target		<{classid}> rdfs:label {preferredlabel} . 
+target		<{classid}> rdfs:label {preferredlabel} .
 source		SELECT "icd9"."classid", "icd9"."preferredlabel" FROM "public"."icd9"
 ]]
-
