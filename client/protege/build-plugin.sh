@@ -7,7 +7,7 @@ pwd=`pwd`
 
 # Build ontop bundles
 cd "$pwd/../.."
-mvn install -DskipTests
+mvn install -DskipTests -Dmaven.javadoc.skip=true
 
 # Compile ontop-protege plugin jar file
 cd "$pwd"

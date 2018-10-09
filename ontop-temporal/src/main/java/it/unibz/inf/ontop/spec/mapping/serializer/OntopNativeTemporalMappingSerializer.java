@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.TemporalTargetQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -14,11 +14,9 @@ import it.unibz.inf.ontop.temporal.mapping.impl.SQLPPTemporalTriplesMapImpl;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-public class OntopNativeTemporalMappingSerializer extends OntopNativeMappingSerializer{
+public class OntopNativeTemporalMappingSerializer extends OntopNativeMappingSerializer {
     /**
      * TODO: may consider building it through Assisted Injection.
-     *
-     * @param ppMapping
      */
     public OntopNativeTemporalMappingSerializer(SQLPPMapping ppMapping) {
         super(ppMapping);
@@ -27,36 +25,50 @@ public class OntopNativeTemporalMappingSerializer extends OntopNativeMappingSeri
     @Override
     protected void writeMappingDeclaration(BufferedWriter writer) throws IOException {
 
-        writer.write(OntopNativeMappingParser.MAPPING_DECLARATION_TAG + " " + OntopNativeMappingParser.START_COLLECTION_SYMBOL);
-        writer.write("\n");
+        writer.write(String.format("%s %s\n", OntopNativeMappingParser.MAPPING_DECLARATION_TAG, OntopNativeMappingParser.START_COLLECTION_SYMBOL));
 
         boolean needLineBreak = false;
         for (SQLPPTriplesMap axiom : this.ppMapping.getTripleMaps()) {
 
-            SQLPPTemporalTriplesMapImpl temporalAxiom = (SQLPPTemporalTriplesMapImpl)axiom;
+            SQLPPTemporalTriplesMapImpl temporalAxiom = (SQLPPTemporalTriplesMapImpl) axiom;
 
             if (needLineBreak) {
                 writer.write("\n");
             }
-            writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
+            writer.write(String.format("%s\t%s\n",
+                    OntopNativeMappingParser.Label.mappingId.name(),
+                    axiom.getId())
+            );
 
-            ImmutableList<ImmutableFunctionalTerm> targetQuery = temporalAxiom.getTargetAtoms();
-            writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
+            writer.write(String.format("%s\t\t%s\n",
+                    OntopNativeMappingParser.Label.target.name(),
+                    printTargetQuery(temporalAxiom.getTargetAtoms()))
+            );
 
-            TemporalMappingInterval temporalMappingInterval = temporalAxiom.getTemporalMappingInterval();
-            writer.write(OntopNativeTemporalMappingParser.Label.interval.name() + "\t" + printIntervalQuery(temporalMappingInterval) + "\n");
+            writer.write(String.format("%s\t%s\n",
+                    OntopNativeTemporalMappingParser.Label.interval.name(),
+                    printIntervalQuery(temporalAxiom.getTemporalMappingInterval()))
+            );
 
-            OBDASQLQuery sourceQuery = temporalAxiom.getSourceQuery();
-            writer.write(OntopNativeMappingParser.Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
+            writer.write(String.format("%s\t\t%s\n",
+                    OntopNativeMappingParser.Label.source.name(),
+                    printSourceQuery(temporalAxiom.getSourceQuery()))
+            );
+
             needLineBreak = true;
         }
-        writer.write(OntopNativeMappingParser.END_COLLECTION_SYMBOL);
-        writer.write("\n\n");
+        writer.write(String.format("%s\n\n",
+                OntopNativeMappingParser.END_COLLECTION_SYMBOL)
+        );
     }
 
-    protected String printIntervalQuery(TemporalMappingInterval query) {
-        String sourceString = query.toString();
-        String toReturn = convertTabToSpaces(sourceString);
+    @Override
+    protected String printTargetQuery(ImmutableList<ImmutableFunctionalTerm> query) {
+        return TemporalTargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
+    }
+
+    private String printIntervalQuery(TemporalMappingInterval query) {
+        String toReturn = convertTabToSpaces(query.toString());
         return toReturn.replaceAll("\n", "\n\t\t\t");
     }
 }
