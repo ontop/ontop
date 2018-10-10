@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.transform.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -21,9 +22,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -64,7 +63,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     /**
      * Affects (left) joins and data nodes.
      * - (left) join: if the same variable is returned by both operands (implicit equality),
-     * rename it in each branch but the leftmost (with a different variable each time),
+     * rename it (with a fresh variable each time) in each branch but the leftmost,
      * and make the corresponding equalities explicit.
      * - data node: create a variable and make the equality explicit (create a filter).
      */
@@ -82,7 +81,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            // One substitution per child
+            // One substitution per child but the leftmost
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
             if (substitutions.isEmpty())
                 return tree;
@@ -102,7 +101,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
-            // One substitution per child
+            // One substitution per child but the leftmost
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
             if (substitutions.isEmpty())
                 return tree;
@@ -121,7 +120,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private ImmutableList<InjectiveVar2VarSubstitution> computeSubstitutions(ImmutableList<IQTree> children) {
-
             if (children.size() < 2) {
                 throw new ExplicitEqualityTransformerInternalException("at least 2 children are expected");
             }
@@ -129,72 +127,47 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .flatMap(t -> t.getVariables().stream())
                     .collect(ImmutableCollectors.toMultiset()).entrySet().stream()
                     .filter(e -> e.getCount() > 1)
-                    .map(e -> e.getElement())
+                    .map(Multiset.Entry::getElement)
                     .collect(ImmutableCollectors.toSet());
 
-            return Stream.concat(
-                    Stream.of(substitutionFactory.getInjectiveVar2VarSubstitution(ImmutableMap.of())),
-                    children.stream()
-                            .map(t -> computeSubstitution(repeatedVariables, t))
-            ).collect(ImmutableCollectors.toList());
+            return children.stream().sequential().skip(1)
+                    .map(t -> computeSubstitution(repeatedVariables, t)
+                    ).collect(ImmutableCollectors.toList());
         }
 
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
-            Iterator<InjectiveVar2VarSubstitution> it = substitutions.iterator();
-            return children.stream().sequential()
-                    .map(t -> t.applyDescendingSubstitutionWithoutOptimizing(it.next()))
+            Iterator<IQTree> it = children.iterator();
+            // Prepend the empty substitution for the leftmost child
+            return Stream.concat(
+                    Stream.of(substitutionFactory.getInjectiveVar2VarSubstitution(ImmutableMap.of())),
+                    substitutions.stream()).sequential()
+                    .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s))
                     .collect(ImmutableCollectors.toList());
         }
 
         private InjectiveVar2VarSubstitution computeSubstitution(ImmutableSet<Variable> repeatedVars, IQTree tree) {
             return substitutionFactory.getInjectiveVar2VarSubstitution(
                     tree.getVariables().stream()
-                            .filter(v -> repeatedVars.contains(v))
+                            .filter(repeatedVars::contains)
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
                                     v -> variableGenerator.generateNewVariable()
-                    )));
+                            )));
         }
 
         private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
-            ImmutableExpression varEqualities = extractEqualities(substitutions);
-            return optionalFilterCondition.isPresent() ?
-                    termFactory.getImmutableExpression(
-                            AND,
-                            optionalFilterCondition.get(),
-                            varEqualities
-                    ) :
-                    varEqualities;
+            Stream<ImmutableExpression> varEqualities = extractEqualities(substitutions);
+            return getConjunction(optionalFilterCondition, varEqualities);
         }
 
-        private ImmutableExpression extractEqualities(ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
-
-            return termFactory.getImmutableExpression(
-                    AND,
-                    substitutions.stream()
-                            .flatMap(s -> s.getImmutableMap().entrySet().stream())
-                            .collect(ImmutableCollectors.toMultimap(
-                                    s -> s.getKey(),
-                                    s -> s.getValue()
-                            )).asMap().entrySet().stream()
-                            .map(e -> getEquivalenceExp(e))
-                            .collect(ImmutableCollectors.toList())
-            );
-        }
-
-        private ImmutableExpression getEquivalenceExp(Map.Entry<Variable, Collection<Variable>> e) {
-            if (e.getValue().isEmpty()) {
-                throw new ExplicitEqualityTransformerInternalException("This collection is expected to be nonEmpty");
-            }
-            Variable refVar = e.getKey();
-            return termFactory.getImmutableExpression(
-                    AND,
-                    e.getValue().stream()
-                            .map(v -> termFactory.getImmutableExpression(
-                                    EQ,
-                                    refVar,
-                                    v
-                            )).collect(ImmutableCollectors.toList()));
+        private Stream<ImmutableExpression> extractEqualities(ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
+            return substitutions.stream()
+                    .flatMap(s -> s.getImmutableMap().entrySet().stream())
+                    .map(e -> termFactory.getImmutableExpression(
+                            EQ,
+                            e.getKey(),
+                            e.getValue()
+                    ));
         }
 
         private IQTree transformDataNode(DataNode dn) {
@@ -241,16 +214,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private FilterNode createFilter(ImmutableMap<GroundTerm, Variable> groundTermSubstitution) {
             return iqFactory.createFilterNode(
-                    termFactory.getImmutableExpression(
-                            AND,
-                            groundTermSubstitution.entrySet().stream().
-                                    map(s -> termFactory.getImmutableExpression(
-                                            EQ,
-                                            s.getKey(),
-                                            s.getValue()
-                                    ))
-                                    .collect(ImmutableCollectors.toList())
-                    ));
+                    getConjunction(groundTermSubstitution.entrySet().stream().
+                            map(s -> termFactory.getImmutableExpression(
+                                    EQ,
+                                    s.getKey(),
+                                    s.getValue()
+                            ))));
         }
     }
 
@@ -268,7 +237,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
             ImmutableList<ImmutableExpression> filterChildExpressions = getFilterChildExpressions(children);
-            if(filterChildExpressions.isEmpty())
+            if (filterChildExpressions.isEmpty())
                 return tree;
 
             return iqFactory.createBinaryNonCommutativeIQTree(
@@ -286,7 +255,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<ImmutableExpression> filterChildExpressions = getFilterChildExpressions(children);
-            if(filterChildExpressions.isEmpty())
+            if (filterChildExpressions.isEmpty())
                 return tree;
 
             return iqFactory.createNaryIQTree(
@@ -297,7 +266,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                             filterChildExpressions
                                     ))),
                     children.stream()
-                            .map(t -> trimRootFilter(t))
+                            .map(this::trimRootFilter)
                             .collect(ImmutableCollectors.toList())
             );
         }
@@ -305,14 +274,14 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
             ImmutableList<ImmutableExpression> filterChildExpressions = getFilterChildExpressions(ImmutableList.of(child));
-            if(filterChildExpressions.isEmpty())
+            if (filterChildExpressions.isEmpty())
                 return tree;
             return iqFactory.createUnaryIQTree(
                     iqFactory.createFilterNode(
-                                    updateJoinCondition(
-                                            Optional.of(rootNode.getFilterCondition()),
-                                            filterChildExpressions
-                                    )),
+                            updateJoinCondition(
+                                    Optional.of(rootNode.getFilterCondition()),
+                                    filterChildExpressions
+                            )),
                     child
             );
         }
@@ -320,32 +289,20 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableList<ImmutableExpression> getFilterChildExpressions(ImmutableList<IQTree> children) {
             return children.stream()
                     .filter(t -> t.getRootNode() instanceof FilterNode)
-                    .map(t -> ((FilterNode)t.getRootNode()).getFilterCondition())
+                    .map(t -> ((FilterNode) t.getRootNode()).getFilterCondition())
                     .collect(ImmutableCollectors.toList());
         }
 
         private IQTree trimRootFilter(IQTree tree) {
-            return tree.getRootNode() instanceof FilterNode?
-                    ((UnaryIQTree) tree).getChild():
+            return tree.getRootNode() instanceof FilterNode ?
+                    ((UnaryIQTree) tree).getChild() :
                     tree;
         }
 
         private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> joinCondition, ImmutableList<ImmutableExpression> additionalConditions) {
             if (additionalConditions.isEmpty())
                 throw new ExplicitEqualityTransformerInternalException("Nonempty list of filters expected");
-            return joinCondition.isPresent() ?
-                    getConjunction(ImmutableList.of(
-                            joinCondition.get(),
-                            getConjunction(additionalConditions)
-                            )):
-                    getConjunction(additionalConditions);
-        }
-
-        private ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> ie) {
-            return termFactory.getImmutableExpression(
-                    AND,
-                    ie
-            );
+            return getConjunction(joinCondition, additionalConditions.stream());
         }
     }
 
@@ -397,7 +354,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             iqFactory.createNaryIQTree(
                                     rootNode,
                                     children.stream()
-                                            .map(t -> trimIdleCn(t))
+                                            .map(this::trimIdleCn)
                                             .collect(ImmutableCollectors.toList())
                             ));
         }
@@ -418,9 +375,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private ImmutableList<ConstructionNode> getIdleCns(Stream<IQTree> trees) {
             return trees
-                    .map(t -> getIdleCn(t))
-                    .filter(o -> o.isPresent())
-                    .map(o -> o.get())
+                    .map(this::getIdleCn)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(ImmutableCollectors.toList());
         }
 
@@ -449,8 +406,30 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
     }
 
+    private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
+        return expressions
+                .reduce(null,
+                        (a, b) -> (a == null) ?
+                                b :
+                                termFactory.getImmutableExpression(
+                                        AND,
+                                        b,
+                                        a
+                                ));
+    }
+
+    private ImmutableExpression getConjunction(Optional<ImmutableExpression> optExpression, Stream<ImmutableExpression> expressions) {
+                return getConjunction(optExpression.isPresent()?
+                        Stream.concat(
+                                Stream.of(optExpression.get()),
+                                expressions
+                        ):
+                        expressions
+                );
+    }
+
     private class ExplicitEqualityTransformerInternalException extends OntopInternalBugException {
-        public ExplicitEqualityTransformerInternalException(String message) {
+        ExplicitEqualityTransformerInternalException(String message) {
             super(message);
         }
     }

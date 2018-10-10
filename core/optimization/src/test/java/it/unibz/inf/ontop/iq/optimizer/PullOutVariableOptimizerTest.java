@@ -86,12 +86,9 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-//        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
-        IQ iq = IQ_CONVERTER.convert(query1);
-        ExplicitEqualityTransformer eet = TRANSFORMER_FACTORY.createEETransformer(iq.getVariableGenerator());
-        IQTree optimizedTree = eet.transform(iq.getTree());
+        IntermediateQuery optimizedQuery = optimize(query1);
 
-//        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
@@ -109,7 +106,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nExpected: \n" +  query2);
 
-//        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
     @Test
@@ -132,7 +129,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -181,7 +178,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -232,7 +229,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -276,7 +273,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -328,7 +325,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -374,7 +371,7 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -435,11 +432,23 @@ public class PullOutVariableOptimizerTest {
 
         System.out.println("\nExpected: \n" +  query2);
 
-        IntermediateQuery optimizedQuery = PULL_OUT_VARIABLE_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
 
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ iq = IQ_CONVERTER.convert(query);
+        ExplicitEqualityTransformer eet = TRANSFORMER_FACTORY.createEETransformer(iq.getVariableGenerator());
+        return IQ_CONVERTER.convert(
+                IQ_FACTORY.createIQ(
+                        iq.getProjectionAtom(),
+                        eet.transform(iq.getTree())
+                ),
+                query.getDBMetadata(),
+                query.getExecutorRegistry()
+        );
+    }
 }

@@ -31,7 +31,7 @@ public class ChildTransformer extends DefaultRecursiveIQTreeVisitingTransformer 
 
     @Override
     protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-        return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(this));
+        return iqFactory.createUnaryIQTree(rootNode, transformer.transform(child));
     }
 
     @Override
