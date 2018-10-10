@@ -300,6 +300,14 @@
 
 
 
+     <!-- http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_4648 -->
+
+     <rdf:Description rdf:about="http://purl.bioontology.org/ontology/HOM-ICD9CM/MM_CLASS_4648">
+        <owl:equivalentClass rdf:resource="http://www.semanticweb.org/ontologies/2018/4/mimic/EndocrineNutrinalMetabolicDiseasesAndImmunityDisorders"/>
+     </rdf:Description>
+
+
+
     <!-- http://www.semanticweb.org/ontologies/2018/4/mimic/Acidosis -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2018/4/mimic/Acidosis">

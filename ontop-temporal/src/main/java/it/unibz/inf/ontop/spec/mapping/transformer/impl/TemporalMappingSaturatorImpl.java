@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.exception.MissingTemporalIntermediateQueryNodeException;
 import it.unibz.inf.ontop.injection.TemporalIntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TemporalSpecificationFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -118,10 +119,13 @@ public class TemporalMappingSaturatorImpl implements TemporalMappingSaturator {
                         intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
                         log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
-                        //iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
-                        //log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
+                        iq = tcEliminator.removeRedundantTemporalCoalesces(iq,temporalDBMetadata,temporalMapping.getExecutorRegistry());
+                        log.debug("Remove redundant coalesces (temporal rule) : \n" + iq.toString());
+
                         mergedMap.put(iq.getProjectionAtom().getPredicate(), iq);
                     } catch (EmptyQueryException /*| MissingTemporalIntermediateQueryNodeException */ e) {
+                        e.printStackTrace();
+                    } catch (MissingTemporalIntermediateQueryNodeException e) {
                         e.printStackTrace();
                     }
                 } else {

@@ -245,12 +245,15 @@ public class TemporalQueryProcessor implements QueryReformulator {
                 intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
                 log.debug("Binding lift optimizer: \n" + intermediateQuery.toString());
 
-                intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
-                log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+                //intermediateQuery = new PushUpBooleanExpressionOptimizerImpl(false, immutabilityTools).optimize(intermediateQuery);
+                //log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
                 intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
                 log.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
+                //TODO:bindingliftoptimizer and projectshrinking optimizer
+                //TODO:have to be used together for hierarchical reasoning queries
+                //TODO:fix this problem
 
                 intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
                 log.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
