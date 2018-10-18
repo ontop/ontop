@@ -154,7 +154,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             .filter(v -> !isFirstOcc(v, children, tree))
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
-                                    v -> variableGenerator.generateNewVariable()
+                                    v -> variableGenerator.generateNewVariableFromVar(v)
                             )));
         }
 
@@ -424,8 +424,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                 b :
                                 termFactory.getImmutableExpression(
                                         AND,
-                                        b,
-                                        a
+                                        a,
+                                        b
                                 ));
     }
 

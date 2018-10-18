@@ -13,29 +13,28 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 /**
  * Applies the transformer to the children
  */
-public class ChildTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public class ChildTransformer extends DefaultNonRecursiveIQTreeTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer transformer;
 
     public ChildTransformer(IntermediateQueryFactory iqFactory, IQTreeTransformer transformer) {
-        super(iqFactory);
         this.iqFactory = iqFactory;
         this.transformer = transformer;
     }
 
     @Override
     protected IQTree transformLeaf(LeafIQTree leaf){
-        return leaf;
+        return transformer.transform(leaf);
     }
 
     @Override
-    protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+    protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return iqFactory.createUnaryIQTree(rootNode, transformer.transform(child));
     }
 
     @Override
-    protected IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+    protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
         return iqFactory.createNaryIQTree(
                 rootNode,
                 children.stream()
@@ -45,12 +44,36 @@ public class ChildTransformer extends DefaultRecursiveIQTreeVisitingTransformer 
     }
 
     @Override
-    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild,
-                                                       IQTree rightChild) {
+    protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return iqFactory.createBinaryNonCommutativeIQTree(
                 rootNode,
                 transformer.transform(leftChild),
                 transformer.transform(rightChild)
         );
     }
+
+//    @Override
+//    protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+//        return iqFactory.createUnaryIQTree(rootNode, transformer.transform(child));
+//    }
+//
+//    @Override
+//    protected IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+//        return iqFactory.createNaryIQTree(
+//                rootNode,
+//                children.stream()
+//                        .map(transformer::transform)
+//                        .collect(ImmutableCollectors.toList())
+//        );
+//    }
+//
+//    @Override
+//    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild,
+//                                                       IQTree rightChild) {
+//        return iqFactory.createBinaryNonCommutativeIQTree(
+//                rootNode,
+//                transformer.transform(leftChild),
+//                transformer.transform(rightChild)
+//        );
+//    }
 }

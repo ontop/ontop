@@ -35,7 +35,7 @@ public final class CompositeRecursiveIQTreeTransformer implements IQTreeTransfor
             currentTree = transformer.transform(currentTree);
         }
 
-        currentTree = childTransformer.transform(currentTree);
+        if(!currentTree.isLeaf()) currentTree = childTransformer.transform(currentTree);
 
         for (IQTreeTransformer transformer : postTransformers) {
             currentTree = transformer.transform(currentTree);
