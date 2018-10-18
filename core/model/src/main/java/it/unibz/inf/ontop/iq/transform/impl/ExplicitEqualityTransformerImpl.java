@@ -62,9 +62,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     /**
      * Affects (left) joins and data nodes.
-     * - (left) join: if the same variable is returned by both operands (implicit equality),
-     * rename it (with a fresh variable each time) in each branch but the leftmost,
+     * - left join: if the same variable is returned by both operands (implicit equality),
+     * rename it (with a fresh variable each time) in each branch but the left one,
      * and make the corresponding equalities explicit.
+     * - inner join: identical to left join, but renaming appears in each branch but the first where the variable appears
      * - data node: create a variable and make the equality explicit (create a filter).
      */
     class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
@@ -130,30 +131,40 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     .map(Multiset.Entry::getElement)
                     .collect(ImmutableCollectors.toSet());
 
-            return children.stream().sequential().skip(1)
-                    .map(t -> computeSubstitution(repeatedVariables, t)
-                    ).collect(ImmutableCollectors.toList());
+            return children.stream().sequential()
+                    .map(t -> computeSubstitution(
+                                    repeatedVariables,
+                                    children,
+                                    t
+                    ))
+                    .collect(ImmutableCollectors.toList());
         }
 
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveVar2VarSubstitution> substitutions, ImmutableList<IQTree> children) {
             Iterator<IQTree> it = children.iterator();
-            // Prepend the empty substitution for the leftmost child
-            return Stream.concat(
-                    Stream.of(substitutionFactory.getInjectiveVar2VarSubstitution(ImmutableMap.of())),
-                    substitutions.stream()).sequential()
+            return substitutions.stream().sequential()
                     .map(s -> it.next().applyDescendingSubstitutionWithoutOptimizing(s))
                     .collect(ImmutableCollectors.toList());
         }
 
-        private InjectiveVar2VarSubstitution computeSubstitution(ImmutableSet<Variable> repeatedVars, IQTree tree) {
+        private InjectiveVar2VarSubstitution computeSubstitution(ImmutableSet<Variable> repeatedVars, ImmutableList<IQTree> children, IQTree tree) {
             return substitutionFactory.getInjectiveVar2VarSubstitution(
                     tree.getVariables().stream()
                             .filter(repeatedVars::contains)
+                            .filter(v -> !isFirstOcc(v, children, tree))
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
                                     v -> variableGenerator.generateNewVariable()
                             )));
         }
+
+        private boolean isFirstOcc(Variable variable, ImmutableList<IQTree> children, IQTree tree) {
+            return children.stream().sequential()
+                    .filter(t -> t.getVariables().contains(variable))
+                    .findFirst().get()
+                    .equals(tree);
+        }
+
 
         private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> optionalFilterCondition, ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
             Stream<ImmutableExpression> varEqualities = extractEqualities(substitutions);
