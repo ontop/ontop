@@ -56,7 +56,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     @Override
     public IQTree transform(IQTree tree) {
-
         return new CompositeRecursiveIQTreeTransformer(preTransformers, postTransformers, iqFactory).transform(tree);
     }
 
@@ -65,8 +64,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * - left join: if the same variable is returned by both operands (implicit equality),
      * rename it (with a fresh variable each time) in each branch but the left one,
      * and make the corresponding equalities explicit.
-     * - inner join: identical to left join, but renaming appears in each branch but the first where the variable appears
-     * - data node: create a variable and make the equality explicit (create a filter).
+     * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
+     * - data node: if the data node contains a ground term, create a variable and make the equality explicit (create a filter).
      */
     class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -102,7 +101,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
-            // One substitution per child but the leftmost
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
             if (substitutions.isEmpty())
                 return tree;
@@ -122,7 +120,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private ImmutableList<InjectiveVar2VarSubstitution> computeSubstitutions(ImmutableList<IQTree> children) {
             if (children.size() < 2) {
-                throw new ExplicitEqualityTransformerInternalException("at least 2 children are expected");
+                throw new ExplicitEqualityTransformerInternalException("At least 2 children are expected");
             }
             ImmutableSet<Variable> repeatedVariables = children.stream()
                     .flatMap(t -> t.getVariables().stream())
@@ -240,7 +238,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * Then:
      * - join and filter: merge the boolean expressions
      * - left join: merge boolean expressions coming from the right, and lift the ones coming from the left.
-     * This lift is only performed for optimization purposes: may avoid a subquery during SQL generation.
+     * This lift is only performed for optimization purposes: may save a subquery during SQL generation.
      */
     class FilterChildNormalizer extends DefaultNonRecursiveIQTreeTransformer {
 

@@ -18,14 +18,14 @@ public class ChildTransformer extends DefaultNonRecursiveIQTreeTransformer {
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer transformer;
 
-    public ChildTransformer(IntermediateQueryFactory iqFactory, IQTreeTransformer transformer) {
+    ChildTransformer(IntermediateQueryFactory iqFactory, IQTreeTransformer transformer) {
         this.iqFactory = iqFactory;
         this.transformer = transformer;
     }
 
     @Override
     protected IQTree transformLeaf(LeafIQTree leaf){
-        return transformer.transform(leaf);
+        return leaf;
     }
 
     @Override
@@ -51,29 +51,4 @@ public class ChildTransformer extends DefaultNonRecursiveIQTreeTransformer {
                 transformer.transform(rightChild)
         );
     }
-
-//    @Override
-//    protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-//        return iqFactory.createUnaryIQTree(rootNode, transformer.transform(child));
-//    }
-//
-//    @Override
-//    protected IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-//        return iqFactory.createNaryIQTree(
-//                rootNode,
-//                children.stream()
-//                        .map(transformer::transform)
-//                        .collect(ImmutableCollectors.toList())
-//        );
-//    }
-//
-//    @Override
-//    protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild,
-//                                                       IQTree rightChild) {
-//        return iqFactory.createBinaryNonCommutativeIQTree(
-//                rootNode,
-//                transformer.transform(leftChild),
-//                transformer.transform(rightChild)
-//        );
-//    }
 }
