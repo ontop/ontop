@@ -84,7 +84,8 @@ public class OntopModelModule extends OntopAbstractModule {
         install(iqFactoryModule);
 
         Module queryTransformerModule = buildFactory(ImmutableList.of(
-                QueryRenamer.class, ExplicitEqualityTransformer.class),
+                QueryRenamer.class,
+                ExplicitEqualityTransformer.class),
                 QueryTransformerFactory.class);
         install(queryTransformerModule);
     }

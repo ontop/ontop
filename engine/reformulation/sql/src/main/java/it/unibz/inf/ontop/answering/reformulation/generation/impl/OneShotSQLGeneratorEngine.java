@@ -39,8 +39,11 @@ import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
@@ -120,6 +123,8 @@ public class OneShotSQLGeneratorEngine {
 	private final UnionFlattener unionFlattener;
 	private final PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer;
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
+	private final IntermediateQueryFactory iqFactory;
+	private final QueryTransformerFactory transformerFactory;
 
 
 	// the only two mutable (query-dependent) fields
@@ -135,9 +140,12 @@ public class OneShotSQLGeneratorEngine {
 							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter, UnionFlattener unionFlattener,
+							  TypeFactory typeFactory, TermFactory termFactory,
+							  IntermediateQueryFactory iqFactory,
+							  IQConverter iqConverter, UnionFlattener unionFlattener,
 							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
+							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+							  QueryTransformerFactory transformerFactory) {
 		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
@@ -149,6 +157,8 @@ public class OneShotSQLGeneratorEngine {
 		this.unionFlattener = unionFlattener;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
+		this.iqFactory = iqFactory;
+		this.transformerFactory = transformerFactory;
 
 		String driverURI = settings.getJdbcDriver()
 				.orElseGet(() -> {
@@ -174,7 +184,7 @@ public class OneShotSQLGeneratorEngine {
 		this.isIRISafeEncodingEnabled = settings.isIRISafeEncodingEnabled();
 		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
- 	}
+	}
 
 	/**
 	 * For clone purposes only
@@ -187,9 +197,11 @@ public class OneShotSQLGeneratorEngine {
 									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
-									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-									  UnionFlattener unionFlattener, PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-									  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
+									  TypeFactory typeFactory, TermFactory termFactory, IntermediateQueryFactory iqFactory,
+									  IQConverter iqConverter, UnionFlattener unionFlattener,
+									  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+									  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+									  QueryTransformerFactory transformerFactory) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -210,6 +222,8 @@ public class OneShotSQLGeneratorEngine {
 		this.unionFlattener = unionFlattener;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
+		this.iqFactory = iqFactory;
+		this.transformerFactory = transformerFactory;
 	}
 
 	private static ImmutableMap<ExpressionOperation, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -266,8 +280,9 @@ public class OneShotSQLGeneratorEngine {
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
-                pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, unionFlattener, pushDownExpressionOptimizer, pullUpExpressionOptimizer);
+				pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                typeFactory, termFactory, iqFactory, iqConverter, unionFlattener, pushDownExpressionOptimizer, pullUpExpressionOptimizer,
+				transformerFactory);
 	}
 
 	/**
@@ -348,24 +363,29 @@ public class OneShotSQLGeneratorEngine {
 		IQ flattenIQ = unionFlattener.optimize(iqConverter.convert(pushedDownQuery));
 		log.debug("New query after flattening the union: \n" + flattenIQ);
 
-		try {
-			IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
-					.optimize(iqConverter.convert(flattenIQ, intermediateQuery.getDBMetadata(),
-							intermediateQuery.getExecutorRegistry()));
-			log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+		IQTree treeAfterPullOut = transformerFactory.createEETransformer(flattenIQ.getVariableGenerator()).transform(flattenIQ.getTree());
+		log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
-			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
-			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
-
-			// Pulling up is needed when filtering conditions appear above a data atom on the left
-			// (causes problems to the IQ2DatalogConverter)
-			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(queryAfterPullOut);
-			log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullOut);
-
-			return iqConverter.convert(queryAfterPullUp);
-		} catch (EmptyQueryException e) {
-			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
-		}
+//		try {
+//			IntermediateQuery groundTermFreeQuery = new GroundTermRemovalFromDataNodeReshaper()
+//					.optimize(iqConverter.convert(flattenIQ, intermediateQuery.getDBMetadata(),
+//							intermediateQuery.getExecutorRegistry()));
+//			log.debug("New query after removing ground terms: \n" + groundTermFreeQuery);
+//
+//			IntermediateQuery queryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeQuery);
+//			log.debug("New query after pulling out equalities: \n" + queryAfterPullOut);
+//
+//
+//			 //Pulling up is needed when filtering conditions appear above a data atom on the left
+//			 //(causes problems to the IQ2DatalogConverter)
+//			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(queryAfterPullOut);
+//			log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullOut);
+//
+//			return iqConverter.convert(queryAfterPullUp);
+//		} catch (EmptyQueryException e) {
+//			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
+//		}
+		return iqFactory.createIQ(flattenIQ.getProjectionAtom(), treeAfterPullOut);
 	}
 
 

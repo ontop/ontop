@@ -18,7 +18,7 @@ public final class CompositeRecursiveIQTreeTransformer implements IQTreeTransfor
     private final ImmutableList<IQTreeTransformer> postTransformers;
     private final IQTreeTransformer childTransformer;
 
-    CompositeRecursiveIQTreeTransformer(ImmutableList<IQTreeTransformer> preTransformers,
+    public CompositeRecursiveIQTreeTransformer(ImmutableList<IQTreeTransformer> preTransformers,
                                         ImmutableList<IQTreeTransformer> postTransformers,
                                         IntermediateQueryFactory iqFactory) {
         this.preTransformers = preTransformers;

@@ -12,10 +12,13 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.CompositeRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -81,7 +84,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // One substitution per child but the leftmost
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
-            if (substitutions.isEmpty())
+            if (substitutions.stream().allMatch(ImmutableSubstitution::isEmpty))
                 return tree;
 
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -100,7 +103,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             ImmutableList<IQTree> children = ImmutableList.of(leftChild, rightChild);
             ImmutableList<InjectiveVar2VarSubstitution> substitutions = computeSubstitutions(children);
-            if (substitutions.isEmpty())
+            if (substitutions.stream().allMatch(ImmutableSubstitution::isEmpty))
                 return tree;
 
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
@@ -350,12 +353,18 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * a) for each child, deletes its root if it is a substitution-free construction node (i.e. a simple projection).
      * b) Then lift the projection if needed (i.e. create a substitution-free construction node above the current one)
      * - Construction node: perform only a)
-     * - Distinct nodes: perform neither a) nor b)
+     * - Distinct or slice nodes: perform neither a) nor b)
+     * TODO: slice nodes: the Cn should be lifted (not supported yet by the Datalog converter)
      */
     class CnLifter extends DefaultNonRecursiveIQTreeTransformer {
 
         @Override
         public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+            return tree;
+        }
+
+        @Override
+        public IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child) {
             return tree;
         }
 

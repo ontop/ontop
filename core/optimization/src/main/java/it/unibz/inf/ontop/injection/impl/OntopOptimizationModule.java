@@ -1,8 +1,14 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Module;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
+import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
@@ -16,11 +22,9 @@ import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
-import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.iq.transform.ExplicitEqualityTransformer;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
@@ -63,6 +67,10 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PushDownBooleanExpressionOptimizer.class);
         bindFromSettings(PushUpBooleanExpressionOptimizer.class);
 
+//        Module optimizerModule = buildFactory(ImmutableList.of(
+//                ExplicitEqualityTransformer.class),
+//                OptimizerFactory.class);
+//        install(optimizerModule);
         // Releases the configuration (enables some GC)
         this.configuration = null;
     }
