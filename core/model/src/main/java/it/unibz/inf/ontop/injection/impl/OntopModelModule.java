@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.transform.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -84,8 +83,7 @@ public class OntopModelModule extends OntopAbstractModule {
         install(iqFactoryModule);
 
         Module queryTransformerModule = buildFactory(ImmutableList.of(
-                QueryRenamer.class,
-                ExplicitEqualityTransformer.class),
+                QueryRenamer.class),
                 QueryTransformerFactory.class);
         install(queryTransformerModule);
     }

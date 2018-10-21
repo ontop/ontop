@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.ExplicitEqualityTransformer;
+import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -56,6 +56,42 @@ public class PullOutVariableOptimizerTest {
             EQ, Z, Z0);
     private final static ImmutableExpression EXPRESSION_Z_Z2 = TERM_FACTORY.getImmutableExpression(
             EQ, Z, Z2);
+
+    @Test
+    public void testDataNode() throws EmptyQueryException {
+
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+
+        ExtensionalDataNode dataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z, Y));
+
+        queryBuilder1.init(projectionAtom, dataNode);
+//        queryBuilder1.addChild(constructionNode, dataNode);
+
+        IntermediateQuery query1 = queryBuilder1.build();
+
+        System.out.println("\nBefore optimization: \n" +  query1);
+
+        IntermediateQuery optimizedQuery = optimize(query1);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION_Z_Z0);
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z0, Y));
+
+        queryBuilder2.init(projectionAtom, constructionNode);
+        queryBuilder2.addChild(constructionNode, filterNode);
+        queryBuilder2.addChild(filterNode, dataNode2);
+
+        IntermediateQuery query2 = queryBuilder2.build();
+
+        System.out.println("\nExpected: \n" +  query2);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
 
     @Test
     public void testJoiningConditionTest1() throws EmptyQueryException {
@@ -432,7 +468,7 @@ public class PullOutVariableOptimizerTest {
 
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
         IQ iq = IQ_CONVERTER.convert(query);
-        ExplicitEqualityTransformer eet = TRANSFORMER_FACTORY.createEETransformer(iq.getVariableGenerator());
+        ExplicitEqualityTransformer eet = OPTIMIZER_FACTORY.createEETransformer(iq.getVariableGenerator());
         return IQ_CONVERTER.convert(
                 IQ_FACTORY.createIQ(
                         iq.getProjectionAtom(),

@@ -18,11 +18,9 @@ import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -46,21 +44,19 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                OntopReformulationSQLSettings settings,
                                IQ2DatalogTranslator iq2DatalogTranslator,
                                JdbcTypeMapper jdbcTypeMapper,
-                               PullOutVariableOptimizer pullOutVariableOptimizer,
                                TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
                                IntermediateQueryFactory iqFactory,
                                IQConverter iqConverter, UnionFlattener unionFlattener,
                                PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-                               PushUpBooleanExpressionOptimizer pullUpBooleanExpression,
-                               QueryTransformerFactory transformerFactory)
+                               OptimizerFactory optimizerFactory)
     {
 
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
-                iq2DatalogTranslator, pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                iq2DatalogTranslator, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqFactory, iqConverter, unionFlattener,
-                pushDownExpressionOptimizer, pullUpBooleanExpression, transformerFactory);
+                pushDownExpressionOptimizer, optimizerFactory);
     }
 
     @Override

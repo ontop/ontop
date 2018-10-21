@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.iq.transform.impl;
+package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -10,10 +10,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.CompositeRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
+import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -67,6 +67,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * and make the corresponding equalities explicit.
      * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
      * - data node: if the data node contains a ground term, create a variable and make the equality explicit (create a filter).
+     *
      */
     class LocalExplicitEqualityEnforcer extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -88,15 +89,17 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                 return tree;
 
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(
-                            Optional.of(
-                                    updateJoinCondition(
-                                            rootNode.getOptionalFilterCondition(),
-                                            substitutions
-                                    ))),
-                    updatedChildren
-            );
+            return iqFactory.createUnaryIQTree(
+                    getProjection(tree),
+                    iqFactory.createNaryIQTree(
+                            iqFactory.createInnerJoinNode(
+                                    Optional.of(
+                                            updateJoinCondition(
+                                                    rootNode.getOptionalFilterCondition(),
+                                                    substitutions
+                                            ))),
+                            updatedChildren
+                    ));
         }
 
         @Override
@@ -107,16 +110,24 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                 return tree;
 
             ImmutableList<IQTree> updatedChildren = updateJoinChildren(substitutions, children);
-            return iqFactory.createBinaryNonCommutativeIQTree(
-                    iqFactory.createLeftJoinNode(
-                            Optional.of(
-                                    updateJoinCondition(
-                                            rootNode.getOptionalFilterCondition(),
-                                            substitutions
-                                    ))),
-                    updatedChildren.get(0),
-                    updatedChildren.get(1)
-            );
+
+            ConstructionNode cn = getProjection(tree);
+            return iqFactory.createUnaryIQTree(
+                    getProjection(tree),
+                    iqFactory.createBinaryNonCommutativeIQTree(
+                            iqFactory.createLeftJoinNode(
+                                    Optional.of(
+                                            updateJoinCondition(
+                                                    rootNode.getOptionalFilterCondition(),
+                                                    substitutions
+                                            ))),
+                            updatedChildren.get(0),
+                            updatedChildren.get(1)
+                    ));
+        }
+
+        private ConstructionNode getProjection(IQTree tree) {
+            return iqFactory.createConstructionNode(tree.getVariables());
         }
 
         private ImmutableList<InjectiveVar2VarSubstitution> computeSubstitutions(ImmutableList<IQTree> children) {
@@ -187,7 +198,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
             FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
             DataAtom atom = replaceVars(dn.getProjectionAtom(), replacementVars);
-            return iqFactory.createUnaryIQTree(filter, dn.newAtom(atom));
+            return iqFactory.createUnaryIQTree(
+                    getProjection(dn),
+                    iqFactory.createUnaryIQTree(
+                            filter,
+                            dn.newAtom(atom)
+                    ));
         }
 
         private boolean empt(ImmutableList<Optional<Variable>> replacementVars) {
@@ -354,7 +370,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * b) Then lift the projection if needed (i.e. create a substitution-free construction node above the current one)
      * - Construction node: perform only a)
      * - Distinct or slice nodes: perform neither a) nor b)
-     * TODO: slice nodes: the Cn should be lifted (not supported yet by the Datalog converter)
      */
     class CnLifter extends DefaultNonRecursiveIQTreeTransformer {
 
@@ -405,6 +420,19 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                             .map(this::trimIdleCn)
                                             .collect(ImmutableCollectors.toList())
                             ));
+        }
+
+        @Override
+        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<ConstructionNode> idleCns = getIdleCns(children.stream());
+            return idleCns.isEmpty() ?
+                    tree :
+                    iqFactory.createNaryIQTree(
+                            rootNode,
+                            children.stream()
+                                    .map(this::trimIdleCn)
+                                    .collect(ImmutableCollectors.toList())
+                    );
         }
 
         @Override

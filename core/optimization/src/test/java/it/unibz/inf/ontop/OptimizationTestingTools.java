@@ -42,7 +42,7 @@ public class OptimizationTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final QueryTransformerFactory TRANSFORMER_FACTORY;
-//    public static final OptimizerFactory OPTIMIZER_FACTORY;
+    public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final PushDownBooleanExpressionOptimizer PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER;
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
@@ -84,7 +84,7 @@ public class OptimizationTestingTools {
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER = injector.getInstance(PushDownBooleanExpressionOptimizer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
-//        OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
+        OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
