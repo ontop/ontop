@@ -8,22 +8,22 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 /**
  *
  * Applies (i) a "set" of (pre)-transformers to the current tree, before
- *         (ii) using a child transformer to apply itself recursively on the children, and
+ *         (ii) using a child transformer to apply on the children, and
  *         (iii) applies another "set" of (post)-transformers to the current tree.
  *
  */
-public final class CompositeRecursiveIQTreeTransformer implements IQTreeTransformer {
+public final class CompositeIQTreeTransformer implements IQTreeTransformer {
 
     private final ImmutableList<IQTreeTransformer> preTransformers;
     private final ImmutableList<IQTreeTransformer> postTransformers;
     private final IQTreeTransformer childTransformer;
 
-    public CompositeRecursiveIQTreeTransformer(ImmutableList<IQTreeTransformer> preTransformers,
-                                        ImmutableList<IQTreeTransformer> postTransformers,
-                                        IntermediateQueryFactory iqFactory) {
+    public CompositeIQTreeTransformer(ImmutableList<IQTreeTransformer> preTransformers,
+                                      ImmutableList<IQTreeTransformer> postTransformers,
+                                      ChildTransformer childTransformer) {
         this.preTransformers = preTransformers;
         this.postTransformers = postTransformers;
-        this.childTransformer = new ChildTransformer(iqFactory, this);
+        this.childTransformer = childTransformer;
     }
 
     @Override

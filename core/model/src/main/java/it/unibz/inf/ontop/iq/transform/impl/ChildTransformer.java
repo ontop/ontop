@@ -18,7 +18,7 @@ public class ChildTransformer extends DefaultNonRecursiveIQTreeTransformer {
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer transformer;
 
-    ChildTransformer(IntermediateQueryFactory iqFactory, IQTreeTransformer transformer) {
+    public ChildTransformer(IntermediateQueryFactory iqFactory, IQTreeTransformer transformer) {
         this.iqFactory = iqFactory;
         this.transformer = transformer;
     }
