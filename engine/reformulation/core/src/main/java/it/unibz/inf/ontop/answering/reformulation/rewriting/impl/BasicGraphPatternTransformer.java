@@ -6,9 +6,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 
-public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTransformer {
+public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     @Inject
     protected BasicGraphPatternTransformer(IntermediateQueryFactory iqFactory) {
