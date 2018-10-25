@@ -147,11 +147,10 @@ public class QuestQueryProcessor implements QueryReformulator {
             InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 
             try {
-
-                IQ converetedIQ = preProcess(translation);
+                IQ convertedIQ = preProcess(translation);
 
                 log.debug("Start the rewriting process...");
-                IQ rewrittenIQ = rewriter.rewrite(converetedIQ);
+                IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 
                 log.debug("Directly translated (SPARQL) IQ: \n" + rewrittenIQ.toString());
 
@@ -184,13 +183,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
                 log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
-//				BasicLeftJoinOptimizer leftJoinOptimizer = new BasicLeftJoinOptimizer();
-//				intermediateQuery = leftJoinOptimizer.optimize(intermediateQuery);
-//				log.debug("New query after left join optimization: \n" + intermediateQuery.toString());
-//
-//				BasicJoinOptimizer joinOptimizer = new BasicJoinOptimizer();
-//				intermediateQuery = joinOptimizer.optimize(intermediateQuery);
-//				log.debug("New query after join optimization: \n" + intermediateQuery.toString());
 
                 ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
                         ImmutableList.copyOf(translation.getSignature()));
