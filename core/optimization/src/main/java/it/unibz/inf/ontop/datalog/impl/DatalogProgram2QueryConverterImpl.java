@@ -184,7 +184,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         private final ImmutableMap<Predicate, IQ> map;
 
         private IntensionalQueryMerger(ImmutableMap<Predicate, IQ> map) {
-            super(iqFactory);
+            super(DatalogProgram2QueryConverterImpl.this.iqFactory);
             this.map = map;
         }
 
@@ -196,7 +196,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         private class DatalogQueryMergingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
             protected DatalogQueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, iqFactory, substitutionFactory, transformerFactory);
+                super(variableGenerator, DatalogProgram2QueryConverterImpl.this.iqFactory, substitutionFactory, transformerFactory);
             }
 
             @Override

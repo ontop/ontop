@@ -48,11 +48,9 @@ public class TestExecutor {
             String queryString = readQueryString();
 
             // NB: the query may be wrong (on purpose) so we cannot use the RDF4J parser
-            SPARQLQueryUtility queryCategorizer = new SPARQLQueryUtility(queryString);
-
-            if (queryCategorizer.isSelectQuery()) {
+            if (SPARQLQueryUtility.isSelectQuery(queryString)) {
                 executeSelectQuery(con, queryString);
-            } else if (queryCategorizer.isAskQuery()) {
+            } else if (SPARQLQueryUtility.isAskQuery(queryString)) {
                 executeAskQuery(con, queryString);
             } else {
                 throw new IllegalArgumentException("Only ASK and SELECT SPARQL queries are supported\n Query: "

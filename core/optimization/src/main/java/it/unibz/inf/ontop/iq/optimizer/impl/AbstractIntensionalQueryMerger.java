@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
+    protected final IntermediateQueryFactory iqFactory;
 
     protected AbstractIntensionalQueryMerger(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;

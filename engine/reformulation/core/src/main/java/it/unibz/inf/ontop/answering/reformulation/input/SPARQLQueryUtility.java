@@ -22,51 +22,17 @@ package it.unibz.inf.ontop.answering.reformulation.input;
 
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
-import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
-import org.eclipse.rdf4j.query.parser.ParsedGraphQuery;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
-import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 
 public class SPARQLQueryUtility {
-	
-	private String query;
 	
 	private static final String ASK_KEYWORD = "ask";
 	private static final String SELECT_KEYWORD = "select";
 	private static final String CONSTRUCT_KEYWORD = "construct";
 	private static final String DESCRIBE_KEYWORD = "describe";
-	
-	public SPARQLQueryUtility(String query) {
-		this.query = query;
-	}
-	
-	public SPARQLQueryUtility() {
-	}
-	
-	public String getQueryString() {
-		return query;
-	}
 
-	public boolean isEmpty() {
-		return query.isEmpty();
-	}
-	
-	public boolean isAskQuery() {
-		return isAskQuery(query);
-	}
-	
-	public boolean isSelectQuery() {
-		return isSelectQuery(query);
-	}
-	
-	public boolean isConstructQuery() {
-		return isConstructQuery(query);
-	}
-	
-	public boolean isDescribeQuery() {
-		return isDescribeQuery(query);
-	}
+	private static final String WHERE_KEYWORD = "where";
 	
 	public static boolean isAskQuery(String query) {
 		return query.toLowerCase().contains(ASK_KEYWORD);
@@ -80,34 +46,16 @@ public class SPARQLQueryUtility {
 		return query.toLowerCase().contains(CONSTRUCT_KEYWORD);
 	}
 	
-	public static boolean isDescribeQuery(String query) {
+	public static boolean isDescribeQuery(String query)  {
 		return query.toLowerCase().contains(DESCRIBE_KEYWORD);
 	}
 
-	public static boolean isAskQuery(ParsedQuery query) {
-		return (query instanceof ParsedBooleanQuery);
-	}
-	
-	public static boolean isSelectQuery(ParsedQuery query) {
-		return (query instanceof ParsedTupleQuery);
-	}
-	
-	public static boolean isConstructQuery(ParsedQuery query) {
-		return (query instanceof ParsedGraphQuery) && isConstructQuery(query.getSourceString());
-	}
-	
-	public static boolean isDescribeQuery(ParsedQuery query) {
-		return (query instanceof ParsedGraphQuery) && isDescribeQuery(query.getSourceString());
-	}
-	
 	public static boolean isVarDescribe(String strquery) {
-		if (strquery.contains("where"))
-		{
-			if (strquery.indexOf('?') < strquery.indexOf("where"))
+		if (strquery.contains(WHERE_KEYWORD)) {
+			if (strquery.indexOf('?') < strquery.indexOf(WHERE_KEYWORD))
 				return true;
 		}
-		else
-		{
+		else {
 			if (strquery.contains("?"))
 				return true;
 		}
@@ -115,7 +63,7 @@ public class SPARQLQueryUtility {
 	}
 
 	public static String getDescribeURI(String strquery) throws MalformedQueryException {
-		int describeIdx = strquery.toLowerCase().indexOf("describe");
+		int describeIdx = strquery.toLowerCase().indexOf(DESCRIBE_KEYWORD);
 		String uri = "";
 		
 		org.eclipse.rdf4j.query.parser.sparql.SPARQLParser parser = new SPARQLParser();
@@ -139,13 +87,11 @@ public class SPARQLQueryUtility {
 	}
 
 	public static boolean isURIDescribe(String strquery) {
-		if (strquery.contains("where"))
-		{
-			if (strquery.indexOf('<') < strquery.indexOf("where"))
+		if (strquery.contains(WHERE_KEYWORD)) {
+			if (strquery.indexOf('<') < strquery.indexOf(WHERE_KEYWORD))
 				return true;
 		}
-		else
-		{
+		else {
 			if (strquery.contains("<") && strquery.contains(">"))
 				return true;
 		}
@@ -155,11 +101,10 @@ public class SPARQLQueryUtility {
 	public static String getSelectVarDescribe(String strquery) {
 		
 		String strlower = strquery.toLowerCase();
-		if (strlower.contains("describe"))
-		{
+		if (strlower.contains(DESCRIBE_KEYWORD)) {
 			StringBuilder bf = new StringBuilder();
 			
-			int idx1 = strlower.indexOf("describe");
+			int idx1 = strlower.indexOf(DESCRIBE_KEYWORD);
 			int idx2 = idx1 + 8;
 			
 			if (idx1 > 0)
@@ -181,21 +126,13 @@ public class SPARQLQueryUtility {
 		return "CONSTRUCT { <" + constant + "> ?p ?o} WHERE { <"
 				+ constant + "> ?p ?o}";
 	}
-	
-	public static String getSelectObjQuery(String constant) {
-		return "SELECT * WHERE { ?s ?p <" + constant + "> }";
-}
-
-	public static String getSelectSubjQuery(String constant) {
-		return "SELECT * WHERE { <" + constant + "> ?p ?o}";
-}
 
 	public static String getSelectFromConstruct(String strquery){
 		String strlower = strquery.toLowerCase();
-		// Lets assume it IS Construct query and we dont need to check
+		// Let's assume it IS Construct query and we don't need to check
 			StringBuilder bf = new StringBuilder();
-			int idx_con = strlower.indexOf("construct");
-			int idx_where = strlower.indexOf("where");
+			int idx_con = strlower.indexOf(CONSTRUCT_KEYWORD);
+			int idx_where = strlower.indexOf(WHERE_KEYWORD);
 			bf.append(strquery.substring(0, idx_con));
 			bf.append(" SELECT * ");
 			bf.append(strquery.substring(idx_where));

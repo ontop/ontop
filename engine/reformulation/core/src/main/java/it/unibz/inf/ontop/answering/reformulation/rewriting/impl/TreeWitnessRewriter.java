@@ -23,25 +23,26 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
@@ -49,6 +50,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.
 
 import java.util.*;
 
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -61,56 +63,56 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-public class TreeWitnessRewriter implements ExistentialQueryRewriter {
+public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQueryRewriter {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private ClassifiedTBox reasoner;
-	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
-
 	private Collection<TreeWitnessGenerator> generators;
+	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
+
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
     private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
-	private final CQCUtilities cqcUtilities;
 	private final ImmutabilityTools immutabilityTools;
-	private final LinearInclusionDependencyTools inclusionDependencyTools;
+    private final IQ2DatalogTranslator iqConverter;
+    private final DatalogProgram2QueryConverter datalogConverter;
 
-	@Inject
+    @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
-								SubstitutionUtilities substitutionUtilities, CQCUtilities cqcUtilities,
-								ImmutabilityTools immutabilityTools, LinearInclusionDependencyTools inclusionDependencyTools) {
-		this.atomFactory = atomFactory;
+                                SubstitutionUtilities substitutionUtilities,
+                                ImmutabilityTools immutabilityTools,
+                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
+                                DatalogProgram2QueryConverter datalogConverter,
+                                IntermediateQueryFactory iqFactory,
+                                IQ2DatalogTranslator iqConverter) {
+        super(inclusionDependencyTools, iqFactory);
+
+        this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
         this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
-		this.cqcUtilities = cqcUtilities;
 		this.immutabilityTools = immutabilityTools;
-		this.inclusionDependencyTools = inclusionDependencyTools;
-	}
+        this.iqConverter = iqConverter;
+        this.datalogConverter = datalogConverter;
+    }
 
 	@Override
 	public void setTBox(ClassifiedTBox reasoner) {
 		double startime = System.currentTimeMillis();
 
 		this.reasoner = reasoner;
+		super.setTBox(reasoner);
 
-		ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
-		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(s, datalogFactory, unifierUtilities,
-				substitutionUtilities, termFactory);
-		
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma(), inclusionDependencyTools);
+
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
-		
-//		log.debug("SET SIGMA");
-//		for (Axiom ax : sigma.getAssertions()) {
-//			log.debug("SIGMA: " + ax);
-//		}
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
@@ -312,15 +314,17 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 	private double time = 0;
 	
 	@Override
-	public List<CQIE> rewrite(List<CQIE> ucq) {
+    public IQ rewrite(IQ query) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
+
+		DatalogProgram program = iqConverter.translate(query);
 
 		List<CQIE> outputRules = new LinkedList<>();
 		Multimap<Predicate, CQIE> ccDP = null;
 		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
 
-		for (CQIE cqie : ucq) {
+		for (CQIE cqie : program.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
 					atomFactory, immutabilityTools);
 			Function cqieAtom = cqie.getHead();
@@ -367,26 +371,80 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
 			outputRules = plugInDefinitions(outputRules, ccDP);
 			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
 		}
-	
-		// extra CQC 
-		if (outputRules.size() > 1) 
-			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
-		
-		for (CQIE cq : outputRules)
-            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), dataDependenciesCQC.dependencies());
+
+        DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of());
+
+        IQTree optimisedTree = convertedIQ.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+            @Override
+            public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+                Map<ImmutableCQ, IQTree> map = new HashMap<>();
+                // fix some order on variables
+                ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
+                for (IQTree child : children) {
+                    ImmutableCQ cq;
+                    if (child.getRootNode() instanceof InnerJoinNode
+                            && !child.getChildren().stream()
+                                .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
+                        cq = new ImmutableCQ(avs, child.getChildren().stream()
+                                .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
+                                .collect(ImmutableCollectors.toList()));
+                    }
+                    else if (child.getRootNode() instanceof IntensionalDataNode) {
+                        cq = new ImmutableCQ(avs, ImmutableList.of(
+                                ((IntensionalDataNode)child.getRootNode()).getProjectionAtom()));
+                    }
+                    else if (child.getRootNode() instanceof ConstructionNode) {
+                        ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode)child.getRootNode()).getSubstitution();
+                        ImmutableList<Variable> avs1 = (ImmutableList<Variable>) substitution.apply(avs);
+                        IQTree subtree = child.getChildren().get(0);
+                        if ((subtree.getRootNode() instanceof InnerJoinNode)
+                                && !subtree.getChildren().stream()
+                                    .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
+                            cq = new ImmutableCQ(avs1,
+                                        subtree.getChildren().stream()
+                                            .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
+                                            .collect(ImmutableCollectors.toList()));
+                        }
+                        else if (subtree.getRootNode() instanceof IntensionalDataNode) {
+                            cq = new ImmutableCQ(avs1, ImmutableList.of(
+                                        ((IntensionalDataNode)subtree.getRootNode()).getProjectionAtom()));
+                        }
+                        else {
+                            return transformNaryCommutativeNode(rootNode, children); // straight away
+                        }
+                    }
+                    else {
+                        return transformNaryCommutativeNode(rootNode, children);  // straight away
+                    }
+                    // .put returns the previous value
+                    if (map.put(cq, child) != null)
+                        return tree;
+                }
+
+                List<ImmutableCQ> ucq = new LinkedList<>(map.keySet());
+                containmentCheckUnderLIDs.removeContainedQueries(ucq);
+                if (ucq.size() == 1)
+                    return map.get(ucq.get(0));
+                else
+                    return iqFactory.createNaryIQTree(rootNode, ucq.stream().map(cq -> map.get(cq))
+                                .collect(ImmutableCollectors.toList()));
+            }
+        });
+
+        IQ result = iqFactory.createIQ(convertedIQ.getProjectionAtom(), optimisedTree);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", outputRules);
-		return outputRules;
+		log.debug("Final rewriting:\n{}", result);
+
+		return super.rewrite(result);
 	}
 
 
-
-
-    public List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
+    private List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
 
         PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
                 Comparator.comparingInt(cq -> cq.getBody().size()));
@@ -452,11 +510,11 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
                 ListIterator<CQIE> i = output.listIterator();
                 while (i.hasNext()) {
                     CQIE q2 = i.next();
-                    if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query, q2)) {
+                    if (isContainedIn(query, q2)) {
                         found = true;
                         break;
                     }
-                    else if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, query)) {
+                    else if (isContainedIn(q2, query)) {
                         i.remove();
                         log.debug("   PRUNED {} BY {}", q2, query);
                     }
@@ -496,6 +554,23 @@ public class TreeWitnessRewriter implements ExistentialQueryRewriter {
                 termscopy.add(t.clone());
         }
         return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
+    }
+
+    /**
+     * Check if query cq1 is contained in cq2, syntactically. That is, if the
+     * head of cq1 and cq2 are equal according to toString().equals and each
+     * atom in cq2 is also in the body of cq1 (also by means of toString().equals().
+     */
+
+    private static boolean isContainedIn(CQIE cq1, CQIE cq2) {
+        if (!cq2.getHead().equals(cq1.getHead()))
+            return false;
+
+        for (Function atom : cq2.getBody())
+            if (!cq1.getBody().contains(atom))
+                return false;
+
+        return true;
     }
 
 }
