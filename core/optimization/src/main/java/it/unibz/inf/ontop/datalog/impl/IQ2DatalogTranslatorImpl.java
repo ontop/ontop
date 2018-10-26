@@ -136,7 +136,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
      * the join (the single data atom plus possibly extra boolean conditions and
      * adds them to the node that is the parent of the join).
 	 *
-	 * TODO: Fake joins: can they still appear?
+	 * NEW: DOES NOT LOOK FOR fake JOINS INSIDE LJ "atoms"
      *
      * @param body
      * @return
@@ -146,18 +146,13 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
             Function currentAtom = (Function) body.get(i);
             if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
                 unfoldJoinTrees(currentAtom.getTerms());
-                long dataAtoms = currentAtom.getTerms().stream()
-                        .filter(a -> ((Function)a).isOperation())
-                        .count();
-                if (dataAtoms == 1) {
-                    body.remove(i);
-                    for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
-                        Term term = currentAtom.getTerm(j);
-                        if (!body.contains(term))
-                            body.add(i, term);
-                    }
-                    i -= 1;
-                }
+				body.remove(i);
+				for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
+					Term term = currentAtom.getTerm(j);
+					if (!body.contains(term))
+						body.add(i, term);
+				}
+				i -= 1;
             }
         }
     }
