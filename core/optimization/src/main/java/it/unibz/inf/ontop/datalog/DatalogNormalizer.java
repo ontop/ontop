@@ -104,9 +104,9 @@ public class DatalogNormalizer {
         }
     }
 
-    private void addMinimalEqualityToLeftJoin(Function leftJoin) {
+    private void addMinimalEqualityToLeftJoin(Function algebraFunctionalTerm) {
 		int booleanAtoms = 0;
-		for (Term term : leftJoin.getTerms()) {
+		for (Term term : algebraFunctionalTerm.getTerms()) {
 			Function f = (Function) term;
 			if (f.isAlgebraFunction()) {
 				addMinimalEqualityToLeftJoin(f);
@@ -114,11 +114,13 @@ public class DatalogNormalizer {
 			if (f.isOperation())
 				booleanAtoms++;
 		}
-		if (leftJoin.isAlgebraFunction() && booleanAtoms == 0) {
+		if (algebraFunctionalTerm.isAlgebraFunction()
+				&& algebraFunctionalTerm.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate())
+				&& booleanAtoms == 0) {
 			Function trivialEquality = termFactory.getFunctionEQ(
 			        termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()),
 					termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()));
-			leftJoin.getTerms().add(trivialEquality);
+			algebraFunctionalTerm.getTerms().add(trivialEquality);
 		}
 	}
 

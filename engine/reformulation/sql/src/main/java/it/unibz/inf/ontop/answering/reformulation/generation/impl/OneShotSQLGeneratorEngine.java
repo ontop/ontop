@@ -721,6 +721,9 @@ public class OneShotSQLGeneratorEngine {
 
 				Set<String> on = getConditionsSet(atoms, index, true);
 
+				if (on.isEmpty())
+					return currentJoin;
+
 				StringBuilder sb = new StringBuilder();
 				sb.append(currentJoin).append("\n").append(indent).append("ON ");
 				Joiner.on(" AND\n" + indent).appendTo(sb, on);
