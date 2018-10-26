@@ -63,6 +63,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -401,6 +402,8 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap = typeResults.getTermTypeMap();
 		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
 
+		AtomicInteger viewCounter = new AtomicInteger(0);
+
 		// non-top-level intensional predicates - need to create subqueries
 
 		ImmutableMap.Builder<Predicate, FromItem> subQueryDefinitionsBuilder = ImmutableMap.builder();
@@ -439,7 +442,7 @@ public class OneShotSQLGeneratorEngine {
 
 				// Creates the body of the subquery
 				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
-						subQueryDefinitionsBuilder.build(), termTypeMap, false);
+						subQueryDefinitionsBuilder.build(), termTypeMap, false, viewCounter);
 
 				RelationID subQueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
 				usedAliases.add(subQueryAlias);
@@ -462,30 +465,30 @@ public class OneShotSQLGeneratorEngine {
 
 		return generateQueryFromRules(ruleIndex.get(topLevelPredicate), topSignature,
 				subQueryDefinitionsBuilder.build(), termTypeMap,
-				isDistinct && !distinctResultSet);
+				isDistinct && !distinctResultSet, viewCounter);
 	}
 
 
 	/**
 	 * Takes a union of CQs and returns its SQL translation.
 	 * It is a helper method for{@link #generateQuery}
-	 *
-	 * @param cqs
+	 *  @param cqs
 	 * @param signature
 	 * @param subQueryDefinitions
 	 * @param termTypeMap
 	 * @param unionNoDuplicates
+	 * @param viewCounter
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
 										  ImmutableList<SignatureVariable> signature,
 										  ImmutableMap<Predicate, FromItem> subQueryDefinitions,
 										  ImmutableMap<CQIE, ImmutableList<Optional<TermType>>> termTypeMap,
-										  boolean unionNoDuplicates) {
+										  boolean unionNoDuplicates, AtomicInteger viewCounter) {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
 		    /* Main loop, constructing the SPJ query for each CQ */
-			AliasIndex index = new AliasIndex(cq, subQueryDefinitions);
+			AliasIndex index = new AliasIndex(cq, subQueryDefinitions, viewCounter);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -1548,8 +1551,10 @@ public class OneShotSQLGeneratorEngine {
 		final Map<RelationID, FromItem> subQueryFromItems = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnsForVariables = new HashMap<>();
 		final Map<RelationID, RelationDefinition> relationsForAliases = new HashMap<>();
+		private final AtomicInteger viewCounter;
 
-		AliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
+		AliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions, AtomicInteger viewCounter) {
+			this.viewCounter = viewCounter;
 			for (Function atom : query.getBody()) {
 				// This will be called recursively if necessary
 				generateViewsIndexVariables(atom, subQueryDefinitions);
@@ -1597,7 +1602,7 @@ public class OneShotSQLGeneratorEngine {
 					return;   // because of dummyN - what exactly is that?
 
 				RelationID relationAlias = createAlias(predicate.getName(),
-						VIEW_SUFFIX + fromItemsForAtoms.size(),
+						VIEW_SUFFIX + viewCounter.getAndIncrement(),
 						fromItemsForAtoms.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 
