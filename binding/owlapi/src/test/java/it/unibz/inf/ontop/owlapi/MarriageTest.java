@@ -245,6 +245,30 @@ public class MarriageTest {
 		assertEquals(2, count);
 	}
 
+	@Test
+	public void testOptionallyMarriedToMusician() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?s ?l2 \n" +
+				"WHERE {\n" +
+				"?x :firstName ?l1 .\n" +
+				   "OPTIONAL { \n" +
+				"    ?p :hasSpouse ?s .\n" +
+				"       OPTIONAL {\n" +
+				"        ?s :firstName ?l2 ;\n" +
+				"          a :Musician .\n" +
+				"       }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"http://example.com/person/1",
+				"http://example.com/person/2",
+				"http://example.com/person/3"
+		);
+		checkReturnedValues(query, expectedValues);
+	}
+
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
         // Now we are ready for querying
