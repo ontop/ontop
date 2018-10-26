@@ -10,6 +10,11 @@ CREATE TABLE "musician" (
 "instrument" VARCHAR(40) NOT NULL
 );
 
+CREATE TABLE "emptyTable" (
+"eid" INT NOT NULL PRIMARY KEY,
+"emptyField" INT NOT NULL
+);
+
 INSERT INTO "person"
 ("id","first_name","last_name", "spouse") VALUES
 (1,'Mary','Smith', 2),

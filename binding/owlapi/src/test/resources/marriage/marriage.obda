@@ -21,5 +21,10 @@ target		<http://example.com/person/{mid}> a :Musician ; :playsInstrument {instru
 source		SELECT *
 			FROM "musician"
 
+mappingId	emptyElement
+target		<http://example.com/empty/{eid}> a :EmptyElement ; :emptyProperty {emptyField}^^xsd:integer .
+source		SELECT *
+			FROM "emptyTable"
+
 ]]
 
