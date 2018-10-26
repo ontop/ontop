@@ -120,7 +120,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 				.forEach(q -> translate(q,  dProgram));
 
         // CQIEs are mutable
-        dProgram.getRules().forEach(q -> unfoldJoinTrees(q.getBody(), true));
+        dProgram.getRules().forEach(q -> unfoldJoinTrees(q.getBody()));
 
         return dProgram;
 	}
@@ -135,21 +135,21 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
      * process and should be eliminated. The elimination takes all the atoms in
      * the join (the single data atom plus possibly extra boolean conditions and
      * adds them to the node that is the parent of the join).
+	 *
+	 * TODO: Fake joins: can they still appear?
      *
      * @param body
      * @return
      */
-    private void unfoldJoinTrees(List body, boolean isJoin) {
+    private void unfoldJoinTrees(List body) {
         for (int i = 0; i < body.size(); i++) {
             Function currentAtom = (Function) body.get(i);
-            if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
-                unfoldJoinTrees(currentAtom.getTerms(), false);
-            else if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
-                unfoldJoinTrees(currentAtom.getTerms(), true);
+            if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
+                unfoldJoinTrees(currentAtom.getTerms());
                 long dataAtoms = currentAtom.getTerms().stream()
                         .filter(a -> ((Function)a).isOperation())
                         .count();
-                if (isJoin || dataAtoms == 1) {
+                if (dataAtoms == 1) {
                     body.remove(i);
                     for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
                         Term term = currentAtom.getTerm(j);
