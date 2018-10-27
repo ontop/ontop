@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
@@ -289,6 +288,7 @@ public class MarriageTest {
 		checkReturnedValues(query, expectedValues);
 	}
 
+	@Ignore
 	@Test
 	public void testLJJoinUnion() throws Exception {
 		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
