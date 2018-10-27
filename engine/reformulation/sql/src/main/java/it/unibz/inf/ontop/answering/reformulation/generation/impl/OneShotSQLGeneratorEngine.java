@@ -294,7 +294,7 @@ public class OneShotSQLGeneratorEngine {
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedQuery);
 
 		for (CQIE cq : queryProgram.getRules()) {
-			datalogNormalizer.addMinimalEqualityToLeftJoin(cq);
+			datalogNormalizer.addMinimalEqualityToLeftOrNestedInnerJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
