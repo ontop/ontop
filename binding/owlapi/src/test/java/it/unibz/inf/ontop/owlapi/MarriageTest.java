@@ -30,6 +30,8 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.*;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,8 +116,8 @@ public class MarriageTest {
                 "}";
 
         ImmutableSet<String> expectedValues = ImmutableSet.of(
-                "http://example.com/person/1",
-                "http://example.com/person/2"
+                "<http://example.com/person/1>",
+                "<http://example.com/person/2>"
         );
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -140,9 +142,9 @@ public class MarriageTest {
 
 		// All distinct values of x
 		ImmutableSet<String> expectedValues = ImmutableSet.of(
-				"http://example.com/person/1",
-				"http://example.com/person/2",
-				"http://example.com/person/3"
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
 		);
 		checkReturnedValues(queryBind, expectedValues);
 	}
@@ -262,10 +264,28 @@ public class MarriageTest {
 				"}\n";
 
 		ImmutableSet<String> expectedValues = ImmutableSet.of(
-				"http://example.com/person/1",
-				"http://example.com/person/2",
-				"http://example.com/person/3"
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
 		);
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Test
+	public void testLJUnion() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?p ?x \n" +
+				"WHERE {\n" +
+				"?p a :Person .\n" +
+				"OPTIONAL { \n" +
+				"    { ?p :firstName ?x . }\n" +
+				"    UNION \n" +
+				"    { ?p :lastName ?x . }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of("Mary", "Bob", "John", "Smith", "Forester", "Doe");
 		checkReturnedValues(query, expectedValues);
 	}
 
@@ -286,9 +306,9 @@ public class MarriageTest {
 				"}\n";
 
 		ImmutableSet<String> expectedValues = ImmutableSet.of(
-				"http://example.com/person/1",
-				"http://example.com/person/2",
-				"http://example.com/person/3"
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
 		);
 		checkReturnedValues(query, expectedValues);
 	}
@@ -305,8 +325,13 @@ public class MarriageTest {
 
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-                returnedValues.add(ind1.toStringID());
+
+				OWLObject value = bindingSet.getOWLObject("x");
+				String stringValue = (value instanceof OWLLiteral)
+						? ((OWLLiteral) value).getLiteral()
+						: (value == null) ? null : value.toString();
+
+                returnedValues.add(stringValue);
             }
         } finally {
             conn.close();
