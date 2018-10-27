@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -26,6 +27,8 @@ public class PullOutVariableOptimizerTest {
     private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate( 4);
     private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private final static AtomPredicate ANS1_ARITY_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
+    private final static AtomPredicate ARRAY_ARITY_2 = ATOM_FACTORY.getAtomPredicate("nest-2", 2);
 
     private final static Variable X = TERM_FACTORY.getVariable("X");
     private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");
@@ -66,7 +69,6 @@ public class PullOutVariableOptimizerTest {
         ExtensionalDataNode dataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z, Y));
 
         queryBuilder1.init(projectionAtom, dataNode);
-//        queryBuilder1.addChild(constructionNode, dataNode);
 
         IntermediateQuery query1 = queryBuilder1.build();
 
@@ -464,6 +466,153 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    @Test
+    public void testDoubleFlattenImplicitJoiningCondition() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, C, X),
+                ImmutableList.of(false, true));
+        queryBuilder.addChild(rootNode, topFlattenNode);
+
+        StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, B, X),
+                ImmutableList.of(false, true));
+        queryBuilder.addChild(topFlattenNode, subFlattenNode);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A));
+        queryBuilder.addChild(subFlattenNode, dataNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION1);
+        expectedQueryBuilder.addChild(rootNode, filterNode);
+
+        StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, C, X0),
+                ImmutableList.of(false, true));
+        expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
+
+        expectedQueryBuilder.addChild(newTopFlattenNode, subFlattenNode);
+        expectedQueryBuilder.addChild(subFlattenNode, dataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nExpected: \n" +  expectedQuery);
+
+        IntermediateQuery optimizedQuery = optimize(query);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testDoubleFlattenImplicitJoiningCondition2() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X),
+                ImmutableList.of(false, true));
+        queryBuilder.addChild(rootNode, topFlattenNode);
+
+        StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, B, X),
+                ImmutableList.of(false, true));
+        queryBuilder.addChild(topFlattenNode, subFlattenNode);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A));
+        queryBuilder.addChild(subFlattenNode, dataNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(
+                EXPRESSION1, EXPRESSION3).get());
+        expectedQueryBuilder.addChild(rootNode, filterNode);
+
+        StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X0, X1),
+                ImmutableList.of(false, true));
+        expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
+
+        expectedQueryBuilder.addChild(newTopFlattenNode, subFlattenNode);
+        expectedQueryBuilder.addChild(subFlattenNode, dataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
+        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    }
+
+    @Test
+    public void testFlattenImplicitJoiningCondition() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X),
+                ImmutableList.of(false, true));
+        queryBuilder.addChild(rootNode, flattenNode);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, B, A));
+        queryBuilder.addChild(flattenNode, dataNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION1);
+        expectedQueryBuilder.addChild(rootNode, filterNode);
+
+        StrictFlattenNode newFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
+                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X0),
+                ImmutableList.of(false, true));
+        expectedQueryBuilder.addChild(filterNode, newFlattenNode);
+
+        expectedQueryBuilder.addChild(newFlattenNode, dataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        System.out.println("\nBefore optimization: \n" +  query);
+        System.out.println("\nExpected query: \n" +  expectedQuery);
+
+        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
+        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query);
+
+        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
+
+        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
     }
 
     private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {

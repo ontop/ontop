@@ -7,15 +7,8 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 /**
  * TODO: describe
  */
-public interface DataNode<P extends AtomPredicate> extends LeafIQTree {
+public interface DataNode<P extends AtomPredicate> extends LeafIQTree, DataAtomQueryNode<P> {
 
-    /**
-     * Data atom containing the projected variables
-     */
-    DataAtom<P> getProjectionAtom();
-
-    /**
-     * Returns a new DataNode of the same type that will use the new atom
-     */
+    @Override
     DataNode<P> newAtom(DataAtom<P> newAtom);
 }

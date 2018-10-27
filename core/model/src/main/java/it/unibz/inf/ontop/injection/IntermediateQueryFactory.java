@@ -7,10 +7,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -45,6 +42,11 @@ public interface IntermediateQueryFactory {
     LeftJoinNode createLeftJoinNode(Optional<ImmutableExpression> joiningCondition);
 
     FilterNode createFilterNode(ImmutableExpression filterCondition);
+
+    StrictFlattenNode createStrictFlattenNode(Variable arrayVariable,
+                                              int arrayIndexIndex,
+                                              DataAtom<FlattenNodePredicate> dataAtom,
+                                              ImmutableList<Boolean> argumentNullability);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);

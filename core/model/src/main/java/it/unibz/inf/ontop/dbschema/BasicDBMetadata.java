@@ -25,8 +25,8 @@ public class BasicDBMetadata implements DBMetadata {
     private final String databaseProductName;
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
-    private boolean isStillMutable;
-    private final TypeMapper typeMapper;
+    protected boolean isStillMutable;
+    protected final TypeMapper typeMapper;
     @Nullable
     private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
