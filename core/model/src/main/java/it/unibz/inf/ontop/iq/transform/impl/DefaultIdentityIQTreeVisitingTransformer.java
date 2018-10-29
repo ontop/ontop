@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 
 /**
  * To be extended by overloading the methods of interest.
  */
-public class DefaultIdentityIQTransformer implements IQTransformer {
+public class DefaultIdentityIQTreeVisitingTransformer implements IQTreeVisitingTransformer {
 
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode dataNode) {

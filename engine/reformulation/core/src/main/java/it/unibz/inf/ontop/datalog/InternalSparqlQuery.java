@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.datalog;
 
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-
 import java.util.List;
 
 public class InternalSparqlQuery {

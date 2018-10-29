@@ -21,50 +21,70 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
-import java.util.List;
+import java.util.*;
 
 /***
- * A query rewriter that does nothing on the given query.
- * 
- * @author mariano
+ * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
  *
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private ImmutableMultimap<Predicate, LinearInclusionDependency> sigma;
-    private final CQCUtilities cqcUtilities;
-    private final LinearInclusionDependencyTools inclusionDependencyTools;
+    private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
+
+    protected final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
+    protected final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private DummyRewriter(CQCUtilities cqcUtilities, LinearInclusionDependencyTools inclusionDependencyTools) {
-        this.cqcUtilities = cqcUtilities;
+    protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
+                            IntermediateQueryFactory iqFactory) {
         this.inclusionDependencyTools = inclusionDependencyTools;
+        this.iqFactory = iqFactory;
     }
 
+    @Override
+    public void setTBox(ClassifiedTBox reasoner) {
+        sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+    }
+
+    protected ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> getSigma() {
+        return sigma;
+    }
 
     @Override
-	public List<CQIE> rewrite(List<CQIE> input) {
+	public IQ rewrite(IQ query) throws EmptyQueryException {
 
-        for (CQIE cq : input)
-            cqcUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+            @Override
+            protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
-        return input;
+                // optimise with Sigma ABox dependencies
+                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
+                // this loop has to remain sequential (no streams)
+                for (int i = 0; i < list.size(); i++) {
+                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(list.get(i).getProjectionAtom(), sigma);
+                    if (!derived.isEmpty()) {
+                        for (int j = 0; j < list.size(); j++)
+                            if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
+                                list.remove(j);
+                                j--;
+                            }
+                    }
+                }
+                return ImmutableList.copyOf(list);
+            }
+        }));
 	}
-
-	@Override
-	public void setTBox(ClassifiedTBox reasoner) {
-        ImmutableList<LinearInclusionDependency> s = inclusionDependencyTools.getABoxDependencies(reasoner, true);
-        sigma = LinearInclusionDependency.toMultimap(s);
-	}
-
 }

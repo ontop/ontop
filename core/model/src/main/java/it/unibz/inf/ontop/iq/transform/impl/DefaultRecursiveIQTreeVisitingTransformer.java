@@ -5,17 +5,17 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * To be extended by overloading the methods of interest.
  */
-public abstract class DefaultRecursiveIQTransformer implements IQTransformer{
+public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTreeVisitingTransformer {
 
-    private final IntermediateQueryFactory iqFactory;
+    protected final IntermediateQueryFactory iqFactory;
 
-    protected DefaultRecursiveIQTransformer(IntermediateQueryFactory iqFactory) {
+    protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
     }
 

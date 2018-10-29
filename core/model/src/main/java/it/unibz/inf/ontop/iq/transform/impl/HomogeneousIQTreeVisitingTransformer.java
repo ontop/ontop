@@ -10,12 +10,12 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 /**
  * Uses a HomogeneousQueryNodeTransformer
  */
-public class HomogeneousIQTransformer extends DefaultRecursiveIQTransformer {
+public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     private final HomogeneousQueryNodeTransformer nodeTransformer;
 
-    public HomogeneousIQTransformer(HomogeneousQueryNodeTransformer nodeTransformer,
-                                    IntermediateQueryFactory iqFactory) {
+    public HomogeneousIQTreeVisitingTransformer(HomogeneousQueryNodeTransformer nodeTransformer,
+                                                IntermediateQueryFactory iqFactory) {
         super(iqFactory);
         this.nodeTransformer = nodeTransformer;
     }

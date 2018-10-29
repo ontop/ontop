@@ -20,11 +20,4 @@ public class LinearInclusionDependency {
 
     @Override
     public String toString() { return head + " :- " + body; }
-
-    public static ImmutableMultimap<Predicate, LinearInclusionDependency> toMultimap(ImmutableList<LinearInclusionDependency> dependencies) {
-        return dependencies.stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        d -> d.getHead().getFunctionSymbol(),
-                        d -> d));
-    }
 }
