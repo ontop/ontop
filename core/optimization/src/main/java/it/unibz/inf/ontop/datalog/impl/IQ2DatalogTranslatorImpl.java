@@ -37,8 +37,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -74,17 +72,14 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
         }
 	}
 
-
-	private static final Logger LOG = LoggerFactory.getLogger(IQ2DatalogTranslatorImpl.class);
-
 	// Incremented
 	private int subQueryCounter;
 	private int dummyPredCounter;
 
 	@Inject
 	private IQ2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-									 SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
-									 ImmutabilityTools immutabilityTools, TermFactory termFactory, OrderByLifter orderByLifter) {
+                                     SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
+                                     ImmutabilityTools immutabilityTools, TermFactory termFactory, OrderByLifter orderByLifter) {
 		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.substitutionFactory = substitutionFactory;
@@ -92,7 +87,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 		this.immutabilityTools = immutabilityTools;
 		this.termFactory = termFactory;
 		this.orderByLifter = orderByLifter;
-		this.subQueryCounter = 0;
+        this.subQueryCounter = 0;
 		this.dummyPredCounter = 0;
 	}
 
@@ -132,10 +127,47 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 		normalizeIQTree(orderLiftedTree)
 				.forEach(t -> translate(t,  dProgram, projectionAtom));
 
-		return dProgram;
+        // CQIEs are mutable
+        dProgram.getRules().forEach(q -> unfoldJoinTrees(q.getBody()));
+
+        return dProgram;
 	}
 
-	/**
+    /***
+     * This expands all Join that can be directly added as conjuncts to a
+     * query's body. Nested Join trees inside left joins are not touched.
+     * <p>
+     * In addition, we will remove any Join atoms that only contain one single
+     * data atom, i.e., the join is not a join, but a table reference with
+     * conditions. These kind of atoms can result from the partial evaluation
+     * process and should be eliminated. The elimination takes all the atoms in
+     * the join (the single data atom plus possibly extra boolean conditions and
+     * adds them to the node that is the parent of the join).
+	 *
+	 * NEW: DOES NOT LOOK FOR fake JOINS INSIDE LJ "atoms"
+     *
+     * @param body
+     * @return
+     */
+    private void unfoldJoinTrees(List body) {
+        for (int i = 0; i < body.size(); i++) {
+            Function currentAtom = (Function) body.get(i);
+            if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
+                unfoldJoinTrees(currentAtom.getTerms());
+				body.remove(i);
+				for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
+					Term term = currentAtom.getTerm(j);
+					if (!body.contains(term))
+						body.add(i, term);
+				}
+				i -= 1;
+            }
+        }
+    }
+
+
+
+    /**
 	 * Assumes that ORDER BY is ABOVE the first construction node
 	 * and the order between these operators is respected and they appear ONE time maximum
 	 */

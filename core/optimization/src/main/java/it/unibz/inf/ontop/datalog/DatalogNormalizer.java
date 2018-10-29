@@ -27,8 +27,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
-
 public class DatalogNormalizer {
 
 	private final TermFactory termFactory;
@@ -41,56 +39,6 @@ public class DatalogNormalizer {
 		this.typeFactory = typeFactory;
 		this.datalogFactory = datalogFactory;
 	}
-
-	/***
-	 * This expands all Join that can be directly added as conjuncts to a
-	 * query's body. Nested Join trees inside left joins are not touched.
-	 * 
-	 * @param query
-	 * @return
-	 */
-	public void unfoldJoinTrees(CQIE query) {
-		unfoldJoinTrees(query.getBody(), true);
-	}
-
-	/***
-	 * This expands all Join that can be directly added as conjuncts to a
-	 * query's body. Nested Join trees inside left joins are not touched.
-	 * <p>
-	 * In addition, we will remove any Join atoms that only contain one single
-	 * data atom, i.e., the join is not a join, but a table reference with
-	 * conditions. These kind of atoms can result from the partial evaluation
-	 * process and should be eliminated. The elimination takes all the atoms in
-	 * the join (the single data atom plus possibly extra boolean conditions and
-	 * adds them to the node that is the parent of the join).
-	 * 
-	 * @param body
-	 * @return
-	 */
-	private void unfoldJoinTrees(List body, boolean isJoin) {
-		for (int i = 0; i < body.size(); i++) {
-			Function currentAtom = (Function) body.get(i);
-			if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
-				unfoldJoinTrees(currentAtom.getTerms(), false);
-			else if (currentAtom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate())) {
-				unfoldJoinTrees(currentAtom.getTerms(), true);
-				long dataAtoms = currentAtom.getTerms().stream()
-                        .filter(a -> ((Function)a).isOperation())
-                        .count();
-				if (isJoin || dataAtoms == 1) {
-					body.remove(i);
-					for (int j = currentAtom.getTerms().size() - 1; j >= 0; j--) {
-						Term term = currentAtom.getTerm(j);
-						if (!body.contains(term))
-							body.add(i, term);
-					}
-					i -= 1;
-				}
-			}
-		}
-	}
-
-
 
 	public void foldJoinTrees(CQIE query) {
 	    foldJoinTrees(query.getBody(), false);
@@ -148,29 +96,30 @@ public class DatalogNormalizer {
 	 * correct LeftJoins in SQL.
 	 */
 
-    public void addMinimalEqualityToLeftJoin(CQIE query) {
+    public void addMinimalEqualityToLeftOrNestedInnerJoin(CQIE query) {
         for (Function f : query.getBody()) {
             if (f.isAlgebraFunction()) {
-                addMinimalEqualityToLeftJoin(f);
+                addMinimalEqualityToLeftOrNestedInnerJoin(f);
             }
         }
     }
 
-    private void addMinimalEqualityToLeftJoin(Function leftJoin) {
+    private void addMinimalEqualityToLeftOrNestedInnerJoin(Function algebraFunctionalTerm) {
 		int booleanAtoms = 0;
-		for (Term term : leftJoin.getTerms()) {
+		for (Term term : algebraFunctionalTerm.getTerms()) {
 			Function f = (Function) term;
 			if (f.isAlgebraFunction()) {
-				addMinimalEqualityToLeftJoin(f);
+				addMinimalEqualityToLeftOrNestedInnerJoin(f);
 			}
 			if (f.isOperation())
 				booleanAtoms++;
 		}
-		if (leftJoin.isAlgebraFunction() && booleanAtoms == 0) {
+		if (algebraFunctionalTerm.isAlgebraFunction()
+				&& booleanAtoms == 0) {
 			Function trivialEquality = termFactory.getFunctionEQ(
 			        termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType()),
 					termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType()));
-			leftJoin.getTerms().add(trivialEquality);
+			algebraFunctionalTerm.getTerms().add(trivialEquality);
 		}
 	}
 

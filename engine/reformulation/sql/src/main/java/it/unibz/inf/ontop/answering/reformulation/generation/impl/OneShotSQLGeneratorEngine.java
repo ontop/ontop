@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
+import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -47,8 +48,6 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.optimizer.GroundTermRemovalFromDataNodeReshaper;
-import it.unibz.inf.ontop.iq.optimizer.PullOutVariableOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -59,9 +58,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -71,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.sql.Types;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -113,17 +111,17 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
-	private final PullOutVariableOptimizer pullOutVariableOptimizer;
 	private final Relation2Predicate relation2Predicate;
 	private final DatalogNormalizer datalogNormalizer;
 	private final DatalogFactory datalogFactory;
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
 	private final IQConverter iqConverter;
-	private final IntermediateQueryFactory iqFactory;
 	private final AtomFactory atomFactory;
 	private final UnionFlattener unionFlattener;
 	private final PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer;
+	private final IntermediateQueryFactory iqFactory;
+	private final OptimizerFactory optimizerFactory;
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final ImmutabilityTools immutabilityTools;
 
@@ -138,14 +136,13 @@ public class OneShotSQLGeneratorEngine {
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
 							  IQ2DatalogTranslator iq2DatalogTranslator,
-							  PullOutVariableOptimizer pullOutVariableOptimizer,
 							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-							  IntermediateQueryFactory iqFactory, AtomFactory atomFactory, UnionFlattener unionFlattener,
-							  ImmutabilityTools immutabilityTools, PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
-		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
+							  AtomFactory atomFactory, UnionFlattener unionFlattener,
+							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+							  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
+							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools) {
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
@@ -153,10 +150,11 @@ public class OneShotSQLGeneratorEngine {
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
-		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
+		this.iqFactory = iqFactory;
+		this.optimizerFactory = optimizerFactory;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.immutabilityTools = immutabilityTools;
 
@@ -175,7 +173,7 @@ public class OneShotSQLGeneratorEngine {
 		this.isIRISafeEncodingEnabled = settings.isIRISafeEncodingEnabled();
 		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
- 	}
+	}
 
 	/**
 	 * For clone purposes only
@@ -185,14 +183,11 @@ public class OneShotSQLGeneratorEngine {
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<FunctionSymbol, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator,
-									  PullOutVariableOptimizer pullOutVariableOptimizer,
 									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
-									  IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
-									  UnionFlattener unionFlattener, ImmutabilityTools immutabilityTools,
-									  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-									  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer) {
+									  AtomFactory atomFactory, UnionFlattener unionFlattener, PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+									  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory, PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -202,7 +197,6 @@ public class OneShotSQLGeneratorEngine {
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-		this.pullOutVariableOptimizer = pullOutVariableOptimizer;
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
@@ -210,12 +204,13 @@ public class OneShotSQLGeneratorEngine {
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
 		this.iqConverter = iqConverter;
-		this.iqFactory = iqFactory;
 		this.atomFactory = atomFactory;
 		this.unionFlattener = unionFlattener;
-		this.immutabilityTools = immutabilityTools;
 		this.pushDownExpressionOptimizer = pushDownExpressionOptimizer;
+		this.iqFactory = iqFactory;
+		this.optimizerFactory = optimizerFactory;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -272,9 +267,8 @@ public class OneShotSQLGeneratorEngine {
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
-                pullOutVariableOptimizer, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, iqFactory, atomFactory, unionFlattener, immutabilityTools,
-				pushDownExpressionOptimizer, pullUpExpressionOptimizer);
+                typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools);
 	}
 
 	/**
@@ -304,8 +298,7 @@ public class OneShotSQLGeneratorEngine {
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, childSignature);
 
 		for (CQIE cq : queryProgram.getRules()) {
-			datalogNormalizer.foldJoinTrees(cq);
-			datalogNormalizer.addMinimalEqualityToLeftJoin(cq);
+			datalogNormalizer.addMinimalEqualityToLeftOrNestedInnerJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
@@ -367,29 +360,35 @@ public class OneShotSQLGeneratorEngine {
 		IQTree flattenSubTree = unionFlattener.optimize(subTree, variableGenerator);
 		log.debug("New query after flattening the union: \n" + flattenSubTree);
 
+		// Just here for converting the IQTree into an IntermediateQuery (will be ignored later on)
+		DistinctVariableOnlyDataAtom temporaryProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+				atomFactory.getRDFAnswerPredicate(flattenSubTree.getVariables().size()),
+				ImmutableList.copyOf(flattenSubTree.getVariables()));
+
 		try {
-			// Just here for converting the IQTree into an IntermediateQuery (will be ignored later on)
-			DistinctVariableOnlyDataAtom temporaryProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-					atomFactory.getRDFAnswerPredicate(flattenSubTree.getVariables().size()),
-					ImmutableList.copyOf(flattenSubTree.getVariables()));
+			IQTree treeAfterPullOut = optimizerFactory.createEETransformer(variableGenerator).transform(flattenSubTree);
+			log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
-			IQ flattenSubQuery = iqFactory.createIQ(temporaryProjectionAtom, flattenSubTree);
 
-			IntermediateQuery groundTermFreeSubQuery = new GroundTermRemovalFromDataNodeReshaper()
-					.optimize(iqConverter.convert(flattenSubQuery, metadata, executorRegistry));
-			log.debug("New query after removing ground terms: \n" + groundTermFreeSubQuery);
+			IQ pulledOutSubQuery = iqFactory.createIQ(temporaryProjectionAtom, treeAfterPullOut);
 
-			IntermediateQuery subQueryAfterPullOut = pullOutVariableOptimizer.optimize(groundTermFreeSubQuery);
-			log.debug("New query after pulling out equalities: \n" + subQueryAfterPullOut);
+            // Trick for pushing down expressions under unions:
+            //   - there the context may be concrete enough for evaluating certain expressions
+            //   - useful for dealing with SPARQL EBVs for instance
+            IntermediateQuery pushedDownQuery = pushDownExpressionOptimizer.optimize(
+            		iqConverter.convert(pulledOutSubQuery, metadata, executorRegistry));
+            log.debug("New query after pushing down the boolean expressions (temporary): \n" + pushedDownQuery);
+
 
 			// Pulling up is needed when filtering conditions appear above a data atom on the left
 			// (causes problems to the IQ2DatalogConverter)
-			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(subQueryAfterPullOut);
+			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(pushedDownQuery);
 			log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullUp);
 
 			return iqConverter.convert(queryAfterPullUp).getTree();
 		} catch (EmptyQueryException e) {
-			throw new MinorOntopInternalBugException("Empty query should have been detected before SQL generation");
+			// Not expected
+			throw new MinorOntopInternalBugException(e.getMessage());
 		}
 	}
 
@@ -421,6 +420,8 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
+
+		AtomicInteger viewCounter = new AtomicInteger(0);
 
 		// non-top-level intensional predicates - need to create subqueries
 
@@ -460,7 +461,7 @@ public class OneShotSQLGeneratorEngine {
 
 				// Creates the body of the subquery
 				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
-						subQueryDefinitionsBuilder.build(), false);
+						subQueryDefinitionsBuilder.build(), false, viewCounter);
 
 				RelationID subQueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases);
 				usedAliases.add(subQueryAlias);
@@ -480,28 +481,29 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableList<SignatureVariable> topSignature = createSignature(signature, castTypeMap.get(topLevelPredicate));
 
 		return generateQueryFromRules(ruleIndex.get(topLevelPredicate), topSignature,
-				subQueryDefinitionsBuilder.build(), isDistinct && !distinctResultSet);
+				subQueryDefinitionsBuilder.build(), isDistinct && !distinctResultSet,
+                viewCounter);
 	}
 
 
 	/**
 	 * Takes a union of CQs and returns its SQL translation.
 	 * It is a helper method for{@link #generateQuery}
-	 *
-	 * @param cqs
+	 *  @param cqs
 	 * @param signature
 	 * @param subQueryDefinitions
 	 * @param unionNoDuplicates
+	 * @param viewCounter
 	 */
 	private String generateQueryFromRules(Collection<CQIE> cqs,
-										  ImmutableList<SignatureVariable> signature,
-										  ImmutableMap<Predicate, FromItem> subQueryDefinitions,
-										  boolean unionNoDuplicates) {
+                                          ImmutableList<SignatureVariable> signature,
+                                          ImmutableMap<Predicate, FromItem> subQueryDefinitions,
+                                          boolean unionNoDuplicates, AtomicInteger viewCounter) {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
 		    /* Main loop, constructing the SPJ query for each CQ */
-			AliasIndex index = new AliasIndex(cq, subQueryDefinitions);
+			AliasIndex index = new AliasIndex(cq, subQueryDefinitions, viewCounter);
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -575,10 +577,10 @@ public class OneShotSQLGeneratorEngine {
 	private ImmutableList<QualifiedAttributeID> getGroupBy(List<Function> body, AliasIndex index) {
 		return body.stream()
 				.filter(a -> a.getFunctionSymbol().equals(datalogFactory.getSparqlGroupPredicate()))
-				.map(a -> a.getVariables())
-				.flatMap(l -> l.stream())
-				.map(v -> index.getColumns(v))
-				.flatMap(l -> l.stream())
+				.map(Function::getVariables)
+				.flatMap(Collection::stream)
+				.map(index::getColumns)
+				.flatMap(Collection::stream)
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -665,7 +667,7 @@ public class OneShotSQLGeneratorEngine {
 	private ImmutableList<String> getTableDefs(List<Function> atoms, AliasIndex index, String indent) {
 		return atoms.stream()
 				.map(a -> getTableDefinition(a, index, indent))
-				.filter(d -> d != null)
+				.filter(Objects::nonNull)
 				.collect(ImmutableCollectors.toList());
 	}
 
@@ -727,6 +729,9 @@ public class OneShotSQLGeneratorEngine {
 
 				Set<String> on = getConditionsSet(atoms, index, true);
 
+				if (on.isEmpty())
+					return currentJoin;
+
 				StringBuilder sb = new StringBuilder();
 				sb.append(currentJoin).append("\n").append(indent).append("ON ");
 				Joiner.on(" AND\n" + indent).appendTo(sb, on);
@@ -750,18 +755,16 @@ public class OneShotSQLGeneratorEngine {
 				boolean parenthesis = joinAtoms.get(0).isAlgebraFunction()
 						|| joinAtoms.get(1).isAlgebraFunction();
 
-				String join =  getTableDefinitions(joinAtoms, index,
+				return getTableDefinitions(joinAtoms, index,
 						"JOIN", parenthesis, indent + INDENT);
-				return join;
 			}
 			else if (functionSymbol.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
 				// in case of left join we want to add the parenthesis only for the right tables
 				// we ignore nested joins from the left tables
 				boolean parenthesis = joinAtoms.get(1).isAlgebraFunction();
 
-				String join =  getTableDefinitions(joinAtoms, index,
+				return getTableDefinitions(joinAtoms, index,
 						"LEFT OUTER JOIN", parenthesis, indent + INDENT);
-				return join;
 			}
 		}
 		else if (!atom.isOperation()) {
@@ -932,11 +935,9 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 	private static final class SignatureVariable {
-		private final String name;
 		private final String columnAlias;
 		private final TermType castType;
-		SignatureVariable(String name, String columnAlias, TermType castType) {
-			this.name = name;
+		SignatureVariable(String columnAlias, TermType castType) {
 			this.columnAlias = columnAlias;
 			this.castType = castType;
 		}
@@ -969,7 +970,7 @@ public class OneShotSQLGeneratorEngine {
 			String mainAlias = sqladapter.nameTopVariable(name, columnAliases);
 			columnAliases.add(mainAlias);
 
-			builder.add(new SignatureVariable(name, mainAlias, castTypes.get(i)));
+			builder.add(new SignatureVariable(mainAlias, castTypes.get(i)));
 		}
 		return builder.build();
 	}
@@ -1196,11 +1197,14 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
+		/*
+		 * TODO: make sure that SPARQL_LANG are eliminated earlier on
+		 */
 		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
 			throw new RuntimeException("SPARQL_LANG is not supported by the SQL generator");
 		}
-		/**
-		 * TODO: replace by a switch
+		/*
+		  TODO: replace by a switch
 		 */
 		if (functionSymbol.equals(ExpressionOperation.IF_ELSE_NULL)) {
 			String condition = getSQLString(function.getTerm(0), index, false);
@@ -1223,9 +1227,8 @@ public class OneShotSQLGeneratorEngine {
 			String orig = getSQLString(function.getTerm(0), index, false);
 			String out_str = getSQLString(function.getTerm(1), index, false);
 			String in_str = getSQLString(function.getTerm(2), index, false);
-			String result = sqladapter.strReplace(orig, out_str, in_str);
 			// TODO: handle flags
-			return result;
+			return sqladapter.strReplace(orig, out_str, in_str);
 		}
 		if (functionSymbol == ExpressionOperation.CONCAT) {
 			String left = getSQLString(function.getTerm(0), index, false);
@@ -1437,8 +1440,10 @@ public class OneShotSQLGeneratorEngine {
 		final Map<RelationID, FromItem> subQueryFromItems = new HashMap<>();
 		final Map<Variable, Set<QualifiedAttributeID>> columnsForVariables = new HashMap<>();
 		final Map<RelationID, RelationDefinition> relationsForAliases = new HashMap<>();
+		private final AtomicInteger viewCounter;
 
-		public AliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions) {
+		AliasIndex(CQIE query, ImmutableMap<Predicate, FromItem> subQueryDefinitions, AtomicInteger viewCounter) {
+			this.viewCounter = viewCounter;
 			for (Function atom : query.getBody()) {
 				// This will be called recursively if necessary
 				generateViewsIndexVariables(atom, subQueryDefinitions);
@@ -1486,7 +1491,7 @@ public class OneShotSQLGeneratorEngine {
 					return;   // because of dummyN - what exactly is that?
 
 				RelationID relationAlias = createAlias(predicate.getName(),
-						VIEW_SUFFIX + fromItemsForAtoms.size(),
+						VIEW_SUFFIX + viewCounter.getAndIncrement(),
 						fromItemsForAtoms.entrySet().stream()
 								.map(e -> e.getValue().alias).collect(Collectors.toList()));
 
@@ -1527,7 +1532,7 @@ public class OneShotSQLGeneratorEngine {
 		 * @param var
 		 *            The variable we want the referenced columns.
 		 */
-		public Set<QualifiedAttributeID> getColumns(Variable var) {
+		Set<QualifiedAttributeID> getColumns(Variable var) {
 			Set<QualifiedAttributeID> columns = columnsForVariables.get(var);
 			if (columns == null || columns.isEmpty())
 				throw new RuntimeException("Unbound variable found in WHERE clause: " + var);
@@ -1537,7 +1542,7 @@ public class OneShotSQLGeneratorEngine {
 		/**
 		 * Generates the view definition, i.e., "tablename viewname".
 		 */
-		public String getViewDefinition(Function atom) {
+		String getViewDefinition(Function atom) {
 
 			FromItem dd = fromItemsForAtoms.get(atom);
 			if (dd != null) {
@@ -1551,7 +1556,7 @@ public class OneShotSQLGeneratorEngine {
 						"Impossible to get data definition for: " + atom + ", type: " + dd);
 		}
 
-		public QualifiedAttributeID getColumn(Function atom, int column) {
+		QualifiedAttributeID getColumn(Function atom, int column) {
 			FromItem dd = fromItemsForAtoms.get(atom);
 			return dd.attributes.get(column);
 		}

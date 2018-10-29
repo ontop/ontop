@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.LinearInclusionDependencyTools;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableHomomorphismUtilities;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.CQCUtilities;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -32,13 +32,12 @@ public class ReformulationTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
-    public static final LinearInclusionDependencyTools INCLUSION_DEPENDENCY_TOOLS;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
+    public static final ImmutableLinearInclusionDependenciesTools IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
-    public static final CQCUtilities CQC_UTILITIES;
 
     public static final RDF RDF_FACTORY;
 
@@ -56,11 +55,10 @@ public class ReformulationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        INCLUSION_DEPENDENCY_TOOLS = injector.getInstance(LinearInclusionDependencyTools.class);
+        IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
-        CQC_UTILITIES = injector.getInstance(CQCUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);

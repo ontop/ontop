@@ -497,6 +497,18 @@ public class BindTest {
 
     }
 
+    @Test
+    public void testBindLangTag() throws Exception {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?x\n" +
+                "WHERE {\n" +
+                "  ?y dc:title ?title .\n" +
+                "  BIND( lang(?title) AS ?x ) .\n" +
+                "}\n";
+
+        runTests(query);
+    }
+
 
         private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 

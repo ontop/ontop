@@ -6,7 +6,10 @@ public class DenodoSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String sqlCast(String value, int type) {
-        if (type == Types.VARCHAR)
+
+        if (type == Types.DOUBLE) {
+            return "CAST(" + value + " AS FLOAT)";
+        } else if (type == Types.VARCHAR)
             return "CAST(" + value + " AS VARCHAR)";
         else
             return super.sqlCast(value, type);

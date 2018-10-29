@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.datalog.CQContainmentCheck;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
 
@@ -28,7 +28,7 @@ public class TMappingRule {
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;	  
-	private final CQContainmentCheck cqc;
+	private final CQContainmentCheckUnderLIDs cqc;
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
 	private final EQNormalizer eqNormalizer;
@@ -54,7 +54,7 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc, DatalogFactory datalogFactory,
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
 						TermFactory termFactory, EQNormalizer eqNormalizer, boolean isClass) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		this.datalogFactory = datalogFactory;
