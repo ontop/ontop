@@ -9,6 +9,10 @@ public interface DBTypeFactory {
 
     DBTermType getDBLargeIntegerType();
 
+    DBTermType getDBDecimalType();
+
+    DBTermType getDBBooleanType();
+
     DBTermType getDBDateType();
 
     DBTermType getDBTimeType();
@@ -16,6 +20,8 @@ public interface DBTypeFactory {
     DBTermType getDBDateTimestampType();
 
     DBTermType getDBDoubleType();
+
+    DBTermType getDBHexBinaryType();
 
     /**
      * Returns an abstract type
@@ -26,6 +32,7 @@ public interface DBTypeFactory {
      * BC: TODO: should we keep the typeCode? Still needed?
      */
     DBTermType getDBTermType(int typeCode, String typeName);
+
 
 
     /**

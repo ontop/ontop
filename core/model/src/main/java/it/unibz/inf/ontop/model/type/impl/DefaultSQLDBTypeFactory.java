@@ -165,6 +165,16 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
+    public DBTermType getDBDecimalType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.DECIMAL));
+    }
+
+    @Override
+    public DBTermType getDBBooleanType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.BOOLEAN));
+    }
+
+    @Override
     public DBTermType getDBDateType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.DATE));
     }
@@ -182,6 +192,11 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     @Override
     public DBTermType getDBDoubleType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.DOUBLE));
+    }
+
+    @Override
+    public DBTermType getDBHexBinaryType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.HEXBINARY));
     }
 
     @Override
