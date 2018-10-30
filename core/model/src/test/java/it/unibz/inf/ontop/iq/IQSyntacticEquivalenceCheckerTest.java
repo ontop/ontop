@@ -50,7 +50,7 @@ public class IQSyntacticEquivalenceCheckerTest {
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
         table1Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);

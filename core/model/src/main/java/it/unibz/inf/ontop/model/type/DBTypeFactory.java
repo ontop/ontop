@@ -7,9 +7,7 @@ public interface DBTypeFactory {
 
     DBTermType getDBStringType();
 
-    DBTermType getDBIntegerType();
-
-    DBTermType getDBLongType();
+    DBTermType getDBLargeIntegerType();
 
     DBTermType getDBDateType();
 

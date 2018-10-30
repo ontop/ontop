@@ -67,7 +67,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		md = defaultDummyMetadata.clone();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
-		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBIntegerType();
+		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
 		// Database schema

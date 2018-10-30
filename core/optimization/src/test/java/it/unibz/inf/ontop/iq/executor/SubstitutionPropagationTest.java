@@ -49,8 +49,8 @@ public class SubstitutionPropagationTest {
     private static final Variable L = TERM_FACTORY.getVariable("l");
     private static final Variable M = TERM_FACTORY.getVariable("m");
     private static final Variable N = TERM_FACTORY.getVariable("n");
-    private static final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private static final Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private static final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static final Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     private static final String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
     private static final String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}/{}";

@@ -4,8 +4,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
-import java.sql.Types;
-
 import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.createDummyMetadata;
 
@@ -20,7 +18,7 @@ public class WrongForeignKeyTest {
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         /*
          * Table 1:

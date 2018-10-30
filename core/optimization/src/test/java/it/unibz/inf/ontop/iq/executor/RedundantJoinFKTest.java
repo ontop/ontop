@@ -18,8 +18,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
-import java.sql.Types;
-
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;
 
@@ -45,7 +43,7 @@ public class RedundantJoinFKTest {
     private final static Variable F = TERM_FACTORY.getVariable("F");
 
     private static Constant ONE = TERM_FACTORY.getDBConstant("1",
-            TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+            TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
             EQ, B, ONE);
@@ -61,7 +59,7 @@ public class RedundantJoinFKTest {
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBIntegerType();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
         Attribute pk1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);

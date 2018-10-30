@@ -422,7 +422,7 @@ public class SelectQueryParserTest {
         RDBMetadata metadata = createDummyMetadata();
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBIntegerType();
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition relation1 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, P));
