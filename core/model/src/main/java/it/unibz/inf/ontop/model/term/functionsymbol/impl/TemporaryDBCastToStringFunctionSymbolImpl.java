@@ -1,18 +1,17 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.Optional;
 
-public class TemporaryCastToStringFunctionSymbolImpl extends AbstractCastFunctionSymbolImpl {
+public class TemporaryDBCastToStringFunctionSymbolImpl extends AbstractDBCastFunctionSymbolImpl {
 
-    protected TemporaryCastToStringFunctionSymbolImpl(TermType inputBaseType, DBTermType targetType) {
+    protected TemporaryDBCastToStringFunctionSymbolImpl(DBTermType inputBaseType, DBTermType targetType) {
         super("TmpTo" + targetType.getName(), inputBaseType, targetType);
     }
 
     @Override
-    public Optional<TermType> getInputType() {
+    public Optional<DBTermType> getInputType() {
         return Optional.empty();
     }
 

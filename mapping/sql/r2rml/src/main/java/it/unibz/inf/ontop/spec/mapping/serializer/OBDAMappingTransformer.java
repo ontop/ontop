@@ -289,7 +289,7 @@ public class OBDAMappingTransformer {
 		return Optional.of(lexicalTerm)
 				.filter(t -> t instanceof ImmutableFunctionalTerm)
 				.map(t -> (ImmutableFunctionalTerm) t)
-				.filter(t -> (t.getFunctionSymbol() instanceof CastFunctionSymbol)
+				.filter(t -> (t.getFunctionSymbol() instanceof DBCastFunctionSymbol)
 						&& t.getFunctionSymbol().getArity() == 1)
 				.map(t -> t.getTerm(0))
 				.orElse(lexicalTerm);
