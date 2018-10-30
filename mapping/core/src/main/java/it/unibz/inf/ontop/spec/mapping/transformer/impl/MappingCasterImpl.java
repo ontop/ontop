@@ -157,7 +157,9 @@ public class MappingCasterImpl implements MappingCaster {
                 .map(n -> castTerm(dbType, n, uncastLexicalTerm))
                 .orElse(uncastLexicalTerm);
 
-        return castTerm(naturalType, dBStringType, naturalizedTerm);
+        return castTerm(naturalType
+                        .map(Optional::of)
+                        .orElse(dbType), dBStringType, naturalizedTerm);
     }
 
     private ImmutableTerm castTerm(Optional<DBTermType> inputType, DBTermType targetType, ImmutableTerm term) {
