@@ -23,8 +23,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
         super(template, createBaseTypes(arity, typeFactory));
         this.template = template;
-        // TODO: use a DB string instead
-        this.lexicalType = typeFactory.getXsdStringDatatype();
+        this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
     }
 
     private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
