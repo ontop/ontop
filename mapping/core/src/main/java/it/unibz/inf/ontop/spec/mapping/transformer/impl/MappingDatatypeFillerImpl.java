@@ -56,7 +56,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     }
 
     @Override
-    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata)
+    public MappingWithProvenance transform(MappingWithProvenance mapping)
             throws UnknownDatatypeException {
 
         ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
