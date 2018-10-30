@@ -427,6 +427,16 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getDBCastFunction(targetType), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getDBCastFunction(inputType, targetType), term);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
 		return getImmutableFunctionalTerm(
 				functionSymbolFactory.getTemporaryToDBStringCastFunctionSymbol(),

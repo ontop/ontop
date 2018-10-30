@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -49,13 +50,15 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final RDF rdfFactory;
+    private final MappingCaster mappingCaster;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
-                                SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory) {
+                                SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory,
+                                MappingCaster mappingCaster) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
@@ -67,6 +70,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.substitutionFactory = substitutionFactory;
         this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
+        this.mappingCaster = mappingCaster;
     }
 
     /**
@@ -96,8 +100,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         dbMetadata.freeze();
 
         MappingWithProvenance filledProvMapping = mappingDatatypeFiller.transform(provMapping);
-
-        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(filledProvMapping);
+        MappingWithProvenance castMapping = mappingCaster.transform(filledProvMapping);
+        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(castMapping);
 
         validateMapping(optionalOntology, canonizedMapping);
 

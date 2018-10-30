@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -62,14 +61,14 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
 
         for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            IQ newIQ = fillDatatypeIfMissing(entry.getKey(), entry.getValue());
+            IQ newIQ = transformMappingAssertion(entry.getKey(), entry.getValue());
             newProvenanceMapBuilder.put(newIQ, entry.getValue());
         }
 
         return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getMetadata());
     }
 
-    private IQ fillDatatypeIfMissing(IQ mappingAssertion, PPMappingAssertionProvenance provenance)
+    private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)
             throws UnknownDatatypeException {
         Variable objectVariable = extractObjectVariable(mappingAssertion);
         ImmutableSet<ImmutableFunctionalTerm> objectDefinitions = extractDefinitions(objectVariable, mappingAssertion);

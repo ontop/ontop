@@ -254,6 +254,9 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 
+	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term);
+	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
+
 	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
 	 * in a PRE-PROCESSED mapping assertion.
