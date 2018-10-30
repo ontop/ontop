@@ -27,5 +27,5 @@ public interface FunctionSymbolFactory {
      * (TEMPORARY usage, to be replaced later on in the process by a fully defined cast function)
      *
      */
-    PartiallyDefinedCastFunctionSymbol getPartiallyDefinedToStringCastFunctionSymbol();
+    CastFunctionSymbol getTemporaryToStringCastFunctionSymbol();
 }

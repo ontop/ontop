@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final RDFTermFunctionSymbol rdfTermFunction;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
-    private final PartiallyDefinedCastFunctionSymbol temporaryToStringCastFunctionSymbol;
+    private final CastFunctionSymbol temporaryToStringCastFunctionSymbol;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -33,9 +34,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
-        // TODO: use more precise types
-        this.temporaryToStringCastFunctionSymbol = new PartiallyDefinedCastFunctionSymbolImpl(
-                typeFactory.getAbstractAtomicTermType(), typeFactory.getXsdStringDatatype());
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.temporaryToStringCastFunctionSymbol = new TemporaryCastToStringFunctionSymbolImpl(
+                dbTypeFactory.getAbstractRootDBType(), dbTypeFactory.getDBStringType());
     }
 
 
@@ -71,7 +72,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public PartiallyDefinedCastFunctionSymbol getPartiallyDefinedToStringCastFunctionSymbol() {
+    public CastFunctionSymbol getTemporaryToStringCastFunctionSymbol() {
         return temporaryToStringCastFunctionSymbol;
     }
 }

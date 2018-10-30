@@ -1,40 +1,41 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.FatalTypingException;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.CastFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract class CastFunctionSymbolImpl extends FunctionSymbolImpl implements CastFunctionSymbol {
+public class CastFunctionSymbolImpl extends AbstractCastFunctionSymbolImpl {
 
-    private final TermType targetType;
+    @Nullable
+    private final TermType inputType;
 
+    /**
+     * Abstract input type
+     */
     protected CastFunctionSymbolImpl(@Nonnull String name, @Nonnull TermType expectedBaseType,
                                      TermType targetType) {
-        super(name, ImmutableList.of(expectedBaseType));
-        this.targetType = targetType;
+        super(name, expectedBaseType, targetType);
+        this.inputType = null;
+    }
+
+    /**
+     * Concrete input type
+     */
+    protected CastFunctionSymbolImpl(@Nonnull TermType inputType, @Nonnull String name,
+                                     TermType targetType) {
+        super(name, inputType, targetType);
+        this.inputType = inputType;
     }
 
     @Override
-    public TermType getTargetType() {
-        return targetType;
+    public Optional<TermType> getInputType() {
+        return Optional.ofNullable(inputType);
     }
 
     @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.of(TermTypeInference.declareTermType(targetType));
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-            throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
+    public boolean isTemporary() {
+        return false;
     }
 }

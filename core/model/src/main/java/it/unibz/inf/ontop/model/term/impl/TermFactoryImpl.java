@@ -429,7 +429,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
 		return getImmutableFunctionalTerm(
-				functionSymbolFactory.getPartiallyDefinedToStringCastFunctionSymbol(),
+				functionSymbolFactory.getTemporaryToStringCastFunctionSymbol(),
 				variable);
 	}
 

@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.PartiallyDefinedCastFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.CastFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -210,11 +210,12 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     }
 
     /**
-     * Uncast the term if it is only partially cast (to string)
+     * Uncast the term only if it is temporally cast
      */
     private ImmutableTerm uncast(ImmutableTerm term) {
         return (term instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof PartiallyDefinedCastFunctionSymbol
+                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof CastFunctionSymbol)
+                && (((CastFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
                 ? ((ImmutableFunctionalTerm) term).getTerm(0)
                 : term;
     }
