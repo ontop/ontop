@@ -28,9 +28,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 
-
+/**
+ * Implementation making use of the UniqueTermTypeExtractor
+ *   (and thus sharing its assumptions on how the source query of the mapping assertion is typed)
+ */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class MappingCasterImpl implements MappingCaster {
+public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     private final FunctionSymbolFactory functionSymbolFactory;
     private final ProvenanceMappingFactory mappingFactory;
@@ -42,11 +45,11 @@ public class MappingCasterImpl implements MappingCaster {
     private final DBTermType dBStringType;
 
     @Inject
-    private MappingCasterImpl(FunctionSymbolFactory functionSymbolFactory,
-                              ProvenanceMappingFactory mappingFactory,
-                              TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
-                              SubstitutionFactory substitutionFactory, UniqueTermTypeExtractor typeExtractor,
-                              TermFactory termFactory, RDF2DBTypeMapper typeMapper) {
+    private UniqueTermTypeMappingCaster(FunctionSymbolFactory functionSymbolFactory,
+                                        ProvenanceMappingFactory mappingFactory,
+                                        TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
+                                        SubstitutionFactory substitutionFactory, UniqueTermTypeExtractor typeExtractor,
+                                        TermFactory termFactory, RDF2DBTypeMapper typeMapper) {
         this.functionSymbolFactory = functionSymbolFactory;
         this.mappingFactory = mappingFactory;
         this.iqFactory = iqFactory;
