@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBCastFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
@@ -62,17 +63,14 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     @Override
     public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
-
-        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            PPMappingAssertionProvenance provenance = entry.getValue();
-            IQ newIQ = transformMappingAssertion(entry.getKey(), provenance);
-            newProvenanceMapBuilder.put(newIQ, provenance);
-        }
-        return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getMetadata());
+        ImmutableMap<IQ, PPMappingAssertionProvenance> newProvenanceMap = mapping.getProvenanceMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> transformMappingAssertion(e.getKey()),
+                        Map.Entry::getValue));
+        return mappingFactory.create(newProvenanceMap, mapping.getMetadata());
     }
 
-    private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance) {
+    private IQ transformMappingAssertion(IQ mappingAssertion) {
         ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(mappingAssertion.getTree())
                 .filter(t -> t.getRootNode() instanceof ConstructionNode)
                 .map(IQTree::getRootNode)
@@ -124,15 +122,16 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         ImmutableTerm uncastLexicalTerm = uncast(rdfTermDefinition.getTerm(0));
         ImmutableTerm rdfTypeTerm = rdfTermDefinition.getTerm(1);
 
-        Optional<DBTermType> dbType = extractLexicalDBType(uncastLexicalTerm, childTree);
+        Optional<DBTermType> dbType = extractInputDBType(uncastLexicalTerm, childTree);
         RDFTermType rdfType = extractRDFTermType(rdfTypeTerm);
 
-        ImmutableTerm newLexicalTerm = transformLexicalTerm(uncastLexicalTerm, dbType, rdfType);
+        ImmutableTerm newLexicalTerm = transformNestedTemporaryCasts(
+                transformTopOfLexicalTerm(uncastLexicalTerm, dbType, rdfType), childTree);
 
         return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm);
     }
 
-    private Optional<DBTermType> extractLexicalDBType(ImmutableTerm uncastLexicalTerm, IQTree childTree) {
+    private Optional<DBTermType> extractInputDBType(ImmutableTerm uncastLexicalTerm, IQTree childTree) {
         Optional<TermType> type = typeExtractor.extractUniqueTermType(uncastLexicalTerm, childTree);
         if (type
                 .filter(t -> !(t instanceof DBTermType))
@@ -144,6 +143,39 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .map(t -> (DBTermType)t);
     }
 
+    /**
+     * For dealing with arguments of templates (which are always cast as strings)
+     */
+    private ImmutableTerm transformNestedTemporaryCasts(ImmutableTerm term, IQTree childTree) {
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+
+            if ((functionSymbol instanceof DBCastFunctionSymbol) &&
+                    ((DBCastFunctionSymbol) functionSymbol).isTemporary()) {
+                DBCastFunctionSymbol castFunctionSymbol = (DBCastFunctionSymbol) functionSymbol;
+                if (functionSymbol.getArity() != 1)
+                    throw new MinorOntopInternalBugException("The casting function was expected to be unary");
+
+                // Optimization: recursion does not seem to be needed
+                ImmutableTerm childTerm = functionalTerm.getTerm(0);
+
+                Optional<DBTermType> inputType = extractInputDBType(childTerm, childTree);
+
+                return castTerm(inputType, castFunctionSymbol.getTargetType(), childTerm);
+            }
+            else {
+                // Recursive
+                return termFactory.getImmutableFunctionalTerm(functionSymbol,
+                        functionalTerm.getTerms().stream()
+                                .map(t -> transformNestedTemporaryCasts(t, childTree))
+                                .collect(ImmutableCollectors.toList()));
+            }
+        }
+        else
+            return term;
+    }
+
     private RDFTermType extractRDFTermType(ImmutableTerm rdfTypeTerm) {
         if (rdfTypeTerm instanceof RDFTermTypeConstant) {
             return ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
@@ -152,8 +184,8 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                     "not " + rdfTypeTerm);
     }
 
-    private ImmutableTerm transformLexicalTerm(ImmutableTerm uncastLexicalTerm, Optional<DBTermType> dbType,
-                                               RDFTermType rdfType) {
+    private ImmutableTerm transformTopOfLexicalTerm(ImmutableTerm uncastLexicalTerm, Optional<DBTermType> dbType,
+                                                  RDFTermType rdfType) {
         Optional<DBTermType> naturalType = typeMapper.getNaturalNonStringDBType(rdfType);
 
         ImmutableTerm naturalizedTerm = naturalType
