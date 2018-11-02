@@ -77,7 +77,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     protected ImmutableTerm constructIRI(String text) {
         ImmutableTerm toReturn = null;
         final String PLACEHOLDER = "{}";
-        List<ImmutableTerm> terms = new LinkedList<>();
         List<FormatString> tokens = parseIRI(text);
         int size = tokens.size();
         if (size == 1) {
@@ -92,13 +91,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             }
         } else {
             StringBuilder sb = new StringBuilder();
+            List<ImmutableTerm> terms = new ArrayList<>();
             for (FormatString token : tokens) {
                 if (token instanceof FixedString) { // if part of URI template
                     sb.append(token.toString());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
                     Variable column = termFactory.getVariable(token.toString());
-                    terms.add(column);
+                    terms.add(termFactory.getPartiallyDefinedToStringCast(column));
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template

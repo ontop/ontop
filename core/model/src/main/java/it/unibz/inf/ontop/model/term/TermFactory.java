@@ -218,7 +218,10 @@ public interface TermFactory {
 	 */
 	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
 
-	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean castToString);
+	/**
+	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
+	 */
+	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
 
 	/**
 	 * At least one argument for the IRI functional term with an IRI template is required
@@ -259,6 +262,7 @@ public interface TermFactory {
 
 	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
+	 *   (either the full lexical value or a fragment involved in a template)
 	 * in a PRE-PROCESSED mapping assertion.
 	 *
 	 * This functional term must not appear in the final mapping
