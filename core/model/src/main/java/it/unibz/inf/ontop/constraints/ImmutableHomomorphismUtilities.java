@@ -80,7 +80,7 @@ public class ImmutableHomomorphismUtilities {
             return true;
 
         State state = new State(iterator.next(), map, to);
-        Deque<State> stack = new ArrayDeque<>();
+        Deque<State> stack = new ArrayDeque<>(from.size());
         while (true) {
             DataAtom candidate = state.remainingAtomChoices.poll();
             if (candidate != null) {

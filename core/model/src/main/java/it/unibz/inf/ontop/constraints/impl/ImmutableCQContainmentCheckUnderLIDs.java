@@ -45,7 +45,9 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
     private ImmutableSet<DataAtom> getChase(ImmutableList<DataAtom> atoms) {
         ImmutableSet<DataAtom> result = chaseCache.get(atoms);
         if (result == null) {
-            result = chaseTools.chaseAllAtoms(atoms, dependencies);
+            result = !dependencies.isPresent()
+                    ? ImmutableSet.copyOf(atoms)
+                    : chaseTools.chaseAllAtoms(atoms, dependencies.get());
             chaseCache.put(atoms, result);
         }
         return result;
