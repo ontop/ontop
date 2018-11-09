@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 
 /**

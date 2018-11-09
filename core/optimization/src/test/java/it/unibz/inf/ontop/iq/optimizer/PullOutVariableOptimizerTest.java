@@ -24,13 +24,16 @@ import static junit.framework.TestCase.assertTrue;
 
 public class PullOutVariableOptimizerTest {
 
-    private final static AtomPredicate ANS1_PREDICATE1 = ATOM_FACTORY.getRDFAnswerPredicate( 4);
-    private final static AtomPredicate ANS1_PREDICATE2 = ATOM_FACTORY.getRDFAnswerPredicate( 3);
-    private final static AtomPredicate ANS1_PREDICATE3 = ATOM_FACTORY.getRDFAnswerPredicate( 2);
-    private final static AtomPredicate ANS1_ARITY_1 = ATOM_FACTORY.getAtomPredicate("ans1", 1);
-    private final static AtomPredicate ARRAY_ARITY_2 = ATOM_FACTORY.getAtomPredicate("nest-2", 2);
+    private final static AtomPredicate ANS1_AR4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
+    private final static AtomPredicate ANS1_AR_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
+    private final static AtomPredicate ANS1_AR_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
+    private final static AtomPredicate ANS1_AR_1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 1);
 
+    private final static Variable A = TERM_FACTORY.getVariable("A");
+    private final static Variable C = TERM_FACTORY.getVariable("C");
+    private final static Variable D = TERM_FACTORY.getVariable("D");
     private final static Variable X = TERM_FACTORY.getVariable("X");
+    private final static Variable X1 = TERM_FACTORY.getVariable("X1");
     private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");
     private final static Variable X2 = TERM_FACTORY.getVariable("Xf2");
     private final static Variable X4 = TERM_FACTORY.getVariable("Xf0f3");
@@ -44,11 +47,14 @@ public class PullOutVariableOptimizerTest {
     private final static Variable R = TERM_FACTORY.getVariable("R");
     private final static Variable S = TERM_FACTORY.getVariable("S");
     private final static Variable T = TERM_FACTORY.getVariable("T");
+    private final static Variable B = TERM_FACTORY.getVariable("B");
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X0);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
             EQ, Y, Y1);
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
+            EQ, X, X1);
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             EQ, X, X2);
     private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
@@ -64,9 +70,9 @@ public class PullOutVariableOptimizerTest {
     public void testDataNode() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
 
-        ExtensionalDataNode dataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z, Y));
+        ExtensionalDataNode dataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR4, Z, X, Z, Y));
 
         queryBuilder1.init(projectionAtom, dataNode);
 
@@ -82,7 +88,7 @@ public class PullOutVariableOptimizerTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION_Z_Z0);
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z0, Y));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR4, Z, X, Z0, Y));
 
         queryBuilder2.init(projectionAtom, constructionNode);
         queryBuilder2.addChild(constructionNode, filterNode);
@@ -99,7 +105,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -120,7 +126,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(EXPRESSION1);
@@ -142,7 +148,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest2() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
@@ -163,7 +169,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
@@ -185,7 +191,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoin3() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -212,7 +218,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(
@@ -240,7 +246,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoin4() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -263,7 +269,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(EXPRESSION_Z_Z0);
@@ -286,7 +292,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest3() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_2_PREDICATE, X, Y);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
@@ -308,7 +314,7 @@ public class PullOutVariableOptimizerTest {
 
 
         IntermediateQueryBuilder expectedQuery = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_2_PREDICATE, X, Y);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1,
@@ -334,7 +340,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest4() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X, Y, Z, W);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, X, Y, Z, W);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -384,7 +390,7 @@ public class PullOutVariableOptimizerTest {
     public void testJoiningConditionTest5() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -405,7 +411,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION1, EXPRESSION2));
@@ -427,7 +433,7 @@ public class PullOutVariableOptimizerTest {
     public void testLJUnnecessaryConstructionNode1() throws EmptyQueryException {
 
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode1 = IQ_FACTORY.createLeftJoinNode();
@@ -446,7 +452,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nBefore optimization: \n" +  query1);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
+        DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_3_PREDICATE, X, Y, Z);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode2 = IQ_FACTORY.createLeftJoinNode(EXPRESSION1);
@@ -471,22 +477,22 @@ public class PullOutVariableOptimizerTest {
     @Test
     public void testDoubleFlattenImplicitJoiningCondition() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, C, X),
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, C, X),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(rootNode, topFlattenNode);
 
         StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, B, X),
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, B, X),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(topFlattenNode, subFlattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A));
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, D, A));
         queryBuilder.addChild(subFlattenNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
@@ -499,9 +505,12 @@ public class PullOutVariableOptimizerTest {
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION1);
         expectedQueryBuilder.addChild(rootNode, filterNode);
 
-        StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getDataAtom(ARRAY_ARITY_2, C, X0),
-                ImmutableList.of(false, true));
+        StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(
+                A,
+                0,
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, C, X0),
+                ImmutableList.of(false, true)
+        );
         expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
 
         expectedQueryBuilder.addChild(newTopFlattenNode, subFlattenNode);
@@ -521,22 +530,22 @@ public class PullOutVariableOptimizerTest {
     @Test
     public void testDoubleFlattenImplicitJoiningCondition2() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X),
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(rootNode, topFlattenNode);
 
         StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, B, X),
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, B, X),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(topFlattenNode, subFlattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A));
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, C, A));
         queryBuilder.addChild(subFlattenNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
@@ -545,12 +554,12 @@ public class PullOutVariableOptimizerTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
         expectedQueryBuilder.init(projectionAtom, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(ImmutabilityTools.foldBooleanExpressions(
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(
                 EXPRESSION1, EXPRESSION3).get());
         expectedQueryBuilder.addChild(rootNode, filterNode);
 
         StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X0, X1),
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, X0, X1),
                 ImmutableList.of(false, true));
         expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
 
@@ -562,8 +571,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nBefore optimization: \n" +  query);
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -573,17 +581,17 @@ public class PullOutVariableOptimizerTest {
     @Test
     public void testFlattenImplicitJoiningCondition() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(EMPTY_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1, X);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X),
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(rootNode, flattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
-                DATA_FACTORY.getDataAtom(TABLE1_PREDICATE, B, A));
+                ATOM_FACTORY.getDataAtom(TABLE1_AR2, B, A));
         queryBuilder.addChild(flattenNode, dataNode);
 
         IntermediateQuery query = queryBuilder.build();
@@ -596,7 +604,7 @@ public class PullOutVariableOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, filterNode);
 
         StrictFlattenNode newFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                DATA_FACTORY.getDataAtom(ARRAY_ARITY_2, X, X0),
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X0),
                 ImmutableList.of(false, true));
         expectedQueryBuilder.addChild(filterNode, newFlattenNode);
 
@@ -607,8 +615,7 @@ public class PullOutVariableOptimizerTest {
         System.out.println("\nBefore optimization: \n" +  query);
         System.out.println("\nExpected query: \n" +  expectedQuery);
 
-        PullOutVariableOptimizer pullOutVariableOptimizer = new PullOutVariableOptimizer();
-        IntermediateQuery optimizedQuery = pullOutVariableOptimizer.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 

@@ -645,7 +645,7 @@ public class PushUpBooleanExpressionOptimizerTest {
         FilterNode filterNode3 = IQ_FACTORY.createFilterNode(IMMUTABILITY_TOOLS.foldBooleanExpressions(EXPRESSION3, EXPRESSION2).get());
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR3, X, W, Z));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, W, Y, Z));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Y, W, U, Z));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR4, Y, W, U, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode1);
         queryBuilder1.addChild(constructionNode1, unionNode1);

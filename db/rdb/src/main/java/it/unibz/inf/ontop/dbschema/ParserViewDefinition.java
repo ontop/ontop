@@ -105,7 +105,6 @@ public class ParserViewDefinition extends RelationDefinition {
 		return ImmutableList.of();
 	}
 
-
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();

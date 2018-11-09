@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
 import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.FlattenNodePredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -18,10 +18,10 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
 
     private final Variable arrayVariable;
     private final int arrayIndexIndex;
-    private final DataAtom<FlattenNodePredicate> dataAtom;
+    private final DataAtom<RelationPredicate> dataAtom;
     protected final ImmutableList<Boolean> argumentNullability;
 
-    protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<FlattenNodePredicate> dataAtom,
+    protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<RelationPredicate> dataAtom,
         ImmutableList<Boolean> argumentNullability) {
         this.arrayVariable = arrayVariable;
         this.arrayIndexIndex = arrayIndexIndex;
@@ -56,7 +56,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return (ImmutableSet<Variable>) Stream.concat(
+        return Stream.concat(
                 Stream.of(arrayVariable),
                 dataAtom.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
@@ -81,11 +81,11 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
     }
 
     @Override
-    public DataAtom<FlattenNodePredicate> getProjectionAtom() {
+    public DataAtom<RelationPredicate> getProjectionAtom() {
         return dataAtom;
     }
 
-    protected int getArrayIndexIndex() {
+    int getArrayIndexIndex() {
         return arrayIndexIndex;
     }
 

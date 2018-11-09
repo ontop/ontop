@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.atom.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
@@ -133,5 +134,15 @@ public class AtomFactoryImpl implements AtomFactory {
     public DistinctVariableOnlyDataAtom getDistinctQuadAtom(Variable subject, Variable property, Variable object,
                                                             Variable namedGraph) {
         return getDistinctVariableOnlyDataAtom(quadPredicate, subject, property, object, namedGraph);
+    }
+
+    @Override
+    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, ImmutableList<Variable> variables) {
+        return getDataAtom(pred, variables);
+    }
+
+    @Override
+    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, Variable... variables) {
+        return getFlattenNodeDataAtom(pred, ImmutableList.copyOf(variables));
     }
 }

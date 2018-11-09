@@ -76,6 +76,16 @@ public class BasicDBMetadata implements DBMetadata {
         return table;
     }
 
+    public DatabaseRelationDefinition createNestedView(RelationID id, DatabaseRelationDefinition parentRelation,
+                                                       Integer indexInParentRelation) {
+        if (!isStillMutable) {
+            throw new IllegalStateException("Too late, cannot create a DB relation");
+        }
+        DatabaseRelationDefinition relation = new DatabaseRelationDefinition(id, typeMapper, parentRelation, indexInParentRelation);
+        add(relation, relations);
+        return relation;
+    }
+
     /**
      * Inserts a new data definition to this metadata object.
      *

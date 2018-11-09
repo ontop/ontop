@@ -45,7 +45,7 @@ public interface IntermediateQueryFactory {
 
     StrictFlattenNode createStrictFlattenNode(Variable arrayVariable,
                                               int arrayIndexIndex,
-                                              DataAtom<FlattenNodePredicate> dataAtom,
+                                              DataAtom<RelationPredicate> dataAtom,
                                               ImmutableList<Boolean> argumentNullability);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);

@@ -56,4 +56,12 @@ public interface TypeFactory {
 	default RDFDatatype getXsdDatetimeDatatype() {
 		return getDatatype(XSD.DATETIME);
 	}
+
+	/**
+	 * Temporary solution to model nested views
+	 * Returns an integer which is not in {@link java.sql.Types}
+	 */
+	default int getUnderspecifiedDBType() {
+		return -1000;
+	}
 }

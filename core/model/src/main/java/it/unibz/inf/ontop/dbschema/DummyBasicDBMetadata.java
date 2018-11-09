@@ -21,11 +21,11 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
     }
 
 
-    private static class DummyTypeMapper implements TypeMapper {
+    static class DummyTypeMapper implements TypeMapper {
 
         private final RDFDatatype defaultType;
 
-        private DummyTypeMapper(TypeFactory typeFactory) {
+        DummyTypeMapper(TypeFactory typeFactory) {
             this.defaultType = typeFactory.getXsdStringDatatype();
         }
 

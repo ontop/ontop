@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.FlattenNodePredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
-public interface FlattenNode extends DataAtomQueryNode<FlattenNodePredicate>{
+public interface FlattenNode extends DataAtomQueryNode<RelationPredicate>{
 
 
     Variable getArrayVariable();
@@ -24,7 +24,7 @@ public interface FlattenNode extends DataAtomQueryNode<FlattenNodePredicate>{
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
     @Override
-    FlattenNode newAtom(DataAtom<FlattenNodePredicate> newAtom);
+    FlattenNode newAtom(DataAtom<RelationPredicate> newAtom);
 
     @Override
     FlattenNode clone();
