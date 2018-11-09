@@ -75,7 +75,12 @@ public class NoDependencyTestDBMetadata {
     private static RelationPredicate createFlattenNodePredicate(QuotedIDFactory idFac, int arity){
         RelationID id = idFac.createRelationID(null, String.format("flattenNodeRel_arity_%s", arity));
         ImmutableList<QuotedID> attributeIds = createAttributeIds(idFac, arity);
-        return new FlattenNodeRelationDefinition(id, attributeIds, TYPE_FACTORY.getUnderspecifiedDBType()).getAtomPredicate();
+        return new FlattenNodeRelationDefinition(
+                id,
+                attributeIds,
+                TYPE_FACTORY.getUnderspecifiedDBType(),
+                TYPE_FACTORY.getDefaultRDFDatatype()
+        ).getAtomPredicate();
     }
 
     private static ImmutableList<QuotedID> createAttributeIds(QuotedIDFactory idFac, int arity) {

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
@@ -13,9 +14,9 @@ public class FlattenNodeRelationDefinition extends RelationDefinition {
     private final ImmutableList<Attribute> attributes;
     @Nullable
 
-    public FlattenNodeRelationDefinition(RelationID id, ImmutableList<QuotedID> attributeIds, int attributesType) {
+    public FlattenNodeRelationDefinition(RelationID id, ImmutableList<QuotedID> attributeIds, int attributeType, TermType termType) {
         super(id);
-        this.attributes = createAttributes(attributeIds, attributesType);
+        this.attributes = createAttributes(attributeIds, attributeType, termType);
     }
 
     @Override
@@ -54,14 +55,14 @@ public class FlattenNodeRelationDefinition extends RelationDefinition {
         }
     }
 
-    private ImmutableList<Attribute> createAttributes(ImmutableList<QuotedID> ids, int attributeType) {
+    private ImmutableList<Attribute> createAttributes(ImmutableList<QuotedID> ids, int attributeType, TermType termType) {
         return IntStream.range(1, ids.size()+1).boxed()
-                .map(i -> createAttribute(i, attributeType, ids.get(i)))
+                .map(i -> createAttribute(i, attributeType, termType, ids.get(i-1)))
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Attribute createAttribute(Integer index, int attributeType, QuotedID id) {
+    private Attribute createAttribute(Integer index, int attributeType, TermType termType, QuotedID id) {
         return new Attribute(this, new QualifiedAttributeID(getID(), id),
-                index, attributeType, null, true, null);
+                index, attributeType, null, true, termType);
     }
 }

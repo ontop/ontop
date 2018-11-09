@@ -85,7 +85,8 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
         return dataAtom;
     }
 
-    int getArrayIndexIndex() {
+    @Override
+    public int getArrayIndexIndex() {
         return arrayIndexIndex;
     }
 
@@ -121,7 +122,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
     @Override
     public abstract N clone();
 
-    protected abstract N newFlattenNode(Variable newArrayVariable, DataAtom newAtom);
+//    protected abstract N newFlattenNode(Variable newArrayVariable, DataAtom newAtom);
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {

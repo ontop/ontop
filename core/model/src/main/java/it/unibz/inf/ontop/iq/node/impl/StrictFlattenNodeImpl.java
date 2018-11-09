@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.StrictFlattenNode;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
@@ -19,10 +20,10 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     private static final String STRICT_FLATTEN_PREFIX = "STRICT-FLATTEN";
 
 
-    @Inject
+    @AssistedInject
     private StrictFlattenNodeImpl(@Assisted Variable arrayVariable,
                                   @Assisted int arrayIndexIndex,
-                                  @Assisted DataAtom dataAtom,
+                                  @Assisted DataAtom<RelationPredicate> dataAtom,
                                   @Assisted ImmutableList<Boolean> argumentNullability) {
         super(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
     }
@@ -67,10 +68,10 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
         return new StrictFlattenNodeImpl(getArrayVariable(), getArrayIndexIndex(), getProjectionAtom(), argumentNullability);
     }
 
-    @Override
-    protected StrictFlattenNode newFlattenNode(Variable newArrayVariable, DataAtom newAtom) {
-        return new StrictFlattenNodeImpl(newArrayVariable, getArrayIndexIndex(), newAtom, argumentNullability);
-    }
+//    @Override
+//    protected StrictFlattenNode newFlattenNode(Variable newArrayVariable, DataAtom<RelationPredicate> newAtom) {
+//        return new StrictFlattenNodeImpl(newArrayVariable, getArrayIndexIndex(), newAtom, argumentNullability);
+//    }
 
     @Override
     public boolean isStrict() {
@@ -119,7 +120,7 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     }
 
     @Override
-    public StrictFlattenNode newAtom(DataAtom newAtom) {
+    public StrictFlattenNode newAtom(DataAtom<RelationPredicate> newAtom) {
         return new StrictFlattenNodeImpl(getArrayVariable(), getArrayIndexIndex(), newAtom, argumentNullability);
     }
 

@@ -64,4 +64,13 @@ public interface TypeFactory {
 	default int getUnderspecifiedDBType() {
 		return -1000;
 	}
+
+	/**
+	 * Default solution for attribute type in relations of:
+	 * . parser views
+	 * . FlattenNode data atoms
+	 */
+	default RDFDatatype getDefaultRDFDatatype() {
+		return getDatatype(XSD.STRING);
+	}
 }

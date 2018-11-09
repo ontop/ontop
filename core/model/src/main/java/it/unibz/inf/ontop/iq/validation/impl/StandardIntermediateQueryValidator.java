@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.validation.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -178,6 +179,22 @@ public class StandardIntermediateQueryValidator implements IntermediateQueryVali
                     throw new InvalidIntermediateQueryException("Some variables used in the node " + this
                             + " are not provided by its child " + child);
                 }
+            }
+        }
+
+        @Override
+        public void visit(FlattenNode flattenNode) {
+            ImmutableList<QueryNode> children = query.getChildren(flattenNode);
+
+            if (children.size() != 1)
+                throw new InvalidIntermediateQueryException("A flatten node must have exactly one child");
+
+            QueryNode child = children.get(0);
+            ImmutableSet<Variable> childVariables = query.getVariables(child);
+
+            if (!childVariables.contains(flattenNode.getArrayVariable())) {
+                throw new InvalidIntermediateQueryException("The array variable (" + flattenNode.getArrayVariable()
+                        + ") of a flatten node must be defined by its sub-tree.\n " + query);
             }
         }
     }

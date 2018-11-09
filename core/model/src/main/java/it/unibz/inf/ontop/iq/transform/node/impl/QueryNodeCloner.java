@@ -64,4 +64,9 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     public OrderByNode transform(OrderByNode orderByNode) {
         return orderByNode.clone();
     }
+
+    @Override
+    public StrictFlattenNode transform(StrictFlattenNode flattenNode) {
+        return flattenNode.clone();
+    }
 }

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 public interface StrictFlattenNode extends FlattenNode {
+
     @Override
     default boolean isStrict() {
         return true;

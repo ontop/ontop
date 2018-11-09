@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -72,6 +73,21 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
     public ConstructionNode transform(ConstructionNode constructionNode) {
         return iqFactory.createConstructionNode(renameProjectedVars(constructionNode.getVariables()),
                 renameSubstitution(constructionNode.getSubstitution()));
+    }
+
+    @Override
+    public StrictFlattenNode transform(StrictFlattenNode flattenNode) {
+        DataAtom newAtom = renamingSubstitution.applyToDataAtom(flattenNode.getProjectionAtom());
+        ImmutableTerm newArrayTerm = renamingSubstitution.apply(flattenNode.getArrayVariable());
+        if (!(newArrayTerm instanceof Variable))
+            throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
+
+        return iqFactory.createStrictFlattenNode(
+                (Variable) newArrayTerm,
+                flattenNode.getArrayIndexIndex(),
+                newAtom,
+                flattenNode.getArgumentNullability()
+        );
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {

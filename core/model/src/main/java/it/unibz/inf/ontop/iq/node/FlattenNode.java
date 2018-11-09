@@ -26,6 +26,8 @@ public interface FlattenNode extends DataAtomQueryNode<RelationPredicate>{
     @Override
     FlattenNode newAtom(DataAtom<RelationPredicate> newAtom);
 
+    int getArrayIndexIndex();
+
     @Override
     FlattenNode clone();
 
