@@ -301,7 +301,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			
 					
 		} else if (node instanceof DataNode) {
-			DataAtom atom = ((DataNode)node).getProjectionAtom();
+			DataAtom atom = ((DataNode)node).getDataAtom();
 			Function mutAt = immutabilityTools.convertToMutableFunction(atom);
 			body.add(mutAt);
 			return body;

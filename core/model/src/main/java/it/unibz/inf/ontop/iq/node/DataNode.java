@@ -9,6 +9,5 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
  */
 public interface DataNode<P extends AtomPredicate> extends LeafIQTree, DataAtomQueryNode<P> {
 
-    @Override
     DataNode<P> newAtom(DataAtom<P> newAtom);
 }

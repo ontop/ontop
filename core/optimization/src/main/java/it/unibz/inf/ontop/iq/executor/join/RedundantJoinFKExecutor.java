@@ -109,7 +109,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         return query.getChildren(joinNode).stream()
                 .filter(c -> c instanceof ExtensionalDataNode)
                 .map(c -> (ExtensionalDataNode) c)
-                .map(c -> Maps.immutableEntry(c.getProjectionAtom().getPredicate().getRelationDefinition(), c))
+                .map(c -> Maps.immutableEntry(c.getDataAtom().getPredicate().getRelationDefinition(), c))
                 .collect(ImmutableCollectors.toMultimap());
     }
 
@@ -154,8 +154,8 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
      */
     private boolean areMatching(ExtensionalDataNode sourceDataNode, ExtensionalDataNode targetDataNode, ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> sourceArguments = sourceDataNode.getProjectionAtom().getArguments();
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
+        ImmutableList<? extends VariableOrGroundTerm> sourceArguments = sourceDataNode.getDataAtom().getArguments();
+        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getDataAtom().getArguments();
 
         return constraint.getComponents().stream()
                 .allMatch(c -> sourceArguments.get(c.getAttribute().getIndex() - 1)
@@ -168,7 +168,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private boolean areNonFKColumnsUnused(ExtensionalDataNode targetDataNode, IntermediateQuery query,
                                           ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
+        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getDataAtom().getArguments();
 
         ImmutableSet<Integer> fkTargetIndexes = constraint.getComponents().stream()
                 .map(c -> c.getReference().getIndex() - 1)

@@ -44,7 +44,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public ExtensionalDataNode transform(ExtensionalDataNode extensionalDataNode) {
-        return iqFactory.createExtensionalDataNode(renameDataAtom(extensionalDataNode.getProjectionAtom()));
+        return iqFactory.createExtensionalDataNode(renameDataAtom(extensionalDataNode.getDataAtom()));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public IntensionalDataNode transform(IntensionalDataNode intensionalDataNode) {
-        return iqFactory.createIntensionalDataNode(renameDataAtom(intensionalDataNode.getProjectionAtom()));
+        return iqFactory.createIntensionalDataNode(renameDataAtom(intensionalDataNode.getDataAtom()));
     }
 
     @Override
@@ -77,17 +77,33 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
 
     @Override
     public StrictFlattenNode transform(StrictFlattenNode flattenNode) {
-        DataAtom newAtom = renamingSubstitution.applyToDataAtom(flattenNode.getProjectionAtom());
+        return iqFactory.createStrictFlattenNode(
+                getNewArrayTerm(flattenNode),
+                flattenNode.getArrayIndexIndex(),
+                getNewAtom(flattenNode),
+                flattenNode.getArgumentNullability()
+        );
+    }
+
+    @Override
+    public RelaxedFlattenNode transform(RelaxedFlattenNode flattenNode) {
+        return iqFactory.createRelaxedFlattenNode(
+                getNewArrayTerm(flattenNode),
+                flattenNode.getArrayIndexIndex(),
+                getNewAtom(flattenNode),
+                flattenNode.getArgumentNullability()
+        );
+    }
+
+    private Variable getNewArrayTerm(FlattenNode flattenNode) {
         ImmutableTerm newArrayTerm = renamingSubstitution.apply(flattenNode.getArrayVariable());
         if (!(newArrayTerm instanceof Variable))
             throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
+        return (Variable) newArrayTerm;
+    }
 
-        return iqFactory.createStrictFlattenNode(
-                (Variable) newArrayTerm,
-                flattenNode.getArrayIndexIndex(),
-                newAtom,
-                flattenNode.getArgumentNullability()
-        );
+    private DataAtom getNewAtom(FlattenNode flattenNode) {
+        return renamingSubstitution.applyToDataAtom(flattenNode.getDataAtom());
     }
 
     private ImmutableSet<Variable> renameProjectedVars(ImmutableSet<Variable> projectedVariables) {

@@ -124,7 +124,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, ExtensionalDataNode> nodeMultiMap = initialNodes.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        n -> extractDeterminantArguments(n.getProjectionAtom(), constraintDeterminantIndexes),
+                        n -> extractDeterminantArguments(n.getDataAtom(), constraintDeterminantIndexes),
                         n -> n));
 
         return nodeMultiMap.asMap().values();
@@ -180,7 +180,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
 
             boolean willBeRemoved = nodesToRemove.contains(currentDataNode);
 
-            unifyDependentTerms(referenceDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(),
+            unifyDependentTerms(referenceDataNode.getDataAtom(), currentDataNode.getDataAtom(),
                     dependentIndexes, willBeRemoved, nullableIndexes)
                     .ifPresent(substitutionCollection::add);
         }
@@ -278,7 +278,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
                 .map(c -> (ExtensionalDataNode) c)
                 .flatMap(c ->
                         // Multiset
-                        c.getProjectionAtom().getArguments().stream()
+                        c.getDataAtom().getArguments().stream()
                         .filter(t -> t instanceof Variable)
                         .map(v -> (Variable) v)
                         .collect(ImmutableCollectors.toMultiset())
@@ -340,7 +340,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
      */
     private boolean isRemovable(ExtensionalDataNode node, ImmutableSet<Integer> independentIndexes,
                                 ImmutableSet<Variable> requiredAndCooccuringVariables) {
-        ImmutableList<? extends VariableOrGroundTerm> arguments = node.getProjectionAtom().getArguments();
+        ImmutableList<? extends VariableOrGroundTerm> arguments = node.getDataAtom().getArguments();
 
         return independentIndexes.stream()
                 .map(i -> arguments.get(i - 1))

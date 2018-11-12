@@ -34,7 +34,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public IntensionalDataNode clone() {
-        return iqFactory.createIntensionalDataNode(getProjectionAtom());
+        return iqFactory.createIntensionalDataNode(getDataAtom());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof IntensionalDataNode)
-                && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+                && ((IntensionalDataNode) node).getDataAtom().equals(this.getDataAtom());
     }
 
     @Override
@@ -83,7 +83,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof IntensionalDataNode)
-                && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
+                && getDataAtom().equals(((IntensionalDataNode) queryNode).getDataAtom());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public String toString() {
-        return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
+        return INTENSIONAL_DATA_NODE_STR + " " + getDataAtom();
     }
 
     @Override

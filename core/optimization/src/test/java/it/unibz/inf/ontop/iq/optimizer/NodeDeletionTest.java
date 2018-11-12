@@ -97,7 +97,7 @@ public class NodeDeletionTest {
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR1.getName());
+        assertEquals(((ExtensionalDataNode) viceRootNode).getDataAtom().getPredicate().getName(), TABLE1_AR1.getName());
         assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
     }
 
@@ -163,7 +163,7 @@ public class NodeDeletionTest {
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
+        assertEquals(((ExtensionalDataNode) viceRootNode).getDataAtom().getPredicate().getName(), TABLE1_AR2.getName());
         assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
     }
 

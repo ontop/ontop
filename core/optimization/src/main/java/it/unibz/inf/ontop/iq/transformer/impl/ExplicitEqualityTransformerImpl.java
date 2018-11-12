@@ -62,12 +62,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     }
 
     /**
-     * Affects (left) joins and data nodes.
+     * Affects (left) joins, data and flatten nodes.
      * - left join: if the same variable is returned by both operands (implicit equality),
      * rename it (with a fresh variable each time) in each branch but the left one,
      * and make the corresponding equalities explicit.
      * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
-     * - data node: if the data node contains a ground term, create a variable and make the equality explicit (create a filter).
+     * - data node or flatten node : if the data atom contains a ground term, create a variable and make the equality explicit (create a filter).
+     * - flatten node: if the data atom contains a ground term, create a variable and make the equality explicit (create a filter).
      *
      * If needed, creates a root projection to ensure that the transformed query has the same signature as the input one
      */
@@ -81,6 +82,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dn) {
             return transformDataNode(dn);
+        }
+
+        @Override
+        public IQTree transformFlatten(FlattenNode fn) {
         }
 
         @Override
@@ -191,8 +196,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             if (empt(replacementVars))
                 return dn;
 
-            FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
-            DataAtom atom = replaceVars(dn.getProjectionAtom(), replacementVars);
+            FilterNode filter = createFilter(dn.getDataAtom(), replacementVars);
+            DataAtom atom = replaceVars(dn.getDataAtom(), replacementVars);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(dn.getVariables()),
                     iqFactory.createUnaryIQTree(
@@ -224,7 +229,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private ImmutableList<Optional<Variable>> getArgumentReplacement(DataNode dn) {
             Set<Variable> vars = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
-            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dn.getProjectionAtom().getArguments()) {
+            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dn.getDataAtom().getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {

@@ -50,7 +50,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public ExtensionalDataNode clone() {
-        return iqFactory.createExtensionalDataNode(getProjectionAtom());
+        return iqFactory.createExtensionalDataNode(getDataAtom());
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
         if (!getVariables().contains(variable))
             throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
 
-        DataAtom<RelationPredicate> atom = getProjectionAtom();
+        DataAtom<RelationPredicate> atom = getDataAtom();
 
         RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
@@ -94,7 +94,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public VariableNullability getVariableNullability() {
         if (variableNullability == null) {
-            DataAtom<RelationPredicate> atom = getProjectionAtom();
+            DataAtom<RelationPredicate> atom = getDataAtom();
             RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
             ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
@@ -124,18 +124,18 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof ExtensionalDataNode)
-                && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+                && ((ExtensionalDataNode) node).getDataAtom().equals(this.getDataAtom());
     }
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof ExtensionalDataNode)
-                && getProjectionAtom().equals(((ExtensionalDataNode) queryNode).getProjectionAtom());
+                && getDataAtom().equals(((ExtensionalDataNode) queryNode).getDataAtom());
     }
 
 
     @Override
     public String toString() {
-        return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
+        return EXTENSIONAL_NODE_STR + " " + getDataAtom();
     }
 }

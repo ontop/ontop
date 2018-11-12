@@ -2,27 +2,33 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.node.FlattenNode;
-import it.unibz.inf.ontop.iq.node.NodeTransformationProposal;
-import it.unibz.inf.ontop.iq.node.QueryNodeVisitor;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeImpl implements FlattenNode {
+public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQueryNodeImpl implements FlattenNode<N> {
 
-    private final Variable arrayVariable;
-    private final int arrayIndexIndex;
-    private final DataAtom<RelationPredicate> dataAtom;
+    protected final Variable arrayVariable;
+    protected final int arrayIndexIndex;
+    protected final DataAtom<RelationPredicate> dataAtom;
+    // True iff the argument is nullable (regardless of implicit equalities)
     protected final ImmutableList<Boolean> argumentNullability;
 
     protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<RelationPredicate> dataAtom,
-        ImmutableList<Boolean> argumentNullability) {
+                              ImmutableList<Boolean> argumentNullability, SubstitutionFactory substitutionFactory,
+                              IntermediateQueryFactory intermediateQueryFactory) {
+        super(substitutionFactory, intermediateQueryFactory);
         this.arrayVariable = arrayVariable;
         this.arrayIndexIndex = arrayIndexIndex;
         this.dataAtom = dataAtom;
@@ -81,7 +87,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
     }
 
     @Override
-    public DataAtom<RelationPredicate> getProjectionAtom() {
+    public DataAtom<RelationPredicate> getDataAtom() {
         return dataAtom;
     }
 
@@ -90,11 +96,6 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
         return arrayIndexIndex;
     }
 
-    //    @Override
-//    public SubstitutionResults<N> applyDescendingSubstitution(
-//            ImmutableSubstitution<? extends ImmutableTerm> substitution, IntermediateQuery query) {
-//        return applySubstitution(substitution);
-//    }
 
 //    @Override
 //    public SubstitutionResults<N> applyAscendingSubstitution(
@@ -102,16 +103,13 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
 //        return applySubstitution(substitution);
 //    }
 
-//    protected SubstitutionResults<N> applySubstitution(
-//            ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-//
-//        DataAtom newAtom = substitution.applyToDataAtom(getAtom());
-//        ImmutableTerm newArrayTerm = substitution.apply(getArrayVariable());
-//        if (!(newArrayTerm instanceof Variable))
-//            throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
-//
-//        return new SubstitutionResultsImpl<>(newFlattenNode((Variable) newArrayTerm, newAtom), substitution);
-//    }
+    protected N applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+        DataAtom<RelationPredicate> newAtom = substitution.applyToDataAtom(dataAtom);
+        ImmutableTerm newArrayTerm = substitution.apply(getArrayVariable());
+        if (!(newArrayTerm instanceof Variable))
+            throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
+        return newNode((Variable) newArrayTerm, arrayIndexIndex, newAtom, argumentNullability);
+    }
 
 //    @Override
 //    public N rename(InjectiveVar2VarSubstitution renamingSubstitution) {
@@ -137,5 +135,65 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends QueryNodeIm
     @Override
     public ImmutableList<Boolean> getArgumentNullability() {
         return argumentNullability;
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
+        return iqFactory.createUnaryIQTree(
+                applySubstitution(descendingSubstitution),
+                applyDescendingSubstitution(
+                        descendingSubstitution,
+                        constraint,
+                        child
+                ));
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
+        return iqFactory.createUnaryIQTree(
+                applySubstitution(descendingSubstitution),
+                applyDescendingSubstitutionWithoutOptimizing(
+                        descendingSubstitution,
+                        child
+                ));
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return child.isConstructed(variable);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+        if (!child.getVariables().contains(arrayVariable)){
+            throw new InvalidIntermediateQueryException("The array variable of Flatten Node "+this+ "is not projected by its child");
+        }
+    }
+
+    @Override
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        /*
+         * Lift the union above the filter
+         */
+        if ((newChildRoot instanceof UnionNode)
+                && ((UnionNode) newChildRoot).hasAChildWithLiftableDefinition(variable, newChild.getChildren())) {
+            UnionNode unionNode = (UnionNode) newChildRoot;
+            ImmutableList<IQTree> grandChildren = newChild.getChildren();
+
+            ImmutableList<IQTree> newChildren = grandChildren.stream()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(this, c))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(unionNode, newChildren);
+        }
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 }

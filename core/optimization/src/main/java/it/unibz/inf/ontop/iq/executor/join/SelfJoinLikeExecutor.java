@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -172,7 +171,7 @@ public class SelfJoinLikeExecutor {
         for (QueryNode node : siblings) {
             if (node instanceof ExtensionalDataNode) {
                 ExtensionalDataNode dataNode = (ExtensionalDataNode) node;
-                mapBuilder.put(dataNode.getProjectionAtom().getPredicate(), dataNode);
+                mapBuilder.put(dataNode.getDataAtom().getPredicate(), dataNode);
             }
         }
         return mapBuilder.build();
@@ -268,9 +267,9 @@ public class SelfJoinLikeExecutor {
         Iterator<ExtensionalDataNode> nodeIterator = redundantNodes.iterator();
 
         // Non-final
-        DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
+        DataAtom accumulatedAtom = nodeIterator.next().getDataAtom();
         while (nodeIterator.hasNext()) {
-            DataAtom newAtom = nodeIterator.next().getProjectionAtom();
+            DataAtom newAtom = nodeIterator.next().getDataAtom();
             // May throw an exception
             accumulatedSubstitution = updateSubstitution(accumulatedSubstitution, accumulatedAtom, newAtom);
             accumulatedAtom = accumulatedSubstitution.applyToDataAtom(accumulatedAtom);

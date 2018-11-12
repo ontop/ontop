@@ -48,6 +48,11 @@ public interface IntermediateQueryFactory {
                                               DataAtom<RelationPredicate> dataAtom,
                                               ImmutableList<Boolean> argumentNullability);
 
+    RelaxedFlattenNode createRelaxedFlattenNode(Variable newArrayTerm,
+                                                int arrayIndexIndex,
+                                                DataAtom<RelationPredicate> newAtom,
+                                                ImmutableList<Boolean> argumentNullability);
+
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
 
@@ -80,4 +85,5 @@ public interface IntermediateQueryFactory {
 
     IQProperties createIQProperties();
     IQProperties createIQProperties(boolean isLifted);
+
 }

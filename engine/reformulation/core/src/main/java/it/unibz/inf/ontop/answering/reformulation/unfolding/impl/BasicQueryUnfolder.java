@@ -62,7 +62,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
 
         @Override
         protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-            DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
+            DataAtom<AtomPredicate> atom = dataNode.getDataAtom();
             return Optional.of(atom)
                     .map(DataAtom::getPredicate)
                     .filter(p -> p instanceof RDFAtomPredicate)

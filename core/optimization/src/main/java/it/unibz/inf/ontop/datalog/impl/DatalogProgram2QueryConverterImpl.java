@@ -201,7 +201,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-                return Optional.ofNullable(map.get(dataNode.getProjectionAtom().getPredicate()));
+                return Optional.ofNullable(map.get(dataNode.getDataAtom().getPredicate()));
             }
 
             @Override

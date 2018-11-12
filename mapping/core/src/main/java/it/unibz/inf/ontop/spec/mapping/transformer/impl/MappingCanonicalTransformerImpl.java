@@ -266,12 +266,12 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-                if (getPropertyIRI(dataNode.getProjectionAtom())
+                if (getPropertyIRI(dataNode.getDataAtom())
                         .filter(i -> i.equals(Ontop.CANONICAL_IRI))
                         .isPresent()) {
                     return Optional.of(definition);
                 }
-                throw new UnexpectedPredicateException(dataNode.getProjectionAtom().getPredicate());
+                throw new UnexpectedPredicateException(dataNode.getDataAtom().getPredicate());
             }
 
             @Override

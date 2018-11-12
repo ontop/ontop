@@ -66,7 +66,7 @@ public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
 
         for (ImmutableList<Integer> primaryKeyPositions : collectionOfUCPositions) {
             for (ExtensionalDataNode dataNode : dataNodes) {
-                groupingMapBuilder.put(extractArguments(dataNode.getProjectionAtom(), primaryKeyPositions), dataNode);
+                groupingMapBuilder.put(extractArguments(dataNode.getDataAtom(), primaryKeyPositions), dataNode);
             }
         }
         return groupingMapBuilder.build();

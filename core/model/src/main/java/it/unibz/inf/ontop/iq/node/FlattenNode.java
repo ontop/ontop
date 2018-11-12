@@ -8,28 +8,34 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
-public interface FlattenNode extends DataAtomQueryNode<RelationPredicate>{
+public interface FlattenNode<P extends FlattenNode> extends DataAtomQueryNode<RelationPredicate>, UnaryOperatorNode {
 
 
     Variable getArrayVariable();
 
     VariableOrGroundTerm getArrayIndexTerm();
 
-    boolean isStrict();
-
     @Override
-    FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
+    P acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
 
     @Override
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
-    @Override
-    FlattenNode newAtom(DataAtom<RelationPredicate> newAtom);
+//    @Override
+//    P newAtom(DataAtom<RelationPredicate> newAtom);
+
+    /**
+     * Returns a new FlattenNode of the same type, with the new arguments
+     */
+    P newNode(Variable arrayVariable,
+              int arrayIndexIndex,
+              DataAtom<RelationPredicate> dataAtom,
+              ImmutableList<Boolean> argumentNullability);
 
     int getArrayIndexIndex();
 
     @Override
-    FlattenNode clone();
+    P clone();
 
     /**
      * TODO: to be generalize to each QueryNode

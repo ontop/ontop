@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -50,20 +48,20 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
 
         ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap
                 = leftDataNodes.stream()
-                .map(ExtensionalDataNode::getProjectionAtom)
+                .map(ExtensionalDataNode::getDataAtom)
                 .map(a -> Maps.immutableEntry(
                         a.getPredicate().getRelationDefinition(), a.getArguments()))
                 .collect(ImmutableCollectors.toMultimap(
                         Map.Entry::getKey,
                         Map.Entry::getValue));
 
-        DataAtom<RelationPredicate> rightProjectionAtom = rightDataNode.getProjectionAtom();
+        DataAtom<RelationPredicate> rightProjectionAtom = rightDataNode.getDataAtom();
         ImmutableList<? extends VariableOrGroundTerm> rightArguments = rightProjectionAtom.getArguments();
         if (leftRelationArgumentMultimap.isEmpty()) {
             // TODO: print a warning
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
-        RelationDefinition rightRelation = rightDataNode.getProjectionAtom().getPredicate().getRelationDefinition();
+        RelationDefinition rightRelation = rightDataNode.getDataAtom().getPredicate().getRelationDefinition();
 
         /*
          * Matched UCs and FKs
@@ -87,7 +85,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
             ExtensionalDataNode newRightDataNode = rightDataNode.newAtom(computeNewRightAtom(rightProjectionAtom.getPredicate(),
                     rightArguments, conflictingRightArgumentIndexes, variableGenerator));
             ImmutableExpression newExpression = computeExpression(rightArguments,
-                    newRightDataNode.getProjectionAtom().getArguments());
+                    newRightDataNode.getDataAtom().getArguments());
 
             return new LeftJoinRightChildNormalizationAnalysisImpl(newRightDataNode, newExpression);
         }
