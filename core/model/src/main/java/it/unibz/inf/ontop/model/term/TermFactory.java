@@ -261,6 +261,11 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
 
 	/**
+	 * TODO: explain
+	 */
+	ImmutableFunctionalTerm getConversion2RDFLexicalFunctionalTerm(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+
+	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
 	 *   (either the full lexical value or a fragment involved in a template)
 	 * in a PRE-PROCESSED mapping assertion.

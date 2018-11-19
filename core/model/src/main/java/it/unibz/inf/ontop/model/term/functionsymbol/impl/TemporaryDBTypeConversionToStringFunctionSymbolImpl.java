@@ -4,9 +4,9 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 
-public class TemporaryDBCastToStringFunctionSymbolImpl extends AbstractDBCastFunctionSymbolImpl {
+public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends AbstractDBTypeConversionFunctionSymbolImpl {
 
-    protected TemporaryDBCastToStringFunctionSymbolImpl(DBTermType inputBaseType, DBTermType targetType) {
+    protected TemporaryDBTypeConversionToStringFunctionSymbolImpl(DBTermType inputBaseType, DBTermType targetType) {
         super("TmpTo" + targetType.getName(), inputBaseType, targetType);
     }
 

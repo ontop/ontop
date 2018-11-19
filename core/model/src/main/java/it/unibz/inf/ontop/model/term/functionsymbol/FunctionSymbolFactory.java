@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 
-import it.unibz.inf.ontop.model.type.DBTermType;
-
 public interface FunctionSymbolFactory {
 
     RDFTermFunctionSymbol getRDFTermFunctionSymbol();
@@ -22,16 +20,6 @@ public interface FunctionSymbolFactory {
      */
     BnodeStringTemplateFunctionSymbol getFreshBnodeStringTemplateFunctionSymbol(int arity);
 
-    /**
-     * Partially cast function for the lexical part of an RDF term.
-     *
-     * ONLY for pre-processed mapping assertions
-     * (TEMPORARY usage, to be replaced later on in the process by a fully defined cast function)
-     *
-     */
-    DBCastFunctionSymbol getTemporaryToDBStringCastFunctionSymbol();
 
-    DBCastFunctionSymbol getDBCastFunction(DBTermType targetType);
-
-    DBCastFunctionSymbol getDBCastFunction(DBTermType inputType, DBTermType targetType);
+    DBFunctionSymbolFactory getDBFunctionSymbolFactory();
 }

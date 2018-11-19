@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.DBCastFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -42,7 +42,6 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     private final SubstitutionFactory substitutionFactory;
     private final UniqueTermTypeExtractor typeExtractor;
     private final TermFactory termFactory;
-    private final RDF2DBTypeMapper typeMapper;
     private final DBTermType dBStringType;
 
     @Inject
@@ -50,14 +49,13 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                                         ProvenanceMappingFactory mappingFactory,
                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
                                         SubstitutionFactory substitutionFactory, UniqueTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory, RDF2DBTypeMapper typeMapper) {
+                                        TermFactory termFactory) {
         this.functionSymbolFactory = functionSymbolFactory;
         this.mappingFactory = mappingFactory;
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.typeExtractor = typeExtractor;
         this.termFactory = termFactory;
-        this.typeMapper = typeMapper;
         this.dBStringType = typeFactory.getDBTypeFactory().getDBStringType();
     }
 
@@ -131,6 +129,17 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm);
     }
 
+    /**
+     * Uncast the term only if it is temporally cast
+     */
+    private ImmutableTerm uncast(ImmutableTerm term) {
+        return (term instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
+                && (((DBTypeConversionFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
+                ? ((ImmutableFunctionalTerm) term).getTerm(0)
+                : term;
+    }
+
     private Optional<DBTermType> extractInputDBType(ImmutableTerm uncastLexicalTerm, IQTree childTree) {
         Optional<TermType> type = typeExtractor.extractUniqueTermType(uncastLexicalTerm, childTree);
         if (type
@@ -143,17 +152,38 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .map(t -> (DBTermType)t);
     }
 
+    private RDFTermType extractRDFTermType(ImmutableTerm rdfTypeTerm) {
+        if (rdfTypeTerm instanceof RDFTermTypeConstant) {
+            return ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
+        }
+        throw new MinorOntopInternalBugException("Was expecting a RDFTermTypeConstant in the RDF term function, " +
+                    "not " + rdfTypeTerm);
+    }
+
+    private ImmutableTerm transformTopOfLexicalTerm(ImmutableTerm uncastLexicalTerm, Optional<DBTermType> dbType,
+                                                  RDFTermType rdfType) {
+
+        return dbType
+                .map(i -> termFactory.getConversion2RDFLexicalFunctionalTerm(i, uncastLexicalTerm, rdfType))
+                .orElseGet(() -> termFactory.getDBCastFunctionalTerm(dBStringType, uncastLexicalTerm));
+    }
+
     /**
      * For dealing with arguments of templates (which are always cast as strings)
+     *
+     * Either remove the casting function (if not needed), replace it by a casting function
+     * knowing its input type or, in the "worst" case, by a replace it by a casting function
+     * NOT knowing the input type.
+     *
      */
     private ImmutableTerm transformNestedTemporaryCasts(ImmutableTerm term, IQTree childTree) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-            if ((functionSymbol instanceof DBCastFunctionSymbol) &&
-                    ((DBCastFunctionSymbol) functionSymbol).isTemporary()) {
-                DBCastFunctionSymbol castFunctionSymbol = (DBCastFunctionSymbol) functionSymbol;
+            if ((functionSymbol instanceof DBTypeConversionFunctionSymbol) &&
+                    ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
+                DBTypeConversionFunctionSymbol castFunctionSymbol = (DBTypeConversionFunctionSymbol) functionSymbol;
                 if (functionSymbol.getArity() != 1)
                     throw new MinorOntopInternalBugException("The casting function was expected to be unary");
 
@@ -162,7 +192,13 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
                 Optional<DBTermType> inputType = extractInputDBType(childTerm, childTree);
 
-                return castTerm(inputType, castFunctionSymbol.getTargetType(), childTerm);
+                return Optional.of(castFunctionSymbol.getTargetType())
+                        .filter(targetType -> !inputType.filter(targetType::equals).isPresent())
+                        .map(targetType -> inputType
+                                .map(i -> termFactory.getDBCastFunctionalTerm(i, targetType, childTerm))
+                                .orElseGet(() -> termFactory.getDBCastFunctionalTerm(targetType, childTerm)))
+                        .map(t -> (ImmutableTerm) t)
+                        .orElse(childTerm);
             }
             else {
                 // Recursive
@@ -174,49 +210,6 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         }
         else
             return term;
-    }
-
-    private RDFTermType extractRDFTermType(ImmutableTerm rdfTypeTerm) {
-        if (rdfTypeTerm instanceof RDFTermTypeConstant) {
-            return ((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType();
-        }
-        throw new MinorOntopInternalBugException("Was expecting a RDFTermTypeConstant in the RDF term function, " +
-                    "not " + rdfTypeTerm);
-    }
-
-    private ImmutableTerm transformTopOfLexicalTerm(ImmutableTerm uncastLexicalTerm, Optional<DBTermType> dbType,
-                                                  RDFTermType rdfType) {
-        Optional<DBTermType> naturalType = typeMapper.getNaturalNonStringDBType(rdfType);
-
-        ImmutableTerm naturalizedTerm = naturalType
-                .map(n -> castTerm(dbType, n, uncastLexicalTerm))
-                .orElse(uncastLexicalTerm);
-
-        return castTerm(naturalType
-                        .map(Optional::of)
-                        .orElse(dbType), dBStringType, naturalizedTerm);
-    }
-
-    private ImmutableTerm castTerm(Optional<DBTermType> inputType, DBTermType targetType, ImmutableTerm term) {
-        return Optional.of(targetType)
-                .filter(t1 -> !inputType.filter(t1::equals).isPresent())
-                .map(n -> inputType
-                        .map(i -> termFactory.getDBCastFunctionalTerm(i, n, term))
-                        .orElseGet(() -> termFactory.getDBCastFunctionalTerm(n, term)))
-                .map(t -> (ImmutableTerm) t)
-                .orElse(term);
-    }
-
-
-    /**
-     * Uncast the term only if it is temporally cast
-     */
-    private ImmutableTerm uncast(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBCastFunctionSymbol)
-                && (((DBCastFunctionSymbol) ((ImmutableFunctionalTerm) term).getFunctionSymbol()).isTemporary())
-                ? ((ImmutableFunctionalTerm) term).getTerm(0)
-                : term;
     }
 
 

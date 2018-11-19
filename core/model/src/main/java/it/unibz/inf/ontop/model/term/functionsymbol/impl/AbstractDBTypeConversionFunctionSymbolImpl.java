@@ -3,18 +3,18 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.DBCastFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
-public abstract class AbstractDBCastFunctionSymbolImpl extends FunctionSymbolImpl implements DBCastFunctionSymbol {
+public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends FunctionSymbolImpl implements DBTypeConversionFunctionSymbol {
 
     private final DBTermType targetType;
 
-    protected AbstractDBCastFunctionSymbolImpl(String name, DBTermType inputBaseType, DBTermType targetType) {
+    protected AbstractDBTypeConversionFunctionSymbolImpl(String name, DBTermType inputBaseType, DBTermType targetType) {
         super(name, ImmutableList.of(inputBaseType));
         this.targetType = targetType;
     }

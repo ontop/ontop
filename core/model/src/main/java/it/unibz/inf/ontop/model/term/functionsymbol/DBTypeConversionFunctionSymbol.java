@@ -4,7 +4,11 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 
-public interface DBCastFunctionSymbol extends FunctionSymbol {
+/**
+ * Slightly more general abstraction than a regular DB cast,
+ * as it MAY perform some normalization to a specific format.
+ */
+public interface DBTypeConversionFunctionSymbol extends FunctionSymbol {
 
     DBTermType getTargetType();
 

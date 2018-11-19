@@ -39,6 +39,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 	private final RDFLiteralConstant valueTrue;
 	private final RDFLiteralConstant valueFalse;
 	private final Constant valueNull;
@@ -49,10 +50,12 @@ public class TermFactoryImpl implements TermFactory {
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
 
 	@Inject
-	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory, OntopModelSettings settings) {
+	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory,
+							DBFunctionSymbolFactory dbFunctionSymbolFactory, OntopModelSettings settings) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
 		this.functionSymbolFactory = functionSymbolFactory;
+		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 		this.valueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
 		this.valueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
@@ -428,18 +431,23 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType targetType, ImmutableTerm term) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getDBCastFunction(targetType), term);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCastFunctionSymbol(targetType), term);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getDBCastFunction(inputType, targetType), term);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCastFunctionSymbol(inputType, targetType), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getConversion2RDFLexicalFunctionalTerm(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getConversion2RDFLexicalFunctionSymbol(inputType, rdfTermType), term);
 	}
 
 	@Override
 	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
 		return getImmutableFunctionalTerm(
-				functionSymbolFactory.getTemporaryToDBStringCastFunctionSymbol(),
+				dbFunctionSymbolFactory.getTemporaryConversionToDBStringFunctionSymbol(),
 				variable);
 	}
 

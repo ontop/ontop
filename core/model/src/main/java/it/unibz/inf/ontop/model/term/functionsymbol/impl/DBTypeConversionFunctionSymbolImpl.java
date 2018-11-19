@@ -6,13 +6,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class DBCastFunctionSymbolImpl extends AbstractDBCastFunctionSymbolImpl {
+public class DBTypeConversionFunctionSymbolImpl extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     @Nullable
     private final DBTermType inputType;
 
-    protected DBCastFunctionSymbolImpl(@Nonnull DBTermType inputBaseType,
-                                       DBTermType targetType) {
+    protected DBTypeConversionFunctionSymbolImpl(@Nonnull DBTermType inputBaseType,
+                                                 DBTermType targetType) {
         super(inputBaseType.isAbstract()
                 ? "to" + targetType
                 : inputBaseType + "To" + targetType,

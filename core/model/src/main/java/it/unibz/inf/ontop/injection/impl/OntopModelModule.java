@@ -15,8 +15,8 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDF2DBTypeMapper;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
@@ -56,7 +56,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(IQConverter.class);
         bindFromSettings(RDF.class);
         bindFromSettings(UniqueTermTypeExtractor.class);
-        bindFromSettings(RDF2DBTypeMapper.class);
+        bindFromSettings(DBFunctionSymbolFactory.class);
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(

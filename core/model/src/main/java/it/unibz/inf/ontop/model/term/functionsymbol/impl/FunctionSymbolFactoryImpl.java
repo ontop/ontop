@@ -1,11 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.HashMap;
@@ -20,30 +16,24 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunction;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
-    private final DBCastFunctionSymbol temporaryToStringCastFunctionSymbol;
-    private final Map<DBTermType, DBCastFunctionSymbol> castFunctionSymbolMap;
-    private final Table<DBTermType, DBTermType, DBCastFunctionSymbol> castFunctionSymbolTable;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
 
     @Inject
-    private FunctionSymbolFactoryImpl(TypeFactory typeFactory) {
+    private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.typeFactory = typeFactory;
         this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
                 typeFactory.getDBTypeFactory().getDBStringType(),
                 typeFactory.getMetaRDFTermType());
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
-        this.castFunctionSymbolMap = new HashMap<>();
-        this.castFunctionSymbolTable = HashBasedTable.create();
         this.counter = new AtomicInteger();
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        this.temporaryToStringCastFunctionSymbol = new TemporaryDBCastToStringFunctionSymbolImpl(
-                dbTypeFactory.getAbstractRootDBType(), dbTypeFactory.getDBStringType());
     }
 
 
@@ -79,24 +69,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public DBCastFunctionSymbol getTemporaryToDBStringCastFunctionSymbol() {
-        return temporaryToStringCastFunctionSymbol;
-    }
-
-    @Override
-    public DBCastFunctionSymbol getDBCastFunction(DBTermType targetType) {
-        return castFunctionSymbolMap
-                .computeIfAbsent(targetType,
-                        t -> new DBCastFunctionSymbolImpl(typeFactory.getDBTypeFactory().getAbstractRootDBType(), t));
-    }
-
-    @Override
-    public DBCastFunctionSymbol getDBCastFunction(DBTermType inputType, DBTermType targetType) {
-        if (castFunctionSymbolTable.contains(inputType, targetType))
-            return castFunctionSymbolTable.get(inputType, targetType);
-
-        DBCastFunctionSymbol castFunctionSymbol = new DBCastFunctionSymbolImpl(inputType, targetType);
-        castFunctionSymbolTable.put(inputType, targetType, castFunctionSymbol);
-        return castFunctionSymbol;
+    public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
+        return dbFunctionSymbolFactory;
     }
 }
