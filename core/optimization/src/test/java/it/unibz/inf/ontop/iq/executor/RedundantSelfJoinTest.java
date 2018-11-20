@@ -16,10 +16,11 @@ import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.sql.Types;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,9 +59,9 @@ public class RedundantSelfJoinTest {
     private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
     private final static Variable P1 = TERM_FACTORY.getVariable("P");
-    private final static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private final static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private final static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     private final static Variable M = TERM_FACTORY.getVariable("m");
     private final static Variable M1 = TERM_FACTORY.getVariable("m1");
@@ -80,13 +81,16 @@ public class RedundantSelfJoinTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+
         /*
          * Table 1: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
@@ -94,9 +98,9 @@ public class RedundantSelfJoinTest {
          * Table 2: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
@@ -104,9 +108,9 @@ public class RedundantSelfJoinTest {
          * Table 3: composite unique constraint over the first TWO columns
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3, col2T3));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
@@ -114,8 +118,8 @@ public class RedundantSelfJoinTest {
          * Table 4: unique constraint over the first column
          */
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
@@ -123,8 +127,8 @@ public class RedundantSelfJoinTest {
          * Table 5: unique constraint over the second column
          */
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T5 = table5Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table5Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T5 = table5Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T5));
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
@@ -132,9 +136,9 @@ public class RedundantSelfJoinTest {
          * Table 6: two atomic unique constraints over the first and third columns
          */
         DatabaseRelationDefinition table6Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table6"));
-        Attribute col1T6 = table6Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table6Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        Attribute col3T6 = table6Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        Attribute col1T6 = table6Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table6Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T6 = table6Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T6));
         table6Def.addUniqueConstraint(new UniqueConstraint.Builder(table6Def)
                 .add(col3T6)

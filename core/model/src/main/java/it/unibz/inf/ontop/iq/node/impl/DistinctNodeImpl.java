@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -127,6 +128,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformDistinct(tree, this, child);
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
+        return visitor.visitDistinct(this, child);
     }
 
     @Override

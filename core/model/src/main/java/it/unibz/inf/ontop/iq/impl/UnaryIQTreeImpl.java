@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -149,6 +150,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return getRootNode().acceptTransformer(this, transformer, getChild());
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return getRootNode().acceptVisitor(visitor, getChild());
     }
 
     @Override

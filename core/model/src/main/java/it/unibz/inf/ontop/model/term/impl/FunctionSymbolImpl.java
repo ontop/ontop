@@ -11,9 +11,13 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nonnull;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
+
+    private final ImmutableList<TermType> expectedBaseTypes;
+
     protected FunctionSymbolImpl(@Nonnull String name,
                                  @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-        super(name, expectedBaseTypes);
+        super(name, expectedBaseTypes.size());
+        this.expectedBaseTypes = expectedBaseTypes;
     }
 
     /**
@@ -56,5 +60,10 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         for(ImmutableTerm term : terms) {
             term.inferAndValidateType();
         }
+    }
+
+    @Override
+    public TermType getExpectedBaseType(int index) {
+        return expectedBaseTypes.get(index);
     }
 }

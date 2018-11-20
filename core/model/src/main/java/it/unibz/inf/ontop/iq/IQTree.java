@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -26,6 +26,8 @@ public interface IQTree {
     ImmutableSet<Variable> getVariables();
 
     IQTree acceptTransformer(IQTreeVisitingTransformer transformer);
+
+    <T> T acceptVisitor(IQVisitor<T> visitor);
 
     IQTree liftBinding(VariableGenerator variableGenerator);
 

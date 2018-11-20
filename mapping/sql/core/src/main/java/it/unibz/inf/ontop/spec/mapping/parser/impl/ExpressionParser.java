@@ -734,7 +734,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(LongValue expression) {
-            process(expression.getStringValue(), dbTypeFactory.getDBLongType());
+            process(expression.getStringValue(), dbTypeFactory.getDBLargeIntegerType());
         }
 
         @Override
@@ -1192,8 +1192,8 @@ public class ExpressionParser {
                 break;
             case 6:
                 // Oracle
-                if (!terms.get(3).equals(termFactory.getDBConstant("1", dbTypeFactory.getDBLongType()))
-                        || !terms.get(4).equals(termFactory.getDBConstant("0", dbTypeFactory.getDBLongType())))
+                if (!terms.get(3).equals(termFactory.getDBConstant("1", dbTypeFactory.getDBLargeIntegerType()))
+                        || !terms.get(4).equals(termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType())))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
 
                 // check that the flags is a combination of imx

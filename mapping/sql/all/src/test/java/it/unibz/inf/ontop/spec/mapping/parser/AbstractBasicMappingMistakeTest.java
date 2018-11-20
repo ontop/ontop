@@ -3,10 +3,9 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Types;
 
 import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 
@@ -19,12 +18,14 @@ public abstract class AbstractBasicMappingMistakeTest {
         RDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
         DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(
                 idFactory.createRelationID(null, "PERSON"));
         Attribute personId = personTable.addAttribute(idFactory.createAttributeID("ID"),
-                Types.INTEGER, null, false);
+                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBLargeIntegerType(), false);
         personTable.addAttribute(idFactory.createAttributeID("FNAME"),
-                Types.VARCHAR, null, false);
+                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBStringType(), false);
         personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personId));
 
         dbMetadata.freeze();

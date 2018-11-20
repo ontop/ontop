@@ -7,8 +7,8 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -115,17 +115,13 @@ public class TypeExtractor {
             Optional<RelationDefinition> td = Optional.ofNullable(metadata.getRelation(tableId));
 
             IntStream.range(0, predicate.getArity())
-                    .forEach(i -> {
-
-                        if(td.isPresent()) {
-                            Attribute attribute = td.get().getAttribute(i+1);
-
-                            //get type from metadata
-                            defaultTypeBuilder.add(attribute.getTermType());
-                        }
-                        else{
-                            defaultTypeBuilder.add(literalType);
-                        }});
+                    .boxed()
+                    .map(i -> td
+                            .map(t -> t.getAttribute(i+1))
+                            .flatMap(Attribute::getTermType)
+                            .map(t -> (TermType)t)
+                            .orElse(literalType))
+                    .forEach(defaultTypeBuilder::add);
             return defaultTypeBuilder.build();
         }
 
@@ -259,8 +255,8 @@ public class TypeExtractor {
         }
         else if (term instanceof ImmutableFunctionalTerm) {
             Predicate functionSymbol = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
-            if (functionSymbol instanceof RDFTermType)
-                return functionSymbol.getExpectedBaseType(0);
+            if (functionSymbol instanceof RDFTermFunctionSymbol)
+                return ((RDFTermFunctionSymbol)functionSymbol).getExpectedBaseType(0);
         }
 
         // TODO: what about the NULL constant?

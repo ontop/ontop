@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -98,6 +99,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformTrue(this);
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.visitTrue(this);
     }
 
     @Override

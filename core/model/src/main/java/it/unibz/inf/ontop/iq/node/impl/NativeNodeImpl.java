@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -103,6 +104,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.visitNative(this);
     }
 
     @Override

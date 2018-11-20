@@ -899,7 +899,7 @@ public class RDBMSSIRepositoryManager {
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = termFactory.getIRIFunctionalTerm(X);
+			subjectTerm = termFactory.getIRIFunctionalTerm(X, true);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -919,7 +919,7 @@ public class RDBMSSIRepositoryManager {
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = termFactory.getIRIFunctionalTerm(X);
+			subjectTerm = termFactory.getIRIFunctionalTerm(X, true);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -928,7 +928,7 @@ public class RDBMSSIRepositoryManager {
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
 					? termFactory.getFreshBnodeFunctionalTerm(Y)
-					: termFactory.getIRIFunctionalTerm(Y);
+					: termFactory.getIRIFunctionalTerm(Y, true);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;

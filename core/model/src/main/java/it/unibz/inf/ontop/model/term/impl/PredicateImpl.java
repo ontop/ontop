@@ -20,26 +20,21 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
 
 
 public class PredicateImpl implements Predicate {
 
-	private final ImmutableList<TermType> expectedBaseTypes;
-
 	private final int arity;
 	private final String name;
 	private final int identifier;
 
-	protected PredicateImpl(@Nonnull String name, @Nonnull ImmutableList<TermType> expectedBaseTypes) {
+	protected PredicateImpl(@Nonnull String name, int arity) {
 		this.name = name;
 		this.identifier = name.hashCode();
-		this.arity = expectedBaseTypes.size();
-		this.expectedBaseTypes = expectedBaseTypes;
+		this.arity = arity;
 	}
 
 	@Override
@@ -79,13 +74,4 @@ public class PredicateImpl implements Predicate {
 		return name;
 	}
 
-	@Override
-	public TermType getExpectedBaseType(int index) {
-		return expectedBaseTypes.get(index);
-	}
-
-	@Override
-	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
-		return expectedBaseTypes;
-	}
 }

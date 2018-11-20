@@ -14,10 +14,10 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.sql.Types;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
@@ -64,9 +64,9 @@ public class FunctionalDependencyTest {
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
-    private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 
@@ -76,16 +76,19 @@ public class FunctionalDependencyTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+
         /*
          * Table 1: PK + non-unique functional constraint + 2 dependent fields + 1 independent
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
+        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
         // Independent
-        table1Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
         table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T1)
@@ -98,9 +101,9 @@ public class FunctionalDependencyTest {
          * Table 2: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
@@ -108,13 +111,13 @@ public class FunctionalDependencyTest {
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
+        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
         // Independent
-        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col6"), Types.INTEGER, null, false);
+        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
         table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T3)
@@ -130,12 +133,12 @@ public class FunctionalDependencyTest {
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
          */
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        Attribute col2T4 = table4Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        Attribute col3T4 = table4Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
-        Attribute col4T4 = table4Def.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, null, false);
+        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T4 = table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T4 = table4Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        Attribute col4T4 = table4Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
         // Independent
-        table4Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
         table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col3T4)

@@ -25,33 +25,28 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import junit.framework.TestCase;
 
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.TYPE_FACTORY;
 
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final SpecificationFactory specificationFactory;
 	private final DummyRDBMetadata defaultDummyMetadata;
+	private final TargetQueryParser targetParser;
 
 	private RDBMetadata md;
-	private PrefixManager pm;
 	private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
 
 	public SQLPPMapping2DatalogConverterTest() {
@@ -60,46 +55,45 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				.build();
 
 		Injector injector = defaultConfiguration.getInjector();
-		specificationFactory = injector.getInstance(SpecificationFactory.class);
 		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
 		defaultDummyMetadata = injector.getInstance(DummyRDBMetadata.class);
+
+		targetParser = injector.getInstance(TargetQueryParserFactory.class).createParser(ImmutableMap.of(
+				":", "http://www.example.org/university#"
+		));
     }
 	
 	public void setUp() {
 		md = defaultDummyMetadata.clone();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
+		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+
 		// Database schema
 		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationID(null, "Student"));
-		table1.addAttribute(idfac.createAttributeID("id"), Types.INTEGER, null, false);
-		table1.addAttribute(idfac.createAttributeID("first_name"), Types.VARCHAR, null, false);
-		table1.addAttribute(idfac.createAttributeID("last_name"), Types.VARCHAR, null, false);
-		table1.addAttribute(idfac.createAttributeID("year"), Types.INTEGER, null, false);
-		table1.addAttribute(idfac.createAttributeID("nationality"), Types.VARCHAR, null, false);
+		table1.addAttribute(idfac.createAttributeID("id"), integerType.getName(), integerType, false);
+		table1.addAttribute(idfac.createAttributeID("first_name"), stringType.getName(), stringType, false);
+		table1.addAttribute(idfac.createAttributeID("last_name"), stringType.getName(), stringType, false);
+		table1.addAttribute(idfac.createAttributeID("year"), integerType.getName(), integerType, false);
+		table1.addAttribute(idfac.createAttributeID("nationality"), stringType.getName(), stringType, false);
 		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 		
 		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationID(null, "Course"));
-		table2.addAttribute(idfac.createAttributeID("cid"), Types.VARCHAR, null, false);
-		table2.addAttribute(idfac.createAttributeID("title"), Types.VARCHAR, null, false);
-		table2.addAttribute(idfac.createAttributeID("credits"), Types.INTEGER, null, false);
-		table2.addAttribute(idfac.createAttributeID("description"), Types.VARCHAR, null, false);
+		table2.addAttribute(idfac.createAttributeID("cid"), stringType.getName(), stringType, false);
+		table2.addAttribute(idfac.createAttributeID("title"), stringType.getName(), stringType, false);
+		table2.addAttribute(idfac.createAttributeID("credits"), integerType.getName(), integerType, false);
+		table2.addAttribute(idfac.createAttributeID("description"), stringType.getName(), stringType, false);
 		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 		
 		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationID(null, "Enrollment"));
-		table3.addAttribute(idfac.createAttributeID("student_id"), Types.INTEGER, null, false);
-		table3.addAttribute(idfac.createAttributeID("course_id"), Types.VARCHAR, null, false);
+		table3.addAttribute(idfac.createAttributeID("student_id"), integerType.getName(), integerType, false);
+		table3.addAttribute(idfac.createAttributeID("course_id"), stringType.getName(), stringType, false);
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
 				table3.getAttribute(idfac.createAttributeID("course_id"))));
-		
-		// Prefix manager
-        Map<String, String> prefixes = new HashMap<>();
-		prefixes.put(":", "http://www.example.org/university#");
-        pm = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), TERM_FACTORY,
-				TARGET_ATOM_FACTORY, RDF_FACTORY);
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);

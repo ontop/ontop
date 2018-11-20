@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.*;
 
@@ -40,7 +41,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
-	private final TypeMapper typeMapper;
 	private UniqueConstraint pk;	
 	
 	
@@ -49,24 +49,21 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * 
 	 * @param name
 	 */
-	protected DatabaseRelationDefinition(RelationID name, TypeMapper typeMapper) {
+	protected DatabaseRelationDefinition(RelationID name) {
 		super(name);
-		this.typeMapper = typeMapper;
 	}
 	
 	/**
 	 * creates a new attribute 
 	 * 
 	 * @param id
-	 * @param type
 	 * @param typeName
+	 * @param termType
 	 * @param canNull
 	 */
-	
-	public Attribute addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
+	public Attribute addAttribute(QuotedID id, String typeName, DBTermType termType, boolean canNull) {
 		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id),
-				attributes.size() + 1, type, typeName, canNull,
-				typeMapper.getTermType(type, typeName));
+				attributes.size() + 1, typeName, termType, canNull);
 		
 		//check for duplicate names (put returns the previous value)
 		Attribute prev = attributeMap.put(id, att);

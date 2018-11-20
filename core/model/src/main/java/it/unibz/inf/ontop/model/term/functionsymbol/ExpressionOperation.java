@@ -163,11 +163,6 @@ public enum ExpressionOperation implements OperationPredicate {
 	}
 
 	@Override
-	public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
-		return argumentValidator.getExpectedBaseArgumentTypes();
-	}
-
-	@Override
 	public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
 
 		ImmutableList<Optional<TermTypeInference>> argumentTypes = terms.stream()

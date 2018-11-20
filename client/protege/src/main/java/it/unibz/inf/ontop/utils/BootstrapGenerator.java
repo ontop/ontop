@@ -41,16 +41,14 @@ public class BootstrapGenerator {
     private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final JdbcTypeMapper jdbcTypeMapper;
     private final TargetAtomFactory targetAtomFactory;
     private final RDF rdfFactory;
     private int currentMappingIndex = 1;
     private final DirectMappingEngine directMappingEngine;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
-                              OWLModelManager owlManager, JdbcTypeMapper jdbcTypeMapper)
+                              OWLModelManager owlManager)
             throws DuplicateMappingException, SQLException {
-        this.jdbcTypeMapper = jdbcTypeMapper;
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
@@ -95,7 +93,7 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
+        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);

@@ -9,10 +9,9 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 public class DummyRDBMetadata extends RDBMetadata {
 
     @Inject
-    private DummyRDBMetadata(TypeFactory typeFactory, JdbcTypeMapper jdbcTypeMapper) {
+    private DummyRDBMetadata(TypeFactory typeFactory) {
 
         super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""), jdbcTypeMapper,
-                typeFactory);
+                new QuotedIDFactoryStandardSQL("\""), typeFactory);
     }
 }

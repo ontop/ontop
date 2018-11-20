@@ -26,27 +26,26 @@ public class BasicDBMetadata implements DBMetadata {
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
     private boolean isStillMutable;
-    private final TypeMapper typeMapper;
+
     @Nullable
     private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, QuotedIDFactory idfac) {
-        this(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper, new HashMap<>(),
+                              QuotedIDFactory idfac) {
+        this(driverName, driverVersion, databaseProductName, databaseVersion, new HashMap<>(),
                 new HashMap<>(), new LinkedList<>(), idfac);
     }
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              TypeMapper typeMapper, Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
+                              Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
             RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
                               QuotedIDFactory idfac) {
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
         this.databaseVersion = databaseVersion;
-        this.typeMapper = typeMapper;
         this.idfac = idfac;
         this.tables = tables;
         this.relations = relations;
@@ -69,7 +68,7 @@ public class BasicDBMetadata implements DBMetadata {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id, typeMapper);
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
         add(table, tables);
         add(table, relations);
         listOfTables.add(table);
@@ -223,7 +222,7 @@ public class BasicDBMetadata implements DBMetadata {
     @Deprecated
     @Override
     public BasicDBMetadata clone() {
-        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion, typeMapper,
+        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
     }
 

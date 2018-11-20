@@ -117,8 +117,8 @@ public class DatalogNormalizer {
 		if (algebraFunctionalTerm.isAlgebraFunction()
 				&& booleanAtoms == 0) {
 			Function trivialEquality = termFactory.getFunctionEQ(
-			        termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType()),
-					termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBIntegerType()));
+			        termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBLargeIntegerType()),
+					termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBLargeIntegerType()));
 			algebraFunctionalTerm.getTerms().add(trivialEquality);
 		}
 	}

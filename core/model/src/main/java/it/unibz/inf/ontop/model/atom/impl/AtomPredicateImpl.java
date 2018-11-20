@@ -10,7 +10,15 @@ import it.unibz.inf.ontop.model.type.TermType;
  */
 public class AtomPredicateImpl extends PredicateImpl implements AtomPredicate {
 
-    protected AtomPredicateImpl(String name, ImmutableList<TermType> expectedBaseTypes) {
-        super(name, expectedBaseTypes);
+    private final ImmutableList<TermType> baseTypesForValidation;
+
+    protected AtomPredicateImpl(String name, ImmutableList<TermType> baseTypesForValidation) {
+        super(name, baseTypesForValidation.size());
+        this.baseTypesForValidation = baseTypesForValidation;
+    }
+
+    @Override
+    public ImmutableList<TermType> getBaseTypesForValidation() {
+        return baseTypesForValidation;
     }
 }

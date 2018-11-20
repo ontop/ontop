@@ -16,26 +16,24 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunction;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
-    private final PartiallyDefinedCastFunctionSymbol temporaryToStringCastFunctionSymbol;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
 
     @Inject
-    private FunctionSymbolFactoryImpl(TypeFactory typeFactory) {
+    private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.typeFactory = typeFactory;
         this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
                 typeFactory.getDBTypeFactory().getDBStringType(),
                 typeFactory.getMetaRDFTermType());
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
-        // TODO: use more precise types
-        this.temporaryToStringCastFunctionSymbol = new PartiallyDefinedCastFunctionSymbolImpl(
-                typeFactory.getAbstractAtomicTermType(), typeFactory.getXsdStringDatatype());
     }
 
 
@@ -71,7 +69,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public PartiallyDefinedCastFunctionSymbol getPartiallyDefinedToStringCastFunctionSymbol() {
-        return temporaryToStringCastFunctionSymbol;
+    public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
+        return dbFunctionSymbolFactory;
     }
 }

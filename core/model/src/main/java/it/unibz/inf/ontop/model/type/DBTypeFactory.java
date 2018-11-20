@@ -7,9 +7,11 @@ public interface DBTypeFactory {
 
     DBTermType getDBStringType();
 
-    DBTermType getDBIntegerType();
+    DBTermType getDBLargeIntegerType();
 
-    DBTermType getDBLongType();
+    DBTermType getDBDecimalType();
+
+    DBTermType getDBBooleanType();
 
     DBTermType getDBDateType();
 
@@ -19,6 +21,18 @@ public interface DBTypeFactory {
 
     DBTermType getDBDoubleType();
 
+    DBTermType getDBHexBinaryType();
+
+    /**
+     * Returns an abstract type
+     */
+    DBTermType getAbstractRootDBType();
+
+    /**
+     * BC: TODO: should we keep the typeCode? Still needed?
+     */
+    DBTermType getDBTermType(int typeCode, String typeName);
+
 
 
     /**
@@ -27,6 +41,6 @@ public interface DBTypeFactory {
      * To be called ONLY by the TypeFactory
      */
     interface Factory {
-        DBTypeFactory createDBFactory(TermType rootTermType);
+        DBTypeFactory createDBFactory(TermType rootTermType, TypeFactory typeFactory);
     }
 }

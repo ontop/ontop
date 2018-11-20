@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDAParser.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,6 +23,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Stateful! See currentSubject.
+ */
 public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor implements TurtleOBDAVisitor {
 
     // Column placeholder pattern
@@ -41,12 +47,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     protected String error = "";
     private final TermFactory termFactory;
     private final RDF rdfFactory;
+    private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
+    private final OntopMappingSettings settings;
 
-    public AbstractTurtleOBDAVisitor(TermFactory termFactory, TargetAtomFactory targetAtomFactory, RDF rdfFactory) {
+    protected AbstractTurtleOBDAVisitor(TermFactory termFactory, TypeFactory typeFactory,
+                                     TargetAtomFactory targetAtomFactory, RDF rdfFactory,
+                                     OntopMappingSettings settings) {
+        this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
+        this.settings = settings;
     }
 
     public String getError() {
@@ -65,7 +77,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     protected ImmutableTerm constructIRI(String text) {
         ImmutableTerm toReturn = null;
         final String PLACEHOLDER = "{}";
-        List<ImmutableTerm> terms = new LinkedList<>();
         List<FormatString> tokens = parseIRI(text);
         int size = tokens.size();
         if (size == 1) {
@@ -76,17 +87,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
-                toReturn = termFactory.getIRIFunctionalTerm(column);
+                toReturn = termFactory.getIRIFunctionalTerm(column, true);
             }
         } else {
             StringBuilder sb = new StringBuilder();
+            List<ImmutableTerm> terms = new ArrayList<>();
             for (FormatString token : tokens) {
                 if (token instanceof FixedString) { // if part of URI template
                     sb.append(token.toString());
                 } else if (token instanceof ColumnString) {
                     sb.append(PLACEHOLDER);
                     Variable column = termFactory.getVariable(token.toString());
-                    terms.add(column);
+                    terms.add(termFactory.getPartiallyDefinedToStringCast(column));
                 }
             }
             String iriTemplate = sb.toString(); // complete IRI template
@@ -321,7 +333,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         }
         VariableContext vc = ctx.variable();
         if (vc != null) {
-            return visitVariable(vc);
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
         }
         BlankContext bc = ctx.blank();
         if (bc != null) {
@@ -332,7 +344,14 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitObject(ObjectContext ctx) {
-        return (ImmutableTerm) visit(ctx.children.iterator().next());
+        ImmutableTerm term = (ImmutableTerm) visit(ctx.children.iterator().next());
+        return (term instanceof Variable)
+                ? termFactory.getRDFLiteralFunctionalTerm(
+                        termFactory.getPartiallyDefinedToStringCast((Variable) term),
+                    // We give the abstract datatype RDFS.LITERAL when it is not determined yet
+                    // --> The concrete datatype be inferred afterwards
+                            RDFS.LITERAL)
+                : term;
     }
 
     @Override
@@ -351,15 +370,24 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
-        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
+    public ImmutableFunctionalTerm visitVariableLiteral_1(VariableLiteral_1Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, visitLanguageTag(ctx.languageTag()));
     }
 
     @Override
-    public ImmutableTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
-        ImmutableFunctionalTerm lexicalTerm = visitVariable(ctx.variable());
+    public ImmutableFunctionalTerm visitVariableLiteral_2(VariableLiteral_2Context ctx) {
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getPartiallyDefinedToStringCast(
+                visitVariable(ctx.variable()));
         IRI iri = visitIri(ctx.iri());
+
+        if ((!settings.areAbstractDatatypesToleratedInMapping())
+            && typeFactory.getDatatype(iri).isAbstract())
+            // TODO: throw a better exception (invalid input)
+            throw new IllegalArgumentException("The datatype of a literal must not be abstract: "
+                    + iri + "\nSet the property "
+                    + OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
         return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, iri);
     }
 
@@ -373,10 +401,10 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
-    public ImmutableFunctionalTerm visitVariable(VariableContext ctx) {
+    public Variable visitVariable(VariableContext ctx) {
         String variableName = removeBrackets(ctx.STRING_WITH_CURLY_BRACKET().getText());
         validateAttributeName(variableName);
-        return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
+        return termFactory.getVariable(variableName);
     }
 
     @Override

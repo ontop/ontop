@@ -70,7 +70,7 @@ public class BindingLiftTest {
     private final Variable M = TERM_FACTORY.getVariable("m");
     private final Variable N = TERM_FACTORY.getVariable("n");
 
-    private final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     private String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
     private String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}";
@@ -380,7 +380,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(F0),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
                             //generateIRIWithTemplate1(F0, AF1),
                         Y, generateIRIWithTemplate1(F))));
 
@@ -722,7 +722,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1))));
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false))));
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         UnionNode expectedUnionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f1, Y));
@@ -1091,7 +1091,7 @@ public class BindingLiftTest {
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         W, generateInt(H),
-                        X, TERM_FACTORY.getIRIFunctionalTerm(F0),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
                         Y, generateInt(G),
                         Z, generateInt(F))));
 
@@ -1165,7 +1165,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1190,7 +1190,7 @@ public class BindingLiftTest {
         queryBuilder.addChild(topUnionNode, joinNode);
 
 
-        DBConstant three = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+        DBConstant three = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1215,7 +1215,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f2),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f2, false),
                         Y, generateIRIWithTemplate1(B))));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(f0f2, B));
@@ -1279,7 +1279,7 @@ public class BindingLiftTest {
         UnionNode leftUnionNode = topUnionNode.clone();
         queryBuilder.addChild(topUnionNode, leftUnionNode);
 
-        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(leftUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -1321,7 +1321,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1),
+                        X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false),
                         Y, generateIRIWithTemplate1(B))));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         UnionNode newTopUnionNode = IQ_FACTORY.createUnionNode(newRootNode.getChildVariables());
@@ -1400,7 +1400,7 @@ public class BindingLiftTest {
 
         ConstructionNode otherNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateInt(
-                        TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType())))));
+                        TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())))));
 
         queryBuilder.addChild(joinNode, otherNode);
         queryBuilder.addChild(otherNode, IQ_FACTORY.createTrueNode());
@@ -1414,7 +1414,7 @@ public class BindingLiftTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(af0), Y, generateInt(
-                        TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType())))));
+                        TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())))));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
         expectedQueryBuilder.addChild(expectedRootNode, IQ_FACTORY.createExtensionalDataNode(
@@ -2020,7 +2020,7 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode2 = buildExtensionalDataNode(TABLE2_AR1, B);
 
         // TODO: use another function (a UDF for instance)
-        ImmutableFunctionalTerm functionalTerm = TERM_FACTORY.getIRIFunctionalTerm(A);
+        ImmutableFunctionalTerm functionalTerm = TERM_FACTORY.getIRIFunctionalTerm(A, false);
 
         IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
