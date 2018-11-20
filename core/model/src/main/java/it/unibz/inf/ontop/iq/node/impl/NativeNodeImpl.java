@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 
@@ -24,19 +26,24 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     private static final String NATIVE_STRING = "NATIVE ";
 
-    private final ImmutableSet<Variable> variables;
+    private final ImmutableMap<Variable, DBTermType> variableTypeMap;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
 
     @AssistedInject
-    private NativeNodeImpl(@Assisted ImmutableSet<Variable> variables,
+    private NativeNodeImpl(@Assisted ImmutableMap<Variable, DBTermType> variableTypeMap,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
         super(iqTreeTools, iqFactory);
-        this.variables = variables;
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;
+        this.variableTypeMap = variableTypeMap;
+    }
+
+    @Override
+    public ImmutableMap<Variable, DBTermType> getTypeMap() {
+        return variableTypeMap;
     }
 
     @Override
@@ -61,7 +68,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return variables;
+        return variableTypeMap.keySet();
     }
 
     @Override
@@ -86,19 +93,19 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return variables;
+        return getLocalVariables();
     }
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof NativeNode)
-                && ((NativeNode) queryNode).getVariables().equals(variables)
+                && ((NativeNode) queryNode).getVariables().equals(variableTypeMap.keySet())
                 && ((NativeNode) queryNode).getNativeQueryString().equals(nativeQueryString);
     }
 
     @Override
     public ImmutableSet<Variable> getVariables() {
-        return variables;
+        return variableTypeMap.keySet();
     }
 
     @Override
@@ -118,7 +125,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public ImmutableSet<Variable> getKnownVariables() {
-        return variables;
+        return getVariables();
     }
 
     @Override
@@ -137,6 +144,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public String toString() {
-        return NATIVE_STRING + variables + "\n" + nativeQueryString;
+        return NATIVE_STRING + variableTypeMap + "\n" + nativeQueryString;
     }
 }
