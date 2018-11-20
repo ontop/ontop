@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -15,6 +16,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
@@ -51,7 +53,7 @@ public interface IntermediateQueryFactory {
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
-    NativeNode createNativeNode(ImmutableSet<Variable> projectedVariables, String nativeQueryString,
+    NativeNode createNativeNode(ImmutableMap<Variable, DBTermType> variableTypeMap, String nativeQueryString,
                                 VariableNullability variableNullability);
 
     TrueNode createTrueNode();
