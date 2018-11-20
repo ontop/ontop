@@ -47,8 +47,19 @@ public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
+        DBTermType stringType = dbTypeFactory.getDBStringType();
+        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        // TODO: complete (timestamp + boolean)
+
+        // Date time
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
+                new DefaultTimestampISONormFunctionSymbol(timestampType, stringType));
+        // Boolean
+        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
+                new DefaultBooleanNormFunctionSymbol(booleanType, stringType));
+
         return builder.build();
     }
 
