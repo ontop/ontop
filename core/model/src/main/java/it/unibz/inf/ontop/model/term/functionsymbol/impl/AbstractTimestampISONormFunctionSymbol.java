@@ -7,11 +7,11 @@ import java.util.Optional;
 /**
  * TODO: declare as injective, non-post-processable
  */
-public class DefaultTimestampISONormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
+public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     private final DBTermType timestampType;
 
-    protected DefaultTimestampISONormFunctionSymbol(DBTermType timestampType, DBTermType dbStringType) {
+    protected AbstractTimestampISONormFunctionSymbol(DBTermType timestampType, DBTermType dbStringType) {
         super("isoTimestamp", timestampType, dbStringType);
         this.timestampType = timestampType;
     }

@@ -7,11 +7,11 @@ import java.util.Optional;
 /**
  * TODO: make it post-processable
  */
-public class DefaultBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
+public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     private final DBTermType booleanType;
 
-    protected DefaultBooleanNormFunctionSymbol(DBTermType booleanType, DBTermType stringType) {
+    protected AbstractBooleanNormFunctionSymbol(DBTermType booleanType, DBTermType stringType) {
         super("booleanLexicalNorm", booleanType, stringType);
         this.booleanType = booleanType;
     }

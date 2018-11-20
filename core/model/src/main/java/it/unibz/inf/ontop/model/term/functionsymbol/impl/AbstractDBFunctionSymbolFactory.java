@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
+public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
     /**
@@ -27,40 +26,17 @@ public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
      *  For conversion function symbols that are SIMPLE CASTs from a determined type (no normalization)
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
-    private final DBTypeFactory dbTypeFactory;
+    private final DBTermType dbStringType;
 
-    @Inject
-    private DefaultDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        this(createDefaultNormalizationTable(typeFactory), typeFactory);
-    }
-
-    protected DefaultDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
-                                             TypeFactory typeFactory) {
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
+                                              TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
-        dbTypeFactory = typeFactory.getDBTypeFactory();
-        this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
-                dbTypeFactory.getAbstractRootDBType(), dbTypeFactory.getDBStringType());
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        DBTermType stringType = dbTypeFactory.getDBStringType();
-        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
-
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        // Date time
-        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
-                new DefaultTimestampISONormFunctionSymbol(timestampType, stringType));
-        // Boolean
-        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultBooleanNormFunctionSymbol(booleanType, stringType));
-
-        return builder.build();
+        this.dbStringType = dbTypeFactory.getDBStringType();
+        this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
+                dbTypeFactory.getAbstractRootDBType(), dbStringType);
     }
 
     @Override
@@ -71,8 +47,7 @@ public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
     @Override
     public DBTypeConversionFunctionSymbol getDBCastFunctionSymbol(DBTermType targetType) {
         return castMap
-                .computeIfAbsent(targetType,
-                        t -> new DBTypeConversionFunctionSymbolImpl(dbTypeFactory.getAbstractRootDBType(), t));
+                .computeIfAbsent(targetType, this::createSimpleCastFunctionSymbol);
     }
 
     @Override
@@ -80,10 +55,15 @@ public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
         if (castTable.contains(inputType, targetType))
             return castTable.get(inputType, targetType);
 
-        DBTypeConversionFunctionSymbol castFunctionSymbol = new DBTypeConversionFunctionSymbolImpl(inputType, targetType);
+        DBTypeConversionFunctionSymbol castFunctionSymbol = createSimpleCastFunctionSymbol(inputType, targetType);
         castTable.put(inputType, targetType, castFunctionSymbol);
         return castFunctionSymbol;
     }
+
+    protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType);
+
+    protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType,
+                                                                                     DBTermType targetType);
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
@@ -92,6 +72,6 @@ public class DefaultDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
                 .map(t -> (RDFDatatype) t)
                 .flatMap(t -> Optional.ofNullable(normalizationTable.get(inputType, t)))
                 // Fallback to simple cast
-                .orElseGet(() -> getDBCastFunctionSymbol(inputType, dbTypeFactory.getDBStringType()));
+                .orElseGet(() -> getDBCastFunctionSymbol(inputType, dbStringType));
     }
 }
