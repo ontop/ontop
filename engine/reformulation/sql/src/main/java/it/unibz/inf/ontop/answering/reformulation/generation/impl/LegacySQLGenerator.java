@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
+import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogNormalizer;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
@@ -54,14 +55,15 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
                                AtomFactory atomFactory, OptimizerFactory optimizerFactory,
                                PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
-                               ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor)
+                               ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor,
+                               PostProcessingProjectionSplitter projectionSplitter)
     {
 
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener,
                 pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools,
-                uniqueTermTypeExtractor);
+                uniqueTermTypeExtractor, projectionSplitter);
     }
 
     @Override

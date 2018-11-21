@@ -32,6 +32,16 @@ public interface FunctionSymbol extends Predicate {
         throw new RuntimeException("TODO: implement it");
     }
 
+    /**
+     * Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
+     *  (outside the optimization phase) .
+     *
+     * TODO: remove this default value!
+     */
+    default boolean canBePostProcessed() {
+        return false;
+    }
+
 
     interface FunctionalTermNullability {
 
