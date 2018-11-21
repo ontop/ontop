@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
@@ -293,9 +290,9 @@ public class OneShotSQLGeneratorEngine {
 		 * Only the SUB-tree is translated into SQL
 		 */
 		IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), executorRegistry);
-		ImmutableList<Variable> childSignature = ImmutableList.copyOf(normalizedSubTree.getVariables());
+		ImmutableSortedSet<Variable> childSignature = ImmutableSortedSet.copyOf(normalizedSubTree.getVariables());
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, childSignature);
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, ImmutableList.copyOf(childSignature));
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.addMinimalEqualityToLeftOrNestedInnerJoin(cq);
@@ -350,7 +347,7 @@ public class OneShotSQLGeneratorEngine {
 
 		ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(normalizedSubTree);
 
-		NativeNode nativeNode = iqFactory.createNativeNode(variableTypeMap, resultingQuery,
+		NativeNode nativeNode = iqFactory.createNativeNode(childSignature, variableTypeMap, resultingQuery,
 				normalizedSubTree.getVariableNullability());
 		UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
 
