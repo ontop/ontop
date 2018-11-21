@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
@@ -205,7 +206,7 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
             NativeNode nativeNode = extractNativeNode(executableQuery);
-            ImmutableList<Variable> signature = nativeNode.getSignature();
+            ImmutableSortedSet<Variable> signature = nativeNode.getVariables();
             ImmutableMap<Variable, DBTermType> typeMap = nativeNode.getTypeMap();
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
@@ -228,7 +229,7 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
             NativeNode nativeNode = extractNativeNode(executableQuery);
-            ImmutableList<Variable> SQLSignature = nativeNode.getSignature();
+            ImmutableSortedSet<Variable> SQLSignature = nativeNode.getVariables();
             ImmutableMap<Variable, DBTermType> SQLTypeMap = nativeNode.getTypeMap();
             try {
                 ResultSet rs = sqlStatement.executeQuery(sqlQuery);

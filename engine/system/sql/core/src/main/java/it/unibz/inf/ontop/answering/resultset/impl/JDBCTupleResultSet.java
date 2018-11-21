@@ -14,18 +14,18 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
 
 public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleResultSet {
 
-    private final ImmutableList<Variable> sqlSignature;
+    private final ImmutableSortedSet<Variable> sqlSignature;
     private final ImmutableMap<Variable, DBTermType> sqlTypeMap;
     private final ImmutableSubstitution sparqlVar2Term;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
-    //Assumption: entries are ordered based on the variable order in each SQL tuple (ImmutableMap is order preserving)
 
     public JDBCTupleResultSet(ResultSet rs,
-                              ImmutableList<Variable> sqlSignature,
+                              ImmutableSortedSet<Variable> sqlSignature,
                               ImmutableMap<Variable, DBTermType> sqlTypeMap,
                               ConstructionNode constructionNode,
                               DistinctVariableOnlyDataAtom answerAtom,
@@ -180,9 +180,10 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
 
         //builder (+loop) in order to throw checked exception
         final ImmutableMap.Builder<Variable,DBConstant> builder = ImmutableMap.builder();
+        Iterator<Variable> it = sqlSignature.iterator();
         try {
             for (int i = 1; i <= getColumnCount(); i++) {
-                Variable var = sqlSignature.get(i-1);
+                Variable var = it.next();
                 builder.put(
                         var,
                         termFactory.getDBConstant(
