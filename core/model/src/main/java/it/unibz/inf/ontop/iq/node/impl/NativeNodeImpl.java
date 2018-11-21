@@ -2,13 +2,16 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
@@ -21,6 +24,8 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
+import java.util.SortedSet;
+
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
@@ -29,16 +34,26 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final ImmutableMap<Variable, DBTermType> variableTypeMap;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
+    private final ImmutableSortedSet<Variable> variables;
 
     @AssistedInject
-    private NativeNodeImpl(@Assisted ImmutableMap<Variable, DBTermType> variableTypeMap,
+    private NativeNodeImpl(@Assisted ImmutableSortedSet<Variable> variables,
+                           @Assisted ImmutableMap<Variable, DBTermType> variableTypeMap,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
-                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
+                           OntopModelSettings settings) {
         super(iqTreeTools, iqFactory);
+        this.variables = variables;
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;
         this.variableTypeMap = variableTypeMap;
+
+        if (settings.isTestModeEnabled()) {
+            if (!variables.equals(variableTypeMap.keySet()))
+                throw new InvalidQueryNodeException("The variableTypeMap must contain " +
+                        "all the projected variables and only them");
+        }
     }
 
     @Override
@@ -68,7 +83,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return variableTypeMap.keySet();
+        return variables;
     }
 
     @Override
@@ -99,13 +114,13 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof NativeNode)
-                && ((NativeNode) queryNode).getVariables().equals(variableTypeMap.keySet())
+                && ((NativeNode) queryNode).getVariables().equals(variables)
                 && ((NativeNode) queryNode).getNativeQueryString().equals(nativeQueryString);
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
-        return variableTypeMap.keySet();
+    public ImmutableSortedSet<Variable> getVariables() {
+        return variables;
     }
 
     @Override
