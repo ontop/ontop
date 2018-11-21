@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import java.util.Optional;
 
 /**
- * TODO: declare as injective, non-post-processable
+ * TODO: declare as injective
  */
 public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -23,6 +23,11 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
 
     @Override
     public boolean isTemporary() {
+        return false;
+    }
+
+    @Override
+    public boolean canBePostProcessed() {
         return false;
     }
 }

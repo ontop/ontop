@@ -57,4 +57,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         validateSubTermTypes(terms);
         return inferType(terms);
     }
+
+    @Override
+    public boolean canBePostProcessed() {
+        return true;
+    }
 }

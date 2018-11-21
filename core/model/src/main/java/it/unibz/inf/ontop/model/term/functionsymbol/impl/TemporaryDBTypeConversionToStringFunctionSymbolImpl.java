@@ -19,4 +19,9 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     public boolean isTemporary() {
         return true;
     }
+
+    @Override
+    public boolean canBePostProcessed() {
+        return false;
+    }
 }

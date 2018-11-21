@@ -12,4 +12,9 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
     protected DefaultSQLSimpleDBCastFunctionSymbol(@Nonnull DBTermType inputBaseType, DBTermType targetType) {
         super(inputBaseType, targetType);
     }
+
+    @Override
+    public boolean canBePostProcessed() {
+        return true;
+    }
 }

@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
@@ -46,7 +47,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
@@ -126,6 +126,7 @@ public class OneShotSQLGeneratorEngine {
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final ImmutabilityTools immutabilityTools;
 	private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
+	private final PostProcessingProjectionSplitter projectionSplitter;
 
 
 	// the only two mutable (query-dependent) fields
@@ -144,7 +145,7 @@ public class OneShotSQLGeneratorEngine {
 							  AtomFactory atomFactory, UnionFlattener unionFlattener,
 							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
 							  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
-							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor) {
+							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor, PostProcessingProjectionSplitter projectionSplitter) {
 		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
@@ -160,6 +161,7 @@ public class OneShotSQLGeneratorEngine {
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.immutabilityTools = immutabilityTools;
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
+		this.projectionSplitter = projectionSplitter;
 
 		String driverURI = settings.getJdbcDriver();
 
@@ -194,7 +196,7 @@ public class OneShotSQLGeneratorEngine {
 									  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
 									  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
 									  ImmutabilityTools immutabilityTools,
-									  UniqueTermTypeExtractor uniqueTermTypeExtractor) {
+									  UniqueTermTypeExtractor uniqueTermTypeExtractor, PostProcessingProjectionSplitter projectionSplitter) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -219,6 +221,7 @@ public class OneShotSQLGeneratorEngine {
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.immutabilityTools = immutabilityTools;
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
+		this.projectionSplitter = projectionSplitter;
 	}
 
 	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -276,7 +279,7 @@ public class OneShotSQLGeneratorEngine {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
-                typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor);
+                typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter);
 	}
 
 	/**
@@ -290,17 +293,12 @@ public class OneShotSQLGeneratorEngine {
 	public IQ generateSourceQuery(IQ initialIQ, ExecutorRegistry executorRegistry)
 			throws OntopReformulationException {
 
-		UnaryIQTree initialTree = Optional.of(initialIQ.getTree())
-				.filter(t -> t.getRootNode() instanceof ConstructionNode)
-				.map(t -> (UnaryIQTree) t)
-				.orElseThrow(() -> new MinorOntopInternalBugException(
-						"The initial IQ is not starting with a construction node.\n" + initialIQ));
-		ConstructionNode rootNode = (ConstructionNode) initialTree.getRootNode();
+		PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(initialIQ);
 
 		/*
 		 * Only the SUB-tree is translated into SQL
 		 */
-		IQTree normalizedSubTree = normalizeSubTree(initialTree.getChild(), initialIQ.getVariableGenerator(), executorRegistry);
+		IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), executorRegistry);
 		ImmutableList<Variable> childSignature = ImmutableList.copyOf(normalizedSubTree.getVariables());
 
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, childSignature);
@@ -360,7 +358,7 @@ public class OneShotSQLGeneratorEngine {
 
 		NativeNode nativeNode = iqFactory.createNativeNode(variableTypeMap, resultingQuery,
 				normalizedSubTree.getVariableNullability());
-		UnaryIQTree newTree = iqFactory.createUnaryIQTree(rootNode, nativeNode);
+		UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
 
 		return iqFactory.createIQ(initialIQ.getProjectionAtom(), newTree);
 	}
