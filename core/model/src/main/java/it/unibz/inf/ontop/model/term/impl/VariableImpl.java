@@ -21,14 +21,11 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
-public class VariableImpl implements Variable, Comparable<Variable> {
+public class VariableImpl extends AbstractNonFunctionalTerm implements Variable, Comparable<Variable> {
 
 	private static final long serialVersionUID = 5723075311798541659L;
 

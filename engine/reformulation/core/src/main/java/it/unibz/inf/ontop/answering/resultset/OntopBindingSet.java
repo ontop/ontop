@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.resultset;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopResultConversionException;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -13,7 +14,9 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
     @Override
     Iterator<OntopBinding> iterator();
 
-    Stream<OntopBinding> getBindings();
+    ImmutableList<RDFConstant> getValues();
+
+    ImmutableList<OntopBinding> getBindings();
 
     ImmutableList<String> getBindingNames();
 
@@ -24,10 +27,10 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
      * @return a constant
      */
     @Nullable
-    Constant getConstant(int column) throws OntopResultConversionException;
+    RDFConstant getConstant(int column) throws OntopResultConversionException;
 
     @Nullable
-    Constant getConstant(String name) throws OntopResultConversionException;
+    RDFConstant getConstant(String name) throws OntopResultConversionException;
 
     /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable

@@ -1,18 +1,22 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
+public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
-    protected final ImmutableList<String> signature;
+    protected final ImmutableMap<String, Integer> bindingName2Index;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -24,14 +28,19 @@ public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
     /* Set to false iff the moveCursor() method returned false (at least once) */
     private boolean foundNextElement = true;
 
-    protected AbstractSQLTupleResultSet(ResultSet rs, ImmutableList<String> signature){
+    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
         this.rs = rs;
-        this.signature = signature;
+        AtomicInteger i = new AtomicInteger(0);
+        this.bindingName2Index = signature.stream()
+                .collect(ImmutableCollectors.toMap(
+                        Object::toString,
+                        s -> i.getAndIncrement()
+                ));
     }
 
     @Override
     public int getColumnCount() {
-        return signature.size();
+        return bindingName2Index.keySet().size();
     }
 
     @Override
@@ -45,7 +54,7 @@ public abstract class AbstractSQLTupleResultSet implements TupleResultSet {
 
     @Override
     public ImmutableList<String> getSignature() {
-        return signature;
+        return ImmutableList.copyOf(bindingName2Index.keySet());
     }
 
 

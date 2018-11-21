@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ public class JDBCConnector implements DBConnector {
 
     private final QueryReformulator queryReformulator;
 
+    private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
     private final Optional<IRIDictionary> iriDictionary;
 
@@ -53,12 +55,14 @@ public class JDBCConnector implements DBConnector {
                           InputQueryFactory inputQueryFactory,
                           TermFactory termFactory,
                           TypeFactory typeFactory,
+                          SubstitutionFactory substitutionFactory,
                           RDF rdfFactory,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
         this.dbMetadata = dbMetadata;
         this.inputQueryFactory = inputQueryFactory;
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
         this.settings = settings;
         this.iriDictionary = Optional.ofNullable(iriDictionary);
         this.connectionPool = connectionPool;
@@ -125,7 +129,7 @@ public class JDBCConnector implements DBConnector {
     public OntopConnection getConnection() throws OntopConnectionException {
 
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary,
-                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, settings);
+                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
     }
 
 

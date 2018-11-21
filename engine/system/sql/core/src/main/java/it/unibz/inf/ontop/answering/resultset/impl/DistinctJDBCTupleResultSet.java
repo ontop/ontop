@@ -21,15 +21,16 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import org.apache.commons.rdf.api.RDF;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,17 +41,16 @@ import java.util.*;
  * See test case DistinctResultSetTest
  */
 
-public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet implements TupleResultSet {
+public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements TupleResultSet {
 
     private Set<List<Object>> rowKeys;
 
-    public SQLDistinctTupleResultSet(ResultSet rs, ImmutableList<Variable> signature,
-                                     ConstructionNode rootConstructionNode,
-                                     DBMetadata dbMetadata,
-                                     Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
-                                     TypeFactory typeFactory, RDF rdfFactory) {
+    public DistinctJDBCTupleResultSet(ResultSet rs, ImmutableSortedSet<Variable> sqlSignature, ImmutableMap<Variable, DBTermType> sqlTypes,
+                                      ConstructionNode constructionNode,
+                                      DistinctVariableOnlyDataAtom answerAtom, TermFactory termFactory,
+                                      SubstitutionFactory substitutionFactory) {
 
-        super(rs, signature, rootConstructionNode, dbMetadata, iriDictionary, termFactory, typeFactory, rdfFactory);
+        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, termFactory, substitutionFactory);
         rowKeys = new HashSet<>();
     }
 
@@ -59,21 +59,21 @@ public class SQLDistinctTupleResultSet extends DelegatedIriSQLTupleResultSet imp
      */
     @Override
     protected boolean moveCursor() throws SQLException, OntopConnectionException {
-        boolean foundFreshRow;
+        boolean foundFreshTuple;
         List<Object> currentKey;
         do{
-           foundFreshRow = rs.next();
+           foundFreshTuple = rs.next();
            // Cannot use this in the while condition: limit case where the last row was a duplicate
-           if(!foundFreshRow) {
+           if(!foundFreshTuple) {
                break;
            }
-           currentKey = computeRowKey(rs);
+           currentKey = computeTupleKey(rs);
         } while(!rowKeys.add(currentKey));
 
-        return foundFreshRow;
+        return foundFreshTuple;
     }
 
-    private List<Object> computeRowKey(ResultSet rs) throws OntopConnectionException {
+    private List<Object> computeTupleKey(ResultSet rs) throws OntopConnectionException {
 
         ArrayList rowKey = new ArrayList<>();
         for (int i = 1; i <= getSignature().size();  i ++ ) {

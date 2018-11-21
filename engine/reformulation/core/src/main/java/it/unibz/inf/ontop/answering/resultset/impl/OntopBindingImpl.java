@@ -1,0 +1,32 @@
+package it.unibz.inf.ontop.answering.resultset.impl;
+
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
+import it.unibz.inf.ontop.exception.OntopResultConversionException;
+import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.model.term.Variable;
+
+public class OntopBindingImpl implements OntopBinding {
+
+    private final String name;
+    private final RDFConstant constant;
+
+    public OntopBindingImpl(String name, RDFConstant constant) {
+        this.name = name;
+        this.constant = constant;
+    }
+
+    public OntopBindingImpl(Variable var, RDFConstant constant) {
+        this.name = var.toString();
+        this.constant = constant;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public RDFConstant getValue() throws OntopResultConversionException {
+        return constant;
+    }
+}

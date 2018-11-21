@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
 /***
@@ -56,6 +57,7 @@ public class SQLConnection implements OntopConnection {
 	private final InputQueryFactory inputQueryFactory;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
+	private final SubstitutionFactory substitutionFactory;
 	private final OntopSystemSQLSettings settings;
 
 	private final JDBCConnector jdbcConnector;
@@ -66,7 +68,7 @@ public class SQLConnection implements OntopConnection {
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
 						 Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
-						 RDF rdfFactory, OntopSystemSQLSettings settings) {
+						 RDF rdfFactory, SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
@@ -75,6 +77,7 @@ public class SQLConnection implements OntopConnection {
 		this.inputQueryFactory = inputQueryFactory;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
+		this.substitutionFactory = substitutionFactory;
 		this.settings = settings;
 		this.rdfFactory = rdfFactory;
 		this.isClosed = false;
@@ -99,7 +102,7 @@ public class SQLConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
-					iriDictionary, dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, settings);
+					inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}

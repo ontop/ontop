@@ -15,11 +15,11 @@ import java.util.Set;
  * Abstract implementation that can reasonably be shared because
  * an immutable and a crazy implementation.
  */
-public abstract class AbstractFunctionalTermImpl implements Function {
+public abstract class AbstractFunctionalTerm implements Function {
 
     private Predicate functor;
 
-    protected AbstractFunctionalTermImpl(Predicate functor) {
+    protected AbstractFunctionalTerm(Predicate functor) {
         this.functor = functor;
     }
 

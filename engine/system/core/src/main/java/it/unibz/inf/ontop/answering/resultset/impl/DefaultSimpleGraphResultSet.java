@@ -192,8 +192,8 @@ public class DefaultSimpleGraphResultSet implements SimpleGraphResultSet {
         }
 
 //		if (node_name.charAt(0) == '-') {
-        if (ve instanceof org.eclipse.rdf4j.query.algebra.ValueConstant) {
-            org.eclipse.rdf4j.query.algebra.ValueConstant vc = (org.eclipse.rdf4j.query.algebra.ValueConstant) ve;
+        if (ve instanceof ValueConstant) {
+            ValueConstant vc = (ValueConstant) ve;
             if (vc.getValue() instanceof IRI) {
                 constant = termFactory.getConstantIRI(rdfFactory.createIRI(vc.getValue().stringValue()));
             }

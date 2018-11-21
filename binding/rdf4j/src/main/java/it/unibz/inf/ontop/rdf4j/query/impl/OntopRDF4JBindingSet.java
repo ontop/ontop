@@ -74,7 +74,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
         }
     }
 
-    /** Inefficient */
+    /** Inefficient*/
     @Override
     public boolean hasBinding(String bindingName) {
         return ontopBindingSet.hasBinding(bindingName);
@@ -83,7 +83,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Override
     @Nonnull
     public Iterator<Binding> iterator() {
-        return ontopBindingSet.getBindings()
+        return ontopBindingSet.getBindings().stream()
                 .map(this::convertBinding)
                 .iterator();
     }

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.resultset.impl;
+package it.unibz.inf.ontop.answering.resultset.legacy;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -26,9 +26,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE.WKT;
-import static it.unibz.inf.ontop.answering.resultset.impl.JDBC2ConstantConverter.System.*;
+import static it.unibz.inf.ontop.answering.resultset.legacy.JDBC2ConstantConverter.System.*;
 
 
+/** Legacy code: this class should not be used **/
 public class JDBC2ConstantConverter {
 
     private final TermFactory termFactory;

@@ -35,6 +35,4 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
         FunctionSymbol functionSymbol = getFunctionSymbol();
         return functionSymbol.inferAndValidateType(getTerms());
     }
-
-    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase);
 }

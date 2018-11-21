@@ -4,92 +4,103 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
-    protected final ImmutableList<String> signature;
+    /* Integer values start at 0 */
+    /* (note: ImmutableMap preserves ordering) */
+    private final ImmutableMap<String, Integer> bindingName2Index;
 
-    // ImmutableMap is order-preserving (similar to a LinkedHashMap)
-    protected Optional<ImmutableMap<String, OntopBinding>> variableName2BindingMap;
+    private Optional<ImmutableList<RDFConstant>> values;
+    private Optional<ImmutableList<OntopBinding>> bindings;
 
-    protected AbstractOntopBindingSet(ImmutableList<String> signature) {
-        this.signature = signature;
-        this.variableName2BindingMap = Optional.empty();
+    AbstractOntopBindingSet(ImmutableMap<String, Integer> bindingName2Index) {
+        this.bindingName2Index = bindingName2Index;
+        this.bindings = Optional.empty();
     }
 
     @Override
     @Nonnull
     public Iterator<OntopBinding> iterator() {
-        return getVariableName2BindingMap().values().iterator();
+        return getBindings().iterator();
     }
 
     @Override
-    public Stream<OntopBinding> getBindings() {
-        return getVariableName2BindingMap().values().stream();
+    public ImmutableList<OntopBinding> getBindings() {
+        if (!bindings.isPresent()) {
+            bindings = Optional.of(computeBindings());
+        }
+        return bindings.get();
     }
 
-    private ImmutableMap<String, OntopBinding> getVariableName2BindingMap(){
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get():
-                computeVariable2BindingMap();
+    @Override
+    public ImmutableList<RDFConstant> getValues() {
+        if (!values.isPresent()) {
+            values = Optional.of(computeValues());
+        }
+        return values.get();
     }
-
-    private ImmutableMap<String, OntopBinding> computeVariable2BindingMap() {
-        this.variableName2BindingMap = Optional.of(
-                signature.stream()
-                .map(s -> new AbstractMap.SimpleImmutableEntry(s, computeBinding(s)))
-                .filter(e -> e.getValue() != null)
-                .collect(ImmutableCollectors.toMap())
-        );
-        return variableName2BindingMap.get();
-    }
-
-    @Nullable
-    protected abstract OntopBinding computeBinding(String variableName);
 
     @Override
     public ImmutableList<String> getBindingNames() {
-        return ImmutableList.copyOf(getVariableName2BindingMap().keySet());
+        return ImmutableList.copyOf(bindingName2Index.keySet());
+    }
+
+    @Nullable
+    @Override
+    public RDFConstant getConstant(int column) {
+        return getValues().get(column - 1);
+    }
+
+    @Nullable
+    @Override
+    public RDFConstant getConstant(String name) {
+        return getValues().get(bindingName2Index.get(name));
     }
 
     @Override
     public String toString() {
-        return getVariableName2BindingMap().values().stream()
+        return getBindings().stream()
                 .map(OntopBinding::toString)
                 .collect(joining(",", "[", "]"));
     }
 
     @Override
+    public boolean hasBinding(String bindingName) {
+        return bindingName2Index.containsKey(bindingName);
+    }
+
+    @Override
     @Nullable
     public OntopBinding getBinding(String name) {
-        return variableName2BindingMap.isPresent()?
-                variableName2BindingMap.get().get(name):
-                computeBinding(name);
+        return getBindings().get(bindingName2Index.get(name));
     }
 
-    public static class UnexpectedTargeTermTypeException extends OntopInternalBugException {
-        public UnexpectedTargeTermTypeException(Term term) {
-            super("Unexpected type "+ term.getClass()+" for term "+term);
-        }
+    @Override
+    @Nullable
+    public OntopBinding getBinding(int index) {
+        return getBindings().get(index - 1);
     }
 
-    public static class UnexpectedTargetPredicateTypeException extends OntopInternalBugException {
-        public UnexpectedTargetPredicateTypeException(Predicate predicate) {
-            super("Unexpected type "+ predicate.getClass()+" for predicate "+predicate);
-        }
+    private ImmutableList<OntopBinding> computeBindings() {
+        Iterator<RDFConstant> it = getValues().iterator();
+        return bindingName2Index.keySet().stream()
+                .map(k -> new OntopBindingImpl(
+                        k,
+                        it.next()
+                ))
+                .collect(ImmutableCollectors.toList());
     }
+
+    protected abstract ImmutableList<RDFConstant> computeValues();
+
 }

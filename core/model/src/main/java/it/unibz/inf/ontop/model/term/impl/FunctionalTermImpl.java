@@ -39,7 +39,7 @@ import java.util.List;
  *
  * Please consider using ImmutableFunctionalTermImpl instead.
  */
-public class FunctionalTermImpl extends AbstractFunctionalTermImpl implements ListenableFunction {
+public class FunctionalTermImpl extends AbstractFunctionalTerm implements ListenableFunction {
 
 	private static final long serialVersionUID = 2832481815465364535L;
 

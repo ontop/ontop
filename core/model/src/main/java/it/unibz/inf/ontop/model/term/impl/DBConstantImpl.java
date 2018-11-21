@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Stream;
 
-public class DBConstantImpl implements DBConstant {
+public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConstant {
     private final String value;
     private final DBTermType termType;
 
