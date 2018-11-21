@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCSolutionMappingSet;
+import it.unibz.inf.ontop.answering.resultset.impl.DistinctJDBCTupleResultSet;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test to check the use of SPARQL Select distinct in Sesame and QuestOWL.
- * Use the class {@link DistinctJDBCSolutionMappingSet}
+ * Use the class {@link DistinctJDBCTupleResultSet}
  */
 
 public class DistinctResultSetTest { //

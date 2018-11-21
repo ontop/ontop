@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -39,16 +40,16 @@ import java.util.*;
  * See test case DistinctResultSetTest
  */
 
-public class DistinctJDBCSolutionMappingSet extends JDBCSolutionMappingSet implements TupleResultSet {
+public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements TupleResultSet {
 
     private Set<List<Object>> rowKeys;
 
-    public DistinctJDBCSolutionMappingSet(ResultSet rs, ImmutableMap<Variable, DBTermType> signature,
-                                          ConstructionNode constructionNode,
-                                          TermFactory termFactory,
-                                          SubstitutionFactory substitutionFactory) {
+    public DistinctJDBCTupleResultSet(ResultSet rs, ImmutableList<Variable> sqlSignature, ImmutableMap<Variable, DBTermType> sqlTypes,
+                                      ConstructionNode constructionNode,
+                                      DistinctVariableOnlyDataAtom answerAtom, TermFactory termFactory,
+                                      SubstitutionFactory substitutionFactory) {
 
-        super(rs, signature, constructionNode, termFactory, substitutionFactory);
+        super(rs, sqlSignature, sqlTypes, constructionNode, answerAtom, termFactory, substitutionFactory);
         rowKeys = new HashSet<>();
     }
 

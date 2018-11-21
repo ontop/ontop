@@ -146,9 +146,4 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     public String toString() {
         return NATIVE_STRING + variableTypeMap + "\n" + nativeQueryString;
     }
-
-    @Override
-    public ImmutableList<Variable> getOrderedVariables() {
-        return orderedVariables;
-    }
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -12,26 +13,22 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public class SQLOntopBindingSet extends AbstractOntopBindingSet implements OntopBindingSet {
 
 
-    private final SQLConstantRetriever constantRetriever;
-    private final ImmutableList<String> rawValues;
-    private final ImmutableSubstitution substitution;
+    private final ImmutableSubstitution<DBConstant> SQLVar2DBConstant;
+    private final ImmutableSubstitution SPARQLVar2Term;
 
 
-    SQLOntopBindingSet(ImmutableList<String> rawValues, ImmutableMap<String, Integer> bindingName2Index,
-                       SQLConstantRetriever constantRetriever, ImmutableSubstitution substitution) {
+    SQLOntopBindingSet(ImmutableMap<String, Integer> bindingName2Index,
+                       ImmutableSubstitution<DBConstant> SQLVar2DBConstant, ImmutableSubstitution SPARQLVar2Term) {
         super(bindingName2Index);
-        this.rawValues = rawValues;
-        this.constantRetriever = constantRetriever;
-        this.substitution = substitution;
+        this.SQLVar2DBConstant = SQLVar2DBConstant;
+        this.SPARQLVar2Term = SPARQLVar2Term;
     }
 
     @Override
     public ImmutableList<RDFConstant> computeValues() {
-        ImmutableSubstitution<ImmutableTerm> composition = substitution.composeWith(
-                constantRetriever.retrieveAllConstants(rawValues)
-        );
+        ImmutableSubstitution<ImmutableTerm> composition = SPARQLVar2Term.composeWith(SQLVar2DBConstant);
         return composition.getImmutableMap().values().stream()
-                .map(this::evaluate)
+                .map(t -> evaluate(t))
                 .collect(ImmutableCollectors.toList());
     }
 

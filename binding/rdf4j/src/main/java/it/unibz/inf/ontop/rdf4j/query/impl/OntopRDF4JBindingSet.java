@@ -83,7 +83,7 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     @Override
     @Nonnull
     public Iterator<Binding> iterator() {
-        return ontopBindingSet.getBindings()
+        return ontopBindingSet.getBindings().stream()
                 .map(this::convertBinding)
                 .iterator();
     }

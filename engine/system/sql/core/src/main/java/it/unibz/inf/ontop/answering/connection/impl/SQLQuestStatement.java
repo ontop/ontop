@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.connection.impl;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import it.unibz.inf.ontop.answering.resultset.impl.*;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
@@ -21,6 +22,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
@@ -202,12 +204,14 @@ public class SQLQuestStatement extends QuestStatement {
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
-            ImmutableList<Variable> SQLSignature = extractSQLSignature(executableQuery);
+            NativeNode nativeNode = extractNativeNode(executableQuery);
+            ImmutableList<Variable> signature = nativeNode.getSignature();
+            ImmutableMap<Variable, DBTermType> typeMap = nativeNode.getTypeMap();
             try {
                 java.sql.ResultSet set = sqlStatement.executeQuery(sqlQuery);
                 return settings.isDistinctPostProcessingEnabled()
-                        ? new DistinctJDBCSolutionMappingSet(set, SQLSignature, constructionNode, termFactory, substitutionFactory)
-                        : new JDBCSolutionMappingSet(set, SQLSignature, constructionNode, termFactory, substitutionFactory);
+                        ? new DistinctJDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), termFactory, substitutionFactory)
+                        : new JDBCTupleResultSet(set, signature, typeMap, constructionNode, executableQuery.getProjectionAtom(), termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e);
             }
@@ -217,18 +221,19 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, IQ executableQuery,
-                                                     boolean collectResults)
+    protected SimpleGraphResultSet executeGraphQuery(ConstructQuery inputQuery, IQ executableQuery, boolean collectResults)
             throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException {
         TupleResultSet tuples;
         try {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
-            ImmutableList<Variable> SQLSignature = extractSQLSignature(executableQuery);
+            NativeNode nativeNode = extractNativeNode(executableQuery);
+            ImmutableList<Variable> SQLSignature = nativeNode.getSignature();
+            ImmutableMap<Variable, DBTermType> SQLTypeMap = nativeNode.getTypeMap();
             try {
                 ResultSet rs = sqlStatement.executeQuery(sqlQuery);
-                tuples = new JDBCSolutionMappingSet(rs, SQLSignature, constructionNode,
-                        termFactory, substitutionFactory );
+                tuples = new JDBCTupleResultSet(rs, SQLSignature, SQLTypeMap, constructionNode,
+                        executableQuery.getProjectionAtom(), termFactory, substitutionFactory);
             } catch (SQLException e) {
                 throw new OntopQueryEvaluationException(e.getMessage());
             }
@@ -236,6 +241,20 @@ public class SQLQuestStatement extends QuestStatement {
             tuples = new EmptyTupleResultSet(executableQuery.getProjectionAtom().getArguments());
         }
         return new DefaultSimpleGraphResultSet(tuples, inputQuery.getConstructTemplate(), collectResults, termFactory, rdfFactory);
+    }
+
+    private NativeNode extractNativeNode(IQ executableQuery) throws EmptyQueryException {
+        IQTree tree = executableQuery.getTree();
+        if (tree.isDeclaredAsEmpty()) {
+            throw new EmptyQueryException();
+        }
+        return Optional.of(tree)
+                .filter(t -> t instanceof UnaryIQTree)
+                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
+                .filter(n -> n instanceof NativeNode)
+                .map(n -> (NativeNode) n)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
+                        "for an executable query\n" + executableQuery));
     }
 
     private String extractSQLQuery(IQ executableQuery) throws EmptyQueryException, OntopInternalBugException {
@@ -269,20 +288,4 @@ public class SQLQuestStatement extends QuestStatement {
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "The \"executable\" query is not starting with a construction node\n" + executableQuery));
     }
-
-    private ImmutableList<Variable> extractSQLSignature(IQ executableQuery) throws EmptyQueryException {
-        IQTree tree = executableQuery.getTree();
-        if (tree.isDeclaredAsEmpty()) {
-            throw new EmptyQueryException();
-        }
-        return Optional.of(tree)
-                .filter(t -> t instanceof UnaryIQTree)
-                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
-                .filter(n -> n instanceof NativeNode)
-                .map(n -> (NativeNode) n)
-                .map(NativeNode::getOrderedVariables)
-                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
-                             "for an executable query\n" + executableQuery));
-    }
-
 }
