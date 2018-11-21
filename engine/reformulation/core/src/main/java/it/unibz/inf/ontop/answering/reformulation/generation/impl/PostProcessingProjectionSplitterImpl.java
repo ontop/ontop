@@ -78,11 +78,13 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         ImmutableMap<Variable, DefinitionDecomposition> decompositionMap = substitution.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> decomposeDefinition(e.getValue(), variableGenerator)
+                        e -> decomposeDefinition(e.getValue(), variableGenerator, Optional.of(e.getKey()))
                 ));
 
         ImmutableSubstitution<ImmutableTerm> postProcessingSubstitution = substitutionFactory.getSubstitution(
                 decompositionMap.entrySet().stream()
+                        // To avoid entries like t/t
+                        .filter(e -> !e.getKey().equals(e.getValue().term))
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
                                 e -> e.getValue().term
@@ -98,13 +100,14 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
     /**
      * Recursive
      */
-    private DefinitionDecomposition decomposeDefinition(ImmutableTerm term, VariableGenerator variableGenerator) {
+    private DefinitionDecomposition decomposeDefinition(ImmutableTerm term, VariableGenerator variableGenerator,
+                                                        Optional<Variable> definedVariable) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             if (functionalTerm.getFunctionSymbol().canBePostProcessed()) {
                 // Recursive
                 ImmutableList<DefinitionDecomposition> childDecompositions = functionalTerm.getTerms().stream()
-                        .map(t -> decomposeDefinition(t, variableGenerator))
+                        .map(t -> decomposeDefinition(t, variableGenerator, Optional.empty()))
                         .collect(ImmutableCollectors.toList());
 
                 Optional<ImmutableSubstitution<ImmutableTerm>> subSubstitution = combineSubstitutions(
@@ -124,9 +127,10 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
                         .orElse(new DefinitionDecomposition(functionalTerm));
             }
             else {
-                Variable newVariable = variableGenerator.generateNewVariable();
-                return new DefinitionDecomposition(newVariable,
-                        substitutionFactory.getSubstitution(newVariable, functionalTerm));
+                Variable variable = definedVariable
+                        .orElseGet(variableGenerator::generateNewVariable);
+                return new DefinitionDecomposition(variable,
+                        substitutionFactory.getSubstitution(variable, functionalTerm));
             }
         }
         else
