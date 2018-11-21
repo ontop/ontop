@@ -931,7 +931,10 @@ public class ExpressionEvaluator {
 				return termFactory.getBooleanConstant(!isEqual);
 			}
 		}
-		return null;
+		// TODO: try to optimize further on
+		return isEqual
+				? termFactory.getImmutableFunctionalTerm(EQ,term1, term2)
+				: termFactory.getImmutableFunctionalTerm(NEQ, term1, term2);
 	}
 
 	private ImmutableTerm evalUriFunctionsWithMultipleTerms(ImmutableFunctionalTerm uriFunction1,
