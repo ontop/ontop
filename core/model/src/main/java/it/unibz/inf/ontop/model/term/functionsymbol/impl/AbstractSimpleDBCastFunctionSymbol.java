@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
+public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     @Nullable
     private final DBTermType inputType;

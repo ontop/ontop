@@ -35,13 +35,8 @@ public interface FunctionSymbol extends Predicate {
     /**
      * Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
      *  (outside the optimization phase) .
-     *
-     * TODO: remove this default value!
      */
-    default boolean canBePostProcessed() {
-        return false;
-    }
-
+    boolean canBePostProcessed();
 
     interface FunctionalTermNullability {
 

@@ -162,6 +162,14 @@ public enum ExpressionOperation implements OperationPredicate {
 		return argumentValidator.getExpectedBaseType(index);
 	}
 
+	/**
+	 * TODO: let some of them be post-processed
+	 */
+	@Override
+	public boolean canBePostProcessed() {
+		return false;
+	}
+
 	@Override
 	public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
 

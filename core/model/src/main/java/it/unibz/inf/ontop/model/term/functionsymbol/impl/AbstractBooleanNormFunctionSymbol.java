@@ -4,9 +4,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 
-/**
- * TODO: make it post-processable
- */
 public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     private final DBTermType booleanType;
@@ -24,5 +21,10 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
     @Override
     public boolean isTemporary() {
         return false;
+    }
+
+    @Override
+    public boolean canBePostProcessed() {
+        return true;
     }
 }
