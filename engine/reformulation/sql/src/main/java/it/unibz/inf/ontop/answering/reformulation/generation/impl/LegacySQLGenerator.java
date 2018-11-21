@@ -47,7 +47,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                OntopReformulationSQLSettings settings,
                                IQ2DatalogTranslator iq2DatalogTranslator,
                                JdbcTypeMapper jdbcTypeMapper,
-                               TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
+                               Relation2Predicate relation2Predicate,
                                DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
                                TypeFactory typeFactory, TermFactory termFactory,
                                IntermediateQueryFactory iqFactory,
@@ -60,7 +60,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     {
 
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
-                iq2DatalogTranslator, typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                iq2DatalogTranslator, relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener,
                 pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools,
                 uniqueTermTypeExtractor, projectionSplitter);

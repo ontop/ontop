@@ -35,10 +35,8 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.exception.OntopTypingException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
@@ -100,7 +98,6 @@ public class OneShotSQLGeneratorEngine {
 	private final QuotedIDFactory idFactory;
 	private final SQLDialectAdapter sqladapter;
 	private final IQ2DatalogTranslator iq2DatalogTranslator;
-	private final TypeExtractor typeExtractor;
 
 	private final boolean distinctResultSet;
 	private final boolean isIRISafeEncodingEnabled;
@@ -139,14 +136,13 @@ public class OneShotSQLGeneratorEngine {
 							  OntopReformulationSQLSettings settings,
 							  JdbcTypeMapper jdbcTypeMapper,
 							  IQ2DatalogTranslator iq2DatalogTranslator,
-							  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
+							  Relation2Predicate relation2Predicate,
 							  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 							  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
 							  AtomFactory atomFactory, UnionFlattener unionFlattener,
 							  PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
 							  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
 							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor, PostProcessingProjectionSplitter projectionSplitter) {
-		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
@@ -187,8 +183,7 @@ public class OneShotSQLGeneratorEngine {
 									  boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<FunctionSymbol, String> operations,
-									  IQ2DatalogTranslator iq2DatalogTranslator,
-									  TypeExtractor typeExtractor, Relation2Predicate relation2Predicate,
+									  IQ2DatalogTranslator iq2DatalogTranslator, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
 									  AtomFactory atomFactory, UnionFlattener unionFlattener,
@@ -206,7 +201,6 @@ public class OneShotSQLGeneratorEngine {
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-		this.typeExtractor = typeExtractor;
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
@@ -278,7 +272,7 @@ public class OneShotSQLGeneratorEngine {
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
 				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
-                typeExtractor, relation2Predicate, datalogNormalizer, datalogFactory,
+                relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter);
 	}
 
@@ -433,18 +427,6 @@ public class OneShotSQLGeneratorEngine {
 								 List<Predicate> predicatesInBottomUp,
 								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
 
-		final TypeExtractor.TypeResults typeResults;
-		try {
-			typeResults = typeExtractor.extractTypes(ruleIndex, predicatesInBottomUp, metadata);
-			/*
-			 * Currently, incompatible terms are treated as a reformulation error
-			 */
-		} catch (FatalTypingException e) {
-			throw new OntopTypingException(e.getMessage());
-		}
-
-		ImmutableMap<Predicate, ImmutableList<TermType>> castTypeMap = typeResults.getCastTypeMap();
-
 		AtomicInteger viewCounter = new AtomicInteger(0);
 
 		// non-top-level intensional predicates - need to create subqueries
@@ -481,7 +463,7 @@ public class OneShotSQLGeneratorEngine {
 				for (int k = 0; k < size; k++) {
 					varListBuilder.add("v" + k);
 				}
-				ImmutableList<SignatureVariable> s = createSignature(varListBuilder.build(), castTypeMap.get(pred));
+				ImmutableList<SignatureVariable> s = createSignature(varListBuilder.build());
 
 				// Creates the body of the subquery
 				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
@@ -502,7 +484,7 @@ public class OneShotSQLGeneratorEngine {
 
 		// top-level intensional predicate
 		Predicate topLevelPredicate = predicatesInBottomUp.get(topLevel);
-		ImmutableList<SignatureVariable> topSignature = createSignature(signature, castTypeMap.get(topLevelPredicate));
+		ImmutableList<SignatureVariable> topSignature = createSignature(signature);
 
 		return generateQueryFromRules(ruleIndex.get(topLevelPredicate), topSignature,
 				subQueryDefinitionsBuilder.build(), isDistinct && !distinctResultSet,
@@ -960,12 +942,12 @@ public class OneShotSQLGeneratorEngine {
 		return Types.VARCHAR;
 	}
 
+	// Use string instead
+	@Deprecated
 	private static final class SignatureVariable {
 		private final String columnAlias;
-		private final TermType castType;
-		SignatureVariable(String columnAlias, TermType castType) {
+		SignatureVariable(String columnAlias) {
 			this.columnAlias = columnAlias;
-			this.castType = castType;
 		}
 	}
 
@@ -977,12 +959,12 @@ public class OneShotSQLGeneratorEngine {
 	private String getSelectClauseFragment(SignatureVariable var,
 										   Term term,
 										   AliasIndex index) {
-		String mainColumn = getMainColumnForSELECT(term, index, var.castType);
+		String mainColumn = getMainColumnForSELECT(term, index);
 
 		return "\n   " + mainColumn + " AS " + var.columnAlias;
 	}
 
-	private ImmutableList<SignatureVariable> createSignature(List<String> names, ImmutableList<TermType> castTypes) {
+	private ImmutableList<SignatureVariable> createSignature(List<String> names) {
 		/*
 		 * Set that contains all the variable names created on the top query.
 		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
@@ -996,19 +978,14 @@ public class OneShotSQLGeneratorEngine {
 			String mainAlias = sqladapter.nameTopVariable(name, columnAliases);
 			columnAliases.add(mainAlias);
 
-			builder.add(new SignatureVariable(mainAlias, castTypes.get(i)));
+			builder.add(new SignatureVariable(mainAlias));
 		}
 		return builder.build();
 	}
 
-	private String getMainColumnForSELECT(Term ht, AliasIndex index, TermType castDataType) {
+	private String getMainColumnForSELECT(Term ht, AliasIndex index) {
 
-		String column = getSQLString(ht, index, false);
-		if (column.charAt(0) != '\'' && column.charAt(0) != '(' && castDataType != null) {
-			// a column that still needs a CAST to VARCHAR
-			return sqladapter.sqlCast(column, jdbcTypeMapper.getSQLType(castDataType));
-		}
-		return column;
+		return getSQLString(ht, index, false);
 	}
 
 
