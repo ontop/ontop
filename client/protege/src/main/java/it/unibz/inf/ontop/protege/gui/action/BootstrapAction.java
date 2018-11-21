@@ -143,7 +143,7 @@ public class BootstrapAction extends ProtegeAction {
 
 			OBDAModelManager obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
 
-			new BootstrapGenerator(obdaModelManager, baseUri, owlManager, obdaModelManager.getJdbcTypeMapper());
+			new BootstrapGenerator(obdaModelManager, baseUri, owlManager);
 
 
 		}

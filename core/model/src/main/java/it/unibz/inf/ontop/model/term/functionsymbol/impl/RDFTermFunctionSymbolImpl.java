@@ -54,4 +54,9 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         validateSubTermTypes(terms);
         return inferType(terms);
     }
+
+    @Override
+    public boolean canBePostProcessed() {
+        return true;
+    }
 }

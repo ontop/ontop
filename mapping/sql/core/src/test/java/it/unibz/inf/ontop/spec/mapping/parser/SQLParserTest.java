@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
@@ -45,135 +45,138 @@ public class SQLParserTest {
 	public void beforeEachTest() {
 		metadata = createDummyMetadata();
 		QuotedIDFactory idfac = metadata.getQuotedIDFactory();
+
+		DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+		
 		DatabaseRelationDefinition r = metadata.createDatabaseRelation(idfac.createRelationID(null, "student"));
-		r.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);
-		r.addAttribute(idfac.createAttributeID("name"), 1, "VARCHAR(20)", false);
-		r.addAttribute(idfac.createAttributeID("birth_year"), 0, "INT", false);
-		r.addAttribute(idfac.createAttributeID("birth_date"), 5, "DATE", false);
-		r.addAttribute(idfac.createAttributeID("semester"), 0, "INT", false);
-		r.addAttribute(idfac.createAttributeID("nationality"), 1, "VARCHAR(20)", false);
-		r.addAttribute(idfac.createAttributeID("grade"), 0, "INT", false);
-		r.addAttribute(idfac.createAttributeID("class"), 0, "INT", false);
-		r.addAttribute(idfac.createAttributeID("address"), 1, "VARCHAR(20)", false);
+		r.addAttribute(idfac.createAttributeID("id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r.addAttribute(idfac.createAttributeID("name"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r.addAttribute(idfac.createAttributeID("birth_year"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r.addAttribute(idfac.createAttributeID("birth_date"), "DATE", dbTypeFactory.getDBTermType(5, "DATE"), false);
+		r.addAttribute(idfac.createAttributeID("semester"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r.addAttribute(idfac.createAttributeID("nationality"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r.addAttribute(idfac.createAttributeID("grade"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r.addAttribute(idfac.createAttributeID("class"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r.addAttribute(idfac.createAttributeID("address"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r2 = metadata.createDatabaseRelation(idfac.createRelationID(null, "QUEST_DATA_PROPERTY_LITERAL_ASSERTION"));
-		r2.addAttribute(idfac.createAttributeID("URI"), 1, "VARCHAR(20)", false);
-		r2.addAttribute(idfac.createAttributeID("ISBNODE"), 2, "BOOLEAN", false);
-		r2.addAttribute(idfac.createAttributeID("IDX"), 0, "INT", false);
-		r2.addAttribute(idfac.createAttributeID("VALUE"), 1, "VARCHAR(20)", false);
-		r2.addAttribute(idfac.createAttributeID("LANG"), 1, "VARCHAR(20)", false);
+		r2.addAttribute(idfac.createAttributeID("URI"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r2.addAttribute(idfac.createAttributeID("ISBNODE"), "BOOLEAN", dbTypeFactory.getDBTermType(2, "BOOLEAN"), false);
+		r2.addAttribute(idfac.createAttributeID("IDX"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r2.addAttribute(idfac.createAttributeID("VALUE"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r2.addAttribute(idfac.createAttributeID("LANG"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r5 = metadata.createDatabaseRelation(idfac.createRelationID(null, "QUEST_OBJECT_PROPERTY_ASSERTION"));
-		r5.addAttribute(idfac.createAttributeID("URI1"), 1, "VARCHAR(20)", false);
-		r5.addAttribute(idfac.createAttributeID("URI2"), 1, "VARCHAR(20)", false);
-		r5.addAttribute(idfac.createAttributeID("ISBNODE"), 2, "BOOLEAN", false);
-		r5.addAttribute(idfac.createAttributeID("ISBNODE2"), 2, "BOOLEAN", false);
-		r5.addAttribute(idfac.createAttributeID("IDX"), 0, "INT", false);
+		r5.addAttribute(idfac.createAttributeID("URI1"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r5.addAttribute(idfac.createAttributeID("URI2"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r5.addAttribute(idfac.createAttributeID("ISBNODE"), "BOOLEAN", dbTypeFactory.getDBTermType(2, "BOOLEAN"), false);
+		r5.addAttribute(idfac.createAttributeID("ISBNODE2"), "BOOLEAN", dbTypeFactory.getDBTermType(2, "BOOLEAN"), false);
+		r5.addAttribute(idfac.createAttributeID("IDX"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r3 = metadata.createDatabaseRelation(idfac.createRelationID(null, "table1"));
-		r3.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);
-		r3.addAttribute(idfac.createAttributeID("name"), 1, "VARCHAR(20)", false);
-		r3.addAttribute(idfac.createAttributeID("value"), 1, "VARCHAR(20)", false);
+		r3.addAttribute(idfac.createAttributeID("id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r3.addAttribute(idfac.createAttributeID("name"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r3.addAttribute(idfac.createAttributeID("value"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r4 = metadata.createDatabaseRelation(idfac.createRelationID("HR", "REGIONS"));
-		r4.addAttribute(idfac.createAttributeID("REGION_ID"), 0, "INT", false);
+		r4.addAttribute(idfac.createAttributeID("REGION_ID"), "INT)", dbTypeFactory.getDBTermType(0, "INT)"), false);
 
 		DatabaseRelationDefinition r6 = metadata.createDatabaseRelation(idfac.createRelationID(null, "tableName"));
-		r6.addAttribute(idfac.createAttributeID("cast"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("do"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("extract"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("siblings"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("first"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("following"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("last"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("materialized"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("nulls"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("partition"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("range"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("row"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("rows"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("value"), 0, "INT", false);
-		r6.addAttribute(idfac.createAttributeID("xml"), 0, "INT", false);
+		r6.addAttribute(idfac.createAttributeID("cast"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("do"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("extract"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("siblings"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("first"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("following"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("last"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("materialized"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("nulls"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("partition"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("range"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("row"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("rows"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("value"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r6.addAttribute(idfac.createAttributeID("xml"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r7 = metadata.createDatabaseRelation(idfac.createRelationID(null, "grade"));
-		r7.addAttribute(idfac.createAttributeID("st_id"), 0, "INT", false);
-		r7.addAttribute(idfac.createAttributeID("class_id"), 0, "INT", false);
-		r7.addAttribute(idfac.createAttributeID("grade"), 0, "INT", false);
-		r7.addAttribute(idfac.createAttributeID("score"), 0, "INT", false);
-		r7.addAttribute(idfac.createAttributeID("course"), 1, "VARCHAR(10)", false);
-		r7.addAttribute(idfac.createAttributeID("mark"), 1, "VARCHAR(10)", false);
-		r7.addAttribute(idfac.createAttributeID("pass"), 3, "BOOLEAN", false);
-		r7.addAttribute(idfac.createAttributeID("sm_id"), 0, "INT", false);
+		r7.addAttribute(idfac.createAttributeID("st_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r7.addAttribute(idfac.createAttributeID("class_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r7.addAttribute(idfac.createAttributeID("grade"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r7.addAttribute(idfac.createAttributeID("score"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r7.addAttribute(idfac.createAttributeID("course"), "VARCHAR(10)", dbTypeFactory.getDBTermType(1, "VARCHAR(10)"), false);
+		r7.addAttribute(idfac.createAttributeID("mark"), "VARCHAR(10)", dbTypeFactory.getDBTermType(1, "VARCHAR(10)"), false);
+		r7.addAttribute(idfac.createAttributeID("pass"), "BOOLEAN", dbTypeFactory.getDBTermType(3, "BOOLEAN"), false);
+		r7.addAttribute(idfac.createAttributeID("sm_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r9 = metadata.createDatabaseRelation(idfac.createRelationID(null, "semester"));
-		r9.addAttribute(idfac.createAttributeID("id"), 0, "INT", false);
+		r9.addAttribute(idfac.createAttributeID("id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r8 = metadata.createDatabaseRelation(idfac.createRelationID(null, "tax"));
-		r8.addAttribute(idfac.createAttributeID("payee"), 1, "VARCHAR(20)", false);
-		r8.addAttribute(idfac.createAttributeID("amount"), 0, "INT", false);
+		r8.addAttribute(idfac.createAttributeID("payee"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r8.addAttribute(idfac.createAttributeID("amount"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r10 = metadata.createDatabaseRelation(idfac.createRelationID(null, "all_tables"));
-		r10.addAttribute(idfac.createAttributeID("table_name"), 1, "VARCHAR(20)", false);
-		r10.addAttribute(idfac.createAttributeID("owner"), 1, "VARCHAR(20)", false);
+		r10.addAttribute(idfac.createAttributeID("table_name"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r10.addAttribute(idfac.createAttributeID("owner"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r11 = metadata.createDatabaseRelation(idfac.createRelationID(null, "all_views"));
-		r11.addAttribute(idfac.createAttributeID("owner"), 1, "VARCHAR(20)", false);
+		r11.addAttribute(idfac.createAttributeID("owner"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r12 = metadata.createDatabaseRelation(idfac.createRelationID(null, "people"));
-		r12.addAttribute(idfac.createAttributeID("\"id\""), 1, "VARCHAR(20)", false);
-		r12.addAttribute(idfac.createAttributeID("\"nick2\""), 1, "VARCHAR(20)", false);
+		r12.addAttribute(idfac.createAttributeID("\"id\""), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r12.addAttribute(idfac.createAttributeID("\"nick2\""), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r13 = metadata.createDatabaseRelation(idfac.createRelationID(null, "pet"));
-		r13.addAttribute(idfac.createAttributeID("name"), 1, "VARCHAR(20)", false);
-		r13.addAttribute(idfac.createAttributeID("testcol"), 1, "VARCHAR(20)", false);
+		r13.addAttribute(idfac.createAttributeID("name"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r13.addAttribute(idfac.createAttributeID("testcol"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 
 		DatabaseRelationDefinition r14 = metadata.createDatabaseRelation(idfac.createRelationID(null, "despatch"));
-		r14.addAttribute(idfac.createAttributeID("des_date"), 1, "VARCHAR(20)", false);
-		r14.addAttribute(idfac.createAttributeID("des_amount"), 0, "INT", false);
-		r14.addAttribute(idfac.createAttributeID("ord_amount"), 0, "INT", false);
+		r14.addAttribute(idfac.createAttributeID("des_date"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r14.addAttribute(idfac.createAttributeID("des_amount"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r14.addAttribute(idfac.createAttributeID("ord_amount"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r15 = metadata.createDatabaseRelation(idfac.createRelationID(null, "Product"));
-		r15.addAttribute(idfac.createAttributeID("maker"), 1, "VARCHAR(20)", false);
-		r15.addAttribute(idfac.createAttributeID("type"), 1, "VARCHAR(20)", false);
-		r15.addAttribute(idfac.createAttributeID("model"), 1, "VARCHAR(20)", false);
+		r15.addAttribute(idfac.createAttributeID("maker"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r15.addAttribute(idfac.createAttributeID("type"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r15.addAttribute(idfac.createAttributeID("model"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r16 = metadata.createDatabaseRelation(idfac.createRelationID(null, "PC"));
-		r16.addAttribute(idfac.createAttributeID("model"), 1, "VARCHAR(20)", false);
+		r16.addAttribute(idfac.createAttributeID("model"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 		DatabaseRelationDefinition r17 = metadata.createDatabaseRelation(idfac.createRelationID("dbo", "TEMPERATURE_DEVIATION"));
-		r17.addAttribute(idfac.createAttributeID("ID"), 1, "VARCHAR(20)", false);
-		r17.addAttribute(idfac.createAttributeID("DATETIME"), 4, "DATETIME", false);
-		r17.addAttribute(idfac.createAttributeID("SCALE"), 0, "INT", false);
-		r17.addAttribute(idfac.createAttributeID("INTERVAL"), 4, "DATETIME", false);
+		r17.addAttribute(idfac.createAttributeID("ID"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r17.addAttribute(idfac.createAttributeID("DATETIME"), "DATETIME", dbTypeFactory.getDBTermType(4, "DATETIME"), false);
+		r17.addAttribute(idfac.createAttributeID("SCALE"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r17.addAttribute(idfac.createAttributeID("INTERVAL"), "DATETIME", dbTypeFactory.getDBTermType(4, "DATETIME"), false);
 
 		DatabaseRelationDefinition r18 = metadata.createDatabaseRelation(idfac.createRelationID("northwind", "Suppliers"));
-		r18.addAttribute(idfac.createAttributeID("Region"), 1, "VARCHAR(20)", false);
-		r18.addAttribute(idfac.createAttributeID("PostalCode"), 1, "VARCHAR(20)", false);
-		r18.addAttribute(idfac.createAttributeID("Address"), 1, "VARCHAR(20)", false);
-		r18.addAttribute(idfac.createAttributeID("Country"), 1, "VARCHAR(20)", false);
+		r18.addAttribute(idfac.createAttributeID("Region"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r18.addAttribute(idfac.createAttributeID("PostalCode"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r18.addAttribute(idfac.createAttributeID("Address"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r18.addAttribute(idfac.createAttributeID("Country"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
 
 
 		DatabaseRelationDefinition r19 = metadata.createDatabaseRelation(idfac.createRelationID("oreda", "pm_maint_items"));
-		r19.addAttribute(idfac.createAttributeID("owner_id"), 0, "INT", false);
-		r19.addAttribute(idfac.createAttributeID("inst_id"), 0, "INT", false);
-		r19.addAttribute(idfac.createAttributeID("i_id"), 0, "INT", false);
-		r19.addAttribute(idfac.createAttributeID("ec_code"), 1, "VARCHAR(20)", false);
-		r19.addAttribute(idfac.createAttributeID("mi_code"), 1, "VARCHAR(10)", false);
-		r19.addAttribute(idfac.createAttributeID("su_code"), 1, "VARCHAR(10)", false);
-		r19.addAttribute(idfac.createAttributeID("mc_code"), 1, "VARCHAR(8)", false);
-		r19.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
-		r19.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
+		r19.addAttribute(idfac.createAttributeID("owner_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r19.addAttribute(idfac.createAttributeID("inst_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r19.addAttribute(idfac.createAttributeID("i_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r19.addAttribute(idfac.createAttributeID("ec_code"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r19.addAttribute(idfac.createAttributeID("mi_code"), "VARCHAR(10)", dbTypeFactory.getDBTermType(1, "VARCHAR(10)"), false);
+		r19.addAttribute(idfac.createAttributeID("su_code"), "VARCHAR(10)", dbTypeFactory.getDBTermType(1, "VARCHAR(10)"), false);
+		r19.addAttribute(idfac.createAttributeID("mc_code"), "VARCHAR(8)", dbTypeFactory.getDBTermType(1, "VARCHAR(8)"), false);
+		r19.addAttribute(idfac.createAttributeID("mac_code"), "VARCHAR(8)", dbTypeFactory.getDBTermType(1, "VARCHAR(8)"), false);
+		r19.addAttribute(idfac.createAttributeID("pm_interval"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		DatabaseRelationDefinition r20 = metadata.createDatabaseRelation(idfac.createRelationID("oreda", "pm_program"));
-		r20.addAttribute(idfac.createAttributeID("owner_id"), 0, "INT", false);
-		r20.addAttribute(idfac.createAttributeID("inst_id"), 0, "INT", false);
-		r20.addAttribute(idfac.createAttributeID("i_id"), 0, "INT", false);
-		r20.addAttribute(idfac.createAttributeID("ec_code"), 1, "VARCHAR(20)", false);
-		r20.addAttribute(idfac.createAttributeID("su_code"), 1, "VARCHAR(10)", false);
-		r20.addAttribute(idfac.createAttributeID("mc_code"), 1, "VARCHAR(8)", false);
-		r20.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
-		r20.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
+		r20.addAttribute(idfac.createAttributeID("owner_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r20.addAttribute(idfac.createAttributeID("inst_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r20.addAttribute(idfac.createAttributeID("i_id"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
+		r20.addAttribute(idfac.createAttributeID("ec_code"), "VARCHAR(20)", dbTypeFactory.getDBTermType(1, "VARCHAR(20)"), false);
+		r20.addAttribute(idfac.createAttributeID("su_code"), "VARCHAR(10)", dbTypeFactory.getDBTermType(1, "VARCHAR(10)"), false);
+		r20.addAttribute(idfac.createAttributeID("mc_code"), "VARCHAR(8)", dbTypeFactory.getDBTermType(1, "VARCHAR(8)"), false);
+		r20.addAttribute(idfac.createAttributeID("mac_code"), "VARCHAR(8)", dbTypeFactory.getDBTermType(1, "VARCHAR(8)"), false);
+		r20.addAttribute(idfac.createAttributeID("pm_interval"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
 		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY);
 	}

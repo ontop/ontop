@@ -46,7 +46,7 @@ public class RelationalExpressionTest {
         y = TERM_FACTORY.getVariable("y");
 
         f1 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("P", 2, TYPE_FACTORY),
+                new FakeRelationPredicate("P", 2),
                 ImmutableList.of(x, y));
 
         table1 = MDFAC.createRelationID(null, "P");
@@ -68,7 +68,7 @@ public class RelationalExpressionTest {
         v = TERM_FACTORY.getVariable("v");
 
         f2 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("Q", 2, TYPE_FACTORY),
+                new FakeRelationPredicate("Q", 2),
                 ImmutableList.of(u, v));
 
         RelationID table2 = MDFAC.createRelationID(null, "Q");
@@ -91,7 +91,7 @@ public class RelationalExpressionTest {
         Variable z = TERM_FACTORY.getVariable("v");
 
         Function f3 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("Q", 2, TYPE_FACTORY),
+                new FakeRelationPredicate("Q", 2),
                 ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");

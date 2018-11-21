@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.protege.views;
  * #L%
  */
 
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
@@ -58,7 +55,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 public class QueryInterfaceView extends AbstractOWLViewComponent implements SavedQueriesPanelListener, OBDAModelManagerListener {
@@ -332,13 +328,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			@Override
 			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
 				removeResultTable();
-				IQ executableQuery = st.getExecutableQuery(query);
-				return  Optional.of(executableQuery.getTree())
-						.filter(t -> t instanceof UnaryIQTree)
-						.map(t -> ((UnaryIQTree) t).getChild().getRootNode())
-						.filter(n -> n instanceof NativeNode)
-						.map(n -> ((NativeNode) n).getNativeQueryString())
-						.orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
+				// TODO: should we show the SQL query only?
+				return st.getExecutableQuery(query).toString();
 			}
 
 			@Override

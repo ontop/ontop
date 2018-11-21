@@ -2,21 +2,18 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
+import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
+import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
-import it.unibz.inf.ontop.iq.executor.groundterm.GroundTermRemovalFromDataNodeExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.projection.ProjectionShrinkingExecutor;
-import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfDataNodeExecutor;
-import it.unibz.inf.ontop.iq.executor.pullout.PullVariableOutOfSubTreeExecutor;
 import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecutor;
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
-import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.proposal.*;
 
 import javax.annotation.Nonnull;
@@ -73,9 +70,6 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
         internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownBooleanExpressionExecutor.class);
         internalExecutorMapBuilder.put(PushUpBooleanExpressionProposal.class, PushUpBooleanExpressionExecutor.class);
-        internalExecutorMapBuilder.put(GroundTermRemovalFromDataNodeProposal.class, GroundTermRemovalFromDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfDataNodeProposal.class, PullVariableOutOfDataNodeExecutor.class);
-        internalExecutorMapBuilder.put(PullVariableOutOfSubTreeProposal.class, PullVariableOutOfSubTreeExecutor.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftExecutor.class);
         internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);
         internalExecutorMapBuilder.put(ProjectionShrinkingProposal.class, ProjectionShrinkingExecutor.class);

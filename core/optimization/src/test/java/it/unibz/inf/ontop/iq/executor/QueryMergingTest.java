@@ -58,9 +58,9 @@ public class QueryMergingTest {
     private static String URI_TEMPLATE_STR_1 = "http://example.org/ds1/{}";
     private static String URI_TEMPLATE_STR_2 = "http://example.org/ds2/{}";
     private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
-    private static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
-    private static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+    private static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE, XSD.INTEGER);
     private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(ONE, XSD.INTEGER);
     private static GroundTerm INT_OF_TWO = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(TWO, XSD.INTEGER);
@@ -824,7 +824,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBIntegerType());
+        DBConstant two = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),

@@ -37,16 +37,14 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
      * Can be useful for eliminating self-joins
      */
     private final PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor;
-    private final JdbcTypeMapper jdbcTypeMapper;
     private final TypeFactory typeFactory;
 
     @Inject
     private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings,
                                         PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor,
-                                        JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory) {
+                                        TypeFactory typeFactory) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
-        this.jdbcTypeMapper = jdbcTypeMapper;
         this.typeFactory = typeFactory;
     }
 
@@ -54,7 +52,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory, jdbcTypeMapper);
+            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory);
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {

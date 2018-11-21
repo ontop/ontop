@@ -111,9 +111,12 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return argumentValidator.getExpectedBaseType(index);
     }
 
+    /**
+     * TODO: let some of them be post-processed
+     */
     @Override
-    public ImmutableList<TermType> getExpectedBaseArgumentTypes() {
-        return argumentValidator.getExpectedBaseArgumentTypes();
+    public boolean canBePostProcessed() {
+        return false;
     }
 
     @Override

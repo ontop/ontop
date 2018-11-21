@@ -29,10 +29,10 @@ public class DatalogFactoryImpl implements DatalogFactory {
 
     @Inject
     private DatalogFactoryImpl(TypeFactory typeFactory, TermFactory termFactory) {
-        sparqlJoinPredicate = new AlgebraOperatorPredicateImpl("Join", typeFactory);
-        sparqlLeftjoinPredicate = new AlgebraOperatorPredicateImpl("LeftJoin", typeFactory);
-        sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group", typeFactory);
-        sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having", typeFactory);
+        sparqlJoinPredicate = new AlgebraOperatorPredicateImpl("Join");
+        sparqlLeftjoinPredicate = new AlgebraOperatorPredicateImpl("LeftJoin");
+        sparqlGroupPredicate = new AlgebraOperatorPredicateImpl("Group");
+        sparqlHavingPredicate = new AlgebraOperatorPredicateImpl("Having");
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
     }

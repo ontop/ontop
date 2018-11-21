@@ -98,7 +98,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
     private final TermFactory termFactory;
-	private final JdbcTypeMapper jdbcTypeMapper;
 	private final TargetAtomFactory targetAtomFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
@@ -109,7 +108,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		prefixManager = obdaModel.getMutablePrefixManager();
         termFactory = obdaModel.getTermFactory();
         targetAtomFactory = obdaModel.getTargetAtomFactory();
-        jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -806,7 +804,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory(), jdbcTypeMapper);
+			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory());
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {

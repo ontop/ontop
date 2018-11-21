@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -90,7 +89,6 @@ public class DirectMappingEngine {
 	private final TypeFactory typeFactory;
 	private final TermFactory termFactory;
 	private final RDF rdfFactory;
-	private final JdbcTypeMapper jdbcTypeMapper;
 	private final OntopSQLCredentialSettings settings;
 	private final TargetAtomFactory targetAtomFactory;
 
@@ -112,14 +110,13 @@ public class DirectMappingEngine {
 	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
-								RDF rdfFactory, JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
+								RDF rdfFactory, TargetAtomFactory targetAtomFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
 		this.typeFactory = typeFactory;
 		this.termFactory = termFactory;
 		this.rdfFactory = rdfFactory;
-		this.jdbcTypeMapper = jdbcTypeMapper;
 		this.targetAtomFactory = targetAtomFactory;
 	}
 
@@ -242,7 +239,7 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);

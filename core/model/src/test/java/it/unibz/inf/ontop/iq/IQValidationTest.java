@@ -14,9 +14,9 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
-
-import java.sql.Types;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
@@ -53,46 +53,49 @@ public class IQValidationTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
         TABLE1 = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table11Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE11"));
-        table11Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table11Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
         TABLE1_1 = table11Def.getAtomPredicate();
 
         DatabaseRelationDefinition table12Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE12"));
-        table12Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table12Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
         TABLE1_2 = table12Def.getAtomPredicate();
 
         DatabaseRelationDefinition table13Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE13"));
-        table13Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
+        table13Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
         TABLE1_3 = table13Def.getAtomPredicate();
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         TABLE2 = table2Def.getAtomPredicate();
 
         DatabaseRelationDefinition table22Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE22"));
-        table22Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table22Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table22Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table22Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         TABLE2_2 = table22Def.getAtomPredicate();
 
         DatabaseRelationDefinition table23Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE22"));
-        table23Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table23Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table23Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table23Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         TABLE2_3 = table23Def.getAtomPredicate();
 
         DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE22"));
-        table24Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table24Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        table24Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table24Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         TABLE2_4 = table24Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         TABLE3 = table3Def.getAtomPredicate();
 
         dbMetadata.freeze();

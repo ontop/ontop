@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
-/*
- * #%L
- * ontop-protege4
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.io.File;
 import java.util.stream.Stream;
 
@@ -30,13 +10,9 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
-import org.junit.Before;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 
@@ -49,8 +25,6 @@ public class SQLMappingParserUsingOwlTest {
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final SQLMappingParser mappingParser;
-
-    private TargetQueryParser parser;
 
     private String[][] mappings = {
             { "M1", "select id, fname, lname, age from student",
@@ -67,7 +41,6 @@ public class SQLMappingParserUsingOwlTest {
             { "M6", "select sid, cid from registrare", 
                     ":P{sid} :hasEnrollment :C{cid} ." }
     };
-    private ImmutableMap<String, String> prefixes;
 
     public SQLMappingParserUsingOwlTest() {
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -83,15 +56,6 @@ public class SQLMappingParserUsingOwlTest {
 
         mappingParser = injector.getInstance(SQLMappingParser.class);
         ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        PrefixManager prefixManager = setupPrefixManager();
-
-        // Setting up the CQ parser
-        prefixes = prefixManager.getPrefixMap();
-        parser = new TurtleOBDASQLParser(prefixes, TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
     }
 
     @Test
@@ -169,12 +133,5 @@ public class SQLMappingParserUsingOwlTest {
             InvalidMappingException, DuplicateMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
-    }
-
-    private PrefixManager setupPrefixManager() {
-        // Setting up the prefixes
-        PrefixManager prefixManager = new SimplePrefixManager(ImmutableMap.of(PrefixManager.DEFAULT_PREFIX,
-                "http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#"));
-        return prefixManager;
     }
 }

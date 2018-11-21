@@ -12,9 +12,10 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -88,8 +89,13 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public IQTree acceptTransformer(IQTransformer transformer) {
+    public IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
         return transformer.transformExtensionalData(this);
+    }
+
+    @Override
+    public <T> T acceptVisitor(IQVisitor<T> visitor) {
+        return visitor.visitExtensionalData(this);
     }
 
     @Override

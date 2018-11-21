@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
@@ -403,12 +403,12 @@ public class SelectQueryParserTest {
     }
 
     private Function dataAtomOf(String predicateName, String var1, String var2) {
-        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 2, TYPE_FACTORY),
+        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 2),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private Function dataAtomOf(String predicateName, String var1, String var2, String var3, String var4) {
-        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 4, TYPE_FACTORY),
+        return TERM_FACTORY.getFunction(new FakeRelationPredicate(predicateName, 4),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
@@ -422,22 +422,24 @@ public class SelectQueryParserTest {
         RDBMetadata metadata = createDummyMetadata();
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
+        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+
         DatabaseRelationDefinition relation1 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, P));
-        relation1.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation1.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
+        relation1.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
+        relation1.addAttribute(idfac.createAttributeID("B"), integerType.getName(), integerType, false);
 
         DatabaseRelationDefinition relation2 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, Q));
-        relation2.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation2.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
+        relation2.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
+        relation2.addAttribute(idfac.createAttributeID("C"), integerType.getName(), integerType, false);
 
         DatabaseRelationDefinition relation3 =
                 metadata.createDatabaseRelation(idfac.createRelationID(null, R));
-        relation3.addAttribute(idfac.createAttributeID("A"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("B"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("C"), 0, "INT", false);
-        relation3.addAttribute(idfac.createAttributeID("D"), 0, "INT", false);
+        relation3.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("B"), integerType.getName(), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("C"), integerType.getName(), integerType, false);
+        relation3.addAttribute(idfac.createAttributeID("D"), integerType.getName(), integerType, false);
 
         return metadata;
     }

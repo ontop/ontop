@@ -87,7 +87,6 @@ public class OBDAModel {
     private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
-    private final JdbcTypeMapper jdbcTypeMapper;
     private final RDF rdfFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
@@ -96,7 +95,7 @@ public class OBDAModel {
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory, DatalogFactory datalogFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
-                     JdbcTypeMapper jdbcTypeMapper, RDF rdfFactory) {
+                     RDF rdfFactory) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
@@ -107,7 +106,6 @@ public class OBDAModel {
         this.datalogFactory = datalogFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
-        this.jdbcTypeMapper = jdbcTypeMapper;
         this.rdfFactory = rdfFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
@@ -498,10 +496,6 @@ public class OBDAModel {
 
     public DatalogFactory getDatalogFactory() {
         return datalogFactory;
-    }
-
-    public JdbcTypeMapper getJDBCTypeMapper() {
-        return jdbcTypeMapper;
     }
 
     public TargetAtomFactory getTargetAtomFactory() {

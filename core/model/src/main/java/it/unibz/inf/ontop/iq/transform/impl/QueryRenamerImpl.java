@@ -43,7 +43,7 @@ public class QueryRenamerImpl implements QueryRenamer {
     @Override
     public IQ transform(IQ originalQuery) {
         QueryNodeRenamer nodeTransformer = new QueryNodeRenamer(iqFactory, renamingSubstitution, atomFactory);
-        HomogeneousIQTransformer iqTransformer = new HomogeneousIQTransformer(nodeTransformer, iqFactory);
+        HomogeneousIQTreeVisitingTransformer iqTransformer = new HomogeneousIQTreeVisitingTransformer(nodeTransformer, iqFactory);
 
         IQTree newIQTree = originalQuery.getTree().acceptTransformer(iqTransformer);
         DistinctVariableOnlyDataAtom newProjectionAtom = transformProjectionAtom(originalQuery.getProjectionAtom());

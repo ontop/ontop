@@ -42,7 +42,7 @@ public class ExpressionParserTest {
     public void beforeEachTest() {
         METADATA = EMPTY_METADATA;
         IDFAC = METADATA.getQuotedIDFactory();
-        dbLongType = TYPE_FACTORY.getDBTypeFactory().getDBLongType();
+        dbLongType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
@@ -953,7 +953,7 @@ public class ExpressionParserTest {
         assertEquals(ImmutableList.of( //FACTORY.getFunction(AND,
                 TERM_FACTORY.getFunction(GTE,
                         v,
-                        TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLongType())),
+                        TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())),
                 TERM_FACTORY.getFunction(LTE,
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation);

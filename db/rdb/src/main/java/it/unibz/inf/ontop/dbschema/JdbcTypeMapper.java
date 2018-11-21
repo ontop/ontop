@@ -33,7 +33,8 @@ import java.util.Optional;
  * This class maps SQL datatypes to XML datatypes.
  * Details look at this link: https://docs.google.com/spreadsheet/ccc?key=0AoDXwrYLJ2lvdFAtRXBPcUs2UjMtY08tZ3NYTEp5dVE&usp=sharing
  */
-public class JdbcTypeMapper implements TypeMapper {
+@Deprecated
+public class JdbcTypeMapper {
 
 	private final ImmutableMap<Integer, TermType> sqlToTermTypeMap;
 	private final ImmutableMap<TermType, Integer> datatypeMap;
@@ -90,13 +91,7 @@ public class JdbcTypeMapper implements TypeMapper {
 		datatypeMap = datatypeBuilder.build();
 	}
 
-	@Override
-	public TermType getTermType(int sqlType, String typeName) {
-		return Optional.ofNullable(sqlToTermTypeMap.get(sqlType))
-				// TODO: use another default type
-				.orElse(typeFactory.getXsdStringDatatype());
-	}
-
+	@Deprecated
 	public int getSQLType(TermType type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);

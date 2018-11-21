@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
-import java.sql.Types;
-
+import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.createDummyMetadata;
 
 /**
@@ -16,16 +17,19 @@ public class WrongForeignKeyTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+
         /*
          * Table 1:
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID("schema1","table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, "INTEGER", false);
-        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, "INTEGER", false);
-        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, "INTEGER", false);
-        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, "INTEGER", false);
+        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
         // Independent
-        table1Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, "INTEGER", false);
+        table1Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
         table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T1)
@@ -38,9 +42,9 @@ public class WrongForeignKeyTest {
          * Table 2:
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID("schema1","table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, "INTEGER", false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, "INTEGER", false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, "INTEGER", false);
+        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
 
 
@@ -48,12 +52,12 @@ public class WrongForeignKeyTest {
          * Table 3:
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, "INTEGER", false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, "INTEGER", false);
-        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), Types.INTEGER, "INTEGER", false);
-        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), Types.INTEGER, "INTEGER", false);
-        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), Types.INTEGER, "INTEGER", false);
-        table3Def.addAttribute(idFactory.createAttributeID("col6"), Types.INTEGER, "INTEGER", false);
+        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
+        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
         table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
                 .addDeterminant(col2T3)

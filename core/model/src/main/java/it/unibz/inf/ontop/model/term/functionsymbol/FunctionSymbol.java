@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
@@ -24,11 +25,18 @@ public interface FunctionSymbol extends Predicate {
     ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
                            TermFactory termFactory);
 
+    TermType getExpectedBaseType(int index);
+
     default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                 TermFactory termFactory) {
         throw new RuntimeException("TODO: implement it");
     }
 
+    /**
+     * Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
+     *  (outside the optimization phase) .
+     */
+    boolean canBePostProcessed();
 
     interface FunctionalTermNullability {
 

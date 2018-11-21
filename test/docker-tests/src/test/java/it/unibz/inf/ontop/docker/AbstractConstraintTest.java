@@ -20,12 +20,8 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
@@ -73,11 +69,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
-			Injector injector = defaultConfiguration.getInjector();
-			JdbcTypeMapper jdbcTypeMapper = injector.getInstance(JdbcTypeMapper.class);
 
-
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

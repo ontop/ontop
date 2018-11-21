@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.*;
 
@@ -43,10 +43,10 @@ public class ParserViewDefinition extends RelationDefinition {
 	/**
 	 *  @param name
 	 * @param statement
-	 * @param defaultType
 	 */
 	
-	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement, TermType defaultType) {
+	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement,
+								DBTypeFactory dbTypeFactory) {
 		super(name);
 		this.statement = statement;
 
@@ -55,9 +55,7 @@ public class ParserViewDefinition extends RelationDefinition {
 		int c = 1;
 		for (QuotedID id : attrs) {
 			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, 0, null, true,
-					// TODO: make sure a type is assigned
-					defaultType);
+					new QualifiedAttributeID(name, id), c, null, true, dbTypeFactory);
 			c++;
 			attributeMapBuilder.put(id, att);
 			attributeBuilder.add(att);

@@ -13,11 +13,11 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Types;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
@@ -53,9 +53,12 @@ public class NoNullValuesEnforcerTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("A"), Types.INTEGER, "INT", true);
-        table2Def.addAttribute(idFactory.createAttributeID("B"), Types.INTEGER, "INT", true);
+        table2Def.addAttribute(idFactory.createAttributeID("A"), integerDBType.getName(), integerDBType, true);
+        table2Def.addAttribute(idFactory.createAttributeID("B"), integerDBType.getName(), integerDBType, true);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         dbMetadata.freeze();
