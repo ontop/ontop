@@ -146,6 +146,7 @@ public class UriTemplateMatcher {
                 (IRIStringTemplateFunctionSymbol)((ImmutableFunctionalTerm) matchingTerm).getFunctionSymbol();
 
         Matcher matcher = pattern.matcher(iri.getIRIString());
+        matcher.matches();
         ImmutableList<DBConstant> arguments = IntStream.range(1, matcher.groupCount() + 1)
                 .boxed()
                 .map(matcher::group)
