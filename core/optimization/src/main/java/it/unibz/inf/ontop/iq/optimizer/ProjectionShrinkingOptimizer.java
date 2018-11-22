@@ -67,12 +67,17 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         return query;
     }
 
-    private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, ImmutableSet<Variable> allRetainedVariables) {
+    private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, ImmutableSet<Variable> retainedVariables) {
 
 
         if (node instanceof UnionNode || node instanceof ConstructionNode) {
+            ImmutableSet<Variable> locallyRetainedVariables = node instanceof ConstructionNode?
+                    getLocallyRequiredVariables((ConstructionNode) node):
+                    ImmutableSet.of();
             Map<Boolean, List<Variable>> splitVariables = node.getVariables().stream()
-                    .collect(Collectors.partitioningBy(allRetainedVariables::contains));
+                    .collect(Collectors.partitioningBy(
+                            v -> retainedVariables.contains(v) || locallyRetainedVariables.contains(v)
+                    ));
 
             if (splitVariables.get(false).iterator().hasNext()) {
                 return Optional.of(
@@ -85,6 +90,13 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         }
         throw new IllegalStateException("A projection shrinking proposal can only be made for a Union or Construction node");
 
+    }
+
+    private ImmutableSet<Variable> getLocallyRequiredVariables(ConstructionNode node) {
+                return node.getSubstitution().getImmutableMap().values().stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(v -> (Variable)v)
+                        .collect(ImmutableCollectors.toSet());
     }
 
 
