@@ -15,6 +15,6 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
 
     @Override
     public boolean canBePostProcessed() {
-        return true;
+        return getInputType().isPresent();
     }
 }
