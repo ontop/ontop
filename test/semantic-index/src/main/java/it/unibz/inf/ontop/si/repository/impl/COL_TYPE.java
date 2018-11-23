@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.utils;
+package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.vocabulary.OntopInternal;

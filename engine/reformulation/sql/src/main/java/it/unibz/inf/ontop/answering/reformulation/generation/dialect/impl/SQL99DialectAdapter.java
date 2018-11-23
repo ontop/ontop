@@ -23,7 +23,9 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 
 import java.sql.Types;
@@ -488,6 +490,15 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     @Override
     public String getNullConstant() {
         return "NULL";
+    }
+
+    @Override
+    public String render(DBConstant constant) {
+        DBTermType dbType = constant.getType();
+
+        return (dbType.isNumber() || dbType.isBoolean())
+                ? constant.getValue()
+                : "'" + constant.getValue() + "'";
     }
 
     /**
