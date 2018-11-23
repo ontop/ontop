@@ -37,7 +37,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
         if (constant instanceof RDFConstant) {
             return (RDFConstant) constant;
         }
-        throw new InvalidTermAsResultException(term);
+        throw new InvalidTermAsResultException(constant);
     }
 
     public static class InvalidTermAsResultException extends OntopInternalBugException {
