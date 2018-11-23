@@ -26,9 +26,9 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
 
     @Override
     public ImmutableList<RDFConstant> computeValues() {
-        ImmutableSubstitution<ImmutableTerm> composition = SPARQLVar2Term.composeWith(SQLVar2DBConstant);
+        ImmutableSubstitution<ImmutableTerm> composition = SQLVar2DBConstant.composeWith(SPARQLVar2Term);
         return composition.getImmutableMap().values().stream()
-                .map(t -> evaluate(t))
+                .map(this::evaluate)
                 .collect(ImmutableCollectors.toList());
     }
 
