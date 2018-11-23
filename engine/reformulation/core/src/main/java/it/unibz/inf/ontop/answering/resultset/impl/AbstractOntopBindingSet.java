@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
 
@@ -20,12 +19,18 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     /* (note: ImmutableMap preserves ordering) */
     private final ImmutableMap<String, Integer> bindingName2Index;
 
-    private Optional<ImmutableList<RDFConstant>> values;
-    private Optional<ImmutableList<OntopBinding>> bindings;
+    /**
+     * Lazy
+     */
+    @Nullable
+    private ImmutableList<RDFConstant> values;
+    @Nullable
+    private ImmutableList<OntopBinding> bindings;
 
     AbstractOntopBindingSet(ImmutableMap<String, Integer> bindingName2Index) {
         this.bindingName2Index = bindingName2Index;
-        this.bindings = Optional.empty();
+        this.bindings = null;
+        this.values = null;
     }
 
     @Override
@@ -36,18 +41,18 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
 
     @Override
     public ImmutableList<OntopBinding> getBindings() {
-        if (!bindings.isPresent()) {
-            bindings = Optional.of(computeBindings());
+        if (bindings == null) {
+            bindings = computeBindings();
         }
-        return bindings.get();
+        return bindings;
     }
 
     @Override
     public ImmutableList<RDFConstant> getValues() {
-        if (!values.isPresent()) {
-            values = Optional.of(computeValues());
+        if (values == null) {
+            values = computeValues();
         }
-        return values.get();
+        return values;
     }
 
     @Override
