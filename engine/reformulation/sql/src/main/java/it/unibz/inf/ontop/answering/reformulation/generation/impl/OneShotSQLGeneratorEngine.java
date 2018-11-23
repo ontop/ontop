@@ -1122,25 +1122,23 @@ public class OneShotSQLGeneratorEngine {
 		if (term == null) {
 			return "";
 		}
-		if (term instanceof RDFLiteralConstant) {
-			RDFLiteralConstant ct = (RDFLiteralConstant) term;
+		if (term instanceof Constant) {
+			if (((Constant) term).isNull())
+				return ((Constant) term).getValue();
+			if (!(term instanceof DBConstant)) {
+				throw new MinorOntopInternalBugException("Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
+			}
+			DBConstant ct = (DBConstant) term;
 			if (hasIRIDictionary()) {
-				if (ct.getType().isA(XSD.STRING)) {
+				// TODO: check this hack
+				if (ct.getType().isString()) {
 					int id = getUriid(ct.getValue());
 					if (id >= 0)
 						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 						return String.valueOf(id);
 				}
 			}
-			return getSQLLexicalForm(ct);
-		}
-		else if (term instanceof IRIConstant) {
-			IRIConstant uc = (IRIConstant) term;
-			if (hasIRIDictionary()) {
-				int id = getUriid(uc.getValue());
-				return sqladapter.getSQLLexicalFormString(String.valueOf(id));
-			}
-			return sqladapter.getSQLLexicalFormString(uc.toString());
+			return sqladapter.render(ct);
 		}
 		else if (term instanceof Variable) {
 			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
@@ -1331,58 +1329,6 @@ public class OneShotSQLGeneratorEngine {
 
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 	}
-
-	/***
-	 * Returns the valid SQL lexical form of rdf literals based on the current
-	 * database and the datatype specified in the function predicate.
-	 *
-	 * <p>
-	 * For example, if the function is xsd:boolean, and the current database is
-	 * H2, the SQL lexical form would be for "true" "TRUE" (or any combination
-	 * of lower and upper case) or "1" is always
-	 *
-	 * @param constant
-	 * @return
-	 */
-	private String getSQLLexicalForm(RDFLiteralConstant constant) {
-
-		if (constant.equals(termFactory.getNullConstant())) {
-			// TODO: we should not have to treat NULL as a special case!
-			// It is because this constant is currently of type COL_TYPE.STRING!
-			return "NULL";
-		}
-		switch (COL_TYPE.getColType(constant.getType().getIRI())) {
-			case BNODE:
-			case OBJECT:
-			case STRING:
-				return sqladapter.getSQLLexicalFormString(constant.getValue());
-			case BOOLEAN:
-				boolean v = XsdDatatypeConverter.parseXsdBoolean(constant.getValue());
-				return sqladapter.getSQLLexicalFormBoolean(v);
-			case DATETIME:
-				return sqladapter.getSQLLexicalFormDatetime(constant.getValue());
-			case DATETIME_STAMP:
-				return sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
-			case DECIMAL:
-			case DOUBLE:
-			case INTEGER:
-			case LONG:
-			case FLOAT:
-			case NON_POSITIVE_INTEGER:
-			case INT:
-			case UNSIGNED_INT:
-			case NEGATIVE_INTEGER:
-			case POSITIVE_INTEGER:
-			case NON_NEGATIVE_INTEGER:
-				return constant.getValue();
-			case NULL:
-				return "NULL";
-			default:
-				return "'" + constant.getValue() + "'";
-		}
-	}
-
-
 
 	private boolean hasIRIDictionary() {
 		return uriRefIds != null;

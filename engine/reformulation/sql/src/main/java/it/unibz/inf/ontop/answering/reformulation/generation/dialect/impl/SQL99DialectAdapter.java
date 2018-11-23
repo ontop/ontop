@@ -498,7 +498,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
         return (dbType.isNumber() || dbType.isBoolean())
                 ? constant.getValue()
-                : sqlQuote(constant.getValue());
+                : "'" + constant.getValue() + "'";
     }
 
     /**
