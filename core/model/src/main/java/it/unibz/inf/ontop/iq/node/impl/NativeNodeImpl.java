@@ -159,6 +159,6 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public String toString() {
-        return NATIVE_STRING + variableTypeMap + "\n" + nativeQueryString;
+        return NATIVE_STRING + variables + "\n" + nativeQueryString;
     }
 }
