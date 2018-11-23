@@ -14,5 +14,9 @@ public interface DBTermType extends TermType {
      */
     boolean isString();
 
+    boolean isNumber();
+
+    boolean isBoolean();
+
     Optional<RDFDatatype> getNaturalRDFDatatype();
 }

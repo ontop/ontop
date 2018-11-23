@@ -20,6 +20,16 @@ public class StringDBTermType extends DBTermTypeImpl {
     }
 
     @Override
+    public boolean isNumber() {
+        return false;
+    }
+
+    @Override
+    public boolean isBoolean() {
+        return false;
+    }
+
+    @Override
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.of(xsdStringDatatype);
     }
