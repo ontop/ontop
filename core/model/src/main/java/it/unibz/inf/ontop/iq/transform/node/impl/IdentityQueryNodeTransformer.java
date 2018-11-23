@@ -68,5 +68,10 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     public StrictFlattenNode transform(StrictFlattenNode flattenNode) {
         return flattenNode;
     }
+
+    @Override
+    public RelaxedFlattenNode transform(RelaxedFlattenNode flattenNode) {
+        return flattenNode;
+    }
 }
 

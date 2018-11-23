@@ -68,7 +68,6 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
      * and make the corresponding equalities explicit.
      * - inner join: identical to left join, but renaming is performed in each branch but the first where the variable appears
      * - data node or flatten node : if the data atom contains a ground term, create a variable and make the equality explicit (create a filter).
-     * - flatten node: if the data atom contains a ground term, create a variable and make the equality explicit (create a filter).
      *
      * If needed, creates a root projection to ensure that the transformed query has the same signature as the input one
      */
@@ -85,7 +84,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         @Override
-        public IQTree transformFlatten(FlattenNode fn) {
+        public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
+            return transformFlattenNode(tree, node, child);
+        }
+
+        @Override
+        public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
+            return transformFlattenNode(tree, node, child);
         }
 
         @Override
@@ -191,7 +196,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         }
 
         private IQTree transformDataNode(DataNode dn) {
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn);
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getDataAtom());
 
             if (empt(replacementVars))
                 return dn;
@@ -226,10 +231,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             );
         }
 
-        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataNode dn) {
+        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom da) {
             Set<Variable> vars = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
-            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dn.getDataAtom().getArguments()) {
+            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) da.getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {
@@ -262,6 +267,29 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             t,
                             variable
                     ));
+        }
+
+        private IQTree transformFlattenNode(IQTree tree, FlattenNode node, IQTree child) {
+
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(node.getDataAtom());
+
+            if (empt(replacementVars))
+                return tree;
+
+            FilterNode filter = createFilter(node.getDataAtom(), replacementVars);
+            DataAtom atom = replaceVars(node.getDataAtom(), replacementVars);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(node.getDataAtom().getVariables()),
+                    iqFactory.createUnaryIQTree(
+                            filter,
+                            iqFactory.createUnaryIQTree(
+                                    node.newNode(
+                                            node.getArrayVariable(),
+                                            node.getArrayIndexIndex(),
+                                            atom,
+                                            node.getArgumentNullability()),
+                                    child
+            )));
         }
     }
 

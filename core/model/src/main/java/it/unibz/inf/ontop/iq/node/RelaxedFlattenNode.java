@@ -6,4 +6,7 @@ public interface RelaxedFlattenNode extends FlattenNode{
 
     @Override
     RelaxedFlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer);
+
+    @Override
+    RelaxedFlattenNode clone();
 }

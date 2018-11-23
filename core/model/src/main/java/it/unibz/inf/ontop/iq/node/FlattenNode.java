@@ -21,9 +21,6 @@ public interface FlattenNode<P extends FlattenNode> extends DataAtomQueryNode<Re
     @Override
     NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer);
 
-//    @Override
-//    P newAtom(DataAtom<RelationPredicate> newAtom);
-
     /**
      * Returns a new FlattenNode of the same type, with the new arguments
      */

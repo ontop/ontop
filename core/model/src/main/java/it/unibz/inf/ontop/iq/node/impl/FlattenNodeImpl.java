@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -27,22 +29,22 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
 
     protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<RelationPredicate> dataAtom,
                               ImmutableList<Boolean> argumentNullability, SubstitutionFactory substitutionFactory,
-                              IntermediateQueryFactory intermediateQueryFactory) {
-        super(substitutionFactory, intermediateQueryFactory);
+                              IntermediateQueryFactory iqFactory) {
+        super(substitutionFactory, iqFactory);
         this.arrayVariable = arrayVariable;
         this.arrayIndexIndex = arrayIndexIndex;
         this.dataAtom = dataAtom;
 
         if ((arrayIndexIndex >= dataAtom.getArguments().size())
                 || arrayIndexIndex < 0)
-            throw new IllegalArgumentException("The array index index must correspond to an argument of the data atom");
+            throw new InvalidQueryNodeException("The array index index must correspond to an argument of the data atom");
         this.argumentNullability = argumentNullability;
 
         if (argumentNullability.size() != dataAtom.getArity())
-            throw new IllegalArgumentException("A nullability entry must be provided for each argument in the atom");
+            throw new InvalidQueryNodeException("A nullability entry must be provided for each argument in the atom");
 
         if (this.argumentNullability.get(arrayIndexIndex))
-            throw new IllegalArgumentException("The array index term must not be nullable");
+            throw new InvalidQueryNodeException("The array index term must not be nullable");
     }
 
     @Override
@@ -67,15 +69,6 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
                 dataAtom.getVariables().stream())
                 .collect(ImmutableCollectors.toSet());
     }
-//    @Override
-//    public NodeTransformationProposal reactToEmptyChild(IntermediateQuery query, EmptyNode emptyChild) {
-//        throw new UnsupportedOperationException("TODO: support it");
-//    }
-//
-//    @Override
-//    public NodeTransformationProposal reactToTrueChildRemovalProposal(IntermediateQuery query, TrueNode trueNode) {
-//        throw new UnsupportedOperationException("TODO: support it");
-//    }
 
     protected String toString(String prefix) {
         return prefix + " " + arrayVariable + " -> " + dataAtom;
@@ -96,13 +89,6 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
         return arrayIndexIndex;
     }
 
-
-//    @Override
-//    public SubstitutionResults<N> applyAscendingSubstitution(
-//            ImmutableSubstitution<? extends ImmutableTerm> substitution, QueryNode childNode, IntermediateQuery query) {
-//        return applySubstitution(substitution);
-//    }
-
     protected N applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         DataAtom<RelationPredicate> newAtom = substitution.applyToDataAtom(dataAtom);
         ImmutableTerm newArrayTerm = substitution.apply(getArrayVariable());
@@ -110,12 +96,6 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
             throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
         return newNode((Variable) newArrayTerm, arrayIndexIndex, newAtom, argumentNullability);
     }
-
-//    @Override
-//    public N rename(InjectiveVar2VarSubstitution renamingSubstitution) {
-//        //noinspection OptionalGetWithoutIsPresent
-//        return applySubstitution(renamingSubstitution).getOptionalNewNode().get();
-//    }
 
     @Override
     public abstract N clone();
@@ -125,11 +105,6 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of(arrayVariable);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return dataAtom.getVariables();
     }
 
     @Override

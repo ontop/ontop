@@ -70,6 +70,16 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     @Override
+    public IQTree transformStrictFlatten(IQTree tree, StrictFlattenNode node, IQTree child) {
+        return transformUnaryNode(node, child);
+    }
+
+    @Override
+    public IQTree transformRelaxedFlatten(IQTree tree, RelaxedFlattenNode node, IQTree child) {
+        return transformUnaryNode(node, child);
+    }
+
+    @Override
     public IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
         return transformUnaryNode(rootNode, child);
     }

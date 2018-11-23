@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -62,6 +63,11 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
         return getDataAtom().getVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        throw new FlattenNodeException("This method should not be called");
     }
 
     @Override
@@ -200,6 +206,12 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
             return query.getFirstChild(this)
                     .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
                     .isVariableNullable(query, variable);
+        }
+    }
+
+    private class FlattenNodeException extends OntopInternalBugException {
+        FlattenNodeException(String message) {
+            super(message);
         }
     }
 }

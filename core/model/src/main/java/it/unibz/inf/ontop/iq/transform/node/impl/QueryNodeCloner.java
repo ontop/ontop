@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.transform.node.impl;
 
+import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
@@ -67,6 +68,11 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
 
     @Override
     public StrictFlattenNode transform(StrictFlattenNode flattenNode) {
+        return flattenNode.clone();
+    }
+
+    @Override
+    public RelaxedFlattenNode transform(RelaxedFlattenNode flattenNode) {
         return flattenNode.clone();
     }
 }
