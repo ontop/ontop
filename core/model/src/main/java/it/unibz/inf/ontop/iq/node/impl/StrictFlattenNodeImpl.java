@@ -8,11 +8,10 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.StrictFlattenNode;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -27,7 +26,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> implements StrictFlattenNode{
+public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> implements StrictFlattenNode {
 
     private static final String STRICT_FLATTEN_PREFIX = "STRICT-FLATTEN";
 
@@ -82,14 +81,31 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
         return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
     }
 
-//    @Override
-//    protected StrictFlattenNode newFlattenNode(Variable newArrayVariable, DataAtom<RelationPredicate> newAtom) {
-//        return new StrictFlattenNodeImpl(newArrayVariable, getArrayIndexIndex(), newAtom, argumentNullability);
-//    }
 
     @Override
     public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return ;
+        IQTree newChild = childIQTree.liftBinding(variableGenerator);
+        QueryNode newChildRoot = newChild.getRootNode();
+
+        IQProperties liftedProperties = currentIQProperties.declareLifted();
+
+        if (newChildRoot instanceof ConstructionNode)
+            return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
+        else if (newChildRoot instanceof EmptyNode)
+            return newChild;
+        return iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
+    }
+
+    /**
+     * Lifts the construction node above and applies its substitution
+     */
+    private IQTree liftChildConstructionNode(ConstructionNode liftedNode, UnaryIQTree newChild, IQProperties liftedProperties) {
+        UnaryIQTree newFlattenTree = iqFactory.createUnaryIQTree(
+                applySubstitution(liftedNode.getSubstitution()),
+                newChild.getChild(),
+                liftedProperties
+        );
+        return iqFactory.createUnaryIQTree(liftedNode, newFlattenTree, liftedProperties);
     }
 
     @Override
@@ -132,7 +148,7 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return ;
+        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint));
     }
 
     @Override
