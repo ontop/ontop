@@ -1453,10 +1453,7 @@ public class OneShotSQLGeneratorEngine {
 						columns = new LinkedHashSet<>();
 						columnsForVariables.put((Variable) term, columns);
 					}
-					int idx = isSubquery
-							? 3 * i + 2 // a view from an Ans predicate
-							: i;        // a database relation
-					columns.add(fromItem.attributes.get(idx));
+					columns.add(fromItem.attributes.get(i));
 				}
 			}
 		}
