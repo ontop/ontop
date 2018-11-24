@@ -31,7 +31,7 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
         ImmutableTerm subTerm = newTerms.get(0);
         return (subTerm instanceof DBConstant)
             ? termFactory.getDBConstant(((DBConstant) subTerm).getValue(), getTargetType())
-            : super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory);
+            : termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     @Override
