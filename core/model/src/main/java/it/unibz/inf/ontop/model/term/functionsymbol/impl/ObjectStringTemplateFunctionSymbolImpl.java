@@ -66,6 +66,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return inferType(terms);
     }
 
+    @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {

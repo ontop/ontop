@@ -183,6 +183,8 @@ public interface TermFactory {
 	 */
 	RDFLiteralConstant getRDFLiteralConstant(String value, String language);
 
+	RDFConstant getRDFConstant(String lexicalValue, RDFTermType termType);
+
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language);
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type);
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, IRI datatype);
