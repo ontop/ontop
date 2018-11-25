@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -26,7 +26,7 @@ import java.util.Optional;
 
 public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
 
-    private final IntermediateQueryFactory iqFactory;
+    protected final IntermediateQueryFactory iqFactory;
 
     protected AbstractIntensionalQueryMerger(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
@@ -53,7 +53,7 @@ public abstract class AbstractIntensionalQueryMerger implements IQOptimizer {
      * Does NOT look for intensional data nodes inside the definitions
      *
      */
-    protected static abstract class QueryMergingTransformer extends DefaultRecursiveIQTransformer {
+    protected static abstract class QueryMergingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
         private final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;

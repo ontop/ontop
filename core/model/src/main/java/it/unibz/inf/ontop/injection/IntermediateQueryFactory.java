@@ -44,7 +44,7 @@ public interface IntermediateQueryFactory {
     LeftJoinNode createLeftJoinNode(ImmutableExpression joiningCondition);
     LeftJoinNode createLeftJoinNode(Optional<ImmutableExpression> joiningCondition);
 
-    FilterNode createFilterNode(ImmutableExpression joiningCondition);
+    FilterNode createFilterNode(ImmutableExpression filterCondition);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);

@@ -28,7 +28,6 @@ import java.util.*;
  */
 public class SameAsRewriterImpl implements SameAsRewriter{
 
-    private final MappingSameAsPredicateExtractor predicateExtractor;
     private final Mapping saturatedMapping;
     private int bnode; //count for bnode created in sameAsmap
     private int rules;
@@ -38,13 +37,12 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private final ImmutabilityTools immutabilityTools;
 
     @Nullable
-    private MappingSameAsPredicateExtractor.SameAsTargets targetPredicates;
+    private SameAsTargets targetPredicates;
 
     @AssistedInject
-    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping, MappingSameAsPredicateExtractor predicateExtractor,
+    private SameAsRewriterImpl(@Assisted Mapping saturatedMapping,
                                AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                                ImmutabilityTools immutabilityTools) {
-        this.predicateExtractor = predicateExtractor;
         this.saturatedMapping = saturatedMapping;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
@@ -61,7 +59,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     public DatalogProgram getSameAsRewriting(DatalogProgram pr) {
 
         if (targetPredicates == null)
-            targetPredicates = predicateExtractor.extract(saturatedMapping);
+            targetPredicates = SameAsTargets.extract(saturatedMapping);
 
         DatalogProgram result = datalogFactory.getDatalogProgram(pr.getQueryModifiers());
 
@@ -201,7 +199,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
     private Function createUnion(Function leftAtom, Function rightAtom, DatalogProgram pr, String newHeadName) {
         Set<Variable> leftVars = getVariables(leftAtom);
         Set<Variable> rightVars = getVariables(rightAtom);
-        List<Term> varListUnion = getUnion(leftVars, rightVars  );
+        List<Term> varListUnion = getUnion(leftVars, rightVars);
 
         // left atom rule
         List<Term> leftTermList = new ArrayList<>(varListUnion.size());

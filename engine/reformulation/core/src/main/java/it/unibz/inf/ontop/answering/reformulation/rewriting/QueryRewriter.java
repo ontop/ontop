@@ -20,18 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependency;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
-import java.util.List;
 
 public interface QueryRewriter {
 
-	List<CQIE> rewrite(List<CQIE> input) throws OntopReformulationException;
+	IQ rewrite(IQ query) throws OntopReformulationException, EmptyQueryException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 

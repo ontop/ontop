@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -139,7 +139,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, IQTree child) {
+    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformDistinct(tree, this, child);
     }
 

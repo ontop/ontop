@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAn
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.impl.JoinLikeChildBindingLifter;
-import it.unibz.inf.ontop.iq.transform.IQTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
@@ -321,7 +320,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree acceptTransformer(IQTree tree, IQTransformer transformer, ImmutableList<IQTree> children) {
+    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, ImmutableList<IQTree> children) {
         return transformer.transformInnerJoin(tree,this, children);
     }
 

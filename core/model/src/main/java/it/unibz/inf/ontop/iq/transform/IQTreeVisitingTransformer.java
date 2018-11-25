@@ -11,18 +11,18 @@ import it.unibz.inf.ontop.iq.node.*;
  *  in case the transformer does not transform the tree,
  *  so as to avoid creating unnecessary new objects.
  */
-public interface IQTransformer {
+public interface IQTreeVisitingTransformer extends IQTreeTransformer {
 
-    IQTree transformIntensionalData(IntensionalDataNode dataNode);
-    IQTree transformExtensionalData(ExtensionalDataNode dataNode);
-    IQTree transformEmpty(EmptyNode node);
-    IQTree transformTrue(TrueNode node);
-    IQTree transformNonStandardLeafNode(LeafIQTree leafNode);
+    IQTree transformIntensionalData(IntensionalDataNode rootNode);
+    IQTree transformExtensionalData(ExtensionalDataNode rootNode);
+    IQTree transformEmpty(EmptyNode rootNode);
+    IQTree transformTrue(TrueNode rootNode);
+    IQTree transformNonStandardLeafNode(LeafIQTree rootNode);
 
     IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child);
     IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child);
     IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child);
-    IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child);
+    IQTree transformSlice(IQTree tree, SliceNode rootNode, IQTree child);
     IQTree transformOrderBy(IQTree tree, OrderByNode rootNode, IQTree child);
     IQTree transformNonStandardUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child);
 
@@ -33,4 +33,8 @@ public interface IQTransformer {
     IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children);
     IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children);
     IQTree transformNonStandardNaryNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children);
+
+    default IQTree transform(IQTree tree) {
+        return tree.acceptTransformer(this);
+    }
 }
