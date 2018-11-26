@@ -17,7 +17,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
     protected final ImmutableList<Variable> signature;
-    protected final ImmutableMap<String, Integer> bindingName2Index;
+//    protected final ImmutableMap<String, Integer> bindingName2Index;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -33,11 +33,11 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
         this.rs = rs;
         this.signature = signature;
         AtomicInteger i = new AtomicInteger(0);
-        this.bindingName2Index = signature.stream()
-                .collect(ImmutableCollectors.toMap(
-                        Object::toString,
-                        s -> i.getAndIncrement()
-                ));
+//        this.bindingName2Index = signature.stream()
+//                .collect(ImmutableCollectors.toMap(
+//                        Object::toString,
+//                        s -> i.getAndIncrement()
+//                ));
     }
 
     @Override

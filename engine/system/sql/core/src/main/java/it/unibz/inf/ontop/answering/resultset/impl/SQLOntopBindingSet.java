@@ -1,54 +1,82 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
+import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFConstant;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.AbstractMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SQLOntopBindingSet extends AbstractOntopBindingSet implements OntopBindingSet {
 
 
-    private final ImmutableList<Variable> signature;
-    private final ImmutableSubstitution<DBConstant> sqlVar2DBConstant;
-    private final ImmutableSubstitution<ImmutableTerm> sparqlVar2Term;
 
-
-    SQLOntopBindingSet(ImmutableList<Variable> signature,
-                       ImmutableMap<String, Integer> bindingName2Index,
+    SQLOntopBindingSet(ImmutableSortedSet<Variable> signature,
                        ImmutableSubstitution<DBConstant> sqlVar2DBConstant,
                        ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
-        super(bindingName2Index);
-        this.signature = signature;
-        this.sqlVar2DBConstant = sqlVar2DBConstant;
-        this.sparqlVar2Term = sparqlVar2Term;
+        super(computeBindingMap(signature, sqlVar2DBConstant, sparqlVar2Term));
     }
 
-    @Override
-    public ImmutableList<RDFConstant> computeValues() {
+    private LinkedHashMap<Variable, OntopBinding> computeBindingMap(ImmutableSortedSet<Variable> signature,
+                                                                    ImmutableSubstitution<DBConstant> sqlVar2DBConstant,
+                                                                    ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
+
         ImmutableSubstitution<ImmutableTerm> composition = sqlVar2DBConstant.composeWith(sparqlVar2Term);
+
         return signature.stream()
-                .map(composition::apply)
-                .map(this::evaluate)
-                .collect(ImmutableCollectors.toList());
+                .map(v -> getBinding(v,composition))
+                .filter(o -> o.isPresent())
+                .map(o -> o.get())
+                .collect(Collectors.toMap(
+                        e -> e.getKey(),
+                        e -> e.getValue(),
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
     }
 
-    private RDFConstant evaluate(ImmutableTerm term) {
-        ImmutableTerm constant = term.simplify(false);
-        if (constant instanceof RDFConstant) {
-            return (RDFConstant) constant;
+    private Optional<Map.Entry<Variable,OntopBinding>> getBinding(Variable v, ImmutableSubstitution<ImmutableTerm> composition) {
+        Optional<RDFConstant> constant = evaluate(composition.apply(v));
+        return constant.isPresent()?
+                Optional.of(new AbstractMap.SimpleImmutableEntry<Variable, OntopBinding>(v, new OntopBindingImpl(v, constant.get()))):
+                Optional.empty();
+    }
+
+    private Optional<RDFConstant> evaluate(ImmutableTerm term) {
+        ImmutableTerm simplifiedTerm = term.simplify(false);
+        if (simplifiedTerm instanceof Constant){
+            if (simplifiedTerm instanceof RDFConstant) {
+                return Optional.of((RDFConstant) simplifiedTerm);
+            }
+            Constant constant = (Constant) simplifiedTerm;
+            if (constant.isNull()) {
+                return Optional.empty();
+            }
+            if(constant instanceof DBConstant){
+                throw new InvalidConstantTypeInResultException(
+                         constant +"is a DB constant. But a binding set cannot have a DB constant as value");
+            }
+            throw new InvalidConstantTypeInResultException("Unexpected constant type for "+constant);
         }
-        throw new InvalidTermAsResultException(constant);
+        throw new InvalidTermAsResultException(simplifiedTerm);
+
     }
 
     public static class InvalidTermAsResultException extends OntopInternalBugException {
         InvalidTermAsResultException(ImmutableTerm term) {
-            super("Term " + term + " does not evaluate to an RDF constant");
+            super("Term " + term + " does not evaluate to a constant");
+        }
+    }
+
+    public static class InvalidConstantTypeInResultException extends OntopInternalBugException {
+        InvalidConstantTypeInResultException (String message) {
+            super(message);
         }
     }
 }

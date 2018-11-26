@@ -62,7 +62,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
         }
         return new SQLOntopBindingSet(
                 signature,
-                bindingName2Index,
+                //bindingName2Index,
                 substitutionFactory.getSubstitution(builder.build()),
                 sparqlVar2Term
         );
