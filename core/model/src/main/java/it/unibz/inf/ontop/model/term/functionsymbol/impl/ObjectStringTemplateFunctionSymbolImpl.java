@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.mikael.urlbuilder.util.Encoder;
 import it.unibz.inf.ontop.exception.FatalTypingException;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -87,6 +85,12 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         // Query element: percent-encoding except if in iunreserved
         // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
         return iriEncoder.encodeQueryElement(constant.getValue());
+    }
+
+
+    @Override
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+        return true;
     }
 
 

@@ -11,10 +11,16 @@ package it.unibz.inf.ontop.iq;
  */
 public interface IQProperties {
 
-    boolean isLifted();
+    boolean isNormalizedForOptimization();
+
+    boolean areDistinctAlreadyRemoved();
 
     /**
      * Creates a NEW (immutable) object
      */
-    IQProperties declareLifted();
+    IQProperties declareNormalizedForOptimization();
+
+    IQProperties declareDistinctRemovalWithoutEffect();
+
+    IQProperties declareDistinctRemovalWithEffect();
 }

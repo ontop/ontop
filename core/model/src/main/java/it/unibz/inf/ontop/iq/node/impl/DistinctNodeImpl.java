@@ -35,25 +35,34 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         this.substitutionFactory = substitutionFactory;
     }
 
+    /**
+     * TODO: refactor
+     */
     @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.liftBinding(variableGenerator);
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQTree newChild = child.removeDistincts();
+        return liftBinding(newChild, variableGenerator, currentIQProperties);
+    }
+
+    /**
+     * TODO: refactor
+     */
+    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
         if (newChildRoot instanceof ConstructionNode)
             return liftBindingConstructionChild(newChild, (ConstructionNode) newChildRoot, currentIQProperties);
-        else if (newChildRoot instanceof DistinctNode)
-            return newChild;
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private IQTree liftBindingConstructionChild(IQTree child, ConstructionNode constructionNode,
                                                 IQProperties currentIQProperties) {
 
-        IQProperties liftedProperties = currentIQProperties.declareLifted();
+        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = constructionNode.getSubstitution();
 
@@ -126,6 +135,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
+    public boolean isDistinct(IQTree child) {
+        return true;
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformDistinct(tree, this, child);
     }
@@ -137,6 +151,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        return child.removeDistincts();
     }
 
     @Override

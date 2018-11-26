@@ -39,9 +39,9 @@ public class QueryUnionSplitterImpl implements QueryUnionSplitter {
         return findFirstSplittableUnion(query)
                 .map(unionTree -> unionTree.getChildren().stream()
                         .map(c -> tree.replaceSubTree(unionTree, c))
-                        .map(t -> t.liftBinding(variableGenerator))
+                        .map(t -> t.normalizeForOptimization(variableGenerator))
                         .map(t -> iqFactory.createIQ(projectionAtom, t))
-                        .map(IQ::liftBinding))
+                        .map(IQ::normalizeForOptimization))
                 .orElseGet(() -> Stream.of(query));
     }
 

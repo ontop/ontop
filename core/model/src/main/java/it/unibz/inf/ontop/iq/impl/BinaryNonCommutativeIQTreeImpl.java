@@ -34,6 +34,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Nullable
     private VariableNullability variableNullability;
     @Nullable
+    private Boolean isDistinct;
+    @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @AssistedInject
@@ -46,6 +48,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         this.rightChild = rightChild;
         this.variableNullability = null;
         this.possibleVariableDefinitions = null;
+        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -82,11 +85,11 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
         IQProperties properties = getProperties();
-        if (properties.isLifted())
+        if (properties.isNormalizedForOptimization())
             return this;
-        return getRootNode().liftBinding(leftChild, rightChild, variableGenerator, properties);
+        return getRootNode().normalizeForOptimization(leftChild, rightChild, variableGenerator, properties);
     }
 
     @Override
@@ -129,6 +132,13 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
+    public boolean isDistinct() {
+        if (isDistinct == null)
+            isDistinct = getRootNode().isDistinct(leftChild, rightChild);
+        return isDistinct;
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
@@ -143,6 +153,14 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
         return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+    }
+
+    @Override
+    public IQTree removeDistincts() {
+        IQProperties properties = getProperties();
+        return properties.areDistinctAlreadyRemoved()
+                ? this
+                : getRootNode().removeDistincts(leftChild, rightChild, properties);
     }
 
     @Override

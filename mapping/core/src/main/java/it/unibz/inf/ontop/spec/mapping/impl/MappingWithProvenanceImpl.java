@@ -105,6 +105,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     private IQ mergeDefinitions(Collection<IQ> assertions) {
         return queryMerger.mergeDefinitions(assertions)
+                .map(IQ::normalizeForOptimization)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
     }
 

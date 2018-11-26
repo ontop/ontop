@@ -118,6 +118,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     }
 
     @Override
+    public boolean isDistinct() {
+        return true;
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }

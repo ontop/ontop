@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 public interface UnaryOperatorNode extends QueryNode {
 
-    IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties);
+    IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties);
 
     IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                        Optional<ImmutableExpression> constraint, IQTree child);
@@ -34,6 +34,9 @@ public interface UnaryOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, IQTree child);
 
+    boolean isDistinct(IQTree child);
+
+    @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
@@ -52,4 +55,6 @@ public interface UnaryOperatorNode extends QueryNode {
     void validateNode(IQTree child) throws InvalidIntermediateQueryException;
 
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child);
+
+    IQTree removeDistincts(IQTree child, IQProperties iqProperties);
 }

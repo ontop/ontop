@@ -88,7 +88,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .map(Optional::get)
                 // In case some legacy implementations do not preserve IS_NOT_NULL conditions
                 .map(noNullValueEnforcer::transform)
-                .map(IQ::liftBinding)
+                .map(IQ::normalizeForOptimization)
                 .collect(ImmutableCollectors.toList());
 
         ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = intermediateQueryList.stream()
@@ -140,7 +140,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 iqFactory);
 
         return noNullValueEnforcer.transform(directlyConvertedIQ)
-                .liftBinding();
+                .normalizeForOptimization();
     }
 
 

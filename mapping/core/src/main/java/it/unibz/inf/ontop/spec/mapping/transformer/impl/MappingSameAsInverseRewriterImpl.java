@@ -90,6 +90,6 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
         return queryMerger.mergeDefinitions(ImmutableList.of(originalDefinition, inversedDefinition))
                 .get()
-                .liftBinding();
+                .normalizeForOptimization();
     }
 }

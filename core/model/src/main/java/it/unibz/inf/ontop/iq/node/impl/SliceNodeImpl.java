@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -53,32 +54,40 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         this.limit = null;
     }
 
-    /**
-     * Blocks substitutions
-     */
     @Override
-    public IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.liftBinding(variableGenerator);
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+
+        IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
-        if (newChildRoot instanceof SliceNode)
-            return liftSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
+        if (newChildRoot instanceof ConstructionNode)
+            return liftChildConstruction((ConstructionNode) newChildRoot, (UnaryIQTree)newChild, variableGenerator);
+        else if (newChildRoot instanceof SliceNode)
+            return mergeWithSliceChild((SliceNode) newChildRoot, newChild, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
+            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
+    }
+
+    private IQTree liftChildConstruction(ConstructionNode childConstructionNode, UnaryIQTree childTree,
+                                         VariableGenerator variableGenerator) {
+        IQTree newSliceLevelTree = iqFactory.createUnaryIQTree(this, childTree.getChild())
+                .normalizeForOptimization(variableGenerator);
+        return iqFactory.createUnaryIQTree(childConstructionNode, newSliceLevelTree,
+                iqFactory.createIQProperties().declareNormalizedForOptimization());
     }
 
     /**
      * TODO: implement it seriously
      */
-    private IQTree liftSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
-        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareLifted());
-    }
-
-    @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
+    private IQTree mergeWithSliceChild(SliceNode newChildRoot, IQTree newChild, IQProperties currentIQProperties) {
+        return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     @Override
@@ -96,6 +105,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public boolean isDistinct(IQTree child) {
+        return child.isDistinct();
+    }
+
+    @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformSlice(tree, this, child);
     }
@@ -107,6 +121,17 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
+        IQTree newChild = child.removeDistincts();
+
+        IQProperties newProperties = newChild.equals(child)
+                ? iqProperties.declareDistinctRemovalWithoutEffect()
+                : iqProperties.declareDistinctRemovalWithEffect();
+
+        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
     }
 
     @Override

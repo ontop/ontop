@@ -51,7 +51,7 @@ public class UnionFlattenerImpl implements UnionFlattener {
             }
             // if the child is a construction node, merge it
             if (transformedChildRoot instanceof ConstructionNode) {
-                return rootCn.liftBinding(
+                return rootCn.normalizeForOptimization(
                         transformedChild,
                         variableGenerator,
                         iqFactory.createIQProperties()

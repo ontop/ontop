@@ -143,6 +143,14 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         return getVariables();
     }
 
+    /**
+     * TODO: implement seriously
+     */
+    @Override
+    public boolean isDistinct() {
+        return false;
+    }
+
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;

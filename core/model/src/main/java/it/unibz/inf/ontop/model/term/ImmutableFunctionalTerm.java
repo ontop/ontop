@@ -35,4 +35,6 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
         FunctionSymbol functionSymbol = getFunctionSymbol();
         return functionSymbol.inferAndValidateType(getTerms());
     }
+
+    boolean isInjective(ImmutableSet<Variable> nonNullVariables);
 }
