@@ -43,7 +43,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        return buildTermAfterEvaluation(newTerms, termFactory);
+        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory);
     }
 
     /**
@@ -52,7 +52,9 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * To be extended for reacting to null values and so on.
      *
      */
-    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory) {
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                     boolean isInConstructionNodeInOptimizationPhase,
+                                                     TermFactory termFactory) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 

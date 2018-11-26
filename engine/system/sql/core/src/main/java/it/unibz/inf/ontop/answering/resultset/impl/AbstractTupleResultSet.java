@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
+    protected final ImmutableList<Variable> signature;
     protected final ImmutableMap<String, Integer> bindingName2Index;
 
     /**
@@ -30,6 +31,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
         this.rs = rs;
+        this.signature = signature;
         AtomicInteger i = new AtomicInteger(0);
         this.bindingName2Index = signature.stream()
                 .collect(ImmutableCollectors.toMap(
@@ -40,7 +42,7 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     @Override
     public int getColumnCount() {
-        return bindingName2Index.keySet().size();
+        return signature.size();
     }
 
     @Override
@@ -54,7 +56,9 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     @Override
     public ImmutableList<String> getSignature() {
-        return ImmutableList.copyOf(bindingName2Index.keySet());
+        return signature.stream()
+                .map(Variable::getName)
+                .collect(ImmutableCollectors.toList());
     }
 
 

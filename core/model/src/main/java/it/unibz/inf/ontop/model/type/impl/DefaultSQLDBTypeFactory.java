@@ -23,6 +23,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String CHARACTER_STR = "CHARACTER";
     protected static final String VARCHAR_STR = "VARCHAR";
     protected static final String CHAR_VAR_STR = "CHARACTER VARYING";
+    protected static final String CLOB_STR = "CLOB";
     protected static final String CHAR_LARGE_STR = "CHARACTER LARGE OBJECT";
     protected static final String NATIONAL_CHAR_STR = "NATIONAL CHARACTER";
     protected static final String NATIONAL_CHAR_VAR_STR = "NATIONAL CHARACTER VARYING";
@@ -74,7 +75,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Returns a mutable map so that it can be modified by sub-classes
      */
     protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
-        DBTermType rootDBType = new NonStringNonNumberDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
+        DBTermType rootDBType = new NonStringNonNumberNonBooleanDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
 
         TermTypeAncestry rootAncestry = rootDBType.getAncestry();
 
@@ -93,12 +94,13 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(VARCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(CHAR_LARGE_STR, rootAncestry, xsdString),
+                    new StringDBTermType(CLOB_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
-                    new NonStringNonNumberDBTermType(BINARY_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanDBTermType(BINARY_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
                     new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger),
@@ -107,10 +109,10 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NonStringNonNumberDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), typeFactory.getXsdBooleanDatatype()),
-                    new NonStringNonNumberDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
-                    new NonStringNonNumberDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
-                    new NonStringNonNumberDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
+                    new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), typeFactory.getXsdBooleanDatatype()),
+                    new NonStringNonNumberNonBooleanDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
+                    new NonStringNonNumberNonBooleanDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
+                    new NonStringNonNumberNonBooleanDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
                 .collect(Collectors.toMap(
                         DBTermType::getName,
                         t -> t));
@@ -144,7 +146,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
          * Creates a new term type if not known
          */
         return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
+                s -> new NonStringNonNumberNonBooleanDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
     }
 
     /**

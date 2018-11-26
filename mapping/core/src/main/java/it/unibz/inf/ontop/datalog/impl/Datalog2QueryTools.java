@@ -38,8 +38,8 @@ public class Datalog2QueryTools {
                 Term typeTerm = func.getTerm(1);
                 // If typeTerm is a variable, we are unsure so we return false
                 if (typeTerm.equals(termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()))
-                        && (lexicalTerm instanceof RDFLiteralConstant))
-                    return ((RDFLiteralConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
+                        && (lexicalTerm instanceof DBConstant))
+                    return ((DBConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
             }
         }
         else if (term instanceof IRIConstant) {

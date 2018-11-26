@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -20,7 +21,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
 
     private final ImmutableSortedSet<Variable> sqlSignature;
     private final ImmutableMap<Variable, DBTermType> sqlTypeMap;
-    private final ImmutableSubstitution sparqlVar2Term;
+    private final ImmutableSubstitution<ImmutableTerm> sparqlVar2Term;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
@@ -60,6 +61,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
             throw new OntopConnectionException(e);
         }
         return new SQLOntopBindingSet(
+                signature,
                 bindingName2Index,
                 substitutionFactory.getSubstitution(builder.build()),
                 sparqlVar2Term

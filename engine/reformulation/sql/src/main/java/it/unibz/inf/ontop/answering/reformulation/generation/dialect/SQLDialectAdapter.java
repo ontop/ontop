@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
 
 import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Collection;
@@ -150,4 +151,6 @@ public interface SQLDialectAdapter {
     String ifElseNull(String condition, String valueIfTrue);
 
     String getNullConstant();
+
+    String render(DBConstant constant);
 }

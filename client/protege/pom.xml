@@ -106,6 +106,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.mikael</groupId>
+            <artifactId>urlbuilder</artifactId>
+            <version>${urlbuilder.version}</version>
+        </dependency>
+
         <!-- OBDA libraries -->
 
         <!-- These are dependencies to the OBDA related classes. -->

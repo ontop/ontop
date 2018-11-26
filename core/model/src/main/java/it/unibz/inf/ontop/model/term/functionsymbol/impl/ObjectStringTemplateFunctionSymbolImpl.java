@@ -1,16 +1,22 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import io.mikael.urlbuilder.util.Encoder;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.URITemplates;
 
+import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -18,12 +24,14 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         implements ObjectStringTemplateFunctionSymbol {
 
     private final String template;
-    private final TermType lexicalType;
+    private final DBTermType lexicalType;
+    private final Encoder iriEncoder;
 
     protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
         super(template, createBaseTypes(arity, typeFactory));
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
+        this.iriEncoder = new Encoder(Charset.forName("utf-8"));
     }
 
     private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
@@ -57,6 +65,30 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         validateSubTermTypes(terms);
         return inferType(terms);
     }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                     boolean isInConstructionNodeInOptimizationPhase,
+                                                     TermFactory termFactory) {
+        if (newTerms.stream()
+            .allMatch(t -> t instanceof DBConstant)) {
+            ImmutableList<String> values = newTerms.stream()
+                    .map(t -> (DBConstant) t)
+                    .map(this::encodeParameter)
+                    .collect(ImmutableCollectors.toList());
+
+            return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
+    private String encodeParameter(DBConstant constant) {
+        // Query element: percent-encoding except if in iunreserved
+        // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
+        return iriEncoder.encodeQueryElement(constant.getValue());
+    }
+
 
     @Override
     public boolean canBePostProcessed() {

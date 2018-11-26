@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
@@ -31,6 +32,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 
 import java.util.*;
 
@@ -48,14 +50,17 @@ public class TermFactoryImpl implements TermFactory {
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
+	private final RDF rdfFactory;
 
 	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory,
-							DBFunctionSymbolFactory dbFunctionSymbolFactory, OntopModelSettings settings) {
+							DBFunctionSymbolFactory dbFunctionSymbolFactory, OntopModelSettings settings,
+							RDF rdfFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
 		this.functionSymbolFactory = functionSymbolFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.rdfFactory = rdfFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 		this.valueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
 		this.valueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
@@ -96,6 +101,19 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public RDFLiteralConstant getRDFLiteralConstant(String value, String language) {
 		return new RDFLiteralConstantImpl(value, language.toLowerCase(), typeFactory);
+	}
+
+	@Override
+	public RDFConstant getRDFConstant(String lexicalValue, RDFTermType termType) {
+		if (termType.isAbstract())
+			throw new IllegalArgumentException("Cannot create an RDFConstant out of a abstract term type");
+		if (termType instanceof RDFDatatype)
+			return getRDFLiteralConstant(lexicalValue, (RDFDatatype)termType);
+		else if (termType.equals(typeFactory.getIRITermType()))
+			return getConstantIRI(rdfFactory.createIRI(lexicalValue));
+		else if (termType.equals(typeFactory.getBlankNodeType()))
+			return getConstantBNode(lexicalValue);
+		throw new MinorOntopInternalBugException("Unexpected RDF term type: " + termType);
 	}
 
 	@Override

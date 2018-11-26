@@ -2,14 +2,13 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
@@ -53,6 +52,32 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
             throws FatalTypingException {
         validateSubTermTypes(terms);
         return inferType(terms);
+    }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                     boolean isInConstructionNodeInOptimizationPhase,
+                                                     TermFactory termFactory) {
+        if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
+                .allMatch(t -> t instanceof Constant)) {
+
+            DBConstant lexicalConstant = Optional.of(newTerms.get(0))
+                    .filter(c -> c instanceof DBConstant)
+                    .map(c -> (DBConstant) c)
+                    .orElseThrow(() -> new MinorOntopInternalBugException(
+                            "The constant for the lexical part was expected to be a DBConstant"));
+
+            RDFTermType rdfTermType = Optional.of(newTerms.get(1))
+                    .filter(c -> c instanceof RDFTermTypeConstant)
+                    .map(c -> (RDFTermTypeConstant) c)
+                    .map(RDFTermTypeConstant::getRDFTermType)
+                    .orElseThrow(() -> new MinorOntopInternalBugException(
+                            "The second constant argument was expected to be a RDFTermTypeConstant"));
+
+            return termFactory.getRDFConstant(lexicalConstant.getValue(), rdfTermType);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     @Override

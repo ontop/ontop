@@ -27,6 +27,16 @@ public class NumberDBTermType extends DBTermTypeImpl {
     }
 
     @Override
+    public boolean isNumber() {
+        return true;
+    }
+
+    @Override
+    public boolean isBoolean() {
+        return false;
+    }
+
+    @Override
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.ofNullable(rdfDatatype);
     }

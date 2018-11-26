@@ -152,6 +152,7 @@
         <commons-rdf.version>0.3.0-incubating</commons-rdf.version>
         <guava.version>18.0</guava.version>
         <jsqlparser.version>1.0</jsqlparser.version>
+        <urlbuilder.version>2.0.9</urlbuilder.version>
     </properties>
 
     <build>
@@ -408,6 +409,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-rdf-rdf4j</artifactId>
                 <version>${commons-rdf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.mikael</groupId>
+                <artifactId>urlbuilder</artifactId>
+                <version>${urlbuilder.version}</version>
             </dependency>
 
             <!-- OWL API -->
