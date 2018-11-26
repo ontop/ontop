@@ -30,11 +30,7 @@ public class OntopOWLBinding implements OWLBinding {
     // TODO(xiao): how about null??
     @Override
     public OWLObject getValue() throws OWLException {
-        try {
-            return translate(ontopBinding.getValue());
-        } catch (OntopResultConversionException e) {
-            throw new OntopOWLException(e);
-        }
+        return translate(ontopBinding.getValue());
     }
 
     // TODO(xiao): duplicated code

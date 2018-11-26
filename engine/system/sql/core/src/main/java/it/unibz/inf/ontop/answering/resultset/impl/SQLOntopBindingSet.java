@@ -15,15 +15,13 @@ import java.util.stream.Collectors;
 
 public class SQLOntopBindingSet extends AbstractOntopBindingSet implements OntopBindingSet {
 
-
-
     SQLOntopBindingSet(ImmutableSortedSet<Variable> signature,
                        ImmutableSubstitution<DBConstant> sqlVar2DBConstant,
                        ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
         super(computeBindingMap(signature, sqlVar2DBConstant, sparqlVar2Term));
     }
 
-    private LinkedHashMap<Variable, OntopBinding> computeBindingMap(ImmutableSortedSet<Variable> signature,
+    private static LinkedHashMap<String, OntopBinding> computeBindingMap(ImmutableSortedSet<Variable> signature,
                                                                     ImmutableSubstitution<DBConstant> sqlVar2DBConstant,
                                                                     ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
 
@@ -41,14 +39,14 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
                 ));
     }
 
-    private Optional<Map.Entry<Variable,OntopBinding>> getBinding(Variable v, ImmutableSubstitution<ImmutableTerm> composition) {
+    private static Optional<Map.Entry<String,OntopBinding>> getBinding(Variable v, ImmutableSubstitution<ImmutableTerm> composition) {
         Optional<RDFConstant> constant = evaluate(composition.apply(v));
         return constant.isPresent()?
-                Optional.of(new AbstractMap.SimpleImmutableEntry<Variable, OntopBinding>(v, new OntopBindingImpl(v, constant.get()))):
+                Optional.of(new AbstractMap.SimpleImmutableEntry<String, OntopBinding>(v.getName(), new OntopBindingImpl(v, constant.get()))):
                 Optional.empty();
     }
 
-    private Optional<RDFConstant> evaluate(ImmutableTerm term) {
+    private static Optional<RDFConstant> evaluate(ImmutableTerm term) {
         ImmutableTerm simplifiedTerm = term.simplify(false);
         if (simplifiedTerm instanceof Constant){
             if (simplifiedTerm instanceof RDFConstant) {
@@ -60,12 +58,11 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
             }
             if(constant instanceof DBConstant){
                 throw new InvalidConstantTypeInResultException(
-                         constant +"is a DB constant. But a binding set cannot have a DB constant as value");
+                         constant +"is a DB constant. But a binding cannot have a DB constant as value");
             }
             throw new InvalidConstantTypeInResultException("Unexpected constant type for "+constant);
         }
         throw new InvalidTermAsResultException(simplifiedTerm);
-
     }
 
     public static class InvalidTermAsResultException extends OntopInternalBugException {

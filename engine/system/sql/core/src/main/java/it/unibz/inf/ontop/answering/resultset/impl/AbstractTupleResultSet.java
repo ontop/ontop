@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.resultset.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
@@ -16,8 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractTupleResultSet implements TupleResultSet {
 
     protected final ResultSet rs;
-    protected final ImmutableList<Variable> signature;
-//    protected final ImmutableMap<String, Integer> bindingName2Index;
+    protected final ImmutableSortedSet<Variable> signature;
 
     /**
      * Flag used to emulate the expected behavior of next() and hasNext()
@@ -29,15 +29,9 @@ public abstract class AbstractTupleResultSet implements TupleResultSet {
     /* Set to false iff the moveCursor() method returned false (at least once) */
     private boolean foundNextElement = true;
 
-    AbstractTupleResultSet(ResultSet rs, ImmutableList<Variable> signature){
+    AbstractTupleResultSet(ResultSet rs, ImmutableSortedSet<Variable> signature){
         this.rs = rs;
         this.signature = signature;
-        AtomicInteger i = new AtomicInteger(0);
-//        this.bindingName2Index = signature.stream()
-//                .collect(ImmutableCollectors.toMap(
-//                        Object::toString,
-//                        s -> i.getAndIncrement()
-//                ));
     }
 
     @Override
