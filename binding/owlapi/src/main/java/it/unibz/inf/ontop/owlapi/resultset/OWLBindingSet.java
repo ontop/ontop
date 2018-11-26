@@ -20,10 +20,7 @@ public interface OWLBindingSet extends Iterable<OWLBinding> {
 
     OWLBinding getBinding(String bindingName) throws OWLException;
 
-//    OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException;
     OWLPropertyAssertionObject getOWLPropertyAssertionObject(String bindingName) throws OWLException;
-
-//    OWLIndividual getOWLIndividual(int column) throws OWLException;
 
     OWLIndividual getOWLIndividual(String bindingName) throws OWLException;
 
@@ -31,11 +28,7 @@ public interface OWLBindingSet extends Iterable<OWLBinding> {
 
     OWLAnonymousIndividual getOWLAnonymousIndividual(String bindingName) throws OWLException;
 
-//    OWLLiteral getOWLLiteral(int column) throws OWLException;
-
     OWLLiteral getOWLLiteral(String bindingName) throws OWLException;
-
-//    OWLObject getOWLObject(int column) throws OWLException;
 
     OWLObject getOWLObject(String bindingName) throws OWLException;
 }
