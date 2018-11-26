@@ -147,19 +147,14 @@ public class SPARQLRegExTest {
 		try {
 
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-			/*
-			 * boolean hasNext = rs.hasNext();
-			 */
-			// assertTrue(rs.hasNext());
 			int count = 0;
 			while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                for (int i = 1; i <= rs.getColumnCount(); i++) {
-					OWLObject ind1 = bindingSet.getOWLObject(i);
+				for (String name: rs.getSignature()) {
+					OWLObject ind1 = bindingSet.getOWLObject(name);
 					System.out.println(" Result: " + ind1.toString());
 				}
 				count += 1;
-
 			}
 			Assert.assertEquals(numberOfResults, count);
 

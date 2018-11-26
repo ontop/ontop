@@ -20,5 +20,5 @@ public interface OntopBinding {
      *
      * @return The value of the binding, never <tt>null</tt>.
      */
-    RDFConstant getValue() throws OntopResultConversionException;
+    RDFConstant getValue();
 }

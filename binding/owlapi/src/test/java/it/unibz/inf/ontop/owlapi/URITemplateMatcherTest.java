@@ -157,9 +157,8 @@ public class URITemplateMatcherTest {
             final OWLBindingSet bindingSet = res.next();
             count += 1;
 			if (count == 1) {
-				for (int i = 1; i <= res.getColumnCount(); i++) {
-					log.debug("Example result " + res.getSignature().get(i - 1) + " = " + bindingSet.getOWLObject(i));
-
+				for (String name: res.getSignature()) {
+					log.debug("Example result " + name + " = " + bindingSet.getOWLObject(name));
 				}
 				result = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject("s"));
 			}

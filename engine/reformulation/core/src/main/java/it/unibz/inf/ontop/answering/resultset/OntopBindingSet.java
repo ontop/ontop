@@ -24,8 +24,8 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
      * @param column The column index of the value to be returned, start at 1
      * @return a constant
      */
-    @Nullable
-    RDFConstant getConstant(int column) throws OntopResultConversionException;
+//    @Nullable
+//    RDFConstant getConstant(int column) throws OntopResultConversionException;
 
     @Nullable
     RDFConstant getConstant(String name) throws OntopResultConversionException;

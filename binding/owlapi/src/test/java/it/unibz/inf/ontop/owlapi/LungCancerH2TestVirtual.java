@@ -185,11 +185,10 @@ public class LungCancerH2TestVirtual extends TestCase {
 		int count = 0;
 		while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-
             count++;
-			for (int i = 1; i <= rs.getColumnCount(); i++) {
-				System.out.print(rs.getSignature().get(i-1));
-				System.out.print("=" + bindingSet.getOWLObject(i));
+			for (String name: rs.getSignature()) {
+				System.out.print(name);
+				System.out.print("=" + bindingSet.getOWLObject(name));
 				System.out.print(" ");
 			}
 			System.out.println();

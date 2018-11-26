@@ -10,11 +10,6 @@ public class OntopBindingImpl implements OntopBinding {
     private final String name;
     private final RDFConstant constant;
 
-    public OntopBindingImpl(String name, RDFConstant constant) {
-        this.name = name;
-        this.constant = constant;
-    }
-
     public OntopBindingImpl(Variable var, RDFConstant constant) {
         this.name = var.toString();
         this.constant = constant;
@@ -26,7 +21,7 @@ public class OntopBindingImpl implements OntopBinding {
     }
 
     @Override
-    public RDFConstant getValue() throws OntopResultConversionException {
+    public RDFConstant getValue() {
         return constant;
     }
 }

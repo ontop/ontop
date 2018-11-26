@@ -152,11 +152,10 @@ public class PropertyCharacteristicTest extends TestCase {
             final OWLBindingSet bindingSet = rs.next();
             counter++;
 			if (stdout) {
-				for (int column = 1; column <= rs.getColumnCount(); column++) {
-					OWLObject binding = bindingSet.getOWLObject(column);
+				for (String name: rs.getSignature()) {
+					OWLObject binding = bindingSet.getOWLObject(name);
 					log.debug(binding.toString() + ", ");
 				}
-
 			}
 		}
 		return counter;

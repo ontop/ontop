@@ -274,7 +274,7 @@ public abstract class QuestStatement implements OntopStatement {
 				ImmutableSet.Builder<String> constantSetBuilder = ImmutableSet.builder();
 				while (resultSet.hasNext()) {
                     final OntopBindingSet bindingSet = resultSet.next();
-                    Constant constant = bindingSet.getConstant(1);
+                    Constant constant = bindingSet.getValues().get(1);
 					if (constant instanceof IRIConstant) {
 						// collect constants in list
 						constantSetBuilder.add(((IRIConstant) constant).getIRI().getIRIString());
