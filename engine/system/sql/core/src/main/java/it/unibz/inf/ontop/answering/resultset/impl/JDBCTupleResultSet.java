@@ -49,7 +49,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
         final ImmutableMap.Builder<Variable,DBConstant> builder = ImmutableMap.builder();
         Iterator<Variable> it = sqlSignature.iterator();
         try {
-            for (int i = 1; i <= getColumnCount(); i++) {
+            for (int i = 1; i <= sqlSignature.size(); i++) {
                 Variable var = it.next();
                 builder.put(
                         var,
