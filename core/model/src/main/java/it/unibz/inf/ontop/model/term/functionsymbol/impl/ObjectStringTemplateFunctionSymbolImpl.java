@@ -77,6 +77,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
             return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
         }
+        else if (isOneArgumentNull(newTerms)) {
+            return termFactory.getNullConstant();
+        }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }

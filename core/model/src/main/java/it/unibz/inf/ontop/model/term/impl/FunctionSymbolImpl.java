@@ -64,6 +64,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         }
     }
 
+    protected boolean isOneArgumentNull(ImmutableList<ImmutableTerm> subTerms) {
+        return subTerms.stream()
+                .filter(t -> t instanceof Constant)
+                .anyMatch(t -> ((Constant) t).isNull());
+    }
+
     @Override
     public TermType getExpectedBaseType(int index) {
         return expectedBaseTypes.get(index);
