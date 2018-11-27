@@ -168,7 +168,8 @@ public enum ExpressionOperation implements OperationPredicate {
 	@Override
 	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
 							   ImmutableSet<Variable> nonNullVariables) {
-		throw new RuntimeException("TODO: implement ExpressionOperation.isInjective(...)");
+		// TODO: implement seriously later on
+		return false;
 	}
 
 	@Override

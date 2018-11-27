@@ -52,24 +52,30 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         QueryNode newChildRoot = newChild.getRootNode();
 
         if (newChildRoot instanceof ConstructionNode)
-            return liftBindingConstructionChild(newChild, (ConstructionNode) newChildRoot, currentIQProperties);
+            return liftBindingConstructionChild((UnaryIQTree) newChild, (ConstructionNode) newChildRoot, currentIQProperties);
         else if (newChildRoot instanceof EmptyNode)
             return newChild;
         else
             return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
-    private IQTree liftBindingConstructionChild(IQTree child, ConstructionNode constructionNode,
+    private IQTree liftBindingConstructionChild(UnaryIQTree child, ConstructionNode constructionNode,
                                                 IQProperties currentIQProperties) {
 
         IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = constructionNode.getSubstitution();
 
+        IQTree grandChild = child.getChild();
+        VariableNullability grandChildVariableNullability = grandChild.getVariableNullability();
+        ImmutableSet<Variable> grandChildNonNullableVariables = grandChild.getVariables().stream()
+                .filter(v -> !grandChildVariableNullability.isPossiblyNullable(v))
+                .collect(ImmutableCollectors.toSet());
+
         ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> partition =
                 initialSubstitution.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.partitioningBy(
-                        e -> isLiftable(e.getValue()),
+                        e -> isLiftable(e.getValue(), grandChildNonNullableVariables),
                         ImmutableCollectors.toMap()));
 
         Optional<ConstructionNode> liftedConstructionNode = Optional.ofNullable(partition.get(true))
@@ -80,8 +86,6 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         ImmutableSet<Variable> newChildVariables = liftedConstructionNode
                 .map(ConstructionNode::getChildVariables)
                 .orElseGet(child::getVariables);
-
-        IQTree grandChild = ((UnaryIQTree) child).getChild();
 
         IQTree newChild = Optional.ofNullable(partition.get(false))
                 .filter(m -> !m.isEmpty())
@@ -102,17 +106,14 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     /**
-     * TODO: return true for injective functions
      *
      * NULL is treated as a regular constant (consistent with SPARQL DISTINCT and apparently with SQL DISTINCT)
      *
      */
-    private boolean isLiftable(ImmutableTerm value) {
-        // TODO: re-enable it
-//        if (value instanceof VariableOrGroundTerm)
-//            return true;
-        // TODO: support injective functions
-        return false;
+    private boolean isLiftable(ImmutableTerm value, ImmutableSet<Variable> nonNullVariables) {
+        if (value instanceof VariableOrGroundTerm)
+            return true;
+        return ((ImmutableFunctionalTerm) value).isInjective(nonNullVariables);
     }
 
     @Override
