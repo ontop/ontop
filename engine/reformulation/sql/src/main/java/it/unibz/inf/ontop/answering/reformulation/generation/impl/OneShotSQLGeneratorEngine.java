@@ -40,7 +40,9 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
+import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -353,7 +355,10 @@ public class OneShotSQLGeneratorEngine {
 
 	private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator, ExecutorRegistry executorRegistry) {
 
-		IQTree flattenSubTree = unionFlattener.optimize(subTree, variableGenerator);
+	    IQTree sliceLiftedTree = liftSlice(subTree);
+        log.debug("New query after lifting the slice: \n" + sliceLiftedTree);
+
+        IQTree flattenSubTree = unionFlattener.optimize(sliceLiftedTree, variableGenerator);
 		log.debug("New query after flattening the union: \n" + flattenSubTree);
 
 		// Just here for converting the IQTree into an IntermediateQuery (will be ignored later on)
@@ -388,7 +393,25 @@ public class OneShotSQLGeneratorEngine {
 		}
 	}
 
-	private ImmutableMap<Variable, DBTermType> extractVariableTypeMap(IQTree normalizedSubTree) {
+    private IQTree liftSlice(IQTree subTree) {
+        if (subTree.getRootNode() instanceof ConstructionNode) {
+            ConstructionNode constructionNode = (ConstructionNode) subTree.getRootNode();
+            IQTree childTree = ((UnaryIQTree) subTree).getChild();
+            if (childTree.getRootNode() instanceof SliceNode) {
+                /*
+                 * Swap the top construction node and the slice
+                 */
+                SliceNode sliceNode = (SliceNode) childTree.getRootNode();
+                IQTree grandChildTree = ((UnaryIQTree) childTree).getChild();
+
+                return iqFactory.createUnaryIQTree(sliceNode,
+                        iqFactory.createUnaryIQTree(constructionNode, grandChildTree));
+            }
+        }
+        return subTree;
+    }
+
+    private ImmutableMap<Variable, DBTermType> extractVariableTypeMap(IQTree normalizedSubTree) {
 		return normalizedSubTree.getVariables().stream()
 				.collect(ImmutableCollectors.toMap(
 						v -> v,
