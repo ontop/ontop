@@ -159,7 +159,7 @@ public class LeftJoinMultipleMatchingTest {
 
     @Test
     public void testOptionalQuery() throws Exception {
-        String optional = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+        String query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rais: <http://www.ontorais.de/>\n" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
@@ -170,11 +170,7 @@ public class LeftJoinMultipleMatchingTest {
                 " OPTIONAL{ ?ao rais:archivalDate ?date.}\n" +
                 "}\n";
 
-        assertEquals(2, runTestQuery("src/test/resources/ljoptional/rais-ontology-small.obda", optional));
-    }
-
-
-    private int runTestQuery(String obdaFile, String query) throws Exception {
+        String obdaFile = "src/test/resources/ljoptional/rais-ontology-small.obda";
 
         // Creating a new instance of the reasoner
     	OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -211,8 +207,6 @@ public class LeftJoinMultipleMatchingTest {
         assertFalse(count != 2);
 
         log.debug("Elapsed time: {} ms", time);
-
-        return count;
     }
 }
 

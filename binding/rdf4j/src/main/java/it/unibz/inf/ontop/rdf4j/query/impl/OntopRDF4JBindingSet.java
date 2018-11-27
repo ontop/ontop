@@ -89,14 +89,14 @@ public class OntopRDF4JBindingSet extends AbstractBindingSet implements BindingS
     }
 
     private Binding convertBinding(OntopBinding ontopBinding) {
-        try {
+//        try {
             return new SimpleBinding(
                     ontopBinding.getName(),
                     RDF4JHelper.getValue(ontopBinding.getValue())
             );
-        } catch (OntopResultConversionException e) {
-            throw new RuntimeException(e);
-        }
+//        } catch (OntopResultConversionException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @Override

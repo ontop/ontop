@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
                               DistinctVariableOnlyDataAtom answerAtom,
                               TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, answerAtom.getArguments());
+        super(rs, ImmutableSortedSet.copyOf(answerAtom.getArguments()));
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;
@@ -62,7 +63,6 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
         }
         return new SQLOntopBindingSet(
                 signature,
-                bindingName2Index,
                 substitutionFactory.getSubstitution(builder.build()),
                 sparqlVar2Term
         );

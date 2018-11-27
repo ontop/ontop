@@ -113,11 +113,10 @@ public class CanonicalIRIUniversityTest {
 
                     String sparqlQuery = query.getQuery();
                     TupleOWLResultSet res = st.executeSelectQuery(sparqlQuery);
-                    int columnSize = res.getColumnCount();
                     while (res.hasNext()) {
                         final OWLBindingSet bindingSet = res.next();
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            OWLObject binding = bindingSet.getOWLObject(idx);
+                        for (String name: res.getSignature()) {
+                            OWLObject binding = bindingSet.getOWLObject(name);
                             System.out.print(binding.toString() + ", ");
                         }
                         System.out.print("\n");
