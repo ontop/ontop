@@ -74,6 +74,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 OrderByNode.class,
                 OrderByNode.OrderComparator.class,
                 StrictFlattenNode.class,
+                RelaxedFlattenNode.class,
                 UnaryIQTree.class,
                 BinaryNonCommutativeIQTree.class,
                 NaryIQTree.class,

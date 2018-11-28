@@ -61,13 +61,9 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     }
 
     @Override
-    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        return getDataAtom().getVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        throw new FlattenNodeException("This method should not be called");
+    public StrictFlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
+            throws QueryNodeTransformationException {
+        return transformer.transform(this);
     }
 
     @Override
@@ -87,85 +83,9 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
         return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
     }
 
-
-    @Override
-    public IQTree liftBinding(IQTree childIQTree, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = childIQTree.liftBinding(variableGenerator);
-        QueryNode newChildRoot = newChild.getRootNode();
-
-        IQProperties liftedProperties = currentIQProperties.declareLifted();
-
-        if (newChildRoot instanceof ConstructionNode)
-            return liftChildConstructionNode((ConstructionNode) newChildRoot, (UnaryIQTree) newChild, liftedProperties);
-        else if (newChildRoot instanceof EmptyNode)
-            return newChild;
-        return iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
-    }
-
-    /**
-     * Lifts the construction node above and applies its substitution
-     */
-    private IQTree liftChildConstructionNode(ConstructionNode liftedNode, UnaryIQTree newChild, IQProperties liftedProperties) {
-        UnaryIQTree newFlattenTree = iqFactory.createUnaryIQTree(
-                applySubstitution(liftedNode.getSubstitution()),
-                newChild.getChild(),
-                liftedProperties
-        );
-        return iqFactory.createUnaryIQTree(liftedNode, newFlattenTree, liftedProperties);
-    }
-
-    @Override
-    public VariableNullability getVariableNullability(IQTree child) {
-        ImmutableList<? extends VariableOrGroundTerm> atomArguments = dataAtom.getArguments();
-
-        ImmutableSet<Variable> localVars = atomArguments.stream()
-                .filter(t -> t instanceof Variable)
-                .map (v -> (Variable)v)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<Variable> childVariables = child.getVariables();
-        Stream<Variable> nullableLocalVars = localVars.stream()
-                .filter(v -> !v.equals(arrayVariable) && !isRepeatedIn(v, dataAtom) && !childVariables.contains(v) ||
-                        !isDeclaredNonNullable(v, atomArguments));
-
-        return new VariableNullabilityImpl(Stream.concat(
-                child.getVariableNullability().getNullableGroups().stream()
-                        .filter(g -> filterNullabilityGroup(g, localVars)),
-                nullableLocalVars
-                        .map(v -> ImmutableSet.of(v)))
-                .collect(ImmutableCollectors.toSet())
-        );
-    }
-
-    private boolean isDeclaredNonNullable(Variable v, ImmutableList<? extends VariableOrGroundTerm> atomArguments) {
-        return !argumentNullability.get(atomArguments.indexOf(v));
-    }
-
-    private boolean isRepeatedIn(Variable v, DataAtom<RelationPredicate> dataAtom) {
-        return dataAtom.getArguments().stream()
-                .filter(t -> t.equals(v))
-                .count() > 1;
-    }
-
-    private boolean filterNullabilityGroup(ImmutableSet<Variable> group, ImmutableSet<Variable> localVars) {
-       return group.stream()
-               .anyMatch(v -> localVars.contains(v));
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, child.propagateDownConstraint(constraint));
-    }
-
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
         return transformer.transformStrictFlatten(tree, this, child);
-    }
-
-    @Override
-    public StrictFlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException {
-        return transformer.transform(this);
     }
 
     @Override
@@ -206,12 +126,6 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
             return query.getFirstChild(this)
                     .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
                     .isVariableNullable(query, variable);
-        }
-    }
-
-    private class FlattenNodeException extends OntopInternalBugException {
-        FlattenNodeException(String message) {
-            super(message);
         }
     }
 }
