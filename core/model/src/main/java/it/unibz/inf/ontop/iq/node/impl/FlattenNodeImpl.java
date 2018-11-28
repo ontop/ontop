@@ -70,9 +70,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
 
     @Override
     public ImmutableSet<Variable> getLocalVariables() {
-        return Stream.concat(
-                Stream.of(arrayVariable),
-                dataAtom.getVariables().stream())
+        return dataAtom.getVariables().stream()
                 .collect(ImmutableCollectors.toSet());
     }
 

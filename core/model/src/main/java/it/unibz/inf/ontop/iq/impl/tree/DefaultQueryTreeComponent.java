@@ -307,15 +307,18 @@ public class DefaultQueryTreeComponent implements QueryTreeComponent {
                 .forEach(i -> insertIQChildren(newChildren.get(i), childrenTrees.get(i).getChildren()));
     }
 
-
+    /**
+     * May contain duplicates (for FlattenNodes)
+     */
     private Stream<Variable> getProjectedVariableStream(QueryNode node) {
         if (node instanceof ExplicitVariableProjectionNode) {
             return ((ExplicitVariableProjectionNode) node).getVariables().stream();
         }
-        else {
-            return getChildrenStream(node)
-                    .flatMap(this::getProjectedVariableStream);
-        }
+        Stream<Variable> childVariables = getChildrenStream(node)
+                .flatMap(this::getProjectedVariableStream);
+        return (node instanceof FlattenNode)?
+                Stream.concat(childVariables, node.getLocalVariables().stream()):
+                childVariables;
     }
 
 

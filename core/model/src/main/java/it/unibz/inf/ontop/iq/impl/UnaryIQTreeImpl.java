@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
+import it.unibz.inf.ontop.iq.node.FlattenNode;
 import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -19,10 +20,12 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
@@ -137,8 +140,13 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
-        else
-            return getChild().getVariables();
+        ImmutableSet<Variable> childVariables = getChild().getVariables();
+        return rootNode instanceof FlattenNode?
+                Stream.concat(
+                        childVariables.stream(),
+                        rootNode.getLocalVariables().stream())
+                        .collect(ImmutableCollectors.toSet()):
+                childVariables;
     }
 
     @Override
