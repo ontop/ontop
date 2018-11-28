@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
@@ -49,7 +49,7 @@ public class ExpressionParserTest {
     public void null_Test() throws JSQLParserException {
         String sql = "SELECT NULL AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -57,7 +57,7 @@ public class ExpressionParserTest {
     public void double_Test() throws JSQLParserException {
         String sql = "SELECT 1.0 AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -69,7 +69,7 @@ public class ExpressionParserTest {
     public void long_Test() throws JSQLParserException {
         String sql = "SELECT 1 AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -81,7 +81,7 @@ public class ExpressionParserTest {
     public void string_Test() throws JSQLParserException {
         String sql = "SELECT \'1\' AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -94,7 +94,7 @@ public class ExpressionParserTest {
         //  ODBC escape sequence syntax
         String sql = "SELECT {d '2016-12-02'} AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -107,7 +107,7 @@ public class ExpressionParserTest {
         //  ODBC escape sequence syntax
         String sql = "SELECT {t '15:57:02'} AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -120,7 +120,7 @@ public class ExpressionParserTest {
         //  ODBC escape sequence syntax
         String sql = "SELECT {ts '2016-12-02 15:57:02.03'} AS A FROM DUMMY";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -136,7 +136,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -154,7 +154,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -172,7 +172,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -190,7 +190,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -208,7 +208,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -226,7 +226,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -244,7 +244,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
 
@@ -264,7 +264,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         assertEquals(TERM_FACTORY.getFunction(
@@ -286,7 +286,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -304,7 +304,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -322,7 +322,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -340,7 +340,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -358,7 +358,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -376,7 +376,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -394,7 +394,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -412,7 +412,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -430,7 +430,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -448,7 +448,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -466,7 +466,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -484,7 +484,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -502,7 +502,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -520,7 +520,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -538,7 +538,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -559,7 +559,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -584,7 +584,7 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -613,7 +613,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -628,7 +628,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -644,7 +644,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -665,7 +665,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -687,7 +687,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -704,7 +704,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -722,7 +722,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -740,7 +740,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -759,7 +759,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -777,7 +777,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -796,7 +796,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -815,7 +815,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -833,7 +833,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -852,7 +852,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -871,7 +871,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -889,7 +889,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -907,7 +907,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -926,7 +926,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -945,7 +945,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -966,7 +966,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -987,7 +987,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -1004,7 +1004,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -1022,7 +1022,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1037,7 +1037,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1052,7 +1052,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1063,7 +1063,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1074,7 +1074,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1086,7 +1086,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1098,7 +1098,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1110,7 +1110,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1124,7 +1124,7 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1137,7 +1137,7 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1150,7 +1150,7 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1161,7 +1161,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1169,7 +1169,7 @@ public class ExpressionParserTest {
     public void interval_Test() throws JSQLParserException {
         String sql = "SELECT INTERVAL '31' DAY FROM DUMMY;";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1177,7 +1177,7 @@ public class ExpressionParserTest {
     public void analyticExpression_Test() throws JSQLParserException {
         String sql = "SELECT LAG(A) OVER () FROM P;";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1185,7 +1185,7 @@ public class ExpressionParserTest {
     public void jsonExpression_Test() throws JSQLParserException {
         String sql = "SELECT A->'B' FROM DUMMY;";
 
-        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY);
+        ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1196,7 +1196,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1208,7 +1208,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1222,7 +1222,7 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(IDFAC.createRelationID(null,"P"), IDFAC.createAttributeID("A")), v,
-                new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(IDFAC.createRelationID(null, "Q"), IDFAC.createAttributeID("A")), u), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
@@ -1234,7 +1234,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
@@ -1253,7 +1253,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
@@ -1272,7 +1272,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -1289,7 +1289,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
 
         System.out.println(translation);
@@ -1306,7 +1306,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
     }
 
@@ -1317,7 +1317,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1335,7 +1335,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1353,7 +1353,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1371,7 +1371,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1382,7 +1382,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1393,7 +1393,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1411,7 +1411,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1429,7 +1429,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1440,7 +1440,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1456,7 +1456,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1474,7 +1474,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1485,7 +1485,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1501,7 +1501,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1518,7 +1518,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1533,7 +1533,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1544,7 +1544,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1559,7 +1559,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
@@ -1570,23 +1570,26 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(UCASE, v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("UCASE", 1), v), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void function_UCASE_2_Test() throws JSQLParserException {
         String sql = "SELECT UCASE(X, 'A') AS A FROM DUMMY";
 
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("UCASE", 2);
+        assertEquals(TERM_FACTORY.getFunction(upperFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
@@ -1596,23 +1599,26 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(UCASE, v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("UCASE", 1), v), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void function_UPPER_2_Test() throws JSQLParserException {
         String sql = "SELECT UPPER(X, 'A') AS A FROM DUMMY";
 
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("UPPER", 2);
+        assertEquals(TERM_FACTORY.getFunction(upperFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
@@ -1622,7 +1628,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
@@ -1637,19 +1643,22 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void function_LEN_Test() throws JSQLParserException {
         String sql = "SELECT LEN(X) AS A FROM DUMMY";
 
         Variable v = TERM_FACTORY.getVariable("x0");
 
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY);
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        DBFunctionSymbol upperFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LEN", 1);
+        assertEquals(TERM_FACTORY.getFunction(upperFunctionSymbol, v), translation);
     }
 
 

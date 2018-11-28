@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
@@ -52,14 +53,17 @@ public class SQLPPMapping2DatalogConverter {
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     @Inject
     private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
-                                          ImmutabilityTools immutabilityTools) {
+                                          ImmutabilityTools immutabilityTools,
+                                          DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
     }
 
     /**
@@ -81,7 +85,7 @@ public class SQLPPMapping2DatalogConverter {
                 ImmutableMap<QualifiedAttributeID, Term> lookupTable;
 
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
+                    SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory, dbFunctionSymbolFactory);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
 

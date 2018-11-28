@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
@@ -149,7 +148,7 @@ public class RelationalExpressionTest {
         System.out.println(eq);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY).parseBooleanExpression(onExpression),
+                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY).parseBooleanExpression(onExpression),
                 TERM_FACTORY);
 
         System.out.println(relationalExpression);
@@ -164,7 +163,7 @@ public class RelationalExpressionTest {
         System.out.println(re1_1);
 
         RAExpression.joinOn(re1, re1_1,
-                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY).parseBooleanExpression(onExpression),
+                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY).parseBooleanExpression(onExpression),
                 TERM_FACTORY);
     }
 
@@ -195,7 +194,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY)
+                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY)
                         .parseBooleanExpression(onExpression), TERM_FACTORY);
 
         System.out.println(relationalExpression);
@@ -251,7 +250,7 @@ public class RelationalExpressionTest {
         System.out.println(re2);
 
         RAExpression relationalExpression = RAExpression.joinOn(re1, re2,
-                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY).parseBooleanExpression(onExpression),
+                attributes -> new ExpressionParser(MDFAC, attributes, TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY).parseBooleanExpression(onExpression),
                 TERM_FACTORY);
 
         System.out.println(relationalExpression);

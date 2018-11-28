@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -38,12 +39,15 @@ public class SelectQueryParser {
     private int relationIndex = 0;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
-    public SelectQueryParser(DBMetadata metadata, TermFactory termFactory, TypeFactory typeFactory) {
+    public SelectQueryParser(DBMetadata metadata, TermFactory termFactory, TypeFactory typeFactory,
+                             DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
     }
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -137,7 +141,7 @@ public class SelectQueryParser {
                 ? current.getFilterAtoms()
                 : ImmutableList.<Function>builder()
                 .addAll(current.getFilterAtoms())
-                .addAll(new ExpressionParser(idfac, current.getAttributes(), termFactory, typeFactory)
+                .addAll(new ExpressionParser(idfac, current.getAttributes(), termFactory, typeFactory, dbFunctionSymbolFactory)
                         .parseBooleanExpression(plainSelect.getWhere()))
                 .build();
 
@@ -209,7 +213,7 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 return RAExpression.joinOn(left, right,
-                        (attributes ->  new ExpressionParser(idfac, attributes, termFactory, typeFactory)
+                        (attributes ->  new ExpressionParser(idfac, attributes, termFactory, typeFactory, dbFunctionSymbolFactory)
                                 .parseBooleanExpression(join.getOnExpression())), termFactory);
             }
             else if (join.getUsingColumns() != null) {
@@ -386,7 +390,7 @@ public class SelectQueryParser {
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
                 //Variable var = termFactory.getVariable(name.getName() + relationIndex);
 
-                Term term =  new ExpressionParser(idfac, attributes, termFactory, typeFactory).parseTerm(expr);
+                Term term =  new ExpressionParser(idfac, attributes, termFactory, typeFactory, dbFunctionSymbolFactory).parseTerm(expr);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
             }
         }

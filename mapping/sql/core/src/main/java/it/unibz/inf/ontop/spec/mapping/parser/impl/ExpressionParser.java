@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -45,13 +47,16 @@ public class ExpressionParser {
     private final ImmutableMap<QualifiedAttributeID, Term> attributes;
     private final TermFactory termFactory;
     private final DBTypeFactory dbTypeFactory;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Term> attributes,
-                            TermFactory termFactory, TypeFactory typeFactory) {
+                            TermFactory termFactory, TypeFactory typeFactory,
+                            DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.idfac = idfac;
         this.attributes = attributes;
         this.termFactory = termFactory;
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
     }
 
     public Term parseTerm(Expression expression) {
@@ -708,13 +713,20 @@ public class ExpressionParser {
                     .build()
                     : ImmutableList.of();
 
+            // Old approach
             BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
                     = FUNCTIONS.get(expression.getName().toUpperCase());
 
-            if (function == null)
-                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
+            result = (function == null)
+                    // New approach
+                    ? convertFunction(expression, terms)
+                    : function.apply(terms, expression);
+        }
 
-            result = function.apply(terms, expression);
+        private Term convertFunction(net.sf.jsqlparser.expression.Function expression, ImmutableList<Term> terms) {
+            DBFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBFunctionSymbol(expression.getName(),
+                    terms.size());
+            return termFactory.getFunction(functionSymbol, terms);
         }
 
 
@@ -1148,8 +1160,6 @@ public class ExpressionParser {
             .put("SUBSTRING", this::get_SUBSTR)
             .put("LCASE", this::get_LCASE)
             .put("LOWER", this::get_LCASE)
-            .put("UCASE", this::get_UCASE)
-            .put("UPPER", this::get_UCASE)
             .put("LENGTH", this::get_STRLEN)
             .put("RAND", this::get_RAND)
             .build();
@@ -1252,13 +1262,6 @@ public class ExpressionParser {
     private Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         if (terms.size() == 1)
             return termFactory.getFunction(ExpressionOperation.LCASE, terms.get(0));
-        // DB2 has 3
-        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-    }
-
-    private Function get_UCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        if (terms.size() == 1)
-            return termFactory.getFunction(ExpressionOperation.UCASE, terms.get(0));
         // DB2 has 3
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
