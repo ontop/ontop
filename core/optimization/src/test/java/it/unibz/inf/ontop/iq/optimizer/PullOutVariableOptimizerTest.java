@@ -33,7 +33,7 @@ public class PullOutVariableOptimizerTest {
     private final static Variable C = TERM_FACTORY.getVariable("C");
     private final static Variable D = TERM_FACTORY.getVariable("D");
     private final static Variable X = TERM_FACTORY.getVariable("X");
-    private final static Variable X1 = TERM_FACTORY.getVariable("X1");
+    private final static Variable X1 = TERM_FACTORY.getVariable("Xf1");
     private final static Variable X0 = TERM_FACTORY.getVariable("Xf0");
     private final static Variable X2 = TERM_FACTORY.getVariable("Xf2");
     private final static Variable X4 = TERM_FACTORY.getVariable("Xf0f3");
