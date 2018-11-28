@@ -37,4 +37,5 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
 
+    DBFunctionSymbol getUCase();
 }

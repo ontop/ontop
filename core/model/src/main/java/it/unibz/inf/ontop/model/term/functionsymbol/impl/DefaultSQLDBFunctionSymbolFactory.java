@@ -76,4 +76,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
     }
+
+    @Override
+    public DBFunctionSymbol getUCase() {
+        return getRegularDBFunctionSymbol(UCASE_STR, 1);
+    }
 }
