@@ -129,4 +129,9 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory);
     }
 
+    @Override
+    public boolean isInjective(ImmutableSet<Variable> nonNullVariables) {
+        return getFunctionSymbol().isInjective(getTerms(), nonNullVariables);
+    }
+
 }

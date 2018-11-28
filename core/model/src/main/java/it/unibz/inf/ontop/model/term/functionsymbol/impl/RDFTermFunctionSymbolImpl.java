@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -18,6 +19,11 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
 
     protected RDFTermFunctionSymbolImpl(TermType lexicalType, MetaRDFTermType typeTermType) {
         super("RDF", ImmutableList.of(lexicalType, typeTermType));
+    }
+
+    @Override
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+        return true;
     }
 
     /**
@@ -58,6 +64,11 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
+
+        // Null argument --> null
+        if ((!isInConstructionNodeInOptimizationPhase) && isOneArgumentNull(newTerms))
+            return termFactory.getNullConstant();
+
         if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
                 .allMatch(t -> t instanceof Constant)) {
 

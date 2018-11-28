@@ -72,6 +72,7 @@ public class MappingTestingTools {
     public static final RelationPredicate TABLE1_AR3;
     public static final RelationPredicate TABLE2_AR3;
     public static final RelationPredicate TABLE3_AR3;
+    public static final RelationPredicate TABLE4_AR3;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -123,6 +124,7 @@ public class MappingTestingTools {
         TABLE1_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 4, 3);
         TABLE2_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 5, 3);
         TABLE3_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 6, 3);
+        TABLE4_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 7, 3);
 
         dbMetadataWithPredicates.freeze();
     }

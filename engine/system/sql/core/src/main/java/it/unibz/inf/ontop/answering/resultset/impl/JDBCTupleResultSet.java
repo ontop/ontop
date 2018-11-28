@@ -5,15 +5,12 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import javax.annotation.Nullable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -46,14 +43,14 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
     protected SQLOntopBindingSet readCurrentRow() throws OntopConnectionException {
 
         //builder (+loop) in order to throw checked exception
-        final ImmutableMap.Builder<Variable,DBConstant> builder = ImmutableMap.builder();
+        final ImmutableMap.Builder<Variable, Constant> builder = ImmutableMap.builder();
         Iterator<Variable> it = sqlSignature.iterator();
         try {
-            for (int i = 1; i <= getColumnCount(); i++) {
+            for (int i = 1; i <= sqlSignature.size(); i++) {
                 Variable var = it.next();
                 builder.put(
                         var,
-                        termFactory.getDBConstant(
+                        convertToConstant(
                             rs.getString(i),
                             sqlTypeMap.get(var)
                         ));
@@ -66,5 +63,11 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
                 substitutionFactory.getSubstitution(builder.build()),
                 sparqlVar2Term
         );
+    }
+
+    private Constant convertToConstant(@Nullable String jdbcValue, DBTermType termType) {
+        if (jdbcValue == null)
+            return termFactory.getNullConstant();
+        return termFactory.getDBConstant(jdbcValue, termType);
     }
 }

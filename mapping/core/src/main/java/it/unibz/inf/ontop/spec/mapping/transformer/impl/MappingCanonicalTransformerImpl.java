@@ -133,7 +133,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                     getIntensionalCanonizedTree(assertion, projAtom, idn));
 
             IQ canonizedQuery = intensionalQueryMerger.optimize(intensionalCanonizedQuery)
-                    .liftBinding();
+                    .normalizeForOptimization();
 
             return canonizedQuery.getTree().isDeclaredAsEmpty()
                     // No matching canonical IRI template

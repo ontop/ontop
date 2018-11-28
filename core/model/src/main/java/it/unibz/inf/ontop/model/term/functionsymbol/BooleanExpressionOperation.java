@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -167,6 +168,15 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return termTypeInferenceRule.inferTypeFromArgumentTypes(actualArgumentTypes);
     }
 
+
+    /**
+     * TODO: implement seriously
+     *
+     */
+    @Override
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+        return false;
+    }
 
     /**
      * TODO: IMPLEMENT IT SERIOUSLY

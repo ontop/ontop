@@ -61,6 +61,14 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         return transformer.transformIntensionalData(this);
     }
 
+    /**
+     * Intensional data nodes are assumed to correspond to triple/quad patterns, which are distinct by definition
+     */
+    @Override
+    public boolean isDistinct() {
+        return true;
+    }
+
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitIntensionalData(this);

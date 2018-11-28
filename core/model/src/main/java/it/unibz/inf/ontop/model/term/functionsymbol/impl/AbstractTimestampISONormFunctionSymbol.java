@@ -1,12 +1,15 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 
-/**
- * TODO: declare as injective
- */
 public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     private final DBTermType timestampType;
@@ -27,7 +30,17 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
     }
 
     @Override
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+        return true;
+    }
+
+    @Override
     public boolean canBePostProcessed() {
         return false;
+    }
+
+    @Override
+    protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
+        throw new RuntimeException("TODO: implement timestamp conversion");
     }
 }

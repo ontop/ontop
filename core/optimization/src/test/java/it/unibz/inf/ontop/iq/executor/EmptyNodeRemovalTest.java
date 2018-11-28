@@ -379,7 +379,7 @@ public class EmptyNodeRemovalTest {
 
     private static void optimizeUnsatisfiableQuery(IntermediateQuery query) throws EmptyQueryException {
         System.out.println("\n Unsatisfiable query: \n" +  query);
-        IQ newQuery = IQ_CONVERTER.convert(query).liftBinding();
+        IQ newQuery = IQ_CONVERTER.convert(query).normalizeForOptimization();
         // Must throw an EmptyQueryException
         IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery, query.getDBMetadata(), query.getExecutorRegistry());
         System.err.println("Unexpected query: " + convertedQuery);
@@ -799,7 +799,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Expected query: \n" +  expectedQuery);
 
         IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
-                IQ_CONVERTER.convert(query).liftBinding(),
+                IQ_CONVERTER.convert(query).normalizeForOptimization(),
                 query.getDBMetadata(), query.getExecutorRegistry());
 
         System.out.println("\n Optimized query: \n" +  optimizedQuery);

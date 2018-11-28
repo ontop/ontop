@@ -38,8 +38,8 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     <T> T acceptVisitor(IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 
-    IQTree liftBinding(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
-                       IQProperties currentIQProperties);
+    IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
+                                    IQProperties currentIQProperties);
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild);
 
@@ -53,10 +53,14 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 
+    boolean isDistinct(IQTree leftChild, IQTree rightChild);
+
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild);
 
     /**
      * Only validates the node, not its children
      */
     void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException;
+
+    IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties);
 }

@@ -30,6 +30,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     // Lazy
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
+    @Nullable
+    private Boolean isDistinct;
     private VariableNullability variableNullability;
 
 
@@ -39,6 +41,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
         possibleVariableDefinitions = null;
+        variableNullability = null;
+        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -51,16 +55,13 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
-        if (getProperties().isLifted())
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        if (getProperties().isNormalizedForOptimization())
             return this;
         else
-            return getRootNode().liftBinding(getChild(), variableGenerator, getProperties());
+            return getRootNode().normalizeForOptimization(getChild(), variableGenerator, getProperties());
     }
 
-    /**
-     * TODO: use the properties for optimization purposes
-     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable) {
         return getRootNode().liftIncompatibleDefinitions(variable, getChild());
@@ -101,6 +102,15 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    public boolean isDistinct() {
+        if (isDistinct == null)
+            isDistinct = getRootNode().isDistinct(getChild());
+
+        return isDistinct;
+
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
@@ -131,6 +141,15 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         if (possibleVariableDefinitions == null)
             possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
         return possibleVariableDefinitions;
+    }
+
+    @Override
+    public IQTree removeDistincts() {
+        IQProperties properties = getProperties();
+
+        return properties.areDistinctAlreadyRemoved()
+            ? this
+            : getRootNode().removeDistincts(getChild(), properties);
     }
 
     @Override

@@ -29,6 +29,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     private VariableNullability variableNullability;
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
+    @Nullable
+    private Boolean isDistinct;
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -39,20 +41,21 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
         variableNullability = null;
         variableDefinition = null;
+        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
-    }
-
-    @Override
-    protected void validateNode() throws InvalidIntermediateQueryException {
-        getRootNode().validateNode(getChildren());
     }
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+    }
+
+    @Override
+    protected void validateNode() throws InvalidIntermediateQueryException {
+        getRootNode().validateNode(getChildren());
     }
 
     @Override
@@ -66,10 +69,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree liftBinding(VariableGenerator variableGenerator) {
-        return getProperties().isLifted()
+    public IQTree normalizeForOptimization(VariableGenerator variableGenerator) {
+        return getProperties().isNormalizedForOptimization()
                 ? this
-                : getRootNode().liftBinding(getChildren(), variableGenerator, getProperties());
+                : getRootNode().normalizeForOptimization(getChildren(), variableGenerator, getProperties());
     }
 
     /**
@@ -118,6 +121,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
+    public boolean isDistinct() {
+        if (isDistinct == null)
+            isDistinct = getRootNode().isDistinct(getChildren());
+        return isDistinct;
+    }
+
+    @Override
     public boolean isDeclaredAsEmpty() {
         return false;
     }
@@ -151,5 +161,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         if (variableDefinition == null)
             variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
         return variableDefinition;
+    }
+
+    @Override
+    public IQTree removeDistincts() {
+        IQProperties properties = getProperties();
+        return properties.areDistinctAlreadyRemoved()
+                ? this
+                : getRootNode().removeDistincts(getChildren(), properties);
     }
 }

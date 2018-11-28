@@ -186,11 +186,9 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
-        expectedQueryBuilder.addChild(constructionNode1, dataNode5);
+        expectedQueryBuilder.init(projectionAtom1, dataNode5);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -214,11 +212,9 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
-        expectedQueryBuilder.addChild(constructionNode1, dataNode5);
+        expectedQueryBuilder.init(projectionAtom1, dataNode5);
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }

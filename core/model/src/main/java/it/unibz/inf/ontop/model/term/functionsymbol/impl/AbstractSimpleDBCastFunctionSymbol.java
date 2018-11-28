@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -25,13 +26,8 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     }
 
     @Override
-    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
-        ImmutableTerm subTerm = newTerms.get(0);
-        return (subTerm instanceof DBConstant)
-            ? termFactory.getDBConstant(((DBConstant) subTerm).getValue(), getTargetType())
-            : termFactory.getImmutableFunctionalTerm(this, newTerms);
+    protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
+        return termFactory.getDBConstant((constant).getValue(), getTargetType());
     }
 
     @Override
