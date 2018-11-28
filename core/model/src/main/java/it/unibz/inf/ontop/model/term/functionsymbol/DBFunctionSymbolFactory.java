@@ -32,4 +32,9 @@ public interface DBFunctionSymbolFactory {
      */
     DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType);
 
+    /**
+     * Not for special DB function symbols such as casts.
+     */
+    DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
+
 }

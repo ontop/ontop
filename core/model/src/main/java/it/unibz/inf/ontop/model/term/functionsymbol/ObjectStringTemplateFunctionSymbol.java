@@ -5,6 +5,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
  *
  * NB: a functional term using this symbol is producing a DB string or a NULL
  */
-public interface ObjectStringTemplateFunctionSymbol extends FunctionSymbol {
+public interface ObjectStringTemplateFunctionSymbol extends DBFunctionSymbol {
     String getTemplate();
 }
