@@ -22,4 +22,8 @@ public interface FunctionSymbolFactory {
 
 
     DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+    // SPARQL functions
+
+    SPARQLFunctionSymbol getUCase();
 }

@@ -1575,7 +1575,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getUCase(), v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUCase(), v), translation);
     }
 
     @Test
@@ -1604,7 +1604,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getUCase(), v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUCase(), v), translation);
     }
 
     @Test

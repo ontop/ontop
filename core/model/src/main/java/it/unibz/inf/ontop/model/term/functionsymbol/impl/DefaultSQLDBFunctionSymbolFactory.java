@@ -78,7 +78,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
-    public DBFunctionSymbol getUCase() {
+    public DBFunctionSymbol getDBUCase() {
         return getRegularDBFunctionSymbol(UCASE_STR, 1);
     }
 }

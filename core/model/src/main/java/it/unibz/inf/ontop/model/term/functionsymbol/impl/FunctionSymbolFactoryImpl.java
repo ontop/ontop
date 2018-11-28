@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +24,15 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+    private final ImmutableMap<String, SPARQLFunctionSymbol> sparqlFunctionMap;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
 
     @Inject
-    private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+    private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory,
+                                      RDF rdfFactory) {
         this.typeFactory = typeFactory;
         this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
                 typeFactory.getDBTypeFactory().getDBStringType(),
@@ -34,6 +41,20 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
+        this.sparqlFunctionMap = createSPARQLFunctionSymbolMap(rdfFactory, typeFactory);
+    }
+
+    private static ImmutableMap<String, SPARQLFunctionSymbol> createSPARQLFunctionSymbolMap(
+            RDF rdfFactory, TypeFactory typeFactory) {
+        RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
+
+        ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
+            new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString)
+        );
+        return functionSymbols.stream()
+                .collect(ImmutableCollectors.toMap(
+                        SPARQLFunctionSymbol::getOfficialName,
+                        f -> f));
     }
 
 
@@ -71,5 +92,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
         return dbFunctionSymbolFactory;
+    }
+
+    @Override
+    public SPARQLFunctionSymbol getUCase() {
+        throw new RuntimeException("TODO: return ucase");
     }
 }
