@@ -1147,7 +1147,7 @@ public class ExpressionParser {
 
 
     // ---------------------------------------------------------------
-    // supported SQL functions
+    // supported and officially unsupported SQL functions
     // (WARNING: not all combinations of the parameters are supported)
     // ---------------------------------------------------------------
 
@@ -1162,6 +1162,8 @@ public class ExpressionParser {
             .put("LOWER", this::get_LCASE)
             .put("LENGTH", this::get_STRLEN)
             .put("RAND", this::get_RAND)
+            // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
+            .put("CONVERT", this::reject)
             .build();
 
     private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
@@ -1271,6 +1273,10 @@ public class ExpressionParser {
             return termFactory.getFunction(ExpressionOperation.STRLEN, terms.get(0));
 
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
+    }
+
+    private Function reject(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
 }
