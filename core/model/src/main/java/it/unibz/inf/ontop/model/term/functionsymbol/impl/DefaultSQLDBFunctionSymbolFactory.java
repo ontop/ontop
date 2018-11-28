@@ -30,7 +30,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
     @Override
     protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
-        throw new RuntimeException("TODO: implement");
+        return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
