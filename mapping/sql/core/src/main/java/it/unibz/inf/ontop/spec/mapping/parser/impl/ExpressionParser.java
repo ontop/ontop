@@ -1164,6 +1164,8 @@ public class ExpressionParser {
             .put("RAND", this::get_RAND)
             // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
             .put("CONVERT", this::reject)
+            // due to COUNT(*) TODO: support it
+            .put("COUNT", this::reject)
             .build();
 
     private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
