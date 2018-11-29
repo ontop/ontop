@@ -28,10 +28,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -79,6 +76,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
 
     private final DatalogProgram program;
     private final DatalogFactory datalogFactory;
@@ -92,6 +90,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      * @param termFactory
      * @param typeFactory
+     * @param functionSymbolFactory
      * @param datalogFactory
      * @param immutabilityTools
      *
@@ -99,13 +98,15 @@ public class SparqlAlgebraToDatalogTranslator {
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
                                      @Nullable IRIDictionary iriDictionary,
                                      AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-                                     DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools,
+                                     FunctionSymbolFactory functionSymbolFactory, DatalogFactory datalogFactory,
+                                     ImmutabilityTools immutabilityTools,
                                      org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
 
@@ -714,6 +715,15 @@ public class SparqlAlgebraToDatalogTranslator {
             for (ValueExpr a : f.getArgs())
                 terms.add(getExpression(a, variables));
 
+            // New approach
+            Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
+                    f.getURI(), terms.size());
+
+            if (optionalFunctionSymbol.isPresent()) {
+                return termFactory.getFunction(optionalFunctionSymbol.get(), terms);
+            }
+
+            // Old approach
             OperationPredicate p = XPathFunctions.get(f.getURI());
             if (p != null) {
                 if (arity != p.getArity())
@@ -786,7 +796,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * String functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
+                    //.put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
                     .put("http://www.w3.org/2005/xpath-functions#lower-case", LCASE)
                     .put("http://www.w3.org/2005/xpath-functions#string-length", STRLEN)
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)

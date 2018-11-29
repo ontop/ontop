@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -29,6 +30,7 @@ public class ReformulationTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
+    public static final FunctionSymbolFactory FS_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
@@ -53,6 +55,7 @@ public class ReformulationTestingTools {
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
+        FS_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);

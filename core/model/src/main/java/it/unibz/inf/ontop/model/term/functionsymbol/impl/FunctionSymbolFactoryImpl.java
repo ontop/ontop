@@ -1,16 +1,17 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -24,7 +25,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
-    private final ImmutableMap<String, SPARQLFunctionSymbol> sparqlFunctionMap;
+    private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> sparqlFunctionTable;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -41,20 +42,23 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
-        this.sparqlFunctionMap = createSPARQLFunctionSymbolMap(rdfFactory, typeFactory);
+        this.sparqlFunctionTable = createSPARQLFunctionSymbolTable(rdfFactory, typeFactory);
     }
 
-    private static ImmutableMap<String, SPARQLFunctionSymbol> createSPARQLFunctionSymbolMap(
+    private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
             RDF rdfFactory, TypeFactory typeFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
             new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString)
         );
-        return functionSymbols.stream()
-                .collect(ImmutableCollectors.toMap(
-                        SPARQLFunctionSymbol::getOfficialName,
-                        f -> f));
+
+        ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
+
+        for(SPARQLFunctionSymbol functionSymbol : functionSymbols) {
+            tableBuilder.put(functionSymbol.getOfficialName(), functionSymbol.getArity(), functionSymbol);
+        }
+        return tableBuilder.build();
     }
 
 
@@ -96,6 +100,17 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public SPARQLFunctionSymbol getUCase() {
-        throw new RuntimeException("TODO: return ucase");
+        return getRequiredSPARQLFunctionSymbol("http://www.w3.org/2005/xpath-functions#upper-case", 1);
+    }
+
+    @Override
+    public Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity) {
+        return Optional.ofNullable(sparqlFunctionTable.get(officialName, arity));
+    }
+
+    protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {
+        return getSPARQLFunctionSymbol(officialName, arity)
+                .orElseThrow(() -> new MinorOntopInternalBugException(
+                        String.format("Not able to get the SPARQL function %s with arity %d", officialName, arity)));
     }
 }
