@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.ATOM_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.TYPE_FACTORY;
 import static it.unibz.inf.ontop.OptimizationTestingTools.createDummyMetadata;
 
@@ -37,10 +36,10 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationPredicate TABLE1_AR2_NESTED;
 
-    public static final RelationPredicate FLATTEN_NODE_PRED_AR1;
-    public static final RelationPredicate FLATTEN_NODE_PRED_AR2;
-    public static final RelationPredicate FLATTEN_NODE_PRED_AR3;
-    public static final RelationPredicate FLATTEN_NODE_PRED_AR4;
+    public static final RelationPredicate NESTED_REL_PRED_AR1;
+    public static final RelationPredicate NESTED_REL_PRED_AR2;
+    public static final RelationPredicate NESTED_REL_PRED_AR3;
+    public static final RelationPredicate NESTED_REL_PRED_AR4;
 
     public static final BasicDBMetadata DB_METADATA;
 
@@ -73,7 +72,7 @@ public class NoDependencyTestDBMetadata {
     }
 
     private static RelationPredicate createFlattenNodePredicate(QuotedIDFactory idFac, int arity){
-        RelationID id = idFac.createRelationID(null, String.format("flattenNodeRel_arity_%s", arity));
+        RelationID id = idFac.createRelationID(null, String.format("nestedRel_arity_%s", arity));
         ImmutableList<QuotedID> attributeIds = createAttributeIds(idFac, arity);
         return new FlattenNodeRelationDefinition(
                 id,
@@ -118,10 +117,10 @@ public class NoDependencyTestDBMetadata {
         TABLE1_AR2_NESTED = createNestedRelationPredicate(dbMetadata, (DatabaseRelationDefinition) TABLE1_AR2.getRelationDefinition(),
                 2, idFactory, 1, 2);
 
-        FLATTEN_NODE_PRED_AR1 = createFlattenNodePredicate(idFactory, 1);
-        FLATTEN_NODE_PRED_AR2 = createFlattenNodePredicate(idFactory, 2);
-        FLATTEN_NODE_PRED_AR3 = createFlattenNodePredicate(idFactory, 3);
-        FLATTEN_NODE_PRED_AR4 = createFlattenNodePredicate(idFactory, 4);
+        NESTED_REL_PRED_AR1 = createFlattenNodePredicate(idFactory, 1);
+        NESTED_REL_PRED_AR2 = createFlattenNodePredicate(idFactory, 2);
+        NESTED_REL_PRED_AR3 = createFlattenNodePredicate(idFactory, 3);
+        NESTED_REL_PRED_AR4 = createFlattenNodePredicate(idFactory, 4);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;

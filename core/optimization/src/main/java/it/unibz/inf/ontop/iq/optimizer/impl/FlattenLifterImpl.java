@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
  * Difficulty: sequence S of consecutive flatten nodes.
  * <p>
  * Ex: filter(A1 = 2 && C3 =3)
- * flatten1 (A -> [A1,A2])
- * flatten2 (B -> [B1,B2])
- * flatten3 (C1 -> [C3,C4])
- * flatten4 (D -> [D1,D2])
- * flatten5 (C -> [C1,C2])
- * table(A,B,C,D)
+ *  flatten1 (A -> [A1,A2])
+ *   flatten2 (B -> [B1,B2])
+ *    flatten3 (C1 -> [C3,C4])
+ *     flatten4 (D -> [D1,D2])
+ *      flatten5 (C -> [C1,C2])
+ *       table(A,B,C,D)
  * <p>
  * Note that:
  * - flatten1 and flatten3 cannot be lifted over the filter.
@@ -52,12 +52,12 @@ import java.util.stream.Collectors;
  * This yields:
  * <p>
  * flatten2 (B -> [B1,B2])
- * flatten4 (D -> [D1,D2])
- * filter(A1 = 2 & C3 =3)
- * flatten1 (A -> [A1,A2])
- * flatten3 (C1 -> [C3,C4])
- * flatten5 (C -> [C1,C2])
- * table(A,B,C,D)
+ *  flatten4 (D -> [D1,D2])
+ *   filter(A1 = 2 & C3 =3)
+ *    flatten1 (A -> [A1,A2])
+ *     flatten3 (C1 -> [C3,C4])
+ *       flatten5 (C -> [C1,C2])
+ *        table(A,B,C,D)
  */
 public class FlattenLifterImpl implements FlattenLifter {
 

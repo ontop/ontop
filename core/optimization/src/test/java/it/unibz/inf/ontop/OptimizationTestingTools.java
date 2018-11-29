@@ -53,6 +53,7 @@ public class OptimizationTestingTools {
     public static final ValueConstant NULL, TRUE, FALSE;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final FlattenLifter FLATTEN_LIFTER;
     public static final RDF RDF_FACTORY;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -72,6 +73,7 @@ public class OptimizationTestingTools {
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         BINDING_LIFT_OPTIMIZER = injector.getInstance(BindingLiftOptimizer.class);
+        FLATTEN_LIFTER = injector.getInstance(FlattenLifter.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
