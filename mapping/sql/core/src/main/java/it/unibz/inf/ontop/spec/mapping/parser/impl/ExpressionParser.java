@@ -1166,6 +1166,14 @@ public class ExpressionParser {
             .put("CONVERT", this::reject)
             // due to COUNT(*) TODO: support it
             .put("COUNT", this::reject)
+            // Array functions changing the cardinality: not yet supported
+            //    - From PostgreSQL
+            .put("UNNEST", this::reject)
+            .put("JSON_EACH", this::reject)
+            .put("JSON_EACH_TEXT", this::reject)
+            .put("JSON_OBJECT_KEYS", this::reject)
+            .put("JSON_POPULATE_RECORDSET", this::reject)
+            .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
 
     private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
