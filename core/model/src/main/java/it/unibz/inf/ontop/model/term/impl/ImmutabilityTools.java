@@ -133,7 +133,7 @@ public class ImmutabilityTools {
     public Optional<ImmutableExpression> foldBooleanExpressions(
             ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
         return Optional.of(conjunctionOfExpressions)
-                .filter(Collection::isEmpty)
+                .filter(l -> !l.isEmpty())
                 .map(termFactory::getConjunction);
     }
 
