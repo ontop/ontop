@@ -343,21 +343,23 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> normalizeValues() {
+    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
                 .map(e -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) e.getValue()))
-                .map(this::applyNullNormalization)
+                .map(e -> applyNullNormalization(e, isInConstructionNodeInOptimizationPhase))
                 .collect(ImmutableCollectors.toMap()));
     }
 
     /**
      * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
+     * TODO: just use the simplify method()
      */
     private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry) {
+            Map.Entry<Variable, ImmutableTerm> substitutionEntry, boolean isInConstructionNodeInOptimizationPhase) {
         ImmutableTerm value = substitutionEntry.getValue();
         if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
+            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value)
+                    .simplify(isInConstructionNodeInOptimizationPhase);
             return newValue.equals(value)
                     ? substitutionEntry
                     : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
