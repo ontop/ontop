@@ -68,7 +68,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
-        if (newTerms.stream()
+        // For efficiency purposes, we keep the term functional to make decomposition easier
+        if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
