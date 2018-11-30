@@ -81,7 +81,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         // NB: isInConstructionNodeInOptimizationPhase is irrelevant for expressions
         ImmutableTerm newTerm = simplify(false);
         if (newTerm instanceof ImmutableExpression)
-            termFactory.getEvaluation((ImmutableExpression) newTerm);
+            return termFactory.getEvaluation((ImmutableExpression) newTerm);
         else if (newTerm.equals(termFactory.getDBBooleanConstant(true)))
             return termFactory.getPositiveEvaluation();
         else if (newTerm.equals(termFactory.getDBBooleanConstant(false)))
