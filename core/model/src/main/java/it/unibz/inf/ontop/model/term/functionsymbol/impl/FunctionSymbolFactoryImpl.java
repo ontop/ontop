@@ -48,15 +48,17 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
         this.isARDFFunctionSymbol = new IsARDFTermTypeFunctionSymbolImpl(typeFactory.getMetaRDFTermType(), dbBooleanType);
 
-        this.sparqlFunctionTable = createSPARQLFunctionSymbolTable(rdfFactory, typeFactory, isARDFFunctionSymbol);
+        this.sparqlFunctionTable = createSPARQLFunctionSymbolTable(rdfFactory, typeFactory, isARDFFunctionSymbol,
+                dbFunctionSymbolFactory);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            RDF rdfFactory, TypeFactory typeFactory, BooleanFunctionSymbol isARDFFunctionSymbol) {
+            RDF rdfFactory, TypeFactory typeFactory, BooleanFunctionSymbol isARDFFunctionSymbol,
+            DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
-            new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString, isARDFFunctionSymbol)
+            new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString, isARDFFunctionSymbol, dbFunctionSymbolFactory)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

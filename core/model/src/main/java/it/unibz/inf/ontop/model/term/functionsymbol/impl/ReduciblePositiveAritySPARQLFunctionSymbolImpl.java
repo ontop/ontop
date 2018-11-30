@@ -134,6 +134,9 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
         throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant");
     }
 
+    /**
+     * Compute the lexical term when there is no input type error
+     */
     protected abstract ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                         TermFactory termFactory);
 

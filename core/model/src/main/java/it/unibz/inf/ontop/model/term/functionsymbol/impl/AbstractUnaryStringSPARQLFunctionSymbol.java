@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -41,5 +42,10 @@ public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends ReducibleP
             return Optional.of(TermTypeInference.declareNonFatalError());
         }
         return childTypeInference;
+    }
+
+    @Override
+    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+        return typeTerms.get(0);
     }
 }
