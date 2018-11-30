@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import org.apache.commons.rdf.api.IRI;
@@ -9,12 +10,14 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends SPARQLFunctionSymbolImpl {
+public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
     private final RDFDatatype xsdStringDatatype;
 
-    protected AbstractUnaryStringSPARQLFunctionSymbol(@Nonnull String name, IRI functionIRI, RDFDatatype xsdStringDatatype) {
-        super(name, functionIRI, ImmutableList.of(xsdStringDatatype));
+    protected AbstractUnaryStringSPARQLFunctionSymbol(@Nonnull String name, IRI functionIRI,
+                                                      RDFDatatype xsdStringDatatype,
+                                                      BooleanFunctionSymbol isARDFTypeFunctionSymbol) {
+        super(name, functionIRI, ImmutableList.of(xsdStringDatatype), isARDFTypeFunctionSymbol);
         this.xsdStringDatatype = xsdStringDatatype;
     }
 

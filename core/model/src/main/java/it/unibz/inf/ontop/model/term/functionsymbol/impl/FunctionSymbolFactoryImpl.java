@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.RDF;
@@ -21,7 +22,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private static final String PLACEHOLDER = "{}";
 
     private final TypeFactory typeFactory;
-    private final RDFTermFunctionSymbol rdfTermFunction;
+    private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
+    private final BooleanFunctionSymbol isARDFFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
@@ -35,22 +37,26 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory,
                                       RDF rdfFactory) {
         this.typeFactory = typeFactory;
-        this.rdfTermFunction = new RDFTermFunctionSymbolImpl(
+        this.rdfTermFunctionSymbol = new RDFTermFunctionSymbolImpl(
                 typeFactory.getDBTypeFactory().getDBStringType(),
                 typeFactory.getMetaRDFTermType());
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
-        this.sparqlFunctionTable = createSPARQLFunctionSymbolTable(rdfFactory, typeFactory);
+
+        DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
+        this.isARDFFunctionSymbol = new IsARDFTermTypeFunctionSymbolImpl(typeFactory.getMetaRDFTermType(), dbBooleanType);
+
+        this.sparqlFunctionTable = createSPARQLFunctionSymbolTable(rdfFactory, typeFactory, isARDFFunctionSymbol);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            RDF rdfFactory, TypeFactory typeFactory) {
+            RDF rdfFactory, TypeFactory typeFactory, BooleanFunctionSymbol isARDFFunctionSymbol) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
-            new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString)
+            new UcaseSPARQLFunctionSymbolImpl(rdfFactory, xsdString, isARDFFunctionSymbol)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -64,7 +70,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public RDFTermFunctionSymbol getRDFTermFunctionSymbol() {
-        return rdfTermFunction;
+        return rdfTermFunctionSymbol;
     }
 
     @Override
@@ -96,6 +102,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
         return dbFunctionSymbolFactory;
+    }
+
+    @Override
+    public BooleanFunctionSymbol isARDFTermTypeFunctionSymbol() {
+        return isARDFFunctionSymbol;
     }
 
     @Override

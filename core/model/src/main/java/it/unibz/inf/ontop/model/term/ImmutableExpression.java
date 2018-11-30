@@ -32,6 +32,8 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
      */
     ImmutableSet<ImmutableExpression> flatten(BooleanFunctionSymbol operator);
 
+    Evaluation evaluate(TermFactory termFactory);
+
     boolean isVar2VarEquality();
 
     default Optional<TermTypeInference> inferTermType(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) {
@@ -46,6 +48,19 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
             return functionSymbol.inferTypeFromArgumentTypesAndCheckForFatalError(actualArgumentTypes);
         } catch (FatalTypingException e) {
             throw new FatalTypingException(this, e);
+        }
+    }
+
+    interface Evaluation {
+
+        Optional<ImmutableExpression> getExpression();
+        Optional<BooleanValue> getValue();
+        ImmutableTerm getTerm();
+
+        enum BooleanValue {
+            TRUE,
+            FALSE,
+            NULL
         }
     }
 }

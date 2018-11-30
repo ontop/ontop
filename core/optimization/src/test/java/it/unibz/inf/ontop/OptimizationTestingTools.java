@@ -139,8 +139,8 @@ public class OptimizationTestingTools {
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         NULL = TERM_FACTORY.getNullConstant();
-        TRUE = TERM_FACTORY.getBooleanConstant(true);
-        FALSE = TERM_FACTORY.getBooleanConstant(false);
+        TRUE = TERM_FACTORY.getRDFBooleanConstant(true);
+        FALSE = TERM_FACTORY.getRDFBooleanConstant(false);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         X = TERM_FACTORY.getVariable("x");

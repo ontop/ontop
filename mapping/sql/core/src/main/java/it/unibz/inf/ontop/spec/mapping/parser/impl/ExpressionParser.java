@@ -892,9 +892,9 @@ public class ExpressionParser {
                 //    - a FUNCTION without arguments like USER, CURRENT_DATE
 
                 if (column.equals(idfac.createAttributeID("true")))
-                    result = termFactory.getBooleanConstant(true);
+                    result = termFactory.getRDFBooleanConstant(true);
                 else if (column.equals(idfac.createAttributeID("false")))
-                    result = termFactory.getBooleanConstant(false);
+                    result = termFactory.getRDFBooleanConstant(false);
                 else
                     throw new UnsupportedSelectQueryRuntimeException("Unable to find attribute name ", expression);
             }

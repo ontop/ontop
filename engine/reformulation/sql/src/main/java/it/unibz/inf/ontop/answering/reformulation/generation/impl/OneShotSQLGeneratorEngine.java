@@ -951,8 +951,8 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		 * Boolean constant
 		 */
-		else if (term.equals(termFactory.getBooleanConstant(false))
-				 || term.equals(termFactory.getBooleanConstant(true))) {
+		else if (term.equals(termFactory.getRDFBooleanConstant(false))
+				 || term.equals(termFactory.getRDFBooleanConstant(true))) {
 			return Types.BOOLEAN;
 		}
 

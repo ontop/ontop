@@ -25,6 +25,8 @@ public interface FunctionSymbolFactory {
 
     DBFunctionSymbolFactory getDBFunctionSymbolFactory();
 
+    BooleanFunctionSymbol isARDFTermTypeFunctionSymbol();
+
     // SPARQL functions
 
     SPARQLFunctionSymbol getUCase();

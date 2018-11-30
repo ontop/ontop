@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TermFactory {
 
@@ -46,7 +47,7 @@ public interface TermFactory {
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
-	public Function getFunction(Predicate functor, Term... terms);
+	Function getFunction(Predicate functor, Term... terms);
 
 	Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments);
 
@@ -56,6 +57,21 @@ public interface TermFactory {
 											   ImmutableList<? extends ImmutableTerm> arguments);
 
 	ImmutableExpression getImmutableExpression(Expression expression);
+
+	/**
+	 * Must be non-empty
+	 */
+	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
+	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
+
+	/**
+	 * Just wraps the expression into an Evaluation object
+	 */
+	ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression);
+	ImmutableExpression.Evaluation getPositiveEvaluation();
+	ImmutableExpression.Evaluation getNegativeEvaluation();
+	ImmutableExpression.Evaluation getNullEvaluation();
+
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
@@ -136,7 +152,10 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
-	public RDFLiteralConstant getBooleanConstant(boolean value);
+	@Deprecated
+	RDFLiteralConstant getRDFBooleanConstant(boolean value);
+
+	DBConstant getDBBooleanConstant(boolean value);
 
 	Constant getNullConstant();
 
@@ -275,4 +294,6 @@ public interface TermFactory {
 	 * This functional term must not appear in the final mapping
 	 */
 	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
+
+	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
 }

@@ -1243,7 +1243,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 EQ,
                 v,
-                TERM_FACTORY.getBooleanConstant(true)), translation.get(0));
+                TERM_FACTORY.getRDFBooleanConstant(true)), translation.get(0));
     }
 
     @Test
@@ -1262,7 +1262,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(
                 EQ,
                 v,
-                TERM_FACTORY.getBooleanConstant(false)), translation.get(0));
+                TERM_FACTORY.getRDFBooleanConstant(false)), translation.get(0));
     }
 
     @Test

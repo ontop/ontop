@@ -31,10 +31,15 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.*;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 
 @Singleton
 public class TermFactoryImpl implements TermFactory {
@@ -42,15 +47,19 @@ public class TermFactoryImpl implements TermFactory {
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
-	private final RDFLiteralConstant valueTrue;
-	private final RDFLiteralConstant valueFalse;
+	private final RDFLiteralConstant rdfValueTrue;
+	private final RDFLiteralConstant rdfValueFalse;
+	private final DBConstant valueTrue;
+	private final DBConstant valueFalse;
 	private final Constant valueNull;
+	// TODO: make it be a DBConstant
 	private final RDFLiteralConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
 	private final RDF rdfFactory;
+	private final ImmutableExpression.Evaluation positiveEvaluation, negativeEvaluation, nullEvaluation;
 
 	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory,
@@ -62,8 +71,13 @@ public class TermFactoryImpl implements TermFactory {
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.rdfFactory = rdfFactory;
 		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-		this.valueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
-		this.valueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
+		this.rdfValueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
+		this.rdfValueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
+
+		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
+		// TODO: let a DB-specific class have the control over DB constant creation
+		this.valueTrue = new DBConstantImpl("true", dbBooleanType);
+		this.valueFalse = new DBConstantImpl("false", dbBooleanType);
 		this.valueNull = new NullConstantImpl();
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
@@ -71,6 +85,12 @@ public class TermFactoryImpl implements TermFactory {
 		this.isTestModeEnabled = settings.isTestModeEnabled();
 		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeTypeConstant = getRDFTermTypeConstant(typeFactory.getBlankNodeType());
+		this.positiveEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
+				ImmutableExpression.Evaluation.BooleanValue.TRUE, valueTrue);
+		this.negativeEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
+				ImmutableExpression.Evaluation.BooleanValue.FALSE, valueFalse);
+		this.nullEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
+				ImmutableExpression.Evaluation.BooleanValue.NULL, valueNull);
 	}
 
 	@Override
@@ -200,6 +220,62 @@ public class TermFactoryImpl implements TermFactory {
 		else {
 			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression), this);
 		}
+	}
+
+	/**
+	 * TODO: consider n-ary ANDs
+	 */
+	@Override
+	public ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
+		final int size = conjunctionOfExpressions.size();
+		switch (size) {
+			case 0:
+				throw new IllegalArgumentException("conjunctionOfExpressions must be non-empty");
+			case 1:
+				return conjunctionOfExpressions.get(0);
+			case 2:
+				return getImmutableExpression(AND, conjunctionOfExpressions);
+			default:
+				// Non-final
+				ImmutableExpression cumulativeExpression = getImmutableExpression(
+						AND,
+						conjunctionOfExpressions.get(0),
+						conjunctionOfExpressions.get(1));
+				for (int i = 2; i < size; i++) {
+					cumulativeExpression = getImmutableExpression(
+							AND,
+							cumulativeExpression,
+							conjunctionOfExpressions.get(i));
+				}
+				return cumulativeExpression;
+		}
+	}
+
+	@Override
+	public ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions) {
+		return getConjunction(
+				Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
+				.collect(ImmutableCollectors.toList()));
+	}
+
+	@Override
+	public ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression) {
+		return new ImmutableExpressionImpl.ExpressionEvaluationImpl(expression);
+	}
+
+	@Override
+	public ImmutableExpression.Evaluation getPositiveEvaluation() {
+		return positiveEvaluation;
+	}
+
+	@Override
+	public ImmutableExpression.Evaluation getNegativeEvaluation() {
+		return negativeEvaluation;
+	}
+
+	@Override
+	public ImmutableExpression.Evaluation getNullEvaluation() {
+		return nullEvaluation;
 	}
 
 	@Override
@@ -345,7 +421,12 @@ public class TermFactoryImpl implements TermFactory {
 
 
 	@Override
-	public RDFLiteralConstant getBooleanConstant(boolean value) {
+	public RDFLiteralConstant getRDFBooleanConstant(boolean value) {
+		return value ? rdfValueTrue : rdfValueFalse;
+	}
+
+	@Override
+	public DBConstant getDBBooleanConstant(boolean value) {
 		return value ? valueTrue : valueFalse;
 	}
 
@@ -467,6 +548,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getTemporaryConversionToDBStringFunctionSymbol(),
 				variable);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term) {
+		return getImmutableFunctionalTerm(IF_ELSE_NULL, condition, term);
 	}
 
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
