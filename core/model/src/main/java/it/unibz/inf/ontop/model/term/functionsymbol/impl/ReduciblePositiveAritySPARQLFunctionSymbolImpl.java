@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -16,6 +17,7 @@ import org.apache.commons.rdf.api.IRI;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * The SPARQL function must be reducible to DB functions and RDF construction and testing functions
@@ -110,8 +112,10 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
 
     private ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
                                                                   TermFactory termFactory) {
-        ImmutableList<ImmutableExpression> typeTestExpressions = typeTerms.stream()
-                .map(t -> termFactory.getImmutableExpression(isARDFTypeFunctionSymbol, t))
+        ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
+                .boxed()
+                .map(i -> termFactory.getImmutableExpression(isARDFTypeFunctionSymbol, typeTerms.get(i),
+                        termFactory.getRDFTermTypeConstant((RDFTermType) getExpectedBaseType(i))))
                 .collect(ImmutableCollectors.toList());
 
          return termFactory.getConjunction(typeTestExpressions)
