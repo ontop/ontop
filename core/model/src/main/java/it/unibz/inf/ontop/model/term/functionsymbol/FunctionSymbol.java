@@ -41,6 +41,7 @@ public interface FunctionSymbol extends Predicate {
      */
     boolean canBePostProcessed();
 
+
     interface FunctionalTermNullability {
 
         boolean isNullable();

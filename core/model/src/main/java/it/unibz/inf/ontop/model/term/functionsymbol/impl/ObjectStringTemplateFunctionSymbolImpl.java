@@ -23,6 +23,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private final String template;
     private final DBTermType lexicalType;
+
     private final Encoder iriEncoder;
 
     protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
@@ -101,5 +102,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     public boolean canBePostProcessed() {
         return true;
+    }
+
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        throw new RuntimeException("TODO: implement getNativeDBString for object template");
     }
 }

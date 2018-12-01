@@ -43,4 +43,9 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
     protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
         throw new RuntimeException("TODO: implement timestamp conversion");
     }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
+    }
 }

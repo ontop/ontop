@@ -23,9 +23,15 @@ import java.util.Optional;
  */
 public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implements DBFunctionSymbol {
 
-    protected AbstractUntypedDBFunctionSymbol(@Nonnull String name,
+    private static final String FUNCTIONAL_TEMPLATE = "%s(%s)";
+
+    @Nonnull
+    private final String nameInDialect;
+
+    protected AbstractUntypedDBFunctionSymbol(@Nonnull String nameInDialect,
                                               @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-        super(name, expectedBaseTypes);
+        super(nameInDialect + expectedBaseTypes.size(), expectedBaseTypes);
+        this.nameInDialect = nameInDialect;
     }
 
     @Override
@@ -48,5 +54,11 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     @Override
     public boolean canBePostProcessed() {
         return false;
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        String parameterString = String.join(",", termStrings);
+        return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
     }
 }

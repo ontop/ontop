@@ -13,6 +13,9 @@ import javax.annotation.Nonnull;
  */
 public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFunctionSymbol {
 
+    private final static String CAST_TEMPLATE = "CAST(%s AS %s)";
+
+
     protected DefaultSQLSimpleDBCastFunctionSymbol(@Nonnull DBTermType inputBaseType, DBTermType targetType) {
         super(inputBaseType, targetType);
     }
@@ -25,5 +28,14 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
     @Override
     public boolean canBePostProcessed() {
         return getInputType().isPresent();
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        if (termStrings.size() != getArity())
+            throw new IllegalArgumentException(termStrings +
+                    " does not respect the arity of " + getArity());
+
+        return String.format(CAST_TEMPLATE, termStrings.get(0), getTargetType().getName());
     }
 }

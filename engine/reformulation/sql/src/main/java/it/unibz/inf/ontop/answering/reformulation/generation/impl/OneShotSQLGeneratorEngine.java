@@ -1347,6 +1347,17 @@ public class OneShotSQLGeneratorEngine {
 			return "SUM(" + columnName + ")";
 		}
 
+		/*
+		 * New approach
+		 */
+		if (functionSymbol instanceof DBFunctionSymbol) {
+			ImmutableList<String> termStrings = function.getTerms().stream()
+					// TODO: try to get rid of useBrackets
+					.map(t -> getSQLString(t, index, false))
+					.collect(ImmutableCollectors.toList());
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
+		}
+
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 	}
 

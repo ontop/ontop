@@ -42,4 +42,10 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
         throw new MinorOntopInternalBugException("A TemporaryDBTypeConversionToStringFunctionSymbolImpl " +
                 "should have been removed before asking it to simplified");
     }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        throw new UnsupportedOperationException("A TemporaryDBTypeConversionToStringFunctionSymbolImpl \" +\n" +
+                "                \"should have been removed before asking for its native DB string");
+    }
 }

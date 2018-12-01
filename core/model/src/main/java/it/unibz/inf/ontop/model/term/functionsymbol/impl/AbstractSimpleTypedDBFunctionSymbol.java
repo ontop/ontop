@@ -14,8 +14,11 @@ import java.util.stream.IntStream;
  * Here we don't know the input types and how to post-process functions
  *
  */
-public class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedDBFunctionSymbol {
+public abstract class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedDBFunctionSymbol {
 
+    private static final String FUNCTIONAL_TEMPLATE = "%s(%s)";
+
+    private final String nameInDialect;
     private final boolean isInjective;
 
     protected AbstractSimpleTypedDBFunctionSymbol(String nameInDialect, int arity, DBTermType targetType, boolean isInjective,
@@ -25,6 +28,7 @@ public class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedDBFunction
                     .map(i -> (TermType) rootDBTermType)
                     .collect(ImmutableCollectors.toList()),
                 targetType);
+        this.nameInDialect = nameInDialect;
         this.isInjective = isInjective;
     }
 
@@ -36,5 +40,11 @@ public class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedDBFunction
     @Override
     public boolean canBePostProcessed() {
         return false;
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        String parameterString = String.join(",", termStrings);
+        return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
     }
 }

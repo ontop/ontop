@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 public class DefaultSQLUntypedDBFunctionSymbol extends AbstractUntypedDBFunctionSymbol {
 
     protected DefaultSQLUntypedDBFunctionSymbol(@Nonnull String nameInDialect, int arity, DBTermType rootDBTermType) {
-        super(nameInDialect + arity, IntStream.range(0, arity)
+        super(nameInDialect, IntStream.range(0, arity)
                 .boxed()
                 .map(i -> (TermType) rootDBTermType)
                 .collect(ImmutableCollectors.toList()));
