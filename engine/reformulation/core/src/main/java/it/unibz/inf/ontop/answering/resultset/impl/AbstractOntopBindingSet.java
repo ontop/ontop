@@ -50,7 +50,10 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     @Nullable
     @Override
     public RDFConstant getConstant(String name) {
-        return bindingMap.get(name).getValue();
+        OntopBinding binding = bindingMap.get(name);
+        return (binding == null)
+                ? null
+                : binding.getValue();
     }
 
     @Override
