@@ -284,9 +284,8 @@ public class OneShotSQLGeneratorEngine {
 	 * Observe that the SQL is produced by {@link #generateQuery}
 	 *
 	 * @param intermediateQuery
-	 * @param signature is the list of main columns in the ResultSet
 	 */
-	SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
+	SQLExecutableQuery generateSourceQuery(IntermediateQuery intermediateQuery)
 			throws OntopReformulationException {
 
 		IQ normalizedQuery = normalizeIQ(intermediateQuery);
@@ -306,6 +305,10 @@ public class OneShotSQLGeneratorEngine {
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
+
+		ImmutableList<String> signature = intermediateQuery.getProjectionAtom().getArguments().stream()
+				.map(Variable::getName)
+				.collect(ImmutableCollectors.toList());
 
 		final String resultingQuery;
 		String queryString = generateQuery(signature, ruleIndex, predicatesInBottomUp, extensionalPredicates);

@@ -61,10 +61,10 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     }
 
     @Override
-    public ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
+    public ExecutableQuery generateSourceQuery(IntermediateQuery query)
             throws OntopReformulationException {
         return originalEngine.clone()
-                .generateSourceQuery(query, signature);
+                .generateSourceQuery(query);
     }
 
     @Override

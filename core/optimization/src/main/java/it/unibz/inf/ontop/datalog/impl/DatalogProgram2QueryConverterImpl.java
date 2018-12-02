@@ -133,23 +133,20 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
     @Override
     public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
-                                    ImmutableList<String> signature) throws EmptyQueryException {
+                                    ImmutableList<Variable> signature) throws EmptyQueryException {
         return enforceSignature(
                 convertDatalogProgram(queryProgram, tablePredicates),
                 signature);
     }
 
-    private IQ enforceSignature(IQ iq, ImmutableList<String> signature) {
-        ImmutableList<Variable> expectedVariables = signature.stream()
-                .map(termFactory::getVariable)
-                .collect(ImmutableCollectors.toList());
+    private IQ enforceSignature(IQ iq, ImmutableList<Variable> signature) {
 
         ImmutableList<Variable> projectedVariables = iq.getProjectionAtom().getArguments();
 
-        if (projectedVariables.equals(expectedVariables))
+        if (projectedVariables.equals(signature))
             return iq;
 
-        if (projectedVariables.size() != expectedVariables.size())
+        if (projectedVariables.size() != signature.size())
             throw new IllegalArgumentException("The arity of the signature does not match the iq");
 
         VariableGenerator variableGenerator =  iq.getVariableGenerator().createSnapshot();
@@ -159,7 +156,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
          * inside the tree
          */
         InjectiveVar2VarSubstitution notConflictingRenaming = substitutionFactory.generateNotConflictingRenaming(
-                variableGenerator, ImmutableSet.copyOf(expectedVariables));
+                variableGenerator, ImmutableSet.copyOf(signature));
 
         ImmutableCollection<Variable> tmpRenamedProjectedVariables = ImmutableSet.copyOf(notConflictingRenaming
                 .reduceDomainToIntersectionWith(ImmutableSet.copyOf(projectedVariables))
@@ -170,7 +167,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                         .boxed()
                         .map(i -> Maps.immutableEntry(
                                 notConflictingRenaming.applyToVariable(projectedVariables.get(i)),
-                                expectedVariables.get(i)))
+                                signature.get(i)))
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
 
