@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -15,16 +13,20 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Converts a datalog program into an intermediate query
@@ -37,6 +39,8 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
+    private final TermFactory termFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
@@ -44,13 +48,17 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                               DatalogRule2QueryConverter datalogRuleConverter,
                                               SubstitutionFactory substitutionFactory,
                                               CoreUtilsFactory coreUtilsFactory,
-                                              QueryTransformerFactory transformerFactory) {
+                                              QueryTransformerFactory transformerFactory,
+                                              TermFactory termFactory,
+                                              QueryTransformerFactory queryTransformerFactory) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
+        this.termFactory = termFactory;
+        this.queryTransformerFactory = queryTransformerFactory;
     }
 
 
@@ -120,8 +128,51 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 iq = intensionalQueryMerger.optimize(iq);
             }
         }
-
         return iq;
+    }
+
+    @Override
+    public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+                                    ImmutableList<String> signature) throws EmptyQueryException {
+        return enforceSignature(
+                convertDatalogProgram(queryProgram, tablePredicates),
+                signature);
+    }
+
+    private IQ enforceSignature(IQ iq, ImmutableList<String> signature) {
+        ImmutableList<Variable> expectedVariables = signature.stream()
+                .map(termFactory::getVariable)
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<Variable> projectedVariables = iq.getProjectionAtom().getArguments();
+
+        if (projectedVariables.equals(expectedVariables))
+            return iq;
+
+        if (projectedVariables.size() != expectedVariables.size())
+            throw new IllegalArgumentException("The arity of the signature does not match the iq");
+
+        VariableGenerator variableGenerator =  iq.getVariableGenerator().createSnapshot();
+
+        InjectiveVar2VarSubstitution notConflictingRenaming = substitutionFactory.generateNotConflictingRenaming(
+                variableGenerator, ImmutableSet.copyOf(expectedVariables));
+
+        InjectiveVar2VarSubstitution secondSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+                IntStream.range(0, projectedVariables.size())
+                        .boxed()
+                        .map(i -> Maps.immutableEntry(
+                                notConflictingRenaming.applyToVariable(projectedVariables.get(i)),
+                                expectedVariables.get(i)))
+                        .filter(e -> !e.getKey().equals(e.getValue()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        InjectiveVar2VarSubstitution renamingSubstitution = secondSubstitution.composeWithAndPreserveInjectivity(notConflictingRenaming,
+                ImmutableSet.of())
+                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting the substitution to be injective"));
+
+
+        return queryTransformerFactory.createRenamer(renamingSubstitution)
+                .transform(iq);
     }
 
 

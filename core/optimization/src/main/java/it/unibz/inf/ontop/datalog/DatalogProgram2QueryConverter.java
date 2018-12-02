@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.datalog;
 
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -15,6 +15,11 @@ public interface DatalogProgram2QueryConverter {
     IQ convertDatalogProgram(DatalogProgram queryProgram,
                              Collection<Predicate> tablePredicates)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, EmptyQueryException;
+
+
+    IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+                             ImmutableList<String> signature) throws EmptyQueryException;
+
 
     Optional<IQ> convertDatalogDefinitions(Collection<CQIE> atomDefinitions,
                                            Collection<Predicate> tablePredicates,

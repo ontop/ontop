@@ -130,7 +130,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
+        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of(),
+				ImmutableList.copyOf(translation.getSignature()));
     }
 	
 
