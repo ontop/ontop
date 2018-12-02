@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -166,12 +167,14 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
 
-        InjectiveVar2VarSubstitution renamingSubstitution = secondSubstitution.composeWithAndPreserveInjectivity(notConflictingRenaming,
-                ImmutableSet.of())
-                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting the substitution to be injective"));
+        ImmutableSubstitution<Variable> renamingSubstitution = (ImmutableSubstitution<Variable>)(ImmutableSubstitution<?>)
+                secondSubstitution.applyToTarget(notConflictingRenaming);
 
 
-        return queryTransformerFactory.createRenamer(renamingSubstitution)
+
+        return queryTransformerFactory.createRenamer(
+                // Convert into an InjectiveVar2VarSubstitution object
+                substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitution.getImmutableMap()))
                 .transform(iq);
     }
 
