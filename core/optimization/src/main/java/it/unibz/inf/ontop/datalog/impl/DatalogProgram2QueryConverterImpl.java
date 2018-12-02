@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -155,8 +154,16 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
         VariableGenerator variableGenerator =  iq.getVariableGenerator().createSnapshot();
 
+        /*
+         * In theory, conflicts may not only happen with projected variables, but ALSO with non-projected variables
+         * inside the tree
+         */
         InjectiveVar2VarSubstitution notConflictingRenaming = substitutionFactory.generateNotConflictingRenaming(
                 variableGenerator, ImmutableSet.copyOf(expectedVariables));
+
+        ImmutableCollection<Variable> tmpRenamedProjectedVariables = ImmutableSet.copyOf(notConflictingRenaming
+                .reduceDomainToIntersectionWith(ImmutableSet.copyOf(projectedVariables))
+                .getImmutableMap().values());
 
         InjectiveVar2VarSubstitution secondSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 IntStream.range(0, projectedVariables.size())
@@ -167,14 +174,13 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<Variable> renamingSubstitution = (ImmutableSubstitution<Variable>)(ImmutableSubstitution<?>)
-                secondSubstitution.applyToTarget(notConflictingRenaming);
+        ImmutableMap<Variable, Variable> renamingSubstitutionMap = secondSubstitution.composeWith2(notConflictingRenaming)
+                .getImmutableMap().entrySet().stream()
+                // Removes the entries related to temporarily renamed projected variables to keep the substitution injective
+                .filter(e -> !tmpRenamedProjectedVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap());
 
-
-
-        return queryTransformerFactory.createRenamer(
-                // Convert into an InjectiveVar2VarSubstitution object
-                substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitution.getImmutableMap()))
+        return queryTransformerFactory.createRenamer(substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitutionMap))
                 .transform(iq);
     }
 
