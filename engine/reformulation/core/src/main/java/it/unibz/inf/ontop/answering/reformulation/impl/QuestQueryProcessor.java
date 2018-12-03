@@ -142,7 +142,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
+
+
+        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of(), translation.getSignature());
     }
 	
 
@@ -202,13 +204,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			}
 			catch (EmptyQueryException e) {
-				ImmutableList<Variable> variables = translation.getSignature().stream()
-						.map(termFactory::getVariable)
-						.collect(ImmutableCollectors.toList());
+				ImmutableList<Variable> signature = translation.getSignature();
 
 				DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-						atomFactory.getRDFAnswerPredicate(variables.size()),
-						variables);
+						atomFactory.getRDFAnswerPredicate(signature.size()),
+						signature);
 
 				return iqFactory.createIQ(projectionAtom,
 						iqFactory.createEmptyNode(projectionAtom.getVariables()));
