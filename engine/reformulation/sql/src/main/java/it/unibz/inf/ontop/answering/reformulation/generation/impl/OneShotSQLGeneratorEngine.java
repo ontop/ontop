@@ -1308,16 +1308,15 @@ public class OneShotSQLGeneratorEngine {
 			}
 			else {
 				// Temporary fix
-				LanguageTag langTag = Optional.of(subTerm)
+				String langString = Optional.of(subTerm)
 						.filter(t -> t instanceof Function)
 						.map(t -> ((Function) t).getFunctionSymbol())
 						.filter(f -> f instanceof DatatypePredicate)
 						.map(f -> ((DatatypePredicate) f).getReturnedType())
 						.flatMap(RDFDatatype::getLanguageTag)
-						.orElseThrow(() -> new RuntimeException("Cannot extract the language tag from "
-								+ subTerm));
-
-				return  sqladapter.getSQLLexicalFormString(langTag.getFullString());
+						.map(LanguageTag::getFullString)
+						.orElse("");
+				return  sqladapter.getSQLLexicalFormString(langString);
 			}
 		}
 		/*

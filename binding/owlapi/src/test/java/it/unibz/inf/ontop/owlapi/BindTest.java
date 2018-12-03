@@ -500,13 +500,32 @@ public class BindTest {
     @Test
     public void testBindLangTag() throws Exception {
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
-                "SELECT ?x\n" +
+                "SELECT ?w\n" +
                 "WHERE {\n" +
                 "  ?y dc:title ?title .\n" +
-                "  BIND( lang(?title) AS ?x ) .\n" +
+                "  BIND( lang(?title) AS ?w ) .\n" +
                 "}\n";
 
-        runTests(query);
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        checkReturnedValues(query, expectedValues);
+    }
+
+    @Test
+    public void testBindLangTag2() throws Exception {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?w\n" +
+                "WHERE {\n" +
+                "  ?y dc:title ?title .\n" +
+                "  BIND (str(?title) AS ?s)\n" +
+                "  BIND( lang(?s) AS ?w ) .\n" +
+                "}\n";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\"\"^^xsd:string");
+        checkReturnedValues(query, expectedValues);
     }
 
 
