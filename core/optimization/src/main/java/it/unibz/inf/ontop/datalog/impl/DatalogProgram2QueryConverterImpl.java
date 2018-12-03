@@ -12,10 +12,8 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -39,7 +37,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final TermFactory termFactory;
     private final QueryTransformerFactory queryTransformerFactory;
 
     @Inject
@@ -49,7 +46,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                               SubstitutionFactory substitutionFactory,
                                               CoreUtilsFactory coreUtilsFactory,
                                               QueryTransformerFactory transformerFactory,
-                                              TermFactory termFactory,
                                               QueryTransformerFactory queryTransformerFactory) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
@@ -57,7 +53,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
-        this.termFactory = termFactory;
         this.queryTransformerFactory = queryTransformerFactory;
     }
 
@@ -83,13 +78,10 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         }
     }
 
-    /**
-     * TODO: explain
-     *
-     */
     @Override
-    public IQ convertDatalogProgram(DatalogProgram queryProgram, Collection<Predicate> tablePredicates)
-            throws InvalidDatalogProgramException, EmptyQueryException {
+    public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+                                    ImmutableList<Variable> signature) throws EmptyQueryException {
+
         List<CQIE> rules = queryProgram.getRules();
 
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
@@ -128,15 +120,8 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                 iq = intensionalQueryMerger.optimize(iq);
             }
         }
-        return iq;
-    }
 
-    @Override
-    public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
-                                    ImmutableList<Variable> signature) throws EmptyQueryException {
-        return enforceSignature(
-                convertDatalogProgram(queryProgram, tablePredicates),
-                signature);
+        return enforceSignature(iq, signature);
     }
 
     private IQ enforceSignature(IQ iq, ImmutableList<Variable> signature) {
