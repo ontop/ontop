@@ -124,6 +124,14 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         return enforceSignature(iq, signature);
     }
 
+    /**
+     * Hacked logic: because of ORDER conditions that are expected to use signature variables,
+     * this method DOES NOT look for conflicts between signature variables and variables only appearing in the sub-tree.
+     *
+     * See the history for a better logic breaking this ugly hack.
+     *
+     * TODO: after getting rid of Datalog for encoding SPARQL queries, could try to clean it
+     */
     private IQ enforceSignature(IQ iq, ImmutableList<Variable> signature) {
 
         ImmutableList<Variable> projectedVariables = iq.getProjectionAtom().getArguments();
@@ -134,35 +142,14 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         if (projectedVariables.size() != signature.size())
             throw new IllegalArgumentException("The arity of the signature does not match the iq");
 
-        VariableGenerator variableGenerator =  iq.getVariableGenerator().createSnapshot();
-
-        /*
-         * In theory, conflicts may not only happen with projected variables, but ALSO with non-projected variables
-         * inside the tree
-         */
-        InjectiveVar2VarSubstitution notConflictingRenaming = substitutionFactory.generateNotConflictingRenaming(
-                variableGenerator, ImmutableSet.copyOf(signature));
-
-        ImmutableCollection<Variable> tmpRenamedProjectedVariables = ImmutableSet.copyOf(notConflictingRenaming
-                .reduceDomainToIntersectionWith(ImmutableSet.copyOf(projectedVariables))
-                .getImmutableMap().values());
-
-        InjectiveVar2VarSubstitution secondSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 IntStream.range(0, projectedVariables.size())
                         .boxed()
-                        .map(i -> Maps.immutableEntry(
-                                notConflictingRenaming.applyToVariable(projectedVariables.get(i)),
-                                signature.get(i)))
+                        .map(i -> Maps.immutableEntry(projectedVariables.get(i), signature.get(i)))
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
 
-        ImmutableMap<Variable, Variable> renamingSubstitutionMap = secondSubstitution.composeWith2(notConflictingRenaming)
-                .getImmutableMap().entrySet().stream()
-                // Removes the entries related to temporarily renamed projected variables to keep the substitution injective
-                .filter(e -> !tmpRenamedProjectedVariables.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap());
-
-        return queryTransformerFactory.createRenamer(substitutionFactory.getInjectiveVar2VarSubstitution(renamingSubstitutionMap))
+        return queryTransformerFactory.createRenamer(renamingSubstitution)
                 .transform(iq);
     }
 
