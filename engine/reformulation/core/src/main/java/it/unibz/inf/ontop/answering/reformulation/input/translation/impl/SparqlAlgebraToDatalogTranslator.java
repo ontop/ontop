@@ -373,8 +373,9 @@ public class SparqlAlgebraToDatalogTranslator {
             if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
                 return sub;
 
-            ImmutableSet<Variable> vars = ImmutableSet.copyOf(
-                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toSet()));
+            // Preserves the variable order of the SPARQL query (good practice)
+            ImmutableSet<Variable> vars = ImmutableSortedSet.copyOf(
+                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toList()));
 
             if (noRenaming)
                 return new TranslationResult(sub.atoms, vars, false);
