@@ -112,22 +112,6 @@ public class TargetQueryRenderer {
         }
     }
 
-    //Appends nested concats
-    public static void getNestedConcats(StringBuilder stb, ImmutableTerm term1, ImmutableTerm term2) {
-        if (term1 instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term1;
-            getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
-        } else {
-            stb.append(appendTerms(term1));
-        }
-        if (term2 instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) term2;
-            getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
-        } else {
-            stb.append(appendTerms(term2));
-        }
-    }
-
     /**
      * Prints the text representation of different terms.
      */
@@ -196,8 +180,7 @@ public class TargetQueryRenderer {
                     return displayFunctionalBnode(function);
             }
         }
-        // TODO: remove?
-        if (functionSymbol == ExpressionOperation.CONCAT)
+        if (functionSymbol instanceof DBConcatFunctionSymbol)
             return displayConcat(function);
         return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
     }
@@ -281,11 +264,14 @@ public class TargetQueryRenderer {
         return sb.toString();
     }
 
-    private static String displayConcat(ImmutableFunctionalTerm function) {
+    /**
+     * Concat is now expected to be flat
+     */
+    public static String displayConcat(ImmutableFunctionalTerm function) {
         StringBuilder sb = new StringBuilder();
         ImmutableList<? extends ImmutableTerm> terms = function.getTerms();
         sb.append("\"");
-        getNestedConcats(sb, terms.get(0), terms.get(1));
+        terms.forEach(TargetQueryRenderer::appendTerms);
         sb.append("\"");
         return sb.toString();
     }

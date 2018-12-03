@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -79,8 +80,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         return nameInDialect.equals(CONCAT_STR);
     }
 
-    private DBFunctionSymbol createDBConcat(int arity) {
-        return new DefaultConcatDBFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
+    private DBConcatFunctionSymbol createDBConcat(int arity) {
+        return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
     }
 
     @Override
@@ -99,9 +100,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
-    public DBFunctionSymbol getDBConcat(int arity) {
+    public DBConcatFunctionSymbol getDBConcat(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
-        return getRegularDBFunctionSymbol(CONCAT_STR, arity);
+        return (DBConcatFunctionSymbol) getRegularDBFunctionSymbol(CONCAT_STR, arity);
     }
 }
