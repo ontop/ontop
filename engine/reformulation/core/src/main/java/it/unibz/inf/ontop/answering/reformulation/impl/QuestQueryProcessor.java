@@ -26,8 +26,10 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +132,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
 					"This is not possible for any SELECT query (other queries are not supported by the translator).");
 
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of());
+
+
+        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of(), translation.getSignature());
     }
 	
 
@@ -184,8 +188,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
                 log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
-                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery,
-                        ImmutableList.copyOf(translation.getSignature()));
+                ExecutableQuery executableQuery = generateExecutableQuery(intermediateQuery);
                 queryCache.put(inputQuery, executableQuery);
                 return executableQuery;
 
@@ -193,7 +196,9 @@ public class QuestQueryProcessor implements QueryReformulator {
             catch (EmptyQueryException e) {
                 // No solution.
                 ExecutableQuery emptyQuery = datasourceQueryGenerator.generateEmptyQuery(
-                        ImmutableList.copyOf(translation.getSignature()));
+                		translation.getSignature().stream()
+								.map(Variable::getName)
+								.collect(ImmutableCollectors.toList()));
 
                 log.debug("Empty query --> no solution.");
                 queryCache.put(inputQuery, emptyQuery);
@@ -214,11 +219,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery, ImmutableList<String> signature)
+	private ExecutableQuery generateExecutableQuery(IntermediateQuery intermediateQuery)
 			throws OntopReformulationException {
 		log.debug("Producing the native query string...");
 
-		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery, signature);
+		ExecutableQuery executableQuery = datasourceQueryGenerator.generateSourceQuery(intermediateQuery);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 

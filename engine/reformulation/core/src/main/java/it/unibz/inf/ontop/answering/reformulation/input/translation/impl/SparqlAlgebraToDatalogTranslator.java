@@ -133,7 +133,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
         TranslationResult body = translate(te);
 
-        List<Term> answerVariables;
+        List<Variable> answerVariables;
 		if (pq instanceof ParsedTupleQuery || pq instanceof ParsedGraphQuery) {
             // order elements of the set in some way by converting it into the list
             answerVariables = new ArrayList<>(body.variables);
@@ -144,13 +144,11 @@ public class SparqlAlgebraToDatalogTranslator {
         }
 
         AtomPredicate pred = atomFactory.getRDFAnswerPredicate(answerVariables.size());
-        Function head = termFactory.getFunction(pred, answerVariables);
+        Function head = termFactory.getFunction(pred, (List<Term>)(List<?>)answerVariables);
         appendRule(head, body.atoms);
 
-        List<String> signature = Lists.transform(answerVariables, t -> ((Variable)t).getName());
-
         //System.out.println("PROGRAM\n" + program.program);
-		return new InternalSparqlQuery(program, signature);
+		return new InternalSparqlQuery(program, ImmutableList.copyOf(answerVariables));
 	}
 
     private class TranslationResult {
@@ -375,8 +373,9 @@ public class SparqlAlgebraToDatalogTranslator {
             if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
                 return sub;
 
-            ImmutableSet<Variable> vars = ImmutableSet.copyOf(
-                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toSet()));
+            // Preserves the variable order of the SPARQL query (good practice)
+            ImmutableSet<Variable> vars = ImmutableSortedSet.copyOf(
+                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toList()));
 
             if (noRenaming)
                 return new TranslationResult(sub.atoms, vars, false);

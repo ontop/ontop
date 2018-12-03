@@ -252,7 +252,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         ImmutableMap<Variable, ? extends ImmutableTerm> otherSubstitutionMap = otherSubstitution.getImmutableMap();
         for (Map.Entry<Variable, ? extends ImmutableTerm> otherEntry : otherSubstitutionMap.entrySet()) {
-            mapBuilder.put(otherEntry.getKey(), apply(otherEntry.getValue()));
+            ImmutableTerm newValue = apply(otherEntry.getValue());
+            if (!otherEntry.getKey().equals(newValue))
+                mapBuilder.put(otherEntry.getKey(), newValue);
         }
         return substitutionFactory.getSubstitution(mapBuilder.build());
     }
