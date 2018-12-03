@@ -818,7 +818,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(Concat expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.CONCAT, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBConcat(), t1, t2));
         }
 
         private void process(BinaryExpression expression, BinaryOperator<Term> op) {
@@ -1155,7 +1155,6 @@ public class ExpressionParser {
             FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
             .put("REGEXP_REPLACE", this::get_REGEXP_REPLACE)
             .put("REPLACE", this::get_REPLACE)
-            .put("CONCAT", this::get_CONCAT)
             .put("SUBSTR", this::get_SUBSTR)
             .put("SUBSTRING", this::get_SUBSTR)
             .put("LCASE", this::get_LCASE)
@@ -1242,14 +1241,6 @@ public class ExpressionParser {
 
         }
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
-    }
-
-    private Function get_CONCAT(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        return (Function)
-                terms.stream()  // left recursion to match || in JSQLParser
-                        .reduce(null, (a, b) -> (a == null)
-                                ? b
-                                : termFactory.getFunction(ExpressionOperation.CONCAT, a, b));
     }
 
     private Function get_SUBSTR(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {

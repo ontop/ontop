@@ -13,6 +13,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
     protected static final String UPPER_STR = "UPPER";
     protected static final String UCASE_STR = "UCASE";
+    protected static final String CONCAT_STR = "CONCAT";
 
     private final DBTypeFactory dbTypeFactory;
 
@@ -60,10 +61,15 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
-        DefaultSQLSimpleTypedDBFunctionSymbol upperFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UPPER_STR, 1, dbStringType,
+        // TODO: provide the base input types
+        DBFunctionSymbol upperFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UPPER_STR, 1, dbStringType,
                 false, abstractRootDBType);
         builder.put(UPPER_STR, 1, upperFunctionSymbol);
         builder.put(UCASE_STR, 1, upperFunctionSymbol);
+
+        DBFunctionSymbol concatFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CONCAT_STR, 2, dbStringType,
+                false, abstractRootDBType);
+        builder.put(CONCAT_STR, 2, concatFunctionSymbol);
         return builder.build();
     }
 
@@ -80,5 +86,10 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     @Override
     public DBFunctionSymbol getDBUCase() {
         return getRegularDBFunctionSymbol(UCASE_STR, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBConcat() {
+        return getRegularDBFunctionSymbol(CONCAT_STR, 2);
     }
 }
