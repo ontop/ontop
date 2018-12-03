@@ -234,7 +234,6 @@ public class ExpressionEvaluator {
 				case FLOOR:
 				case RAND:
 				case STRLEN:
-				case UCASE:
 				case LCASE:
 				case SUBSTR2:
 				case SUBSTR3:

@@ -1283,10 +1283,6 @@ public class OneShotSQLGeneratorEngine {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.iriSafeEncode(literal);
 		}
-		if (functionSymbol == ExpressionOperation.UCASE) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.strUcase(literal);
-		}
 		if (functionSymbol == ExpressionOperation.MD5) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.MD5(literal);
