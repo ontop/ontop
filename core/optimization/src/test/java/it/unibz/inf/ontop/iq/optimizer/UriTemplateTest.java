@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.CONCAT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
@@ -90,7 +89,8 @@ public class UriTemplateTest {
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(EQ,
-                        TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getDBStringConstant(URI_TEMPLATE_STR_1_PREFIX), A),
+                        TERM_FACTORY.getConcatFunctionalTerm(
+                                ImmutableList.of(TERM_FACTORY.getDBStringConstant(URI_TEMPLATE_STR_1_PREFIX), A)),
                         C));
 
         expectedQueryBuilder.addChild(leftConstructionNode, newJoinNode);

@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.evaluator;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
@@ -832,6 +833,11 @@ public class ExpressionEvaluator {
 			if (functionSymbol1 instanceof OperationPredicate) {
 				return term;
 			}
+
+			// TODO: implement it seriously
+			if (!functionSymbol1.isInjective(f1.getTerms(), ImmutableSet.of()))
+				return term;
+
 
 			/*
 			 * Evaluate the second term
