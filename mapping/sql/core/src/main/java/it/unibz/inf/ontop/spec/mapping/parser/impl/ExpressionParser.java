@@ -818,7 +818,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(Concat expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBConcat(), t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBConcat(2), t1, t2));
         }
 
         private void process(BinaryExpression expression, BinaryOperator<Term> op) {

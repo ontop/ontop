@@ -16,6 +16,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static final String CONCAT_STR = "CONCAT";
 
     private final DBTypeFactory dbTypeFactory;
+    private final DBTermType dbStringType;
+    private final DBTermType abstractRootDBType;
 
     @Inject
     private DefaultSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -27,11 +29,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
                                                 TypeFactory typeFactory) {
         super(normalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
-    }
-
-    @Override
-    protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
-        return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
+        this.dbStringType = dbTypeFactory.getDBStringType();
+        this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -66,11 +65,22 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
                 false, abstractRootDBType);
         builder.put(UPPER_STR, 1, upperFunctionSymbol);
         builder.put(UCASE_STR, 1, upperFunctionSymbol);
-
-        DBFunctionSymbol concatFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CONCAT_STR, 2, dbStringType,
-                false, abstractRootDBType);
-        builder.put(CONCAT_STR, 2, concatFunctionSymbol);
         return builder.build();
+    }
+
+    @Override
+    protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
+        if (isConcat(nameInDialect))
+            return createDBConcat(arity);
+        return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
+    }
+
+    protected boolean isConcat(String nameInDialect) {
+        return nameInDialect.equals(CONCAT_STR);
+    }
+
+    private DBFunctionSymbol createDBConcat(int arity) {
+        return new DefaultConcatDBFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
     }
 
     @Override
@@ -89,7 +99,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
-    public DBFunctionSymbol getDBConcat() {
-        return getRegularDBFunctionSymbol(CONCAT_STR, 2);
+    public DBFunctionSymbol getDBConcat(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
+        return getRegularDBFunctionSymbol(CONCAT_STR, arity);
     }
 }

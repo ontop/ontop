@@ -555,6 +555,14 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(IF_ELSE_NULL, condition, term);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
+		int arity = terms.size();
+		if (arity < 2)
+			throw new IllegalArgumentException("CONCAT needs at least two arguments");
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBConcat(arity), terms);
+	}
+
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);

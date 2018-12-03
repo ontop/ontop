@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -17,7 +16,6 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -230,7 +228,6 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     //this function returns nested concats
-    //in case of more than two terms need to be concatted
     private ImmutableTerm getNestedConcat(String str) {
         List<ImmutableTerm> terms;
         terms = addToTermsList(str);
@@ -238,11 +235,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             return terms.get(0);
         }
 
-        ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
-        for (int j = 2; j < terms.size(); j++) {
-            f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
-        }
-        return f;
+        return termFactory.getConcatFunctionalTerm(ImmutableList.copyOf(terms));
     }
 
 

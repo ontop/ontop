@@ -39,5 +39,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBUCase();
 
-    DBFunctionSymbol getDBConcat();
+    /**
+     * arity must be >= 2
+     */
+    DBFunctionSymbol getDBConcat(int arity);
 }

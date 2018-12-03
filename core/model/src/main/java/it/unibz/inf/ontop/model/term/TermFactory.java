@@ -296,4 +296,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
+
+	/**
+	 * At least two terms are expected
+	 */
+	ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 }
