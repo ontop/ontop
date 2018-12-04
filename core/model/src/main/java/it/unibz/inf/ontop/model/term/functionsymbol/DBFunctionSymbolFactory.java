@@ -43,4 +43,9 @@ public interface DBFunctionSymbolFactory {
      * arity must be >= 2
      */
     DBConcatFunctionSymbol getDBConcat(int arity);
+
+    /**
+     * arity must be >= 2
+     */
+    DBBooleanFunctionSymbol getDBAnd(int arity);
 }

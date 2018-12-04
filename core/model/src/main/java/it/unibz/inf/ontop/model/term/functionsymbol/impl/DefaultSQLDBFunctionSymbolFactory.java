@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
@@ -15,9 +16,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static final String UPPER_STR = "UPPER";
     protected static final String UCASE_STR = "UCASE";
     protected static final String CONCAT_STR = "CONCAT";
+    protected static final String AND_STR = "AND";
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
+    private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
 
     @Inject
@@ -31,6 +34,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         super(normalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
+        this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
     }
 
@@ -71,7 +75,10 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
     @Override
     protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
-        if (isConcat(nameInDialect))
+        // TODO: avoid if-then-else
+        if (isAnd(nameInDialect))
+            return createDBAnd(arity);
+        else if (isConcat(nameInDialect))
             return createDBConcat(arity);
         return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
@@ -80,8 +87,16 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         return nameInDialect.equals(CONCAT_STR);
     }
 
+    protected boolean isAnd(String nameInDialect) {
+        return nameInDialect.equals(AND_STR);
+    }
+
     private DBConcatFunctionSymbol createDBConcat(int arity) {
         return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
+    }
+
+    private DBBooleanFunctionSymbol createDBAnd(int arity) {
+        return new DefaultDBAndSymbol(AND_STR, arity, dbBooleanType);
     }
 
     @Override
@@ -104,5 +119,12 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         if (arity < 2)
             throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
         return (DBConcatFunctionSymbol) getRegularDBFunctionSymbol(CONCAT_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBAnd(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of AND must be >= 2");
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 }

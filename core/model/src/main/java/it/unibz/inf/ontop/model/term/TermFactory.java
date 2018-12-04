@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TermFactory {
 
@@ -63,6 +62,13 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
+
+	/**
+	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
+	 *
+	 * Must be non-empty
+	 */
+	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
 
 	/**
 	 * Just wraps the expression into an Evaluation object
