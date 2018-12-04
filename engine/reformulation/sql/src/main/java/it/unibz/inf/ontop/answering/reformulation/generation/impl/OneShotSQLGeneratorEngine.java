@@ -1242,11 +1242,6 @@ public class OneShotSQLGeneratorEngine {
 			// TODO: handle flags
 			return sqladapter.strReplace(orig, out_str, in_str);
 		}
-		if (functionSymbol == ExpressionOperation.CONCAT) {
-			String left = getSQLString(function.getTerm(0), index, false);
-			String right = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.strConcat(new String[]{left, right});
-		}
 		if (functionSymbol == ExpressionOperation.STRLEN) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strLength(literal);

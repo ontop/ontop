@@ -563,6 +563,15 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBConcat(arity), terms);
 	}
 
+	@Override
+	public ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms) {
+		int arity = typeTerms.size();
+		if (arity < 2)
+			throw new IllegalArgumentException("Expected arity >= 2 for a common denominator");
+
+		return getImmutableFunctionalTerm(functionSymbolFactory.getCommonDenominatorFunctionSymbol(arity), typeTerms);
+	}
+
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);

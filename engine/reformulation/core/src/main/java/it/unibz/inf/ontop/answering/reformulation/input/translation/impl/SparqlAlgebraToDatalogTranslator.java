@@ -736,18 +736,6 @@ public class SparqlAlgebraToDatalogTranslator {
             // these are all special cases with **variable** number of arguments
 
             switch (f.getURI()) {
-                // CONCAT (Sec 17.4.3.12)
-                // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
-                case "http://www.w3.org/2005/xpath-functions#concat":
-                    if (arity < 1)
-                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found " + terms.size() +
-                                ", at least 1) for SPARQL function CONCAT");
-
-                    Term concat = terms.get(0);
-                    for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                        concat = termFactory.getFunction(CONCAT, concat, terms.get(i));
-                    return concat;
-
                 // REPLACE (Sec 17.4.3.15)
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)

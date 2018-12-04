@@ -29,7 +29,7 @@ public interface FunctionSymbolFactory {
 
     // SPARQL functions
 
-    SPARQLFunctionSymbol getUCase();
-
     Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity);
+
+    FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 }

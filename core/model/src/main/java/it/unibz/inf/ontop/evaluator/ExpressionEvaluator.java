@@ -241,7 +241,6 @@ public class ExpressionEvaluator {
 				case STRBEFORE:
 				case STRAFTER:
 				case REPLACE:
-				case CONCAT:
 				case ENCODE_FOR_URI:
 				case MD5:
 				case SHA1:

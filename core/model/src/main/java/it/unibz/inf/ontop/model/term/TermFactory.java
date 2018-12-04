@@ -301,4 +301,6 @@ public interface TermFactory {
 	 * At least two terms are expected
 	 */
 	ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+
+    ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms);
 }
