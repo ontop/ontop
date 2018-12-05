@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndSymbol;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -41,6 +43,12 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
      */
     @Override
     public ImmutableSet<ImmutableExpression> flattenAND() {
+        // TODO: refactor this temporary solution!
+        if (getFunctionSymbol() instanceof DefaultDBAndSymbol) {
+            return getTerms().stream()
+                    .map(t -> (ImmutableExpression) t)
+                    .collect(ImmutableCollectors.toSet());
+        }
         return flatten(AND);
     }
 
