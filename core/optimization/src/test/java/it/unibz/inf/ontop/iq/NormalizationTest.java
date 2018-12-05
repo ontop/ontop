@@ -550,7 +550,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newFilterNode, extensionalDataNode);
 
@@ -578,7 +578,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
                 IQ_FACTORY.createUnaryIQTree(newFilterNode, extensionalDataNode));
@@ -607,7 +607,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createUnaryIQTree(newFilterNode, extensionalDataNode));
@@ -639,7 +639,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
@@ -692,7 +692,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         IQTree expectedTree = IQ_FACTORY.createNaryIQTree(newJoinNode,
                 ImmutableList.of(extensionalDataNode1, extensionalDataNode2));
@@ -722,7 +722,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createNaryIQTree(newJoinNode, ImmutableList.of(extensionalDataNode1, extensionalDataNode2)));
@@ -752,7 +752,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
-                TERM_FACTORY.getImmutableExpression(AND, expression1, expression2));
+                TERM_FACTORY.getConjunction(expression1, expression2));
 
         IQTree expectedTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
                 IQ_FACTORY.createNaryIQTree(newJoinNode, ImmutableList.of(extensionalDataNode1, extensionalDataNode2)));

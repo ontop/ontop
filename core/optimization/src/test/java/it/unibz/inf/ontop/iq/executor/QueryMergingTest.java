@@ -425,10 +425,10 @@ public class QueryMergingTest {
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
         ConstructionNode remainingConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
+                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, A, A));
+        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, B, B, B));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
