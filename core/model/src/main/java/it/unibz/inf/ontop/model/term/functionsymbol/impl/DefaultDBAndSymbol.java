@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
 
@@ -58,6 +59,12 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
                 // We don't care about TRUE
                 .filter(t -> (t instanceof ImmutableExpression))
                 .map(t -> (ImmutableExpression) t)
+                // Flattens nested ANDs
+                .flatMap(t -> (t.getFunctionSymbol() instanceof DefaultDBAndSymbol)
+                        ? t.getTerms().stream()
+                            .map(s -> (ImmutableExpression)s)
+                        : Stream.of(t))
+                .distinct()
                 .collect(ImmutableCollectors.toList());
 
         return others.isEmpty()
