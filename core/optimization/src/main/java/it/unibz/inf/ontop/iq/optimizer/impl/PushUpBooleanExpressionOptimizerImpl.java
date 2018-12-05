@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.proposal.PushUpBooleanExpressionProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.PushUpBooleanExpressionProposalImpl;
@@ -62,16 +62,16 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
 
 
     private final boolean pushAboveUnions;
-    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
     @Inject
-    private PushUpBooleanExpressionOptimizerImpl(ImmutabilityTools immutabilityTools) {
-        this(false, immutabilityTools);
+    private PushUpBooleanExpressionOptimizerImpl(TermFactory termFactory) {
+        this(false, termFactory);
     }
 
-    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions, ImmutabilityTools immutabilityTools) {
+    public PushUpBooleanExpressionOptimizerImpl(boolean pushAboveUnions, TermFactory termFactory) {
         this.pushAboveUnions = pushAboveUnions;
-        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -242,8 +242,10 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         }
 
         /* conjunction of all conjuncts to propagate */
-        ImmutableExpression conjunction = immutabilityTools.foldBooleanExpressions(propagatedExpressions.stream())
-                .orElseThrow(() -> new IllegalStateException("The conjunction should be present"));
+        ImmutableExpression conjunction = termFactory.getConjunction(propagatedExpressions.stream()
+                .flatMap(e -> e.flattenAND().stream())
+                .distinct()
+                .collect(ImmutableCollectors.toList()));
 
         Optional<Optional<PushUpBooleanExpressionProposal>> merge = providers.stream()
                 .map(n -> makeNodeCentricProposal(
@@ -337,10 +339,15 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
                 .orElseThrow(() -> new IllegalStateException("The provider is expected to have a filtering condition"));
 
         // conjuncts which will not be propagated up from this child
-        return immutabilityTools.foldBooleanExpressions(
-                fullBooleanExpression.flattenAND().stream()
-                        .filter(e -> !propagatedExpressions.contains(e))
-        );
+
+        ImmutableList<ImmutableExpression> conjuncts = fullBooleanExpression.flattenAND().stream()
+                .filter(e -> !propagatedExpressions.contains(e))
+                .flatMap(e -> e.flattenAND().stream())
+                .collect(ImmutableCollectors.toList());
+
+        return Optional.of(conjuncts)
+                .filter(c -> !c.isEmpty())
+                .map(termFactory::getConjunction);
     }
 
     /**
@@ -362,7 +369,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         ImmutableSet.Builder<ExplicitVariableProjectionNode> removedProjectors = ImmutableSet.builder();
 
         while ((optChild = query.getFirstChild(currentNode)).isPresent()) {
-            if (currentNode instanceof ConstructionNode || currentNode instanceof  QueryModifierNode) {
+            if (currentNode instanceof ConstructionNode || currentNode instanceof QueryModifierNode) {
                 if(currentNode instanceof ConstructionNode) {
                     removedProjectors.add((ConstructionNode) currentNode);
                 }
