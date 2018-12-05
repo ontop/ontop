@@ -589,7 +589,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(OR,
-                TERM_FACTORY.getFunction(AND,
+                TERM_FACTORY.getFunctionAND(
                         TERM_FACTORY.getFunction(EQ,
                                 v1,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),

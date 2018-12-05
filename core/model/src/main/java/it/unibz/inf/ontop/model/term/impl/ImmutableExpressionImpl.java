@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -15,7 +14,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
@@ -50,7 +48,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
                     .map(t -> (ImmutableExpression) t)
                     .collect(ImmutableCollectors.toSet());
         }
-        return flatten(AND);
+        return ImmutableSet.of(this);
     }
 
     @Override

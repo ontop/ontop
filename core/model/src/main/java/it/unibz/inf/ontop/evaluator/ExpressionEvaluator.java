@@ -268,8 +268,6 @@ public class ExpressionEvaluator {
 		}
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
-				case AND :
-					return evalAnd(term.getTerm(0), term.getTerm(1));
 				case OR:
 					return evalOr(term.getTerm(0), term.getTerm(1));
 				case NOT:
@@ -952,7 +950,7 @@ public class ExpressionEvaluator {
 					temp.add(result);
 					if (temp.size() == 2) {
 						if (isEqual){
-							result = termFactory.getImmutableFunctionalTerm(AND, temp.get(0), temp.get(1));
+							result = termFactory.getConjunction((ImmutableExpression) temp.get(0), (ImmutableExpression)temp.get(1));
 						}else{
 							result = termFactory.getImmutableFunctionalTerm(OR, temp.get(0), temp.get(1));
 						}
@@ -963,26 +961,6 @@ public class ExpressionEvaluator {
 				return result;
 			}
 		}
-	}
-
-
-	private ImmutableTerm evalAnd(ImmutableTerm t1, ImmutableTerm t2) {
-		ImmutableTerm e1 = eval(t1);
-		ImmutableTerm e2 = eval(t2);
-
-		if (e1 == valueFalse || e2 == valueFalse)
-			return valueFalse;
-
-		if (e1 == valueTrue)
-			return e2;
-
-		if (e2 == valueTrue)
-			return e1;
-
-		if (e1 == null && e2 == null)
-			return termFactory.getNullConstant();
-
-		return termFactory.getImmutableFunctionalTerm(AND, e1, e2);
 	}
 
 	/**

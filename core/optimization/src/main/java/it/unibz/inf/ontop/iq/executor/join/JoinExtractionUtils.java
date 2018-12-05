@@ -16,8 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
-
 /**
  * TODO: describe
  */
@@ -106,10 +104,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableExpression currentExpression = termFactory.getImmutableExpression(AND,
+                ImmutableExpression currentExpression = termFactory.getConjunction(
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = termFactory.getImmutableExpression(AND, currentExpression, it.next());
+                    currentExpression = termFactory.getConjunction(currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);

@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 
@@ -44,7 +43,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                 .map(g -> g.stream().findFirst())
                 .map(Optional::get)
                 .map(v -> termFactory.getImmutableExpression(IS_NOT_NULL, v))
-                .reduce(null, (a, b) -> (a == null) ? b : termFactory.getImmutableExpression(AND, a, b));
+                .reduce(null, (a, b) -> (a == null) ? b : termFactory.getConjunction(a, b));
     }
 
     private IQ insertFilter(IQ originalQuery, ImmutableSet<ImmutableSet<Variable>> nullableVariables) {

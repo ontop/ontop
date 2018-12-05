@@ -394,7 +394,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionAND(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.AND, term1, term2);
+		return getExpression(dbFunctionSymbolFactory.getDBAnd(2), term1, term2);
 	}
 
 	@Override

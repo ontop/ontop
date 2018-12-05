@@ -23,8 +23,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
-
 @Singleton
 public class FilterNormalizerImpl implements FilterNormalizer {
 
@@ -217,7 +215,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
                 if (childRoot instanceof FilterNode) {
                     FilterNode filterChild = (FilterNode) childRoot;
 
-                    ImmutableExpression newCondition = termFactory.getImmutableExpression(AND, condition.get(),
+                    ImmutableExpression newCondition = termFactory.getConjunction(condition.get(),
                             filterChild.getFilterCondition());
 
                     return updateConditionAndChild(newCondition, ((UnaryIQTree)child).getChild());
@@ -225,7 +223,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
 
                 else if (childRoot instanceof InnerJoinNode) {
                     ImmutableExpression newJoiningCondition = ((InnerJoinNode) childRoot).getOptionalFilterCondition()
-                            .map(c -> termFactory.getImmutableExpression(AND, condition.get(), c))
+                            .map(c -> termFactory.getConjunction(condition.get(), c))
                             .orElse(condition.get());
 
                     InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(newJoiningCondition);
