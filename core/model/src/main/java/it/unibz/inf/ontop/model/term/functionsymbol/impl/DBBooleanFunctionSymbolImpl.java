@@ -27,4 +27,8 @@ public abstract class DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolI
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect,
                 String.join( ",", termStrings));
     }
+
+    protected String inBrackets(String expression) {
+        return "(" + expression + ")";
+    }
 }

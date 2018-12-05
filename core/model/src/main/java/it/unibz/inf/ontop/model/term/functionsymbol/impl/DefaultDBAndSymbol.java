@@ -10,10 +10,13 @@ import java.util.Optional;
 
 public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
 
+    private final String argumentSeparator;
+
     protected DefaultDBAndSymbol(String nameInDialect, int arity, DBTermType dbBooleanTermType) {
         super(nameInDialect, arity, dbBooleanTermType);
         if (arity < 2)
             throw new IllegalArgumentException("Arity must be >= 2");
+        this.argumentSeparator = String.format(" %s ", nameInDialect);
     }
 
     @Override
@@ -66,10 +69,6 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
 
     @Override
     public String getNativeDBString(ImmutableList<String> termStrings) {
-        return inBrackets(String.join(" AND ", termStrings));
-    }
-
-    private String inBrackets(String expression) {
-        return "(" + expression + ")";
+        return inBrackets(String.join(argumentSeparator, termStrings));
     }
 }
