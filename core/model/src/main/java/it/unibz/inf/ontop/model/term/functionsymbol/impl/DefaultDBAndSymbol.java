@@ -34,16 +34,24 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
+        return computeNewConjunction(newTerms, termFactory);
+    }
+
+    /**
+     * Temporarily public
+     * TODO: hide it again
+     */
+    public static ImmutableTerm computeNewConjunction(ImmutableList<ImmutableTerm> evaluatedTerms, TermFactory termFactory) {
         DBConstant falseValue = termFactory.getDBBooleanConstant(false);
-        if (newTerms.stream()
+        if (evaluatedTerms.stream()
                 .anyMatch(falseValue::equals))
             return falseValue;
 
-        Optional<ImmutableTerm> optionalNull = newTerms.stream()
+        Optional<ImmutableTerm> optionalNull = evaluatedTerms.stream()
                 .filter(t -> (t instanceof Constant) && ((Constant) t).isNull())
                 .findFirst();
 
-        ImmutableList<ImmutableExpression> others = newTerms.stream()
+        ImmutableList<ImmutableExpression> others = evaluatedTerms.stream()
                 // We don't care about TRUE
                 .filter(t -> (t instanceof ImmutableExpression))
                 .map(t -> (ImmutableExpression) t)
@@ -52,7 +60,7 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
         return others.isEmpty()
                 ? optionalNull.orElseGet(() -> termFactory.getDBBooleanConstant(true))
                 :  optionalNull
-                    .map(n -> (ImmutableTerm) termFactory.getFalseOrNullFunctionalTerm(others))
-                    .orElseGet(() -> others.size() == 1 ? others.get(0) : termFactory.getConjunction(others));
+                .map(n -> (ImmutableTerm) termFactory.getFalseOrNullFunctionalTerm(others))
+                .orElseGet(() -> others.size() == 1 ? others.get(0) : termFactory.getConjunction(others));
     }
 }
