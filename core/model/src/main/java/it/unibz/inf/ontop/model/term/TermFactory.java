@@ -158,9 +158,6 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
-	@Deprecated
-	RDFLiteralConstant getRDFBooleanConstant(boolean value);
-
 	DBConstant getDBBooleanConstant(boolean value);
 
 	Constant getNullConstant();

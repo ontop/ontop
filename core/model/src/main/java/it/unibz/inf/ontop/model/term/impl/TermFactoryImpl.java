@@ -46,8 +46,6 @@ public class TermFactoryImpl implements TermFactory {
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
-	private final RDFLiteralConstant rdfValueTrue;
-	private final RDFLiteralConstant rdfValueFalse;
 	private final DBConstant valueTrue;
 	private final DBConstant valueFalse;
 	private final Constant valueNull;
@@ -69,9 +67,6 @@ public class TermFactoryImpl implements TermFactory {
 		this.functionSymbolFactory = functionSymbolFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.rdfFactory = rdfFactory;
-		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-		this.rdfValueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
-		this.rdfValueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
 
 		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
 		// TODO: let a DB-specific class have the control over DB constant creation
@@ -405,12 +400,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Expression getFunctionIsTrue(Term term) {
 		return getExpression(BooleanExpressionOperation.IS_TRUE, term);
-	}
-
-
-	@Override
-	public RDFLiteralConstant getRDFBooleanConstant(boolean value) {
-		return value ? rdfValueTrue : rdfValueFalse;
 	}
 
 	@Override
