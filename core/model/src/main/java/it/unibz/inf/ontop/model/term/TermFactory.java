@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface TermFactory {
 
@@ -62,6 +64,11 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
+
+	/**
+	 * May be empty
+	 */
+	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
 	/**
 	 * Must be non-empty

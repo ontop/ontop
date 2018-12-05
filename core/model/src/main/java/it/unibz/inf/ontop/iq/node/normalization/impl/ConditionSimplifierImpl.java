@@ -26,7 +26,6 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     private final SubstitutionFactory substitutionFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final TermFactory termFactory;
     private final ImmutableUnificationTools unificationTools;
     private final ImmutableSubstitutionTools substitutionTools;
@@ -38,7 +37,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                     ImmutableSubstitutionTools substitutionTools,
                                     ExpressionEvaluator defaultExpressionEvaluator) {
         this.substitutionFactory = substitutionFactory;
-        this.immutabilityTools = immutabilityTools;
         this.termFactory = termFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
@@ -108,7 +106,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
-        Optional<ImmutableExpression> newExpression = immutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 Stream.concat(
                         // Expressions that are not function-free equalities
                         expressions.stream()
@@ -152,7 +150,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     .applyToBooleanExpression(optionalConstraint.get());
 
             ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
-                    .flatMap(e -> immutabilityTools.foldBooleanExpressions(
+                    .flatMap(e -> termFactory.getConjunction(
                             Stream.concat(
                                     e.flattenAND().stream(),
                                     substitutedConstraint.flattenAND().stream())))

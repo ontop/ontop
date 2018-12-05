@@ -238,6 +238,18 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream) {
+		ImmutableList<ImmutableExpression> conjuncts = expressionStream
+				.flatMap(e -> e.flattenAND().stream())
+				.distinct()
+				.collect(ImmutableCollectors.toList());
+
+		return Optional.of(conjuncts)
+				.filter(c -> !c.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
 	public ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> disjunctionOfExpressions) {
 		final int size = disjunctionOfExpressions.size();
 		switch (size) {
