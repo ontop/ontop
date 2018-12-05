@@ -545,7 +545,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (!XMLDatatypeUtil.isValidValue(value, typeURI))
                 throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
 
-            Term constant = termFactory.getRDFLiteralConstant(value, type);
+            Term constant = termFactory.getDBStringConstant(value);
 
             return termFactory.getRDFLiteralMutableFunctionalTerm(constant, type);
 
