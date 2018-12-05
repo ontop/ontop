@@ -61,12 +61,20 @@ public interface TermFactory {
 
 	/**
 	 * Must be non-empty
+	 *
+	 * Does NOT take care of flattening conjunctions in the arguments
 	 */
 	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
+
+	/**
+	 * Does NOT take care of flattening conjunctions in the arguments
+	 */
 	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
 
 	/**
-	 * May be empty
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
 	 */
 	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
 
