@@ -683,6 +683,13 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(atom.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
+		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
+			ImmutableList<String> termStrings = atom.getTerms().stream()
+					// TODO: try to get rid of useBrackets
+					.map(t -> getSQLString(t, index, false))
+					.collect(ImmutableCollectors.toList());
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
+		}
 
 		throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
 	}
