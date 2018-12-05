@@ -63,4 +63,13 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
                 .map(n -> (ImmutableTerm) termFactory.getFalseOrNullFunctionalTerm(others))
                 .orElseGet(() -> others.size() == 1 ? others.get(0) : termFactory.getConjunction(others));
     }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        return inBrackets(String.join(" AND ", termStrings));
+    }
+
+    private String inBrackets(String expression) {
+        return "(" + expression + ")";
+    }
 }
