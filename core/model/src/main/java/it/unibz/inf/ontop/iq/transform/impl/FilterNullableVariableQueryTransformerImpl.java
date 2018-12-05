@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.iq.*;
@@ -37,18 +36,16 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
     private final IntermediateQueryFactory iqFactory;
     private final ExpressionEvaluator defaultExpressionEvaluator;
     private final TermFactory termFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private FilterNullableVariableQueryTransformerImpl(IntermediateQueryFactory iqFactory,
                                                        ExpressionEvaluator defaultExpressionEvaluator,
-                                                       TermFactory termFactory, ImmutabilityTools immutabilityTools,
+                                                       TermFactory termFactory,
                                                        SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.defaultExpressionEvaluator = defaultExpressionEvaluator;
         this.termFactory = termFactory;
-        this.immutabilityTools = immutabilityTools;
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -82,7 +79,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
                 .map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
                 .distinct();
 
-        ImmutableExpression nonOptimizedExpression = immutabilityTools.foldBooleanExpressions(filteringExpressionStream)
+        ImmutableExpression nonOptimizedExpression = termFactory.getConjunction(filteringExpressionStream)
                 .orElseThrow(() -> new IllegalArgumentException("Is nullableProjectedVariables empty? After folding" +
                         "there should be one expression"));
         EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
@@ -110,9 +107,9 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
 
         if (formerRootChild instanceof FilterNode) {
             FilterNode newFilterNode = iqFactory.createFilterNode(
-                    immutabilityTools.foldBooleanExpressions(
+                    termFactory.getConjunction(
                             ((FilterNode) formerRootChild).getFilterCondition(),
-                            filterCondition).get());
+                            filterCondition));
             queryBuilder.addChild(rootNode, newFilterNode);
             query.getChildren(formerRootChild)
                     .forEach(c -> {
@@ -124,7 +121,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
             InnerJoinNode formerJoinNode = (InnerJoinNode) formerRootChild;
 
             ImmutableExpression newJoiningCondition = formerJoinNode.getOptionalFilterCondition()
-                    .map(e -> immutabilityTools.foldBooleanExpressions(e, filterCondition).get())
+                    .map(e -> termFactory.getConjunction(e, filterCondition))
                     .orElse(filterCondition);
             InnerJoinNode newJoinNode = formerJoinNode.changeOptionalFilterCondition(Optional.of(newJoiningCondition));
 

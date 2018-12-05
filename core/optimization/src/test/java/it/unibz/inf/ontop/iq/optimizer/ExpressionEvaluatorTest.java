@@ -295,9 +295,9 @@ public class ExpressionEvaluatorTest {
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
-                IMMUTABILITY_TOOLS.foldBooleanExpressions(
+                TERM_FACTORY.getConjunction(
                         TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X),
-                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)).get());
+                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)));
     }
 
     @Test

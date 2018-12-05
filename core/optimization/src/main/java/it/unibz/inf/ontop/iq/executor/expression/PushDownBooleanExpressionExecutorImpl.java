@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
@@ -24,12 +24,12 @@ import java.util.Optional;
 public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
-    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
     @Inject
-    private PushDownBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
+    private PushDownBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     /**
@@ -61,8 +61,8 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
 
     private void updateIndirectRecipientNode(QueryTreeComponent treeComponent, QueryNode targetNode,
                                              Collection<ImmutableExpression> additionalExpressions) {
-        ImmutableExpression foldedExpression = immutabilityTools.foldBooleanExpressions(
-                ImmutableList.copyOf(additionalExpressions)).get();
+        ImmutableExpression foldedExpression = termFactory.getConjunction(
+                ImmutableList.copyOf(additionalExpressions));
         FilterNode newFilterNode = iqFactory.createFilterNode(foldedExpression);
 
         treeComponent.insertParent(targetNode, newFilterNode);
@@ -104,8 +104,7 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
 
     private Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableExpression> newExpressions) {
-        Optional<ImmutableExpression> optionalExpression = immutabilityTools.foldBooleanExpressions(
-                newExpressions);
+        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(newExpressions.stream());
 
         if (formerNode instanceof JoinLikeNode) {
             JoinOrFilterNode newNode = ((JoinLikeNode)formerNode).changeOptionalFilterCondition(optionalExpression);

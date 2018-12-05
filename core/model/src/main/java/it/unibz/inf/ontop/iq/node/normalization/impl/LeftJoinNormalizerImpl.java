@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -37,18 +36,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
     private final ConditionSimplifier conditionSimplifier;
-    private final ImmutabilityTools immutabilityTools;
     private final JoinLikeChildBindingLifter bindingLifter;
 
     @Inject
     private LeftJoinNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, ConditionSimplifier conditionSimplifier,
-                                   ImmutabilityTools immutabilityTools, JoinLikeChildBindingLifter bindingLifter) {
+                                   JoinLikeChildBindingLifter bindingLifter) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.conditionSimplifier = conditionSimplifier;
-        this.immutabilityTools = immutabilityTools;
         this.bindingLifter = bindingLifter;
     }
 
@@ -251,9 +248,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             FilterNode filterNode = (FilterNode) liftedRightChild.getRootNode();
 
             ImmutableExpression newLJCondition = ljCondition
-                    .map(c -> immutabilityTools.foldBooleanExpressions(Stream.concat(
-                            c.flattenAND().stream(),
-                            filterNode.getFilterCondition().flattenAND().stream())).get())
+                    .map(c -> termFactory.getConjunction(Stream.of(c, filterNode.getFilterCondition())).get())
                     .orElseGet(filterNode::getFilterCondition);
 
             return updateConditionAndRightChild(Optional.of(newLJCondition), liftedRightChild.getChild());
@@ -266,7 +261,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (filterCondition.isPresent()) {
                 ImmutableExpression condition = filterCondition.get();
                 ImmutableExpression newLJCondition = ljCondition
-                        .map(c -> immutabilityTools.foldBooleanExpressions(Stream.concat(
+                        .map(c -> termFactory.getConjunction(Stream.concat(
                                 c.flattenAND().stream(),
                                 condition.flattenAND().stream())).get())
                         .orElse(condition);
@@ -658,7 +653,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .filter(e -> leftVariables.contains(e.getKey()))
                     .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
 
-            return immutabilityTools.foldBooleanExpressions(
+            return termFactory.getConjunction(
                     Stream.concat(
                             ljCondition
                                     .map(selectedSubstitution::applyToBooleanExpression)

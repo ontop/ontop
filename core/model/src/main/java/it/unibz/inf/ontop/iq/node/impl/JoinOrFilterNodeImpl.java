@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -29,7 +28,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected final TermFactory termFactory;
     protected final TypeFactory typeFactory;
     protected final DatalogTools datalogTools;
-    protected final ImmutabilityTools immutabilityTools;
     protected final SubstitutionFactory substitutionFactory;
     protected final ImmutableUnificationTools unificationTools;
     protected final ImmutableSubstitutionTools substitutionTools;
@@ -38,7 +36,7 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                                   ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
+                                   SubstitutionFactory substitutionFactory,
                                    ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                                    ExpressionEvaluator defaultExpressionEvaluator) {
         super(substitutionFactory, iqFactory);
@@ -47,7 +45,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogTools = datalogTools;
-        this.immutabilityTools = immutabilityTools;
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;

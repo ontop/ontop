@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -53,19 +52,17 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private LeftToInnerJoinExecutor(LeftJoinRightChildNormalizationAnalyzer normalizer,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                    ImmutabilityTools immutabilityTools, CoreUtilsFactory coreUtilsFactory) {
+                                    CoreUtilsFactory coreUtilsFactory) {
         this.normalizer = normalizer;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
-        this.immutabilityTools = immutabilityTools;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
@@ -154,7 +151,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         /*
          * All the conditions that could be assigned to the LJ put together
          */
-        Optional<ImmutableExpression> newLJCondition = immutabilityTools.foldBooleanExpressions(Stream.concat(
+        Optional<ImmutableExpression> newLJCondition = termFactory.getConjunction(Stream.concat(
                     // Former condition
                     Stream.of(leftJoinNode.getOptionalFilterCondition(),
                             // New condition proposed by the analyser

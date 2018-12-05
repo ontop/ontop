@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
@@ -43,13 +42,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
                            TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                           ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
+                           SubstitutionFactory substitutionFactory,
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory,
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
                            FilterNormalizer normalizer) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
+                substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;

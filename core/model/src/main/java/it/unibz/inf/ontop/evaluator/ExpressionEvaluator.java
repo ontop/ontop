@@ -26,7 +26,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndSymbol;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -57,14 +56,13 @@ public class ExpressionEvaluator {
 	private final Constant valueNull;
 	private final ImmutableUnificationTools unificationTools;
 	private final ExpressionNormalizer normalizer;
-	private final ImmutabilityTools immutabilityTools;
 	private final RDFTermTypeConstant iriConstant, bnodeConstant;
 	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								ImmutableUnificationTools unificationTools, ExpressionNormalizer normalizer,
-								ImmutabilityTools immutabilityTools, RDF rdfFactory) {
+								RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -73,7 +71,6 @@ public class ExpressionEvaluator {
 		valueNull = termFactory.getNullConstant();
 		this.unificationTools = unificationTools;
 		this.normalizer = normalizer;
-		this.immutabilityTools = immutabilityTools;
 		this.iriConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 		this.rdfFactory = rdfFactory;
@@ -657,7 +654,7 @@ public class ExpressionEvaluator {
 			else if (functionSymbol != IS_NULL
 					&& functionSymbol != IS_NOT_NULL
 					&& functionSymbol != IF_ELSE_NULL) {
-				ImmutableExpression notNullExpression = immutabilityTools.foldBooleanExpressions(
+				ImmutableExpression notNullExpression = termFactory.getConjunction(
 						functionalTerm.getTerms().stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
 				return eval(isnull
@@ -704,7 +701,7 @@ public class ExpressionEvaluator {
 			if (terms.isEmpty())
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, uriTemplate);
 			else
-				return eval(immutabilityTools.foldBooleanExpressions(
+				return eval(termFactory.getConjunction(
 						terms.stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
 				).get());
@@ -1018,6 +1015,6 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, immutabilityTools, rdfFactory);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, rdfFactory);
 	}
 }

@@ -1537,8 +1537,8 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         ImmutableExpression newExpression = topExpression
-                .map(e -> IMMUTABILITY_TOOLS.foldBooleanExpressions(e, leftExpression, rightExpression))
-                .orElseGet(() -> IMMUTABILITY_TOOLS.foldBooleanExpressions(leftExpression, rightExpression)).get();
+                .map(e -> TERM_FACTORY.getConjunction(e, leftExpression, rightExpression))
+                .orElseGet(() -> TERM_FACTORY.getConjunction(leftExpression, rightExpression));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(newExpression),
@@ -1568,7 +1568,7 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        Optional<ImmutableExpression> newExpression = IMMUTABILITY_TOOLS.foldBooleanExpressions(leftExpression, rightExpression);
+        ImmutableExpression newExpression = TERM_FACTORY.getConjunction(leftExpression, rightExpression);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(newExpression),
