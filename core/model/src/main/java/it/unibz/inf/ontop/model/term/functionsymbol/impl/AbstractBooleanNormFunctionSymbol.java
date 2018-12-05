@@ -50,4 +50,9 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
     protected String normalizeValue(String value) {
         return value.toLowerCase();
     }
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
+    }
 }

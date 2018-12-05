@@ -951,8 +951,8 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		 * Boolean constant
 		 */
-		else if (term.equals(termFactory.getBooleanConstant(false))
-				 || term.equals(termFactory.getBooleanConstant(true))) {
+		else if (term.equals(termFactory.getRDFBooleanConstant(false))
+				 || term.equals(termFactory.getRDFBooleanConstant(true))) {
 			return Types.BOOLEAN;
 		}
 
@@ -1242,11 +1242,6 @@ public class OneShotSQLGeneratorEngine {
 			// TODO: handle flags
 			return sqladapter.strReplace(orig, out_str, in_str);
 		}
-		if (functionSymbol == ExpressionOperation.CONCAT) {
-			String left = getSQLString(function.getTerm(0), index, false);
-			String right = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.strConcat(new String[]{left, right});
-		}
 		if (functionSymbol == ExpressionOperation.STRLEN) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.strLength(literal);
@@ -1282,10 +1277,6 @@ public class OneShotSQLGeneratorEngine {
 		if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.iriSafeEncode(literal);
-		}
-		if (functionSymbol == ExpressionOperation.UCASE) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.strUcase(literal);
 		}
 		if (functionSymbol == ExpressionOperation.MD5) {
 			String literal = getSQLString(function.getTerm(0), index, false);
@@ -1345,6 +1336,17 @@ public class OneShotSQLGeneratorEngine {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			//havingCond = true;
 			return "SUM(" + columnName + ")";
+		}
+
+		/*
+		 * New approach
+		 */
+		if (functionSymbol instanceof DBFunctionSymbol) {
+			ImmutableList<String> termStrings = function.getTerms().stream()
+					// TODO: try to get rid of useBrackets
+					.map(t -> getSQLString(t, index, false))
+					.collect(ImmutableCollectors.toList());
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
 		}
 
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);

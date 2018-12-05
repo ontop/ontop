@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
@@ -28,7 +29,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
     private final DBTermType dbStringType;
 
+    /**
+     * Name (in the DB dialect), arity -> regular DBFunctionSymbol
+     */
+    private final Table<String, Integer, DBFunctionSymbol> regularFunctionTable;
+
     protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
+                                              ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
@@ -37,6 +44,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
+        this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
     }
 
     @Override
@@ -59,6 +67,28 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         castTable.put(inputType, targetType, castFunctionSymbol);
         return castFunctionSymbol;
     }
+
+    @Override
+    public DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity) {
+        String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
+
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(regularFunctionTable.get(canonicalName, arity));
+        if (optionalSymbol.isPresent())
+            return optionalSymbol.get();
+
+        DBFunctionSymbol symbol = createRegularFunctionSymbol(canonicalName, arity);
+        regularFunctionTable.put(canonicalName, arity, symbol);
+        return symbol;
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected String canonicalizeRegularFunctionSymbolName(String nameInDialect) {
+        return nameInDialect.toUpperCase();
+    }
+
+    protected abstract DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity);
 
     protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType);
 

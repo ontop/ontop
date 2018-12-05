@@ -80,7 +80,7 @@ public class UnknownDatatypeMappingTest {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_tochar_function.obda");
     }
 
-    @Test(expected = InvalidMappingExceptionWithIndicator.class)
+    @Test(expected = UnknownDatatypeException.class)
     public void testMappingRDFSLiteralFunction() throws OBDASpecificationException {
         TEST_MANAGER.extractSpecification(DEFAULT_OWL_FILE, DIR + "marriage_rdfsliteral.obda");
     }

@@ -53,7 +53,7 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
                 .composeWith(ascendingSubstitution)
                 .reduceDomainToIntersectionWith(projectedVariables)
-                .normalizeValues();
+                .normalizeValues(true);
 
         return new AscendingSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);

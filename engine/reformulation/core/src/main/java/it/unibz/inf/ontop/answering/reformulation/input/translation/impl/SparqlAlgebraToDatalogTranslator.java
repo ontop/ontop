@@ -28,10 +28,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -79,6 +76,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
 
     private final DatalogProgram program;
     private final DatalogFactory datalogFactory;
@@ -92,6 +90,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      * @param termFactory
      * @param typeFactory
+     * @param functionSymbolFactory
      * @param datalogFactory
      * @param immutabilityTools
      *
@@ -99,13 +98,15 @@ public class SparqlAlgebraToDatalogTranslator {
 	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
                                      @Nullable IRIDictionary iriDictionary,
                                      AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
-                                     DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools,
+                                     FunctionSymbolFactory functionSymbolFactory, DatalogFactory datalogFactory,
+                                     ImmutabilityTools immutabilityTools,
                                      org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
 
@@ -613,7 +614,7 @@ public class SparqlAlgebraToDatalogTranslator {
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getBooleanConstant(false);
+            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getRDFBooleanConstant(false);
         }
         else if (expr instanceof UnaryValueOperator) {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
@@ -713,6 +714,15 @@ public class SparqlAlgebraToDatalogTranslator {
             for (ValueExpr a : f.getArgs())
                 terms.add(getExpression(a, variables));
 
+            // New approach
+            Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
+                    f.getURI(), terms.size());
+
+            if (optionalFunctionSymbol.isPresent()) {
+                return termFactory.getFunction(optionalFunctionSymbol.get(), terms);
+            }
+
+            // Old approach
             OperationPredicate p = XPathFunctions.get(f.getURI());
             if (p != null) {
                 if (arity != p.getArity())
@@ -726,18 +736,6 @@ public class SparqlAlgebraToDatalogTranslator {
             // these are all special cases with **variable** number of arguments
 
             switch (f.getURI()) {
-                // CONCAT (Sec 17.4.3.12)
-                // string literal  CONCAT(string literal ltrl1 ... string literal ltrln)
-                case "http://www.w3.org/2005/xpath-functions#concat":
-                    if (arity < 1)
-                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found " + terms.size() +
-                                ", at least 1) for SPARQL function CONCAT");
-
-                    Term concat = terms.get(0);
-                    for (int i = 1; i < arity; i++) // .get(i) is OK because it's based on an array
-                        concat = termFactory.getFunction(CONCAT, concat, terms.get(i));
-                    return concat;
-
                 // REPLACE (Sec 17.4.3.15)
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
                 //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
@@ -785,7 +783,7 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * String functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
+                    //.put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
                     .put("http://www.w3.org/2005/xpath-functions#lower-case", LCASE)
                     .put("http://www.w3.org/2005/xpath-functions#string-length", STRLEN)
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)

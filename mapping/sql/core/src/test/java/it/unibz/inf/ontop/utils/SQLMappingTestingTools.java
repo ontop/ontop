@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
@@ -23,6 +24,7 @@ public class SQLMappingTestingTools {
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
+    public static final DBFunctionSymbolFactory DB_FS_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
@@ -44,6 +46,7 @@ public class SQLMappingTestingTools {
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
+        DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
         RDF_FACTORY = injector.getInstance(RDF.class);

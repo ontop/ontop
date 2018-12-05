@@ -21,9 +21,9 @@ import static junit.framework.TestCase.assertEquals;
 public class NormalizationTest {
 
     private static GroundFunctionalTerm GROUND_FUNCTIONAL_TERM =
-            (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(CONCAT,
+            (GroundFunctionalTerm) TERM_FACTORY.getConcatFunctionalTerm(ImmutableList.of(
                     TERM_FACTORY.getDBStringConstant("this-"),
-                    TERM_FACTORY.getDBStringConstant("that"));
+                    TERM_FACTORY.getDBStringConstant("that")));
 
     @Test
     public void testDistinct1() {
@@ -1656,12 +1656,12 @@ public class NormalizationTest {
     }
 
     private ImmutableFunctionalTerm createNonInjectiveFunctionalTerm(Variable stringV1, Variable stringV2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, stringV1, stringV2);
+        return TERM_FACTORY.getConcatFunctionalTerm(ImmutableList.of(stringV1, stringV2));
     }
 
     private ImmutableFunctionalTerm createInjectiveFunctionalTerm1(ImmutableTerm term) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(CONCAT, TERM_FACTORY.getDBStringConstant("-something"),
-                term);
+        return TERM_FACTORY.getConcatFunctionalTerm(
+                ImmutableList.of(TERM_FACTORY.getDBStringConstant("-something"), term));
     }
 
     private ImmutableFunctionalTerm createInjectiveFunctionalTerm2(ImmutableTerm term) {

@@ -398,9 +398,25 @@ public class BindTest {
         expectedValues.add("\"SPARQL Tutorial title\"^^xsd:string");
         expectedValues.add("\"The Semantic Web title\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testBindWithUCase() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (UCASE(?title) AS ?w)\n"
+                + "}";
 
 
-
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL TUTORIAL\"@en");
+        expectedValues.add("\"THE SEMANTIC WEB\"@en");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test

@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 
+import java.util.Optional;
+
 public interface FunctionSymbolFactory {
 
     RDFTermFunctionSymbol getRDFTermFunctionSymbol();
@@ -22,4 +24,12 @@ public interface FunctionSymbolFactory {
 
 
     DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+    BooleanFunctionSymbol isARDFTermTypeFunctionSymbol();
+
+    // SPARQL functions
+
+    Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity);
+
+    FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 }

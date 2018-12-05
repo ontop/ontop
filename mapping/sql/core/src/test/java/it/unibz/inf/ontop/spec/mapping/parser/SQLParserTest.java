@@ -178,7 +178,7 @@ public class SQLParserTest {
 		r20.addAttribute(idfac.createAttributeID("mac_code"), "VARCHAR(8)", dbTypeFactory.getDBTermType(1, "VARCHAR(8)"), false);
 		r20.addAttribute(idfac.createAttributeID("pm_interval"), "INT", dbTypeFactory.getDBTermType(0, "INT"), false);
 
-		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY);
+		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
 	}
 
 	@Test
@@ -266,9 +266,13 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to to_char (Oracle specific cast)
+	@Test
 	public void test_1_5_extra_3() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
+		// to_char (Oracle specific cast)
 		RAExpression re = sqp.parse("select to_char(REGION_ID) as RID FROM HR.REGIONS");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
 	@Test
@@ -457,24 +461,36 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to MAX
+	@Test
 	public void test_3_1() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT MAX(score) as max_score FROM grade");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // sue to MIN
+	@Test
 	public void test_3_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT MIN(score) as min_score FROM grade");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to AVG
+	@Test
 	public void test_3_3() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT AVG(score) as avg_score FROM grade");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to SUM
+	@Test
 	public void test_3_4() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT SUM(amount) as total_amount FROM tax");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
 	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT(*)
@@ -482,15 +498,17 @@ public class SQLParserTest {
 		RAExpression re = sqp.parse("SELECT COUNT(*) as student_count FROM student");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT
+	@Test(expected = UnsupportedSelectQueryException.class) // due to COUNT(id)
 	public void test_3_6() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT COUNT(id) as student_count FROM student");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to EVERY
-	// *function* EVERY is not supported - it has no special meaning in SQL
+	@Test
 	public void test_3_7() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT EVERY(id) as student_count FROM student");
+		assertEquals(1, re.getDataAtoms().size());
+		assertEquals(0, re.getFilterAtoms().size());
+		assertEquals(1, re.getAttributes().size());
 	}
 
 	// @Test(expected = UnsupportedSelectQueryException.class)

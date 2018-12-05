@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import java.util.Optional;
+import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -9,18 +9,12 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 
 public class ImmutabilityTools {
 
@@ -135,39 +129,21 @@ public class ImmutabilityTools {
         return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
     }
 
+    @Deprecated
     public Optional<ImmutableExpression> foldBooleanExpressions(
             ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
-        final int size = conjunctionOfExpressions.size();
-        switch (size) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                return Optional.of(conjunctionOfExpressions.get(0));
-            case 2:
-                return Optional.of(termFactory.getImmutableExpression(
-                        AND,
-                        conjunctionOfExpressions));
-            default:
-                // Non-final
-                ImmutableExpression cumulativeExpression = termFactory.getImmutableExpression(
-                        AND,
-                        conjunctionOfExpressions.get(0),
-                        conjunctionOfExpressions.get(1));
-                for (int i = 2; i < size; i++) {
-                    cumulativeExpression = termFactory.getImmutableExpression(
-                            AND,
-                            cumulativeExpression,
-                            conjunctionOfExpressions.get(i));
-                }
-                return Optional.of(cumulativeExpression);
-        }
+        return Optional.of(conjunctionOfExpressions)
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction);
     }
 
+    @Deprecated
     public Optional<ImmutableExpression> foldBooleanExpressions(
             ImmutableExpression... conjunctionOfExpressions) {
         return foldBooleanExpressions(ImmutableList.copyOf(conjunctionOfExpressions));
     }
 
+    @Deprecated
     public Optional<ImmutableExpression> foldBooleanExpressions(
             Stream<ImmutableExpression> conjunctionOfExpressions) {
         return foldBooleanExpressions(conjunctionOfExpressions

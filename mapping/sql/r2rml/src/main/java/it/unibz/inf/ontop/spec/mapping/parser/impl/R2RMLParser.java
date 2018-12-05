@@ -27,7 +27,6 @@ import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
@@ -553,11 +552,7 @@ public class R2RMLParser {
 			// terms.add(0, uriTemplate);
 			return termFactory.getRDFLiteralFunctionalTerm(lexicalValue, XSD.STRING);
 		case 4://concat
-			ImmutableFunctionalTerm f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, terms.get(0), terms.get(1));
-            for(int j=2;j<terms.size();j++){
-                f = termFactory.getImmutableFunctionalTerm(ExpressionOperation.CONCAT, f, terms.get(j));
-            }
-            return f;
+			return termFactory.getConcatFunctionalTerm(ImmutableList.copyOf(terms));
 		}
 		return null;
 	}

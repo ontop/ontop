@@ -258,11 +258,9 @@ public class OBDAMappingTransformer {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			Predicate functionSymbol = functionalLexicalTerm.getFunctionSymbol();
 
-			if (functionSymbol == ExpressionOperation.CONCAT) { //concat
-				StringBuilder sb = new StringBuilder();
-				ImmutableList<? extends ImmutableTerm> terms = functionalLexicalTerm.getTerms();
-				TargetQueryRenderer.getNestedConcats(sb, terms.get(0), terms.get(1));
-				termMap = templateFct.apply(mappingFactory.createTemplate(sb.toString()));
+			if (functionSymbol instanceof DBConcatFunctionSymbol) { //concat
+				termMap = templateFct.apply(mappingFactory.createTemplate(
+						TargetQueryRenderer.displayConcat(functionalLexicalTerm)));
 			} else
 				throw new R2RMLSerializationException("Unexpected function symbol: " + functionSymbol);
 		}

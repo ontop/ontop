@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
@@ -29,6 +30,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
     private final RDF rdfFactory;
@@ -40,7 +42,8 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
     private DatalogSparqlQueryTranslator(@Assisted UriTemplateMatcher uriTemplateMatcher,
                                          @Nullable IRIDictionary iriDictionary,
                                          AtomFactory atomFactory, TermFactory termFactory,
-                                         TypeFactory typeFactory, DatalogFactory datalogFactory,
+                                         TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory,
+                                         DatalogFactory datalogFactory,
                                          ImmutabilityTools immutabilityTools, RDF rdfFactory) {
 
         this.uriTemplateMatcher = uriTemplateMatcher;
@@ -48,6 +51,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
         this.rdfFactory = rdfFactory;
@@ -60,7 +64,7 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
 
         SparqlAlgebraToDatalogTranslator mutableTranslator =
                 new SparqlAlgebraToDatalogTranslator(uriTemplateMatcher, iriDictionary, atomFactory, termFactory,
-                        typeFactory, datalogFactory, immutabilityTools, rdfFactory);
+                        typeFactory, functionSymbolFactory, datalogFactory, immutabilityTools, rdfFactory);
 
         return mutableTranslator.translate(inputParsedQuery);
     }

@@ -23,6 +23,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private final String template;
     private final DBTermType lexicalType;
+
     private final Encoder iriEncoder;
 
     protected ObjectStringTemplateFunctionSymbolImpl(String template, int arity, TypeFactory typeFactory) {
@@ -68,7 +69,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
-        if (newTerms.stream()
+        // For efficiency purposes, we keep the term functional to make decomposition easier
+        if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
@@ -100,5 +102,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     @Override
     public boolean canBePostProcessed() {
         return true;
+    }
+
+
+    @Override
+    public String getNativeDBString(ImmutableList<String> termStrings) {
+        throw new RuntimeException("TODO: implement getNativeDBString for object template");
     }
 }

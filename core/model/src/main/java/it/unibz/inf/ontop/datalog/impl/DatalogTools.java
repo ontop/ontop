@@ -27,7 +27,7 @@ public class DatalogTools {
     private DatalogTools(TermFactory termFactory, DatalogFactory datalogFactory) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
-        RDFLiteralConstant valueTrue = termFactory.getBooleanConstant(true);
+        RDFLiteralConstant valueTrue = termFactory.getRDFBooleanConstant(true);
         TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
         IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
         IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
