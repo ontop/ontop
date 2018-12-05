@@ -242,12 +242,12 @@ public class PushDownBooleanExpressionOptimizerImpl implements PushDownBooleanEx
         /*
          * Decomposes the boolean expressions as much as possible (conjunction)
          */
-        ImmutableSet<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
+        Stream<ImmutableExpression> booleanExpressions = optionalNestedExpression.get().flattenAND();
 
         /*
          * For each boolean expression, looks for recipients.
          */
-        ImmutableMultimap<Recipient, ImmutableExpression> recipientMap = booleanExpressions.stream()
+        ImmutableMultimap<Recipient, ImmutableExpression> recipientMap = booleanExpressions
                 .flatMap(ex -> selectPushes(currentQuery, providerNode, preSelectedChildren, ex))
                 .collect(ImmutableCollectors.toMultimap(
                         p -> p.recipient,

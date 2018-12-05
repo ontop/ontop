@@ -347,10 +347,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .map(ct -> ct.condition)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .flatMap(c -> c.flattenAND().stream());
+                    .flatMap(ImmutableExpression::flattenAND);
 
             Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition
-                    .map(c -> Stream.concat(c.flattenAND().stream(), conditions))
+                    .map(c -> Stream.concat(c.flattenAND(), conditions))
                     .orElse(conditions));
 
             ImmutableList<IQTree> newChildren = conditionAndTrees.stream()

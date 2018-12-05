@@ -96,7 +96,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     private DBBooleanFunctionSymbol createDBAnd(int arity) {
-        return new DefaultDBAndSymbol(AND_STR, arity, dbBooleanType);
+        return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
     }
 
     @Override

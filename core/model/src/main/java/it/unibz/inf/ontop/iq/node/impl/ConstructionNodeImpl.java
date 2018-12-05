@@ -763,7 +763,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
                 tauCPropagationResults.filter
-                        .map(e -> e.flattenAND().stream())
+                        .map(ImmutableExpression::flattenAND)
                         .orElseGet(Stream::empty),
                 newConditionStream));
 

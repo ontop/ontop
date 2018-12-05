@@ -454,7 +454,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .collect(ImmutableCollectors.toSet());
 
 
-        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
+                .collect(ImmutableCollectors.toSet());
         ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {

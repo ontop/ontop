@@ -478,7 +478,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
     private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
         return termFactory.getConjunction(expressions
-                .flatMap(e -> e.flattenAND().stream())
+                .flatMap(ImmutableExpression::flattenAND)
                 .collect(ImmutableCollectors.toList()));
     }
 

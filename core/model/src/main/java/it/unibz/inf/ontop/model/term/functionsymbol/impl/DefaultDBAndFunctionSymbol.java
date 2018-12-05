@@ -3,17 +3,18 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
+public class DefaultDBAndFunctionSymbol extends DBBooleanFunctionSymbolImpl implements DBAndFunctionSymbol {
 
     private final String argumentSeparator;
 
-    protected DefaultDBAndSymbol(String nameInDialect, int arity, DBTermType dbBooleanTermType) {
+    protected DefaultDBAndFunctionSymbol(String nameInDialect, int arity, DBTermType dbBooleanTermType) {
         super(nameInDialect, arity, dbBooleanTermType);
         if (arity < 2)
             throw new IllegalArgumentException("Arity must be >= 2");
@@ -60,7 +61,7 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
                 .filter(t -> (t instanceof ImmutableExpression))
                 .map(t -> (ImmutableExpression) t)
                 // Flattens nested ANDs
-                .flatMap(t -> (t.getFunctionSymbol() instanceof DefaultDBAndSymbol)
+                .flatMap(t -> (t.getFunctionSymbol() instanceof DBAndFunctionSymbol)
                         ? t.getTerms().stream()
                             .map(s -> (ImmutableExpression)s)
                         : Stream.of(t))

@@ -140,7 +140,8 @@ public class ImmutabilityTools {
     private ImmutableSet<ImmutableExpression> filterOuterMostConjuncts(java.util.function.Predicate<ImmutableExpression> filterMethod,
                                                                               ImmutableExpression expression) {
 
-        ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND()
+                .collect(ImmutableCollectors.toSet());
         if (conjuncts.size() > 1) {
             ImmutableList<ImmutableExpression> filteredConjuncts = conjuncts.stream()
                     .filter(filterMethod)

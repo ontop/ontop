@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndSymbol;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -311,7 +311,7 @@ public class ExpressionEvaluator {
 			}
 		}
 		// TODO: remove this temporary hack!
-		else if (functionSymbol instanceof DefaultDBAndSymbol) {
+		else if (functionSymbol instanceof DBAndFunctionSymbol) {
 			return evalNaryAnd(term.getTerms());
 		}
 		else {
@@ -967,7 +967,7 @@ public class ExpressionEvaluator {
 	 * Temporary
 	 */
 	private ImmutableTerm evalNaryAnd(ImmutableList<? extends ImmutableTerm> terms) {
-		return DefaultDBAndSymbol.computeNewConjunction(
+		return DefaultDBAndFunctionSymbol.computeNewConjunction(
 				terms.stream()
 						.map(this::eval)
 						.map(t -> t == null ? (ImmutableTerm) termFactory.getNullEvaluation() : t)

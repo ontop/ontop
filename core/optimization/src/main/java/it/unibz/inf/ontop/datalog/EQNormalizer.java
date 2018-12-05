@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -60,8 +60,8 @@ public class EQNormalizer {
                 i--;
             }
             //search for nested equalities in AND function
-            // TODO: refactor this temporary solution! (unnesting should be not needed)
-            else if (atom.getFunctionSymbol() instanceof DefaultDBAndSymbol) {
+            // TODO: simplify (unnesting should not be needed)
+            else if (atom.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                 nestedEQSubstitutions(atom, mgu);
 
                 //we remove the function if empty because all its terms were equalities
@@ -109,7 +109,7 @@ public class EQNormalizer {
                 //consider the case of  AND function. Calls recursive method to consider nested equalities
                 else {
                     // TODO: temporary!
-                    if (t2.getFunctionSymbol() instanceof DefaultDBAndSymbol) {
+                    if (t2.getFunctionSymbol() instanceof DBAndFunctionSymbol) {
                         nestedEQSubstitutions(t2, mgu);
 
                         //we remove the function if empty because all its terms were equalities

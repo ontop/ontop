@@ -91,8 +91,7 @@ public class JoinLikeChildBindingLifter {
                 initialJoiningCondition
                         .map(substitution::applyToBooleanExpression)
                         .map(ImmutableExpression::flattenAND)
-                        .orElseGet(ImmutableSet::of)
-                        .stream(),
+                        .orElseGet(Stream::empty),
                 freshRenaming.getImmutableMap().entrySet().stream()
                         .map(r -> termFactory.getImmutableExpression(EQ,
                                 substitution.applyToVariable(r.getKey()),

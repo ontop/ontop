@@ -8,11 +8,11 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndSymbol;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
@@ -41,14 +41,13 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
      * Recursive
      */
     @Override
-    public ImmutableSet<ImmutableExpression> flattenAND() {
-        // TODO: refactor this temporary solution!
-        if (getFunctionSymbol() instanceof DefaultDBAndSymbol) {
+    public Stream<ImmutableExpression> flattenAND() {
+        if (getFunctionSymbol() instanceof DBAndFunctionSymbol) {
             return getTerms().stream()
                     .map(t -> (ImmutableExpression) t)
-                    .collect(ImmutableCollectors.toSet());
+                    .distinct();
         }
-        return ImmutableSet.of(this);
+        return Stream.of(this);
     }
 
     @Override

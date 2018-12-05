@@ -261,9 +261,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             if (filterCondition.isPresent()) {
                 ImmutableExpression condition = filterCondition.get();
                 ImmutableExpression newLJCondition = ljCondition
-                        .map(c -> termFactory.getConjunction(Stream.concat(
-                                c.flattenAND().stream(),
-                                condition.flattenAND().stream())).get())
+                        .map(c -> termFactory.getConjunction(Stream.of(c, condition)).get())
                         .orElse(condition);
 
                 NaryIQTree newRightChild = iqFactory.createNaryIQTree(

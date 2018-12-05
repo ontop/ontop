@@ -240,7 +240,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream) {
 		ImmutableList<ImmutableExpression> conjuncts = expressionStream
-				.flatMap(e -> e.flattenAND().stream())
+				.flatMap(ImmutableExpression::flattenAND)
 				.distinct()
 				.collect(ImmutableCollectors.toList());
 

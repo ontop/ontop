@@ -242,10 +242,7 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
         }
 
         /* conjunction of all conjuncts to propagate */
-        ImmutableExpression conjunction = termFactory.getConjunction(propagatedExpressions.stream()
-                .flatMap(e -> e.flattenAND().stream())
-                .distinct()
-                .collect(ImmutableCollectors.toList()));
+        ImmutableExpression conjunction = termFactory.getConjunction(propagatedExpressions.stream()).get();
 
         Optional<Optional<PushUpBooleanExpressionProposal>> merge = providers.stream()
                 .map(n -> makeNodeCentricProposal(
@@ -340,9 +337,9 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
 
         // conjuncts which will not be propagated up from this child
 
-        ImmutableList<ImmutableExpression> conjuncts = fullBooleanExpression.flattenAND().stream()
+        ImmutableList<ImmutableExpression> conjuncts = fullBooleanExpression.flattenAND()
                 .filter(e -> !propagatedExpressions.contains(e))
-                .flatMap(e -> e.flattenAND().stream())
+                .flatMap(ImmutableExpression::flattenAND)
                 .collect(ImmutableCollectors.toList());
 
         return Optional.of(conjuncts)
@@ -355,7 +352,8 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
      */
     private ImmutableSet<ImmutableExpression> getExpressionsToPropagateAboveUnion(ImmutableSet<CommutativeJoinOrFilterNode> providers) {
         return providers.stream()
-                .map(n -> n.getOptionalFilterCondition().get().flattenAND())
+                .map(n -> n.getOptionalFilterCondition().get().flattenAND()
+                        .collect(ImmutableCollectors.toSet()))
                 .reduce(this::computeIntersection).get();
     }
 

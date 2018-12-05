@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 public interface ImmutableExpression extends ImmutableFunctionalTerm {
@@ -18,7 +19,7 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
     /**
      * Flattens AND expressions.
      */
-    ImmutableSet<ImmutableExpression> flattenAND();
+    Stream<ImmutableExpression> flattenAND();
 
     /**
      * Flattens OR expressions.
