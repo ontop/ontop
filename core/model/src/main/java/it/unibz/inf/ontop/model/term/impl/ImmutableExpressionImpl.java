@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
@@ -98,6 +99,17 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
             return termFactory.getNullEvaluation();
 
         throw new IncorrectExpressionSimplificationBugException(this, newTerm);
+    }
+
+    @Override
+    public ImmutableExpression negate(TermFactory termFactory) {
+        BooleanFunctionSymbol functionSymbol = getFunctionSymbol();
+
+        if (functionSymbol.blocksNegation()) {
+            return termFactory.getImmutableExpression(NOT, this);
+        }
+        else
+            return functionSymbol.negate(getTerms(), termFactory);
     }
 
 

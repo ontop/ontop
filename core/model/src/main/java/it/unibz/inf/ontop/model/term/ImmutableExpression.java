@@ -51,6 +51,11 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
         }
     }
 
+    /**
+     * Returns the equivalent to NOT(this)
+     */
+    ImmutableExpression negate(TermFactory termFactory);
+
     interface Evaluation {
 
         Optional<ImmutableExpression> getExpression();

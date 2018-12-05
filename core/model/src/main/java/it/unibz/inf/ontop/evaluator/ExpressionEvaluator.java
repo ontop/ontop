@@ -735,27 +735,8 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalNot(ImmutableFunctionalTerm term) {
 		ImmutableTerm initialSubTerm = term.getTerm(0);
 		ImmutableTerm teval = eval(initialSubTerm);
-		if (teval instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
-			FunctionSymbol functionSymbol = f.getFunctionSymbol();
-			if (functionSymbol == IS_NOT_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			} else if (functionSymbol == IS_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
-			} else if (functionSymbol == NEQ) {
-				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
-			} else if (functionSymbol == EQ) {
-				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
-			}
-			else if ((functionSymbol == AND || functionSymbol == OR)) {
-				ImmutableList<ImmutableTerm> negatedArguments = f.getTerms().stream()
-						.map(t -> termFactory.getImmutableFunctionalTerm(NOT, t))
-						.map(this::eval)
-						.collect(ImmutableCollectors.toList());
-				return functionSymbol == AND
-						? termFactory.getImmutableFunctionalTerm(OR, negatedArguments)
-						: termFactory.getImmutableFunctionalTerm(AND, negatedArguments);
-			}
+		if (teval instanceof ImmutableExpression) {
+			return ((ImmutableExpression) teval).negate(termFactory);
 		} else if (teval instanceof Constant) {
 			if (teval == valueFalse)
 				return valueTrue;

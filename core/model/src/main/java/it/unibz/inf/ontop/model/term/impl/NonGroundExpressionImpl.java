@@ -2,13 +2,11 @@ package it.unibz.inf.ontop.model.term.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundFunctionalTerm;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.checkNonGroundTermConstraint;
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {

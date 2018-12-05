@@ -64,6 +64,11 @@ public interface TermFactory {
 	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
 
 	/**
+	 * Must be non-empty
+	 */
+	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
+
+	/**
 	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
 	 *
 	 * Must be non-empty

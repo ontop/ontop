@@ -78,4 +78,18 @@ public class DefaultDBAndSymbol extends DBBooleanFunctionSymbolImpl {
     public String getNativeDBString(ImmutableList<String> termStrings) {
         return inBrackets(String.join(argumentSeparator, termStrings));
     }
+
+    @Override
+    public boolean blocksNegation() {
+        return false;
+    }
+
+    @Override
+    public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
+        return termFactory.getDisjunction(
+                subTerms.stream()
+                    .map(t -> (ImmutableExpression) t)
+                    .map(t -> t.negate(termFactory))
+                    .collect(ImmutableCollectors.toList()));
+    }
 }

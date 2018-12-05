@@ -38,6 +38,7 @@ import org.apache.commons.rdf.api.RDF;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 
 @Singleton
@@ -237,6 +238,32 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> disjunctionOfExpressions) {
+		final int size = disjunctionOfExpressions.size();
+		switch (size) {
+			case 0:
+				throw new IllegalArgumentException("disjunctionOfExpressions must be non-empty");
+			case 1:
+				return disjunctionOfExpressions.get(0);
+			case 2:
+				return getImmutableExpression(OR, disjunctionOfExpressions);
+			default:
+				// Non-final
+				ImmutableExpression cumulativeExpression = getImmutableExpression(
+						OR,
+						disjunctionOfExpressions.get(0),
+						disjunctionOfExpressions.get(1));
+				for (int i = 2; i < size; i++) {
+					cumulativeExpression = getImmutableExpression(
+							OR,
+							cumulativeExpression,
+							disjunctionOfExpressions.get(i));
+				}
+				return cumulativeExpression;
+		}
+	}
+
+	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
 	}
@@ -360,7 +387,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.OR,term1, term2);
+		return getExpression(OR,term1, term2);
 	}
 
 
