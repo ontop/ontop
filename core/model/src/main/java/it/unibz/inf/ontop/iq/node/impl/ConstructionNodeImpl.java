@@ -24,13 +24,11 @@ import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol.FunctionalTermNullability;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -64,7 +62,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final TermFactory termFactory;
     private final Constant nullValue;
-    private final ImmutabilityTools immutabilityTools;
     private final ExpressionEvaluator expressionEvaluator;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -75,7 +72,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
-                                 TermFactory termFactory, IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools,
+                                 TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ExpressionEvaluator expressionEvaluator, OntopModelSettings settings,
                                  AscendingSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
@@ -90,7 +87,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.termFactory = termFactory;
         this.nullValue = termFactory.getNullConstant();
         this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionNormalizer = substitutionNormalizer;
@@ -141,7 +137,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ImmutabilityTools immutabilityTools, ExpressionEvaluator expressionEvaluator,
+                                 ExpressionEvaluator expressionEvaluator,
                                  AscendingSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
@@ -152,7 +148,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.substitution = substitutionFactory.getSubstitution();
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
         this.expressionEvaluator = expressionEvaluator;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
@@ -731,7 +726,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
                 .map(e -> createEquality(e.getKey(), e.getValue()));
 
-        return immutabilityTools.foldBooleanExpressions(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
+        return termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
     }
 
     private PropagationResults<VariableOrGroundTerm> propagateTauF(ImmutableSubstitution<GroundFunctionalTerm> tauF,
@@ -766,9 +761,9 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                 .map(e -> createEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));
 
-        Optional<ImmutableExpression> newF = immutabilityTools.foldBooleanExpressions(Stream.concat(
+        Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
                 tauCPropagationResults.filter
-                        .map(e -> e.flattenAND().stream())
+                        .map(ImmutableExpression::flattenAND)
                         .orElseGet(Stream::empty),
                 newConditionStream));
 

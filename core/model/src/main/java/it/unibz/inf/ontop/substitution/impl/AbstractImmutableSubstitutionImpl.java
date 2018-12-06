@@ -422,8 +422,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                 // Non-final
                 ImmutableExpression aggregateExpression = equalityIterator.next();
                 while (equalityIterator.hasNext()) {
-                    aggregateExpression = termFactory.getImmutableExpression(BooleanExpressionOperation.AND, aggregateExpression,
-                            equalityIterator.next());
+                    aggregateExpression = termFactory.getConjunction(aggregateExpression, equalityIterator.next());
                 }
                 return Optional.of(aggregateExpression);
         }

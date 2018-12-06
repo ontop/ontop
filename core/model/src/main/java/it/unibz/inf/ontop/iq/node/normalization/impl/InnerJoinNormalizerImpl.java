@@ -14,11 +14,7 @@ import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -37,17 +33,17 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
     private final ConditionSimplifier conditionSimplifier;
-    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
                                     AscendingSubstitutionNormalizer substitutionNormalizer,
-                                    ConditionSimplifier conditionSimplifier, ImmutabilityTools immutabilityTools) {
+                                    ConditionSimplifier conditionSimplifier, TermFactory termFactory) {
         this.bindingLift = bindingLift;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.conditionSimplifier = conditionSimplifier;
-        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -351,10 +347,10 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .map(ct -> ct.condition)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
-                    .flatMap(c -> c.flattenAND().stream());
+                    .flatMap(ImmutableExpression::flattenAND);
 
-            Optional<ImmutableExpression> newJoiningCondition = immutabilityTools.foldBooleanExpressions(joiningCondition
-                    .map(c -> Stream.concat(c.flattenAND().stream(), conditions))
+            Optional<ImmutableExpression> newJoiningCondition = termFactory.getConjunction(joiningCondition
+                    .map(c -> Stream.concat(c.flattenAND(), conditions))
                     .orElse(conditions));
 
             ImmutableList<IQTree> newChildren = conditionAndTrees.stream()

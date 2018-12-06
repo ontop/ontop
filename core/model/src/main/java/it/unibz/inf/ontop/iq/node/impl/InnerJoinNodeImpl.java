@@ -12,11 +12,9 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.JoinLikeChildBindingLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -46,14 +44,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
                                 TermNullabilityEvaluator nullabilityEvaluator,
                                 TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                                ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                                ExpressionEvaluator defaultExpressionEvaluator,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                                ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift,
+                                ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                defaultExpressionEvaluator, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
@@ -63,13 +61,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                               TermNullabilityEvaluator nullabilityEvaluator,
                               TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                              ExpressionEvaluator defaultExpressionEvaluator,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift, InnerJoinNormalizer normalizer) {
+                              ConditionSimplifier conditionSimplifier,InnerJoinNormalizer normalizer) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                defaultExpressionEvaluator, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
@@ -78,13 +76,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                               TypeFactory typeFactory, DatalogTools datalogTools,
-                              ExpressionEvaluator defaultExpressionEvaluator, ImmutabilityTools immutabilityTools,
+                              ExpressionEvaluator defaultExpressionEvaluator,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier, JoinLikeChildBindingLifter bindingLift, InnerJoinNormalizer normalizer) {
+                              ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools);
+                substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;

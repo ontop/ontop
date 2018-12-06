@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 
 /**
  * TODO: find a better name!
@@ -40,5 +39,15 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
             return termFactory.getDBBooleanConstant(firstType.isA(secondType));
         }
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
+    @Override
+    public boolean blocksNegation() {
+        return false;
+    }
+
+    @Override
+    public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
+        return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
     }
 }

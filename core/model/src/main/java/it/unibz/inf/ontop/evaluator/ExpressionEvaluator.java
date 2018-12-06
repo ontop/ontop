@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -51,28 +51,26 @@ public class ExpressionEvaluator {
 	private final DatalogTools datalogTools;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final RDFLiteralConstant valueFalse;
-	private final RDFLiteralConstant valueTrue;
+	private final DBConstant valueFalse;
+	private final DBConstant valueTrue;
 	private final Constant valueNull;
 	private final ImmutableUnificationTools unificationTools;
 	private final ExpressionNormalizer normalizer;
-	private final ImmutabilityTools immutabilityTools;
 	private final RDFTermTypeConstant iriConstant, bnodeConstant;
 	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								ImmutableUnificationTools unificationTools, ExpressionNormalizer normalizer,
-								ImmutabilityTools immutabilityTools, RDF rdfFactory) {
+								RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
-		valueFalse = termFactory.getRDFBooleanConstant(false);
-		valueTrue = termFactory.getRDFBooleanConstant(true);
+		valueFalse = termFactory.getDBBooleanConstant(false);
+		valueTrue = termFactory.getDBBooleanConstant(true);
 		valueNull = termFactory.getNullConstant();
 		this.unificationTools = unificationTools;
 		this.normalizer = normalizer;
-		this.immutabilityTools = immutabilityTools;
 		this.iriConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 		this.rdfFactory = rdfFactory;
@@ -140,7 +138,7 @@ public class ExpressionEvaluator {
 				return optionalExpression.get();
 			else
 				return optionalBooleanValue
-						.map(b -> (Constant) termFactory.getRDFBooleanConstant(b))
+						.map(b -> (Constant) termFactory.getDBBooleanConstant(b))
 						.orElseGet(termFactory::getNullConstant);
 		}
 	}
@@ -270,8 +268,6 @@ public class ExpressionEvaluator {
 		}
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
-				case AND :
-					return evalAnd(term.getTerm(0), term.getTerm(1));
 				case OR:
 					return evalOr(term.getTerm(0), term.getTerm(1));
 				case NOT:
@@ -314,6 +310,10 @@ public class ExpressionEvaluator {
 
 			}
 		}
+		// TODO: remove this temporary hack!
+		else if (functionSymbol instanceof DBAndFunctionSymbol) {
+			return evalNaryAnd(term.getTerms());
+		}
 		else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "
@@ -334,7 +334,7 @@ public class ExpressionEvaluator {
 				.map(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))
 				.orElse(false);
 
-		return termFactory.getRDFBooleanConstant(isNumeric);
+		return termFactory.getDBBooleanConstant(isNumeric);
 	}
 
 	/*
@@ -350,7 +350,7 @@ public class ExpressionEvaluator {
 				return optionalTypeInference.get()
 						.getTermType()
 						.map(t -> t.isA(typeFactory.getAbstractRDFSLiteral()))
-						.map(termFactory::getRDFBooleanConstant)
+						.map(termFactory::getDBBooleanConstant)
 						// Non-fatal error
 						.orElse(null);
 			}
@@ -369,7 +369,7 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalIsBlank(ImmutableFunctionalTerm term) {
 		ImmutableTerm teval = eval(term.getTerm(0));
 		if (teval instanceof ImmutableFunctionalTerm) {
-			return termFactory.getRDFBooleanConstant(isKnownToBeBlank((ImmutableFunctionalTerm) teval));
+			return termFactory.getDBBooleanConstant(isKnownToBeBlank((ImmutableFunctionalTerm) teval));
 		}
 		return term;
 	}
@@ -380,7 +380,7 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalIsIri(ImmutableFunctionalTerm term) {
 		ImmutableTerm teval = eval(term.getTerm(0));
 		if (teval instanceof ImmutableFunctionalTerm) {
-			return termFactory.getRDFBooleanConstant(isKnownToBeIRI((ImmutableFunctionalTerm) teval));
+			return termFactory.getDBBooleanConstant(isKnownToBeIRI((ImmutableFunctionalTerm) teval));
 		}
 		return term;
 	}
@@ -534,7 +534,7 @@ public class ExpressionEvaluator {
 					return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, teval1);
 			}
 			else {
-				return termFactory.getRDFBooleanConstant(lang1.equals(lang2));
+				return termFactory.getDBBooleanConstant(lang1.equals(lang2));
 			}
 		}
 		else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
@@ -630,10 +630,10 @@ public class ExpressionEvaluator {
 		}
 		ImmutableTerm result = eval(innerTerm);
 		if (result == valueNull) {
-			return termFactory.getRDFBooleanConstant(isnull);
+			return termFactory.getDBBooleanConstant(isnull);
 		}
 		else if (result instanceof Constant) {
-			return termFactory.getRDFBooleanConstant(!isnull);
+			return termFactory.getDBBooleanConstant(!isnull);
 		}
 
 		if (result instanceof ImmutableFunctionalTerm) {
@@ -652,7 +652,7 @@ public class ExpressionEvaluator {
 			else if (functionSymbol != IS_NULL
 					&& functionSymbol != IS_NOT_NULL
 					&& functionSymbol != IF_ELSE_NULL) {
-				ImmutableExpression notNullExpression = immutabilityTools.foldBooleanExpressions(
+				ImmutableExpression notNullExpression = termFactory.getConjunction(
 						functionalTerm.getTerms().stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
 				return eval(isnull
@@ -699,7 +699,7 @@ public class ExpressionEvaluator {
 			if (terms.isEmpty())
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, uriTemplate);
 			else
-				return eval(immutabilityTools.foldBooleanExpressions(
+				return eval(termFactory.getConjunction(
 						terms.stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
 				).get());
@@ -730,27 +730,8 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalNot(ImmutableFunctionalTerm term) {
 		ImmutableTerm initialSubTerm = term.getTerm(0);
 		ImmutableTerm teval = eval(initialSubTerm);
-		if (teval instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
-			FunctionSymbol functionSymbol = f.getFunctionSymbol();
-			if (functionSymbol == IS_NOT_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			} else if (functionSymbol == IS_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
-			} else if (functionSymbol == NEQ) {
-				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
-			} else if (functionSymbol == EQ) {
-				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
-			}
-			else if ((functionSymbol == AND || functionSymbol == OR)) {
-				ImmutableList<ImmutableTerm> negatedArguments = f.getTerms().stream()
-						.map(t -> termFactory.getImmutableFunctionalTerm(NOT, t))
-						.map(this::eval)
-						.collect(ImmutableCollectors.toList());
-				return functionSymbol == AND
-						? termFactory.getImmutableFunctionalTerm(OR, negatedArguments)
-						: termFactory.getImmutableFunctionalTerm(AND, negatedArguments);
-			}
+		if (teval instanceof ImmutableExpression) {
+			return ((ImmutableExpression) teval).negate(termFactory);
 		} else if (teval instanceof Constant) {
 			if (teval == valueFalse)
 				return valueTrue;
@@ -819,9 +800,9 @@ public class ExpressionEvaluator {
 		}
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			if (eval1.equals(eval2))
-				return termFactory.getRDFBooleanConstant(eq);
+				return termFactory.getDBBooleanConstant(eq);
 			else
-				return termFactory.getRDFBooleanConstant(!eq);
+				return termFactory.getDBBooleanConstant(!eq);
 
 		}
 		else if (eval1 instanceof ImmutableFunctionalTerm) {
@@ -864,7 +845,7 @@ public class ExpressionEvaluator {
 					}
 				}
 				else if (!functionSymbol1.equals(pred2)) {
-					return termFactory.getRDFBooleanConstant(!eq);
+					return termFactory.getDBBooleanConstant(!eq);
 				}
 				else {
 					return term;
@@ -888,12 +869,12 @@ public class ExpressionEvaluator {
 				return evalUriFunctionsWithSingleTerm(uriFunction1, uriFunction2, isEqual);
 			} else if (arityForFunction2 > 1) {
 				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return termFactory.getRDFBooleanConstant(!isEqual);
+				return termFactory.getDBBooleanConstant(!isEqual);
 			}
 		} else if (arityForFunction1 > 1) {
 			if (arityForFunction2 == 1) {
 				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return termFactory.getRDFBooleanConstant(!isEqual);
+				return termFactory.getDBBooleanConstant(!isEqual);
 			} else if (arityForFunction2 > 1) {
 				return evalUriFunctionsWithMultipleTerms(uriFunction1, uriFunction2, isEqual);
 			}
@@ -923,7 +904,7 @@ public class ExpressionEvaluator {
 		} else if (term2 instanceof Constant) {
 
 			if (term1.equals(term2))
-				return termFactory.getRDFBooleanConstant(isEqual);
+				return termFactory.getDBBooleanConstant(isEqual);
 			else
 				{
 				if (term1 instanceof Variable) {
@@ -932,7 +913,7 @@ public class ExpressionEvaluator {
 					else
 						return termFactory.getImmutableFunctionalTerm(NEQ, term1, term2);
 				}
-				return termFactory.getRDFBooleanConstant(!isEqual);
+				return termFactory.getDBBooleanConstant(!isEqual);
 			}
 		}
 		// TODO: try to optimize further on
@@ -944,17 +925,17 @@ public class ExpressionEvaluator {
 	private ImmutableTerm evalUriFunctionsWithMultipleTerms(ImmutableFunctionalTerm uriFunction1,
 															ImmutableFunctionalTerm uriFunction2, boolean isEqual) {
 		if (uriFunction1.equals(uriFunction2))
-			return termFactory.getRDFBooleanConstant(isEqual);
+			return termFactory.getDBBooleanConstant(isEqual);
 
 		Optional<ImmutableSubstitution<ImmutableTerm>> optionalTheta = unificationTools.computeMGU(uriFunction1, uriFunction2);
 		if (!optionalTheta.isPresent())
-			return termFactory.getRDFBooleanConstant(!isEqual);
+			return termFactory.getDBBooleanConstant(!isEqual);
 		else {
 			ImmutableSubstitution<ImmutableTerm> theta = optionalTheta.get();
 
 			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
-				return termFactory.getRDFBooleanConstant(!isEqual);
+				return termFactory.getDBBooleanConstant(!isEqual);
 			}
 			else {
 				ImmutableFunctionalTerm result = null;
@@ -969,7 +950,7 @@ public class ExpressionEvaluator {
 					temp.add(result);
 					if (temp.size() == 2) {
 						if (isEqual){
-							result = termFactory.getImmutableFunctionalTerm(AND, temp.get(0), temp.get(1));
+							result = termFactory.getConjunction((ImmutableExpression) temp.get(0), (ImmutableExpression)temp.get(1));
 						}else{
 							result = termFactory.getImmutableFunctionalTerm(OR, temp.get(0), temp.get(1));
 						}
@@ -982,24 +963,16 @@ public class ExpressionEvaluator {
 		}
 	}
 
-
-	private ImmutableTerm evalAnd(ImmutableTerm t1, ImmutableTerm t2) {
-		ImmutableTerm e1 = eval(t1);
-		ImmutableTerm e2 = eval(t2);
-
-		if (e1 == valueFalse || e2 == valueFalse)
-			return valueFalse;
-
-		if (e1 == valueTrue)
-			return e2;
-
-		if (e2 == valueTrue)
-			return e1;
-
-		if (e1 == null && e2 == null)
-			return termFactory.getNullConstant();
-
-		return termFactory.getImmutableFunctionalTerm(AND, e1, e2);
+	/**
+	 * Temporary
+	 */
+	private ImmutableTerm evalNaryAnd(ImmutableList<? extends ImmutableTerm> terms) {
+		return DefaultDBAndFunctionSymbol.computeNewConjunction(
+				terms.stream()
+						.map(this::eval)
+						.map(t -> t == null ? (ImmutableTerm) termFactory.getNullEvaluation() : t)
+						.collect(ImmutableCollectors.toList()),
+				termFactory);
 	}
 
 	private ImmutableTerm evalOr(ImmutableTerm t1, ImmutableTerm t2) {
@@ -1020,6 +993,6 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, immutabilityTools, rdfFactory);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, rdfFactory);
 	}
 }

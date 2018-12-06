@@ -129,27 +129,6 @@ public class ImmutabilityTools {
         return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
     }
 
-    @Deprecated
-    public Optional<ImmutableExpression> foldBooleanExpressions(
-            ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
-        return Optional.of(conjunctionOfExpressions)
-                .filter(l -> !l.isEmpty())
-                .map(termFactory::getConjunction);
-    }
-
-    @Deprecated
-    public Optional<ImmutableExpression> foldBooleanExpressions(
-            ImmutableExpression... conjunctionOfExpressions) {
-        return foldBooleanExpressions(ImmutableList.copyOf(conjunctionOfExpressions));
-    }
-
-    @Deprecated
-    public Optional<ImmutableExpression> foldBooleanExpressions(
-            Stream<ImmutableExpression> conjunctionOfExpressions) {
-        return foldBooleanExpressions(conjunctionOfExpressions
-                .collect(ImmutableCollectors.toList()));
-    }
-
     public ImmutableSet<ImmutableExpression> retainVar2VarEqualityConjuncts(ImmutableExpression expression) {
         return filterOuterMostConjuncts(e -> e.isVar2VarEquality(), expression);
     }
@@ -161,7 +140,8 @@ public class ImmutabilityTools {
     private ImmutableSet<ImmutableExpression> filterOuterMostConjuncts(java.util.function.Predicate<ImmutableExpression> filterMethod,
                                                                               ImmutableExpression expression) {
 
-        ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND()
+                .collect(ImmutableCollectors.toSet());
         if (conjuncts.size() > 1) {
             ImmutableList<ImmutableExpression> filteredConjuncts = conjuncts.stream()
                     .filter(filterMethod)

@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
@@ -478,15 +477,9 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
     }
 
     private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
-        return expressions
-                .reduce(null,
-                        (a, b) -> (a == null) ?
-                                b :
-                                termFactory.getImmutableExpression(
-                                        AND,
-                                        a,
-                                        b
-                                ));
+        return termFactory.getConjunction(expressions
+                .flatMap(ImmutableExpression::flattenAND)
+                .collect(ImmutableCollectors.toList()));
     }
 
     private ImmutableExpression getConjunction(Optional<ImmutableExpression> optExpression, Stream<ImmutableExpression> expressions) {

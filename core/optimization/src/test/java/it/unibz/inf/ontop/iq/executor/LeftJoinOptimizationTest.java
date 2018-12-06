@@ -934,10 +934,10 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
-        ImmutableExpression zCondition = IMMUTABILITY_TOOLS.foldBooleanExpressions(
+        ImmutableExpression zCondition = TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(EQ, M, N),
                 TERM_FACTORY.getImmutableExpression(EQ, M, MF1),
-                o1IsNotNull).get();
+                o1IsNotNull);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
@@ -994,10 +994,10 @@ public class LeftJoinOptimizationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
-        ImmutableExpression zCondition = IMMUTABILITY_TOOLS.foldBooleanExpressions(
+        ImmutableExpression zCondition = TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(EQ, F0, N),
                 o1IsNotNull,
-                TERM_FACTORY.getImmutableExpression(EQ, M, N)).get();
+                TERM_FACTORY.getImmutableExpression(EQ, M, N));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(

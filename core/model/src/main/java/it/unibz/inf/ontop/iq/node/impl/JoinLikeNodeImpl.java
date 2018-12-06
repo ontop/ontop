@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.JoinLikeNode;
@@ -31,10 +30,10 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                TypeFactory typeFactory, DatalogTools datalogTools,
                                ExpressionEvaluator defaultExpressionEvaluator,
-                               ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory,
+                               SubstitutionFactory substitutionFactory,
                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                immutabilityTools, substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
+                substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
     }
 
     @Override
@@ -49,10 +48,6 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
 
         return Stream.concat(cooccuringVariableStream, getLocallyRequiredVariables().stream())
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    protected ImmutabilityTools getImmutabilityTools() {
-        return immutabilityTools;
     }
 
     /**

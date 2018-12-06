@@ -38,7 +38,7 @@ import org.apache.commons.rdf.api.RDF;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 
 @Singleton
@@ -47,8 +47,6 @@ public class TermFactoryImpl implements TermFactory {
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
-	private final RDFLiteralConstant rdfValueTrue;
-	private final RDFLiteralConstant rdfValueFalse;
 	private final DBConstant valueTrue;
 	private final DBConstant valueFalse;
 	private final Constant valueNull;
@@ -70,9 +68,6 @@ public class TermFactoryImpl implements TermFactory {
 		this.functionSymbolFactory = functionSymbolFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.rdfFactory = rdfFactory;
-		RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-		this.rdfValueTrue = new RDFLiteralConstantImpl("true", xsdBoolean);
-		this.rdfValueFalse = new RDFLiteralConstantImpl("false", xsdBoolean);
 
 		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
 		// TODO: let a DB-specific class have the control over DB constant creation
@@ -222,9 +217,6 @@ public class TermFactoryImpl implements TermFactory {
 		}
 	}
 
-	/**
-	 * TODO: consider n-ary ANDs
-	 */
 	@Override
 	public ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> conjunctionOfExpressions) {
 		final int size = conjunctionOfExpressions.size();
@@ -233,21 +225,8 @@ public class TermFactoryImpl implements TermFactory {
 				throw new IllegalArgumentException("conjunctionOfExpressions must be non-empty");
 			case 1:
 				return conjunctionOfExpressions.get(0);
-			case 2:
-				return getImmutableExpression(AND, conjunctionOfExpressions);
 			default:
-				// Non-final
-				ImmutableExpression cumulativeExpression = getImmutableExpression(
-						AND,
-						conjunctionOfExpressions.get(0),
-						conjunctionOfExpressions.get(1));
-				for (int i = 2; i < size; i++) {
-					cumulativeExpression = getImmutableExpression(
-							AND,
-							cumulativeExpression,
-							conjunctionOfExpressions.get(i));
-				}
-				return cumulativeExpression;
+				return getImmutableExpression(dbFunctionSymbolFactory.getDBAnd(size), conjunctionOfExpressions);
 		}
 	}
 
@@ -256,6 +235,49 @@ public class TermFactoryImpl implements TermFactory {
 		return getConjunction(
 				Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
 				.collect(ImmutableCollectors.toList()));
+	}
+
+	@Override
+	public Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream) {
+		ImmutableList<ImmutableExpression> conjuncts = expressionStream
+				.flatMap(ImmutableExpression::flattenAND)
+				.distinct()
+				.collect(ImmutableCollectors.toList());
+
+		return Optional.of(conjuncts)
+				.filter(c -> !c.isEmpty())
+				.map(this::getConjunction);
+	}
+
+	@Override
+	public ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> disjunctionOfExpressions) {
+		final int size = disjunctionOfExpressions.size();
+		switch (size) {
+			case 0:
+				throw new IllegalArgumentException("disjunctionOfExpressions must be non-empty");
+			case 1:
+				return disjunctionOfExpressions.get(0);
+			case 2:
+				return getImmutableExpression(OR, disjunctionOfExpressions);
+			default:
+				// Non-final
+				ImmutableExpression cumulativeExpression = getImmutableExpression(
+						OR,
+						disjunctionOfExpressions.get(0),
+						disjunctionOfExpressions.get(1));
+				for (int i = 2; i < size; i++) {
+					cumulativeExpression = getImmutableExpression(
+							OR,
+							cumulativeExpression,
+							disjunctionOfExpressions.get(i));
+				}
+				return cumulativeExpression;
+		}
+	}
+
+	@Override
+	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
+		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
 	}
 
 	@Override
@@ -372,12 +394,12 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionAND(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.AND, term1, term2);
+		return getExpression(dbFunctionSymbolFactory.getDBAnd(2), term1, term2);
 	}
 
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.OR,term1, term2);
+		return getExpression(OR,term1, term2);
 	}
 
 
@@ -417,12 +439,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Expression getFunctionIsTrue(Term term) {
 		return getExpression(BooleanExpressionOperation.IS_TRUE, term);
-	}
-
-
-	@Override
-	public RDFLiteralConstant getRDFBooleanConstant(boolean value) {
-		return value ? rdfValueTrue : rdfValueFalse;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.iq.*;
@@ -16,16 +17,17 @@ import it.unibz.inf.ontop.iq.proposal.impl.PushUpBooleanExpressionResultsImpl;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
-    private final ImmutabilityTools immutabilityTools;
+    private final TermFactory termFactory;
 
     @Inject
-    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
+    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqFactory = iqFactory;
-        this.immutabilityTools = immutabilityTools;
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -76,7 +78,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
     private ImmutableExpression getCombinedExpression(ImmutableExpression expressionToPropagate, JoinOrFilterNode recipientNode) {
         Optional<ImmutableExpression> recipientNodeFormerExpression = recipientNode.getOptionalFilterCondition();
         if (recipientNodeFormerExpression.isPresent()) {
-            return immutabilityTools.foldBooleanExpressions(recipientNodeFormerExpression.get(), expressionToPropagate)
+            return termFactory.getConjunction(Stream.of(recipientNodeFormerExpression.get(), expressionToPropagate))
                     .orElseThrow(() -> new IllegalStateException("Folding two existing expressions should produce an expression"));
         }
         return expressionToPropagate;

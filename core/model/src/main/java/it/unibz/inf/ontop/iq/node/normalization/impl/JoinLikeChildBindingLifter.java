@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -28,15 +27,13 @@ public class JoinLikeChildBindingLifter {
 
     private final ConditionSimplifier conditionSimplifier;
     private final TermFactory termFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private JoinLikeChildBindingLifter(ConditionSimplifier conditionSimplifier, TermFactory termFactory,
-                                       ImmutabilityTools immutabilityTools, SubstitutionFactory substitutionFactory) {
+                                       SubstitutionFactory substitutionFactory) {
         this.conditionSimplifier = conditionSimplifier;
         this.termFactory = termFactory;
-        this.immutabilityTools = immutabilityTools;
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -94,14 +91,13 @@ public class JoinLikeChildBindingLifter {
                 initialJoiningCondition
                         .map(substitution::applyToBooleanExpression)
                         .map(ImmutableExpression::flattenAND)
-                        .orElseGet(ImmutableSet::of)
-                        .stream(),
+                        .orElseGet(Stream::empty),
                 freshRenaming.getImmutableMap().entrySet().stream()
                         .map(r -> termFactory.getImmutableExpression(EQ,
                                 substitution.applyToVariable(r.getKey()),
                                 r.getValue())));
 
-        return immutabilityTools.foldBooleanExpressions(expressions);
+        return termFactory.getConjunction(expressions);
     }
 
     private InjectiveVar2VarSubstitution computeOtherChildrenRenaming(ImmutableSubstitution<ImmutableFunctionalTerm> nonDownPropagatedFragment,

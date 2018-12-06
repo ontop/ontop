@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -26,19 +25,17 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     private final SubstitutionFactory substitutionFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final TermFactory termFactory;
     private final ImmutableUnificationTools unificationTools;
     private final ImmutableSubstitutionTools substitutionTools;
     private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
-    private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory, ImmutabilityTools immutabilityTools,
+    private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory,
                                     TermFactory termFactory, ImmutableUnificationTools unificationTools,
                                     ImmutableSubstitutionTools substitutionTools,
                                     ExpressionEvaluator defaultExpressionEvaluator) {
         this.substitutionFactory = substitutionFactory;
-        this.immutabilityTools = immutabilityTools;
         this.termFactory = termFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
@@ -92,7 +89,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                                                                       ImmutableSet<Variable> nonLiftableVariables)
             throws UnsatisfiableConditionException {
 
-        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND();
+        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
+                .collect(ImmutableCollectors.toSet());
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol().equals(EQ))
                 .filter(e -> {
@@ -108,7 +106,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
-        Optional<ImmutableExpression> newExpression = immutabilityTools.foldBooleanExpressions(
+        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 Stream.concat(
                         // Expressions that are not function-free equalities
                         expressions.stream()
@@ -152,10 +150,10 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                     .applyToBooleanExpression(optionalConstraint.get());
 
             ImmutableExpression combinedExpression = conditionSimplificationResults.getOptionalExpression()
-                    .flatMap(e -> immutabilityTools.foldBooleanExpressions(
+                    .flatMap(e -> termFactory.getConjunction(
                             Stream.concat(
-                                    e.flattenAND().stream(),
-                                    substitutedConstraint.flattenAND().stream())))
+                                    e.flattenAND(),
+                                    substitutedConstraint.flattenAND())))
                     .orElse(substitutedConstraint);
 
             ExpressionEvaluator.EvaluationResult evaluationResults = evaluateExpression(combinedExpression);

@@ -231,7 +231,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(BooleanExpressionOperation.GTE, "%s >= %s")
 				.put(BooleanExpressionOperation.LT, "%s < %s")
 				.put(BooleanExpressionOperation.LTE, "%s <= %s")
-				.put(BooleanExpressionOperation.AND, "%s AND %s")
 				.put(BooleanExpressionOperation.OR, "%s OR %s")
 				.put(BooleanExpressionOperation.NOT, "NOT %s")
 				.put(BooleanExpressionOperation.IS_NULL, "%s IS NULL")
@@ -626,17 +625,8 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isOperation()) {  // Boolean expression
-				if (atom.getFunctionSymbol() == BooleanExpressionOperation.AND) {
-					// flatten ANDs
-					for (Term t : atom.getTerms()) {
-						Set<String> arg = getBooleanConditions(ImmutableList.of((Function)t), index);
-						conditions.addAll(arg);
-					}
-				}
-				else {
-					String condition = getSQLCondition(atom, index);
-					conditions.add(condition);
-				}
+				String condition = getSQLCondition(atom, index);
+				conditions.add(condition);
 			}
 		}
 		return conditions;
@@ -682,6 +672,13 @@ public class OneShotSQLGeneratorEngine {
 			String column = getSQLString(atom.getTerm(0), index, false);
 			String pattern = getSQLString(atom.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+		}
+		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
+			ImmutableList<String> termStrings = atom.getTerms().stream()
+					// TODO: try to get rid of useBrackets
+					.map(t -> getSQLString(t, index, false))
+					.collect(ImmutableCollectors.toList());
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
 		}
 
 		throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
@@ -951,8 +948,8 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		 * Boolean constant
 		 */
-		else if (term.equals(termFactory.getRDFBooleanConstant(false))
-				 || term.equals(termFactory.getRDFBooleanConstant(true))) {
+		else if (term.equals(termFactory.getDBBooleanConstant(false))
+				 || term.equals(termFactory.getDBBooleanConstant(true))) {
 			return Types.BOOLEAN;
 		}
 

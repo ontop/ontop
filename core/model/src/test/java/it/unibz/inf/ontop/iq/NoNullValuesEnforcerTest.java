@@ -41,7 +41,7 @@ public class NoNullValuesEnforcerTest {
     private final static ImmutableExpression NOT_NULL_Z = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Z);
     private final static ImmutableExpression NOT_NULL_X = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X);
     private final static ImmutableExpression NOT_NULL_W = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, W);
-    private final static ImmutableExpression NOT_NULL_X_AND_NOT_NULL_W = TERM_FACTORY.getImmutableExpression(AND, NOT_NULL_X, NOT_NULL_W);
+    private final static ImmutableExpression NOT_NULL_X_AND_NOT_NULL_W = TERM_FACTORY.getConjunction(NOT_NULL_X, NOT_NULL_W);
 
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;

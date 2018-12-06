@@ -1236,7 +1236,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(AND,
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(EQ, N, ONE),
                 TERM_FACTORY.getImmutableExpression(EQ, O, ONE)));
 

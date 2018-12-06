@@ -614,7 +614,7 @@ public class SparqlAlgebraToDatalogTranslator {
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getRDFBooleanConstant(false);
+            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
         }
         else if (expr instanceof UnaryValueOperator) {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);

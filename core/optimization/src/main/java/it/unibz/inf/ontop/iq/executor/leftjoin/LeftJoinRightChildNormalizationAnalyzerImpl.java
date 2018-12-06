@@ -210,7 +210,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .boxed()
                 .map(i -> termFactory.getImmutableExpression(EQ, newRightArguments.get(i), formerRightArguments.get(i)));
 
-        return immutabilityTools.foldBooleanExpressions(expressions)
+        return termFactory.getConjunction(expressions)
                 .orElseThrow(() -> new MinorOntopInternalBugException("A boolean expression was expected"));
     }
 

@@ -333,7 +333,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			List<IQTree> children =  tree.getChildren();
 			body.addAll(getAtomFrom(children.get(0), heads, subQueryProjectionAtoms, true));
 
-			filter.flattenAND().stream()
+			filter.flattenAND()
 					.map(immutabilityTools::convertToMutableBooleanExpression)
 					.forEach(body::add);
 
@@ -461,7 +461,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 			}
 			else {
 				body.addAll(atoms);
-				filter.get().flattenAND().stream()
+				filter.get().flattenAND()
 						.map(immutabilityTools::convertToMutableBooleanExpression)
 						.forEach(body::add);
 				return body;

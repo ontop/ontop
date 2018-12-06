@@ -30,6 +30,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface TermFactory {
 
@@ -60,9 +61,34 @@ public interface TermFactory {
 
 	/**
 	 * Must be non-empty
+	 *
+	 * Does NOT take care of flattening conjunctions in the arguments
 	 */
 	ImmutableExpression getConjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
+
+	/**
+	 * Does NOT take care of flattening conjunctions in the arguments
+	 */
 	ImmutableExpression getConjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
+
+	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
+	 */
+	Optional<ImmutableExpression> getConjunction(Stream<ImmutableExpression> expressionStream);
+
+	/**
+	 * Must be non-empty
+	 */
+	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
+
+	/**
+	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
+	 *
+	 * Must be non-empty
+	 */
+	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
 
 	/**
 	 * Just wraps the expression into an Evaluation object
@@ -151,9 +177,6 @@ public interface TermFactory {
 	public IRIConstant getConstantIRI(IRI iri);
 	
 	public BNode getConstantBNode(String name);
-
-	@Deprecated
-	RDFLiteralConstant getRDFBooleanConstant(boolean value);
 
 	DBConstant getDBBooleanConstant(boolean value);
 

@@ -274,8 +274,8 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 
 		OWLLiteral literal=node.getLiteral();
 		
-		if (literal.isBoolean()) 
-			terms.add(termFactory.getRDFBooleanConstant(literal.parseBoolean()));
+		if (literal.isBoolean())
+			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), typeFactory.getXsdBooleanDatatype()));
 		else if(literal.hasLang())
 			terms.add(termFactory.getRDFLiteralConstant(literal.getLiteral(), literal.getLang()));
 		else if (literal.isDouble())

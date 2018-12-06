@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -29,7 +26,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    AND("AND", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
     OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
     NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 
@@ -190,4 +186,42 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return new FunctionalTermNullabilityImpl(isNullable);
     }
 
+    @Override
+    public boolean blocksNegation() {
+        switch (this) {
+            case OR:
+            case EQ:
+            case NEQ:
+            case IS_NULL:
+            case IS_NOT_NULL:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * NB: in theory, further operators could be consider for simplification
+     */
+    @Override
+    public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
+        if (this == IS_NOT_NULL) {
+            return termFactory.getImmutableExpression(IS_NULL, subTerms.get(0));
+        } else if (this == IS_NULL) {
+            return termFactory.getImmutableExpression(IS_NOT_NULL, subTerms.get(0));
+        } else if (this == NEQ) {
+            return termFactory.getImmutableExpression(EQ, subTerms.get(0), subTerms.get(1));
+        } else if (this == EQ) {
+            return termFactory.getImmutableExpression(NEQ, subTerms.get(0), subTerms.get(1));
+        }
+        else if (this == OR) {
+            ImmutableList<ImmutableExpression> negatedArguments = subTerms.stream()
+                    .map(t -> (ImmutableExpression) t)
+                    .map(t -> t.negate(termFactory))
+                    .collect(ImmutableCollectors.toList());
+            return termFactory.getConjunction(negatedArguments);
+        }
+        else
+            return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+    }
 }

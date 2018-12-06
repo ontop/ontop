@@ -2,18 +2,19 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.AND;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
@@ -40,8 +41,13 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
      * Recursive
      */
     @Override
-    public ImmutableSet<ImmutableExpression> flattenAND() {
-        return flatten(AND);
+    public Stream<ImmutableExpression> flattenAND() {
+        if (getFunctionSymbol() instanceof DBAndFunctionSymbol) {
+            return getTerms().stream()
+                    .map(t -> (ImmutableExpression) t)
+                    .distinct();
+        }
+        return Stream.of(this);
     }
 
     @Override
@@ -90,6 +96,17 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
             return termFactory.getNullEvaluation();
 
         throw new IncorrectExpressionSimplificationBugException(this, newTerm);
+    }
+
+    @Override
+    public ImmutableExpression negate(TermFactory termFactory) {
+        BooleanFunctionSymbol functionSymbol = getFunctionSymbol();
+
+        if (functionSymbol.blocksNegation()) {
+            return termFactory.getImmutableExpression(NOT, this);
+        }
+        else
+            return functionSymbol.negate(getTerms(), termFactory);
     }
 
 
