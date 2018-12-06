@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -64,6 +65,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(RDF.class);
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
+        bindFromSettings(TypeConstantDictionary.class);
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(
