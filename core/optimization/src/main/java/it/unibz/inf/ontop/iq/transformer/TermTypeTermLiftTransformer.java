@@ -5,5 +5,5 @@ import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 /**
  * Makes sure that terms with a MetaTermType only appears in the top construction node
  */
-public interface MetaTermTypeTermLiftTransformer extends IQTreeTransformer {
+public interface TermTypeTermLiftTransformer extends IQTreeTransformer {
 }

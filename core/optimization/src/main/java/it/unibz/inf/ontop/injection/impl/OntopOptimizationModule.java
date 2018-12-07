@@ -22,7 +22,7 @@ import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
-import it.unibz.inf.ontop.iq.transformer.MetaTermTypeTermLiftTransformer;
+import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 
 public class OntopOptimizationModule extends OntopAbstractModule {
 
@@ -61,11 +61,11 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(UnionFlattener.class);
         bindFromSettings(PushDownBooleanExpressionOptimizer.class);
         bindFromSettings(PushUpBooleanExpressionOptimizer.class);
-        bindFromSettings(MetaTermTypeTermLifter.class);
+        bindFromSettings(TermTypeTermLifter.class);
 
         Module optimizerModule = buildFactory(ImmutableList.of(
                 ExplicitEqualityTransformer.class,
-                MetaTermTypeTermLiftTransformer.class),
+                TermTypeTermLiftTransformer.class),
                 OptimizerFactory.class);
         install(optimizerModule);
         // Releases the configuration (enables some GC)

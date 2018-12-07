@@ -31,7 +31,7 @@ public interface FunctionSymbolFactory {
 
     BooleanFunctionSymbol isARDFTermTypeFunctionSymbol();
 
-    MetaRDFTermTypeFunctionSymbol getMetaRDFTermTypeFunctionSymbol(
+    RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(
             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap);
 
     // SPARQL functions

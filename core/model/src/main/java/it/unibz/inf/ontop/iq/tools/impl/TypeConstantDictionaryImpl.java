@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.tools.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -8,7 +9,9 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +49,14 @@ public class TypeConstantDictionaryImpl implements TypeConstantDictionary {
     public RDFTermTypeConstant convert(DBConstant constant) {
         return Optional.ofNullable(intToTypeMap.get(constant))
                 .orElseThrow(() -> new NoIntConstantForTermTypeConstantException(constant));
+    }
+
+    @Override
+    public ImmutableMap<DBConstant, RDFTermTypeConstant> createConversionMap(
+            Collection<RDFTermTypeConstant> termTypeConstants) {
+        return intToTypeMap.entrySet().stream()
+                .filter(e -> termTypeConstants.contains(e.getValue()))
+                .collect(ImmutableCollectors.toMap());
     }
 
     private static class NoIntConstantForTermTypeConstantException extends MinorOntopInternalBugException {

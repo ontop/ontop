@@ -43,7 +43,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
-import it.unibz.inf.ontop.iq.optimizer.MetaTermTypeTermLifter;
+import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -121,7 +121,7 @@ public class OneShotSQLGeneratorEngine {
 	private final ImmutabilityTools immutabilityTools;
 	private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
 	private final PostProcessingProjectionSplitter projectionSplitter;
-	private final MetaTermTypeTermLifter metaTypeLifter;
+	private final TermTypeTermLifter rdfTypeLifter;
 
 
 	// the only two mutable (query-dependent) fields
@@ -142,7 +142,7 @@ public class OneShotSQLGeneratorEngine {
 							  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
 							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools,
 							  UniqueTermTypeExtractor uniqueTermTypeExtractor, PostProcessingProjectionSplitter projectionSplitter,
-							  MetaTermTypeTermLifter metaTypeLifter) {
+							  TermTypeTermLifter rdfTypeLifter) {
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
@@ -158,7 +158,7 @@ public class OneShotSQLGeneratorEngine {
 		this.immutabilityTools = immutabilityTools;
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
 		this.projectionSplitter = projectionSplitter;
-		this.metaTypeLifter = metaTypeLifter;
+		this.rdfTypeLifter = rdfTypeLifter;
 
 		String driverURI = settings.getJdbcDriver();
 
@@ -194,7 +194,7 @@ public class OneShotSQLGeneratorEngine {
 									  ImmutabilityTools immutabilityTools,
 									  UniqueTermTypeExtractor uniqueTermTypeExtractor,
 									  PostProcessingProjectionSplitter projectionSplitter,
-									  MetaTermTypeTermLifter metaTypeLifter
+									  TermTypeTermLifter rdfTypeLifter
 									  ) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
@@ -220,7 +220,7 @@ public class OneShotSQLGeneratorEngine {
 		this.immutabilityTools = immutabilityTools;
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
 		this.projectionSplitter = projectionSplitter;
-		this.metaTypeLifter = metaTypeLifter;
+		this.rdfTypeLifter = rdfTypeLifter;
 	}
 
 	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
@@ -279,7 +279,7 @@ public class OneShotSQLGeneratorEngine {
                 relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory,
 				optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter,
-				metaTypeLifter);
+				rdfTypeLifter);
 	}
 
 	/**
@@ -293,9 +293,11 @@ public class OneShotSQLGeneratorEngine {
 	public IQ generateSourceQuery(IQ initialIQ, ExecutorRegistry executorRegistry)
 			throws OntopReformulationException {
 
-		IQ metaTypeLiftedIQ = metaTypeLifter.optimize(initialIQ);
+		IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(initialIQ);
 
-		PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(metaTypeLiftedIQ);
+		log.debug("After lifting the RDF types:\n" + rdfTypeLiftedIQ);
+
+		PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(rdfTypeLiftedIQ);
 
 		/*
 		 * Only the SUB-tree is translated into SQL

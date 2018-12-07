@@ -118,8 +118,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public MetaRDFTermTypeFunctionSymbol getMetaRDFTermTypeFunctionSymbol(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
-        return new MetaRDFTermTypeFunctionSymbolImpl(typeFactory, conversionMap);
+    public RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+        return new RDFTermTypeFunctionSymbolImpl(typeFactory, conversionMap);
     }
 
     @Override

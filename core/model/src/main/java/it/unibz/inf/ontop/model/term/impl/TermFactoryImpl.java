@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -170,6 +171,12 @@ public class TermFactoryImpl implements TermFactory {
 	public RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type) {
 		return termTypeConstantMap
 				.computeIfAbsent(type, t -> new RDFTermTypeConstantImpl(t, typeFactory.getMetaRDFTermType()));
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term,
+			ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermTypeFunctionSymbol(conversionMap), term);
 	}
 
 	@Override

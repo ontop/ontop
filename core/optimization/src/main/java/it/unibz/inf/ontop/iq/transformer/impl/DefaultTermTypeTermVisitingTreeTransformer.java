@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
 import it.unibz.inf.ontop.iq.IQTree;
@@ -13,13 +14,15 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transformer.MetaTermTypeTermLiftTransformer;
+import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -29,8 +32,8 @@ import java.util.stream.Stream;
  *
  * TODO: explain it further
  */
-public class DefaultMetaTermTypeTermVisitingTreeTransformer
-        extends DefaultRecursiveIQTreeVisitingTransformer implements MetaTermTypeTermLiftTransformer {
+public class DefaultTermTypeTermVisitingTreeTransformer
+        extends DefaultRecursiveIQTreeVisitingTransformer implements TermTypeTermLiftTransformer {
 
     private final VariableGenerator variableGenerator;
     private final TypeConstantDictionary dictionary;
@@ -39,11 +42,11 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private DefaultMetaTermTypeTermVisitingTreeTransformer(@Assisted VariableGenerator variableGenerator,
-                                                           TermFactory termFactory,
-                                                           IntermediateQueryFactory iqFactory,
-                                                           TypeConstantDictionary typeConstantDictionary,
-                                                           SubstitutionFactory substitutionFactory) {
+    private DefaultTermTypeTermVisitingTreeTransformer(@Assisted VariableGenerator variableGenerator,
+                                                       TermFactory termFactory,
+                                                       IntermediateQueryFactory iqFactory,
+                                                       TypeConstantDictionary typeConstantDictionary,
+                                                       SubstitutionFactory substitutionFactory) {
         super(iqFactory);
         this.variableGenerator = variableGenerator;
         this.dictionary = typeConstantDictionary;
@@ -71,7 +74,10 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
                 .collect(ImmutableCollectors.toList());
 
         ImmutableSet<Variable> metaTermTypeVariables = rootNode.getVariables().stream()
-                .filter(v -> isMetaTermTypeVariable(liftedChildren))
+                .filter(v -> liftedChildren.stream()
+                        .anyMatch(c -> isRDFTermTypeVariable(v, c)
+                                .filter(b -> b)
+                                .isPresent()))
                 .collect(ImmutableCollectors.toSet());
 
         if (metaTermTypeVariables.isEmpty())
@@ -83,6 +89,7 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
                         .flatMap(v -> liftedChildren.stream()
                             .flatMap(child -> extractPossibleTermTypeConstants(v, child))
                             .map(c -> Maps.immutableEntry(v, c)))
+                        .distinct()
                         .collect(ImmutableCollectors.toMultimap());
 
         // Meta RDF term type variable -> new integer variable
@@ -103,29 +110,42 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
                 iqFactory.createUnionNode(newUnionVariables),
                 newChildren);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = createNewUnionSubstitution(possibleConstantMultimap);
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = createNewUnionSubstitution(possibleConstantMultimap,
+                integerVariableMap);
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(rootNode.getVariables(), newSubstitution),
                 newUnionTree);
     }
 
-    /**
-     * TODO: implement it seriously
-     */
-    private boolean isMetaTermTypeVariable(ImmutableList<IQTree> unionChildren) {
-        return false;
+    private Optional<Boolean> isRDFTermTypeVariable(Variable variable, IQTree unionChild) {
+        return extractDefinition(variable, unionChild)
+                .map(definition -> {
+                    if (definition instanceof RDFTermTypeConstant)
+                        return Optional.of(true);
+                    else if (definition.equals(nullValue))
+                        return Optional.<Boolean>empty();
+                    else if (definition instanceof ImmutableFunctionalTerm)
+                        return Optional.of(((ImmutableFunctionalTerm) definition).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol);
+                    else
+                        return Optional.of(false);
+                })
+                // RDF term type variables are expected to be blocked by the Union
+                .orElseGet(() -> Optional.of(false));
+    }
+
+    private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree unionChild) {
+        ConstructionNode constructionNode = Optional.of(unionChild.getRootNode())
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode) n)
+                .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
+                        "Was expecting the child to start with a ConstructionNode"));
+        return Optional.ofNullable(constructionNode.getSubstitution().get(variable));
     }
 
     private Stream<RDFTermTypeConstant> extractPossibleTermTypeConstants(Variable variable, IQTree child) {
-        ConstructionNode constructionNode = Optional.of(child.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "Was expecting the child to start with a ConstructionNode"));
-
-        ImmutableTerm definition = Optional.ofNullable(constructionNode.getSubstitution().get(variable))
-                .orElseThrow(() ->  new MinorOntopInternalBugException(
+        ImmutableTerm definition = extractDefinition(variable, child)
+                .orElseThrow(() ->  new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to define the blocked definition of the RDF term type variable"));
 
         if (definition instanceof RDFTermTypeConstant)
@@ -135,7 +155,7 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
         else if (definition instanceof ImmutableFunctionalTerm)
             return extractPossibleTermTypeConstants((ImmutableFunctionalTerm) definition);
         else
-            throw new MinorOntopInternalBugException("Was not expecting a Variable or a different kind of Constant");
+            throw new UnexpectedlyFormattedIQTreeException("Was not expecting a Variable or a different kind of Constant");
     }
 
     /**
@@ -143,7 +163,12 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
      * TODO: define it
      */
     private Stream<RDFTermTypeConstant> extractPossibleTermTypeConstants(ImmutableFunctionalTerm definition) {
-        throw new RuntimeException("TODO: implement that case");
+        RDFTermTypeFunctionSymbol functionSymbol = Optional.of(definition.getFunctionSymbol())
+                .filter(f -> f instanceof RDFTermTypeFunctionSymbol)
+                .map(f -> (RDFTermTypeFunctionSymbol)f)
+                .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException("Was expecting the definition to be a " +
+                        "RDFTermTypeFunctionSymbol"));
+        return functionSymbol.getConversionMap().values().stream();
     }
 
     private IQTree transformUnionChild(IQTree child, ImmutableMap<Variable, Variable> integerVariableMap,
@@ -151,15 +176,16 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
         ConstructionNode initialConstructionNode = Optional.of(child.getRootNode())
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
+                .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
                 initialConstructionNode.getSubstitution().getImmutableMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 e -> Optional.ofNullable(integerVariableMap.get(e.getKey())).orElseGet(e::getKey),
-                                e -> transformIntoIntegerDefinition(e.getValue())
-                        )));
+                                e -> integerVariableMap.containsKey(e.getKey())
+                                        ? transformIntoIntegerDefinition(e.getValue())
+                                        : e.getValue())));
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(newProjectedVariables, newSubstitution),
@@ -169,12 +195,25 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
     private ImmutableTerm transformIntoIntegerDefinition(ImmutableTerm term) {
         if (term instanceof RDFTermTypeConstant)
             return dictionary.convert((RDFTermTypeConstant) term);
-        throw new RuntimeException("TODO: support other conversions");
+
+        else if ((term instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
+            return ((ImmutableFunctionalTerm) term).getTerm(0);
+        }
+        else
+            throw new MinorOntopInternalBugException("Unexpected definition for RDFTermType term");
     }
 
     private ImmutableSubstitution<ImmutableTerm> createNewUnionSubstitution(
-            ImmutableMultimap<Variable, RDFTermTypeConstant> possibleConstantMultimap) {
-        throw new RuntimeException("TODO: implement createNewUnionSubstitution()");
+            ImmutableMultimap<Variable, RDFTermTypeConstant> possibleConstantMultimap,
+            ImmutableMap<Variable, Variable> integerVariableMap) {
+        return substitutionFactory.getSubstitution(
+                possibleConstantMultimap.asMap().entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> termFactory.getRDFTermTypeFunctionalTerm(
+                                    integerVariableMap.get(e.getKey()),
+                                    dictionary.createConversionMap(e.getValue())))));
     }
 
     protected IQTree transformLeaf(LeafIQTree leaf){
@@ -194,6 +233,14 @@ public class DefaultMetaTermTypeTermVisitingTreeTransformer
     protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
         return super.transformBinaryNonCommutativeNode(rootNode, leftChild, rightChild)
                 .normalizeForOptimization(variableGenerator);
+    }
+
+
+    private static class UnexpectedlyFormattedIQTreeException extends OntopInternalBugException {
+
+        protected UnexpectedlyFormattedIQTreeException(String message) {
+            super(message);
+        }
     }
 
 }
