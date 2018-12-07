@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -112,6 +115,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol isARDFTermTypeFunctionSymbol() {
         return isARDFFunctionSymbol;
+    }
+
+    @Override
+    public MetaRDFTermTypeFunctionSymbol getMetaRDFTermTypeFunctionSymbol(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+        return new MetaRDFTermTypeFunctionSymbolImpl(typeFactory, conversionMap);
     }
 
     @Override
