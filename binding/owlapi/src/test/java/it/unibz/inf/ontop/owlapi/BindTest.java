@@ -463,6 +463,46 @@ public class BindTest {
 
     }
 
+    @Test
+    public void testBindConcatUnderUnion() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?w WHERE \n"
+                + "{"
+                + "   { BIND (\"plop\" AS ?w) }\n"
+                + "   UNION\n"
+                + "   { \n"
+                + "     ?x ns:price ?p .\n" +
+                "       ?x ns:discount ?discount .\n"
+                + "    ?x dc:title ?title .\n"
+                + "    BIND (CONCAT(?title, ?title) AS ?w) }\n"
+                + "}";
+
+        runTests(queryBind);
+    }
+
+    @Test
+    public void testBindConcatAboveUnion() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?w WHERE \n"
+                + "{"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   { BIND (\"plop\" AS ?s) }\n"
+                + "   UNION\n"
+                + "   { \n"
+                + "    ?y dc:title ?s .\n"
+                + "   }\n"
+                + "   BIND (CONCAT(?title, ?s) AS ?w)"
+                + "}";
+
+        runTests(queryBind);
+    }
+
     //language tag are not supported when they are stored in different columns or
     // when one of the two is stored in the database
     //the correct results would have been with "@en" language tag
