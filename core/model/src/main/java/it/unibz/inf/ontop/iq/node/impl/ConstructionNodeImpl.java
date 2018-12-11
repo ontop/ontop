@@ -293,7 +293,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
                 .map(e ->
-                        Optional.ofNullable(functionSubTermMultimap.get(e.getKey()))
+                        Optional.of(functionSubTermMultimap.get(e.getKey()))
+                                .filter(indexes -> !indexes.isEmpty())
                                 .map(indexes -> {
                                     Variable v = e.getKey();
                                     ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
