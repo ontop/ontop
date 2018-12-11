@@ -10,7 +10,9 @@ import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermTypeFunctionSymbol {
@@ -21,9 +23,19 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
     protected RDFTermTypeFunctionSymbolImpl(TypeFactory typeFactory,
                                             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
-        super("rdfTypeConversion", ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
+        super("rdfType" + extractConversionMapString(conversionMap),
+                ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
         metaType = typeFactory.getMetaRDFTermType();
         this.conversionMap = conversionMap;
+    }
+
+    private static String extractConversionMapString(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+        return conversionMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> e.getKey().getValue(),
+                        Map.Entry::getValue))
+                .toString()
+                .replace(" ", "");
     }
 
     @Override
