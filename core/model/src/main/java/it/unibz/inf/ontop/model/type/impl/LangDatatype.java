@@ -66,7 +66,7 @@ public class LangDatatype extends AbstractRDFDatatype {
 
     @Override
     public String toString() {
-        return super.toString() + "@" + langTag.getFullString();
+        return "@" + langTag.getFullString();
     }
 
     @Override

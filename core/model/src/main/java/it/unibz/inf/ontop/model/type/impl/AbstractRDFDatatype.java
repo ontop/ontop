@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
 public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDFDatatype {
@@ -9,8 +10,15 @@ public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDF
     private final IRI datatypeIRI;
 
     protected AbstractRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        super(datatypeIRI.getIRIString(), parentAncestry, isAbstract);
+        super(extractIRIString(datatypeIRI), parentAncestry, isAbstract);
         this.datatypeIRI = datatypeIRI;
+    }
+
+    private static String extractIRIString(IRI datatypeIRI) {
+        String iriString = datatypeIRI.getIRIString();
+        if (iriString.startsWith(XSD.PREFIX))
+            return "xsd:" + iriString.substring(XSD.PREFIX.length());
+        return iriString;
     }
 
     @Override
