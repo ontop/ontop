@@ -209,7 +209,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
 		ImmutableList<ImmutableTerm> newTerms = terms.stream()
 				.map(t -> (t instanceof ImmutableFunctionalTerm)
-						? ((ImmutableFunctionalTerm) t).simplify(isInConstructionNodeInOptimizationPhase)
+						? t.simplify(isInConstructionNodeInOptimizationPhase)
 						: t)
 				.collect(ImmutableCollectors.toList());
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);
