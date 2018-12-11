@@ -6,16 +6,12 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -24,12 +20,12 @@ import java.util.stream.IntStream;
  */
 public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
-    protected ConcatSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType, BooleanFunctionSymbol isARDFTypeFunctionSymbol) {
+    protected ConcatSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
         super("SP_CONCAT" + arity, XPathFunction.CONCAT,
                 IntStream.range(0, arity)
                         .boxed()
                         .map(i -> (TermType) xsdStringType)
-                        .collect(ImmutableCollectors.toList()), isARDFTypeFunctionSymbol);
+                        .collect(ImmutableCollectors.toList()));
         if (arity < 2)
             throw new IllegalArgumentException("CONCAT arity must be >= 2");
     }

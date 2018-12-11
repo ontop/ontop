@@ -19,10 +19,8 @@ public class UcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunc
     private final DBFunctionSymbol dbUcaseFunctionSymbol;
 
     protected UcaseSPARQLFunctionSymbolImpl(RDFDatatype xsdStringDatatype,
-                                            BooleanFunctionSymbol isARDFFunctionSymbol,
                                             DBFunctionSymbolFactory dbFunctionSymbolFactory) {
-        super("SP_UCASE", XPathFunction.UPPER_CASE,
-                xsdStringDatatype, isARDFFunctionSymbol);
+        super("SP_UCASE", XPathFunction.UPPER_CASE, xsdStringDatatype);
         this.dbUcaseFunctionSymbol = dbFunctionSymbolFactory.getDBUCase();
     }
 

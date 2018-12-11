@@ -288,6 +288,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType) {
+		return getImmutableExpression(functionSymbolFactory.getIsARDFTermTypeFunctionSymbol(baseType), termTypeTerm);
+	}
+
+	@Override
 	public ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression) {
 		return new ImmutableExpressionImpl.ExpressionEvaluationImpl(expression);
 	}

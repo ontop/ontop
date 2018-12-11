@@ -92,6 +92,11 @@ public interface TermFactory {
 	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
 
 	/**
+	 * Compares a TermType term to a base type
+	 */
+	ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType);
+
+	/**
 	 * Just wraps the expression into an Evaluation object
 	 */
 	ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression);

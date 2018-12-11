@@ -14,8 +14,12 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
  */
 public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
-    protected IsARDFTermTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbBooleanTermType) {
-        super("IS_A", ImmutableList.of(metaRDFTermType, metaRDFTermType), dbBooleanTermType);
+    private final RDFTermType baseType;
+
+    protected IsARDFTermTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbBooleanTermType,
+                                               RDFTermType baseType) {
+        super("IS_A", ImmutableList.of(metaRDFTermType), dbBooleanTermType);
+        this.baseType = baseType;
     }
 
     @Override
@@ -32,11 +36,11 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
-        if (newTerms.stream()
-                .allMatch(t -> t instanceof RDFTermTypeConstant)) {
-            RDFTermType firstType = ((RDFTermTypeConstant) newTerms.get(0)).getRDFTermType();
-            RDFTermType secondType = ((RDFTermTypeConstant) newTerms.get(1)).getRDFTermType();
-            return termFactory.getDBBooleanConstant(firstType.isA(secondType));
+        ImmutableTerm subTerm = newTerms.get(0);
+
+        if (subTerm instanceof RDFTermTypeConstant) {
+            RDFTermType firstType = ((RDFTermTypeConstant) subTerm).getRDFTermType();
+            return termFactory.getDBBooleanConstant(firstType.isA(baseType));
         }
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }

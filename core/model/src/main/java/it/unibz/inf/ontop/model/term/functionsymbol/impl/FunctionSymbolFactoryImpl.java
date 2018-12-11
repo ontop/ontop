@@ -8,9 +8,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
 import java.util.HashMap;
@@ -26,13 +24,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
-    private final BooleanFunctionSymbol isARDFFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
+    private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
+
+    private final MetaRDFTermType metaRDFType;
+    private final DBTermType dbBooleanType;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -49,22 +50,21 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
 
-        DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
-        this.isARDFFunctionSymbol = new IsARDFTermTypeFunctionSymbolImpl(typeFactory.getMetaRDFTermType(), dbBooleanType);
+        this.dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
+        this.metaRDFType = typeFactory.getMetaRDFTermType();
 
-        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, isARDFFunctionSymbol,
-                dbFunctionSymbolFactory);
+        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
         this.commonDenominatorMap = new HashMap<>();
         this.concatMap = new HashMap<>();
+        this.isAMap = new HashMap<>();
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            TypeFactory typeFactory, BooleanFunctionSymbol isARDFFunctionSymbol,
-            DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+            TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
-            new UcaseSPARQLFunctionSymbolImpl(xsdString, isARDFFunctionSymbol, dbFunctionSymbolFactory)
+            new UcaseSPARQLFunctionSymbolImpl(xsdString, dbFunctionSymbolFactory)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -113,8 +113,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public BooleanFunctionSymbol isARDFTermTypeFunctionSymbol() {
-        return isARDFFunctionSymbol;
+    public BooleanFunctionSymbol getIsARDFTermTypeFunctionSymbol(RDFTermType rdfTermType) {
+        return isAMap
+                .computeIfAbsent(rdfTermType, t -> new IsARDFTermTypeFunctionSymbolImpl(metaRDFType, dbBooleanType, t));
     }
 
     @Override
@@ -136,8 +137,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return arity < 2
                 ? Optional.empty()
                 : Optional.of(concatMap
-                        .computeIfAbsent(arity, a -> new ConcatSPARQLFunctionSymbolImpl(a, typeFactory.getXsdStringDatatype(),
-                            isARDFFunctionSymbol)));
+                        .computeIfAbsent(arity, a -> new ConcatSPARQLFunctionSymbolImpl(a, typeFactory.getXsdStringDatatype())));
     }
 
     @Override

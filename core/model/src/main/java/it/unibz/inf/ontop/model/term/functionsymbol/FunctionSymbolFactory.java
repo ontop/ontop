@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ public interface FunctionSymbolFactory {
 
     DBFunctionSymbolFactory getDBFunctionSymbolFactory();
 
-    BooleanFunctionSymbol isARDFTermTypeFunctionSymbol();
+    BooleanFunctionSymbol getIsARDFTermTypeFunctionSymbol(RDFTermType rdfTermType);
 
     RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(
             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap);
