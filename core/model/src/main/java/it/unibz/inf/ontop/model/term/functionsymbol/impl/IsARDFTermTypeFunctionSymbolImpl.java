@@ -15,7 +15,7 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     protected IsARDFTermTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbBooleanTermType) {
-        super("isA", ImmutableList.of(metaRDFTermType, metaRDFTermType), dbBooleanTermType);
+        super("IS_A", ImmutableList.of(metaRDFTermType, metaRDFTermType), dbBooleanTermType);
     }
 
     @Override

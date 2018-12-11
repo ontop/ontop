@@ -23,7 +23,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
     protected RDFTermTypeFunctionSymbolImpl(TypeFactory typeFactory,
                                             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
-        super("rdfType" + extractConversionMapString(conversionMap),
+        super("RDF_TYPE" + extractConversionMapString(conversionMap),
                 ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
         metaType = typeFactory.getMetaRDFTermType();
         this.conversionMap = conversionMap;
