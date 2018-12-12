@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -29,24 +28,19 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
     @Nullable
     private final IRI functionIRI;
     private final String officialName;
-    private final BooleanFunctionSymbol isARDFTypeFunctionSymbol;
 
     protected ReduciblePositiveAritySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull IRI functionIRI,
-                                                             @Nonnull ImmutableList<TermType> expectedBaseTypes,
-                                                             BooleanFunctionSymbol isARDFTypeFunctionSymbol) {
+                                                             @Nonnull ImmutableList<TermType> expectedBaseTypes) {
         super(functionSymbolName, expectedBaseTypes);
         this.functionIRI = functionIRI;
         this.officialName = functionIRI.getIRIString();
-        this.isARDFTypeFunctionSymbol = isARDFTypeFunctionSymbol;
         if (expectedBaseTypes.isEmpty())
             throw new IllegalArgumentException("The arity must be >= 1");
     }
 
     protected ReduciblePositiveAritySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull String officialName,
-                                                             @Nonnull ImmutableList<TermType> expectedBaseTypes,
-                                                             BooleanFunctionSymbol isARDFTypeFunctionSymbol) {
+                                                             @Nonnull ImmutableList<TermType> expectedBaseTypes) {
         super(functionSymbolName, expectedBaseTypes);
-        this.isARDFTypeFunctionSymbol = isARDFTypeFunctionSymbol;
         this.functionIRI = null;
         this.officialName = officialName;
         if (expectedBaseTypes.isEmpty())
@@ -114,8 +108,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                                                                   TermFactory termFactory) {
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
                 .boxed()
-                .map(i -> termFactory.getImmutableExpression(isARDFTypeFunctionSymbol, typeTerms.get(i),
-                        termFactory.getRDFTermTypeConstant((RDFTermType) getExpectedBaseType(i))))
+                .map(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
                 .collect(ImmutableCollectors.toList());
 
          return termFactory.getConjunction(typeTestExpressions)

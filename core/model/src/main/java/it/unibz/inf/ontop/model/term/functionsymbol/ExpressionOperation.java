@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.type.ArgumentValidator;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -210,7 +207,12 @@ public enum ExpressionOperation implements OperationPredicate {
 	 */
 	@Override
 	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
-		return termFactory.getImmutableFunctionalTerm(this, terms);
+		ImmutableList<ImmutableTerm> newTerms = terms.stream()
+				.map(t -> (t instanceof ImmutableFunctionalTerm)
+						? t.simplify(isInConstructionNodeInOptimizationPhase)
+						: t)
+				.collect(ImmutableCollectors.toList());
+		return termFactory.getImmutableFunctionalTerm(this, newTerms);
 	}
 
 	@Override

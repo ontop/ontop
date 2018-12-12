@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -29,6 +31,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -89,6 +92,11 @@ public interface TermFactory {
 	 * Must be non-empty
 	 */
 	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
+
+	/**
+	 * Compares a TermType term to a base type
+	 */
+	ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType);
 
 	/**
 	 * Just wraps the expression into an Evaluation object
@@ -254,6 +262,8 @@ public interface TermFactory {
 	public Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
+	ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
+														 ImmutableSet<RDFTermTypeConstant> possibleConstants);
 
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
@@ -319,6 +329,21 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE
+	 *
+	 * whenPairs must not be empty
+	 */
+	ImmutableFunctionalTerm getDBCase(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+									  ImmutableTerm defaultTerm);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE NULL
+	 *
+	 * whenPairs must not be empty
+	 */
+	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
 	/**
 	 * At least two terms are expected

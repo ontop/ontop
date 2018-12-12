@@ -16,9 +16,8 @@ public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends ReducibleP
     private final RDFDatatype xsdStringDatatype;
 
     protected AbstractUnaryStringSPARQLFunctionSymbol(@Nonnull String name, IRI functionIRI,
-                                                      RDFDatatype xsdStringDatatype,
-                                                      BooleanFunctionSymbol isARDFTypeFunctionSymbol) {
-        super(name, functionIRI, ImmutableList.of(xsdStringDatatype), isARDFTypeFunctionSymbol);
+                                                      RDFDatatype xsdStringDatatype) {
+        super(name, functionIRI, ImmutableList.of(xsdStringDatatype));
         this.xsdStringDatatype = xsdStringDatatype;
     }
 

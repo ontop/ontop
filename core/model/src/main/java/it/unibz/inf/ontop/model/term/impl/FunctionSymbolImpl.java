@@ -39,7 +39,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? ((ImmutableFunctionalTerm) t).simplify(isInConstructionNodeInOptimizationPhase)
+                        ? t.simplify(isInConstructionNodeInOptimizationPhase)
                         : t)
                 .collect(ImmutableCollectors.toList());
 

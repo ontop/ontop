@@ -1,12 +1,19 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 
 /**
@@ -14,8 +21,12 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
  */
 public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
-    protected IsARDFTermTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbBooleanTermType) {
-        super("isA", ImmutableList.of(metaRDFTermType, metaRDFTermType), dbBooleanTermType);
+    private final RDFTermType baseType;
+
+    protected IsARDFTermTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbBooleanTermType,
+                                               RDFTermType baseType) {
+        super("IS_A_" + baseType.toString().toUpperCase(), ImmutableList.of(metaRDFTermType), dbBooleanTermType);
+        this.baseType = baseType;
     }
 
     @Override
@@ -32,13 +43,37 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
-        if (newTerms.stream()
-                .allMatch(t -> t instanceof RDFTermTypeConstant)) {
-            RDFTermType firstType = ((RDFTermTypeConstant) newTerms.get(0)).getRDFTermType();
-            RDFTermType secondType = ((RDFTermTypeConstant) newTerms.get(1)).getRDFTermType();
-            return termFactory.getDBBooleanConstant(firstType.isA(secondType));
+        ImmutableTerm subTerm = newTerms.get(0);
+
+        if (subTerm instanceof RDFTermTypeConstant) {
+            RDFTermType firstType = ((RDFTermTypeConstant) subTerm).getRDFTermType();
+            return termFactory.getDBBooleanConstant(firstType.isA(baseType));
+        }
+        else if ((subTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) subTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol) {
+            ImmutableFunctionalTerm functionalTerm = ((ImmutableFunctionalTerm) subTerm);
+
+            ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap = ((RDFTermTypeFunctionSymbol)
+                    functionalTerm.getFunctionSymbol()).getConversionMap();
+
+            return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory);
+
         }
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
+    private ImmutableTerm simplifyIntoConjunction(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap,
+                                                        ImmutableTerm term, TermFactory termFactory) {
+        Stream<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
+                .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
+                .map(Map.Entry::getKey)
+                .map(n -> termFactory.getImmutableExpression(NEQ, term, n));
+
+        return termFactory.getConjunction(Stream.concat(
+                    Stream.of(termFactory.getImmutableExpression(IS_NOT_NULL, term)),
+                    excludedMagicNumbers))
+                .get()
+                .simplify(false);
     }
 
     @Override

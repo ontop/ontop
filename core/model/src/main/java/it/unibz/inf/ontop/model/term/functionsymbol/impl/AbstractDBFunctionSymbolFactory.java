@@ -27,6 +27,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      *  For conversion function symbols that are SIMPLE CASTs from a determined type (no normalization)
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
+
+    /**
+     * For the CASE functions
+     */
+    private final Map<Integer, DBFunctionSymbol> caseMap;
+
     private final DBTermType dbStringType;
 
     /**
@@ -45,6 +51,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
+        this.caseMap = new HashMap<>();
     }
 
     @Override
@@ -81,6 +88,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return symbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBCase(int arity) {
+        if ((arity < 3) || (arity % 2 == 0))
+            throw new IllegalArgumentException("Arity of a CASE function symbol must be odd and >= 3");
+
+        return caseMap
+                .computeIfAbsent(arity, a -> createDBCase(arity));
+
+    }
+
     /**
      * Can be overridden
      */
@@ -94,6 +111,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType,
                                                                                      DBTermType targetType);
+
+    protected abstract DBFunctionSymbol createDBCase(int arity);
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {

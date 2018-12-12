@@ -110,8 +110,13 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
-    public DBFunctionSymbol getDBUCase() {
-        return getRegularDBFunctionSymbol(UCASE_STR, 1);
+    protected DBFunctionSymbol createDBCase(int arity) {
+        return new DefaultSQLCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBUpper() {
+        return getRegularDBFunctionSymbol(UPPER_STR, 1);
     }
 
     @Override

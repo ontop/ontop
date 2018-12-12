@@ -21,10 +21,13 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -173,6 +176,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
+			ImmutableSet<RDFTermTypeConstant> possibleConstants) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermTypeFunctionSymbol(dictionary, possibleConstants), term);
+	}
+
+	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
 		return getFunction(functor, Arrays.asList(arguments));
 	}
@@ -278,6 +287,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
+	}
+
+	@Override
+	public ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType) {
+		return getImmutableExpression(functionSymbolFactory.getIsARDFTermTypeFunctionSymbol(baseType), termTypeTerm);
 	}
 
 	@Override
@@ -569,6 +583,32 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term) {
 		return getImmutableFunctionalTerm(IF_ELSE_NULL, condition, term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBCase(
+			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm) {
+		ImmutableList<ImmutableTerm> terms = Stream.concat(
+				whenPairs
+						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
+				Stream.of(defaultTerm))
+				.collect(ImmutableCollectors.toList());
+
+		int arity = terms.size();
+
+		if (arity < 3) {
+			throw new IllegalArgumentException("whenPairs must be non-empty");
+		}
+
+		if ((arity == 3) && defaultTerm.equals(valueNull))
+			return getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1));
+
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity), terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs) {
+		return getDBCase(whenPairs, valueNull);
 	}
 
 	@Override

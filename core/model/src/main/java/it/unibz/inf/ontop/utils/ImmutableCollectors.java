@@ -152,6 +152,48 @@ public class ImmutableCollectors {
                 Collector.Characteristics.UNORDERED);
     }
 
+    public static <T, K, U> Collector<T, ? ,ImmutableBiMap<K,U>> toBiMap(Function<? super T, ? extends K> keyMapper,
+                                                                     Function<? super T, ? extends U> valueMapper) {
+        return Collector.of(
+                // Supplier
+                ImmutableBiMap::<K,U>builder,
+                // Accumulator
+                (builder, e) -> builder.put(keyMapper.apply(e), valueMapper.apply(e)),
+                // Merger
+                (builder1, builder2) -> builder1.putAll(builder2.build()),
+                // Finisher
+                ImmutableBiMap.Builder::<K,U>build,
+                Collector.Characteristics.UNORDERED);
+    }
+
+    public static <T, K, U> Collector<T, ? ,ImmutableBiMap<K,U>> toBiMap(Function<? super T, ? extends K> keyMapper,
+                                                                     Function<? super T, ? extends U> valueMapper,
+                                                                     BinaryOperator<U> mergeFunction) {
+        return Collector.of(
+                // Supplier
+                Maps::<K,U>newHashMap,
+                // Accumulator
+                (m, e) -> m.merge(keyMapper.apply(e), valueMapper.apply(e), mergeFunction),
+                // Merger
+                mapMerger(mergeFunction),
+                // Finisher
+                ImmutableBiMap::copyOf,
+                Collector.Characteristics.UNORDERED);
+    }
+
+    public static <T extends Map.Entry<K,U>, K, U> Collector<T, ? ,ImmutableBiMap<K,U>> toBiMap() {
+        return Collector.of(
+                // Supplier
+                ImmutableBiMap::<K,U>builder,
+                // Accumulator
+                ImmutableBiMap.Builder::<K,U>put,
+                // Merger
+                (builder1, builder2) -> builder1.putAll(builder2.build()),
+                // Finisher
+                ImmutableBiMap.Builder::<K,U>build,
+                Collector.Characteristics.UNORDERED);
+    }
+
     public static <T extends Table.Cell<R,C,U>, R, C, U> Collector<T, ? ,ImmutableTable<R,C,U>> toTable() {
         return Collector.of(
                 // Supplier
