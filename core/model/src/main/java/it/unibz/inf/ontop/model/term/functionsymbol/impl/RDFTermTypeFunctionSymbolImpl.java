@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -21,11 +21,11 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
     private final MetaRDFTermType metaType;
     private final TypeConstantDictionary dictionary;
-    private final ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap;
+    private final ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap;
 
     protected RDFTermTypeFunctionSymbolImpl(TypeFactory typeFactory,
                                             TypeConstantDictionary dictionary,
-                                            ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+                                            ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap) {
         super("RDF_TYPE" + extractConversionMapString(conversionMap),
                 ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
         metaType = typeFactory.getMetaRDFTermType();
@@ -33,7 +33,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
         this.conversionMap = conversionMap;
     }
 
-    private static String extractConversionMapString(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+    private static String extractConversionMapString(ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap) {
         return conversionMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> e.getKey().getValue(),
@@ -76,7 +76,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    public ImmutableMap<DBConstant, RDFTermTypeConstant> getConversionMap() {
+    public ImmutableBiMap<DBConstant, RDFTermTypeConstant> getConversionMap() {
         return conversionMap;
     }
 

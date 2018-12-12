@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -122,7 +122,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
                                                                   ImmutableSet<RDFTermTypeConstant> possibleConstants) {
-        ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap = dictionary.createConversionMap(possibleConstants);
+        ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap = dictionary.createConversionMap(possibleConstants);
         return new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap);
     }
 

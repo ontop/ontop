@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.iq.tools;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableBiMap;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 
@@ -11,5 +11,5 @@ public interface TypeConstantDictionary {
 
     RDFTermTypeConstant convert(DBConstant constant);
 
-    ImmutableMap<DBConstant, RDFTermTypeConstant> createConversionMap(Collection<RDFTermTypeConstant> termTypeConstants);
+    ImmutableBiMap<DBConstant, RDFTermTypeConstant> createConversionMap(Collection<RDFTermTypeConstant> termTypeConstants);
 }
