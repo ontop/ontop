@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -46,7 +45,7 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
                 .flatMap(i -> i.getTermType()
                         .map(Optional::of)
                         // Continues on a type of a variable defined in the sub-tree
-                        .orElseGet(() -> i.getVariable()
+                        .orElseGet(() -> i.getRedirectionVariable()
                                 .flatMap(v -> extractTypeFromVariable(v, subTree))));
     }
 

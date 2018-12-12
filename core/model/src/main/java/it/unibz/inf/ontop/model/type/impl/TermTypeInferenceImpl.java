@@ -36,7 +36,7 @@ public class TermTypeInferenceImpl implements TermTypeInference {
         return new TermTypeInferenceImpl(termType);
     }
 
-    public static TermTypeInference declareVariable(@Nonnull Variable variable) {
+    public static TermTypeInference declareRedirectionVariable(@Nonnull Variable variable) {
         return new TermTypeInferenceImpl(variable);
     }
 
@@ -46,7 +46,7 @@ public class TermTypeInferenceImpl implements TermTypeInference {
     }
 
     @Override
-    public Optional<Variable> getVariable() {
+    public Optional<Variable> getRedirectionVariable() {
         return Optional.ofNullable(variable);
     }
 
