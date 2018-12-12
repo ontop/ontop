@@ -37,7 +37,14 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
 
-    DBFunctionSymbol getDBUCase();
+    /**
+     * IF THEN, ELSE IF ..., ELSE
+     *
+     * Arity must be odd and >= 3
+     */
+    DBFunctionSymbol getDBCase(int arity);
+
+    DBFunctionSymbol getDBUpper();
 
     /**
      * arity must be >= 2

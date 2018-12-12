@@ -1574,7 +1574,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUCase(), v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
 
     @Test
@@ -1603,7 +1603,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUCase(), v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
 
     @Test

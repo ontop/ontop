@@ -586,6 +586,32 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBCase(
+			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm) {
+		ImmutableList<ImmutableTerm> terms = Stream.concat(
+				whenPairs
+						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
+				Stream.of(defaultTerm))
+				.collect(ImmutableCollectors.toList());
+
+		int arity = terms.size();
+
+		if (arity < 3) {
+			throw new IllegalArgumentException("whenPairs must be non-empty");
+		}
+
+		if ((arity == 3) && defaultTerm.equals(valueNull))
+			return getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1));
+
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity), terms);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs) {
+		return getDBCase(whenPairs, valueNull);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
 		int arity = terms.size();
 		if (arity < 2)

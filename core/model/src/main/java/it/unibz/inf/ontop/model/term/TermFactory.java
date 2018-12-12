@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -328,6 +329,21 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE
+	 *
+	 * whenPairs must not be empty
+	 */
+	ImmutableFunctionalTerm getDBCase(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+									  ImmutableTerm defaultTerm);
+
+	/**
+	 * IF THEN, ELSE IF ..., ELSE NULL
+	 *
+	 * whenPairs must not be empty
+	 */
+	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
 	/**
 	 * At least two terms are expected
