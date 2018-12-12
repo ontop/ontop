@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type;
 
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceImpl;
 
 import java.util.Optional;
@@ -18,7 +19,17 @@ public interface TermTypeInference {
      */
     Optional<TermType> getTermType();
 
+    /**
+     * Only when the type cannot be determined locally
+     * but corresponds to the type of a variable (defined in the sub-tree)
+     */
+    Optional<Variable> getVariable();
+
     static TermTypeInference declareTermType(TermType termType) {
         return TermTypeInferenceImpl.declareTermType(termType);
+    }
+
+    static TermTypeInference declareVariable(Variable variable) {
+        return TermTypeInferenceImpl.declareVariable(variable);
     }
 }
