@@ -2,9 +2,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.FatalTypingException;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -13,6 +14,9 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -80,6 +84,55 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
 
 
     @Override
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
+                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+        int arity = getArity();
+
+        List<Map.Entry<ImmutableExpression, ImmutableTerm>> newWhenPairs = new ArrayList<>();
+
+        /*
+         * When conditions
+         */
+        for (int i=0; i < arity - (arity % 2); i+=2) {
+            ImmutableExpression expression =  (ImmutableExpression) terms.get(i);
+            ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase);
+
+            ImmutableExpression.Evaluation evaluation = expression.evaluate(termFactory);
+            if (evaluation.getValue().isPresent()) {
+                switch (evaluation.getValue().get()) {
+                    case TRUE:
+                        if (newWhenPairs.isEmpty())
+                            return possibleValue;
+                        else
+                            return termFactory.getDBCase(newWhenPairs.stream(), possibleValue);
+                    default:
+                        // Discard the case entry
+                }
+            }
+            else {
+                ImmutableExpression newExpression = evaluation.getExpression()
+                        .orElseThrow(() -> new MinorOntopInternalBugException("The evaluation was expected " +
+                                "to return an expression because no value was returned"));
+                newWhenPairs.add(Maps.immutableEntry(newExpression, possibleValue));
+            }
+        }
+
+        ImmutableTerm defaultValue = extractDefaultValue(terms).simplify(isInConstructionNodeInOptimizationPhase);
+
+        if (newWhenPairs.isEmpty())
+            return defaultValue;
+
+        ImmutableFunctionalTerm newTerm = termFactory.getDBCase(newWhenPairs.stream(), defaultValue);
+
+        // Make sure the size was reduced so as to avoid an infinite loop
+        // For instance, new opportunities may appear when reduced to a IF_ELSE_NULL
+        return (newWhenPairs.size() < terms.size() % 2)
+                ? newTerm.simplify(isInConstructionNodeInOptimizationPhase)
+                : newTerm;
+    }
+
+
+    @Override
     public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
             throws FatalTypingException {
         validateSubTermTypes(terms);
@@ -87,10 +140,13 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     }
 
     /**
-     * TODO: allow it
+     * Currently considered too dangerous to post-processed
+     * as it may cause some functions to be called with invalid arguments.
      */
     @Override
     public boolean canBePostProcessed() {
         return false;
     }
+
+    protected abstract ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms);
 }
