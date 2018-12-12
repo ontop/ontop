@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
+
 public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final MetaRDFTermType metaRDFTermType;
@@ -130,13 +132,19 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
                 .orElseThrow(() -> new IllegalArgumentException("otherTerms must be non-empty"));
 
         ImmutableMap<ImmutableList<RDFTermTypeConstant>, RDFTermTypeConstant> validCombinations = possibleCombinations.stream()
-                .map(l -> evaluateCombination(l, termFactory)
+                .map(l -> evaluateCombination(l, optionalMergedTypeConstant, termFactory)
                         .map(r -> Maps.immutableEntry(l, r)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toMap());
 
-        throw new RuntimeException("TODO: continue simplifyUsingMagicNumbers()");
+        if (validCombinations.isEmpty())
+            return termFactory.getNullConstant();
+
+        return termFactory.getDBCaseElseNull(validCombinations.entrySet().stream()
+                .map(e -> Maps.immutableEntry(
+                        convertIntoConjunction(e.getKey(), subVariables, dictionary, termFactory),
+                        dictionary.convert(e.getValue()))));
 
     }
 
@@ -151,21 +159,42 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
         ImmutableFunctionalTerm firstTerm = terms.get(0);
         RDFTermTypeFunctionSymbol functionSymbol = (RDFTermTypeFunctionSymbol) firstTerm.getFunctionSymbol();
 
-        // Recursive (non-tail)
-        ImmutableSet<ImmutableList<RDFTermTypeConstant>> otherCombinations = extractPossibleCombinations(terms.subList(1, terms.size()));
+        ImmutableList<ImmutableFunctionalTerm> followingTerms = terms.subList(1, terms.size());
 
-        return functionSymbol.getConversionMap().values().stream()
-                .flatMap(v1 -> otherCombinations.stream()
-                        .map(c -> Stream.concat(Stream.of(v1), c.stream())
-                                .collect(ImmutableCollectors.toList())))
-                .collect(ImmutableCollectors.toSet());
+        if (followingTerms.isEmpty()) {
+            return functionSymbol.getConversionMap().values().stream()
+                    .map(ImmutableList::of)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        else {
+            // Recursive (non-tail)
+            ImmutableSet<ImmutableList<RDFTermTypeConstant>> otherCombinations = extractPossibleCombinations(followingTerms);
+
+            return functionSymbol.getConversionMap().values().stream()
+                    .flatMap(v1 -> otherCombinations.stream()
+                            .map(c -> Stream.concat(Stream.of(v1), c.stream())
+                                    .collect(ImmutableCollectors.toList())))
+                    .collect(ImmutableCollectors.toSet());
+        }
     }
 
     protected Optional<RDFTermTypeConstant> evaluateCombination(ImmutableList<RDFTermTypeConstant> constants,
+                                                                Optional<RDFTermTypeConstant> optionalMergedTypeConstant,
                                                                 TermFactory termFactory) {
-        return constants.stream()
+        return optionalMergedTypeConstant
+                .map(c -> Stream.concat(Stream.of(c), constants.stream()))
+                .orElseGet(constants::stream)
                 .reduce((c1, c2) -> termFactory.getRDFTermTypeConstant(
                         (RDFTermType) c1.getRDFTermType().getCommonDenominator(c2.getRDFTermType())))
                 .filter(c -> !c.getRDFTermType().isAbstract());
+    }
+
+    private ImmutableExpression convertIntoConjunction(ImmutableList<RDFTermTypeConstant> constants,
+                                                       ImmutableList<Variable> subVariables,
+                                                       TypeConstantDictionary dictionary, TermFactory termFactory) {
+        return termFactory.getConjunction(IntStream.range(0, constants.size())
+                .boxed()
+                .map(i -> termFactory.getImmutableExpression(EQ, subVariables.get(i), dictionary.convert(constants.get(i)))))
+                .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty stream"));
     }
 }
