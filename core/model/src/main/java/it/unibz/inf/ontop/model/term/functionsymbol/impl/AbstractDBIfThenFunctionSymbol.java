@@ -95,12 +95,12 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
          */
         for (int i=0; i < arity - (arity % 2); i+=2) {
             ImmutableExpression expression =  (ImmutableExpression) terms.get(i);
-            ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase);
 
             ImmutableExpression.Evaluation evaluation = expression.evaluate(termFactory);
             if (evaluation.getValue().isPresent()) {
                 switch (evaluation.getValue().get()) {
                     case TRUE:
+                        ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase);
                         if (newWhenPairs.isEmpty())
                             return possibleValue;
                         else
@@ -113,6 +113,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
                 ImmutableExpression newExpression = evaluation.getExpression()
                         .orElseThrow(() -> new MinorOntopInternalBugException("The evaluation was expected " +
                                 "to return an expression because no value was returned"));
+                ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase);
                 newWhenPairs.add(Maps.immutableEntry(newExpression, possibleValue));
             }
         }
