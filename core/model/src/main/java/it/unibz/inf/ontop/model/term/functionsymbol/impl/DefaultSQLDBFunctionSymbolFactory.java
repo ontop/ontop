@@ -22,6 +22,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
+    private final DBFunctionSymbol ifElseNull;
 
     @Inject
     private DefaultSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -36,6 +37,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        ifElseNull = createDBIfElseNull(dbBooleanType, abstractRootDBType);
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -91,12 +93,16 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         return nameInDialect.equals(AND_STR);
     }
 
-    private DBConcatFunctionSymbol createDBConcat(int arity) {
+    protected DBConcatFunctionSymbol createDBConcat(int arity) {
         return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
     }
 
-    private DBBooleanFunctionSymbol createDBAnd(int arity) {
+    protected DBBooleanFunctionSymbol createDBAnd(int arity) {
         return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
+    }
+
+    protected DBFunctionSymbol createDBIfElseNull(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
+        return new DefaultSQLIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
     @Override
@@ -112,6 +118,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     @Override
     protected DBFunctionSymbol createDBCase(int arity) {
         return new DefaultSQLCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIfElseNull() {
+        return ifElseNull;
     }
 
     @Override

@@ -85,12 +85,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
 	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
 	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
-	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE, false),
-
-	/*
- 	 * Conditional
- 	 */
-	IF_ELSE_NULL("IF_ELSE_NULL", TermTypeInferenceRules.SECOND_ARG_RULE, XSD_BOOLEAN_DT, RDF_TERM_TYPE, false);
+	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE, false);
 
 
 	// 0-ary operations

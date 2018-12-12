@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.AbstractDBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -222,8 +223,6 @@ public class ExpressionEvaluator {
 					return evalDatatype(term);
 				case SPARQL_LANG:
 					return evalLang(term);
-				case IF_ELSE_NULL:
-					return evalIfElseNull(term);
 				case UUID:
 				case STRUUID:
 				case MINUS:
@@ -651,7 +650,8 @@ public class ExpressionEvaluator {
 			 */
 			else if (functionSymbol != IS_NULL
 					&& functionSymbol != IS_NOT_NULL
-					&& functionSymbol != IF_ELSE_NULL) {
+					// TODO: use something else!
+					&& (!(functionSymbol instanceof AbstractDBIfThenFunctionSymbol))) {
 				ImmutableExpression notNullExpression = termFactory.getConjunction(
 						functionalTerm.getTerms().stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();

@@ -22,7 +22,6 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertNotEquals;
 
@@ -394,8 +393,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull1() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableFunctionalTerm(
-                    IF_ELSE_NULL,
+                TERM_FACTORY.getIfElseNull(
                     TERM_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
@@ -408,8 +406,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull2() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableFunctionalTerm(
-                        IF_ELSE_NULL,
+                TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
@@ -422,8 +419,7 @@ public class ExpressionEvaluatorTest {
     public void testIfElseNull3() {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
-                TERM_FACTORY.getImmutableFunctionalTerm(
-                        IF_ELSE_NULL,
+                TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);

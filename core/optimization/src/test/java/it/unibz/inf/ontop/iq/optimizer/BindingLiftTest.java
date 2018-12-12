@@ -21,7 +21,6 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.SPARQL_DATATYPE;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -1076,8 +1075,7 @@ public class BindingLiftTest {
         // TODO: drop E for the construction node as it is not needed.
         ConstructionNode expectedNodeOnLeft =IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        E, TERM_FACTORY.getImmutableFunctionalTerm(
-                                IF_ELSE_NULL,
+                        E, TERM_FACTORY.getIfElseNull(
                                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F),
                                 A),
                         F0, generateIRIString(URI_TEMPLATE_STR_1, A))));
@@ -2189,7 +2187,7 @@ public class BindingLiftTest {
 
     private static ImmutableFunctionalTerm generateIfIsNotNullElseNull(Variable rightSpecificVariable,
                                                                        ImmutableTerm conditionalValue) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
+        return TERM_FACTORY.getIfElseNull(
                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable),
                 conditionalValue);
     }
