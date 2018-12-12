@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 
@@ -10,4 +11,6 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
 
     ImmutableMap<DBConstant, RDFTermTypeConstant> getConversionMap();
+
+    TypeConstantDictionary getDictionary();
 }

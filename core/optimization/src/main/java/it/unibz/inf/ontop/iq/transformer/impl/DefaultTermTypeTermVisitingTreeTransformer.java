@@ -213,7 +213,7 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                             Map.Entry::getKey,
                             e -> termFactory.getRDFTermTypeFunctionalTerm(
                                     integerVariableMap.get(e.getKey()),
-                                    dictionary.createConversionMap(e.getValue())))));
+                                    dictionary, ImmutableSet.copyOf(e.getValue())))));
     }
 
     protected IQTree transformLeaf(LeafIQTree leaf){

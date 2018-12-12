@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -19,13 +20,16 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
 
     private final MetaRDFTermType metaType;
+    private final TypeConstantDictionary dictionary;
     private final ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap;
 
     protected RDFTermTypeFunctionSymbolImpl(TypeFactory typeFactory,
+                                            TypeConstantDictionary dictionary,
                                             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
         super("RDF_TYPE" + extractConversionMapString(conversionMap),
                 ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
         metaType = typeFactory.getMetaRDFTermType();
+        this.dictionary = dictionary;
         this.conversionMap = conversionMap;
     }
 
@@ -74,5 +78,10 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     @Override
     public ImmutableMap<DBConstant, RDFTermTypeConstant> getConversionMap() {
         return conversionMap;
+    }
+
+    @Override
+    public TypeConstantDictionary getDictionary() {
+        return dictionary;
     }
 }

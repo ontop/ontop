@@ -22,10 +22,12 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -174,9 +176,9 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term,
-			ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermTypeFunctionSymbol(conversionMap), term);
+	public ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
+			ImmutableSet<RDFTermTypeConstant> possibleConstants) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermTypeFunctionSymbol(dictionary, possibleConstants), term);
 	}
 
 	@Override

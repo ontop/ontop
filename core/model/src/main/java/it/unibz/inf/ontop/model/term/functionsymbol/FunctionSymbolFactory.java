@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.term.DBConstant;
+
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
@@ -32,8 +33,8 @@ public interface FunctionSymbolFactory {
 
     BooleanFunctionSymbol getIsARDFTermTypeFunctionSymbol(RDFTermType rdfTermType);
 
-    RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(
-            ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap);
+    RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
+            ImmutableSet<RDFTermTypeConstant> possibleConstants);
 
     // SPARQL functions
 
