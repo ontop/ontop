@@ -86,12 +86,6 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                 .findAny()
                 .orElseThrow(() -> new MinorOntopInternalBugException("No object definition found"));
 
-        if (optionalTypeInference
-                .filter(TermTypeInference::isNonFatalError)
-                .isPresent())
-            throw new MinorOntopInternalBugException("A non-fatal error is not expected in a mapping assertion\n"
-                    + mappingAssertion);
-
         /*
          * If the datatype is abstract --> we consider it as missing
          */

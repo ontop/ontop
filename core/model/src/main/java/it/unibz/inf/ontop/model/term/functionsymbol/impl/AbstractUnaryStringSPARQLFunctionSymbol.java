@@ -32,15 +32,11 @@ public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends ReducibleP
 
         // TODO: use a more generic method looking for base type violations
         ImmutableTerm subTerm = terms.get(0);
-        Optional<TermTypeInference> childTypeInference = subTerm.inferType();
 
-        if (childTypeInference
-                .flatMap(TermTypeInference::getTermType)
-                .filter(t -> !t.isA(xsdStringDatatype))
-                .isPresent()) {
-            return Optional.of(TermTypeInference.declareNonFatalError());
-        }
-        return childTypeInference;
+        return subTerm.inferType()
+                .filter(i -> i.getTermType()
+                        .filter(t -> t.isA(xsdStringDatatype))
+                        .isPresent());
     }
 
     @Override

@@ -40,11 +40,6 @@ public class TermTypeInferenceImpl implements TermTypeInference {
     }
 
     @Override
-    public boolean isNonFatalError() {
-        return termType == null;
-    }
-
-    @Override
     public boolean equals(Object o) {
         return (o instanceof TermTypeInference)
                 && getTermType().equals(((TermTypeInference) o).getTermType());

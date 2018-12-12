@@ -18,13 +18,7 @@ public interface TermTypeInference {
      */
     Optional<TermType> getTermType();
 
-    boolean isNonFatalError();
-
     static TermTypeInference declareTermType(TermType termType) {
         return TermTypeInferenceImpl.declareTermType(termType);
-    }
-
-    static TermTypeInference declareNonFatalError() {
-        return TermTypeInferenceImpl.declareNonFatalError();
     }
 }

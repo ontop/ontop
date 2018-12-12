@@ -41,7 +41,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         if (terms.stream()
                 .filter(t -> t instanceof Constant)
                 .anyMatch(c -> ((Constant) c).isNull()))
-            return Optional.of(TermTypeInference.declareNonFatalError());
+            return Optional.empty();
 
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
