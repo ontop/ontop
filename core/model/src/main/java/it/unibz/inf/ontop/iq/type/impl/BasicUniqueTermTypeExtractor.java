@@ -34,24 +34,20 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
     public Optional<TermType> extractUniqueTermType(ImmutableTerm term, IQTree subTree) {
         return (term instanceof Variable)
                 ? extractTypeFromVariable((Variable)term, subTree)
-                : extractType((NonVariableTerm) term);
+                : extractType((NonVariableTerm) term, subTree);
     }
 
     private Optional<TermType> extractTypeFromVariable(Variable variable, IQTree subTree) {
         return subTree.acceptVisitor(new TermTypeVariableVisitor(variable, this));
     }
 
-    /**
-     * At the moment, we only extract types from:
-     *    - ground terms
-     *    - non ground functional terms that are able to define their target type independently
-     *      of the children variable types
-     *
-     * TODO: should we detected multiple term types?
-     */
-    private Optional<TermType> extractType(NonVariableTerm nonVariableTerm) {
+    private Optional<TermType> extractType(NonVariableTerm nonVariableTerm, IQTree subTree) {
         return nonVariableTerm.inferType()
-                .flatMap(TermTypeInference::getTermType);
+                .flatMap(i -> i.getTermType()
+                        .map(Optional::of)
+                        // Continues on a type of a variable defined in the sub-tree
+                        .orElseGet(() -> i.getVariable()
+                                .flatMap(v -> extractTypeFromVariable(v, subTree))));
     }
 
 
