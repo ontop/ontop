@@ -117,7 +117,8 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
             }
         }
 
-        ImmutableTerm defaultValue = extractDefaultValue(terms).simplify(isInConstructionNodeInOptimizationPhase);
+        ImmutableTerm defaultValue = extractDefaultValue(terms, termFactory)
+                .simplify(isInConstructionNodeInOptimizationPhase);
 
         if (newWhenPairs.isEmpty())
             return defaultValue;
@@ -148,5 +149,5 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
         return false;
     }
 
-    protected abstract ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms);
+    protected abstract ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory);
 }

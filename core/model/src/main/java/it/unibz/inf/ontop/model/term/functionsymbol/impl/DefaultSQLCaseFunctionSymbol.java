@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class DefaultSQLCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol
     }
 
     @Override
-    protected ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms) {
+    protected ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory) {
         return terms.get(terms.size() - 1);
     }
 }
