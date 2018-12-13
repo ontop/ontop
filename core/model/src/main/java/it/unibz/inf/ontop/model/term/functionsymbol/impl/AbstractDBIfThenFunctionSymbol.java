@@ -142,13 +142,26 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     }
 
     /**
-     * Currently considered too dangerous to post-processed
-     * as it may cause some functions to be called with invalid arguments.
-     * @param arguments
+     * Conservative: can only be post-processed when all sub-functional terms (at different levels of depth)
+     * can be post-processed.
+     *
+     * TODO: consider perhaps a less conservative approach
+     *
      */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        return extractSubFunctionalTerms(arguments)
+                .allMatch(ImmutableFunctionalTerm::canBePostProcessed);
+    }
+
+    /**
+     * Recursive
+     */
+    protected Stream<ImmutableFunctionalTerm> extractSubFunctionalTerms(ImmutableList<? extends ImmutableTerm> subTerms) {
+        return subTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm)t)
+                .flatMap(f -> Stream.concat(Stream.of(f), extractSubFunctionalTerms(f.getTerms())));
     }
 
     protected abstract ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory);

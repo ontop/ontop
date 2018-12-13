@@ -37,4 +37,6 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
     }
 
     boolean isInjective(ImmutableSet<Variable> nonNullVariables);
+
+    boolean canBePostProcessed();
 }

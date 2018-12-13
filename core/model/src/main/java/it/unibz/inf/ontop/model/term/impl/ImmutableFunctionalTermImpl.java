@@ -134,4 +134,9 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         return getFunctionSymbol().isInjective(getTerms(), nonNullVariables);
     }
 
+    @Override
+    public boolean canBePostProcessed() {
+        return functionSymbol.canBePostProcessed(terms);
+    }
+
 }

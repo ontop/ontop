@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
@@ -32,5 +29,15 @@ public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThe
                 return possibleValue;
         }
         return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory);
+    }
+
+    /**
+     * Only looks if the second argument is guaranteed to be post-processed or not
+     * since the first argument (the condition expression) will always be evaluated.
+     */
+    @Override
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
+        return extractSubFunctionalTerms(arguments.subList(1, 2))
+                .allMatch(ImmutableFunctionalTerm::canBePostProcessed);
     }
 }
