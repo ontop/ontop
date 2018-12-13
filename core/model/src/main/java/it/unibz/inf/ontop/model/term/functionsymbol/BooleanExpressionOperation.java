@@ -135,8 +135,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return termFactory.getImmutableFunctionalTerm(this, terms);
     }
 
-    @Override
-    public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
+    private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
         try {
             return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
         } catch (FatalTypingException e) {

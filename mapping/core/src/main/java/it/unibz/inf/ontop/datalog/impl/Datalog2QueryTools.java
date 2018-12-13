@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -15,7 +15,7 @@ public class Datalog2QueryTools {
 
     public static Stream<Predicate> extractPredicates(Function atom) {
         Predicate currentpred = atom.getFunctionSymbol();
-        if (currentpred instanceof OperationPredicate)
+        if (currentpred instanceof FunctionSymbol)
             return Stream.of();
         else if (currentpred instanceof AlgebraOperatorPredicate) {
             return atom.getTerms().stream()

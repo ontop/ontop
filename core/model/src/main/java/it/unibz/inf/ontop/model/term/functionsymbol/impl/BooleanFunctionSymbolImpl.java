@@ -22,14 +22,6 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     }
 
     @Override
-    public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) {
-        throw new RuntimeException("TODO: support inferTypeFromArgumentTypes?");
-    }
-
-    /**
-     * TODO: look at it seriously
-     */
-    @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(dbBooleanTermType));
     }

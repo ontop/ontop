@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
-public enum ExpressionOperation implements OperationPredicate {
+public enum ExpressionOperation implements FunctionSymbol {
 
 	/* Numeric operations */
 
@@ -198,8 +198,7 @@ public enum ExpressionOperation implements OperationPredicate {
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);
 	}
 
-	@Override
-	public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
+	private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
 		try {
 			return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
 		} catch (FatalTypingException e) {

@@ -8,8 +8,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -95,7 +94,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     }
 
     private boolean isExpressionNullable(ImmutableExpression expression, ImmutableSet<Variable> nullableVariables) {
-        OperationPredicate functionSymbol = expression.getFunctionSymbol();
+        BooleanFunctionSymbol functionSymbol = expression.getFunctionSymbol();
 
         if (functionSymbol instanceof BooleanExpressionOperation) {
             switch((BooleanExpressionOperation) functionSymbol) {

@@ -683,7 +683,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunction(REGEX, term1, term2, term3);
             }
             else if (expr instanceof Compare) {
-                OperationPredicate p = RelationalOperations.get(((Compare) expr).getOperator());
+                BooleanExpressionOperation p = RelationalOperations.get(((Compare) expr).getOperator());
                 return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
@@ -723,7 +723,7 @@ public class SparqlAlgebraToDatalogTranslator {
             }
 
             // Old approach
-            OperationPredicate p = XPathFunctions.get(f.getURI());
+            FunctionSymbol p = XPathFunctions.get(f.getURI());
             if (p != null) {
                 if (arity != p.getArity())
                     throw new OntopInvalidInputQueryException(
@@ -778,8 +778,8 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
     // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
-    private static final ImmutableMap<String, OperationPredicate> XPathFunctions =
-            new ImmutableMap.Builder<String, OperationPredicate>()
+    private static final ImmutableMap<String, FunctionSymbol> XPathFunctions =
+            new ImmutableMap.Builder<String, FunctionSymbol>()
                     /*
                      * String functions
                      */

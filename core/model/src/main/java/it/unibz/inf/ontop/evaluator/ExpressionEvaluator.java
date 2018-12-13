@@ -43,7 +43,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
 /**
@@ -198,7 +197,7 @@ public class ExpressionEvaluator {
 
 	private ImmutableTerm eval(ImmutableFunctionalTerm expr) {
 		FunctionSymbol functionSymbol = expr.getFunctionSymbol();
-		if (functionSymbol instanceof OperationPredicate) {
+		if ((functionSymbol instanceof ExpressionOperation) || (functionSymbol instanceof BooleanExpressionOperation)) {
 			return evalOperation(expr);
 		}
 		// TODO: remove this temporary hack!
@@ -560,7 +559,7 @@ public class ExpressionEvaluator {
 		else if (teval1 instanceof ImmutableFunctionalTerm && innerTerm2 instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) teval1;
 			ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) innerTerm2;
-			if(f1.getFunctionSymbol() instanceof OperationPredicate){
+			if((f1.getFunctionSymbol() instanceof ExpressionOperation) || (f1.getFunctionSymbol() instanceof BooleanExpressionOperation)){
 				return term;
 			}
 			return evalLangMatches(termFactory.getImmutableFunctionalTerm(LANGMATCHES, f1.getTerm(0),
@@ -827,7 +826,7 @@ public class ExpressionEvaluator {
 			FunctionSymbol functionSymbol1 = f1.getFunctionSymbol();
 
 			// TODO: see if we can get rid of it
-			if (functionSymbol1 instanceof OperationPredicate) {
+			if ((functionSymbol1 instanceof ExpressionOperation) || (functionSymbol1 instanceof BooleanExpressionOperation)) {
 				return term;
 			}
 

@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
-public interface BooleanFunctionSymbol extends OperationPredicate {
+public interface BooleanFunctionSymbol extends FunctionSymbol {
 
     /**
      * Returns TRUE if the NOT operator has to stay ABOVE the expression
