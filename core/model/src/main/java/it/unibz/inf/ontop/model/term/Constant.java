@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.term;
  */
 
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
@@ -41,8 +40,4 @@ public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 	 */
 	Optional<TermType> getOptionalType();
 
-	@Override
-	default Optional<TermTypeInference> inferAndValidateType() {
-		return inferType();
-	}
 }

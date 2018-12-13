@@ -38,7 +38,7 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }
 

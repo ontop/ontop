@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
@@ -45,14 +44,7 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    public final Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-            throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

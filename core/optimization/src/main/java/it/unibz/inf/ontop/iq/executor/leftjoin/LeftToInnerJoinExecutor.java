@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 
@@ -288,7 +287,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                 newVariableMap.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
-                                e -> termFactory.getImmutableFunctionalTerm(IF_ELSE_NULL, newCondition, e.getValue())
+                                e -> termFactory.getIfElseNull(newCondition, e.getValue())
                     )));
 
         ImmutableSubstitution<ImmutableTerm> substitutionToPropagate = remainingRightSubstitution

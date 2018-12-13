@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 @Singleton
 public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
@@ -542,8 +541,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .anyMatch(v -> !leftVariables.contains(v)))
                 return value;
 
-            return termFactory.getImmutableFunctionalTerm(
-                    IF_ELSE_NULL,
+            return termFactory.getIfElseNull(
                     termFactory.getImmutableExpression(IS_NOT_NULL, rightProvenanceVariable),
                     value);
         }

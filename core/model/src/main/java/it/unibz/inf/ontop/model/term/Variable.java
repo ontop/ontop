@@ -34,11 +34,6 @@ public interface Variable extends NonFunctionalTerm, NonConstantTerm, NonGroundT
 	String getName();
 
 	@Override
-	default Optional<TermTypeInference> inferAndValidateType(){
-		return Optional.empty();
-	}
-
-	@Override
 	default Optional<TermTypeInference> inferType(){
 		return Optional.empty();
 	}

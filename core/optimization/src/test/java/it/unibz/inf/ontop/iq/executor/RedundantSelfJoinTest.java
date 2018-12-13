@@ -28,7 +28,6 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -996,7 +995,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
-                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
+                        TERM_FACTORY.getIfElseNull(
                                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
                                 M
                                 )));
@@ -1181,7 +1180,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M,
-                        TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
+                        TERM_FACTORY.getIfElseNull(
                                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
                                 O
                         )));

@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
@@ -104,7 +104,7 @@ public abstract class AbstractFunctionalTerm implements Function {
 
     @Override
     public boolean isOperation() {
-        return functor instanceof OperationPredicate;
+        return functor instanceof FunctionSymbol;
     }
 
     @Override

@@ -28,10 +28,4 @@ public abstract class AbstractTypedDBFunctionSymbol extends FunctionSymbolImpl i
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(targetType));
     }
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
-    }
 }

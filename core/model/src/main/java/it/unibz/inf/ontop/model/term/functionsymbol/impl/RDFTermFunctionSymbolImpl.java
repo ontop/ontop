@@ -41,7 +41,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         if (terms.stream()
                 .filter(t -> t instanceof Constant)
                 .anyMatch(c -> ((Constant) c).isNull()))
-            return Optional.of(TermTypeInference.declareNonFatalError());
+            return Optional.empty();
 
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
@@ -51,13 +51,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                 .map(t -> (RDFTermTypeConstant) t)
                 .map(RDFTermTypeConstant::getRDFTermType)
                 .map(TermTypeInference::declareTermType);
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-            throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
     }
 
     @Override
@@ -92,7 +85,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }
 }

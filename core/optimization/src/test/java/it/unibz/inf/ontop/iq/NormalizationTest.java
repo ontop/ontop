@@ -1669,7 +1669,7 @@ public class NormalizationTest {
     }
 
     private ImmutableFunctionalTerm createIfIsNotNullElseNull(Variable rightSpecificVariable, ImmutableTerm value) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(IF_ELSE_NULL,
+        return TERM_FACTORY.getIfElseNull(
                 TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable), value);
     }
 

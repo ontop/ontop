@@ -1230,11 +1230,6 @@ public class OneShotSQLGeneratorEngine {
 		/*
 		  TODO: replace by a switch
 		 */
-		if (functionSymbol.equals(ExpressionOperation.IF_ELSE_NULL)) {
-			String condition = getSQLString(function.getTerm(0), index, false);
-			String value = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.ifElseNull(condition, value);
-		}
 		if (functionSymbol == ExpressionOperation.QUEST_CAST) {
 			String columnName = getSQLString(function.getTerm(0), index, false);
 			String datatype = ((Constant) function.getTerm(1)).getValue();

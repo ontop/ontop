@@ -42,7 +42,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.IF_ELSE_NULL;
 
 @Singleton
 public class TermFactoryImpl implements TermFactory {
@@ -582,7 +581,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term) {
-		return getImmutableFunctionalTerm(IF_ELSE_NULL, condition, term);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfElseNull(), condition, term);
 	}
 
 	@Override

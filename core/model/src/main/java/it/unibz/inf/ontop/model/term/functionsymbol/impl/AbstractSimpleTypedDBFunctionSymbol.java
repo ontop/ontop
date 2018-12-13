@@ -38,7 +38,7 @@ public abstract class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedD
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

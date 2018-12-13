@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -24,20 +23,18 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
     @Override
     public ImmutableExpression normalize(ImmutableExpression expression) {
 
-        OperationPredicate functionSymbol = expression.getFunctionSymbol();
+        BooleanFunctionSymbol functionSymbol = expression.getFunctionSymbol();
 
         if (functionSymbol instanceof BooleanExpressionOperation) {
-
-            BooleanFunctionSymbol booleanFunctionSymbol = (BooleanFunctionSymbol) functionSymbol;
 
             switch((BooleanExpressionOperation)functionSymbol) {
                 //case AND:
                 //case OR:
                 case EQ:
                 case NEQ:
-                    return normalizeCommutative(booleanFunctionSymbol, expression.getTerms());
+                    return normalizeCommutative(functionSymbol, expression.getTerms());
                 default:
-                    return normalizeArguments(booleanFunctionSymbol, expression.getTerms());
+                    return normalizeArguments(functionSymbol, expression.getTerms());
             }
         }
         else {

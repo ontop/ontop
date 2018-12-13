@@ -36,9 +36,10 @@ public class DefaultDBConcatFunctionSymbol extends AbstractTypedDBFunctionSymbol
 
     /**
      * TODO: allow post-processing
+     * @param arguments
      */
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

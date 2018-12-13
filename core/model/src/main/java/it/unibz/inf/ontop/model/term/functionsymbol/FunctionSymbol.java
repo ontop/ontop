@@ -23,8 +23,6 @@ public interface FunctionSymbol extends Predicate {
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);
 
-    Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
-
     ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
                            TermFactory termFactory);
 
@@ -36,10 +34,18 @@ public interface FunctionSymbol extends Predicate {
     }
 
     /**
-     * Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
-     *  (outside the optimization phase) .
+     * 1. When a functional term simplifies itself in a BOTTOM-UP manner:
+     *     Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
+     *     (outside the optimization phase) .
+     *
+     * 2.  When a functional term simplifies itself in a TOP-DOWN manner (e.g. IF-THEN-ELSE functional terms):
+     *     The permission for post-processing may depend on the ability of sub-functional terms to be post-processed
+     *      or safely evaluated by the DB engine.
+     *  (Recall that top-down evaluation allows some arguments not to be evaluated when their pre-conditions are not met.
+     *   This is particularly valuable for preventing fatal errors).
+     *
      */
-    boolean canBePostProcessed();
+    boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
 
 
     interface FunctionalTermNullability {

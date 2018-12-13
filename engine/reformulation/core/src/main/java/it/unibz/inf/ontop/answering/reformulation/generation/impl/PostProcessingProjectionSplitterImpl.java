@@ -104,7 +104,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
                                                         Optional<Variable> definedVariable) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-            if (functionalTerm.getFunctionSymbol().canBePostProcessed()) {
+            if (functionalTerm.canBePostProcessed()) {
                 // Recursive
                 ImmutableList<DefinitionDecomposition> childDecompositions = functionalTerm.getTerms().stream()
                         .map(t -> decomposeDefinition(t, variableGenerator, Optional.empty()))

@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
-public enum ExpressionOperation implements OperationPredicate {
+public enum ExpressionOperation implements FunctionSymbol {
 
 	/* Numeric operations */
 
@@ -85,12 +85,7 @@ public enum ExpressionOperation implements OperationPredicate {
 	SUM("SUM", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
 	MAX("MAX", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
 	MIN("MIN", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, RDF_TERM_TYPE, false),
-	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE, false),
-
-	/*
- 	 * Conditional
- 	 */
-	IF_ELSE_NULL("IF_ELSE_NULL", TermTypeInferenceRules.SECOND_ARG_RULE, XSD_BOOLEAN_DT, RDF_TERM_TYPE, false);
+	COUNT("COUNT", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, RDF_TERM_TYPE, false);
 
 
 	// 0-ary operations
@@ -173,9 +168,10 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	/**
 	 * TODO: let some of them be post-processed
+	 * @param arguments
 	 */
 	@Override
-	public boolean canBePostProcessed() {
+	public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
 		return false;
 	}
 
@@ -187,19 +183,6 @@ public enum ExpressionOperation implements OperationPredicate {
 				.collect(ImmutableCollectors.toList());
 
 		return inferTypeFromArgumentTypes(argumentTypes);
-	}
-
-	@Override
-	public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-			throws FatalTypingException {
-
-		ImmutableList.Builder<Optional<TermTypeInference>> argumentTypeBuilder = ImmutableList.builder();
-
-		for (ImmutableTerm term : terms) {
-			argumentTypeBuilder.add(term.inferAndValidateType());
-		}
-
-		return inferTypeFromArgumentTypesAndCheckForFatalError(argumentTypeBuilder.build());
 	}
 
 	/**
@@ -215,8 +198,7 @@ public enum ExpressionOperation implements OperationPredicate {
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);
 	}
 
-	@Override
-	public Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
+	private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
 		try {
 			return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
 		} catch (FatalTypingException e) {
@@ -224,15 +206,6 @@ public enum ExpressionOperation implements OperationPredicate {
 			return Optional.empty();
 		}
 	}
-
-	@Override
-	public Optional<TermTypeInference> inferTypeFromArgumentTypesAndCheckForFatalError(
-			ImmutableList<Optional<TermTypeInference>> argumentTypes) throws FatalTypingException {
-		argumentValidator.validate(argumentTypes);
-
-		return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
-	}
-
 
 	/**
 	 * TODO: IMPLEMENT IT SERIOUSLY
