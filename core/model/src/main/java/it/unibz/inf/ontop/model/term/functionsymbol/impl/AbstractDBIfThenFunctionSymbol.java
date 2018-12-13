@@ -144,9 +144,10 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     /**
      * Currently considered too dangerous to post-processed
      * as it may cause some functions to be called with invalid arguments.
+     * @param arguments
      */
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

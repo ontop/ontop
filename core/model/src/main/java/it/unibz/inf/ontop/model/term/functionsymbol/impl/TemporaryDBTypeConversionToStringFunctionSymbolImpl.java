@@ -33,7 +33,7 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

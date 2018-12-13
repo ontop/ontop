@@ -110,9 +110,10 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
     /**
      * TODO: let some of them be post-processed
+     * @param arguments
      */
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

@@ -168,9 +168,10 @@ public enum ExpressionOperation implements OperationPredicate {
 
 	/**
 	 * TODO: let some of them be post-processed
+	 * @param arguments
 	 */
 	@Override
-	public boolean canBePostProcessed() {
+	public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
 		return false;
 	}
 

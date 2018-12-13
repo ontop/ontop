@@ -39,7 +39,7 @@ public interface FunctionSymbol extends Predicate {
      * Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
      *  (outside the optimization phase) .
      */
-    boolean canBePostProcessed();
+    boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
 
 
     interface FunctionalTermNullability {

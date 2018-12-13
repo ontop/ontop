@@ -35,7 +35,7 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

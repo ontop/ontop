@@ -71,7 +71,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }
 

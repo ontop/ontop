@@ -48,7 +48,7 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 

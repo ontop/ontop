@@ -26,7 +26,7 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return getInputType().isPresent();
     }
 

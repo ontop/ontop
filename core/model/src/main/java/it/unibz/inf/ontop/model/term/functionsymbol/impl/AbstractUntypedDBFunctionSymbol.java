@@ -52,7 +52,7 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    public boolean canBePostProcessed() {
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
 
