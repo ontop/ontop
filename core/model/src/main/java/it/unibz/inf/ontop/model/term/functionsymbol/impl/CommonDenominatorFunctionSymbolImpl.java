@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -141,10 +138,13 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
         if (validCombinations.isEmpty())
             return termFactory.getNullConstant();
 
-        return termFactory.getDBCaseElseNull(validCombinations.entrySet().stream()
+        ImmutableFunctionalTerm caseTerm = termFactory.getDBCaseElseNull(validCombinations.entrySet().stream()
                 .map(e -> Maps.immutableEntry(
                         convertIntoConjunction(e.getKey(), subVariables, dictionary, termFactory),
                         dictionary.convert(e.getValue()))));
+
+        return termFactory.getRDFTermTypeFunctionalTerm(caseTerm, dictionary,
+                ImmutableSet.copyOf(validCombinations.values()));
 
     }
 
