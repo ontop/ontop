@@ -9,23 +9,13 @@ import java.util.stream.IntStream;
 
 public abstract class DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl implements DBBooleanFunctionSymbol {
 
-    private final String nameInDialect;
-    private static final String FUNCTIONAL_TEMPLATE = "%s(%s)";
-
-    protected DBBooleanFunctionSymbolImpl(String nameInDialect, int arity, DBTermType dbBooleanTermType) {
-        super(nameInDialect + arity,
+    protected DBBooleanFunctionSymbolImpl(String name, int arity, DBTermType dbBooleanTermType) {
+        super(name + arity,
                 IntStream.range(0, arity)
                         .boxed()
                         .map(i -> dbBooleanTermType)
                         .collect(ImmutableCollectors.toList()),
                 dbBooleanTermType);
-        this.nameInDialect = nameInDialect;
-    }
-
-    @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        return String.format(FUNCTIONAL_TEMPLATE, nameInDialect,
-                String.join( ",", termStrings));
     }
 
     protected String inBrackets(String expression) {
