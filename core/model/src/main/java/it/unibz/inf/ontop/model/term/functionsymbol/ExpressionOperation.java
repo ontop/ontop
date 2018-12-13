@@ -185,19 +185,6 @@ public enum ExpressionOperation implements OperationPredicate {
 		return inferTypeFromArgumentTypes(argumentTypes);
 	}
 
-	@Override
-	public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-			throws FatalTypingException {
-
-		ImmutableList.Builder<Optional<TermTypeInference>> argumentTypeBuilder = ImmutableList.builder();
-
-		for (ImmutableTerm term : terms) {
-			argumentTypeBuilder.add(term.inferAndValidateType());
-		}
-
-		return inferTypeFromArgumentTypesAndCheckForFatalError(argumentTypeBuilder.build());
-	}
-
 	/**
 	 * TODO: implement it seriously after getting rid of this enum
 	 */
@@ -220,15 +207,6 @@ public enum ExpressionOperation implements OperationPredicate {
 			return Optional.empty();
 		}
 	}
-
-	@Override
-	public Optional<TermTypeInference> inferTypeFromArgumentTypesAndCheckForFatalError(
-			ImmutableList<Optional<TermTypeInference>> argumentTypes) throws FatalTypingException {
-		argumentValidator.validate(argumentTypes);
-
-		return termTypeInferenceRule.inferTypeFromArgumentTypes(argumentTypes);
-	}
-
 
 	/**
 	 * TODO: IMPLEMENT IT SERIOUSLY

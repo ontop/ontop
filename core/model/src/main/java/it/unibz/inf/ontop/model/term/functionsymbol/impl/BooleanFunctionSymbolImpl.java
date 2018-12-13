@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -27,23 +26,11 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
         throw new RuntimeException("TODO: support inferTypeFromArgumentTypes?");
     }
 
-    @Override
-    public Optional<TermTypeInference> inferTypeFromArgumentTypesAndCheckForFatalError(
-            ImmutableList<Optional<TermTypeInference>> actualArgumentTypes) throws FatalTypingException {
-        throw new RuntimeException("TODO: support inferTypeFromArgumentTypesAndCheckForFatalError?");
-    }
-
     /**
      * TODO: look at it seriously
      */
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(dbBooleanTermType));
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
     }
 }

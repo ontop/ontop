@@ -23,8 +23,6 @@ public interface FunctionSymbol extends Predicate {
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);
 
-    Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms) throws FatalTypingException;
-
     ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
                            TermFactory termFactory);
 

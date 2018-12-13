@@ -30,12 +30,6 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
         return functionSymbol.inferType(getTerms());
     }
 
-    @Override
-    default Optional<TermTypeInference> inferAndValidateType() throws FatalTypingException {
-        FunctionSymbol functionSymbol = getFunctionSymbol();
-        return functionSymbol.inferAndValidateType(getTerms());
-    }
-
     boolean isInjective(ImmutableSet<Variable> nonNullVariables);
 
     boolean canBePostProcessed();

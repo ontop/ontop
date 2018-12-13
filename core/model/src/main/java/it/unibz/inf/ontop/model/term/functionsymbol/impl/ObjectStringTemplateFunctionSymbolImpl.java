@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.mikael.urlbuilder.util.Encoder;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -56,13 +55,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return Optional.empty();
         }
         return Optional.of(TermTypeInference.declareTermType(lexicalType));
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-            throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
     }
 
     @Override

@@ -133,14 +133,6 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
                 : newTerm;
     }
 
-
-    @Override
-    public Optional<TermTypeInference> inferAndValidateType(ImmutableList<? extends ImmutableTerm> terms)
-            throws FatalTypingException {
-        validateSubTermTypes(terms);
-        return inferType(terms);
-    }
-
     /**
      * Conservative: can only be post-processed when all sub-functional terms (at different levels of depth)
      * can be post-processed.
