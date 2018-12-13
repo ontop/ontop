@@ -206,7 +206,9 @@ public class ExpressionEvaluator {
 			return evalIfElseNull(expr.getTerms());
 		}
 		else {
-			return expr;
+			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
+			// to exploit unification techniques for simplifying equalities
+			return expr.simplify(true);
 		}
 	}
 
