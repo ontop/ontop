@@ -23,9 +23,11 @@ package it.unibz.inf.ontop.evaluator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.AbstractDBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.AbstractDBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
@@ -199,8 +201,11 @@ public class ExpressionEvaluator {
 		if (functionSymbol instanceof OperationPredicate) {
 			return evalOperation(expr);
 		}
+		// TODO: remove this temporary hack!
+		else if (functionSymbol instanceof AbstractDBIfElseNullFunctionSymbol) {
+			return evalIfElseNull(expr.getTerms());
+		}
 		else {
-			// TODO: should we evaluation non operation?
 			return expr;
 		}
 	}
@@ -312,6 +317,10 @@ public class ExpressionEvaluator {
 		// TODO: remove this temporary hack!
 		else if (functionSymbol instanceof DBAndFunctionSymbol) {
 			return evalNaryAnd(term.getTerms());
+		}
+		// TODO: remove this temporary hack!
+		else if (functionSymbol instanceof AbstractDBIfElseNullFunctionSymbol) {
+			return evalIfElseNull(term.getTerms());
 		}
 		else {
 			throw new RuntimeException(
@@ -601,17 +610,23 @@ public class ExpressionEvaluator {
 
     }
 
-	private ImmutableTerm evalIfElseNull(ImmutableFunctionalTerm term) {
-		ImmutableTerm formerCondition = term.getTerm(0);
-		ImmutableTerm newCondition = eval(formerCondition);
-		if (newCondition.equals(formerCondition))
-			return term;
-		else if (newCondition.equals(valueFalse))
+	/**
+	 * Temporary: allows to use eval() on the condition
+	 */
+	private ImmutableTerm evalIfElseNull(ImmutableList<? extends ImmutableTerm> terms) {
+		ImmutableTerm newCondition = eval(terms.get(0));
+		if (newCondition.equals(valueFalse))
 			return valueNull;
 		else if (newCondition.equals(valueTrue))
-			return term.getTerm(1);
+			return terms.get(1);
+		else if (newCondition.equals(valueNull))
+			return valueNull;
+		else if (newCondition instanceof ImmutableExpression)
+			return termFactory.getIfElseNull((ImmutableExpression) newCondition, terms.get(1))
+					.simplify(false);
 		else
-			return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), newCondition, term.getTerm(1));
+			throw new MinorOntopInternalBugException("The new condition was expected " +
+					"to be a ImmutableExpression, not " + newCondition);
 	}
 
 	private ImmutableTerm evalIsNullNotNull(ImmutableFunctionalTerm term, boolean isnull) {
