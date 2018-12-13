@@ -146,7 +146,7 @@ public class ExpressionEvaluator {
 	}
 
 	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
-		ImmutableTerm evaluatedTerm = evalOperation(expression);
+		ImmutableTerm evaluatedTerm = eval(expression);
 
 		/**
 		 * If a function, convert it into an ImmutableBooleanExpression
@@ -195,23 +195,7 @@ public class ExpressionEvaluator {
 			return eval((ImmutableFunctionalTerm) expr);
 	}
 
-	private ImmutableTerm eval(ImmutableFunctionalTerm expr) {
-		FunctionSymbol functionSymbol = expr.getFunctionSymbol();
-		if ((functionSymbol instanceof ExpressionOperation) || (functionSymbol instanceof BooleanExpressionOperation)) {
-			return evalOperation(expr);
-		}
-		// TODO: remove this temporary hack!
-		else if (functionSymbol instanceof AbstractDBIfElseNullFunctionSymbol) {
-			return evalIfElseNull(expr.getTerms());
-		}
-		else {
-			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
-			// to exploit unification techniques for simplifying equalities
-			return expr.simplify(true);
-		}
-	}
-
-	private ImmutableTerm evalOperation(ImmutableFunctionalTerm term) {
+	private ImmutableTerm eval(ImmutableFunctionalTerm term) {
 
 		FunctionSymbol functionSymbol = term.getFunctionSymbol();
 		if (functionSymbol instanceof ExpressionOperation) {
@@ -324,9 +308,9 @@ public class ExpressionEvaluator {
 			return evalIfElseNull(term.getTerms());
 		}
 		else {
-			throw new RuntimeException(
-					"Evaluation of expression not supported: "
-							+ term.toString());
+			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
+			// to exploit unification techniques for simplifying equalities
+			return term.simplify(true);
 		}
 	}
 
