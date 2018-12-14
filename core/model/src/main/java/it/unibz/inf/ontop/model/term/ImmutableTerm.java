@@ -12,6 +12,11 @@ import java.util.stream.Stream;
  */
 public interface ImmutableTerm {
 
+    /**
+     * Returns true if and only if the term is a NULL Constant.
+     */
+    boolean isNull();
+
     boolean isGround();
 
     Stream<Variable> getVariableStream();

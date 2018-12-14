@@ -30,8 +30,6 @@ import java.util.Optional;
  */
 public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 
-	boolean isNull();
-
 	// TODO: eliminate getValue from this interface
 	String getValue();
 
