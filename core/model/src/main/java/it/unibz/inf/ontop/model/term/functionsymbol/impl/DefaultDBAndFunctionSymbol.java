@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class DefaultDBAndFunctionSymbol extends DBBooleanFunctionSymbolImpl implements DBAndFunctionSymbol {
+public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFunctionSymbol implements DBAndFunctionSymbol {
 
     private final String argumentSeparator;
 
