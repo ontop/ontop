@@ -94,7 +94,12 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
          * When conditions
          */
         for (int i=0; i < arity - (arity % 2); i+=2) {
-            ImmutableExpression expression =  (ImmutableExpression) terms.get(i);
+            ImmutableTerm term = terms.get(i);
+            ImmutableExpression expression =  Optional.of(term)
+                    .filter(t -> t instanceof ImmutableExpression)
+                    .map(t -> (ImmutableExpression)t)
+                    .orElseThrow(() -> new MinorOntopInternalBugException(term + " was expected to be " +
+                            "an ImmutableExpression due to its position in " + this));
 
             ImmutableExpression.Evaluation evaluation = expression.evaluate(termFactory);
             if (evaluation.getValue().isPresent()) {

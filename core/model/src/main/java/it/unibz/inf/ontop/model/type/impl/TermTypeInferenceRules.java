@@ -23,11 +23,13 @@ public class TermTypeInferenceRules {
 
     public static final TermTypeInferenceRule PREDEFINED_IRI_RULE;
     public static final TermTypeInferenceRule PREDEFINED_STRING_RULE;
-    public static final TermTypeInferenceRule PREDEFINED_BOOLEAN_RULE;
+    public static final TermTypeInferenceRule PREDEFINED_XSD_BOOLEAN_RULE;
     public static final TermTypeInferenceRule PREDEFINED_INTEGER_RULE;
     public static final TermTypeInferenceRule PREDEFINED_DECIMAL_RULE;
     public static final TermTypeInferenceRule PREDEFINED_DOUBLE_RULE;
     public static final TermTypeInferenceRule PREDEFINED_DATETIME_RULE;
+
+    public static final TermTypeInferenceRule PREDEFINED_DB_BOOLEAN_RULE;
 
     public static final ArgumentValidator COMPATIBLE_STRING_VALIDATOR;
 
@@ -56,7 +58,7 @@ public class TermTypeInferenceRules {
      * TODO: explain
      */
     public static final TermTypeInferenceRule SECOND_ARG_RULE;
-    
+
     static {
         // UGLY!! Temporary hack
         TypeFactory typeFactory = OntopModelConfiguration.defaultBuilder().build().getTypeFactory();
@@ -73,9 +75,12 @@ public class TermTypeInferenceRules {
         IRI_RDF_TYPE = typeFactory.getIRITermType();
         ROOT_TERM_TYPE = typeFactory.getAbstractAtomicTermType();
 
+        DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
+
         PREDEFINED_IRI_RULE = new PredefinedTermTypeInferenceRule(IRI_RDF_TYPE);
         PREDEFINED_STRING_RULE = new PredefinedTermTypeInferenceRule(XSD_STRING_DT);
-        PREDEFINED_BOOLEAN_RULE = new PredefinedTermTypeInferenceRule(XSD_BOOLEAN_DT);
+        PREDEFINED_XSD_BOOLEAN_RULE = new PredefinedTermTypeInferenceRule(XSD_BOOLEAN_DT);
+        PREDEFINED_DB_BOOLEAN_RULE = new PredefinedTermTypeInferenceRule(dbBooleanType);
         PREDEFINED_INTEGER_RULE = new PredefinedTermTypeInferenceRule(XSD_INTEGER_DT);
         PREDEFINED_DECIMAL_RULE = new PredefinedTermTypeInferenceRule(XSD_DECIMAL_DT);
         PREDEFINED_DOUBLE_RULE = new PredefinedTermTypeInferenceRule(XSD_DOUBLE_DT);

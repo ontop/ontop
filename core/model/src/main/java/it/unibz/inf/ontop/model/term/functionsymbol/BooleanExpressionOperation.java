@@ -26,38 +26,38 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    OR("OR", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
-    NOT("NOT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, XSD_BOOLEAN_DT),
+    OR("OR", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
+    NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 
-    EQ("EQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
-    NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
+    EQ("EQ", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
+    NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
     /*
      * BC: is it defined for IRIs?
      */
-    GTE("GTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    GT("GT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    LTE("LTE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    LT("LT", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    GTE("GTE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    GT("GT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    LTE("LTE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    LT("LT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
-    IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
 
-    STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-    STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-    CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
+    STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
+    STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
+    CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
 
     /* SPARQL built-in predicates */
 
-    IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDF_TERM_TYPE),
-    LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    REGEX("regex", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
+    REGEX("regex", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
     // ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-    SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT);
+    SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT);
 
     // unary operations
     BooleanExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
@@ -114,7 +114,13 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        switch (this) {
+            case IS_TRUE:
+                return true;
+                // TODO: allow additional ones
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -131,8 +137,24 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      * TODO: implement it seriously after getting rid of this enum
      */
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
-        return termFactory.getImmutableFunctionalTerm(this, terms);
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
+                                  boolean isInConstructionNodeInOptimizationPhase,
+                                  TermFactory termFactory) {
+        if (this == IS_TRUE) {
+            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase);
+            if (newTerm instanceof Constant) {
+                /*
+                 * TODO: Is ok to say that IS TRUE can return NULL?
+                 */
+                return newTerm.isNull()
+                        ? newTerm
+                        : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(true)));
+            }
+            else
+                return termFactory.getImmutableExpression(IS_TRUE, newTerm);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, terms);
     }
 
     private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {

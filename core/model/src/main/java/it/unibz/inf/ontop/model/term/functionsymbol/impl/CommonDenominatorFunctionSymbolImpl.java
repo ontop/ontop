@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
-
 public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final MetaRDFTermType metaRDFTermType;
@@ -187,7 +185,7 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
                                                        TypeConstantDictionary dictionary, TermFactory termFactory) {
         return termFactory.getConjunction(IntStream.range(0, constants.size())
                 .boxed()
-                .map(i -> termFactory.getImmutableExpression(EQ, subVariables.get(i), dictionary.convert(constants.get(i)))))
+                .map(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i)))))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty stream"));
     }
 }

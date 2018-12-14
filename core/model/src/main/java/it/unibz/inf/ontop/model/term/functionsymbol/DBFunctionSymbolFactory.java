@@ -57,4 +57,6 @@ public interface DBFunctionSymbolFactory {
      * arity must be >= 2
      */
     DBBooleanFunctionSymbol getDBAnd(int arity);
+
+    DBBooleanFunctionSymbol getDBStrictEquality(int arity);
 }

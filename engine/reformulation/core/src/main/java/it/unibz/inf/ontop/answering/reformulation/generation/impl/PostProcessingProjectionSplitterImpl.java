@@ -10,10 +10,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -22,6 +19,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_TRUE;
 
 public class PostProcessingProjectionSplitterImpl implements PostProcessingProjectionSplitter {
 
@@ -129,7 +128,14 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
             else {
                 Variable variable = definedVariable
                         .orElseGet(variableGenerator::generateNewVariable);
-                return new DefinitionDecomposition(variable,
+
+                // Wraps variables replacing an expression into an IS_TRUE functional term
+                ImmutableTerm newTerm = ((!definedVariable.isPresent())
+                        && (functionalTerm instanceof ImmutableExpression))
+                        ? termFactory.getImmutableExpression(IS_TRUE, variable)
+                        : variable;
+
+                return new DefinitionDecomposition(newTerm,
                         substitutionFactory.getSubstitution(variable, functionalTerm));
             }
         }

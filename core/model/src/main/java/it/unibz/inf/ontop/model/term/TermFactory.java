@@ -94,6 +94,13 @@ public interface TermFactory {
 	ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
 
 	/**
+	 * When filled with constants, evaluates to TRUE if one argument is TRUE or to NULL otherwise.
+	 *
+	 * Must be non-empty
+	 */
+	ImmutableExpression getTrueOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments);
+
+	/**
 	 * Compares a TermType term to a base type
 	 */
 	ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType);
@@ -351,4 +358,28 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 
     ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms);
+
+	/**
+	 * terms must have at least two distinct elements
+	 */
+	ImmutableExpression getStrictEquality(ImmutableSet<ImmutableTerm> terms);
+
+	/**
+	 * terms must have at least two elements
+	 */
+	ImmutableExpression getStrictEquality(ImmutableList<ImmutableTerm> terms);
+
+	ImmutableExpression getStrictEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
+
+	/**
+	 * terms must have at least two elements
+	 * Logically equivalent to NOT(STRICT_EQx(...))
+	 */
+	ImmutableExpression getStrictNEquality(ImmutableSet<ImmutableTerm> terms);
+
+	/**
+	 * terms must have at least two elements
+	 * Logically equivalent to NOT(STRICT_EQx(...))
+	 */
+	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
 }
