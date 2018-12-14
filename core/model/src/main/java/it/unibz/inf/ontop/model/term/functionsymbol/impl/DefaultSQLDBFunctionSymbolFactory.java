@@ -6,10 +6,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 
 public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -22,6 +19,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
+    private final TermType abstractRootType;
     private final DBFunctionSymbol ifElseNull;
 
     @Inject
@@ -37,7 +35,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-        ifElseNull = createDBIfElseNull(dbBooleanType, abstractRootDBType);
+        this.ifElseNull = createDBIfElseNull(dbBooleanType, abstractRootDBType);
+        this.abstractRootType = typeFactory.getAbstractAtomicTermType();
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -118,6 +117,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     @Override
     protected DBFunctionSymbol createDBCase(int arity) {
         return new DefaultSQLCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBStrictEquality(int arity) {
+        return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
 
     @Override

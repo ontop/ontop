@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
@@ -33,6 +34,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBFunctionSymbol> caseMap;
 
+    /**
+     * For the strict equalities
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> strictEqMap;
+
     private final DBTermType dbStringType;
 
     /**
@@ -52,6 +58,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
         this.caseMap = new HashMap<>();
+        this.strictEqMap = new HashMap<>();
     }
 
     @Override
@@ -98,6 +105,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBStrictEquality(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of a strict equality must be >= 2");
+
+        return strictEqMap
+                .computeIfAbsent(arity, a -> createDBStrictEquality(arity));
+    }
+
     /**
      * Can be overridden
      */
@@ -113,6 +129,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                                                      DBTermType targetType);
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
+
+    protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {

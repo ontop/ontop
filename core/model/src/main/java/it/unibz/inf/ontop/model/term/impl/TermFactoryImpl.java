@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -286,6 +285,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
+	}
+
+	@Override
+	public ImmutableExpression getTrueOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
+		throw new RuntimeException("TODO: implement getTrueOrNullFunctionalTerm()");
 	}
 
 	@Override
@@ -625,6 +629,34 @@ public class TermFactoryImpl implements TermFactory {
 			throw new IllegalArgumentException("Expected arity >= 2 for a common denominator");
 
 		return getImmutableFunctionalTerm(functionSymbolFactory.getCommonDenominatorFunctionSymbol(arity), typeTerms);
+	}
+
+	@Override
+	public ImmutableExpression getStrictEquality(ImmutableSet<ImmutableTerm> terms) {
+		if (terms.size() < 2)
+			throw new IllegalArgumentException("At least two distinct values where expected in " + terms);
+		return getStrictEquality(ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public ImmutableExpression getStrictEquality(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 2)
+			throw new IllegalArgumentException("At least two values where expected in " + terms);
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBStrictEquality(terms.size()), terms);
+	}
+
+	@Override
+	public ImmutableExpression getStrictNEquality(ImmutableSet<ImmutableTerm> terms) {
+		if (terms.size() < 2)
+			throw new IllegalArgumentException("At least two distinct values where expected in " + terms);
+		return getStrictNEquality(ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 2)
+			throw new IllegalArgumentException("At least two values where expected in " + terms);
+		throw new RuntimeException("TODO: implement getStrictNEquality(...)");
 	}
 
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
