@@ -646,6 +646,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableExpression getStrictEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms) {
+		return getStrictEquality(Stream.concat(Stream.of(term1, term2), Stream.of(otherTerms))
+				.collect(ImmutableCollectors.toList()));
+	}
+
+	@Override
 	public ImmutableExpression getStrictNEquality(ImmutableSet<ImmutableTerm> terms) {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two distinct values where expected in " + terms);

@@ -369,6 +369,8 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getStrictEquality(ImmutableList<ImmutableTerm> terms);
 
+	ImmutableExpression getStrictEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
+
 	/**
 	 * terms must have at least two elements
 	 * Logically equivalent to NOT(STRICT_EQx(...))
