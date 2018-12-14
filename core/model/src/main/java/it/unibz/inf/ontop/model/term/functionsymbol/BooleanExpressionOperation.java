@@ -41,7 +41,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
     IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
+    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
 
     STR_STARTS("STRSTARTS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
     STR_ENDS("STRENDS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
@@ -114,7 +114,13 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        switch (this) {
+            case IS_TRUE:
+                return true;
+                // TODO: allow additional ones
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -131,8 +137,24 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      * TODO: implement it seriously after getting rid of this enum
      */
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
-        return termFactory.getImmutableFunctionalTerm(this, terms);
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
+                                  boolean isInConstructionNodeInOptimizationPhase,
+                                  TermFactory termFactory) {
+        if (this == IS_TRUE) {
+            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase);
+            if (newTerm instanceof Constant) {
+                /*
+                 * TODO: Is ok to say that IS TRUE can return NULL?
+                 */
+                return newTerm.isNull()
+                        ? newTerm
+                        : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(true)));
+            }
+            else
+                return termFactory.getImmutableExpression(IS_TRUE, newTerm);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, terms);
     }
 
     private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
