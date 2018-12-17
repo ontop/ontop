@@ -135,12 +135,10 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
     private Optional<ImmutableTerm> extractDefinition(Variable variable, IQTree unionChild) {
-        ConstructionNode constructionNode = Optional.of(unionChild.getRootNode())
+        return Optional.of(unionChild.getRootNode())
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
-                .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
-                        "Was expecting the child to start with a ConstructionNode"));
-        return Optional.ofNullable(constructionNode.getSubstitution().get(variable));
+                .flatMap(c -> Optional.ofNullable(c.getSubstitution().get(variable)));
     }
 
     private Stream<RDFTermTypeConstant> extractPossibleTermTypeConstants(Variable variable, IQTree child) {
