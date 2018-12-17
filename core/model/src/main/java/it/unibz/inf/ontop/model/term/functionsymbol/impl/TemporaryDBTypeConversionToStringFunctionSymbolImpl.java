@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -44,7 +45,7 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("A TemporaryDBTypeConversionToStringFunctionSymbolImpl \" +\n" +
                 "                \"should have been removed before asking for its native DB string");
     }

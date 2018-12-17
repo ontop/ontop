@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,13 +21,16 @@ public class DefaultSQLCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        String whenClauseString = IntStream.range(0, termStrings.size() / 2)
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String whenClauseString = IntStream.range(0, terms.size() / 2)
                 .boxed()
-                .map(i -> String.format(WHEN_THEN_TEMPLATE, termStrings.get(i), termStrings.get(i + 1)))
+                .map(i -> String.format(WHEN_THEN_TEMPLATE,
+                        termConverter.apply(terms.get(i)),
+                        termConverter.apply(terms.get(i + 1))))
                 .collect(Collectors.joining());
 
-        return String.format(FULL_TEMPLATE, whenClauseString, termStrings.get(termStrings.size() - 1));
+        return String.format(FULL_TEMPLATE, whenClauseString,
+                termConverter.apply(terms.get(terms.size() - 1)));
     }
 
     @Override

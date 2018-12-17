@@ -550,7 +550,9 @@ public class OneShotSQLGeneratorEngine {
 
 			List<String> select;
 			if (!signature.isEmpty()) {
-				List<Term> terms = cq.getHead().getTerms();
+				List<ImmutableTerm> terms = cq.getHead().getTerms().stream()
+						.map(immutabilityTools::convertIntoImmutableTerm)
+						.collect(Collectors.toList());
 				select = Lists.newArrayListWithCapacity(signature.size());
 				for (int i = 0; i < signature.size(); i++) {
 					select.add(getSelectClauseFragment(signature.get(i), terms.get(i), index));
@@ -640,7 +642,9 @@ public class OneShotSQLGeneratorEngine {
 		Set<String> conditions = new LinkedHashSet<>();
 		for (Function atom : atoms) {
 			if (atom.isOperation()) {  // Boolean expression
-				String condition = getSQLCondition(atom, index);
+				ImmutableFunctionalTerm functionalTerm =  (ImmutableFunctionalTerm)
+						immutabilityTools.convertIntoImmutableTerm(atom);
+				String condition = getSQLCondition(functionalTerm, index);
 				conditions.add(condition);
 			}
 		}
@@ -650,13 +654,13 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * Returns the SQL for an atom representing an SQL condition (booleans).
 	 */
-	private String getSQLCondition(Function atom, AliasIndex index) {
+	private String getSQLCondition(ImmutableFunctionalTerm atom, AliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
 			if (functionSymbol.getArity() == 1) {
 				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
-				Term term = atom.getTerm(0);
+				ImmutableTerm term = atom.getTerm(0);
 				final String arg;
 				if (functionSymbol == BooleanExpressionOperation.NOT) {
 					arg = getSQLString(term, index, false);
@@ -689,11 +693,9 @@ public class OneShotSQLGeneratorEngine {
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
 		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
-			ImmutableList<String> termStrings = atom.getTerms().stream()
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(atom.getTerms(),
 					// TODO: try to get rid of useBrackets
-					.map(t -> getSQLString(t, index, false))
-					.collect(ImmutableCollectors.toList());
-			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
+					t -> getSQLString(t, index, false), termFactory);
 		}
 
 		throw new RuntimeException("The builtin function " + functionSymbol + " is not supported yet!");
@@ -913,7 +915,7 @@ public class OneShotSQLGeneratorEngine {
 				for (int i = 0; i < atom.getArity(); i++) {
 					Term t = atom.getTerm(i);
 					if (t instanceof Constant) {
-						String value = getSQLString(t, index, false);
+						String value = getSQLString((Constant)t, index, false);
 						QualifiedAttributeID column = index.getColumn(atom, i);
 						equalities.add(String.format("(%s = %s)", column.getSQLRendering(), value));
 					}
@@ -926,7 +928,7 @@ public class OneShotSQLGeneratorEngine {
 	/**
 	 * TODO: remove
 	 */
-	private String effectiveBooleanValue(Term term, AliasIndex index) {
+	private String effectiveBooleanValue(ImmutableTerm term, AliasIndex index) {
 
 		String column = getSQLString(term, index, false);
 		// find data type of term and evaluate accordingly
@@ -948,10 +950,10 @@ public class OneShotSQLGeneratorEngine {
 	// return the SQL data type
     // TODO: get rid of it
     @Deprecated
-	private int getDataType(Term term) {
-		if (term instanceof Function){
-			Function functionalTerm = (Function) term;
-			return Optional.of((ImmutableFunctionalTerm) immutabilityTools.convertIntoImmutableTerm(functionalTerm))
+	private int getDataType(ImmutableTerm term) {
+		if (term instanceof ImmutableFunctionalTerm){
+			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+			return Optional.of(functionalTerm)
 					.flatMap(ImmutableFunctionalTerm::inferType)
 					.flatMap(TermTypeInference::getTermType)
 					.map(jdbcTypeMapper::getSQLType)
@@ -986,7 +988,7 @@ public class OneShotSQLGeneratorEngine {
 	 * @return the sql select clause
 	 */
 	private String getSelectClauseFragment(SignatureVariable var,
-										   Term term,
+										   ImmutableTerm term,
 										   AliasIndex index) {
 		String mainColumn = getMainColumnForSELECT(term, index);
 
@@ -1012,7 +1014,7 @@ public class OneShotSQLGeneratorEngine {
 		return builder.build();
 	}
 
-	private String getMainColumnForSELECT(Term ht, AliasIndex index) {
+	private String getMainColumnForSELECT(ImmutableTerm ht, AliasIndex index) {
 
 		return getSQLString(ht, index, false);
 	}
@@ -1020,10 +1022,10 @@ public class OneShotSQLGeneratorEngine {
 
 	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 
-	private String getSQLStringForTemplateFunction(List<Term> terms, AliasIndex index) {
+	private String getSQLStringForTemplateFunction(List<? extends ImmutableTerm> terms, AliasIndex index) {
 
 		// The first argument determines the form of the result
-		Term term0 = terms.get(0);
+		ImmutableTerm term0 = terms.get(0);
 		if (term0 instanceof RDFLiteralConstant || term0 instanceof BNode) {
 			// An actual template: the first term is a string of the form
 			// http://.../.../ or empty "{}" with placeholders of the form {}
@@ -1045,7 +1047,7 @@ public class OneShotSQLGeneratorEngine {
 
 			int size = terms.size();
 			for (int i = 1; i < size; i++) {
-				Term term = terms.get(i);
+				ImmutableTerm term = terms.get(i);
 				String arg = getSQLString(term, index, false);
 				String cast = isStringColType(term, index)
 						? arg
@@ -1087,10 +1089,10 @@ public class OneShotSQLGeneratorEngine {
 		return toReturn;
 	}
 
-	private boolean isStringColType(Term term, AliasIndex index) {
-		if (term instanceof Function) {
-			Function function = (Function) term;
-			Predicate functionSymbol = function.getFunctionSymbol();
+	private boolean isStringColType(ImmutableTerm term, AliasIndex index) {
+		if (term instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
+			FunctionSymbol functionSymbol = function.getFunctionSymbol();
 			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
 				/*
 				 * A URI function always returns a string, thus it is a string
@@ -1149,13 +1151,13 @@ public class OneShotSQLGeneratorEngine {
 	 * <p>
 	 * If its a boolean comparison, it returns the corresponding SQL comparison.
 	 */
-	private String getSQLString(Term term, AliasIndex index, boolean useBrackets) {
+	private String getSQLString(ImmutableTerm term, AliasIndex index, boolean useBrackets) {
 
 		if (term == null) {
 			return "";
 		}
 		if (term instanceof Constant) {
-			if (((Constant) term).isNull())
+			if (term.isNull())
 				return ((Constant) term).getValue();
 			if (!(term instanceof DBConstant)) {
 				throw new MinorOntopInternalBugException("Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
@@ -1178,15 +1180,9 @@ public class OneShotSQLGeneratorEngine {
 		}
 
 		// If it's not constant, or variable it's a function
-		Function function = (Function) term;
+		ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
-		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
-
-		 	// The atom must be of the form uri("...", x, y)
-			return getSQLStringForTemplateFunction(function.getTerms(), index);
-		}
 		if (operations.containsKey(functionSymbol)) {
 			String expressionFormat = operations.get(functionSymbol);
 			switch (function.getArity()) {
@@ -1353,7 +1349,9 @@ public class OneShotSQLGeneratorEngine {
 					// TODO: try to get rid of useBrackets
 					.map(t -> getSQLString(t, index, false))
 					.collect(ImmutableCollectors.toList());
-			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(termStrings);
+			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(
+					function.getTerms(),
+					t -> getSQLString(t, index, false), termFactory);
 		}
 
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);

@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -19,14 +22,16 @@ public class DefaultDBStrictEqFunctionSymbol extends AbstractDBStrictEqNeqFuncti
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        if (termStrings.size() < 2)
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (terms.size() < 2)
             throw new IllegalArgumentException("At least two arguments were expected");
-        String firstTerm = termStrings.get(0);
+        String firstTerm = termConverter.apply(terms.get(0));
         String prefix = firstTerm + OPERATOR;
 
-        return termStrings.stream()
+        return terms.stream()
                 .skip(1)
+                .map(termConverter::apply)
                 .map(s -> prefix + s)
                 .collect(Collectors.joining(CONNECTOR));
     }

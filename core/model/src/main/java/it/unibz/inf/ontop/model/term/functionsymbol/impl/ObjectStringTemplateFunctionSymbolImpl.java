@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.utils.URITemplates;
 
 import java.nio.charset.Charset;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSymbolImpl
@@ -98,7 +99,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new RuntimeException("TODO: implement getNativeDBString for object template");
     }
 }

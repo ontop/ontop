@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -11,6 +12,8 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Function symbols of each we don't know the return type.
@@ -49,8 +52,10 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        String parameterString = String.join(",", termStrings);
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String parameterString = terms.stream()
+                .map(termConverter::apply)
+                .collect(Collectors.joining(","));
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
     }
 }

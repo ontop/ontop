@@ -1,7 +1,11 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
+
+import java.util.function.Function;
 
 public class DefaultSQLIfElseNullFunctionSymbol extends AbstractDBIfElseNullFunctionSymbol {
 
@@ -12,7 +16,12 @@ public class DefaultSQLIfElseNullFunctionSymbol extends AbstractDBIfElseNullFunc
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        return String.format(TEMPLATE, termStrings.toArray());
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format(
+                TEMPLATE,
+                terms.stream()
+                        .map(termConverter::apply)
+                        .toArray());
     }
 }
