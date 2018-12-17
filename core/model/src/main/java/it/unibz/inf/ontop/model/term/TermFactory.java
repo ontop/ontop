@@ -352,10 +352,12 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
+	ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
+
 	/**
 	 * At least two terms are expected
 	 */
-	ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+	ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms);
 
     ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms);
 
@@ -382,4 +384,5 @@ public interface TermFactory {
 	 * Logically equivalent to NOT(STRICT_EQx(...))
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
+
 }

@@ -48,6 +48,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBUpper();
 
+    DBFunctionSymbol getDBReplace();
+
     /**
      * arity must be >= 2
      */

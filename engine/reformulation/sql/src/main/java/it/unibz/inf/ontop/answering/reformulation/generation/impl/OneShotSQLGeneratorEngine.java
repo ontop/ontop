@@ -1020,57 +1020,6 @@ public class OneShotSQLGeneratorEngine {
 	}
 
 
-	private static final Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
-
-	private String getSQLStringForTemplateFunction(List<? extends ImmutableTerm> terms, AliasIndex index) {
-
-		// The first argument determines the form of the result
-		ImmutableTerm term0 = terms.get(0);
-		if (term0 instanceof RDFLiteralConstant || term0 instanceof BNode) {
-			// An actual template: the first term is a string of the form
-			// http://.../.../ or empty "{}" with placeholders of the form {}
-			// The other terms are variables or constants that should replace
-			// the placeholders. We need to tokenize and form the CONCAT
-			String template = (term0 instanceof BNode)
-					? ((BNode) term0).getName()   // getValue should be removed from Constant
-					: ((RDFLiteralConstant) term0).getValue();
-			// strip the template of all quotation marks (dubious step)
-			while (pQuotes.matcher(template).matches()) {
-				template = template.substring(1, template.length() - 1);
-			}
-			String[] split = template.split("[{][}]");
-
-			List<String> vex = new ArrayList<>();
-			if (split.length > 0 && !split[0].isEmpty()) { // fragment before the first {}
-				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
-			}
-
-			int size = terms.size();
-			for (int i = 1; i < size; i++) {
-				ImmutableTerm term = terms.get(i);
-				String arg = getSQLString(term, index, false);
-				String cast = isStringColType(term, index)
-						? arg
-						: sqladapter.sqlCast(arg, Types.VARCHAR);
-				// empty placeholder: the correct uri is in the column of DB no need to replace
-				vex.add((split.length > 0 && isIRISafeEncodingEnabled)
-						? sqladapter.iriSafeEncode(cast)
-						: cast);
-				if (i < split.length) { // fragment after the current {} (if it exists)
-					vex.add(sqladapter.getSQLLexicalFormString(split[i]));
-				}
-			}
-
-			// if there is only one element there is nothing to concatenate
-			return (vex.size() == 1) ? vex.get(0) : getStringConcatenation(vex.toArray(new String[0]));
-		}
-		else {
-			// a concrete uri, a variable or a complex expression like in uri(CONCAT(x, "a"))
-			// use the first term as the result string and ignore other terms
-			return getSQLString(term0, index, false);
-		}
-	}
-
 	// TODO: move to SQLAdapter
 	private String getStringConcatenation(String[] params) {
 		String toReturn = sqladapter.strConcat(params);
@@ -1345,13 +1294,10 @@ public class OneShotSQLGeneratorEngine {
 		 * New approach
 		 */
 		if (functionSymbol instanceof DBFunctionSymbol) {
-			ImmutableList<String> termStrings = function.getTerms().stream()
-					// TODO: try to get rid of useBrackets
-					.map(t -> getSQLString(t, index, false))
-					.collect(ImmutableCollectors.toList());
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(
 					function.getTerms(),
-					t -> getSQLString(t, index, false), termFactory);
+                    // TODO: try to get rid of useBrackets
+                    t -> getSQLString(t, index, false), termFactory);
 		}
 
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
