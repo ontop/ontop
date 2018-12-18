@@ -235,7 +235,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             return terms.get(0);
         }
 
-        return termFactory.getConcatFunctionalTerm(ImmutableList.copyOf(terms));
+        return termFactory.getDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
     }
 
 

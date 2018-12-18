@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -45,7 +46,8 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
     }
 }

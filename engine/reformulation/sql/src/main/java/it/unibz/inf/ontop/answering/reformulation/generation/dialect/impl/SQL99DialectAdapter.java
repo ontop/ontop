@@ -498,7 +498,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
         return (dbType.isNumber() || dbType.isBoolean())
                 ? constant.getValue()
-                : "'" + constant.getValue() + "'";
+                : getSQLLexicalFormString(constant.getValue());
     }
 
     /**
@@ -517,6 +517,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         return "SELECT 1";
     }
 
+    /**
+     * By default, quotes and escapes isolated single quotes
+     */
     @Override
     public String getSQLLexicalFormString(String constant) {
 

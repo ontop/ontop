@@ -552,7 +552,7 @@ public class R2RMLParser {
 			// terms.add(0, uriTemplate);
 			return termFactory.getRDFLiteralFunctionalTerm(lexicalValue, XSD.STRING);
 		case 4://concat
-			return termFactory.getConcatFunctionalTerm(ImmutableList.copyOf(terms));
+			return termFactory.getDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
 		}
 		return null;
 	}

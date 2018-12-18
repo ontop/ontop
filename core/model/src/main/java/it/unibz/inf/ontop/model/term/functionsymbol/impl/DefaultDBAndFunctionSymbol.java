@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFunctionSymbol implements DBAndFunctionSymbol {
@@ -76,8 +78,10 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        return inBrackets(String.join(argumentSeparator, termStrings));
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return inBrackets(terms.stream()
+                        .map(termConverter::apply)
+                        .collect(Collectors.joining(argumentSeparator)));
     }
 
     @Override

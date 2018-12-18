@@ -32,7 +32,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
-        return termFactory.getConcatFunctionalTerm(subLexicalTerms);
+        return termFactory.getDBConcatFunctionalTerm(subLexicalTerms);
     }
 
     @Override

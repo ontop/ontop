@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,13 @@ import java.util.Optional;
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
+
+    /**
+     * Lazy
+     */
+    @Nullable
+    private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
+
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
      */
@@ -59,6 +67,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
         this.caseMap = new HashMap<>();
         this.strictEqMap = new HashMap<>();
+        this.r2rmlIRISafeEncodeFunctionSymbol = null;
     }
 
     @Override
@@ -114,6 +123,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .computeIfAbsent(arity, a -> createDBStrictEquality(arity));
     }
 
+    @Override
+    public DBFunctionSymbol getR2RMLIRISafeEncode() {
+        if (r2rmlIRISafeEncodeFunctionSymbol == null)
+            r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
+        return r2rmlIRISafeEncodeFunctionSymbol;
+    }
+
     /**
      * Can be overridden
      */
@@ -131,6 +147,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBCase(int arity);
 
     protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
+
+    protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {

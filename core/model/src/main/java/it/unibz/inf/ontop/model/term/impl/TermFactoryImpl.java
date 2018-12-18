@@ -614,8 +614,18 @@ public class TermFactoryImpl implements TermFactory {
 		return getDBCase(whenPairs, valueNull);
 	}
 
-	@Override
-	public ImmutableFunctionalTerm getConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
+    @Override
+    public ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
+    }
+
+    @Override
+	public ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
 		int arity = terms.size();
 		if (arity < 2)
 			throw new IllegalArgumentException("CONCAT needs at least two arguments");

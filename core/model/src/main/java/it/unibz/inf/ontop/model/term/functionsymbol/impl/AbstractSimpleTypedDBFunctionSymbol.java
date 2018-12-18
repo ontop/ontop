@@ -3,11 +3,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -43,8 +46,10 @@ public abstract class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedD
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<String> termStrings) {
-        String parameterString = String.join(",", termStrings);
-        return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format(FUNCTIONAL_TEMPLATE, nameInDialect,
+                terms.stream()
+                        .map(termConverter::apply)
+                        .collect(Collectors.joining(",")));
     }
 }
