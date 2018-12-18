@@ -11,15 +11,10 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 import javax.annotation.Nullable;
 import java.nio.charset.Charset;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -125,10 +120,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return true;
     }
 
-
-    /**
-     * TODO: optimize by creating an iriParameterEncode function symbol
-     */
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
@@ -147,24 +138,16 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                     ? termsToConcatenate.get(0)
                     : termFactory.getDBConcatFunctionalTerm(termsToConcatenate);
 
-        String s = termConverter.apply(concatTerm);
-        return s;
+        return termConverter.apply(concatTerm);
     }
 
+    /**
+     * TODO: delegate everything to R2RMLIRISafeEncodeFunctionSymbol
+     */
     protected ImmutableTerm encodeTerm(ImmutableTerm term, TermFactory termFactory) {
         if (term instanceof DBConstant) {
             return termFactory.getDBStringConstant(encodeParameter((DBConstant) term));
         }
-
-        //Non-final
-        ImmutableTerm currentTerm = term;
-
-        for (Map.Entry<String, String> e : R2RMLIRISafeEncoder.TABLE.entrySet()) {
-            currentTerm = termFactory.getDBReplaceFunctionalTerm(
-                    currentTerm,
-                    termFactory.getDBStringConstant(e.getValue()),
-                    termFactory.getDBStringConstant(e.getKey()));
-        }
-        return currentTerm;
+        return termFactory.getR2RMLIRISafeEncodeFunctionalTerm(term);
     }
 }
