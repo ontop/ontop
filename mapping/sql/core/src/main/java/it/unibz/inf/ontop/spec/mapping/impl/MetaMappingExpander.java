@@ -29,8 +29,11 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -62,11 +65,9 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -168,7 +169,9 @@ public class MetaMappingExpander {
 				// otherwise, it's a property and the template is the predicate
 				ImmutableFunctionalTerm templateAtom = (ImmutableFunctionalTerm)m.target.getSubstitutedTerm(isClass ? 2 : 1);
 
-				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateAtom.getTerms());
+				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateAtom);
+
+				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateVariables);
 
 				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
 
@@ -238,6 +241,26 @@ public class MetaMappingExpander {
 		return builder.build();
 	}
 
+	private ImmutableList<Variable> extractTemplateVariables(ImmutableFunctionalTerm templateAtom) {
+		return Optional.of(templateAtom)
+				.filter(a -> a.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
+				.map(a -> a.getTerm(0))
+				.map(l -> (l instanceof ImmutableFunctionalTerm)
+						&& (((ImmutableFunctionalTerm) l).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
+						? ((ImmutableFunctionalTerm) l).getTerms().stream()
+						: Stream.of(l))
+				.map(s -> s
+						// Unwrap CASTs
+						.map(t -> (t instanceof ImmutableFunctionalTerm)
+								&& (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
+								? ((ImmutableFunctionalTerm) t).getTerm(0)
+								: t)
+						.filter(t -> t instanceof Variable)
+						.map(t -> (Variable) t)
+						.collect(ImmutableCollectors.toList()))
+				.orElseThrow(() -> new MinorOntopInternalBugException(
+						String.format("Unexpected template atom %s: was expected to a RDF functional term", templateAtom)));
+	}
 
 
 	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(DBMetadata metadata, String sql)
@@ -334,8 +357,8 @@ public class MetaMappingExpander {
 				ImmutableTerm typeTerm = func.getTerm(1);
 				// If typeTerm is a variable, we are unsure so we return false
 				if (typeTerm.equals(termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()))
-						&& (lexicalTerm instanceof RDFLiteralConstant))
-					return ((RDFLiteralConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
+						&& (lexicalTerm instanceof DBConstant))
+					return ((DBConstant) lexicalTerm).getValue().equals(RDF.TYPE.getIRIString());
 			}
 		}
 		else if (term instanceof IRIConstant) {
@@ -353,39 +376,27 @@ public class MetaMappingExpander {
 	 * Output: [X, Y]
 	 *
 	 */
-
 	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac,
-																  ImmutableList<? extends ImmutableTerm> templateTerms) {
-
-		final ImmutableList<Variable> vars;
-		int len = templateTerms.size();
-		if (len == 1) { // the case of <{varUri}>
-			ImmutableTerm uri = templateTerms.get(0);
-			if (uri instanceof Variable)
-				 vars = ImmutableList.of((Variable) uri);
-			else
-				throw new IllegalArgumentException("No variables could be found for this metamapping." +
-					"Check that the variable in the metamapping is enclosed in a URI, for instance, " +
-					"http://.../{var}");
-		}
-		else {
-			ImmutableList.Builder<Variable> builder = ImmutableList.builder();
-			for (int i = 1; i < len; i++) // index 0 is for the URI template term
-				builder.add((Variable) templateTerms.get(i));
-			vars = builder.build();
-		}
-		return vars.stream()
+																  ImmutableList<Variable> templateVariables) {
+		return templateVariables.stream()
 				.map(v -> QuotedID.createIdFromDatabaseRecord(idfac, v.getName()))
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private static String getPredicateName(ImmutableTerm templateTerm, List<String> values) {
-		if (templateTerm instanceof Variable) {
+	private static String getPredicateName(ImmutableTerm lexicalTerm, List<String> values) {
+		if (lexicalTerm instanceof Variable) {
 			return values.get(0);
 		}
+		else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
+				&& ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
+
+			String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
+					((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol())
+					.getTemplate();
+			return URITemplates.format(iriTemplate, values);
+		}
 		else {
-			String uriTemplate = ((RDFLiteralConstant) templateTerm).getValue();
-			return URITemplates.format(uriTemplate, values);
+			throw new MinorOntopInternalBugException("Unexpected lexical template term: " + lexicalTerm);
 		}
 	}
 }
