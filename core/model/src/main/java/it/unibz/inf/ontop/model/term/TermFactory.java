@@ -354,6 +354,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
 
+	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
+
 	/**
 	 * At least two terms are expected
 	 */

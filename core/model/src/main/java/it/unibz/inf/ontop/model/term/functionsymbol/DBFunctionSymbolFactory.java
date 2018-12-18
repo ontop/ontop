@@ -50,6 +50,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBReplace();
 
+    DBFunctionSymbol getR2RMLIRISafeEncode();
+
     /**
      * arity must be >= 2
      */

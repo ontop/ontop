@@ -130,6 +130,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
+    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
+        return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfElseNull() {
         return ifElseNull;
     }

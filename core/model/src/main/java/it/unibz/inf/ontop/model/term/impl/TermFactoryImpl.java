@@ -620,6 +620,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
+    }
+
+    @Override
 	public ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
 		int arity = terms.size();
 		if (arity < 2)
