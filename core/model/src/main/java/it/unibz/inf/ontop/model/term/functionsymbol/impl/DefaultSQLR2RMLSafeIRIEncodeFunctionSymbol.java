@@ -11,12 +11,12 @@ import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import java.util.Map;
 import java.util.function.Function;
 
-public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBFunctionSymbol {
+public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSafeIRIEncodeFunctionSymbol {
 
-    private final String ENCODE_FOR_URI_START, ENCODE_FOR_URI_END;
+    private final String encodeForIriStart, encodeForIriEnd;
 
     protected DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
-        super("R2RMLIRISafeEncode", ImmutableList.of(dbStringType), dbStringType);
+        super(dbStringType);
         /*
          * Imported from SQL99DialectAdapter
          */
@@ -31,8 +31,8 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBF
                     .append(")");
 
         }
-        ENCODE_FOR_URI_START = sb1.toString();
-        ENCODE_FOR_URI_END = sb2.toString();
+        this.encodeForIriStart = sb1.toString();
+        this.encodeForIriEnd = sb2.toString();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBF
 
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        return true;
     }
 
     /**
@@ -52,7 +52,7 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBF
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter,
                                     TermFactory termFactory) {
-        return ENCODE_FOR_URI_START + termConverter.apply(terms.get(0)) + ENCODE_FOR_URI_END;
+        return encodeForIriStart + termConverter.apply(terms.get(0)) + encodeForIriEnd;
     }
 
     /**

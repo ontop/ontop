@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import io.mikael.urlbuilder.util.Encoder;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionSymbolImpl;
@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.URITemplates;
 
 import javax.annotation.Nullable;
-import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -26,8 +25,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final String template;
     private final DBTermType lexicalType;
 
-    private final Encoder iriEncoder;
-
     // Lazy
     @Nullable
     private ImmutableList<DBConstant> templateConstants;
@@ -36,7 +33,6 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         super(template, createBaseTypes(arity, typeFactory));
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
-        this.iriEncoder = new Encoder(Charset.forName("utf-8"));
         this.templateConstants = null;
     }
 
@@ -74,7 +70,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
-                    .map(this::encodeParameter)
+                    .map(c -> encodeParameter(c, termFactory))
                     .collect(ImmutableCollectors.toList());
 
             return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
@@ -86,12 +82,15 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant) {
-        // Query element: percent-encoding except if in iunreserved
-        // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
-        // TODO: redundant with R2RMLIRISafeEncoder. Which one shall we choose?
-        return iriEncoder.encodeQueryElement(constant.getValue());
+    private String encodeParameter(DBConstant constant, TermFactory termFactory) {
+        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(false))
+                .filter(t -> t instanceof DBConstant)
+                .map(t -> ((DBConstant) t).getValue())
+                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
+                        "the getR2RMLIRISafeEncodeFunctionalTerm to simplify itself to a DBConstant " +
+                        "when receving a DBConstant"));
     }
+
 
     protected ImmutableList<DBConstant> getTemplateConstants(TermFactory termFactory) {
         if (templateConstants == null) {
@@ -128,7 +127,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         ImmutableList<ImmutableTerm> termsToConcatenate = IntStream.range(0, templateCsts.size())
                 .boxed()
                 .flatMap(i -> (i < terms.size())
-                        ? Stream.of(templateCsts.get(i), encodeTerm(terms.get(i), termFactory))
+                        ? Stream.of(templateCsts.get(i), termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)))
                         : Stream.of(templateCsts.get(i)))
                 .collect(ImmutableCollectors.toList());
 
@@ -139,15 +138,5 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                     : termFactory.getDBConcatFunctionalTerm(termsToConcatenate);
 
         return termConverter.apply(concatTerm);
-    }
-
-    /**
-     * TODO: delegate everything to R2RMLIRISafeEncodeFunctionSymbol
-     */
-    protected ImmutableTerm encodeTerm(ImmutableTerm term, TermFactory termFactory) {
-        if (term instanceof DBConstant) {
-            return termFactory.getDBStringConstant(encodeParameter((DBConstant) term));
-        }
-        return termFactory.getR2RMLIRISafeEncodeFunctionalTerm(term);
     }
 }
