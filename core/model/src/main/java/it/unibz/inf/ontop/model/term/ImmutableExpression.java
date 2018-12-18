@@ -24,7 +24,7 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
     /**
      * Flattens OR expressions.
      */
-    ImmutableSet<ImmutableExpression> flattenOR();
+    Stream<ImmutableExpression> flattenOR();
 
     /**
      * Generalization of flattening (AND, OR, etc.).

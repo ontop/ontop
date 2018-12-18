@@ -283,6 +283,18 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public Optional<ImmutableExpression> getDisjunction(Stream<ImmutableExpression> expressionStream) {
+		ImmutableList<ImmutableExpression> disjuncts = expressionStream
+				.flatMap(ImmutableExpression::flattenOR)
+				.distinct()
+				.collect(ImmutableCollectors.toList());
+
+		return Optional.of(disjuncts)
+				.filter(c -> !c.isEmpty())
+				.map(this::getDisjunction);
+	}
+
+	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
 	}

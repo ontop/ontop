@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 
@@ -829,15 +831,22 @@ public class ExpressionEvaluator {
 //					throw new RuntimeException("Unsupported type: " + pred2);
 //				}
 
+				// Unification assumption
 				if (functionSymbol1.equals(pred2)) {
-					if (eq) {
-						ImmutableFunctionalTerm neweq = termFactory.getImmutableFunctionalTerm(EQ, f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, true);
-					}
-					else {
-						ImmutableFunctionalTerm neweq = termFactory.getImmutableFunctionalTerm(NEQ, f1.getTerm(0), f2.getTerm(0));
-						return evalEqNeq(neweq, false);
-					}
+
+					BooleanFunctionSymbol comparisonSymbol = eq ? EQ : NEQ;
+
+					Stream<ImmutableExpression> expressions = IntStream.range(0, f1.getArity())
+							.boxed()
+							.map(i -> termFactory.getImmutableExpression(comparisonSymbol, f1.getTerm(i), f2.getTerm(i)));
+
+					Optional<ImmutableExpression> optionalExpression = eq
+							? termFactory.getConjunction(expressions)
+							: termFactory.getDisjunction(expressions);
+
+					return optionalExpression
+							.map(this::eval)
+							.orElseGet(() -> termFactory.getDBBooleanConstant(eq));
 				}
 				else if (!functionSymbol1.equals(pred2)) {
 					return termFactory.getDBBooleanConstant(!eq);
