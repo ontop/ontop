@@ -26,8 +26,8 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSaf
             sb1.append("REPLACE(");
             String value = e.getValue();
             String encode = e.getKey();
-            sb2.append(", ").append(getSQLLexicalFormString(value))
-                    .append(", ").append(getSQLLexicalFormString(encode))
+            sb2.append(", ").append(encodeSQLStringConstant(value))
+                    .append(", ").append(encodeSQLStringConstant(encode))
                     .append(")");
 
         }
@@ -46,7 +46,7 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSaf
     }
 
     /**
-     * Imported from SQL99DialectAdapter
+     * Derived from SQL99DialectAdapter
      */
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
@@ -57,15 +57,20 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSaf
 
     /**
      * Imported from SQL99DialectAdapter
+     *
+     * By default, quotes and escapes isolated single quotes
      */
-    protected String getSQLLexicalFormString(String constant) {
-        return "'" + constant.replaceAll("(?<!')'(?!')", escapedSingleQuote()) + "'";
+    protected String encodeSQLStringConstant(String constant) {
+        return "'" + constant.replaceAll("(?<!')'(?!')", getEscapedSingleQuote()) + "'";
     }
 
     /**
      * Imported from SQL99DialectAdapter
+     *
+     * By default, escapes single quotes by doubling them
+     *
      */
-    protected String escapedSingleQuote() {
+    protected String getEscapedSingleQuote() {
         return "''";
     }
 }

@@ -257,9 +257,12 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		return "\\'";
 	 }
 
+	/**
+	 * Also doubles anti-slashes
+	 */
     @Override
     public String getSQLLexicalFormString(String constant) {
-        return "'" + constant.replace("\\", "\\\\").replace("'", "\\'") + "'";
-        //return super.getSQLLexicalFormString(constant).replace("\\", "\\\\");
+        //return "'" + constant.replace("\\", "\\\\").replace("'", escapedSingleQuote()) + "'";
+        return super.getSQLLexicalFormString(constant.replace("\\", "\\\\"));
     }
 }
