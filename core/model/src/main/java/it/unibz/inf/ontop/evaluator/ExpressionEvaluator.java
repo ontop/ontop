@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 
@@ -829,20 +831,22 @@ public class ExpressionEvaluator {
 //					throw new RuntimeException("Unsupported type: " + pred2);
 //				}
 
+				// Unification assumption
 				if (functionSymbol1.equals(pred2)) {
-					if (functionSymbol1 instanceof IRIStringTemplateFunctionSymbol) {
-						return evalUriTemplateEqNeq(f1, f2, eq);
-					}
-					else {
-						if (eq) {
-							ImmutableFunctionalTerm neweq = termFactory.getImmutableFunctionalTerm(EQ, f1.getTerm(0), f2.getTerm(0));
-							return evalEqNeq(neweq, true);
-						}
-						else {
-							ImmutableFunctionalTerm neweq = termFactory.getImmutableFunctionalTerm(NEQ, f1.getTerm(0), f2.getTerm(0));
-							return evalEqNeq(neweq, false);
-						}
-					}
+
+					BooleanFunctionSymbol comparisonSymbol = eq ? EQ : NEQ;
+
+					Stream<ImmutableExpression> expressions = IntStream.range(0, f1.getArity())
+							.boxed()
+							.map(i -> termFactory.getImmutableExpression(comparisonSymbol, f1.getTerm(i), f2.getTerm(i)));
+
+					Optional<ImmutableExpression> optionalExpression = eq
+							? termFactory.getConjunction(expressions)
+							: termFactory.getDisjunction(expressions);
+
+					return optionalExpression
+							.map(this::eval)
+							.orElseGet(() -> termFactory.getDBBooleanConstant(eq));
 				}
 				else if (!functionSymbol1.equals(pred2)) {
 					return termFactory.getDBBooleanConstant(!eq);
@@ -858,108 +862,6 @@ public class ExpressionEvaluator {
 			return termFactory.getImmutableFunctionalTerm(EQ, teval1, teval2);
 		} else {
 			return termFactory.getImmutableFunctionalTerm(NEQ, teval1, teval2);
-		}
-	}
-
-	private ImmutableTerm evalUriTemplateEqNeq(ImmutableFunctionalTerm uriFunction1, ImmutableFunctionalTerm uriFunction2, boolean isEqual) {
-		int arityForFunction1 = uriFunction1.getArity();
-		int arityForFunction2 = uriFunction2.getArity();
-		if (arityForFunction1 == 1) {
-			if (arityForFunction2 == 1) {
-				return evalUriFunctionsWithSingleTerm(uriFunction1, uriFunction2, isEqual);
-			} else if (arityForFunction2 > 1) {
-				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return termFactory.getDBBooleanConstant(!isEqual);
-			}
-		} else if (arityForFunction1 > 1) {
-			if (arityForFunction2 == 1) {
-				// Currently, we assume the arity should be the same (already decomposed URIs)
-				return termFactory.getDBBooleanConstant(!isEqual);
-			} else if (arityForFunction2 > 1) {
-				return evalUriFunctionsWithMultipleTerms(uriFunction1, uriFunction2, isEqual);
-			}
-		}
-		return null;
-	}
-
-	private ImmutableTerm evalUriFunctionsWithSingleTerm(ImmutableFunctionalTerm uriFunction1,
-														 ImmutableFunctionalTerm uriFunction2, boolean isEqual) {
-		ImmutableTerm term1 = uriFunction1.getTerm(0);
-		ImmutableTerm term2 = uriFunction2.getTerm(0);
-
-		if (term2 instanceof Variable) {
-
-			if (isEqual) {
-				return termFactory.getImmutableFunctionalTerm(EQ, term2, term1);
-			} else {
-				if(term1 instanceof Constant){
-					if (isEqual)
-						return termFactory.getImmutableFunctionalTerm(EQ, term1, term2);
-					else
-						return termFactory.getImmutableFunctionalTerm(NEQ, term1, term2);
-				}
-				return termFactory.getImmutableFunctionalTerm(NEQ, term2, term1);
-			}
-
-		} else if (term2 instanceof Constant) {
-
-			if (term1.equals(term2))
-				return termFactory.getDBBooleanConstant(isEqual);
-			else
-				{
-				if (term1 instanceof Variable) {
-					if (isEqual)
-						return termFactory.getImmutableFunctionalTerm(EQ, term1, term2);
-					else
-						return termFactory.getImmutableFunctionalTerm(NEQ, term1, term2);
-				}
-				return termFactory.getDBBooleanConstant(!isEqual);
-			}
-		}
-		// TODO: try to optimize further on
-		return isEqual
-				? termFactory.getImmutableFunctionalTerm(EQ,term1, term2)
-				: termFactory.getImmutableFunctionalTerm(NEQ, term1, term2);
-	}
-
-	private ImmutableTerm evalUriFunctionsWithMultipleTerms(ImmutableFunctionalTerm uriFunction1,
-															ImmutableFunctionalTerm uriFunction2, boolean isEqual) {
-		if (uriFunction1.equals(uriFunction2))
-			return termFactory.getDBBooleanConstant(isEqual);
-
-		Optional<ImmutableSubstitution<ImmutableTerm>> optionalTheta = unificationTools.computeMGU(uriFunction1, uriFunction2);
-		if (!optionalTheta.isPresent())
-			return termFactory.getDBBooleanConstant(!isEqual);
-		else {
-			ImmutableSubstitution<ImmutableTerm> theta = optionalTheta.get();
-
-			boolean isEmpty = theta.isEmpty();
-			if (isEmpty) {
-				return termFactory.getDBBooleanConstant(!isEqual);
-			}
-			else {
-				ImmutableFunctionalTerm result = null;
-				List<ImmutableFunctionalTerm> temp = new ArrayList<>();
-				Set<Variable> keys = theta.getDomain();
-				for (Variable var : keys) {
-					if (isEqual)
-						result = termFactory.getImmutableFunctionalTerm(EQ, var, theta.get(var));
-					else
-						result = termFactory.getImmutableFunctionalTerm(NEQ, var, theta.get(var));
-
-					temp.add(result);
-					if (temp.size() == 2) {
-						if (isEqual){
-							result = termFactory.getConjunction((ImmutableExpression) temp.get(0), (ImmutableExpression)temp.get(1));
-						}else{
-							result = termFactory.getImmutableFunctionalTerm(OR, temp.get(0), temp.get(1));
-						}
-						temp.clear();
-						temp.add(result);
-					}
-				}
-				return result;
-			}
 		}
 	}
 

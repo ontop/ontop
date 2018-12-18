@@ -51,8 +51,8 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public ImmutableSet<ImmutableExpression> flattenOR() {
-        return flatten(OR);
+    public Stream<ImmutableExpression> flattenOR() {
+        return flatten(OR).stream();
     }
 
     @Override

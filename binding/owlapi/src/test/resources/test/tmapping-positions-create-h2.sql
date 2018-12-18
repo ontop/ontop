@@ -7,9 +7,9 @@ CREATE TABLE TABLE1 (
 );
 
 
-INSERT INTO TABLE1 VALUES ('uri1', 1, 0, 0);
-INSERT INTO TABLE1 VALUES ('uri2', 0, 1, 0);
-INSERT INTO TABLE1 VALUES ('uri3', 0, 0, 1);
+INSERT INTO TABLE1 VALUES ('http://example.org/1', 1, 0, 0);
+INSERT INTO TABLE1 VALUES ('http://example.org/2', 0, 1, 0);
+INSERT INTO TABLE1 VALUES ('http://example.org/3', 0, 0, 1);
 
 ALTER TABLE TABLE1
     ADD CONSTRAINT table1_pkey PRIMARY KEY (uri);

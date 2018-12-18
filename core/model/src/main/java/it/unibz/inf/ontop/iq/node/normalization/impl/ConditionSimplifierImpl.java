@@ -119,7 +119,12 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
                 ));
 
-        return new ExpressionAndSubstitutionImpl(newExpression, normalizedUnifier);
+        ImmutableSubstitution<NonFunctionalTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
+                normalizedUnifier.getImmutableMap().entrySet().stream()
+                        .filter(e -> !nonLiftableVariables.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }
 
     private ImmutableSubstitution<NonFunctionalTerm> unify(

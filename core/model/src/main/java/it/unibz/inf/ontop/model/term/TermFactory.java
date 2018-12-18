@@ -87,6 +87,13 @@ public interface TermFactory {
 	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 
 	/**
+	 * May be empty.
+	 *
+	 * Takes care of flattening the arguments
+	 */
+	Optional<ImmutableExpression> getDisjunction(Stream<ImmutableExpression> expressions);
+
+	/**
 	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
 	 *
 	 * Must be non-empty
