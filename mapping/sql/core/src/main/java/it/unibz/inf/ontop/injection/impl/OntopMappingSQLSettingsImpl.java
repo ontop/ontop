@@ -17,7 +17,7 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadDefaultOBDAProperties();
+        Properties properties = OntopSQLCoreSettingsImpl.loadSQLCoreProperties();
         properties.putAll(loadDefaultMappingSQLProperties());
         properties.putAll(userProperties);
         return properties;

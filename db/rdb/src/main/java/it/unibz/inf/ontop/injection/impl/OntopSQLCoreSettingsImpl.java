@@ -54,7 +54,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                     }
                 });
 
-        Properties properties = loadDefaultPropertiesFromFile(OntopOBDASettings.class, DEFAULT_FILE);
+        Properties properties = loadSQLCoreProperties();
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
         properties.putAll(userProperties);
 
@@ -68,6 +68,10 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                 .ifPresent(v -> properties.setProperty(dbTypeFactoryName, v));
 
         return properties;
+    }
+
+    static Properties loadSQLCoreProperties() {
+        return loadDefaultPropertiesFromFile(OntopSQLCoreSettings.class, DEFAULT_FILE);
     }
 
 
