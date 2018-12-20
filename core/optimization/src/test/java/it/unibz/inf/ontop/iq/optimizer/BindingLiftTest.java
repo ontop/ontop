@@ -592,7 +592,7 @@ public class BindingLiftTest {
 
     private ImmutableFunctionalTerm generateIRIString(String template, Variable... variables) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                FUNCTION_SYMBOL_FACTORY.getIRIStringTemplateFunctionSymbol(template),
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory().getIRIStringTemplateFunctionSymbol(template),
                 variables);
     }
 

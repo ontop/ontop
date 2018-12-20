@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;

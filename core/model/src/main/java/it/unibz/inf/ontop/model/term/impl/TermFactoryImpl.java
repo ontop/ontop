@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -517,7 +519,7 @@ public class TermFactoryImpl implements TermFactory {
 			throw new IllegalArgumentException("At least one argument for the IRI functional term " +
 					"with an IRI template is required");
 
-		FunctionSymbol templateFunctionSymbol = functionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
+		FunctionSymbol templateFunctionSymbol = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
 		ImmutableFunctionalTerm templateFunctionalTerm = getImmutableFunctionalTerm(templateFunctionSymbol, arguments);
 
 		return getRDFFunctionalTerm(templateFunctionalTerm, iriTypeConstant);
@@ -540,7 +542,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments) {
-		FunctionSymbol templateFunctionSymbol = functionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
+		FunctionSymbol templateFunctionSymbol = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
 		Function lexicalTerm = getFunction(templateFunctionSymbol, arguments);
 		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalTerm);
 	}
@@ -560,7 +562,7 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate, 
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				functionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
+				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}
@@ -568,7 +570,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(ImmutableList<ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
-				functionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
+				dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(arguments.size()),
 				arguments);
 		return getRDFFunctionalTerm(lexicalTerm, bnodeTypeConstant);
 	}

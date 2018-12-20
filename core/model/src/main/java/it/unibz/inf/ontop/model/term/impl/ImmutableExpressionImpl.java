@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.DBAndFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

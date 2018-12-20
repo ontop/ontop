@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 
 import java.util.Arrays;
 import java.util.Collection;
