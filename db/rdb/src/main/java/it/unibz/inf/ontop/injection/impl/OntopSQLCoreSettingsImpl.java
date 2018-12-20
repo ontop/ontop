@@ -54,7 +54,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                     }
                 });
 
-        Properties properties = loadSQLCoreProperties();
+        Properties properties = loadDefaultPropertiesFromFile(OntopSQLCoreSettings.class, DEFAULT_FILE);
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
         properties.putAll(userProperties);
 
@@ -63,17 +63,11 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
         Optional.ofNullable(properties.getProperty(typeFactoryKey))
                 // Must NOT override user properties
-                .filter(v -> !userProperties.contains(typeFactoryKey))
-                .filter(v -> !userProperties.contains(dbTypeFactoryName))
+                .filter(v -> !userProperties.containsKey(dbTypeFactoryName))
                 .ifPresent(v -> properties.setProperty(dbTypeFactoryName, v));
 
         return properties;
     }
-
-    static Properties loadSQLCoreProperties() {
-        return loadDefaultPropertiesFromFile(OntopSQLCoreSettings.class, DEFAULT_FILE);
-    }
-
 
     @Override
     public String getJdbcUrl() {

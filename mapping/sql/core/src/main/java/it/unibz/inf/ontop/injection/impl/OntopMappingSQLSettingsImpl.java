@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.impl.OntopSQLCoreSettingsImpl.loadSQLCoreProperties;
+
 
 public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implements OntopMappingSQLSettings {
 
@@ -17,7 +19,7 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
     }
 
     private static Properties loadProperties(Properties userProperties) {
-        Properties properties = OntopSQLCoreSettingsImpl.loadSQLCoreProperties();
+        Properties properties = loadSQLCoreProperties(userProperties);
         properties.putAll(loadDefaultMappingSQLProperties());
         properties.putAll(userProperties);
         return properties;
