@@ -29,6 +29,8 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -66,14 +68,14 @@ public class SameAsTargets {
 
         return triplePredicate
                 .map(p -> {
-                    ImmutableSet<Constant> iriTemplates = extractSameAsIRITemplates(mapping, p);
+                    ImmutableSet<String> iriTemplates = extractSameAsIRITemplates(mapping, p);
                     return extractSameAsTargets(iriTemplates, mapping, p);
                 })
                 .orElseGet(() -> new SameAsTargets(ImmutableSet.of(), ImmutableSet.of()));
     }
 
 
-    private static ImmutableSet<Constant> extractSameAsIRITemplates(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+    private static ImmutableSet<String> extractSameAsIRITemplates(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
 
         Optional<IQ> definition = mapping.getRDFPropertyDefinition(rdfAtomPredicate, OWL.SAME_AS);
         return definition
@@ -81,44 +83,32 @@ public class SameAsTargets {
                     .orElseGet(ImmutableSet::of);
     }
 
-    private static ImmutableSet<Constant> extractIRITemplates(IQ definition) {
+    private static ImmutableSet<String> extractIRITemplates(IQ definition) {
         return Optional.of(definition.getProjectionAtom().getPredicate())
                 .filter(p -> p instanceof RDFAtomPredicate)
                 .map(p -> extractIRITemplates((RDFAtomPredicate) p, definition))
                 .orElseGet(ImmutableSet::of);
     }
 
-    private static ImmutableSet<Constant> extractIRITemplates(RDFAtomPredicate predicate, IQ definition) {
+    private static ImmutableSet<String> extractIRITemplates(RDFAtomPredicate predicate, IQ definition) {
         ImmutableList<Variable> projectedVariables = definition.getProjectionAtom().getArguments();
         return Stream.of(predicate.getSubject(projectedVariables), predicate.getObject(projectedVariables))
                 .flatMap(v -> extractIRITemplates(v, definition.getTree()))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private static Stream<Constant> extractIRITemplates(Variable variable, IQTree tree) {
+    private static Stream<String> extractIRITemplates(Variable variable, IQTree tree) {
         return tree.getPossibleVariableDefinitions().stream()
                 .map(s -> s.get(variable))
-                .filter(t -> !t.equals(variable))
-                .map(SameAsTargets::tryToExtractIRITemplateString)
-                .filter(t -> t instanceof Constant)
-                .map(t -> (Constant) t);
+                .filter(t -> (t instanceof ImmutableFunctionalTerm)
+                        && (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof RDFTermFunctionSymbol))
+                .map(t -> ((ImmutableFunctionalTerm) t).getTerm(0))
+                .filter(l -> (l instanceof ImmutableFunctionalTerm)
+                        && ((ImmutableFunctionalTerm) l).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
+                .map(l -> ((ObjectStringTemplateFunctionSymbol) ((ImmutableFunctionalTerm) l).getFunctionSymbol()).getTemplate());
     }
 
-
-    /**
-     * TODO: refactor this weak code!!!
-     */
-    private static ImmutableTerm tryToExtractIRITemplateString(ImmutableTerm term) {
-        if (term instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-            return functionalTerm.getArity() > 0
-                    ? tryToExtractIRITemplateString(functionalTerm.getTerm(0))
-                    : term;
-        }
-        return term;
-    }
-
-    private static SameAsTargets extractSameAsTargets(ImmutableSet<Constant> sameAsIriTemplates,
+    private static SameAsTargets extractSameAsTargets(ImmutableSet<String> sameAsIriTemplates,
                                                       Mapping mapping,
                                                       RDFAtomPredicate rdfAtomPredicate) {
         if (sameAsIriTemplates.isEmpty())
@@ -148,7 +138,7 @@ public class SameAsTargets {
                 ImmutableSet.copyOf(propertyIris.get(PredicateClassification.AT_LEAST_OBJECT)));
     }
 
-    private static PredicateClassification classify(ImmutableSet<Constant> sameAsIriTemplates, IQ definition,
+    private static PredicateClassification classify(ImmutableSet<String> sameAsIriTemplates, IQ definition,
                                              RDFAtomPredicate rdfAtomPredicate, boolean isClass) {
         ImmutableList<Variable> variables = definition.getProjectionAtom().getArguments();
 
