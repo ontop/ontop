@@ -283,6 +283,11 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
+	 * Returns RDF(NULL, NULL)
+	 */
+	ImmutableFunctionalTerm getNullRDFFunctionalTerm();
+
+	/**
 	 * TODO: use a more precise type for the argument
 	 */
 	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
@@ -313,6 +318,10 @@ public interface TermFactory {
 	 */
 	Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments);
 	Function getIRIMutableFunctionalTerm(IRI iri);
+
+	Function getNullRDFMutableFunctionalTerm();
+
+
 
 	/**
 	 * NB: a fresh Bnode template is created
@@ -394,5 +403,4 @@ public interface TermFactory {
 	 * Logically equivalent to NOT(STRICT_EQx(...))
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
-
 }

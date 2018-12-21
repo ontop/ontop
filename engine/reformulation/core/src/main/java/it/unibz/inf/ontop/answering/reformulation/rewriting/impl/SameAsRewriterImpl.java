@@ -204,7 +204,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         // left atom rule
         List<Term> leftTermList = new ArrayList<>(varListUnion.size());
         for (Term t : varListUnion) {
-            Term lt =  (leftVars.contains(t)) ? t : termFactory.getNullConstant();
+            Term lt =  (leftVars.contains(t)) ? t : termFactory.getNullRDFMutableFunctionalTerm();
             leftTermList.add(lt);
         }
         CQIE leftRule = createRule(pr, newHeadName, leftTermList, leftAtom);
@@ -212,7 +212,7 @@ public class SameAsRewriterImpl implements SameAsRewriter{
         // right atom rule
         List<Term> rightTermList = new ArrayList<>(varListUnion.size());
         for (Term t : varListUnion) {
-            Term lt =  (rightVars.contains(t)) ? t : termFactory.getNullConstant();
+            Term lt =  (rightVars.contains(t)) ? t : termFactory.getNullRDFMutableFunctionalTerm();
             rightTermList.add(lt);
         }
         CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtom);

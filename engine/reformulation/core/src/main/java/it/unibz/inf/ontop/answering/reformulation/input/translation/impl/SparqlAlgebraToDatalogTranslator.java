@@ -204,7 +204,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (nullVariables.isEmpty())
                 return atoms;
 
-            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, valueNull)));
+            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, termFactory.getNullRDFMutableFunctionalTerm())));
         }
 
         /**

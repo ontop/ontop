@@ -501,6 +501,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableFunctionalTerm getNullRDFFunctionalTerm() {
+		return getRDFFunctionalTerm(valueNull, valueNull);
+    }
+
+    @Override
     public GroundFunctionalTerm getIRIFunctionalTerm(IRI iri) {
 		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
 		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
@@ -551,6 +556,11 @@ public class TermFactoryImpl implements TermFactory {
 	public Function getIRIMutableFunctionalTerm(IRI iri) {
 		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
 		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
+	}
+
+	@Override
+	public Function getNullRDFMutableFunctionalTerm() {
+		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), valueNull, valueNull);
 	}
 
 	@Override
