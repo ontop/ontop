@@ -100,8 +100,7 @@ public class OntopMaterializerTest {
 	AtomFactory atomFactory;
 	public OntopMaterializerTest() {
 
-		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
-				.enableTestMode()
+		OntopModelConfiguration defaultConfiguration = createAndInitConfiguration()
 				.build();
 
 		Injector injector = defaultConfiguration.getInjector();

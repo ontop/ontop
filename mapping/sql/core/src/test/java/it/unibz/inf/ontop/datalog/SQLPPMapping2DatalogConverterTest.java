@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -37,34 +34,24 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
-import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.TYPE_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-	private final DummyRDBMetadata defaultDummyMetadata;
 	private final TargetQueryParser targetParser;
 
 	private RDBMetadata md;
-	private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
 
 	public SQLPPMapping2DatalogConverterTest() {
-		OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
-				.enableTestMode()
-				.build();
-
-		Injector injector = defaultConfiguration.getInjector();
-		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
-		defaultDummyMetadata = injector.getInstance(DummyRDBMetadata.class);
-
-		targetParser = injector.getInstance(TargetQueryParserFactory.class).createParser(ImmutableMap.of(
+		targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(ImmutableMap.of(
 				":", "http://www.example.org/university#"
 		));
     }
 	
 	public void setUp() {
-		md = defaultDummyMetadata.clone();
+		md = DEFAULT_DUMMY_DB_METADATA.clone();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
 		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
@@ -97,7 +84,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
-		Set<CQIE> dp = ppMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
+		Set<CQIE> dp = PP_MAPPING_2_DATALOG_CONVERTER.convert(ImmutableList.of(mappingAxiom), md).keySet();
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());
