@@ -99,7 +99,6 @@ public class OneShotSQLGeneratorEngine {
 	private final IQ2DatalogTranslator iq2DatalogTranslator;
 
 	private final boolean distinctResultSet;
-	private final boolean isIRISafeEncodingEnabled;
 
 	@Nullable
 	private final IRIDictionary uriRefIds;
@@ -174,7 +173,6 @@ public class OneShotSQLGeneratorEngine {
 		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-		this.isIRISafeEncodingEnabled = settings.isIRISafeEncodingEnabled();
 		this.uriRefIds = iriDictionary;
 		this.jdbcTypeMapper = jdbcTypeMapper;
 	}
@@ -183,7 +181,7 @@ public class OneShotSQLGeneratorEngine {
 	 * For clone purposes only
 	 */
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
-									  boolean isIRISafeEncodingEnabled, boolean distinctResultSet,
+									  boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
 									  ImmutableMap<FunctionSymbol, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator, Relation2Predicate relation2Predicate,
@@ -202,7 +200,6 @@ public class OneShotSQLGeneratorEngine {
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
 		this.operations = operations;
-		this.isIRISafeEncodingEnabled = isIRISafeEncodingEnabled;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
@@ -277,7 +274,7 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
-				isIRISafeEncodingEnabled, distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
+				distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
                 relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory,
 				optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter,

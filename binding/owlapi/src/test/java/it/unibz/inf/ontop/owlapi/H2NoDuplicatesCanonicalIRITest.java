@@ -77,7 +77,6 @@ public class H2NoDuplicatesCanonicalIRITest {
 				.jdbcUrl(JDBC_URL)
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
-				.enableIRISafeEncoding(false)
 				.enableTestMode()
 				.build();
 

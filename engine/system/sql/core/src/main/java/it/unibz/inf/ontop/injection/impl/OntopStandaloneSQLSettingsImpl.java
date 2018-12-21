@@ -32,11 +32,6 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
-    public boolean isIRISafeEncodingEnabled() {
-        return systemSettings.isIRISafeEncodingEnabled();
-    }
-
-    @Override
     public boolean isKeepAliveEnabled() {
         return systemSettings.isKeepAliveEnabled();
     }

@@ -27,10 +27,6 @@ public interface OntopReformulationConfiguration extends OntopOBDAConfiguration,
 
 
     interface OntopReformulationBuilderFragment<B extends Builder<B>> {
-        /**
-         * In the case of SQL, inserts REPLACE functions in the generated query
-         */
-        B enableIRISafeEncoding(boolean enable);
 
         B enableExistentialReasoning(boolean enable);
 

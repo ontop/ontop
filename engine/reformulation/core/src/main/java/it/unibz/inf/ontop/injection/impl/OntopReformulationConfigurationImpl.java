@@ -130,18 +130,11 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             implements OntopReformulationBuilderFragment<B> {
 
         private final B builder;
-        private Optional<Boolean> encodeIRISafely = Optional.empty();
         private Optional<Boolean> existentialReasoning = Optional.empty();
         private Optional<IRIDictionary> iriDictionary = Optional.empty();
 
         DefaultOntopReformulationBuilderFragment(B builder) {
             this.builder = builder;
-        }
-
-        @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            this.encodeIRISafely = Optional.of(enable);
-            return builder;
         }
 
         @Override
@@ -160,7 +153,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
         Properties generateProperties() {
             Properties p = new Properties();
 
-            encodeIRISafely.ifPresent(e -> p.put(OntopReformulationSettings.SQL_GENERATE_REPLACE, e));
             existentialReasoning.ifPresent(r -> p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, r));
 
             return p;
@@ -183,11 +175,6 @@ public class OntopReformulationConfigurationImpl extends OntopOBDAConfigurationI
             B builder = (B) this;
             localBuilderFragment = new DefaultOntopReformulationBuilderFragment<>(builder);
             optimizationBuilderFragment = new DefaultOntopOptimizationBuilderFragment<>(builder);
-        }
-
-        @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            return localBuilderFragment.enableIRISafeEncoding(enable);
         }
 
         @Override

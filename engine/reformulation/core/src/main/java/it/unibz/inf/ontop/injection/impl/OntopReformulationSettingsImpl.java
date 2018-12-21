@@ -33,11 +33,6 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     }
 
     @Override
-    public boolean isIRISafeEncodingEnabled() {
-        return getRequiredBoolean(SQL_GENERATE_REPLACE);
-    }
-
-    @Override
     public boolean isDistinctPostProcessingEnabled() {
         return getRequiredBoolean(DISTINCT_RESULTSET);
     }

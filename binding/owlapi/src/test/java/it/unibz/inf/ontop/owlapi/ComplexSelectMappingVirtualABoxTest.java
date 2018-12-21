@@ -46,7 +46,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.injection.OntopReformulationSettings.SQL_GENERATE_REPLACE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -177,19 +176,6 @@ public class ComplexSelectMappingVirtualABoxTest  {
 			reasoner.dispose();
 		}
         return ToStringRenderer.getInstance().getRendering(val);
-	}
-
-    @Test
-	public void testReplace() throws Exception {
-
-		Properties p = new Properties();
-        p.put(SQL_GENERATE_REPLACE, false);
-
-		this.query = "PREFIX : <http://it.unibz.inf/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
-
-        String val = runTests(p);
-        assertEquals("\"value1\"^^xsd:string", val);
-
 	}
 
     @Test

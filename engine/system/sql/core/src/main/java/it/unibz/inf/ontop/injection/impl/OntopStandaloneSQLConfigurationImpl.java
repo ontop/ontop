@@ -106,11 +106,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         }
 
         @Override
-        public B enableIRISafeEncoding(boolean enable) {
-            return translationFragmentBuilder.enableIRISafeEncoding(enable);
-        }
-
-        @Override
         public B enableExistentialReasoning(boolean enable) {
             return translationFragmentBuilder.enableExistentialReasoning(enable);
         }
