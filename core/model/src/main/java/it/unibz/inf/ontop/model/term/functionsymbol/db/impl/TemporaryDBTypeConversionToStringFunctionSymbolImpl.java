@@ -38,10 +38,19 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
         return false;
     }
 
+    /**
+     * Minimal optimization
+     */
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                     boolean isInConstructionNodeInOptimizationPhase,
+                                                     TermFactory termFactory) {
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
     @Override
     protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        throw new MinorOntopInternalBugException("A TemporaryDBTypeConversionToStringFunctionSymbolImpl " +
-                "should have been removed before asking it to simplified");
+        throw new MinorOntopInternalBugException("should not be called");
     }
 
     @Override
