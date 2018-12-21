@@ -68,8 +68,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm typeTerm(String text, IRI datatype) {
-        RDFLiteralConstant integerConstant = termFactory.getRDFLiteralConstant(text, datatype);
-        return termFactory.getRDFLiteralFunctionalTerm(integerConstant, datatype);
+        DBConstant lexicalTerm = termFactory.getDBStringConstant(text);
+        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatype);
     }
 
     protected ImmutableTerm constructIRI(String text) {
