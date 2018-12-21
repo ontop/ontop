@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
 
@@ -16,6 +17,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
     private static final String DB_PREFIX = "DB-";
     private static final String DB_TYPE_FACTORY_SUFFIX = "-typeFactory";
+    private static final String DB_FS_FACTORY_SUFFIX = "-symbolFactory";
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
     private final String jdbcDriver;
@@ -58,13 +60,25 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
         properties.putAll(userProperties);
 
+        /*
+         * DB type factory
+         */
         String typeFactoryKey = jdbcDriver + DB_TYPE_FACTORY_SUFFIX;
         String dbTypeFactoryName = DBTypeFactory.class.getCanonicalName();
-
         Optional.ofNullable(properties.getProperty(typeFactoryKey))
                 // Must NOT override user properties
                 .filter(v -> !userProperties.containsKey(dbTypeFactoryName))
                 .ifPresent(v -> properties.setProperty(dbTypeFactoryName, v));
+
+        /*
+         * DB function symbol factory
+         */
+        String dbFSFactoryKey = jdbcDriver + DB_FS_FACTORY_SUFFIX;
+        String dbFSFactoryName = DBFunctionSymbolFactory.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(dbFSFactoryKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(dbFSFactoryName))
+                .ifPresent(v -> properties.setProperty(dbFSFactoryName, v));
 
         return properties;
     }
