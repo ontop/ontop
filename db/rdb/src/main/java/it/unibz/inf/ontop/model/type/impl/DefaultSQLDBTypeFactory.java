@@ -35,7 +35,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String DECIMAL_STR = "DECIMAL";
     protected static final String FLOAT_STR = "FLOAT";
     protected static final String REAL_STR = "REAL";
-    protected static final String DOUBLE_STR = "DOUBLE PRECISION";
+    protected static final String DOUBLE_STR = "DOUBLE";
+    protected static final String DOUBLE_PREC_STR = "DOUBLE PRECISION";
     protected static final String BOOLEAN_STR = "BOOLEAN";
     protected static final String DATE_STR = "DATE";
     protected static final String TIME_STR = "TIME";
@@ -109,6 +110,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
+                    new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble),
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), typeFactory.getXsdBooleanDatatype()),
                     new NonStringNonNumberNonBooleanDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
