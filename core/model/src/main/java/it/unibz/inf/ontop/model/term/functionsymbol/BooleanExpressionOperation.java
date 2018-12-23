@@ -153,8 +153,20 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
             else
                 return termFactory.getImmutableExpression(IS_TRUE, newTerm);
         }
+        else if (this == IS_NOT_NULL) {
+            return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory);
+        }
         else
             return termFactory.getImmutableFunctionalTerm(this, terms);
+    }
+
+    private ImmutableTerm simplifyIsNotNull(ImmutableTerm subTerm,
+                                            boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+        ImmutableTerm newTerm = subTerm.simplify(isInConstructionNodeInOptimizationPhase);
+        if (newTerm instanceof Constant) {
+            return termFactory.getDBBooleanConstant(!newTerm.isNull());
+        }
+        return termFactory.getImmutableExpression(this, newTerm);
     }
 
     private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {

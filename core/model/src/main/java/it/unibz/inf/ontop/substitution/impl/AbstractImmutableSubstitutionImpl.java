@@ -379,7 +379,9 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
                         ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
                         : arg)
                 .collect(ImmutableCollectors.toList());
-        if (newArguments.stream()
+        // Does not simplify RDF(NULL,NULL)
+        if ((!(functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol))
+                && newArguments.stream()
                 .anyMatch(arg -> arg.equals(nullValue))) {
             return nullValue;
         }

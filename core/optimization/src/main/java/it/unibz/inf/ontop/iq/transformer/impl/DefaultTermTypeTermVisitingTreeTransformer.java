@@ -198,6 +198,8 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
             return ((ImmutableFunctionalTerm) term).getTerm(0);
         }
+        else if ((term instanceof Constant) && term.isNull())
+            return term;
         else
             throw new MinorOntopInternalBugException("Unexpected definition for RDFTermType term");
     }
