@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.Inject;
@@ -12,8 +13,10 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -62,10 +65,13 @@ import java.util.stream.Collectors;
 public class FlattenLifterImpl implements FlattenLifter {
 
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutabilityTools immutabilityTools;
+
 
     @Inject
-    private FlattenLifterImpl(IntermediateQueryFactory iqFactory) {
+    private FlattenLifterImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
@@ -96,17 +102,57 @@ public class FlattenLifterImpl implements FlattenLifter {
                 FlattenLift lift = liftFlattenSequence(
                         (FlattenNode) childNode,
                         new HashSet<>(),
-                        fn.getFilterCondition().getVariables(),
+                        getBlockingVariables(fn.getFilterCondition()),
                         ((UnaryIQTree) child).getChild()
                 );
                 if (!lift.getLiftableNodes().isEmpty()) {
-                    return buildUnaryTreeRec(
-                            ImmutableList.<UnaryOperatorNode>builder().addAll(lift.getLiftableNodes()).add(fn).build().reverse().iterator(),
-                            lift.getSubtree()
-                    );
+
+                    ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitConjuncts = splitExpression(lift.getDefinedVariables(), fn.getFilterCondition());
+                    // If some conjunct in the filter expression has no variable provided by the flatten node(s), perform the lift
+                    ImmutableList<ImmutableExpression> nonLiftedConjuncts = splitConjuncts.get(false);
+                    if(!nonLiftedConjuncts.isEmpty()){
+                        FilterNode nonLiftedFilter = iqFactory.createFilterNode(
+                                immutabilityTools.foldBooleanExpressions(nonLiftedConjuncts).get());
+
+                        ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.<UnaryOperatorNode>builder();
+                        ImmutableList<ImmutableExpression> liftedConjuncts = splitConjuncts.get(true);
+                        // Part of the filter condition may be lifted together with the flatten node(s)
+                        if(!liftedConjuncts.isEmpty()){
+                            builder.add(iqFactory.createFilterNode(
+                                    immutabilityTools.foldBooleanExpressions(liftedConjuncts).get()));
+                        }
+                        builder.addAll(lift.liftableNodes);
+                        builder.add(iqFactory.createFilterNode(immutabilityTools.foldBooleanExpressions(liftedConjuncts).get()));
+                        return buildUnaryTreeRec(
+                                builder.build().reverse().iterator(),
+                                lift.getSubtree()
+                        );
+                    }
                 }
             }
             return iqFactory.createUnaryIQTree(fn, child);
+        }
+
+        /**
+         * Returns variables appearing in all conjuncts of the expression
+         */
+        private ImmutableSet<Variable> getBlockingVariables(ImmutableExpression expr) {
+            ImmutableSet<ImmutableExpression> conjuncts = expr.flattenAND();
+            ImmutableSet<Variable> firstConjunctVars = conjuncts.iterator().next().getVariables();
+            return conjuncts.stream()
+                    .flatMap(c -> c.getVariableStream())
+                    .filter(v -> firstConjunctVars.contains(v))
+                    .collect(ImmutableCollectors.toSet());
+        }
+
+        /** Partitions the conjuncts of the input expression:
+         * - conjuncts containing no variable in vars
+         * - conjuncts containing some variable in vars
+         */
+        private ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitExpression(ImmutableSet<Variable> vars, ImmutableExpression expr) {
+                    return expr.flattenAND().stream()
+                    .collect(ImmutableCollectors.partitioningBy(e -> e.getVariableStream()
+                            .anyMatch(vars::contains)));
         }
 
         @Override
@@ -146,8 +192,8 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
         /**
-         * @param blockingVars: if the current flatten node's data atom uses one of these var, then the node cannot be lifted
-         * @param blockingIfExclusiveVars: if the current flatten node's data atom uses one of these var, and the subtree does not project it, then the node cannot be lifted
+         * @param blockingVars: if the flatten node's data atom uses one of these var, then the node cannot be lifted
+         * @param blockingIfExclusiveVars: if the flatten node's data atom uses one of these var, and the subtree does not project it, then the node cannot be lifted
          */
         private FlattenLift liftFlattenSequence(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, IQTree child) {
             FlattenLift childLift;
@@ -227,6 +273,15 @@ public class FlattenLifterImpl implements FlattenLifter {
 
             ImmutableList<FlattenNode> getLiftableNodes() {
                 return liftableNodes;
+            }
+
+            /**
+             * Variables defined by some of the lifted flkatten nodes
+             */
+            ImmutableSet<Variable> getDefinedVariables(){
+                return (ImmutableSet<Variable>) liftableNodes.stream()
+                        .flatMap(n -> n.getDataAtom().getVariables().stream())
+                        .collect(ImmutableCollectors.toSet());
             }
 
             IQTree getSubtree() {
