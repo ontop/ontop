@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.*;
@@ -256,7 +257,7 @@ public class R2RMLParser {
 	 * @throws Exception
 	 */
 	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) throws InvalidR2RMLMappingException {
-		ImmutableTerm objectAtom = null;
+		ImmutableTerm lexicalTerm = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
 		}
@@ -281,15 +282,14 @@ public class R2RMLParser {
 			// create the function object later
 
 			if (lan != null || datatype != null) {
-				RDFLiteralConstant constantLiteral = termFactory.getRDFLiteralConstant(((Literal) constantObj).getLexicalForm(), XSD.STRING);
-				objectAtom = constantLiteral;
+				lexicalTerm = termFactory.getDBStringConstant(((Literal) constantObj).getLexicalForm());
 
 			} else {
 
 				if (constantObj instanceof Literal){
 
 					String lexicalString = ((Literal) constantObj).getLexicalForm();
-					DBConstant lexicalTerm = termFactory.getDBStringConstant(lexicalString);
+					lexicalTerm = termFactory.getDBStringConstant(lexicalString);
 					Literal constantLit1 = (Literal) constantObj;
 
 					String lanConstant = om.getLanguageTag();
@@ -298,7 +298,7 @@ public class R2RMLParser {
 					// we check if it is a literal with language tag
 
 					if (lanConstant != null) {
-						objectAtom = termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, lanConstant);
+						return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, lanConstant);
 					}
 
 					// we check if it is a typed literal
@@ -308,14 +308,14 @@ public class R2RMLParser {
 							throw new InvalidR2RMLMappingException("Abstract datatype "
 									+datatypeConstant  + " detected in the mapping assertion.\nSet the property "
 									+ OntopMappingSettings.TOLERATE_ABSTRACT_DATATYPE + " to true to tolerate them.");
-						objectAtom = termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeConstant);
+						return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatypeConstant);
 					}
 					else {
 						// Use RDFS.LITERAL when the datatype is not specified (-> to be inferred)
-						objectAtom = termFactory.getRDFLiteralConstant(lexicalString, RDFS.LITERAL);
+						return termFactory.getRDFLiteralConstant(lexicalString, RDFS.LITERAL);
 					}
                 } else if (constantObj instanceof IRI){
-                    objectAtom = termFactory.getIRIFunctionalTerm((IRI) constantObj);
+                    return termFactory.getIRIFunctionalTerm((IRI) constantObj);
                 }
 			}
 		}
@@ -330,7 +330,7 @@ public class R2RMLParser {
 				col = joinCond + col;
 			}
 
-			objectAtom = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(col));
+			lexicalTerm = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(col));
 
 		}
 
@@ -344,7 +344,7 @@ public class R2RMLParser {
 			//then we check if the template includes concat 
 			concat = isConcat(t.toString());
 			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
-				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
+				lexicalTerm = getTypedFunction(t.toString(), 4, joinCond);
 			}else {
 
 				// a template can be a rr:IRI, a
@@ -359,14 +359,14 @@ public class R2RMLParser {
 						value = joinCond + value;
 
 					}
-					objectAtom = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(value));
+					lexicalTerm = termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(value));
 				} else {
 					IRI type = om.getTermType();
 
 					// we check if the template is a IRI a simple literal or a
 					// blank
 					// node and create the function object
-					objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
+					lexicalTerm = getTermTypeAtom(t.toString(), type, joinCond);
 				}
 			}
 		}
@@ -378,7 +378,7 @@ public class R2RMLParser {
 			} else if(termMapType.equals(TermMap.TermMapType.COLUMN_VALUED)){
 				if(typ.equals(R2RMLVocabulary.iri)) {
 					// Cast to Variable added. TODO: check
-					objectAtom = termFactory.getIRIFunctionalTerm((Variable) objectAtom, true);
+					return termFactory.getIRIFunctionalTerm((Variable) lexicalTerm, true);
 				}
 			}
 
@@ -387,16 +387,19 @@ public class R2RMLParser {
 		// we check if it is a literal with language tag
 
 		if (lan != null) {
-			objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, lan);
+			return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, lan);
 		}
 
 		// we check if it is a typed literal
 		if (datatype != null) {
-			RDFDatatype type = typeFactory.getDatatype(datatype);
-			objectAtom = termFactory.getRDFLiteralFunctionalTerm(objectAtom, datatype);
+			return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatype);
 		}
 
-		return objectAtom;
+		if (typ.equals(R2RMLVocabulary.literal)) {
+			return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, RDFS.LITERAL);
+		}
+
+		throw new MinorOntopInternalBugException("TODO: fix this broken logic for " + lexicalTerm);
 	}
 
 	@Deprecated

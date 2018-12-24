@@ -86,7 +86,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .allMatch(t -> (t instanceof ImmutableFunctionalTerm) &&
                         ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))) {
             throw new MinorOntopInternalBugException(
-                    "The root construction node is not defining all the variables with a functional term\n"
+                    "The root construction node is not defining all the variables with a RDF functional term\n"
                             + mappingAssertion);
         }
         IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
