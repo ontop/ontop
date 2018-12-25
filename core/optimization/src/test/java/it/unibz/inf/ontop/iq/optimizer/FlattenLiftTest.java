@@ -339,10 +339,10 @@ public class FlattenLiftTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, rightFlattenNode);
-        expectedQueryBuilder.addChild(rightFlattenNode, leftFlattenNode);
+        expectedQueryBuilder.addChild(rootNode, leftFlattenNode);
+        expectedQueryBuilder.addChild(leftFlattenNode, rightFlattenNode);
 
-        expectedQueryBuilder.addChild(leftFlattenNode, joinNode);
+        expectedQueryBuilder.addChild(rightFlattenNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, leftDataNode);
         expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
@@ -372,7 +372,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Z, F),
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
@@ -498,7 +498,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Y, D, E),
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
                 ImmutableList.of(false, true, true));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
@@ -507,7 +507,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Z, F),
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
                 ImmutableList.of(false, true));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 

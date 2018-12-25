@@ -123,8 +123,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .map(c -> c.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableSet<Variable> blockingVars = getImplicitJoinVariables(children);
-            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars, children);
+            //ImmutableSet<Variable> blockingVars = getImplicitJoinVariables(children);
+            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(ImmutableSet.of(), children);
             if (flattenLifts.stream()
                     .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
                 SplitExpression split = splitExpression(flattenLifts.iterator(), join.getOptionalFilterCondition());
@@ -179,7 +179,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                     );
                 }
             }
-            return new SplitExpression(ImmutableSet.of(), Optional.empty());
+            return new SplitExpression(ImmutableSet.of(), expr);
         }
 
         private FlattenLift getFlattenLift(ImmutableSet<Variable> blockingVariables, IQTree child) {
@@ -189,6 +189,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                         (FlattenNode) n,
                         new HashSet<>(),
                         blockingVariables,
+                        Optional.empty(),
                         ((UnaryIQTree) child).getChild()
                 );
             }
@@ -222,15 +223,16 @@ public class FlattenLifterImpl implements FlattenLifter {
                 ImmutableSubstitution sub = cn.getSubstitution();
                 FlattenLift lift = liftFlattenSequence(
                         (FlattenNode) childNode,
-                        getVarsInSubRange(sub),
-                        ImmutableSet.of(),
+                        getVarsInSubstitutionRange(sub),
+                        cn.getVariables(),
+                        Optional.of(cn.getVariables()),
                         ((UnaryIQTree) child).getChild()
                 );
                 if (!lift.getLiftableNodes().isEmpty()) {
                     return buildUnaryTreeRec(
                             ImmutableList.<UnaryOperatorNode>builder()
                                     .addAll(applySubstitution(lift.getLiftableNodes(), sub))
-                                    .add(cn).build().reverse().iterator(),
+                                    .add(cn).build().iterator(),
                             lift.getSubtree()
                     );
                 }
@@ -238,15 +240,15 @@ public class FlattenLifterImpl implements FlattenLifter {
             return iqFactory.createUnaryIQTree(cn, child);
         }
 
-        private HashSet<Variable> getVarsInSubRange(ImmutableSubstitution sub) {
+        private HashSet<Variable> getVarsInSubstitutionRange(ImmutableSubstitution sub) {
             return (HashSet<Variable>) sub.getImmutableMap().values().stream()
                     .flatMap(t -> ((ImmutableTerm) t).getVariableStream())
                     .collect(Collectors.toCollection(HashSet::new));
         }
 
-        private Iterable<? extends UnaryOperatorNode> applySubstitution
-                (ImmutableList<FlattenNode> liftableNodes, ImmutableSubstitution sub) {
-            return liftableNodes.stream()
+        private Iterable<? extends UnaryOperatorNode> applySubstitution (ImmutableList<FlattenNode> flattenNodes,
+                                                                         ImmutableSubstitution sub) {
+            return flattenNodes.stream()
                     .map(n -> applySubstitution(sub, n))
                     .collect(ImmutableCollectors.toList());
         }
@@ -254,17 +256,20 @@ public class FlattenLifterImpl implements FlattenLifter {
         /**
          * @param blockingVars:            if the flatten node's data atom uses one of these var, then the node cannot be lifted
          * @param blockingIfExclusiveVars: if the flatten node's data atom uses one of these var, and the subtree does not project it, then the node cannot be lifted
+         * @param projectedVars:           if present, and if the flatten node's array variable is NOT one of these, then the node cannot be lifted
          */
-        private FlattenLift liftFlattenSequence(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, IQTree child) {
+        private FlattenLift liftFlattenSequence(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars,
+                                                Optional<ImmutableSet<Variable>> projectedVars,
+                                                IQTree child) {
             FlattenLift childLift;
             if (child.getRootNode() instanceof FlattenNode) {
                 blockingVars.add(fn.getArrayVariable());
-                childLift = liftFlattenSequence((FlattenNode) child.getRootNode(), blockingVars, blockingIfExclusiveVars, ((UnaryIQTree) child).getChild());
+                childLift = liftFlattenSequence((FlattenNode) child.getRootNode(), blockingVars, blockingIfExclusiveVars, projectedVars, ((UnaryIQTree) child).getChild());
             } else {
                 childLift = new FlattenLift(ImmutableList.of(), child);
             }
 
-            if (isLiftable(fn, blockingVars, blockingIfExclusiveVars, child)) {
+            if (isLiftable(fn, blockingVars, blockingIfExclusiveVars, projectedVars, child)) {
                 return new FlattenLift(
                         ImmutableList.<FlattenNode>builder().add(fn).addAll(childLift.getLiftableNodes()).build(),
                         childLift.getSubtree()
@@ -307,12 +312,13 @@ public class FlattenLifterImpl implements FlattenLifter {
             );
         }
 
-        private boolean isLiftable(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, IQTree child) {
+        private boolean isLiftable(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, Optional<ImmutableSet<Variable>> projectedVars, IQTree child) {
             ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child);
-            if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains)) {
+            if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains))
                 return false;
-            }
-            return !fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains);
+            if(fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
+                return false;
+            return projectedVars.map(variables -> variables.contains(fn.getArrayVariable())).orElse(true);
         }
 
         private ImmutableSet<Variable> getDataAtomExclusiveVars(FlattenNode fn, IQTree child) {
@@ -336,11 +342,12 @@ public class FlattenLifterImpl implements FlattenLifter {
             }
 
             /**
-             * Variables defined by some of the lifted flatten nodes
+             * Variables defined by some of the lifted flatten nodes (and not in the subtree)
              */
             ImmutableSet<Variable> getDefinedVariables() {
                 return (ImmutableSet<Variable>) liftableNodes.stream()
                         .flatMap(n -> n.getDataAtom().getVariables().stream())
+                        .filter(v -> !subtree.getVariables().contains(v))
                         .collect(ImmutableCollectors.toSet());
             }
 
