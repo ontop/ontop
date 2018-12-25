@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -153,6 +154,33 @@ public class FlattenLifterImpl implements FlattenLifter {
             return iqFactory.createNaryIQTree(join, children);
         }
 
+        @Override
+        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
+            ImmutableList<IQTree> children = ImmutableList.of(
+                    leftChild.acceptTransformer(this),
+                    rightChild.acceptTransformer(this)
+            );
+
+            ImmutableSet.Builder<Variable> blockingVars = ImmutableSet.builder();
+            blockingVars.addAll(getImplicitJoinVariables(children));
+            lj.getOptionalFilterCondition()
+                    .ifPresent(e -> blockingVars.addAll(e.getVariables()));
+
+            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars.build(), children);
+            if (flattenLifts.stream()
+                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
+                return buildUnaryTreeRec(
+                        flattenLifts.stream()
+                                .flatMap(l -> l.getLiftableNodes().stream()).iterator(),
+                        iqFactory.createBinaryNonCommutativeIQTree(
+                                lj,
+                                flattenLifts.get(0).getSubtree(),
+                                flattenLifts.get(1).getSubtree()
+                        ));
+            }
+            return iqFactory.createBinaryNonCommutativeIQTree(lj, children.get(0), children.get(1));
+        }
+
         private ImmutableSet<Variable> getImplicitJoinVariables(ImmutableList<IQTree> children) {
             return children.stream()
                     .flatMap(t -> t.getVariables().stream())
@@ -283,7 +311,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                     ));
         }
 
-        private IQTree buildUnaryTreeRec(UnmodifiableIterator<UnaryOperatorNode> it, IQTree subtree) {
+        private IQTree buildUnaryTreeRec(Iterator<? extends UnaryOperatorNode> it, IQTree subtree) {
             if (it.hasNext()) {
                 return iqFactory.createUnaryIQTree(
                         it.next(),
