@@ -78,7 +78,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
 
     @Override
     public boolean blocksNegation() {
-        return false;
+        return true;
     }
 
     @Override

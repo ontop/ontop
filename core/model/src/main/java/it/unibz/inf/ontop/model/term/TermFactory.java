@@ -113,6 +113,12 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getIsAExpression(ImmutableTerm termTypeTerm, RDFTermType baseType);
 
+
+	/**
+	 * See https://www.w3.org/TR/sparql11-query/#func-arg-compatibility
+	 */
+	ImmutableExpression getAreCompatibleRDFStringExpression(ImmutableTerm typeTerm1, ImmutableTerm typeTerm2);
+
 	/**
 	 * Just wraps the expression into an Evaluation object
 	 */
@@ -371,6 +377,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
 
+	ImmutableExpression getDBStartsWithFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
 
 	/**
@@ -403,4 +411,5 @@ public interface TermFactory {
 	 * Logically equivalent to NOT(STRICT_EQx(...))
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
+
 }

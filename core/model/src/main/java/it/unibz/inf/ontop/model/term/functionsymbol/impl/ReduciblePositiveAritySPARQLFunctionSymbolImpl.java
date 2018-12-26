@@ -94,7 +94,10 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                 && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
     }
 
-    private ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    /**
+     * Default implementation, can be overridden
+     */
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
                                                                   TermFactory termFactory) {
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
                 .boxed()

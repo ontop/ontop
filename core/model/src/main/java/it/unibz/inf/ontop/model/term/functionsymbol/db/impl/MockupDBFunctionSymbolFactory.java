@@ -128,4 +128,9 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBStartsWith() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
 }

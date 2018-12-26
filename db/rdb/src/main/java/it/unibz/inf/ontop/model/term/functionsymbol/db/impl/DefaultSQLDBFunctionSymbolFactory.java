@@ -159,4 +159,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBStartsWith() {
+        throw new RuntimeException("TODO: implement DBStartsWith");
+    }
 }

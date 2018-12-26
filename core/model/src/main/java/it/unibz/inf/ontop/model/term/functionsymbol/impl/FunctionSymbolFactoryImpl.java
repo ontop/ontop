@@ -21,6 +21,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
+    private final BooleanFunctionSymbol areCompatibleRDFStringFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
@@ -45,14 +46,17 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonDenominatorMap = new HashMap<>();
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
+        this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
             TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
-            new UcaseSPARQLFunctionSymbolImpl(xsdString, dbFunctionSymbolFactory)
+                new UcaseSPARQLFunctionSymbolImpl(xsdString, dbFunctionSymbolFactory),
+                new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -79,6 +83,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public BooleanFunctionSymbol getIsARDFTermTypeFunctionSymbol(RDFTermType rdfTermType) {
         return isAMap
                 .computeIfAbsent(rdfTermType, t -> new IsARDFTermTypeFunctionSymbolImpl(metaRDFType, dbBooleanType, t));
+    }
+
+    @Override
+    public BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol() {
+        return areCompatibleRDFStringFunctionSymbol;
     }
 
     @Override

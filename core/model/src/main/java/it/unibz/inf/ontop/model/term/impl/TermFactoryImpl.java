@@ -311,7 +311,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(functionSymbolFactory.getIsARDFTermTypeFunctionSymbol(baseType), termTypeTerm);
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getAreCompatibleRDFStringExpression(ImmutableTerm typeTerm1, ImmutableTerm typeTerm2) {
+        return getImmutableExpression(functionSymbolFactory.getAreCompatibleRDFStringFunctionSymbol(), typeTerm1, typeTerm2);
+    }
+
+    @Override
 	public ImmutableExpression.Evaluation getEvaluation(ImmutableExpression expression) {
 		return new ImmutableExpressionImpl.ExpressionEvaluationImpl(expression);
 	}
@@ -641,6 +646,11 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
+    }
+
+    @Override
+    public ImmutableExpression getDBStartsWithFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBStartsWith(), terms);
     }
 
     @Override
