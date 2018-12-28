@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -14,11 +12,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Arity >= 2
  */
 public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+
+    private final RDFDatatype xsdStringType;
 
     protected ConcatSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
         super("SP_CONCAT" + arity, XPathFunction.CONCAT,
@@ -26,6 +27,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
                         .boxed()
                         .map(i -> (TermType) xsdStringType)
                         .collect(ImmutableCollectors.toList()));
+        this.xsdStringType = xsdStringType;
         if (arity < 2)
             throw new IllegalArgumentException("CONCAT arity must be >= 2");
     }
@@ -37,7 +39,11 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
 
     @Override
     protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return termFactory.getCommonDenominatorFunctionalTerm(typeTerms)
+        ImmutableExpression condition = termFactory.getStrictEquality(typeTerms);
+
+        return termFactory.getDBCase(
+                Stream.of(Maps.immutableEntry(condition, typeTerms.get(0))),
+                termFactory.getRDFTermTypeConstant(xsdStringType))
                 // NB: isInConstructionNodeInOptimizationPhase is irrelevant here
                 .simplify(false);
     }
