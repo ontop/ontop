@@ -126,7 +126,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        return targetType.equals(dbBooleanType)
+                ? new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType)
+                : new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
     }
 
     @Override
