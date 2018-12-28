@@ -29,6 +29,11 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     }
 
     @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
         return false;
     }

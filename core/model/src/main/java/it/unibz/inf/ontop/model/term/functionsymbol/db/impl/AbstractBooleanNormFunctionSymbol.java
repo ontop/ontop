@@ -31,6 +31,11 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
         return false;
     }
 
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
+
     /**
      * Here we assume that the DB has only one way to represent the boolean value as a string
      */

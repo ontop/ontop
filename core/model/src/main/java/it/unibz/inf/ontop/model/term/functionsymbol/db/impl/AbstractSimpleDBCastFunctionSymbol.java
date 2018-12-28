@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
@@ -27,9 +30,41 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
         return termFactory.getDBConstant((constant).getValue(), getTargetType());
     }
 
+    /**
+     * Tries to simplify nested casts
+     */
+    @Override
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm,
+                                                        TermFactory termFactory) {
+
+        if (subTerm.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
+            DBTypeConversionFunctionSymbol functionSymbol =
+                    (DBTypeConversionFunctionSymbol) subTerm.getFunctionSymbol();
+
+            ImmutableTerm subSubTerm = subTerm.getTerm(0);
+
+            DBTermType targetType = getTargetType();
+
+            if (functionSymbol.isSimple()) {
+                return functionSymbol.getInputType()
+                        .map(input -> input.equals(targetType)
+                                ? subSubTerm
+                                : termFactory.getDBCastFunctionalTerm(input, targetType, subSubTerm))
+                        .orElseGet(() -> termFactory.getDBCastFunctionalTerm(targetType, subSubTerm));
+            }
+        }
+        // Default
+        return super.buildTermFromFunctionalTerm(subTerm, termFactory);
+    }
+
     @Override
     public Optional<DBTermType> getInputType() {
         return Optional.ofNullable(inputType);
+    }
+
+    @Override
+    public boolean isSimple() {
+        return true;
     }
 
     @Override

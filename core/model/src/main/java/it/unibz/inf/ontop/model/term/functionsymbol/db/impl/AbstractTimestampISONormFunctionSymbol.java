@@ -31,6 +31,11 @@ public class AbstractTimestampISONormFunctionSymbol extends AbstractDBTypeConver
     }
 
     @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
         return true;
     }

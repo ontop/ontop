@@ -16,4 +16,12 @@ public interface DBTypeConversionFunctionSymbol extends DBFunctionSymbol {
     Optional<DBTermType> getInputType();
 
     boolean isTemporary();
+
+    /**
+     * Returns true if does not transform the string representation of the value
+     * (i.e. no normalization).
+     *
+     * Useful for simplifying nested casts ( A-to-B(B-to-A(x)) === x if both casts are simple)
+     */
+    boolean isSimple();
 }
