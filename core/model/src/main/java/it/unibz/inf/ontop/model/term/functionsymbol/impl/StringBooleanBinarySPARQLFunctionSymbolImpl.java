@@ -41,7 +41,7 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     }
 
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    protected boolean isAlwaysInjective() {
         return false;
     }
 }

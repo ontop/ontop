@@ -37,7 +37,7 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    protected boolean isAlwaysInjective() {
         return false;
     }
 

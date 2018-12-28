@@ -40,7 +40,7 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
      * Here we assume that the DB has only one way to represent the boolean value as a string
      */
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    protected boolean isAlwaysInjective() {
         return true;
     }
 

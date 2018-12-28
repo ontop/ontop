@@ -49,6 +49,11 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
     }
 
     @Override
+    protected boolean isAlwaysInjective() {
+        return false;
+    }
+
+    @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
         return arguments.stream()
                 .filter(t -> !(t instanceof Constant))

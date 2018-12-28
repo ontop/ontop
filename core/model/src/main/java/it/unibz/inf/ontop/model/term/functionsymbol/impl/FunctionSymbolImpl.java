@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -106,12 +107,17 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
-     * TODO: make it abstract
+     * When the function symbol is sometimes but not always injective, please override isInjective(...)
      */
-    protected boolean isAlwaysInjective() {
-        return false;
-    }
+    protected abstract boolean isAlwaysInjective();
 
+    /**
+     * To be overridden when is sometimes but not always injective.
+     */
+    @Override
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+        return isAlwaysInjective();
+    }
 
     /**
      * By default, just build a new functional term.

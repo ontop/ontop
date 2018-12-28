@@ -41,7 +41,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    protected boolean isAlwaysInjective() {
         return true;
     }
 
