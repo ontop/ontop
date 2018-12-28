@@ -20,12 +20,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final TypeFactory typeFactory;
     private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
+    private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
 
     /**
      * Lazy
      */
     @Nullable
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
+
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -81,6 +83,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
         this.typeFactory = typeFactory;
+        this.dbStartsWithFunctionSymbol = new DefaultDBStrStartsWithFunctionSymbol(
+                dbTypeFactory.getAbstractRootDBType(), dbStringType);
     }
 
     @Override
@@ -160,6 +164,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         return strictEqMap
                 .computeIfAbsent(arity, a -> createDBStrictEquality(arity));
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBStartsWith() {
+        return dbStartsWithFunctionSymbol;
     }
 
     @Override

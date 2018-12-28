@@ -61,6 +61,10 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBReplace();
 
+    DBFunctionSymbol getDBSubString();
+
+    DBFunctionSymbol getDBStrlen();
+
     DBFunctionSymbol getR2RMLIRISafeEncode();
 
     /**

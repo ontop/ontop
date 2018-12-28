@@ -211,6 +211,8 @@ public interface TermFactory {
 
 	Constant getNullConstant();
 
+	DBConstant getDBIntegerConstant(int value);
+
 	/**
 	 * TODO: explain
 	 */
@@ -414,4 +416,7 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
 
+	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
 }

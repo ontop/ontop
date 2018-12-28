@@ -116,6 +116,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBSubString() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBStrlen() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBConcatFunctionSymbol getDBConcat(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
@@ -129,8 +139,4 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
-    @Override
-    public DBBooleanFunctionSymbol getDBStartsWith() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
-    }
 }

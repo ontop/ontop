@@ -12,6 +12,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String AND_STR = "AND";
+    protected static final String SUBSTRING_STR = "SUBSTRING";
+    protected static final String LENGTH_STR = "LENGTH";
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
@@ -60,6 +62,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
+        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
@@ -73,6 +76,16 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         DBFunctionSymbol replaceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REPLACE_STR, 3, dbStringType,
                 false, abstractRootDBType);
         builder.put(REPLACE_STR, 3, replaceFunctionSymbol);
+
+        DBFunctionSymbol subStringFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTRING_STR, 3, subStringFunctionSymbol);
+
+        // TODO: check precise output type
+        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LENGTH_STR, 1, dbIntType,
+                false, abstractRootDBType);
+        builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+
         return builder.build();
     }
 
@@ -147,6 +160,16 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
+    public DBFunctionSymbol getDBSubString() {
+        return getRegularDBFunctionSymbol(SUBSTRING_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBStrlen() {
+        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    }
+
+    @Override
     public DBConcatFunctionSymbol getDBConcat(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
@@ -160,8 +183,4 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
-    @Override
-    public DBBooleanFunctionSymbol getDBStartsWith() {
-        throw new RuntimeException("TODO: implement DBStartsWith");
-    }
 }

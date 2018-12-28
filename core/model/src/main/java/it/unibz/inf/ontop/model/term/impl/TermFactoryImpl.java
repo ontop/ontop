@@ -488,6 +488,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public DBConstant getDBIntegerConstant(int value) {
+		return getDBConstant(String.format("%d", value), typeFactory.getDBTypeFactory().getDBLargeIntegerType());
+	}
+
+	@Override
 	public RDFLiteralConstant getProvenanceSpecialConstant() {
 		return provenanceConstant;
 	}
@@ -712,6 +717,16 @@ public class TermFactoryImpl implements TermFactory {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two values where expected in " + terms);
 		throw new RuntimeException("TODO: implement getStrictNEquality(...)");
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBStrlen(), stringTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString(), stringTerm, from, to);
 	}
 
 	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
