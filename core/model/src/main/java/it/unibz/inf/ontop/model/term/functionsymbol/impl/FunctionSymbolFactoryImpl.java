@@ -48,7 +48,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
-        rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(), dbBooleanType);
+        rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
+                dbBooleanType, typeFactory.getDBTypeFactory().getDBStringType());
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(

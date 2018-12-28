@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 
@@ -12,8 +13,14 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOper
 
 public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
-    protected RDF2DBBooleanFunctionSymbolImpl(RDFDatatype xsdBooleanType, DBTermType dbBooleanTermType) {
+    private final DBTermType dbBooleanTermType;
+    private final DBTermType dbStringTermType;
+
+    protected RDF2DBBooleanFunctionSymbolImpl(RDFDatatype xsdBooleanType, DBTermType dbBooleanTermType,
+                                              DBTermType dbStringTermType) {
         super("RDF_2_DB_BOOL", ImmutableList.of(xsdBooleanType), dbBooleanTermType);
+        this.dbBooleanTermType = dbBooleanTermType;
+        this.dbStringTermType = dbStringTermType;
     }
 
     @Override
@@ -49,7 +56,13 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
                     .map(b -> (ImmutableTerm) termFactory.getDBBooleanConstant(b))
                     .orElseGet(termFactory::getNullConstant);
         }
-        // TODO: simplify RDF(..., XSD.BOOLEAN)
+        else if ((newTerm instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) newTerm).getFunctionSymbol()) instanceof RDFTermFunctionSymbol) {
+            // TODO: shall we check the RDF datatype?
+            ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) newTerm).getTerm(0);
+            return termFactory.getDBCastFunctionalTerm(dbStringTermType, dbBooleanTermType, lexicalTerm)
+                    .simplify(isInConstructionNodeInOptimizationPhase);
+        }
         else
             return termFactory.getImmutableExpression(this, newTerms);
     }
