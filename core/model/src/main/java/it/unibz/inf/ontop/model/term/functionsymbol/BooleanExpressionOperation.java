@@ -109,6 +109,14 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     }
 
     /**
+     * TODO: implement it?
+     */
+    @Override
+    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory) {
+        return EvaluationResult.declareSameExpression();
+    }
+
+    /**
      * TODO: let some of them be post-processed
      * @param arguments
      */

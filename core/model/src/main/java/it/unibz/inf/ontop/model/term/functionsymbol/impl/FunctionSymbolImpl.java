@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -46,6 +47,28 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
         return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory);
     }
+
+    /**
+     * Default implementation, to be overridden to convert more cases
+     */
+    @Override
+    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                             TermFactory termFactory) {
+        boolean differentTypeDetected = inferType(terms)
+                .flatMap(TermTypeInference::getTermType)
+                .map(t1 -> otherTerm.inferType()
+                        .flatMap(TermTypeInference::getTermType)
+                        .map(t2 -> !t1.equals(t2))
+                        .orElse(false))
+                .orElse(false);
+
+        if (differentTypeDetected)
+            return EvaluationResult.declareIsFalse();
+
+        // TODO: consider injectivity for simplifying
+        return EvaluationResult.declareSameExpression();
+    }
+
 
     /**
      * By default, just build a new functional term.

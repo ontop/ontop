@@ -28,10 +28,8 @@ public interface FunctionSymbol extends Predicate {
 
     TermType getExpectedBaseType(int index);
 
-    default EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                              TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement it");
-    }
+    EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                      TermFactory termFactory);
 
     /**
      * 1. When a functional term simplifies itself in a BOTTOM-UP manner:
