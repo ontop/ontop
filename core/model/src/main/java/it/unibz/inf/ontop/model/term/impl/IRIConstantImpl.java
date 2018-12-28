@@ -88,7 +88,7 @@ public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRICon
 	}
 
 	@Override
-	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
 		if (otherTerm instanceof Constant) {
 			if (((Constant) otherTerm).isNull())
 				return EvaluationResult.declareIsNull();
@@ -97,7 +97,7 @@ public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRICon
 					: EvaluationResult.declareIsFalse();
 		}
 		else
-			return otherTerm.evaluateEq(this);
+			return otherTerm.evaluateStrictEq(this);
 	}
 
 	@Deprecated

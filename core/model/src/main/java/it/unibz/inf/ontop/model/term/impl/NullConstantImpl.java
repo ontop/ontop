@@ -50,7 +50,7 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
     }
 
     @Override
-    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
         return EvaluationResult.declareIsNull();
     }
 

@@ -86,7 +86,7 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 	}
 
 	@Override
-	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
 		if (otherTerm instanceof RDFLiteralConstant) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
@@ -98,7 +98,7 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 				? EvaluationResult.declareIsNull()
 				: EvaluationResult.declareIsFalse();
 		else
-			return otherTerm.evaluateEq(this);
+			return otherTerm.evaluateStrictEq(this);
 	}
 
 	@Override

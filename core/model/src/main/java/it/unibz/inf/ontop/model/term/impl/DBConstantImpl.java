@@ -59,7 +59,7 @@ public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConst
     }
 
     @Override
-    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
         if (otherTerm instanceof Constant) {
             return ((Constant) otherTerm).isNull()
                     ? EvaluationResult.declareIsNull()
@@ -68,7 +68,7 @@ public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConst
                         : EvaluationResult.declareIsFalse();
         }
         else
-            return otherTerm.evaluateEq(this);
+            return otherTerm.evaluateStrictEq(this);
     }
 
     @Override

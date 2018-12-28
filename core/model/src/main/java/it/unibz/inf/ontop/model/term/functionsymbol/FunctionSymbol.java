@@ -28,8 +28,8 @@ public interface FunctionSymbol extends Predicate {
 
     TermType getExpectedBaseType(int index);
 
-    default EvaluationResult evaluateEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                TermFactory termFactory) {
+    default EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                              TermFactory termFactory) {
         throw new RuntimeException("TODO: implement it");
     }
 

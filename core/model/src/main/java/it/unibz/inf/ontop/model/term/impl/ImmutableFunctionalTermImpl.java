@@ -120,8 +120,8 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
-        return functionSymbol.evaluateEq(getTerms(), otherTerm, termFactory);
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+        return functionSymbol.evaluateStrictEq(getTerms(), otherTerm, termFactory);
     }
 
     @Override

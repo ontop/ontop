@@ -81,7 +81,7 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	}
 
 	@Override
-	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
 		if (otherTerm instanceof Variable) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
@@ -89,7 +89,7 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 		}
 		else if (otherTerm instanceof ImmutableFunctionalTerm) {
 			// Functional terms are in charge of evaluating other terms
-			return otherTerm.evaluateEq(this);
+			return otherTerm.evaluateStrictEq(this);
 		}
 		// Constant
 		else  {

@@ -22,10 +22,8 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -88,7 +86,7 @@ public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNod
 	}
 
 	@Override
-	public EvaluationResult evaluateEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
 		if (otherTerm instanceof Constant) {
 			if (((Constant) otherTerm).isNull())
 				return EvaluationResult.declareIsNull();
@@ -97,7 +95,7 @@ public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNod
 					: EvaluationResult.declareIsFalse();
 		}
 		else
-			return otherTerm.evaluateEq(this);
+			return otherTerm.evaluateStrictEq(this);
 	}
 
 	@Override
