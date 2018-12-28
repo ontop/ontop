@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import java.util.stream.IntStream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
 
@@ -65,8 +67,49 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (differentTypeDetected)
             return EvaluationResult.declareIsFalse();
 
-        // TODO: consider injectivity for simplifying
+        /*
+         * In case of "inconditional" injectivity
+         */
+        if ((otherTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this)
+                && isAlwaysInjective()) {
+            if (getArity() == 0)
+                return EvaluationResult.declareIsTrue();
+
+            ImmutableFunctionalTerm otherFunctionalTerm = (ImmutableFunctionalTerm) otherTerm;
+
+            ImmutableExpression newExpression = termFactory.getConjunction(
+                    IntStream.range(0, getArity())
+                            .boxed()
+                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherFunctionalTerm.getTerm(i)))
+                            .collect(ImmutableCollectors.toList()));
+
+            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory);
+            return newEvaluation.getExpression()
+                    .map(EvaluationResult::declareSimplifiedExpression)
+                    .orElseGet(() -> newEvaluation.getValue()
+                            .map(v -> {
+                                switch (v) {
+                                    case TRUE:
+                                        return EvaluationResult.declareIsTrue();
+                                    case FALSE:
+                                        return EvaluationResult.declareIsFalse();
+                                    //case NULL:
+                                    default:
+                                        return EvaluationResult.declareIsNull();
+                                }
+                            })
+                            .orElseThrow(() -> new MinorOntopInternalBugException(
+                                    "An evaluation either is expected to return an expression or a value")));
+        }
         return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * TODO: make it abstract
+     */
+    protected boolean isAlwaysInjective() {
+        return false;
     }
 
 
