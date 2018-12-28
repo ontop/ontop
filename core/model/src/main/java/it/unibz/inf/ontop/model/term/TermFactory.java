@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunction
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -419,4 +420,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
 	ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
+
+	TypeFactory getTypeFactory();
 }

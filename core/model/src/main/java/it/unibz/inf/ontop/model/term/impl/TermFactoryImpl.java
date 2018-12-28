@@ -389,6 +389,7 @@ public class TermFactoryImpl implements TermFactory {
 		return new NonGroundFunctionalTermImpl(functor, terms, this);
 	}
 
+	@Override
 	public TypeFactory getTypeFactory() {
 		return typeFactory;
 	}
@@ -729,7 +730,7 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString(), stringTerm, from, to);
 	}
 
-	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
+    private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);
 	}

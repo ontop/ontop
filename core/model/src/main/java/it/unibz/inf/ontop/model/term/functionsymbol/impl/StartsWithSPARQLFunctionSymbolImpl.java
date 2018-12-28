@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
@@ -14,7 +15,12 @@ public class StartsWithSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQ
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
-        return termFactory.getDBStartsWithFunctionalTerm(subLexicalTerms);
+        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+
+        return termFactory.getDBCastFunctionalTerm(
+                dbTypeFactory.getDBBooleanType(),
+                dbTypeFactory.getDBStringType(),
+                termFactory.getDBStartsWithFunctionalTerm(subLexicalTerms));
     }
 
     /**
