@@ -34,10 +34,9 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory) {
         ImmutableList<TermType> termTypes = newTerms.stream()
-                .flatMap(t -> t.inferType()
-                        .flatMap(TermTypeInference::getTermType)
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
+                .filter(t -> t instanceof RDFTermTypeConstant)
+                .map(t -> (RDFTermTypeConstant) t)
+                .map(RDFTermTypeConstant::getRDFTermType)
                 .collect(ImmutableCollectors.toList());
 
         /*
@@ -45,7 +44,7 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
          */
         if (termTypes.stream().anyMatch(t -> (!(t instanceof RDFDatatype))
                 || (!((RDFDatatype)t).isA(XSD.STRING))))
-            return termFactory.getNullConstant();
+            return termFactory.getDBBooleanConstant(false);
 
         switch (termTypes.size()) {
             case 2:
