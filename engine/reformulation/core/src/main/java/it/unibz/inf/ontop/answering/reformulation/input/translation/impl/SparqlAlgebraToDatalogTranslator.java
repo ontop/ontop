@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -441,7 +442,15 @@ public class SparqlAlgebraToDatalogTranslator {
         // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
         if (term instanceof Function) {
             Function f = (Function) term;
-            // TODO: check whether the return type is Boolean
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) immutabilityTools.convertIntoImmutableTerm(f);
+            if ((functionalTerm.getFunctionSymbol() instanceof SPARQLFunctionSymbol)
+                    && functionalTerm.inferType()
+                        .flatMap(TermTypeInference::getTermType)
+                        .filter(t -> t instanceof RDFDatatype)
+                        .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
+                        .isPresent())
+                return immutabilityTools.convertToMutableFunction(termFactory.getRDF2DBBooleanFunctionalTerm(functionalTerm));
+            // TODO: deal with other functional terms
             return f;
         }
         return termFactory.getFunctionIsTrue(term);

@@ -27,6 +27,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
+    private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -47,6 +48,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
+        rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(), dbBooleanType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -88,6 +90,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol() {
         return areCompatibleRDFStringFunctionSymbol;
+    }
+
+    @Override
+    public BooleanFunctionSymbol getRDF2DBBooleanFunctionSymbol() {
+        return rdf2DBBooleanFunctionSymbol;
     }
 
     @Override

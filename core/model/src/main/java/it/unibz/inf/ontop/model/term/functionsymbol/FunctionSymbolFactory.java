@@ -22,6 +22,13 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol();
 
+    /**
+     * Used for wrapping SPARQL boolean functional terms to make them becoming ImmutableExpressions
+     *
+     * Such a wrapping consists in converting XSD booleans into DB booleans.
+     */
+    BooleanFunctionSymbol getRDF2DBBooleanFunctionSymbol();
+
     RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
             ImmutableSet<RDFTermTypeConstant> possibleConstants);
 

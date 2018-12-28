@@ -358,6 +358,8 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable);
 
+	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
+
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
 
 	/**

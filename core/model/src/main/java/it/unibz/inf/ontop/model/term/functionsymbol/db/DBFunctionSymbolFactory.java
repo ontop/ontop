@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
-
+/**
+ * Factory for DBFunctionSymbols
+ */
 public interface DBFunctionSymbolFactory {
 
     /**
