@@ -822,7 +822,7 @@ public class ExpressionEvaluator {
 			}
 
 			// TODO: implement it seriously
-			if (!functionSymbol1.isInjective(f1.getTerms(), ImmutableSet.of()))
+			if (!functionSymbol1.isInjective(f1.getTerms(), variableNullability))
 				return term;
 
 

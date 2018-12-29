@@ -138,8 +138,8 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public boolean isInjective(ImmutableSet<Variable> nonNullVariables) {
-        return getFunctionSymbol().isInjective(getTerms(), nonNullVariables);
+    public boolean isInjective(VariableNullability variableNullability) {
+        return getFunctionSymbol().isInjective(getTerms(), variableNullability);
     }
 
     @Override

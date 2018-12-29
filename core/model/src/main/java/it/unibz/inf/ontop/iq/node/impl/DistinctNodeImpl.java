@@ -68,14 +68,11 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
         IQTree grandChild = child.getChild();
         VariableNullability grandChildVariableNullability = grandChild.getVariableNullability();
-        ImmutableSet<Variable> grandChildNonNullableVariables = grandChild.getVariables().stream()
-                .filter(v -> !grandChildVariableNullability.isPossiblyNullable(v))
-                .collect(ImmutableCollectors.toSet());
 
         ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> partition =
                 initialSubstitution.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.partitioningBy(
-                        e -> isLiftable(e.getValue(), grandChildNonNullableVariables),
+                        e -> isLiftable(e.getValue(), grandChildVariableNullability),
                         ImmutableCollectors.toMap()));
 
         Optional<ConstructionNode> liftedConstructionNode = Optional.ofNullable(partition.get(true))
@@ -110,10 +107,10 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
      * NULL is treated as a regular constant (consistent with SPARQL DISTINCT and apparently with SQL DISTINCT)
      *
      */
-    private boolean isLiftable(ImmutableTerm value, ImmutableSet<Variable> nonNullVariables) {
+    private boolean isLiftable(ImmutableTerm value, VariableNullability variableNullability) {
         if (value instanceof VariableOrGroundTerm)
             return true;
-        return ((ImmutableFunctionalTerm) value).isInjective(nonNullVariables);
+        return ((ImmutableFunctionalTerm) value).isInjective(variableNullability);
     }
 
     @Override

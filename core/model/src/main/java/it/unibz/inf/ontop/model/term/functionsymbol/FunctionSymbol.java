@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -14,7 +13,7 @@ import java.util.Optional;
  */
 public interface FunctionSymbol extends Predicate {
 
-    boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables);
+    boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability);
 
     FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
                                VariableNullability childNullability);

@@ -75,7 +75,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
          */
         if ((otherTerm instanceof ImmutableFunctionalTerm)
                 && ((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this)
-                && isInjective(terms, ImmutableSet.of())) {
+                && isInjective(terms, variableNullability)) {
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
@@ -117,7 +117,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * To be overridden when is sometimes but not always injective.
      */
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
         return isAlwaysInjective();
     }
 
