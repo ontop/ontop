@@ -531,7 +531,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             IQTree newGrandChild = normalization.updateChild(grandChild);
 
             return proposedConstructionNode
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareNormalizedForOptimization()))
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newGrandChild, currentIQProperties.declareNormalizedForOptimization()))
                     .orElse(newGrandChild);
         }
         else
