@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -38,14 +39,15 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+                                            VariableNullability variableNullability) {
         ImmutableExpression condition = termFactory.getStrictEquality(typeTerms);
 
         return termFactory.getDBCase(
                 Stream.of(Maps.immutableEntry(condition, typeTerms.get(0))),
                 termFactory.getRDFTermTypeConstant(xsdStringType))
                 // NB: isInConstructionNodeInOptimizationPhase is irrelevant here
-                .simplify(false);
+                .simplify(false, variableNullability);
     }
 
     @Override

@@ -517,6 +517,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         if (child.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode) child.getRootNode();
 
+            IQTree grandChild = ((UnaryIQTree) child).getChild();
+
             AscendingSubstitutionNormalization normalization = substitutionNormalizer.normalizeAscendingSubstitution(
                     constructionNode.getSubstitution(), projectedVariables);
             Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
@@ -526,11 +528,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     .isPresent())
                 return child;
 
-            IQTree grandChild = normalization.updateChild(((UnaryIQTree) child).getChild());
+            IQTree newGrandChild = normalization.updateChild(grandChild);
 
             return proposedConstructionNode
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, currentIQProperties.declareNormalizedForOptimization()))
-                    .orElse(grandChild);
+                    .orElse(newGrandChild);
         }
         else
             return child;

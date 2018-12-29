@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -83,9 +84,9 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public Evaluation evaluate(TermFactory termFactory) {
+    public Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability) {
         // NB: isInConstructionNodeInOptimizationPhase is irrelevant for expressions
-        ImmutableTerm newTerm = simplify(false);
+        ImmutableTerm newTerm = simplify(false, variableNullability);
         if (newTerm instanceof ImmutableExpression)
             return termFactory.getEvaluation((ImmutableExpression) newTerm);
         else if (newTerm.equals(termFactory.getDBBooleanConstant(true)))

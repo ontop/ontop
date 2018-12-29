@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
@@ -53,7 +53,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm term = newTerms.get(0);
         if (term instanceof DBConstant) {
             return conversionMap.get(term);

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
@@ -46,15 +47,15 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
 
     @Override
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                           boolean isInConstructionNodeInOptimizationPhase,
+                                                           TermFactory termFactory, VariableNullability variableNullability) {
         if (newTerms.stream()
                 .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof RDFConstant))) {
             ImmutableList<ImmutableTerm> typeTerms = newTerms.stream()
                     .map(t -> extractRDFTermTypeTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(typeTerms, termFactory);
+            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(typeTerms, termFactory, variableNullability);
             if (inputTypeErrorEvaluation.getValue().isPresent()) {
                 switch (inputTypeErrorEvaluation.getValue().get()) {
                     case FALSE:
@@ -73,7 +74,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                             .collect(ImmutableCollectors.toList()),
                         termFactory);
 
-            ImmutableTerm typeTerm = computeTypeTerm(typeTerms, termFactory);
+            ImmutableTerm typeTerm = computeTypeTerm(typeTerms, termFactory, variableNullability);
 
             Optional<ImmutableExpression> condition = inputTypeErrorEvaluation.getExpression();
 
@@ -98,14 +99,14 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
      * Default implementation, can be overridden
      */
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
-                                                                  TermFactory termFactory) {
+                                                                    TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
                 .boxed()
                 .map(i -> termFactory.getIsAExpression(typeTerms.get(i), (RDFTermType) getExpectedBaseType(i)))
                 .collect(ImmutableCollectors.toList());
 
          return termFactory.getConjunction(typeTestExpressions)
-                 .evaluate(termFactory);
+                 .evaluate(termFactory, variableNullability);
     }
 
     private ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
@@ -130,7 +131,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
     protected abstract ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                         TermFactory termFactory);
 
-    protected abstract ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
+    protected abstract ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability);
 
     @Override
     public Optional<IRI> getIRI() {

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -18,7 +19,7 @@ public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThe
     }
 
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm possibleValue = terms.get(1);
         /*
          * Optimizes the special case IF_ELSE_NULL(IS_NOT_NULL(x),x) === x
@@ -28,7 +29,7 @@ public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThe
             if ((expression.getFunctionSymbol() == IS_NOT_NULL) && expression.getTerm(0).equals(possibleValue))
                 return possibleValue;
         }
-        return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory);
+        return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
 
     /**

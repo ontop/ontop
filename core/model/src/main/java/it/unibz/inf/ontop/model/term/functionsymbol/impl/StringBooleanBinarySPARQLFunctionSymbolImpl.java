@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import org.apache.commons.rdf.api.IRI;
@@ -29,15 +28,15 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getRDFTermTypeConstant(xsdBooleanType);
     }
 
     @Override
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
-                                                                    TermFactory termFactory) {
+                                                                    TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getAreCompatibleRDFStringExpression(typeTerms.get(0), typeTerms.get(1))
-                .evaluate(termFactory);
+                .evaluate(termFactory, variableNullability);
     }
 
     @Override

@@ -112,7 +112,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      * TODO: implement it?
      */
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory) {
+    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return EvaluationResult.declareSameExpression();
     }
 
@@ -147,9 +147,9 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
                                   boolean isInConstructionNodeInOptimizationPhase,
-                                  TermFactory termFactory) {
+                                  TermFactory termFactory, VariableNullability variableNullability) {
         if (this == IS_TRUE) {
-            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase);
+            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
             if (newTerm instanceof Constant) {
                 /*
                  * TODO: Is ok to say that IS TRUE can return NULL?
@@ -162,15 +162,16 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
                 return termFactory.getImmutableExpression(IS_TRUE, newTerm);
         }
         else if (this == IS_NOT_NULL) {
-            return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory);
+            return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, terms);
     }
 
     private ImmutableTerm simplifyIsNotNull(ImmutableTerm subTerm,
-                                            boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
-        ImmutableTerm newTerm = subTerm.simplify(isInConstructionNodeInOptimizationPhase);
+                                            boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory,
+                                            VariableNullability variableNullability) {
+        ImmutableTerm newTerm = subTerm.simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
         if (newTerm instanceof Constant) {
             return termFactory.getDBBooleanConstant(!newTerm.isNull());
         }

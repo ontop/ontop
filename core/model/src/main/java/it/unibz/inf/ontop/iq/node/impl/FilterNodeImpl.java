@@ -38,6 +38,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     private final ConstructionNodeTools constructionNodeTools;
     private final ConditionSimplifier conditionSimplifier;
     private final FilterNormalizer normalizer;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
@@ -46,12 +47,13 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory,
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
-                           FilterNormalizer normalizer) {
+                           FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
+        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
@@ -96,7 +98,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
-        return updateWithFilter(getFilterCondition(), child.getVariableNullability().getNullableGroups());
+        return variableNullabilityTools.updateWithFilter(getFilterCondition(), child.getVariableNullability().getNullableGroups());
     }
 
 
@@ -129,12 +131,14 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private IQTree propagateDownCondition(IQTree child, Optional<ImmutableExpression> initialConstraint) {
         try {
+            VariableNullability childVariableNullability = child.getVariableNullability();
+
             // TODO: also consider the constraint for simplifying the condition
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier
-                    .simplifyCondition(getFilterCondition());
+                    .simplifyCondition(getFilterCondition(), childVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults);
+                    conditionSimplificationResults, childVariableNullability);
 
             IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                     .filter(s -> !s.isEmpty())
@@ -248,11 +252,15 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
+        VariableNullability dummyVariableNullability = new VariableNullabilityImpl(newlyProjectedVariables.stream()
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet()));
+
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression);
+            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, dummyVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution);
+                    expressionAndSubstitution, dummyVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)

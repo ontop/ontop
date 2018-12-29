@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -34,6 +35,8 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
 
     /**
      * Prevents creating construction nodes out of ascending substitutions
+     *
+     * Here, variable nullability is not considered due to the complexity induced by the descending substitution
      *
      */
     @Override

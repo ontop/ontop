@@ -40,15 +40,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? t.simplify(isInConstructionNodeInOptimizationPhase)
+                        ? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory);
+        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     @Override
     public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                             TermFactory termFactory) {
+                                             TermFactory termFactory, VariableNullability variableNullability) {
         boolean differentTypeDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
@@ -87,7 +87,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .map(i -> termFactory.getStrictEquality(terms.get(i), otherFunctionalTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
 
-            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory);
+            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
             return newEvaluation.getExpression()
                     .map(EvaluationResult::declareSimplifiedExpression)
                     .orElseGet(() -> newEvaluation.getValue()
@@ -129,7 +129,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 

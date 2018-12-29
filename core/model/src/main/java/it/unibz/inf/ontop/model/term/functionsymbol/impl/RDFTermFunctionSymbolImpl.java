@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -54,7 +53,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
 
         // Null argument --> null
         if ((!isInConstructionNodeInOptimizationPhase) && isOneArgumentNull(newTerms))

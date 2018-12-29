@@ -27,8 +27,6 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -37,6 +35,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private static final String JOIN_NODE_STR = "JOIN" ;
     private final ConstructionNodeTools constructionNodeTools;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final ConditionSimplifier conditionSimplifier;
     private final InnerJoinNormalizer normalizer;
 
@@ -48,11 +47,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                                ConditionSimplifier conditionSimplifier,
+                                JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
         super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
+        this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
     }
@@ -65,10 +65,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier,InnerJoinNormalizer normalizer) {
+                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 defaultExpressionEvaluator, substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
+        this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
     }
@@ -80,10 +81,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                              ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
+                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
         super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
                 substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
+        this.variableNullabilityTools = variableNullabilityTools;
         this.conditionSimplifier = conditionSimplifier;
         this.normalizer = normalizer;
     }
@@ -205,12 +207,16 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
                 .map(descendingSubstitution::applyToBooleanExpression);
 
+
+        VariableNullability dummyVariableNullability = variableNullabilityTools.getDummyVariableNullability(
+                constructionNodeTools.computeNewProjectedVariables(descendingSubstitution, getProjectedVariables(children)));
+
         try {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of());
+                    unoptimizedExpression, ImmutableSet.of(), dummyVariableNullability);
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution);
+                    expressionAndSubstitution, dummyVariableNullability);
 
             ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution =
                     ((ImmutableSubstitution<VariableOrGroundTerm>)descendingSubstitution)
@@ -261,27 +267,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children) {
-
-        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
-                .flatMap(c -> c.getVariables().stream()
-                        .map(v -> Maps.immutableEntry(v, c)))
-                .collect(ImmutableCollectors.toMultimap())
-                .asMap();
-
-        ImmutableSet<Variable> coOccuringVariables = variableProvenanceMap.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()
-                .flatMap(c -> c.getVariableNullability().getNullableGroups().stream())
-                .filter(g -> g.stream()
-                        .noneMatch(coOccuringVariables::contains))
-                .collect(ImmutableCollectors.toSet());
-
-        return getOptionalFilterCondition()
-                .map(e -> updateWithFilter(e, nullableGroups))
-                .orElseGet(() -> new VariableNullabilityImpl(nullableGroups));
+        return variableNullabilityTools.getVariableNullability(children, getOptionalFilterCondition());
     }
 
     @Override
@@ -355,12 +341,19 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
+        VariableNullability childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children);
+
         try {
             ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of());
+                    getOptionalFilterCondition(), ImmutableSet.of(), childrenVariableNullability);
+
+            // TODO: find a way to avoid creating dummy objects
+            // NB: if some variables are not nullable at the join level, they may be at the child level
+            VariableNullability dummyVariableNullability = variableNullabilityTools
+                    .getDummyVariableNullability(getProjectedVariables(children));
 
             Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults);
+                    conditionSimplificationResults, dummyVariableNullability);
 
             //TODO: propagate different constraints to different children
 

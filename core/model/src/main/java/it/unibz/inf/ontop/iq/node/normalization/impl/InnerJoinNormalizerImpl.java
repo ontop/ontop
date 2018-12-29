@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
@@ -34,16 +35,19 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
     private final ConditionSimplifier conditionSimplifier;
     private final TermFactory termFactory;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
                                     AscendingSubstitutionNormalizer substitutionNormalizer,
-                                    ConditionSimplifier conditionSimplifier, TermFactory termFactory) {
+                                    ConditionSimplifier conditionSimplifier, TermFactory termFactory,
+                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         this.bindingLift = bindingLift;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.conditionSimplifier = conditionSimplifier;
         this.termFactory = termFactory;
+        this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
@@ -82,15 +86,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         private final ImmutableList<IQTree> children;
         private final Optional<ImmutableExpression> joiningCondition;
         private final VariableGenerator variableGenerator;
+        private final VariableNullability childrenVariableNullability;
 
         private State(ImmutableSet<Variable> projectedVariables,
                       ImmutableList<UnaryOperatorNode> ancestors, ImmutableList<IQTree> children,
-                      Optional<ImmutableExpression> joiningCondition, VariableGenerator variableGenerator) {
+                      Optional<ImmutableExpression> joiningCondition, VariableGenerator variableGenerator,
+                      VariableNullability childrenVariableNullability) {
             this.projectedVariables = projectedVariables;
             this.ancestors = ancestors;
             this.children = children;
             this.joiningCondition = joiningCondition;
             this.variableGenerator = variableGenerator;
+            this.childrenVariableNullability = childrenVariableNullability;
         }
 
         /**
@@ -99,18 +106,21 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         public State(ImmutableList<IQTree> children, Optional<ImmutableExpression> joiningCondition,
                      VariableGenerator variableGenerator) {
             this(extractProjectedVariables(children), ImmutableList.of(), children,
-                    joiningCondition, variableGenerator);
+                    joiningCondition, variableGenerator,
+                    variableNullabilityTools.getChildrenVariableNullability(children));
         }
 
         private State updateChildren(ImmutableList<IQTree> newChildren) {
             if (children.equals(newChildren))
                 return this;
-            return new State(projectedVariables, ancestors, newChildren, joiningCondition, variableGenerator);
+            return new State(projectedVariables, ancestors, newChildren, joiningCondition, variableGenerator,
+                    variableNullabilityTools.getChildrenVariableNullability(newChildren));
         }
 
         private State updateConditionAndChildren(Optional<ImmutableExpression> newCondition,
                                                  ImmutableList<IQTree> newChildren) {
-            return new State(projectedVariables, ancestors, newChildren, newCondition, variableGenerator);
+            return new State(projectedVariables, ancestors, newChildren, newCondition, variableGenerator,
+                    variableNullabilityTools.getChildrenVariableNullability(newChildren));
         }
 
         private State updateParentConditionAndChildren(UnaryOperatorNode newParent, Optional<ImmutableExpression> newCondition,
@@ -120,7 +130,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                     .addAll(ancestors)
                     .build();
 
-            return new State(projectedVariables, newAncestors, newChildren, newCondition, variableGenerator);
+            return new State(projectedVariables, newAncestors, newChildren, newCondition, variableGenerator,
+                    variableNullabilityTools.getChildrenVariableNullability(newChildren));
         }
 
         /**
@@ -130,7 +141,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             EmptyNode emptyChild = iqFactory.createEmptyNode(projectedVariables);
 
             return new State(projectedVariables, ImmutableList.of(), ImmutableList.of(emptyChild),
-                    Optional.empty(), variableGenerator);
+                    Optional.empty(), variableGenerator, childrenVariableNullability);
         }
 
         @Override
@@ -202,7 +213,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         selectedChildPosition,
                         selectedGrandChild,
                         liftedChildren, ImmutableSet.of(), joiningCondition, variableGenerator,
-                        this::convertIntoState);
+                        childrenVariableNullability, this::convertIntoState);
             } catch (UnsatisfiableConditionException e) {
                 return declareAsEmpty();
             }
@@ -284,7 +295,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             try {
                 ConditionSimplifier.ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        joiningCondition.get());
+                        joiningCondition.get(), childrenVariableNullability);
 
                 Optional<ImmutableExpression> newJoiningCondition = conditionSimplificationResults.getOptionalExpression();
                 // TODO: build a proper constraint (more than just the joining condition)

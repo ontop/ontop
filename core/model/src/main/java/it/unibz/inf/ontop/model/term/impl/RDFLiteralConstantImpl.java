@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -86,7 +87,7 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 	}
 
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof RDFLiteralConstant) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
@@ -98,7 +99,7 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 				? EvaluationResult.declareIsNull()
 				: EvaluationResult.declareIsFalse();
 		else
-			return otherTerm.evaluateStrictEq(this);
+			return otherTerm.evaluateStrictEq(this, variableNullability);
 	}
 
 	@Override

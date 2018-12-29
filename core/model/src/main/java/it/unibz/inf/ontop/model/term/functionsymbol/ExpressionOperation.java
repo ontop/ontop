@@ -170,7 +170,7 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it?
 	 */
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory) {
+	public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
 		return EvaluationResult.declareSameExpression();
 	}
 
@@ -197,10 +197,10 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it seriously after getting rid of this enum
 	 */
 	@Override
-	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
 		ImmutableList<ImmutableTerm> newTerms = terms.stream()
 				.map(t -> (t instanceof ImmutableFunctionalTerm)
-						? t.simplify(isInConstructionNodeInOptimizationPhase)
+						? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
 						: t)
 				.collect(ImmutableCollectors.toList());
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -104,5 +105,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 
+    ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
+
     ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase);
+
 }

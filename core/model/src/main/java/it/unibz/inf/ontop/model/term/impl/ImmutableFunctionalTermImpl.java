@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.utils.DummyVariableNullability;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
@@ -120,13 +122,19 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
-        return functionSymbol.evaluateStrictEq(getTerms(), otherTerm, termFactory);
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+        return functionSymbol.evaluateStrictEq(getTerms(), otherTerm, termFactory, variableNullability);
+    }
+
+    @Override
+    public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability) {
+        return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
 
     @Override
     public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase) {
-        return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory);
+        return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory,
+                new DummyVariableNullability(this));
     }
 
     @Override

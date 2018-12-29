@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -18,7 +19,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         // Null
         if (isOneArgumentNull(newTerms))
             return termFactory.getNullConstant();

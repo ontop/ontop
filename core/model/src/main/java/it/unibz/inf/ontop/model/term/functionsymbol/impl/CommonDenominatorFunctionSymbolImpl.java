@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
@@ -48,7 +49,7 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         /*
          * Constant terms are first reduced
          */

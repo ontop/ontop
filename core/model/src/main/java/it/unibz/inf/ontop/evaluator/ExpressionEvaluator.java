@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.*;
@@ -35,6 +36,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBAndFunction
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.DummyVariableNullability;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
 
@@ -146,7 +148,11 @@ public class ExpressionEvaluator {
 	}
 
 	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
-		ImmutableTerm evaluatedTerm = eval(expression);
+		return evaluateExpression(expression, new DummyVariableNullability(expression));
+	}
+
+	public EvaluationResult evaluateExpression(ImmutableExpression expression, VariableNullability variableNullability) {
+		ImmutableTerm evaluatedTerm = eval(expression, variableNullability);
 
 		/**
 		 * If a function, convert it into an ImmutableBooleanExpression
@@ -184,7 +190,7 @@ public class ExpressionEvaluator {
 	}
 
 
-	private ImmutableTerm eval(ImmutableTerm expr) {
+	private ImmutableTerm eval(ImmutableTerm expr, VariableNullability variableNullability) {
 		if (expr instanceof Variable)
 			return expr;
 
@@ -192,10 +198,10 @@ public class ExpressionEvaluator {
 			return expr;
 
 		else
-			return eval((ImmutableFunctionalTerm) expr);
+			return eval((ImmutableFunctionalTerm) expr, variableNullability);
 	}
 
-	private ImmutableTerm eval(ImmutableFunctionalTerm term) {
+	private ImmutableTerm eval(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
 
 		FunctionSymbol functionSymbol = term.getFunctionSymbol();
 		if (functionSymbol instanceof ExpressionOperation) {
@@ -258,31 +264,31 @@ public class ExpressionEvaluator {
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
 				case OR:
-					return evalOr(term.getTerm(0), term.getTerm(1));
+					return evalOr(term.getTerm(0), term.getTerm(1), variableNullability);
 				case NOT:
-					return evalNot(term);
+					return evalNot(term, variableNullability);
 				case EQ:
-					return evalEqNeq(term, true);
+					return evalEqNeq(term, true, variableNullability);
 				case NEQ:
-					return evalEqNeq(term, false);
+					return evalEqNeq(term, false, variableNullability);
 				case IS_NULL:
-					return evalIsNullNotNull(term, true);
+					return evalIsNullNotNull(term, true, variableNullability);
 				case IS_NOT_NULL:
-					return evalIsNullNotNull(term, false);
+					return evalIsNullNotNull(term, false, variableNullability);
 				case IS_TRUE:
-					return evalIsTrue(term);
+					return evalIsTrue(term, variableNullability);
 				case IS_NUMERIC:
 					return evalIsRDFLiteralNumeric(term);
 				case IS_LITERAL:
 					return evalIsLiteral(term);
 				case IS_IRI:
-					return evalIsIri(term);
+					return evalIsIri(term, variableNullability);
 				case IS_BLANK:
-					return evalIsBlank(term);
+					return evalIsBlank(term, variableNullability);
 				case LANGMATCHES:
-					return evalLangMatches(term);
+					return evalLangMatches(term, variableNullability);
 				case REGEX:
-					return evalRegex(term);
+					return evalRegex(term, variableNullability);
 				case GTE:
 				case GT:
 				case LTE:
@@ -301,16 +307,16 @@ public class ExpressionEvaluator {
 		}
 		// TODO: remove this temporary hack!
 		else if (functionSymbol instanceof DBAndFunctionSymbol) {
-			return evalNaryAnd(term.getTerms());
+			return evalNaryAnd(term.getTerms(), variableNullability);
 		}
 		// TODO: remove this temporary hack!
 		else if (functionSymbol instanceof AbstractDBIfElseNullFunctionSymbol) {
-			return evalIfElseNull(term.getTerms());
+			return evalIfElseNull(term.getTerms(), variableNullability);
 		}
 		else {
 			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
 			// to exploit unification techniques for simplifying equalities
-			return term.simplify(true);
+			return term.simplify(true, variableNullability);
 		}
 	}
 
@@ -359,8 +365,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isBlank() function
 	 */
-	private ImmutableTerm evalIsBlank(ImmutableFunctionalTerm term) {
-		ImmutableTerm teval = eval(term.getTerm(0));
+	private ImmutableTerm evalIsBlank(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
+		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
 		if (teval instanceof ImmutableFunctionalTerm) {
 			return termFactory.getDBBooleanConstant(isKnownToBeBlank((ImmutableFunctionalTerm) teval));
 		}
@@ -370,8 +376,8 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for isIRI() and isURI() function
 	 */
-	private ImmutableTerm evalIsIri(ImmutableFunctionalTerm term) {
-		ImmutableTerm teval = eval(term.getTerm(0));
+	private ImmutableTerm evalIsIri(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
+		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
 		if (teval instanceof ImmutableFunctionalTerm) {
 			return termFactory.getDBBooleanConstant(isKnownToBeIRI((ImmutableFunctionalTerm) teval));
 		}
@@ -496,13 +502,13 @@ public class ExpressionEvaluator {
 	/*
 	 * Expression evaluator for langMatches() function
 	 */
-	private ImmutableTerm evalLangMatches(ImmutableFunctionalTerm term) {
+	private ImmutableTerm evalLangMatches(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
 		final String SELECT_ALL = "*";
 
 		/*
 		 * Evaluate the first term
 		 */
-		ImmutableTerm teval1 = eval(term.getTerm(0));
+		ImmutableTerm teval1 = eval(term.getTerm(0), variableNullability);
 		if (teval1 == null) {
 			return valueNull; // ROMAN (10 Jan 2017): not valueFalse
 		}
@@ -547,23 +553,23 @@ public class ExpressionEvaluator {
 				return term;
 			}
 			return evalLangMatches(termFactory.getImmutableFunctionalTerm(LANGMATCHES, f1.getTerm(0),
-					f2.getTerm(0)));
+					f2.getTerm(0)), variableNullability);
 		}
 		else {
 			return term;
 		}
 	}
 
-	private ImmutableTerm evalRegex(ImmutableFunctionalTerm term) {
+	private ImmutableTerm evalRegex(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
 //
 		ImmutableTerm eval1 = term.getTerm(0);
-		eval1 = evalRegexSingleExpression(eval1);
+		eval1 = evalRegexSingleExpression(eval1, variableNullability);
 
         ImmutableTerm eval2 = term.getTerm(1);
-		eval2 = evalRegexSingleExpression(eval2);
+		eval2 = evalRegexSingleExpression(eval2, variableNullability);
 
         ImmutableTerm eval3 = term.getTerm(2);
-        eval3 = evalRegexSingleExpression(eval3);
+        eval3 = evalRegexSingleExpression(eval3, variableNullability);
 
         if(eval1.equals(valueFalse)
                 || eval2.equals(valueFalse)
@@ -576,7 +582,7 @@ public class ExpressionEvaluator {
 
 	}
 
-	private ImmutableTerm evalRegexSingleExpression(ImmutableTerm expr){
+	private ImmutableTerm evalRegexSingleExpression(ImmutableTerm expr, VariableNullability variableNullability){
 
         if (expr instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm function1 = (ImmutableFunctionalTerm) expr;
@@ -586,10 +592,10 @@ public class ExpressionEvaluator {
 						|| function1.getTerm(1).equals(bnodeConstant))) {
                 return valueFalse;
             }
-			ImmutableTerm evaluatedExpression = eval(expr);
+			ImmutableTerm evaluatedExpression = eval(expr, variableNullability);
 			return expr.equals(evaluatedExpression)
 					? expr
-					: evalRegexSingleExpression(evaluatedExpression);
+					: evalRegexSingleExpression(evaluatedExpression, variableNullability);
         }
         return expr;
 
@@ -598,8 +604,8 @@ public class ExpressionEvaluator {
 	/**
 	 * Temporary: allows to use eval() on the condition
 	 */
-	private ImmutableTerm evalIfElseNull(ImmutableList<? extends ImmutableTerm> terms) {
-		ImmutableTerm newCondition = eval(terms.get(0));
+	private ImmutableTerm evalIfElseNull(ImmutableList<? extends ImmutableTerm> terms, VariableNullability variableNullability) {
+		ImmutableTerm newCondition = eval(terms.get(0), variableNullability);
 		if (newCondition.equals(valueFalse))
 			return valueNull;
 		else if (newCondition.equals(valueTrue))
@@ -608,13 +614,13 @@ public class ExpressionEvaluator {
 			return valueNull;
 		else if (newCondition instanceof ImmutableExpression)
 			return termFactory.getIfElseNull((ImmutableExpression) newCondition, terms.get(1))
-					.simplify(false);
+					.simplify(false, variableNullability);
 		else
 			throw new MinorOntopInternalBugException("The new condition was expected " +
 					"to be a ImmutableExpression, not " + newCondition);
 	}
 
-	private ImmutableTerm evalIsNullNotNull(ImmutableFunctionalTerm term, boolean isnull) {
+	private ImmutableTerm evalIsNullNotNull(ImmutableFunctionalTerm term, boolean isnull, VariableNullability variableNullability) {
 		ImmutableTerm innerTerm = term.getTerms().get(0);
 		if (innerTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalInnerTerm = (ImmutableFunctionalTerm) innerTerm;
@@ -624,10 +630,10 @@ public class ExpressionEvaluator {
 				ImmutableFunctionalTerm isNotNullInnerInnerTerm = termFactory.getImmutableFunctionalTerm(
 						isnull ? IS_NULL : IS_NOT_NULL,
 						((ImmutableFunctionalTerm) innerTerm).getTerm(0));
-				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull);
+				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull, variableNullability);
 			}
 		}
-		ImmutableTerm result = eval(innerTerm);
+		ImmutableTerm result = eval(innerTerm, variableNullability);
 		if (result == valueNull) {
 			return termFactory.getDBBooleanConstant(isnull);
 		}
@@ -642,7 +648,7 @@ public class ExpressionEvaluator {
 			 * Special optimization for URI templates
 			 */
 			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull);
+				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull, variableNullability);
 			}
 			/*
 			 * All the functions that accepts null
@@ -657,7 +663,8 @@ public class ExpressionEvaluator {
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
 				return eval(isnull
 						? termFactory.getImmutableFunctionalTerm(NOT, notNullExpression)
-						: notNullExpression);
+						: notNullExpression,
+						variableNullability);
 			}
 		}
 
@@ -676,7 +683,7 @@ public class ExpressionEvaluator {
 	/**
 	 * TODO: make it stronger (in case someone uses complex sub-terms such as IS_NULL(x) inside the URI template...)
 	 */
-	private ImmutableTerm simplifyIsNullorNotNullUriTemplate(ImmutableFunctionalTerm uriTemplate, boolean isNull) {
+	private ImmutableTerm simplifyIsNullorNotNullUriTemplate(ImmutableFunctionalTerm uriTemplate, boolean isNull, VariableNullability variableNullability) {
 		ImmutableList<? extends ImmutableTerm> terms = uriTemplate.getTerms();
 		if (isNull) {
 			switch (terms.size()) {
@@ -702,12 +709,12 @@ public class ExpressionEvaluator {
 				return eval(termFactory.getConjunction(
 						terms.stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
-				).get());
+				).get(), variableNullability);
 		}
 	}
 
-	private ImmutableTerm evalIsTrue(ImmutableFunctionalTerm term) {
-		ImmutableTerm teval = eval(term.getTerm(0));
+	private ImmutableTerm evalIsTrue(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
+		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
 		if (teval instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
 			FunctionSymbol functionSymbol = f.getFunctionSymbol();
@@ -727,9 +734,9 @@ public class ExpressionEvaluator {
 	}
 
 
-	private ImmutableTerm evalNot(ImmutableFunctionalTerm term) {
+	private ImmutableTerm evalNot(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
 		ImmutableTerm initialSubTerm = term.getTerm(0);
-		ImmutableTerm teval = eval(initialSubTerm);
+		ImmutableTerm teval = eval(initialSubTerm, variableNullability);
 		if (teval instanceof ImmutableExpression) {
 			return ((ImmutableExpression) teval).negate(termFactory);
 		} else if (teval instanceof Constant) {
@@ -747,7 +754,7 @@ public class ExpressionEvaluator {
 				: termFactory.getImmutableFunctionalTerm(NOT, teval);
 	}
 
-	private ImmutableTerm evalEqNeq(ImmutableFunctionalTerm term, boolean eq) {
+	private ImmutableTerm evalEqNeq(ImmutableFunctionalTerm term, boolean eq, VariableNullability variableNullability) {
 		/*
 		 * Evaluate the first term
 		 */
@@ -756,7 +763,7 @@ public class ExpressionEvaluator {
 		ImmutableTerm teval1;
 		if (term.getTerm(0) instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm t1 = (ImmutableFunctionalTerm) term.getTerm(0);
-			teval1 = eval(term.getTerm(0));
+			teval1 = eval(term.getTerm(0), variableNullability);
 			if (teval1 == null) {
 				return valueFalse;
 			}
@@ -766,7 +773,7 @@ public class ExpressionEvaluator {
 			return eq ? valueFalse : valueTrue;
 		}
 		else {
-			teval1 = eval(term.getTerm(0));
+			teval1 = eval(term.getTerm(0), variableNullability);
 		}
 
 		/*
@@ -776,7 +783,7 @@ public class ExpressionEvaluator {
 		ImmutableTerm teval2;
 		if (term.getTerm(1) instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm t2 = (ImmutableFunctionalTerm) term.getTerm(1);
-			teval2 = eval(term.getTerm(1));
+			teval2 = eval(term.getTerm(1), variableNullability);
 			if (teval2 == null) {
 				return valueFalse;
 			}
@@ -786,7 +793,7 @@ public class ExpressionEvaluator {
 			return eq ? valueFalse : valueTrue;
 		}
 		else {
-			teval2 = eval(term.getTerm(1));
+			teval2 = eval(term.getTerm(1), variableNullability);
 		}
 
 		/*
@@ -843,7 +850,7 @@ public class ExpressionEvaluator {
 							: termFactory.getDisjunction(expressions);
 
 					return optionalExpression
-							.map(this::eval)
+							.map(e -> eval(e, variableNullability))
 							.orElseGet(() -> termFactory.getDBBooleanConstant(eq));
 				}
 				else if (!functionSymbol1.equals(pred2)) {
@@ -866,18 +873,18 @@ public class ExpressionEvaluator {
 	/**
 	 * Temporary
 	 */
-	private ImmutableTerm evalNaryAnd(ImmutableList<? extends ImmutableTerm> terms) {
+	private ImmutableTerm evalNaryAnd(ImmutableList<? extends ImmutableTerm> terms, VariableNullability variableNullability) {
 		return DefaultDBAndFunctionSymbol.computeNewConjunction(
 				terms.stream()
-						.map(this::eval)
+						.map(t -> eval(t, variableNullability))
 						.map(t -> t == null ? (ImmutableTerm) termFactory.getNullEvaluation() : t)
 						.collect(ImmutableCollectors.toList()),
 				termFactory);
 	}
 
-	private ImmutableTerm evalOr(ImmutableTerm t1, ImmutableTerm t2) {
-		ImmutableTerm e1 = eval(t1);
-		ImmutableTerm e2 = eval(t2);
+	private ImmutableTerm evalOr(ImmutableTerm t1, ImmutableTerm t2, VariableNullability variableNullability) {
+		ImmutableTerm e1 = eval(t1, variableNullability);
+		ImmutableTerm e2 = eval(t2, variableNullability);
 
 		if (e1 == valueTrue || e2 == valueTrue)
 			return valueTrue;

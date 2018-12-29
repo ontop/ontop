@@ -408,7 +408,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
         try {
-            Optional<ImmutableExpression> childConstraint = computeChildConstraint(substitution, Optional.of(constraint));
+            Optional<ImmutableExpression> childConstraint = computeChildConstraint(substitution, Optional.of(constraint),
+                    child.getVariableNullability());
             IQTree newChild = childConstraint
                     .map(child::propagateDownConstraint)
                     .orElse(child);
@@ -601,8 +602,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private IQTree propagateDescendingSubstitutionToChild(IQTree child,
                                                           PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint) throws EmptyTreeException {
+
+        VariableNullability dummyVariableNullability = new VariableNullabilityImpl(child.getVariables().stream()
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet()));
+
         Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
-                constraint);
+                constraint, dummyVariableNullability);
 
         return Optional.of(tauFPropagationResults.delta)
                 .filter(delta -> !delta.isEmpty())
@@ -772,12 +778,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     }
 
     private Optional<ImmutableExpression> computeChildConstraint(ImmutableSubstitution<ImmutableTerm> theta,
-                                                                 Optional<ImmutableExpression> initialConstraint)
+                                                                 Optional<ImmutableExpression> initialConstraint,
+                                                                 VariableNullability childVariableNullability)
             throws EmptyTreeException {
 
         Optional<ExpressionEvaluator.EvaluationResult> descendingConstraintResults = initialConstraint
                 .map(theta::applyToBooleanExpression)
-                .map(exp -> expressionEvaluator.clone().evaluateExpression(exp));
+                .map(exp -> expressionEvaluator.clone().evaluateExpression(exp, childVariableNullability));
 
         if (descendingConstraintResults
                 .filter(ExpressionEvaluator.EvaluationResult::isEffectiveFalse)
@@ -807,7 +814,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                     && ((!newPartialTheta.isDefining(v)) || originalProjectedVariables.contains(v));
                         })
                         .collect(ImmutableCollectors.toMap(
-                               e -> e.getKey(),
+                                Map.Entry::getKey,
                                e -> valueTransformationFct.apply(e.getValue())
                         )));
     }
@@ -818,19 +825,21 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
 
+        IQTree grandChild = childIQ.getChild();
+
         AscendingSubstitutionNormalization ascendingNormalization = substitutionNormalizer.normalizeAscendingSubstitution(
                 childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 
-        IQTree grandChild = ascendingNormalization.updateChild(childIQ.getChild());
+        IQTree newGrandChild = ascendingNormalization.updateChild(grandChild);
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
 
-        return grandChild.getVariables().equals(newConstructionNode.getVariables())
-                ? grandChild
-                : iqFactory.createUnaryIQTree(newConstructionNode, grandChild, currentIQProperties.declareNormalizedForOptimization());
+        return newGrandChild.getVariables().equals(newConstructionNode.getVariables())
+                ? newGrandChild
+                : iqFactory.createUnaryIQTree(newConstructionNode, newGrandChild, currentIQProperties.declareNormalizedForOptimization());
     }
 
     private class EmptyTreeException extends Exception {

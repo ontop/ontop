@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.*;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 /**
  * Common abstract class for ImmutableSubstitutionImpl and Var2VarSubstitutionImpl
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
         implements ImmutableSubstitution<T> {
 
@@ -345,10 +347,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
+    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase,
+                                                                VariableNullability variableNullability) {
+        return normalizeValues(isInConstructionNodeInOptimizationPhase, Optional.of(variableNullability));
+    }
+
+    @Override
     public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase) {
+        return normalizeValues(isInConstructionNodeInOptimizationPhase, Optional.empty());
+    }
+
+    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase,
+                                                                Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
                 .map(e -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) e.getValue()))
-                .map(e -> applyNullNormalization(e, isInConstructionNodeInOptimizationPhase))
+                .map(e -> applyNullNormalization(e, isInConstructionNodeInOptimizationPhase, variableNullability))
                 .collect(ImmutableCollectors.toMap()));
     }
 
@@ -357,11 +370,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
      * TODO: just use the simplify method()
      */
     private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry, boolean isInConstructionNodeInOptimizationPhase) {
+            Map.Entry<Variable, ImmutableTerm> substitutionEntry, boolean isInConstructionNodeInOptimizationPhase,
+            Optional<VariableNullability> variableNullability) {
         ImmutableTerm value = substitutionEntry.getValue();
         if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm newValue = normalizeFunctionalTerm((ImmutableFunctionalTerm) value)
-                    .simplify(isInConstructionNodeInOptimizationPhase);
+            ImmutableTerm normalizedTerm = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
+            ImmutableTerm newValue = variableNullability
+                    .map(n -> normalizedTerm.simplify(isInConstructionNodeInOptimizationPhase, n))
+                    .orElseGet(() -> normalizedTerm.simplify(isInConstructionNodeInOptimizationPhase));
             return newValue.equals(value)
                     ? substitutionEntry
                     : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);

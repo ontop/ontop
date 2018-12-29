@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
@@ -36,16 +37,20 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final ConditionSimplifier conditionSimplifier;
     private final JoinLikeChildBindingLifter bindingLifter;
+    private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
+
 
     @Inject
     private LeftJoinNormalizerImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, ConditionSimplifier conditionSimplifier,
-                                   JoinLikeChildBindingLifter bindingLifter) {
+                                   JoinLikeChildBindingLifter bindingLifter,
+                                   JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
         this.conditionSimplifier = conditionSimplifier;
         this.bindingLifter = bindingLifter;
+        this.variableNullabilityTools = variableNullabilityTools;
     }
 
 
@@ -107,8 +112,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         protected LJNormalizationState(ImmutableSet<Variable> projectedVariables, IQTree initialLeftChild,
-                                    IQTree initialRightChild, Optional<ImmutableExpression> ljCondition,
-                                    VariableGenerator variableGenerator) {
+                                       IQTree initialRightChild, Optional<ImmutableExpression> ljCondition,
+                                       VariableGenerator variableGenerator) {
             this(projectedVariables, initialLeftChild, initialRightChild, ljCondition,
                     ImmutableList.of(), variableGenerator);
         }
@@ -173,9 +178,12 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             IQTree leftGrandChild = liftedLeftChild.getChild();
 
             try {
+                ImmutableList<IQTree> children = ImmutableList.of(liftedLeftChild, rightChild);
+
                 return bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
-                        ImmutableList.of(liftedLeftChild,rightChild),
-                        leftGrandChild.getVariables(), ljCondition, variableGenerator, this::applyLeftChildBindingLift)
+                        children,
+                        leftGrandChild.getVariables(), ljCondition, variableGenerator,
+                        variableNullabilityTools.getChildrenVariableNullability(children), this::applyLeftChildBindingLift)
                         // Recursive (for optimization purposes)
                         .liftLeftChild();
             }
@@ -345,7 +353,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             ImmutableSet<Variable> leftVariables = leftChild.getVariables();
 
             try {
-                ConditionSimplifier.ExpressionAndSubstitution simplificationResults = conditionSimplifier.simplifyCondition(ljCondition, leftVariables);
+                ConditionSimplifier.ExpressionAndSubstitution simplificationResults = conditionSimplifier.simplifyCondition(
+                        ljCondition, leftVariables,
+                        variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
                 ImmutableSubstitution<NonFunctionalTerm> downSubstitution = selectDownSubstitution(
                         simplificationResults.getSubstitution(), rightChild.getVariables());
