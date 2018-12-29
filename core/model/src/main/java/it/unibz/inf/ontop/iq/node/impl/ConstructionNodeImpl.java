@@ -579,8 +579,14 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
          */
         else if (liftedChild.getVariables().equals(projectedVariables))
             return liftedChild;
-        else
-            return iqFactory.createUnaryIQTree(this, liftedChild, currentIQProperties.declareNormalizedForOptimization());
+        else {
+            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.normalizeValues(true, liftedChild.getVariableNullability());
+            ConstructionNode newConstructionNode = newSubstitution.equals(substitution)
+                    ? this
+                    : iqFactory.createConstructionNode(projectedVariables, newSubstitution);
+
+            return iqFactory.createUnaryIQTree(newConstructionNode, liftedChild, currentIQProperties.declareNormalizedForOptimization());
+        }
     }
 
 
@@ -830,9 +836,10 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         AscendingSubstitutionNormalization ascendingNormalization = substitutionNormalizer.normalizeAscendingSubstitution(
                 childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
-
         IQTree newGrandChild = ascendingNormalization.updateChild(grandChild);
+
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution()
+                .normalizeValues(true, newGrandChild.getVariableNullability());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
