@@ -440,14 +440,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
-        VariableNullability dummyVariableNullability = new VariableNullabilityImpl(
-                Sets.union(leftChildVariables, rightChildVariables).stream()
-                        .map(ImmutableSet::of)
-                        .collect(ImmutableCollectors.toSet()));
-
         ExpressionEvaluator.EvaluationResult results =
                 createExpressionEvaluator().evaluateExpression(
-                        descendingSubstitution.applyToBooleanExpression(initialExpression), dummyVariableNullability);
+                        descendingSubstitution.applyToBooleanExpression(initialExpression));
 
         if (results.isEffectiveFalse())
             throw new UnsatisfiableConditionException();
