@@ -69,11 +69,13 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return EvaluationResult.declareIsFalse();
 
         /*
-         * In case of "inconditional" injectivity
+         * In case of injectivity
+         * TODO: consider nullability information for arity >1 for avoiding evaluating as FALSE instead of NULL
+         * (first produced equality evaluated as false, while the second evaluates as NULL)
          */
         if ((otherTerm instanceof ImmutableFunctionalTerm)
                 && ((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this)
-                && isAlwaysInjective()) {
+                && isInjective(terms, ImmutableSet.of())) {
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
