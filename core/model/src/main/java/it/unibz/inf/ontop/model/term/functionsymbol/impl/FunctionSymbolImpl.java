@@ -68,23 +68,39 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (differentTypeDetected)
             return EvaluationResult.declareIsFalse();
 
+        if ((otherTerm instanceof ImmutableFunctionalTerm))
+            return evaluateStrictEqWithFunctionalTerm(terms, (ImmutableFunctionalTerm) otherTerm, termFactory,
+                    variableNullability);
+        else if ((otherTerm instanceof Constant) && otherTerm.isNull())
+            return EvaluationResult.declareIsNull();
+        else if (otherTerm instanceof NonNullConstant) {
+            return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory);
+        }
+        return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * Default implementation, can be overridden
+     *
+     */
+    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                  ImmutableFunctionalTerm otherTerm,
+                                                                  TermFactory termFactory,
+                                                                  VariableNullability variableNullability) {
         /*
          * In case of injectivity
          * TODO: consider nullability information for arity >1 for avoiding evaluating as FALSE instead of NULL
          * (first produced equality evaluated as false, while the second evaluates as NULL)
          */
-        if ((otherTerm instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this)
+        if (otherTerm.getFunctionSymbol().equals(this)
                 && isInjective(terms, variableNullability)) {
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
-            ImmutableFunctionalTerm otherFunctionalTerm = (ImmutableFunctionalTerm) otherTerm;
-
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
                             .boxed()
-                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherFunctionalTerm.getTerm(i)))
+                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
 
             ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
@@ -105,6 +121,14 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .orElseThrow(() -> new MinorOntopInternalBugException(
                                     "An evaluation either is expected to return an expression or a value")));
         }
+        return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * Default implementation, does nothing, can be overridden
+     */
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
         return EvaluationResult.declareSameExpression();
     }
 
