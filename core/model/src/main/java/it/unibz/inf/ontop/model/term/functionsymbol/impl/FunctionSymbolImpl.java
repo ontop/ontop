@@ -97,6 +97,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
+            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getVariables()))
+                /*
+                 * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
+                 */
+                return EvaluationResult.declareSameExpression();
+
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
                             .boxed()
@@ -121,7 +127,29 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .orElseThrow(() -> new MinorOntopInternalBugException(
                                     "An evaluation either is expected to return an expression or a value")));
         }
-        return EvaluationResult.declareSameExpression();
+        else
+            return EvaluationResult.declareSameExpression();
+    }
+
+    /*
+     * ONLY for injective function symbols
+     *
+     * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
+     * (first produced equality evaluated as false, while the second evaluates as NULL)
+     */
+    private boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableSet<Variable> otherVariables) {
+        if (getArity() == 1)
+            return true;
+
+        ImmutableSet<Variable> variables = terms.stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .collect(ImmutableCollectors.toSet());
+
+        return !(variableNullability.canPossiblyBeNullSeparately(variables)
+                || variableNullability.canPossiblyBeNullSeparately(otherVariables));
     }
 
     /**
