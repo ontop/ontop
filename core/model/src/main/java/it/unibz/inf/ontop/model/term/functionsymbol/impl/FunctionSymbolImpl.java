@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
 
@@ -57,6 +58,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                              TermFactory termFactory, VariableNullability variableNullability) {
+        // TODO: simplify
         boolean differentTypeDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
@@ -97,7 +99,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
-            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getVariables()))
+            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms()))
                 /*
                  * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
                  */
@@ -131,19 +133,32 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return EvaluationResult.declareSameExpression();
     }
 
-    /*
+    /**
      * ONLY for injective function symbols
      *
      * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
      * (first produced equality evaluated as false, while the second evaluates as NULL)
+     *
      */
     private boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
                                                          VariableNullability variableNullability,
-                                                         ImmutableSet<Variable> otherVariables) {
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (getArity() == 1)
             return true;
 
+        if (Stream.concat(terms.stream(), otherTerms.stream())
+                .anyMatch(t -> t instanceof ImmutableFunctionalTerm))
+            /*
+             * TODO: support also the case of functional sub-terms
+             */
+            return false;
+
         ImmutableSet<Variable> variables = terms.stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable) t)
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> otherVariables = otherTerms.stream()
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable) t)
                 .collect(ImmutableCollectors.toSet());
