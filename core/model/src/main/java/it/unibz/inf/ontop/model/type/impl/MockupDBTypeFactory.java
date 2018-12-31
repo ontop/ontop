@@ -69,4 +69,19 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     public DBTermType getDBTermType(int typeCode, String typeName) {
         return new NonStringNonNumberNonBooleanDBTermType(typeName, rootAncestry, false);
     }
+
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "TRUE";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "FALSE";
+    }
+
+    @Override
+    public String getNullLexicalValue() {
+        return "NULL";
+    }
 }
