@@ -54,11 +54,14 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     /**
      * Default implementation, to be overridden to convert more cases
+     *
+     * Incoming terms are not simplified as they are presumed to be already simplified
+     *  (so please simplify them before)
+     *
      */
     @Override
     public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                              TermFactory termFactory, VariableNullability variableNullability) {
-        // TODO: simplify
         boolean differentTypeDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
@@ -144,25 +147,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (getArity() == 1)
             return true;
 
-        if (Stream.concat(terms.stream(), otherTerms.stream())
-                .anyMatch(t -> t instanceof ImmutableFunctionalTerm))
-            /*
-             * TODO: support also the case of functional sub-terms
-             */
-            return false;
-
-        ImmutableSet<Variable> variables = terms.stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<Variable> otherVariables = otherTerms.stream()
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t)
-                .collect(ImmutableCollectors.toSet());
-
-        return !(variableNullability.canPossiblyBeNullSeparately(variables)
-                || variableNullability.canPossiblyBeNullSeparately(otherVariables));
+        return !(variableNullability.canPossiblyBeNullSeparately(terms)
+                || variableNullability.canPossiblyBeNullSeparately(otherTerms));
     }
 
     /**
