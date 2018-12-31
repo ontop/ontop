@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
 
@@ -40,23 +41,27 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? t.simplify(isInConstructionNodeInOptimizationPhase)
+                        ? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory);
+        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
 
     /**
      * Default implementation, to be overridden to convert more cases
+     *
+     * Incoming terms are not simplified as they are presumed to be already simplified
+     *  (so please simplify them before)
+     *
      */
     @Override
     public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                             TermFactory termFactory) {
+                                             TermFactory termFactory, VariableNullability variableNullability) {
         boolean differentTypeDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
@@ -68,26 +73,46 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (differentTypeDetected)
             return EvaluationResult.declareIsFalse();
 
+        if ((otherTerm instanceof ImmutableFunctionalTerm))
+            return evaluateStrictEqWithFunctionalTerm(terms, (ImmutableFunctionalTerm) otherTerm, termFactory,
+                    variableNullability);
+        else if ((otherTerm instanceof Constant) && otherTerm.isNull())
+            return EvaluationResult.declareIsNull();
+        else if (otherTerm instanceof NonNullConstant) {
+            return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory);
+        }
+        return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * Default implementation, can be overridden
+     *
+     */
+    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                  ImmutableFunctionalTerm otherTerm,
+                                                                  TermFactory termFactory,
+                                                                  VariableNullability variableNullability) {
         /*
          * In case of injectivity
-         * TODO: consider nullability information for arity >1 for avoiding evaluating as FALSE instead of NULL
-         * (first produced equality evaluated as false, while the second evaluates as NULL)
          */
-        if ((otherTerm instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this)
-                && isInjective(terms, ImmutableSet.of())) {
+        if (otherTerm.getFunctionSymbol().equals(this)
+                && isInjective(terms, variableNullability)) {
             if (getArity() == 0)
                 return EvaluationResult.declareIsTrue();
 
-            ImmutableFunctionalTerm otherFunctionalTerm = (ImmutableFunctionalTerm) otherTerm;
+            if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms()))
+                /*
+                 * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
+                 */
+                return EvaluationResult.declareSameExpression();
 
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
                             .boxed()
-                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherFunctionalTerm.getTerm(i)))
+                            .map(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
 
-            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory);
+            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
             return newEvaluation.getExpression()
                     .map(EvaluationResult::declareSimplifiedExpression)
                     .orElseGet(() -> newEvaluation.getValue()
@@ -105,6 +130,32 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .orElseThrow(() -> new MinorOntopInternalBugException(
                                     "An evaluation either is expected to return an expression or a value")));
         }
+        else
+            return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * ONLY for injective function symbols
+     *
+     * Makes sure that the conjunction would never evaluate as FALSE instead of NULL
+     * (first produced equality evaluated as false, while the second evaluates as NULL)
+     *
+     */
+    private boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                         VariableNullability variableNullability,
+                                                         ImmutableList<? extends ImmutableTerm> otherTerms) {
+        if (getArity() == 1)
+            return true;
+
+        return !(variableNullability.canPossiblyBeNullSeparately(terms)
+                || variableNullability.canPossiblyBeNullSeparately(otherTerms));
+    }
+
+    /**
+     * Default implementation, does nothing, can be overridden
+     */
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
         return EvaluationResult.declareSameExpression();
     }
 
@@ -117,7 +168,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * To be overridden when is sometimes but not always injective.
      */
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables) {
+    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
         return isAlwaysInjective();
     }
 
@@ -129,7 +180,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 

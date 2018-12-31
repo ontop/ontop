@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -15,7 +13,7 @@ import java.util.Optional;
  */
 public interface FunctionSymbol extends Predicate {
 
-    boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonNullVariables);
+    boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability);
 
     FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
                                VariableNullability childNullability);
@@ -24,12 +22,12 @@ public interface FunctionSymbol extends Predicate {
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);
 
     ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
-                           TermFactory termFactory);
+                           TermFactory termFactory, VariableNullability variableNullability);
 
     TermType getExpectedBaseType(int index);
 
     EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                      TermFactory termFactory);
+                                      TermFactory termFactory, VariableNullability variableNullability);
 
     /**
      * 1. When a functional term simplifies itself in a BOTTOM-UP manner:

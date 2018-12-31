@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
@@ -38,11 +38,14 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     // LAZY
     @Nullable
     private VariableNullability variableNullability;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
-                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
+                                    CoreUtilsFactory coreUtilsFactory) {
         super(atom, iqTreeTools, iqFactory);
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -126,7 +129,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                     .map(ImmutableSet::of)
                     .collect(ImmutableCollectors.toSet());
 
-            variableNullability = new VariableNullabilityImpl(nullableGroups);
+            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups);
         }
 
         return variableNullability;

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -156,7 +155,7 @@ public enum ExpressionOperation implements FunctionSymbol {
 
 	@Override
 	public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
-							   ImmutableSet<Variable> nonNullVariables) {
+                               VariableNullability variableNullability) {
 		// TODO: implement seriously later on
 		return false;
 	}
@@ -170,7 +169,7 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it?
 	 */
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory) {
+	public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
 		return EvaluationResult.declareSameExpression();
 	}
 
@@ -197,10 +196,10 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it seriously after getting rid of this enum
 	 */
 	@Override
-	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
 		ImmutableList<ImmutableTerm> newTerms = terms.stream()
 				.map(t -> (t instanceof ImmutableFunctionalTerm)
-						? t.simplify(isInConstructionNodeInOptimizationPhase)
+						? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
 						: t)
 				.collect(ImmutableCollectors.toList());
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);

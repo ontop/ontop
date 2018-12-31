@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -50,7 +51,7 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         return EvaluationResult.declareIsNull();
     }
 

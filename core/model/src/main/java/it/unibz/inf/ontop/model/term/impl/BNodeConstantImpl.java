@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -86,7 +87,7 @@ public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNod
 	}
 
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof Constant) {
 			if (((Constant) otherTerm).isNull())
 				return EvaluationResult.declareIsNull();
@@ -95,7 +96,7 @@ public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNod
 					: EvaluationResult.declareIsFalse();
 		}
 		else
-			return otherTerm.evaluateStrictEq(this);
+			return otherTerm.evaluateStrictEq(this, variableNullability);
 	}
 
 	@Override

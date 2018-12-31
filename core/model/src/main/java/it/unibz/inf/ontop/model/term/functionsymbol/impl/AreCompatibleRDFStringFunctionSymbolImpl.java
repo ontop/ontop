@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 
@@ -32,7 +30,7 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<TermType> termTypes = newTerms.stream()
                 .filter(t -> t instanceof RDFTermTypeConstant)
                 .map(t -> (RDFTermTypeConstant) t)

@@ -3,14 +3,12 @@ package it.unibz.inf.ontop.evaluator.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -19,20 +17,13 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
-    private final DatalogTools datalogTools;
     private final Constant valueNull;
     private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
     private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
-                                         TypeFactory typeFactory, DatalogTools datalogTools,
                                          ExpressionEvaluator defaultExpressionEvaluator) {
         this.substitutionFactory = substitutionFactory;
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
-        this.datalogTools = datalogTools;
         this.valueNull = termFactory.getNullConstant();
         this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }

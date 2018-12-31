@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.stream.Stream;
@@ -81,7 +82,7 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	}
 
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof Variable) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
@@ -89,7 +90,7 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 		}
 		else if (otherTerm instanceof ImmutableFunctionalTerm) {
 			// Functional terms are in charge of evaluating other terms
-			return otherTerm.evaluateStrictEq(this);
+			return otherTerm.evaluateStrictEq(this, variableNullability);
 		}
 		// Constant
 		else  {

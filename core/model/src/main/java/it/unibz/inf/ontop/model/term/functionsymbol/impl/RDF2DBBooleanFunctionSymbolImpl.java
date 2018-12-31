@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -45,7 +45,7 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory) {
+                                                     boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof Constant) {
             Constant newConstant = (Constant) newTerm;
@@ -61,7 +61,7 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
             // TODO: shall we check the RDF datatype?
             ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) newTerm).getTerm(0);
             return termFactory.getDBCastFunctionalTerm(dbStringTermType, dbBooleanTermType, lexicalTerm)
-                    .simplify(isInConstructionNodeInOptimizationPhase);
+                    .simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
         }
         else
             return termFactory.getImmutableExpression(this, newTerms);

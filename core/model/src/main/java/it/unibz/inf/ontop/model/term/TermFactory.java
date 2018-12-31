@@ -23,9 +23,11 @@ package it.unibz.inf.ontop.model.term;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.impl.ImmutableFunctionalTermImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -422,4 +424,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
 
 	TypeFactory getTypeFactory();
+
+    VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);
 }

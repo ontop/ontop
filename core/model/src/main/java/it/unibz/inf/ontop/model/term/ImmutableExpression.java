@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.model.term;
 
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.FatalTypingException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,7 +31,7 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
      */
     ImmutableSet<ImmutableExpression> flatten(BooleanFunctionSymbol operator);
 
-    Evaluation evaluate(TermFactory termFactory);
+    Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability);
 
     boolean isVar2VarEquality();
 

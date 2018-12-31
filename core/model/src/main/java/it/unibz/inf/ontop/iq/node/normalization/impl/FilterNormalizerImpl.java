@@ -81,7 +81,6 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         private final ImmutableList<UnaryOperatorNode> ancestors;
         private final Optional<ImmutableExpression> condition;
         private final IQTree child;
-
         /**
          * Initial constructor
          */
@@ -93,7 +92,7 @@ public class FilterNormalizerImpl implements FilterNormalizer {
         }
 
         protected State(ImmutableSet<Variable> projectedVariables, ImmutableList<UnaryOperatorNode> ancestors,
-                      Optional<ImmutableExpression> condition, IQTree child) {
+                        Optional<ImmutableExpression> condition, IQTree child) {
             this.projectedVariables = projectedVariables;
             this.ancestors = ancestors;
             this.condition = condition;
@@ -241,12 +240,14 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             }
 
             try {
+                VariableNullability childVariableNullability = child.getVariableNullability();
+
                 // TODO: also consider the constraint for simplifying the condition
                 ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                        condition.get());
+                        condition.get(), childVariableNullability);
 
                 Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.empty(),
-                        conditionSimplificationResults);
+                        conditionSimplificationResults, childVariableNullability);
 
                 IQTree newChild = Optional.of(conditionSimplificationResults.getSubstitution())
                         .filter(s -> !s.isEmpty())

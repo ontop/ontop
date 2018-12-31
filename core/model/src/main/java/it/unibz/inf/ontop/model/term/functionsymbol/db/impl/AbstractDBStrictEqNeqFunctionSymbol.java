@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -38,7 +39,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
 
         if (newTerms.size() < 2)
             throw new IllegalArgumentException("newTerms must have at least two elements");
@@ -58,19 +59,19 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
                         : termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getStrictNEquality(nonNullTerms)));
 
                 // Indirectly recursive
-                return newExpression.simplify(isInConstructionNodeInOptimizationPhase);
+                return newExpression.simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
             }
         }
         else if (nonNullTerms.size() == 1) {
             return termFactory.getDBBooleanConstant(isEq);
         }
         else {
-            return simplifyNonNullTerms(ImmutableList.copyOf(nonNullTerms), termFactory);
+            return simplifyNonNullTerms(ImmutableList.copyOf(nonNullTerms), termFactory, variableNullability);
         }
     }
 
     private ImmutableTerm simplifyNonNullTerms(ImmutableList<ImmutableTerm> nonNullTerms,
-                                               TermFactory termFactory) {
+                                               TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableSet.Builder<ImmutableTerm> remainingTermBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableExpression> otherExpressionBuilder = ImmutableSet.builder();
@@ -85,7 +86,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
 
             for (int j=i+1; (j < size) && keepTerm; j++) {
                 ImmutableTerm otherTerm = nonNullTerms.get(j);
-                EvaluationResult evaluation = term.evaluateStrictEq(otherTerm);
+                EvaluationResult evaluation = term.evaluateStrictEq(otherTerm, variableNullability);
 
                 switch(evaluation.getStatus()) {
                     case SAME_EXPRESSION:

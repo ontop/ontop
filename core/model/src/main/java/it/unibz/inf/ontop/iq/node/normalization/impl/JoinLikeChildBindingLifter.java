@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
@@ -41,13 +42,14 @@ public class JoinLikeChildBindingLifter {
      * For children of a commutative join or for the left child of a LJ
      */
     public <R> R liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
-                                            int selectedChildPosition,
-                                            IQTree selectedGrandChild,
-                                            ImmutableList<IQTree> children,
-                                            ImmutableSet<Variable> nonLiftableVariables,
-                                            Optional<ImmutableExpression> initialJoiningCondition,
-                                            VariableGenerator variableGenerator,
-                                            BindingLiftConverter<R> bindingLiftConverter) throws UnsatisfiableConditionException {
+                                         int selectedChildPosition,
+                                         IQTree selectedGrandChild,
+                                         ImmutableList<IQTree> children,
+                                         ImmutableSet<Variable> nonLiftableVariables,
+                                         Optional<ImmutableExpression> initialJoiningCondition,
+                                         VariableGenerator variableGenerator,
+                                         VariableNullability variableNullability,
+                                         BindingLiftConverter<R> bindingLiftConverter) throws UnsatisfiableConditionException {
 
         ImmutableSubstitution<ImmutableTerm> selectedChildSubstitution = selectedChildConstructionNode.getSubstitution();
 
@@ -69,7 +71,7 @@ public class JoinLikeChildBindingLifter {
 
         ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
                 computeNonOptimizedCondition(initialJoiningCondition, selectedChildSubstitution, freshRenaming),
-                nonLiftableVariables);
+                nonLiftableVariables, variableNullability);
         Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied

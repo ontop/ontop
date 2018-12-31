@@ -85,15 +85,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                 .isPresent();
     }
 
-    protected VariableNullability updateWithFilter(ImmutableExpression filter,
-                                                   ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
-        ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
-                .filter(g -> !nullabilityEvaluator.isFilteringNullValues(filter, g))
-                .collect(ImmutableCollectors.toSet());
-
-        return new VariableNullabilityImpl(newNullableGroups);
-    }
-
     protected TermNullabilityEvaluator getNullabilityEvaluator() {
         return nullabilityEvaluator;
     }

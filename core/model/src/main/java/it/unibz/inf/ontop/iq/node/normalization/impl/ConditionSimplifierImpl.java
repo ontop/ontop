@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
@@ -44,19 +45,20 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
 
     @Override
-    public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression)
+    public ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression, VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
-        return simplifyCondition(Optional.of(expression), ImmutableSet.of());
+        return simplifyCondition(Optional.of(expression), ImmutableSet.of(), variableNullability);
     }
 
     @Override
     public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
-                                                                                  ImmutableSet<Variable> nonLiftableVariables)
+                                                       ImmutableSet<Variable> nonLiftableVariables,
+                                                       VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
         Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
                 nonOptimizedExpression
-                        .map(this::evaluateExpression);
+                        .map(expression -> evaluateExpression(expression, variableNullability));
 
         if (optionalEvaluationResults.isPresent()) {
             ExpressionEvaluator.EvaluationResult results = optionalEvaluationResults.get();
@@ -75,8 +77,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
             return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
     }
 
-    private ExpressionEvaluator.EvaluationResult evaluateExpression(ImmutableExpression expression) {
-        return (defaultExpressionEvaluator.clone()).evaluateExpression(expression);
+    private ExpressionEvaluator.EvaluationResult evaluateExpression(ImmutableExpression expression, VariableNullability variableNullability) {
+        return (defaultExpressionEvaluator.clone()).evaluateExpression(expression, variableNullability);
     }
 
     /**
@@ -148,7 +150,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
     @Override
     public Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                               ExpressionAndSubstitution conditionSimplificationResults)
+                                                               ExpressionAndSubstitution conditionSimplificationResults,
+                                                               VariableNullability childVariableNullability)
             throws UnsatisfiableConditionException {
         if (optionalConstraint.isPresent()) {
             ImmutableExpression substitutedConstraint = conditionSimplificationResults.getSubstitution()
@@ -161,7 +164,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                     substitutedConstraint.flattenAND())))
                     .orElse(substitutedConstraint);
 
-            ExpressionEvaluator.EvaluationResult evaluationResults = evaluateExpression(combinedExpression);
+            ExpressionEvaluator.EvaluationResult evaluationResults = evaluateExpression(combinedExpression, childVariableNullability);
 
             if (evaluationResults.isEffectiveFalse())
                 throw new UnsatisfiableConditionException();

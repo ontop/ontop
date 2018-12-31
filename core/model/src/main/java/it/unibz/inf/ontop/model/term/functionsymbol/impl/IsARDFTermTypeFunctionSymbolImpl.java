@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -42,7 +42,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      boolean isInConstructionNodeInOptimizationPhase,
-                                                     TermFactory termFactory) {
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm subTerm = newTerms.get(0);
 
         if (subTerm instanceof RDFTermTypeConstant) {
@@ -56,14 +56,14 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
             ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap = ((RDFTermTypeFunctionSymbol)
                     functionalTerm.getFunctionSymbol()).getConversionMap();
 
-            return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory);
+            return simplifyIntoConjunction(conversionMap, functionalTerm.getTerm(0), termFactory, variableNullability);
 
         }
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     private ImmutableTerm simplifyIntoConjunction(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap,
-                                                        ImmutableTerm term, TermFactory termFactory) {
+                                                  ImmutableTerm term, TermFactory termFactory, VariableNullability variableNullability) {
         Stream<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
                 .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
                 .map(Map.Entry::getKey)
@@ -73,7 +73,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                     Stream.of(termFactory.getImmutableExpression(IS_NOT_NULL, term)),
                     excludedMagicNumbers))
                 .get()
-                .simplify(false);
+                .simplify(false, variableNullability);
     }
 
     @Override

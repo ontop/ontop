@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -67,7 +68,7 @@ public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implement
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm) {
+    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         if (otherTerm instanceof Constant) {
             if (((Constant) otherTerm).isNull())
                 return EvaluationResult.declareIsNull();
@@ -76,6 +77,6 @@ public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implement
                     : EvaluationResult.declareIsFalse();
         }
         else
-            return otherTerm.evaluateStrictEq(this);
+            return otherTerm.evaluateStrictEq(this, variableNullability);
     }
 }

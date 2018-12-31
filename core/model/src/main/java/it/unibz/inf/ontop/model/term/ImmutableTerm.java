@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term;
 
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
@@ -27,7 +28,12 @@ public interface ImmutableTerm {
      */
     Optional<TermTypeInference> inferType();
 
-    EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm);
+    EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability);
 
+    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
+
+    /**
+     * When no variableNullability is available
+     */
     ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase);
 }
