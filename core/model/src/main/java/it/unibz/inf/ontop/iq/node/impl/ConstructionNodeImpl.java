@@ -6,7 +6,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -23,7 +22,6 @@ import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol.FunctionalTermNullability;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -37,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
@@ -239,130 +236,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
-        VariableNullability childNullability = child.getVariableNullability();
-
-        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
-                Sets.union(projectedVariables, child.getVariables()).immutableCopy());
-
-        /*
-         * The substitutions are split by nesting level
-         */
-        VariableNullability nullabilityBeforeProjectingOut = splitSubstitution(substitution, variableGenerator)
-                .reduce(childNullability,
-                        (n, s) -> updateVariableNullability(s, n),
-                        (n1, n2) -> {
-                            throw new MinorOntopInternalBugException("vns are not expected to be combined");
-                        });
-
-        /*
-         * Projects away irrelevant variables
-         */
-        ImmutableSet<ImmutableSet<Variable>> nullableGroups = nullabilityBeforeProjectingOut.getNullableGroups().stream()
-                .map(g -> g.stream()
-                        .filter(projectedVariables::contains)
-                        .collect(ImmutableCollectors.toSet()))
-                .filter(g -> !g.isEmpty())
-                .collect(ImmutableCollectors.toSet());
-
-        return new VariableNullabilityImpl(nullableGroups);
-    }
-
-    /*
-     * TODO: explain
-     */
-    private Stream<ImmutableSubstitution<ImmutableTerm>> splitSubstitution(
-            ImmutableSubstitution<ImmutableTerm> substitution, VariableGenerator variableGenerator) {
-
-        ImmutableMultimap<Variable, Integer> functionSubTermMultimap = substitution.getImmutableMap().entrySet().stream()
-                .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                .flatMap(e -> {
-                    ImmutableList<? extends ImmutableTerm> subTerms = ((ImmutableFunctionalTerm) e.getValue()).getTerms();
-                    return IntStream.range(0, subTerms.size())
-                            .filter(i -> subTerms.get(i) instanceof ImmutableFunctionalTerm)
-                            .boxed()
-                            .map(i -> Maps.immutableEntry(e.getKey(), i));
-                })
-                .collect(ImmutableCollectors.toMultimap());
-
-        if (functionSubTermMultimap.isEmpty())
-            return Stream.of(substitution);
-
-        ImmutableTable<Variable, Integer, Variable> subTermNames = functionSubTermMultimap.entries().stream()
-                .map(e -> Tables.immutableCell(e.getKey(), e.getValue(), variableGenerator.generateNewVariable()))
-                .collect(ImmutableCollectors.toTable());
-
-        ImmutableMap<Variable, ImmutableTerm> parentSubstitutionMap = substitution.getImmutableMap().entrySet().stream()
-                .map(e ->
-                        Optional.of(functionSubTermMultimap.get(e.getKey()))
-                                .filter(indexes -> !indexes.isEmpty())
-                                .map(indexes -> {
-                                    Variable v = e.getKey();
-                                    ImmutableFunctionalTerm def = (ImmutableFunctionalTerm) substitution.get(v);
-                                    ImmutableList<ImmutableTerm> newArgs = IntStream.range(0, def.getArity())
-                                            .boxed()
-                                            .map(i -> Optional.ofNullable((ImmutableTerm) subTermNames.get(v, i))
-                                                    .orElseGet(() -> def.getTerm(i)))
-                                            .collect(ImmutableCollectors.toList());
-
-                                    ImmutableTerm newDef = termFactory.getImmutableFunctionalTerm(
-                                            def.getFunctionSymbol(), newArgs);
-                                    return Maps.immutableEntry(v, newDef);
-                                })
-                                .orElse(e))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableSubstitution<ImmutableTerm> parentSubstitution = substitutionFactory.getSubstitution(parentSubstitutionMap);
-
-
-        ImmutableSubstitution<ImmutableTerm> childSubstitution = substitutionFactory.getSubstitution(
-                subTermNames.cellSet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                        Table.Cell::getValue,
-                        c -> ((ImmutableFunctionalTerm) substitution.get(c.getRowKey())).getTerm(c.getColumnKey()))));
-
-        return Stream.concat(
-                // Recursive
-                splitSubstitution(childSubstitution, variableGenerator),
-                Stream.of(parentSubstitution));
-    }
-
-
-    private VariableNullability updateVariableNullability(
-            ImmutableSubstitution<ImmutableTerm> nonNestedSubstitution, VariableNullability childNullability) {
-
-        // TODO: find a better name
-        ImmutableMap<Variable, Variable> nullabilityBindings = nonNestedSubstitution.getImmutableMap().entrySet().stream()
-                .flatMap(e -> evaluateTermNullability(e.getValue(), childNullability, e.getKey())
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap());
-
-        return childNullability.appendNewVariables(nullabilityBindings);
-    }
-
-    private Optional<Map.Entry<Variable, Variable>> evaluateTermNullability(
-            ImmutableTerm term, VariableNullability childNullability, Variable key) {
-        if (term instanceof Constant) {
-            return term.equals(nullValue)
-                    ? Optional.of(Maps.immutableEntry(key, key))
-                    : Optional.empty();
-        }
-        else if (term instanceof Variable)
-            return Optional.of((Variable) term)
-                    .filter(childNullability::isPossiblyNullable)
-                    .map(v -> Maps.immutableEntry(key, v));
-        else {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-            FunctionalTermNullability results = functionalTerm.getFunctionSymbol().evaluateNullability(
-                    (ImmutableList<NonFunctionalTerm>) functionalTerm.getTerms(),
-                    childNullability);
-
-            return results.isNullable()
-                    ? Optional.of(results.getBoundVariable()
-                        .map(v -> Maps.immutableEntry(key, v))
-                        .orElseGet(() -> Maps.immutableEntry(key, key)))
-                    : Optional.empty();
-        }
+        return child.getVariableNullability().update(substitution, projectedVariables);
     }
 
     @Override
@@ -609,9 +483,8 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                                           PropagationResults<VariableOrGroundTerm> tauFPropagationResults,
                                                           Optional<ImmutableExpression> constraint) throws EmptyTreeException {
 
-        VariableNullability dummyVariableNullability = new VariableNullabilityImpl(child.getVariables().stream()
-                .map(ImmutableSet::of)
-                .collect(ImmutableCollectors.toSet()));
+        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
+                child.getVariables().stream());
 
         Optional<ImmutableExpression> descendingConstraint = computeChildConstraint(tauFPropagationResults.theta,
                 constraint, dummyVariableNullability);

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 
 public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
@@ -23,14 +24,16 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
     private final ConstructionNodeTools constructionNodeTools;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           IQTreeTools iqTreeTools, ConstructionNodeTools constructionNodeTools,
-                          IntermediateQueryFactory iqFactory) {
+                          IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
         super(iqTreeTools, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionNodeTools = constructionNodeTools;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -119,7 +122,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public VariableNullability getVariableNullability() {
-        return VariableNullabilityImpl.empty();
+        return coreUtilsFactory.createEmptyVariableNullability();
     }
 
     @Override

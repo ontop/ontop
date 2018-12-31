@@ -15,16 +15,19 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 
 public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     private static final String PREFIX = "TRUE";
     private static final ImmutableSet<Variable> EMPTY_VARIABLE_SET = ImmutableSet.of();
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
-    private TrueNodeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory) {
+    private TrueNodeImpl(IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory) {
         super(iqTreeTools, iqFactory);
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -129,7 +132,7 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     @Override
     public VariableNullability getVariableNullability() {
-        return VariableNullabilityImpl.empty();
+        return coreUtilsFactory.createEmptyVariableNullability();
     }
 
     @Override

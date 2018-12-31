@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
@@ -35,6 +36,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -50,6 +52,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final TypeFactory typeFactory;
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+	private final CoreUtilsFactory coreUtilsFactory;
 	private final DBConstant valueTrue;
 	private final DBConstant valueFalse;
 	private final Constant valueNull;
@@ -64,12 +67,13 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Inject
 	private TermFactoryImpl(TypeFactory typeFactory, FunctionSymbolFactory functionSymbolFactory,
-							DBFunctionSymbolFactory dbFunctionSymbolFactory, OntopModelSettings settings,
+							DBFunctionSymbolFactory dbFunctionSymbolFactory, CoreUtilsFactory coreUtilsFactory, OntopModelSettings settings,
 							RDF rdfFactory) {
 		// protected constructor prevents instantiation from other classes.
 		this.typeFactory = typeFactory;
 		this.functionSymbolFactory = functionSymbolFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.coreUtilsFactory = coreUtilsFactory;
 		this.rdfFactory = rdfFactory;
 
 		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
@@ -394,7 +398,12 @@ public class TermFactoryImpl implements TermFactory {
 		return typeFactory;
 	}
 
-	@Override
+    @Override
+    public VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm) {
+		return coreUtilsFactory.createDummyVariableNullability(functionalTerm);
+    }
+
+    @Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(BooleanExpressionOperation.EQ, firstTerm, secondTerm);
 	}

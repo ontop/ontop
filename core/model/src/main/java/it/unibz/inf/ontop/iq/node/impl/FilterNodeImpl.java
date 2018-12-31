@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -37,6 +38,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     private static final String FILTER_NODE_STR = "FILTER";
     private final ConstructionNodeTools constructionNodeTools;
     private final ConditionSimplifier conditionSimplifier;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final FilterNormalizer normalizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
@@ -47,11 +49,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            ExpressionEvaluator defaultExpressionEvaluator, IntermediateQueryFactory iqFactory,
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
-                           FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
+                           CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 substitutionFactory, unificationTools, substitutionTools, defaultExpressionEvaluator);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.normalizer = normalizer;
         this.variableNullabilityTools = variableNullabilityTools;
     }
@@ -252,9 +255,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
         ImmutableSet<Variable> newlyProjectedVariables = constructionNodeTools
                 .computeNewProjectedVariables(descendingSubstitution, child.getVariables());
 
-        VariableNullability dummyVariableNullability = new VariableNullabilityImpl(newlyProjectedVariables.stream()
-                .map(ImmutableSet::of)
-                .collect(ImmutableCollectors.toSet()));
+        VariableNullability dummyVariableNullability = coreUtilsFactory.createDummyVariableNullability(
+                newlyProjectedVariables.stream());
 
         try {
             ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(unoptimizedExpression, dummyVariableNullability);

@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -36,12 +37,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
 
     @AssistedInject
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                          CoreUtilsFactory coreUtilsFactory,
                           AscendingSubstitutionNormalizer substitutionNormalizer) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
@@ -49,6 +52,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionNormalizer = substitutionNormalizer;
     }
 
@@ -60,7 +64,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     @Override
     public UnionNode clone() {
         return new UnionNodeImpl(projectedVariables, constructionTools, iqFactory,
-                substitutionFactory, termFactory, substitutionNormalizer);
+                substitutionFactory, termFactory, coreUtilsFactory, substitutionNormalizer);
     }
 
     @Override
@@ -115,7 +119,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
                 .collect(ImmutableCollectors.toSet());
 
-        return new VariableNullabilityImpl(nullableGroups);
+        return coreUtilsFactory.createVariableNullability(nullableGroups);
     }
 
     private ImmutableSet<Variable> computeNullableGroup(Variable mainVariable,

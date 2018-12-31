@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
@@ -19,10 +20,13 @@ import java.util.Optional;
 public class JoinOrFilterVariableNullabilityTools {
 
     private final TermNullabilityEvaluator nullabilityEvaluator;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private JoinOrFilterVariableNullabilityTools(TermNullabilityEvaluator nullabilityEvaluator) {
+    private JoinOrFilterVariableNullabilityTools(TermNullabilityEvaluator nullabilityEvaluator,
+                                                 CoreUtilsFactory coreUtilsFactory) {
         this.nullabilityEvaluator = nullabilityEvaluator;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     public VariableNullability getChildrenVariableNullability(ImmutableList<IQTree> children) {
@@ -51,7 +55,7 @@ public class JoinOrFilterVariableNullabilityTools {
 
         return joiningCondition
                 .map(e -> updateWithFilter(e, nullableGroups))
-                .orElseGet(() -> new VariableNullabilityImpl(nullableGroups));
+                .orElseGet(() -> coreUtilsFactory.createVariableNullability(nullableGroups));
     }
 
     public VariableNullability updateWithFilter(ImmutableExpression filter,
@@ -60,12 +64,10 @@ public class JoinOrFilterVariableNullabilityTools {
                 .filter(g -> !nullabilityEvaluator.isFilteringNullValues(filter, g))
                 .collect(ImmutableCollectors.toSet());
 
-        return new VariableNullabilityImpl(newNullableGroups);
+        return coreUtilsFactory.createVariableNullability(newNullableGroups);
     }
 
     public VariableNullability getDummyVariableNullability(ImmutableSet<Variable> variables) {
-        return new VariableNullabilityImpl(variables.stream()
-                .map(ImmutableSet::of)
-                .collect(ImmutableCollectors.toSet()));
+        return coreUtilsFactory.createDummyVariableNullability(variables.stream());
     }
 }

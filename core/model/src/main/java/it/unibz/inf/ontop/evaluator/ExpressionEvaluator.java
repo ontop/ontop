@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.evaluator;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -36,7 +35,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBAndFunction
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.DummyVariableNullability;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
 
@@ -60,13 +59,14 @@ public class ExpressionEvaluator {
 	private final Constant valueNull;
 	private final ImmutableUnificationTools unificationTools;
 	private final ExpressionNormalizer normalizer;
+	private final CoreUtilsFactory coreUtilsFactory;
 	private final RDFTermTypeConstant iriConstant, bnodeConstant;
 	private final RDF rdfFactory;
 
 	@Inject
 	private ExpressionEvaluator(DatalogTools datalogTools, TermFactory termFactory, TypeFactory typeFactory,
 								ImmutableUnificationTools unificationTools, ExpressionNormalizer normalizer,
-								RDF rdfFactory) {
+								CoreUtilsFactory coreUtilsFactory, RDF rdfFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.datalogTools = datalogTools;
@@ -75,6 +75,7 @@ public class ExpressionEvaluator {
 		valueNull = termFactory.getNullConstant();
 		this.unificationTools = unificationTools;
 		this.normalizer = normalizer;
+		this.coreUtilsFactory = coreUtilsFactory;
 		this.iriConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 		this.rdfFactory = rdfFactory;
@@ -148,7 +149,7 @@ public class ExpressionEvaluator {
 	}
 
 	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
-		return evaluateExpression(expression, new DummyVariableNullability(expression));
+		return evaluateExpression(expression, coreUtilsFactory.createDummyVariableNullability(expression));
 	}
 
 	public EvaluationResult evaluateExpression(ImmutableExpression expression, VariableNullability variableNullability) {
@@ -900,6 +901,7 @@ public class ExpressionEvaluator {
 
 	@Override
 	public ExpressionEvaluator clone() {
-		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer, rdfFactory);
+		return new ExpressionEvaluator(datalogTools, termFactory, typeFactory, unificationTools, normalizer,
+				coreUtilsFactory, rdfFactory);
 	}
 }

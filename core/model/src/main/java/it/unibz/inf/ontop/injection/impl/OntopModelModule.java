@@ -69,7 +69,8 @@ public class OntopModelModule extends OntopAbstractModule {
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(
-                        VariableGenerator.class
+                        VariableGenerator.class,
+                        VariableNullability.class
                 ),
                 CoreUtilsFactory.class);
         install(utilsModule);

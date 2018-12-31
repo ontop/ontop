@@ -91,8 +91,6 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                                   VariableNullability variableNullability) {
         /*
          * In case of injectivity
-         * TODO: consider nullability information for arity >1 for avoiding evaluating as FALSE instead of NULL
-         * (first produced equality evaluated as false, while the second evaluates as NULL)
          */
         if (otherTerm.getFunctionSymbol().equals(this)
                 && isInjective(terms, variableNullability)) {
