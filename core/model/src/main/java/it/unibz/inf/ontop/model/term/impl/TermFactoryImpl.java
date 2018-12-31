@@ -78,8 +78,8 @@ public class TermFactoryImpl implements TermFactory {
 
 		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
 		// TODO: let a DB-specific class have the control over DB constant creation
-		this.valueTrue = new DBConstantImpl("true", dbBooleanType);
-		this.valueFalse = new DBConstantImpl("false", dbBooleanType);
+		this.valueTrue = new DBConstantImpl("TRUE", dbBooleanType);
+		this.valueFalse = new DBConstantImpl("FALSE", dbBooleanType);
 		this.valueNull = new NullConstantImpl();
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
