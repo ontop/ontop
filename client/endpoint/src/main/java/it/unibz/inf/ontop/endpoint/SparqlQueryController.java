@@ -23,10 +23,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.io.ByteArrayOutputStream;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 @RestController
@@ -55,7 +57,6 @@ public class SparqlQueryController {
 
     @RequestMapping(value = "/sparql",
             method = {RequestMethod.GET}
-            //, produces = {"text/turtle", "application/xml", "application/json"}
     )
     @ResponseBody
     public HttpEntity query_get(
@@ -181,4 +182,24 @@ public class SparqlQueryController {
         }
         return new ResponseEntity<>(result, headers, status);
     }
+
+
+    @ExceptionHandler({MalformedQueryException.class})
+    public ResponseEntity handleMalformedQueryException(Exception ex) {
+        String message = ex.getMessage();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(message, headers, status);
+    }
+
+    @ExceptionHandler({RepositoryException.class})
+    public ResponseEntity handleRepositoryException(Exception ex) {
+        String message = ex.getMessage();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        return new ResponseEntity<>(message, headers, status);
+    }
+
 }
