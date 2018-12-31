@@ -159,7 +159,7 @@ public class TreeWitness {
 	 */
 	
 	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
-		Set<Term> commonTerms = new HashSet<Term>(tw1.getDomain());
+		Set<Term> commonTerms = new HashSet<>(tw1.getDomain());
 		commonTerms.retainAll(tw2.getDomain());
 		if (!commonTerms.isEmpty()) {
 			if (!tw1.getRoots().containsAll(commonTerms) || !tw2.getRoots().containsAll(commonTerms))

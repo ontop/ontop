@@ -30,8 +30,11 @@ package it.unibz.inf.ontop.substitution.impl;
  * variables ie. A(#1,#2)
  */
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.CQIE;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
@@ -43,38 +46,14 @@ import it.unibz.inf.ontop.substitution.Substitution;
  *
  * @author mariano
  */
+@Singleton
 public class UnifierUtilities {
 
-    /**
-     * Unifies two atoms in a conjunctive query returning a new conjunctive
-     * query. To to this we calculate the MGU for atoms, duplicate the query q
-     * into q', remove i and j from q', apply the mgu to q', and
-     *
-     * @param q
-     * @param i
-     * @param j (j > i)
-     * @return null if the two atoms are not unifiable, else a new conjunctive
-     * query produced by the unification of j and i
-     * @throws Exception
-     */
-    public static CQIE unify(CQIE q, int i, int j) {
+    private final TermFactory termFactory;
 
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        
-        Substitution mgu = getMGU(atom1, atom2);
-        if (mgu == null)
-            return null;
-
-        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
-        unifiedQ.getBody().remove(i);
-        unifiedQ.getBody().remove(j - 1);
-
-        Function newatom = (Function) atom1.clone();
-        SubstitutionUtilities.applySubstitution(newatom, mgu);
-        unifiedQ.getBody().add(i, newatom);
-
-        return unifiedQ;
+    @Inject
+    public UnifierUtilities(TermFactory termFactory) {
+        this.termFactory = termFactory;
     }
 
 
@@ -90,8 +69,8 @@ public class UnifierUtilities {
      * @param second
      * @return the substitution corresponding to this unification.
      */
-    public static Substitution getMGU(Function first, Function second) {
-        SubstitutionImpl mgu = new SubstitutionImpl();
+    public Substitution getMGU(Function first, Function second) {
+        SubstitutionImpl mgu = new SubstitutionImpl(termFactory);
         if (mgu.composeFunctions(first, second))
             return mgu;
         return null;

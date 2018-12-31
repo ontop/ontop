@@ -26,7 +26,7 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
         this.connection = connection;
 
         OntopSQLOWLAPIConfiguration.Builder builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .ppMapping(repo.getMappings())
+                .ppMapping(repo.createMappings())
                 .properties(properties)
                 .jdbcUrl(repo.getJdbcUrl())
                 .jdbcUser(repo.getUser())

@@ -27,12 +27,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
@@ -57,15 +58,17 @@ public class SQLPPMappingToR2RMLConverter {
     private List<SQLPPTriplesMap> ppMappingAxioms;
     private PrefixManager prefixmng;
     private OWLOntology ontology;
+    private final RDF rdfFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology) {
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, OWLOntology ontology, RDF rdfFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
         this.ontology = ontology;
+        this.rdfFactory = rdfFactory;
     }
 
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer();
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory);
         transformer.setOntology(ontology);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
                 .map(a -> transformer.getTriplesMap(a, prefixmng))
@@ -97,8 +100,8 @@ public class SQLPPMappingToR2RMLConverter {
     }
 
     private ImmutableList<SQLPPTriplesMap> splitMappingAxiom(SQLPPTriplesMap mappingAxiom, String delimiterSubstring) {
-        Multimap<ImmutableFunctionalTerm, ImmutableFunctionalTerm> subjectTermToTargetTriples = ArrayListMultimap.create();
-        for (ImmutableFunctionalTerm targetTriple : mappingAxiom.getTargetAtoms()) {
+        Multimap<ImmutableFunctionalTerm, TargetAtom> subjectTermToTargetTriples = ArrayListMultimap.create();
+        for (TargetAtom targetTriple : mappingAxiom.getTargetAtoms()) {
             ImmutableFunctionalTerm subjectTerm = getFirstFunctionalTerm(targetTriple)
                     .orElseThrow(() -> new IllegalStateException("Invalid OBDA mapping"));
             subjectTermToTargetTriples.put(subjectTerm, targetTriple);
@@ -106,9 +109,9 @@ public class SQLPPMappingToR2RMLConverter {
         // If the partition per target triple subject is non trivial
         if (subjectTermToTargetTriples.size() > 1) {
             // Create ids for the new mapping axioms
-            Map<Function, String> subjectTermToMappingIndex = new HashMap<>();
+            Map<ImmutableFunctionalTerm, String> subjectTermToMappingIndex = new HashMap<>();
             int i = 1;
-            for (Function subjectTerm : subjectTermToTargetTriples.keySet()) {
+            for (ImmutableFunctionalTerm subjectTerm : subjectTermToTargetTriples.keySet()) {
                 subjectTermToMappingIndex.put(subjectTerm, mappingAxiom.getId() + delimiterSubstring + i);
                 i++;
             }
@@ -122,8 +125,8 @@ public class SQLPPMappingToR2RMLConverter {
         return ImmutableList.of(mappingAxiom);
     }
 
-    private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm(ImmutableFunctionalTerm inputFunction) {
-        return inputFunction.getArguments().stream()
+    private Optional<ImmutableFunctionalTerm> getFirstFunctionalTerm(TargetAtom targetAtom) {
+        return targetAtom.getSubstitution().getImmutableMap().values().stream()
                 .findFirst()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t);

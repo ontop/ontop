@@ -20,11 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-
-import java.util.List;
 
 /**
  * This filter receives a string in the constructor and returns true if accepts
@@ -48,23 +46,21 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMa
 			}
 
 			// Check in the Mapping Target Query
-			final List<? extends Function> atoms = object.getTargetAtoms();
-			for (int i = 0; i < atoms.size(); i++) {
-				Function predicate = atoms.get(i);
-				isMatch = isMatch || MappingHeadVariableTreeModelFilter.match(keyword.trim(), predicate);
+			for (TargetAtom targetAtom : object.getTargetAtoms()) {
+				isMatch = isMatch || TreeModelTools.match(keyword.trim(), targetAtom);
 			}
 			if (isMatch) {
 				break; // end loop if a match is found!
 			}
 
 			// Check in the Mapping Source Query
-			final OBDASQLQuery query = (OBDASQLQuery) object.getSourceQuery();
+			final OBDASQLQuery query = object.getSourceQuery();
 			isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
 			if (isMatch) {
 				break; // end loop if a match is found!
 			}
 		}
 		// no match found!
-		return (bNegation ? !isMatch : isMatch);
+		return bNegation != isMatch;
 	}
 }

@@ -4,25 +4,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.model.IriConstants;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.*;
 
 /**
  * Uses the old Datalog-based mapping saturation code
@@ -33,71 +34,79 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
+    private final TermFactory termFactory;
+    private final TMappingProcessor tMappingProcessor;
+    private final DatalogFactory datalogFactory;
+    private final UnifierUtilities unifierUtilities;
+    private final SubstitutionUtilities substitutionUtilities;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    Mapping2DatalogConverter mapping2DatalogConverter,
-                                   Datalog2QueryMappingConverter datalog2MappingConverter) {
+                                   Datalog2QueryMappingConverter datalog2MappingConverter, TermFactory termFactory,
+                                   TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
+                                   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.datalog2MappingConverter = datalog2MappingConverter;
+        this.termFactory = termFactory;
+        this.tMappingProcessor = tMappingProcessor;
+        this.datalogFactory = datalogFactory;
+        this.unifierUtilities = unifierUtilities;
+        this.substitutionUtilities = substitutionUtilities;
     }
 
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
+        ImmutableList<LinearInclusionDependency> foreignKeyRules =
+                dbMetadata.getDatabaseRelations().stream()
+                    .map(r -> r.getForeignKeys())
+                    .flatMap(List::stream)
+                    .map(fk -> getLinearInclusionDependency(fk))
+                    .collect(ImmutableCollectors.toList());
+
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
+                unifierUtilities, substitutionUtilities, termFactory);
+
         ImmutableList<CQIE> initialMappingRules = mapping2DatalogConverter.convert(mapping)
                 .collect(ImmutableCollectors.toList());
 
-        LinearInclusionDependencies foreignKeyRules = new LinearInclusionDependencies(dbMetadata.generateFKRules());
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
-        ImmutableSet<CQIE> saturatedMappingRules = TMappingProcessor.getTMappings(initialMappingRules, saturatedTBox,
-                foreignKeyCQC, tMappingExclusionConfig).stream()
-                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<CQIE> saturatedMappingRules = ImmutableSet.copyOf(
+                tMappingProcessor.getTMappings(initialMappingRules, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig));
 
-        List<CQIE> allMappingRules = new ArrayList<>(saturatedMappingRules);
-        allMappingRules.addAll(generateTripleMappings(saturatedMappingRules));
-
-        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(allMappingRules),
-                dbMetadata, mapping.getExecutorRegistry(), mapping.getMetadata());
+        return datalog2MappingConverter.convertMappingRules(ImmutableList.copyOf(saturatedMappingRules), mapping.getMetadata());
     }
 
-    /***
-     * Creates mappings with heads as "triple(x,y,z)" from mappings with binary
-     * and unary atoms"
-     *
-     * TODO: clean it
-     */
-    private static ImmutableList<CQIE> generateTripleMappings(ImmutableSet<CQIE> saturatedRules) {
-        return saturatedRules.stream()
-                .filter(r -> !r.getHead().getFunctionSymbol().getName().startsWith(DATALOG_FACTORY.getSubqueryPredicatePrefix()))
-                .map(r -> generateTripleMapping(r))
-                .collect(ImmutableCollectors.toList());
+
+    private LinearInclusionDependency getLinearInclusionDependency(ForeignKeyConstraint fk) {
+        DatabaseRelationDefinition def = fk.getRelation();
+        DatabaseRelationDefinition def2 = fk.getReferencedRelation();
+
+        // create variables for the current table
+        int len1 = def.getAttributes().size();
+        List<Term> terms1 = new ArrayList<>(len1);
+        for (int i = 1; i <= len1; i++)
+            terms1.add(termFactory.getVariable("t" + i));
+
+        // create variables for the referenced table
+        int len2 = def2.getAttributes().size();
+        List<Term> terms2 = new ArrayList<>(len2);
+        for (int i = 1; i <= len2; i++)
+            terms2.add(termFactory.getVariable("p" + i));
+
+        for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
+            // indexes start at 1
+            int pos1 = comp.getAttribute().getIndex() - 1; // current column (1)
+            int pos2 = comp.getReference().getIndex() - 1; // referenced column (2)
+
+            terms1.set(pos1, terms2.get(pos2));
+        }
+
+        Function head = termFactory.getFunction(def2.getAtomPredicate(), terms2);
+        Function body = termFactory.getFunction(def.getAtomPredicate(), terms1);
+
+        return new LinearInclusionDependency(head, body);
     }
 
-    private static CQIE generateTripleMapping(CQIE rule) {
-        Function newhead;
-        Function currenthead = rule.getHead();
-        if (currenthead.getArity() == 1) {
-             // head is Class(x) Forming head as triple(x,uri(rdf:type), uri(Class))
-            Function rdfTypeConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(IriConstants.RDF_TYPE));
-
-            String classname = currenthead.getFunctionSymbol().getName();
-            Term classConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(classname));
-
-            newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), rdfTypeConstant, classConstant);
-        }
-        else if (currenthead.getArity() == 2) {
-            // head is Property(x,y) Forming head as triple(x,uri(Property), y)
-            String propname = currenthead.getFunctionSymbol().getName();
-            Function propConstant = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral(propname));
-
-            newhead = ATOM_FACTORY.getTripleAtom(currenthead.getTerm(0), propConstant, currenthead.getTerm(1));
-        }
-        else {
-            // head is triple(x,uri(Property),y)
-            newhead = (Function) currenthead.clone();
-        }
-        return DATALOG_FACTORY.getCQIE(newhead, rule.getBody());
-    }
 }

@@ -26,13 +26,16 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
 
 /**
@@ -53,7 +56,8 @@ public class TurtleSyntaxParserTest {
 		Injector injector = configuration.getInjector();
         specificationFactory = injector.getInstance(SpecificationFactory.class);
     }
-	
+
+    @Test
 	public void test_1_1() {
 		final boolean result = parse(":Person-{id} a :Person .");
 		TestCase.assertTrue(result);
@@ -213,6 +217,7 @@ public class TurtleSyntaxParserTest {
 		TestCase.assertTrue(result);
 	}
 
+	@Ignore("TODO: should we forbid not-recognized datatypes using the XSD prefix?")
 	@Test
 	public void test_6_1() {
 		final boolean result = parse(":Person-{id} a :Person ; :firstName {fname}^^xsd:String .");
@@ -228,7 +233,7 @@ public class TurtleSyntaxParserTest {
 	@Test
 	public void test_6_2() {
 		final boolean result = parse(":Person-{id} a :Person ; :firstName {fname}^^ex:randomDatatype .");
-		TestCase.assertFalse(result);
+		TestCase.assertTrue(result);
 	}
 
 	@Test
@@ -303,17 +308,18 @@ public class TurtleSyntaxParserTest {
 
 	}
 
-	//Test for language tag from db
+	//Test for language tag from a variable (FORBIDDEN)
 	@Test
 	public void test_12_1(){
 		final boolean result = parse(":Person-{id} a :Person ; :firstName {name}@{lang} . ");
-		TestCase.assertTrue(result);
+		TestCase.assertFalse(result);
 
 	}
 
 	private boolean compareCQIE(String input, int countBody) {
-		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap());
-		ImmutableList<ImmutableFunctionalTerm> mapping;
+		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
+                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
+		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
 		} catch (TargetQueryParserException e) {
@@ -328,9 +334,10 @@ public class TurtleSyntaxParserTest {
 
 
 	private boolean parse(String input) {
-		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap());
+		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
+                TERM_FACTORY, TARGET_ATOM_FACTORY, RDF_FACTORY);
 
-		ImmutableList<ImmutableFunctionalTerm> mapping;
+		ImmutableList<TargetAtom> mapping;
 		try {
 			mapping = parser.parse(input);
 			log.debug("mapping " + mapping);

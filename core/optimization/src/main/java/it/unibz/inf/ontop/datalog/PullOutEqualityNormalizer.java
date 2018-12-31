@@ -1,5 +1,9 @@
 package it.unibz.inf.ontop.datalog;
 
+import fj.P2;
+import fj.data.List;
+import it.unibz.inf.ontop.model.term.Function;
+
 /**
  * Normalizer that "pulls out equalities".
  * This transformation is an important step of the transformation from relational calculus to relational algebra.
@@ -25,8 +29,5 @@ package it.unibz.inf.ontop.datalog;
  */
 public interface PullOutEqualityNormalizer {
 
-    /**
-     * Returns a normalized rule.
-     */
-    CQIE normalizeByPullingOutEqualities(CQIE initialRule);
+    P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(List<Function> ljSubAtoms);
 }

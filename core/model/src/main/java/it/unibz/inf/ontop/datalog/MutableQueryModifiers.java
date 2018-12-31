@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.datalog;
 
-import it.unibz.inf.ontop.iq.node.QueryModifiers;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.List;
@@ -17,10 +16,7 @@ public interface MutableQueryModifiers extends QueryModifiers {
 
     MutableQueryModifiers clone();
 
-    void copy(MutableQueryModifiers other);
-
     void setDistinct();
-
 
     void setLimit(long limit);
 
@@ -28,10 +24,7 @@ public interface MutableQueryModifiers extends QueryModifiers {
 
     void addOrderCondition(Variable var, int direction);
 
-    void addGroupCondition(Variable var);
-
     boolean hasModifiers();
 
     boolean hasGroup();
-    List<Variable> getGroupConditions();
 }

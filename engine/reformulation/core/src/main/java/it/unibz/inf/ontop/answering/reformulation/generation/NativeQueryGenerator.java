@@ -38,7 +38,7 @@ public interface NativeQueryGenerator extends Serializable {
 	 * be evaluated by a evaluation engine.
 	 *
 	 */
-	ExecutableQuery generateSourceQuery(IntermediateQuery query, ImmutableList<String> signature)
+	ExecutableQuery generateSourceQuery(IntermediateQuery query)
 			throws OntopReformulationException;
 
 	ExecutableQuery generateEmptyQuery(ImmutableList<String> signature);

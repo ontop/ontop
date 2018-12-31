@@ -30,9 +30,17 @@ mappingId	MAPID-T7
 target		:id/{id} :p {p1}@en . 
 source		SELECT * FROM T7
 
-mappingId	MAPID-T8
-target		:id/{id} :p {p1}@{p2} . 
-source		SELECT * FROM T8
+mappingId	MAPID-T8-en
+target		:id/{id} :p {p1}@en .
+source		SELECT * FROM T8 WHERE p2 = 'en'
+
+mappingId	MAPID-T8-es
+target		:id/{id} :p {p1}@es .
+source		SELECT * FROM T8 WHERE p2 = 'es'
+
+mappingId	MAPID-T8-fr
+target		:id/{id} :p {p1}@fr .
+source		SELECT * FROM T8 WHERE p2 = 'fr'
 
 mappingId	MAPID-T9
 target		:id/{id} :q :id/{id2} . 

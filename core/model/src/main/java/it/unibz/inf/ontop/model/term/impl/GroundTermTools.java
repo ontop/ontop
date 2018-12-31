@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.model.term.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class GroundTermTools {
 
@@ -33,8 +35,13 @@ public class GroundTermTools {
         if (term instanceof Function) {
             Function functionalTerm = (Function) term;
             // Recursive
-            return new GroundFunctionalTermImpl(functionalTerm.getFunctionSymbol(),
-                    castIntoGroundTerms(functionalTerm.getTerms()));
+            FunctionSymbol functionSymbol = Optional.of(functionalTerm.getFunctionSymbol())
+                    .filter(p -> p instanceof FunctionSymbol)
+                    .map(p -> (FunctionSymbol)p)
+                    .orElseThrow(() -> new NonGroundTermException(term + "is not using a function symbol but a"
+                            + functionalTerm.getFunctionSymbol().getClass()));
+
+            return new GroundFunctionalTermImpl(castIntoGroundTerms(functionalTerm.getTerms()), functionSymbol);
         }
 
         throw new NonGroundTermException(term + " is not a ground term");
@@ -44,14 +51,10 @@ public class GroundTermTools {
      * Returns true if is a ground term (even if it is not explicitly typed as such).
      */
     public static boolean isGroundTerm(Term term) {
-        if (term instanceof ImmutableTerm)
-            return ((ImmutableTerm) term).isGround();
-
         if (term instanceof Function) {
             return ((Function)term).getVariables().isEmpty();
         }
-
-        return false;
+        return term instanceof Constant;
     }
 
     public static boolean areGroundTerms(Collection<? extends ImmutableTerm> terms) {

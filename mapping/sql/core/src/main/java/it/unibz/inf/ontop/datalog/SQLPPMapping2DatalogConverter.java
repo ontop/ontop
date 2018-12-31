@@ -22,10 +22,14 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
@@ -40,18 +44,28 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 
 public class SQLPPMapping2DatalogConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMapping2DatalogConverter.class);
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogFactory datalogFactory;
+    private final ImmutabilityTools immutabilityTools;
+
+    @Inject
+    private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
+                                          ImmutabilityTools immutabilityTools) {
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogFactory = datalogFactory;
+        this.immutabilityTools = immutabilityTools;
+    }
 
     /**
      * returns a Datalog representation of the mappings
      */
-    public static ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+    public ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
                                                                      RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
         Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
 
@@ -67,7 +81,7 @@ public class SQLPPMapping2DatalogConverter {
                 ImmutableMap<QualifiedAttributeID, Term> lookupTable;
 
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(metadata);
+                    SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
 
@@ -76,7 +90,7 @@ public class SQLPPMapping2DatalogConverter {
                     body.addAll(re.getFilterAtoms());
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata)
+                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
                             .extract(sourceQuery.toString());
                     ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
 
@@ -84,7 +98,7 @@ public class SQLPPMapping2DatalogConverter {
                     ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()
                             .map(att -> new AbstractMap.SimpleEntry<>(
                                     new QualifiedAttributeID(null, att.getID()), // strip off the ParserViewDefinitionName
-                                    TERM_FACTORY.getVariable(att.getID().getName())))
+                                    termFactory.getVariable(att.getID().getName())))
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -92,15 +106,19 @@ public class SQLPPMapping2DatalogConverter {
                     List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
                     body = new ArrayList<>(1);
-                    body.add(TERM_FACTORY.getFunction(Relation2Predicate.createPredicateFromRelation(view), arguments));
+                    body.add(termFactory.getFunction(view.getAtomPredicate(), arguments));
                 }
 
-                for (ImmutableFunctionalTerm atom : mappingAxiom.getTargetAtoms()) {
+                for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
 
-                        Function head = renameVariables(atom, lookupTable, idfac);
-                        CQIE rule = DATALOG_FACTORY.getCQIE(head, body);
+                        Function mergedAtom = immutabilityTools.convertToMutableFunction(
+                                atom.getProjectionAtom().getPredicate(),
+                                atom.getSubstitutedTerms());
+
+                        Function head = renameVariables(mergedAtom, lookupTable, idfac);
+                        CQIE rule = datalogFactory.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
                         if (previous != null)
@@ -131,7 +149,7 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private static Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
+    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
                                             QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
@@ -162,7 +180,7 @@ public class SQLPPMapping2DatalogConverter {
             newTerms.add(newTerm);
         }
 
-        return TERM_FACTORY.getFunction(function.getFunctionSymbol(), newTerms);
+        return termFactory.getFunction(function.getFunctionSymbol(), newTerms);
     }
 
 

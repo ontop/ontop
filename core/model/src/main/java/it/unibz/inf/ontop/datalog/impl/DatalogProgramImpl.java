@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import it.unibz.inf.ontop.model.term.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -56,6 +55,12 @@ public class DatalogProgramImpl implements DatalogProgram {
 
 	protected DatalogProgramImpl() {
 		modifiers = new MutableQueryModifiersImpl();
+		rules = new LinkedList<>();
+		predicateIndex = new HashMap<>();
+	}
+
+	protected DatalogProgramImpl(MutableQueryModifiers modifiers) {
+		this.modifiers = modifiers.clone();
 		rules = new LinkedList<>();
 		predicateIndex = new HashMap<>();
 	}
@@ -91,18 +96,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 	}
 
 	@Override
-	public void removeRules(Collection<CQIE> rs) {
-		for (CQIE rule : rs) {
-			this.rules.remove(rule);
-
-			Predicate predicate = rule.getHead().getFunctionSymbol();
-			List<CQIE> indexedRules = this.predicateIndex.get(predicate);
-			if (indexedRules != null)
-				indexedRules.remove(rule);
-		}
-	}
-
-	@Override
 	public List<CQIE> getRules() {
 		return Collections.unmodifiableList(rules);
 	}
@@ -131,8 +124,4 @@ public class DatalogProgramImpl implements DatalogProgram {
 		return modifiers;
 	}
 	
-	@Override
-	public boolean hasModifiers() {
-		return modifiers.hasModifiers();
-	}
 }

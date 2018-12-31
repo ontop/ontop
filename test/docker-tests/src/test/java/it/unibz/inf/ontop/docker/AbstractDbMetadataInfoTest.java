@@ -20,8 +20,13 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import com.google.inject.Injector;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +57,14 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 			properties = new Properties();
 			properties.load(pStream);
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-			metadata = RDBMetadataExtractionTools.createMetadata(conn);
+
+			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+			Injector injector = defaultConfiguration.getInjector();
+
+			metadata = RDBMetadataExtractionTools.createMetadata(conn,
+					injector.getInstance(TypeFactory.class),
+					injector.getInstance(JdbcTypeMapper.class));
+
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
 		catch (IOException e) {

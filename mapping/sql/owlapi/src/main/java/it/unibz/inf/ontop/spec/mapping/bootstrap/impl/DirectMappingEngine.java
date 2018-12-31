@@ -23,31 +23,35 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /***
@@ -82,7 +86,12 @@ public class DirectMappingEngine {
 	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
+	private final TypeFactory typeFactory;
+	private final TermFactory termFactory;
+	private final RDF rdfFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
 	private final OntopSQLCredentialSettings settings;
+	private final TargetAtomFactory targetAtomFactory;
 
     private String baseIRI;
 	private int currentMappingIndex = 1;
@@ -101,10 +110,16 @@ public class DirectMappingEngine {
 	@Inject
 	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
-                                SQLPPMappingFactory ppMappingFactory) {
+								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
+								RDF rdfFactory, JdbcTypeMapper jdbcTypeMapper, TargetAtomFactory targetAtomFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
+		this.typeFactory = typeFactory;
+		this.termFactory = termFactory;
+		this.rdfFactory = rdfFactory;
+		this.jdbcTypeMapper = jdbcTypeMapper;
+		this.targetAtomFactory = targetAtomFactory;
 	}
 
 	/**
@@ -148,30 +163,48 @@ public class DirectMappingEngine {
 	}
 
 
-	public static Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, Stream<? extends Function> targetAtoms) {
+	public Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, Stream<TargetAtom> targetAtoms) {
 
         OWLDataFactory dataFactory = manager.getOWLDataFactory();
-        Set<OWLDeclarationAxiom> declarationAxioms = new HashSet<>();
+        return targetAtoms
+				.map(targetAtom -> {
 
-        targetAtoms.forEach(f -> {
-            IRI iri = IRI.create(f.getFunctionSymbol().getName());
+			ImmutableList<ImmutableTerm> terms = targetAtom.getSubstitutedTerms();
+			RDFAtomPredicate predicate = (RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate();
+
+			Optional<org.apache.commons.rdf.api.IRI> classIRI = predicate.getClassIRI(terms);
+			Optional<org.apache.commons.rdf.api.IRI> propertyIRI = predicate.getPropertyIRI(terms);
+
             final OWLEntity entity;
-            if (f.getArity() == 1) {
-                entity = dataFactory.getOWLClass(iri);
+            if (classIRI.isPresent()) {
+                entity = dataFactory.getOWLClass(IRI.create(classIRI.get().getIRIString()));
             }
-            else {
-                Predicate.COL_TYPE secondArgType = f.getFunctionSymbol().getType(1);
-                if ((secondArgType != null) && secondArgType.equals(Predicate.COL_TYPE.OBJECT)) {
-                    entity = dataFactory.getOWLObjectProperty(iri);
-                }
-                else {
-                    entity = dataFactory.getOWLDataProperty(iri);
-                }
-            }
-            declarationAxioms.add(dataFactory.getOWLDeclarationAxiom(entity));
-        });
+            else if (propertyIRI.isPresent()) {
+            	IRI iri = IRI.create(propertyIRI.get().getIRIString());
 
-        return declarationAxioms;
+            	ImmutableTerm objectTerm = predicate.getObject(terms);
+            	if (objectTerm instanceof ImmutableFunctionalTerm) {
+					/*
+					 * Temporary (later we will use the type of the RDF function)
+					 */
+					Predicate objectFunctionSymbol = ((ImmutableFunctionalTerm) objectTerm).getFunctionSymbol();
+					if (objectFunctionSymbol instanceof DatatypePredicate)
+					{
+						entity = dataFactory.getOWLDataProperty(iri);
+					}
+					else {
+						entity = dataFactory.getOWLObjectProperty(iri);
+					}
+				}
+				else
+					throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);
+			}
+            else {
+				throw new MinorOntopInternalBugException("No IRI could extracted from " + targetAtom);
+            }
+            return dataFactory.getOWLDeclarationAxiom(entity);
+        })
+				.collect(Collectors.toSet());
     }
 
 	/***
@@ -184,7 +217,8 @@ public class DirectMappingEngine {
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
             it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, UriTemplateMatcher.create(Stream.empty()));
+            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager,
+					UriTemplateMatcher.create(Stream.empty(), termFactory));
             mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
         }
         else
@@ -207,7 +241,7 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory, jdbcTypeMapper);
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			return bootstrapMappings(metadata, ppMapping);
@@ -242,16 +276,18 @@ public class DirectMappingEngine {
 	 */
 	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, TERM_FACTORY);
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory,
+				rdfFactory);
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
-		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
+		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,
+				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
 		currentMappingIndex++;
 		
-		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = dmap.getRefAxioms(table);
-		for (Map.Entry<String, ImmutableList<ImmutableFunctionalTerm>> e : refAxioms.entrySet()) {
+		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table);
+		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
             OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
-			ImmutableList<ImmutableFunctionalTerm> targetQuery = e.getValue();
+			ImmutableList<TargetAtom> targetQuery = e.getValue();
             axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
 			currentMappingIndex++;
 		}

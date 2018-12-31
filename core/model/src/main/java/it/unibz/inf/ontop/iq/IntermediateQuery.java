@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -126,7 +127,7 @@ public interface IntermediateQuery {
      */
     ImmutableSet<Variable> getVariables(QueryNode subTreeRootNode);
 
-    int getVersionNumber();
+    UUID getVersionNumber();
 
     /**
      * Creates a uninitialized query builder.

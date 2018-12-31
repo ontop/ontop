@@ -6,7 +6,8 @@ import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.OWLAPI_TRANSLATOR;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.*;
 
@@ -32,7 +34,9 @@ public class OWL2QLTranslatorTest {
 
 	private static final String owl = "http://www.w3.org/2002/07/owl#";
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
-	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";	
+	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
+
+	private final RDF rdfFactory = new SimpleRDF();
 	
 	@Test
 	public void test_R1_2() throws Exception {
@@ -401,7 +405,7 @@ public class OWL2QLTranslatorTest {
 
     @Test
 	public void test_R6() {
-		OntologyBuilder builder = OntologyBuilderImpl.builder();
+		OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
 		
 		ObjectPropertyExpression top = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
 		ObjectPropertyExpression topInv = top.getInverse();
@@ -446,7 +450,7 @@ public class OWL2QLTranslatorTest {
 		OWLDataRange dr4 = factory.getOWLDataIntersectionOf(OWL2Datatype.XSD_DECIMAL.XSD_INTEGER.getDatatype(factory), OWL2Datatype.XSD_BOOLEAN.getDatatype(factory));
 		manager.addAxiom(onto, factory.getOWLDatatypeDefinitionAxiom(dt4, dr4));
 	
-		Ontology dlliteonto = OWLAPITranslatorOWL2QL.translateAndClassify(onto);
+		Ontology dlliteonto = OWLAPI_TRANSLATOR.translateAndClassify(onto);
 	}
 	
 	@Test
@@ -788,7 +792,7 @@ public class OWL2QLTranslatorTest {
 			boolean flag = false;
 			try {
 				manager.addAxiom(onto, factory.getOWLReflexiveObjectPropertyAxiom(owlBottom));
-				OWLAPITranslatorOWL2QL.translateAndClassify(onto);
+				OWLAPI_TRANSLATOR.translateAndClassify(onto);
 			}
 			catch (RuntimeException e) {
 				if (e.getMessage().startsWith("Incon"))
@@ -801,7 +805,7 @@ public class OWL2QLTranslatorTest {
 			try {
 				OWLOntology onto2 = manager.createOntology(IRI.create("http://example/testonto2"));
 				manager.addAxiom(onto2, factory.getOWLIrreflexiveObjectPropertyAxiom(owlTop));
-				OWLAPITranslatorOWL2QL.translateAndClassify(onto);
+				OWLAPI_TRANSLATOR.translateAndClassify(onto);
 			}
 			catch (RuntimeException e) {
 				if (e.getMessage().startsWith("Incon"))
@@ -1194,7 +1198,7 @@ public class OWL2QLTranslatorTest {
 
 
 	public static OntologyImpl.UnclassifiedOntologyTBox translateTBox(OWLOntology owl) {
-		return ((OntologyImpl)OWLAPITranslatorOWL2QL.translateAndClassify(owl)).unclassifiedTBox();
+		return ((OntologyImpl)OWLAPI_TRANSLATOR.translateAndClassify(owl)).unclassifiedTBox();
 	}
 
     /**
@@ -1208,7 +1212,7 @@ public class OWL2QLTranslatorTest {
     public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
         OWLOntologyManager man = OWLManager.createOWLOntologyManager();
         OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-        Ontology onto = OWLAPITranslatorOWL2QL.translateAndClassify(owl);
+        Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
         return onto.tbox();
     }
 }

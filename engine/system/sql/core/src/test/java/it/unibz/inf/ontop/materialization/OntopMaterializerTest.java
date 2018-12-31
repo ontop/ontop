@@ -27,14 +27,18 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -45,42 +49,86 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 import static org.junit.Assert.assertEquals;
 
 public class OntopMaterializerTest {
 
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-
 	private static final String PREFIX = "http://example.com/vocab#";
-
-	private static final Predicate person = TERM_FACTORY.getClassPredicate(PREFIX + "Person");
-	private static final Predicate fn = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "fn", COL_TYPE.STRING);
-	private static final Predicate ln = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "ln", COL_TYPE.STRING);
-	private static final Predicate age = TERM_FACTORY.getDataPropertyPredicate(PREFIX + "age", COL_TYPE.STRING);
-	private static final Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate(PREFIX + "hasschool");
-	private static final Predicate school = TERM_FACTORY.getClassPredicate(PREFIX + "School");
 
 	private static final String driver = "org.h2.Driver";
 	private static String url = "jdbc:h2:mem:aboxdump";
 	private static String username = "sa";
 	private static String password = "";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
+	private final SQLMappingFactory mappingFactory;
+	private final RDF rdfFactory;
+	private final RDFDatatype xsdStringDt;
 
-    public OntopMaterializerTest() {
+	private final ImmutableTerm type;
+	private final ImmutableTerm person;
+	private final ImmutableTerm fn;
+	private final ImmutableTerm ln;
+	private final ImmutableTerm age;
+	private final ImmutableTerm hasschool;
+	private final ImmutableTerm school;
+
+	private final IRI personIRI;
+	private final IRI fnIRI;
+	private final IRI lnIRI;
+	private final IRI ageIRI;
+	private final IRI hasschoolIRI;
+	private final IRI schoolIRI;
+	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final TargetAtomFactory targetAtomFactory;
+	AtomFactory atomFactory;
+	public OntopMaterializerTest() {
+
+		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
+				.enableTestMode()
+				.build();
+
+		Injector injector = defaultConfiguration.getInjector();
+		termFactory = injector.getInstance(TermFactory.class);
+		typeFactory = injector.getInstance(TypeFactory.class);
+		atomFactory = injector.getInstance(AtomFactory.class);
+		targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
+		rdfFactory = injector.getInstance(RDF.class);
+
+		mappingFactory = SQLMappingFactoryImpl.getInstance();
+		
+		personIRI = rdfFactory.createIRI(PREFIX + "Person");
+		fnIRI = rdfFactory.createIRI(PREFIX + "fn");
+		lnIRI = rdfFactory.createIRI(PREFIX + "ln");
+		ageIRI = rdfFactory.createIRI(PREFIX + "age");
+		hasschoolIRI = rdfFactory.createIRI(PREFIX + "hasschool");
+		schoolIRI = rdfFactory.createIRI(PREFIX + "School");
+
+		xsdStringDt = typeFactory.getXsdStringDatatype();
+
+		type = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE.getIRIString()));
+		person = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(personIRI.getIRIString()));
+		fn = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(fnIRI.getIRIString()));
+		ln = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(lnIRI.getIRIString()));
+		age =termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(ageIRI.getIRIString()));
+		hasschool = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(hasschoolIRI.getIRIString()));
+		school = termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(schoolIRI.getIRIString()));
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {
@@ -92,7 +140,7 @@ public class OntopMaterializerTest {
 	}
 
 	@Test(expected = InvalidOntopConfigurationException.class)
-	public void testNoSource() throws Exception {
+	public void testNoSource()  {
 		OntopStandaloneSQLConfiguration.defaultBuilder().build();
 	}
 
@@ -123,8 +171,7 @@ public class OntopMaterializerTest {
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
-		ImmutableSet<URI> vocabulary = Stream.of(fn, ln, age, hasschool, school)
-				.map(p -> URI.create(p.getName()))
+		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
 		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
@@ -156,7 +203,7 @@ public class OntopMaterializerTest {
 
 
 
-	private static SQLPPMapping createMapping() throws DuplicateMappingException {
+	private SQLPPMapping createMapping() throws DuplicateMappingException {
 
     	// TODO: we should not have to create an high-level configuration just for constructing these objects...
 		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
@@ -171,39 +218,44 @@ public class OntopMaterializerTest {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		ImmutableFunctionalTerm personTemplate = TERM_FACTORY.getImmutableUriTemplate(
-				TERM_FACTORY.getConstantLiteral("http://schools.com/person/{}-{}"),
-				TERM_FACTORY.getVariable("fn"),
-				TERM_FACTORY.getVariable("ln"));
+		ImmutableFunctionalTerm personTemplate = termFactory.getImmutableUriTemplate(
+				termFactory.getConstantLiteral("http://schools.com/person/{}-{}"),
+				termFactory.getVariable("fn"),
+				termFactory.getVariable("ln"));
 
-		ImmutableFunctionalTerm schoolTemplate = TERM_FACTORY.getImmutableUriTemplate(
-				TERM_FACTORY.getConstantLiteral("{}"),
-				TERM_FACTORY.getVariable("schooluri"));
+		ImmutableFunctionalTerm schoolTemplate = termFactory.getImmutableUriTemplate(
+				termFactory.getConstantLiteral("{}"),
+				termFactory.getVariable("schooluri"));
 
-		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(person, personTemplate));
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(fn, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm(TERM_FACTORY.getVariable("fn"), Predicate.COL_TYPE.STRING)));
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(ln, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("ln"), Predicate.COL_TYPE.STRING)));
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(age, personTemplate,
-				TERM_FACTORY.getImmutableTypedTerm( TERM_FACTORY.getVariable("age"), Predicate.COL_TYPE.STRING)));
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(hasschool, personTemplate, schoolTemplate));
-		bodyBuilder.add(TERM_FACTORY.getImmutableFunctionalTerm(school, schoolTemplate));
+		RDFDatatype stringDatatype = xsdStringDt;
 
-		ImmutableList<ImmutableFunctionalTerm> body = bodyBuilder.build();
+		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
-		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sql), body);
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, type, person));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getImmutableTypedTerm(termFactory.getVariable("fn"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getImmutableTypedTerm(termFactory.getVariable("ln"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getImmutableTypedTerm(termFactory.getVariable("age"), stringDatatype)));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, hasschool, schoolTemplate));
+		bodyBuilder.add(getTripleTargetAtom(personTemplate, school, schoolTemplate));
+
+		ImmutableList<TargetAtom> body = bodyBuilder.build();
+
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
 
 		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
 				body.stream()
-						.flatMap(atom -> atom.getArguments().stream())
+						.flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
 						.filter(t -> t instanceof ImmutableFunctionalTerm)
-						.map(t -> (ImmutableFunctionalTerm) t));
+						.map(t -> (ImmutableFunctionalTerm) t),
+				termFactory);
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
+	}
+
+	private TargetAtom getTripleTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o) {
+		return targetAtomFactory.getTripleTargetAtom(s, p, o);
 	}
 
 //	public void testTwoSources() throws Exception {
@@ -258,31 +310,31 @@ public class OntopMaterializerTest {
 //
 //            String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 //
-//            Predicate q = TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+//            Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //            List<Term> headTerms = new LinkedList<Term>();
-//            headTerms.add(TERM_FACTORY.getVariable("fn"));
-//            headTerms.add(TERM_FACTORY.getVariable("ln"));
-//            headTerms.add(TERM_FACTORY.getVariable("age"));
-//            headTerms.add(TERM_FACTORY.getVariable("schooluri"));
+//            headTerms.add(termFactory.getVariable("fn"));
+//            headTerms.add(termFactory.getVariable("ln"));
+//            headTerms.add(termFactory.getVariable("age"));
+//            headTerms.add(termFactory.getVariable("schooluri"));
 //
-//            Function head = TERM_FACTORY.getFunction(q, headTerms);
+//            Function head = termFactory.getFunction(q, headTerms);
 //
-//            Term objectTerm = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://schools.com/persons", 2), TERM_FACTORY.getVariable("fn"),
-//                    TERM_FACTORY.getVariable("ln"));
+//            Term objectTerm = termFactory.getFunction(termFactory.getIRI("http://schools.com/persons", 2), termFactory.getVariable("fn"),
+//                    termFactory.getVariable("ln"));
 //
 //		List<Function> body = new LinkedList<Function>();
-//		Predicate person = TERM_FACTORY.getClassPredicate("Person");
-//		Predicate fn = TERM_FACTORY.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-//		Predicate ln = TERM_FACTORY.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
-//		Predicate age = TERM_FACTORY.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
-//		Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate("hasschool");
-//		Predicate school = TERM_FACTORY.getClassPredicate("School");
-//		body.add(TERM_FACTORY.getFunction(person, objectTerm));
-//		body.add(TERM_FACTORY.getFunction(fn, objectTerm, TERM_FACTORY.getVariable("fn")));
-//		body.add(TERM_FACTORY.getFunction(ln, objectTerm, TERM_FACTORY.getVariable("ln")));
-//		body.add(TERM_FACTORY.getFunction(age, objectTerm, TERM_FACTORY.getVariable("age")));
-//		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
-//		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
+//		Predicate person = termFactory.getClassPredicate("Person");
+//		Predicate fn = termFactory.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+//		Predicate ln = termFactory.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+//		Predicate age = termFactory.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+//		Predicate hasschool = termFactory.getObjectPropertyPredicate("hasschool");
+//		Predicate school = termFactory.getClassPredicate("School");
+//		body.add(termFactory.getFunction(person, objectTerm));
+//		body.add(termFactory.getFunction(fn, objectTerm, termFactory.getVariable("fn")));
+//		body.add(termFactory.getFunction(ln, objectTerm, termFactory.getVariable("ln")));
+//		body.add(termFactory.getFunction(age, objectTerm, termFactory.getVariable("age")));
+//		body.add(termFactory.getFunction(hasschool, objectTerm, termFactory.getVariable("schooluri")));
+//		body.add(termFactory.getFunction(school, termFactory.getVariable("schooluri")));
 //
 //            OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
@@ -371,31 +423,31 @@ public class OntopMaterializerTest {
 //
 //		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 //
-//		Predicate q = TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+//		Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //		List<Term> headTerms = new LinkedList<Term>();
-//		headTerms.add(TERM_FACTORY.getVariable("fn"));
-//		headTerms.add(TERM_FACTORY.getVariable("ln"));
-//		headTerms.add(TERM_FACTORY.getVariable("age"));
-//		headTerms.add(TERM_FACTORY.getVariable("schooluri"));
+//		headTerms.add(termFactory.getVariable("fn"));
+//		headTerms.add(termFactory.getVariable("ln"));
+//		headTerms.add(termFactory.getVariable("age"));
+//		headTerms.add(termFactory.getVariable("schooluri"));
 //
-//		Function head = TERM_FACTORY.getFunction(q, headTerms);
+//		Function head = termFactory.getFunction(q, headTerms);
 //
-//		Term objectTerm = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://schools.com/persons", 2), TERM_FACTORY.getVariable("fn"),
-//				TERM_FACTORY.getVariable("ln"));
+//		Term objectTerm = termFactory.getFunction(termFactory.getIRI("http://schools.com/persons", 2), termFactory.getVariable("fn"),
+//				termFactory.getVariable("ln"));
 //
 //		List<Function> body = new LinkedList<Function>();
-//		Predicate person = TERM_FACTORY.getClassPredicate("Person");
-//		Predicate fn = TERM_FACTORY.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-//		Predicate ln = TERM_FACTORY.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
-//		Predicate age = TERM_FACTORY.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
-//		Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate("hasschool");
-//		Predicate school = TERM_FACTORY.getClassPredicate("School");
-//		body.add(TERM_FACTORY.getFunction(person, objectTerm));
-//		body.add(TERM_FACTORY.getFunction(fn, objectTerm, TERM_FACTORY.getVariable("fn")));
-//		body.add(TERM_FACTORY.getFunction(ln, objectTerm, TERM_FACTORY.getVariable("ln")));
-//		body.add(TERM_FACTORY.getFunction(age, objectTerm, TERM_FACTORY.getVariable("age")));
-//		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
-//		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
+//		Predicate person = termFactory.getClassPredicate("Person");
+//		Predicate fn = termFactory.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+//		Predicate ln = termFactory.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+//		Predicate age = termFactory.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+//		Predicate hasschool = termFactory.getObjectPropertyPredicate("hasschool");
+//		Predicate school = termFactory.getClassPredicate("School");
+//		body.add(termFactory.getFunction(person, objectTerm));
+//		body.add(termFactory.getFunction(fn, objectTerm, termFactory.getVariable("fn")));
+//		body.add(termFactory.getFunction(ln, objectTerm, termFactory.getVariable("ln")));
+//		body.add(termFactory.getFunction(age, objectTerm, termFactory.getVariable("age")));
+//		body.add(termFactory.getFunction(hasschool, objectTerm, termFactory.getVariable("schooluri")));
+//		body.add(termFactory.getFunction(school, termFactory.getVariable("schooluri")));
 //
 //		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
@@ -548,31 +600,31 @@ public class OntopMaterializerTest {
 //
 //		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 //
-//		Predicate q = TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+//		Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //		List<Term> headTerms = new LinkedList<Term>();
-//		headTerms.add(TERM_FACTORY.getVariable("fn"));
-//		headTerms.add(TERM_FACTORY.getVariable("ln"));
-//		headTerms.add(TERM_FACTORY.getVariable("age"));
-//		headTerms.add(TERM_FACTORY.getVariable("schooluri"));
+//		headTerms.add(termFactory.getVariable("fn"));
+//		headTerms.add(termFactory.getVariable("ln"));
+//		headTerms.add(termFactory.getVariable("age"));
+//		headTerms.add(termFactory.getVariable("schooluri"));
 //
-//		Function head = TERM_FACTORY.getFunction(q, headTerms);
+//		Function head = termFactory.getFunction(q, headTerms);
 //
-//		Term objectTerm = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate("http://schools.com/persons", 2), TERM_FACTORY.getVariable("fn"),
-//				TERM_FACTORY.getVariable("ln"));
+//		Term objectTerm = termFactory.getFunction(termFactory.getIRI("http://schools.com/persons", 2), termFactory.getVariable("fn"),
+//				termFactory.getVariable("ln"));
 //
 //		List<Function> body = new LinkedList<Function>();
-//		Predicate person = TERM_FACTORY.getClassPredicate("Person");
-//		Predicate fn = TERM_FACTORY.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
-//		Predicate ln = TERM_FACTORY.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
-//		Predicate age = TERM_FACTORY.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
-//		Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate("hasschool");
-//		Predicate school = TERM_FACTORY.getClassPredicate("School");
-//		body.add(TERM_FACTORY.getFunction(person, objectTerm));
-//		body.add(TERM_FACTORY.getFunction(fn, objectTerm, TERM_FACTORY.getVariable("fn")));
-//		body.add(TERM_FACTORY.getFunction(ln, objectTerm, TERM_FACTORY.getVariable("ln")));
-//		body.add(TERM_FACTORY.getFunction(age, objectTerm, TERM_FACTORY.getVariable("age")));
-//		body.add(TERM_FACTORY.getFunction(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
-//		body.add(TERM_FACTORY.getFunction(school, TERM_FACTORY.getVariable("schooluri")));
+//		Predicate person = termFactory.getClassPredicate("Person");
+//		Predicate fn = termFactory.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+//		Predicate ln = termFactory.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+//		Predicate age = termFactory.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+//		Predicate hasschool = termFactory.getObjectPropertyPredicate("hasschool");
+//		Predicate school = termFactory.getClassPredicate("School");
+//		body.add(termFactory.getFunction(person, objectTerm));
+//		body.add(termFactory.getFunction(fn, objectTerm, termFactory.getVariable("fn")));
+//		body.add(termFactory.getFunction(ln, objectTerm, termFactory.getVariable("ln")));
+//		body.add(termFactory.getFunction(age, objectTerm, termFactory.getVariable("age")));
+//		body.add(termFactory.getFunction(hasschool, objectTerm, termFactory.getVariable("schooluri")));
+//		body.add(termFactory.getFunction(school, termFactory.getVariable("schooluri")));
 //
 //		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql), body);
 //
@@ -642,46 +694,46 @@ public class OntopMaterializerTest {
 //		String sql5 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 //		String sql6 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 //
-//		Predicate q = TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+//		Predicate q = termFactory.getIRI(OBDALibConstants.QUERY_HEAD, 4);
 //		List<Term> headTerms = new LinkedList<Term>();
 //
-//		final Term firstNameVariable = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getVariable("fn"), COL_TYPE.STRING);
-//		final Term lastNameVariable = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getVariable("ln"), COL_TYPE.STRING);
-//		final Term ageVariable = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getVariable("age"), COL_TYPE.INTEGER);
-//		final Term schoolUriVariable = TERM_FACTORY.getTypedTerm(TERM_FACTORY.getVariable("schooluri"), COL_TYPE.STRING);
+//		final Term firstNameVariable = termFactory.getTypedTerm(termFactory.getVariable("fn"), COL_TYPE.STRING);
+//		final Term lastNameVariable = termFactory.getTypedTerm(termFactory.getVariable("ln"), COL_TYPE.STRING);
+//		final Term ageVariable = termFactory.getTypedTerm(termFactory.getVariable("age"), COL_TYPE.INTEGER);
+//		final Term schoolUriVariable = termFactory.getTypedTerm(termFactory.getVariable("schooluri"), COL_TYPE.STRING);
 //
 //		headTerms.add(firstNameVariable);
 //		headTerms.add(lastNameVariable);
 //		headTerms.add(ageVariable);
 //		headTerms.add(schoolUriVariable);
 //
-//		Function head = TERM_FACTORY.getFunction(q, headTerms);
+//		Function head = termFactory.getFunction(q, headTerms);
 //
-//		Term objectTerm = TERM_FACTORY.getUriTemplate(TERM_FACTORY.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
+//		Term objectTerm = termFactory.getUriTemplate(termFactory.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
 //				firstNameVariable,
 //				lastNameVariable);
 //
 ////		List<Function> body = new LinkedList<Function>();
-//		Predicate person = TERM_FACTORY.getClassPredicate("Person");
-//		Predicate fn = TERM_FACTORY.getDataPropertyPredicate("firstn", COL_TYPE.LITERAL);
-//		Predicate ln = TERM_FACTORY.getDataPropertyPredicate("lastn", COL_TYPE.LITERAL);
-//		Predicate age = TERM_FACTORY.getDataPropertyPredicate("agee", COL_TYPE.LITERAL);
-//		Predicate hasschool = TERM_FACTORY.getObjectPropertyPredicate("hasschool");
-//		Predicate school = TERM_FACTORY.getClassPredicate("School");
-////		body.add(TERM_FACTORY.getFunctionalTerm(person, objectTerm));
-////		body.add(TERM_FACTORY.getFunctionalTerm(fn, objectTerm, TERM_FACTORY.getVariable("fn")));
-////		body.add(TERM_FACTORY.getFunctionalTerm(ln, objectTerm, TERM_FACTORY.getVariable("ln")));
-////		body.add(TERM_FACTORY.getFunctionalTerm(age, objectTerm, TERM_FACTORY.getVariable("age")));
-////		body.add(TERM_FACTORY.getFunctionalTerm(hasschool, objectTerm, TERM_FACTORY.getVariable("schooluri")));
-////		body.add(TERM_FACTORY.getFunctionalTerm(school, TERM_FACTORY.getVariable("schooluri")));
+//		Predicate person = termFactory.getClassPredicate("Person");
+//		Predicate fn = termFactory.getDataPropertyPredicate("firstn", COL_TYPE.LITERAL);
+//		Predicate ln = termFactory.getDataPropertyPredicate("lastn", COL_TYPE.LITERAL);
+//		Predicate age = termFactory.getDataPropertyPredicate("agee", COL_TYPE.LITERAL);
+//		Predicate hasschool = termFactory.getObjectPropertyPredicate("hasschool");
+//		Predicate school = termFactory.getClassPredicate("School");
+////		body.add(termFactory.getFunctionalTerm(person, objectTerm));
+////		body.add(termFactory.getFunctionalTerm(fn, objectTerm, termFactory.getVariable("fn")));
+////		body.add(termFactory.getFunctionalTerm(ln, objectTerm, termFactory.getVariable("ln")));
+////		body.add(termFactory.getFunctionalTerm(age, objectTerm, termFactory.getVariable("age")));
+////		body.add(termFactory.getFunctionalTerm(hasschool, objectTerm, termFactory.getVariable("schooluri")));
+////		body.add(termFactory.getFunctionalTerm(school, termFactory.getVariable("schooluri")));
 //
 //
-//		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql1), Arrays.asList(TERM_FACTORY.getFunction(person, objectTerm)));
-//		OBDAMappingAxiom map2 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql2), Arrays.asList(TERM_FACTORY.getFunction(fn, objectTerm, firstNameVariable)));
-//		OBDAMappingAxiom map3 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql3), Arrays.asList(TERM_FACTORY.getFunction(ln, objectTerm, lastNameVariable)));
-//		OBDAMappingAxiom map4 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql4), Arrays.asList(TERM_FACTORY.getFunction(age, objectTerm, ageVariable)));
-//		OBDAMappingAxiom map5 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql5), Arrays.asList(TERM_FACTORY.getFunction(hasschool, objectTerm, schoolUriVariable)));
-//		OBDAMappingAxiom map6 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql6), Arrays.asList(TERM_FACTORY.getFunction(school, schoolUriVariable)));
+//		OBDAMappingAxiom map1 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql1), Arrays.asList(termFactory.getFunction(person, objectTerm)));
+//		OBDAMappingAxiom map2 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql2), Arrays.asList(termFactory.getFunction(fn, objectTerm, firstNameVariable)));
+//		OBDAMappingAxiom map3 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql3), Arrays.asList(termFactory.getFunction(ln, objectTerm, lastNameVariable)));
+//		OBDAMappingAxiom map4 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql4), Arrays.asList(termFactory.getFunction(age, objectTerm, ageVariable)));
+//		OBDAMappingAxiom map5 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql5), Arrays.asList(termFactory.getFunction(hasschool, objectTerm, schoolUriVariable)));
+//		OBDAMappingAxiom map6 = nativeQLFactory.create(MAPPING_FACTORY.getSQLQuery(sql6), Arrays.asList(termFactory.getFunction(school, schoolUriVariable)));
 //
 //        dataSources.add(source);
 //        mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));

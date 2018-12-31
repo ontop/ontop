@@ -1,15 +1,15 @@
 package it.unibz.inf.ontop.rdf4j.utils;
 
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.BNode;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.spec.ontology.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Objects;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
 
 public class RDF4JHelper {
 
@@ -18,33 +18,29 @@ public class RDF4JHelper {
 	public static Resource getResource(ObjectConstant obj) {
 		if (obj instanceof BNode)
 			return fact.createBNode(((BNode)obj).getName());
-		else if (obj instanceof URIConstant)
-			return fact.createIRI(((URIConstant)obj).getURI());
+		else if (obj instanceof IRIConstant)
+			return fact.createIRI(((IRIConstant) obj).getIRI().getIRIString());
 		else
             return null;
 			//throw new IllegalArgumentException("Invalid constant as subject!" + obj);
 	}
-	
+
+	/**
+	 * TODO: could we have a RDF sub-class of ValueConstant?
+	 */
 	public static Literal getLiteral(ValueConstant literal)
 	{
         Objects.requireNonNull(literal);
+		TermType type = literal.getType();
+		if (!(type instanceof RDFDatatype))
+			// TODO: throw a proper exception
+			throw new IllegalStateException("A ValueConstant given to OWLAPI must have a RDF datatype");
+		RDFDatatype datatype = (RDFDatatype) type;
 
-        switch (literal.getType()) {
-            case OBJECT:
-            case LITERAL:
-            case STRING:
-                // creates xsd:string
-                return fact.createLiteral(literal.getValue());
-            case LANG_STRING:
-                // creates xsd:langString
-                return fact.createLiteral(literal.getValue(), literal.getLanguage());
-            default:
-                IRI datatype = TYPE_FACTORY.getDatatypeURI(literal.getType());
-                if (datatype == null)
-                    throw new RuntimeException(
-                            "Found unknown TYPE for constant: " + literal + " with COL_TYPE=" + literal.getType());
-                return fact.createLiteral(literal.getValue(), datatype);
-        }
+		return datatype.getLanguageTag()
+				.map(lang -> fact.createLiteral(literal.getValue(), lang.getFullString()))
+				.orElseGet(() -> fact.createLiteral(literal.getValue(),
+						fact.createIRI(datatype.getIRI().getIRIString())));
 	}
 
     public static Value getValue(Constant c) {
@@ -80,13 +76,13 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(ObjectPropertyAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getSubject()),
-				createURI(assertion.getProperty().getPredicate().getName()),
+				createURI(assertion.getProperty().getIRI().getIRIString()),
 				getResource(assertion.getObject()));
 	}
 
 	private static Statement createStatement(DataPropertyAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getSubject()),
-				createURI(assertion.getProperty().getPredicate().getName()),
+				createURI(assertion.getProperty().getIRI().getIRIString()),
 				getLiteral(assertion.getValue())
 		);
 	}
@@ -96,11 +92,11 @@ public class RDF4JHelper {
 
 		if (constant instanceof ValueConstant) {
 			return fact.createStatement(getResource(assertion.getSubject()),
-					createURI(assertion.getProperty().getPredicate().getName()),
+					createURI(assertion.getProperty().getIRI().getIRIString()),
 					getLiteral((ValueConstant) constant));
 		} else if (constant instanceof ObjectConstant)  {
 			return fact.createStatement(getResource(assertion.getSubject()),
-					createURI(assertion.getProperty().getPredicate().getName()),
+					createURI(assertion.getProperty().getIRI().getIRIString()),
 					getResource((ObjectConstant) constant));
 		} else {
 			throw new RuntimeException("Unsupported constant for an annotation property!"
@@ -110,7 +106,7 @@ public class RDF4JHelper {
 
 	private static Statement createStatement(ClassAssertion assertion) {
 		return fact.createStatement(getResource(assertion.getIndividual()),
-				createURI(IriConstants.RDF_TYPE),
-				createURI(assertion.getConcept().getPredicate().getName()));
+				RDF.TYPE,
+				createURI(assertion.getConcept().getIRI().getIRIString()));
 	}
 }

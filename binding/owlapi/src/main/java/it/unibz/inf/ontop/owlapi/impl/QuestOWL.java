@@ -104,7 +104,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 
 	private final OntopQueryEngine queryEngine;
 	private final InputQueryFactory inputQueryFactory;
-	
+	private final OWLAPITranslatorOWL2QL owlapiTranslator;
+
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
 
@@ -143,6 +144,8 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		pm = owlConfiguration.getProgressMonitor();
 
 		version = extractVersion();
+
+		owlapiTranslator = ontopConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
 
 		prepareReasoner();
 
@@ -222,15 +225,15 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 	 * The translation is done using our OWLAPITranslator that gets the TBox
 	 * part of the ontologies and filters all the DL-Lite axioms (RDFS/OWL2QL
 	 * and DL-Lite).
-	 * 
+	 *
 	 */
-	public static ClassifiedTBox loadOntologies(OWLOntology ontology) {
+	private ClassifiedTBox loadOntologies(OWLOntology ontology) {
 		/*
 		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation.
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
-        Ontology mergeOntology = OWLAPITranslatorOWL2QL.translateAndClassify(ontology);
+        Ontology mergeOntology = owlapiTranslator.translateAndClassify(ontology);
         return mergeOntology.tbox();
 	}
 

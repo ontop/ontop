@@ -20,44 +20,33 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TermType;
+
+import javax.annotation.Nonnull;
 
 //import com.hp.hpl.jena.iri.IRI;
 
-public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
+public class DatatypePredicateImpl extends FunctionSymbolImpl implements DatatypePredicate {
 
-	private static final long serialVersionUID = -6678449661465775977L;
+	@Nonnull
+	private final RDFDatatype returnedType;
 
-	/**
-	 * Constructs a datatype predicate with one term. This is a usual construct
-	 * where the type of the term represents the datatype itself.
-	 * 
-	 * @param name
-	 * 			The predicate name.
-	 * @param type
-	 * 			The datatype that the term holds.
-	 */
-	public DatatypePredicateImpl(String name, COL_TYPE type) {
-		super(name, 1, new COL_TYPE[] { type });
-	}
-	
-	/**
-	 * Construct a datatype predicate with two or more terms. The first term
-	 * used to hold the value and the others are for any additional information.
-	 * An example for using this constructor is the rdfs:Literal(value, lang).
-	 * The predicate uses the second term to put the language tag.
-	 * 
-	 * @param name
-	 * 			The predicate name.
-	 * @param types
-	 * 			The datatypes that each term holds.
-	 */
-	public DatatypePredicateImpl(String name, COL_TYPE[] types) {
-		super(name, types.length, types);
+	protected DatatypePredicateImpl(@Nonnull RDFDatatype returnedType, @Nonnull TermType argumentType) {
+		super(returnedType.toString(), ImmutableList.of(argumentType));
+		this.returnedType = returnedType;
 	}
 	
 	@Override
 	public DatatypePredicateImpl clone() {
 		return this;
+	}
+
+
+	@Override
+	public RDFDatatype getReturnedType() {
+		return returnedType;
 	}
 }

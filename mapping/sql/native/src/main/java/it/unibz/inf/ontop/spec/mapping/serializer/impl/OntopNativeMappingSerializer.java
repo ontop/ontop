@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
 
@@ -89,7 +89,7 @@ public class OntopNativeMappingSerializer {
             }
             writer.write(OntopNativeMappingParser.Label.mappingId.name() + "\t" + axiom.getId() + "\n");
 
-            ImmutableList<ImmutableFunctionalTerm> targetQuery = axiom.getTargetAtoms();
+            ImmutableList<TargetAtom> targetQuery = axiom.getTargetAtoms();
             writer.write(OntopNativeMappingParser.Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
 
             OBDASQLQuery sourceQuery = axiom.getSourceQuery();
@@ -100,7 +100,7 @@ public class OntopNativeMappingSerializer {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(ImmutableList<ImmutableFunctionalTerm> query) {
+    private String printTargetQuery(ImmutableList<TargetAtom> query) {
         return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
     }
 

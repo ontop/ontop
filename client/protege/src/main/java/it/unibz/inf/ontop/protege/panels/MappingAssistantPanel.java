@@ -28,15 +28,20 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLSer
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.ValueConstant;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
-import it.unibz.inf.ontop.protege.core.impl.RDBMSourceParameterConstants;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.MapItem;
 import it.unibz.inf.ontop.protege.gui.PredicateItem;
@@ -46,11 +51,7 @@ import it.unibz.inf.ontop.protege.gui.component.PropertyMappingPanel;
 import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import org.apache.commons.rdf.api.IRI;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -72,7 +73,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.protege.gui.PredicateItem.PredicateType.CLASS;
 
 public class MappingAssistantPanel extends javax.swing.JPanel implements DatasourceSelectorListener {
 
@@ -96,6 +97,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+    private final TermFactory termFactory;
+	private final JdbcTypeMapper jdbcTypeMapper;
+	private final TargetAtomFactory targetAtomFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -103,6 +107,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		this.configurationManager = configurationManager;
 		this.owlModelManager = owlModelManager;
 		prefixManager = obdaModel.getMutablePrefixManager();
+        termFactory = obdaModel.getTermFactory();
+        targetAtomFactory = obdaModel.getTargetAtomFactory();
+        jdbcTypeMapper = obdaModel.getJDBCTypeMapper();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -303,8 +310,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 		pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
 		Vector<Object> v = new Vector<>();
-		for (Predicate c : obdaModel.getCurrentVocabulary().classes()) {
-			v.addElement(new PredicateItem(c, prefixManager));
+		for (IRI c : obdaModel.getCurrentVocabulary().classes()) {
+			v.addElement(new PredicateItem(c, CLASS, prefixManager));
 		}
 		cboClassAutoSuggest = new AutoSuggestComboBox(v);
 		cboClassAutoSuggest.setRenderer(new ClassListCellRenderer());
@@ -530,7 +537,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Prepare the mapping target
 			List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			ImmutableList<ImmutableFunctionalTerm> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			ImmutableList<TargetAtom> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 
 			if (target.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
@@ -554,14 +561,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 	}// GEN-LAST:event_cmdCreateMappingActionPerformed
 
-	private ImmutableList<ImmutableFunctionalTerm> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
+	private ImmutableList<TargetAtom> prepareTargetQuery(MapItem predicateSubjectMap, List<MapItem> predicateObjectMapsList) {
 		// Create the body of the CQ
-		ImmutableList.Builder<ImmutableFunctionalTerm> bodyBuilder = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
 
 		// Store concept in the body, if any
 		ImmutableTerm subjectTerm = createSubjectTerm(predicateSubjectMap);
-		if (!predicateSubjectMap.getName().equals("owl:Thing")) {
-			ImmutableFunctionalTerm concept = TERM_FACTORY.getImmutableFunctionalTerm(predicateSubjectMap.getSourcePredicate(), subjectTerm);
+		if (!predicateSubjectMap.getPredicateIRI().equals(OWL.THING)) {
+			TargetAtom concept = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateSubjectMap.getPredicateIRI());
 			bodyBuilder.add(concept);
 		}
 
@@ -570,18 +577,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		for (MapItem predicateObjectMap : predicateObjectMapsList) {
 			if (predicateObjectMap.isObjectMap()) { // if an attribute
 				ImmutableTerm objectTerm = createObjectTerm(getColumnName(predicateObjectMap), predicateObjectMap.getDataType());
-				ImmutableFunctionalTerm attribute = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectTerm);
+				TargetAtom attribute = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateObjectMap.getPredicateIRI(), objectTerm);
 				bodyBuilder.add(attribute);
 				//distinguishVariables.add(objectTerm);
 			} else if (predicateObjectMap.isRefObjectMap()) { // if a role
 				ImmutableFunctionalTerm objectRefTerm = createRefObjectTerm(predicateObjectMap);
-				ImmutableFunctionalTerm role = TERM_FACTORY.getImmutableFunctionalTerm(predicateObjectMap.getSourcePredicate(), subjectTerm, objectRefTerm);
+				TargetAtom role = targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateObjectMap.getPredicateIRI(), objectRefTerm);
 				bodyBuilder.add(role);
 			}
 		}
 		// Create the head
 		//int arity = distinguishVariables.size();
-		//Function head = TERM_FACTORY.getFunction(TERM_FACTORY.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
+		//Function head = termFactory.getFunction(termFactory.getTermType(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 
 		// Create and return the conjunctive query
 		return bodyBuilder.build();
@@ -598,10 +605,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		return getUriFunctionTerm(subjectUriTemplate);
 	}
 
-	private ImmutableTerm createObjectTerm(String column, Predicate datatype) {
+	private ImmutableTerm createObjectTerm(String column, FunctionSymbol datatype) {
 		ImmutableTerm object;
 		if(column.matches("\"([\\w.]+)?\"")){
-			object = TERM_FACTORY.getConstantLiteral(column.substring(1, column.length()-1));
+			object = termFactory.getConstantLiteral(column.substring(1, column.length()-1));
 		}
 		else {
 			List<FormatString> columnStrings = parse(column);
@@ -609,12 +616,12 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				throw new RuntimeException("Unsupported column mapping: " + column);
 			}
 			String columnName = columnStrings.get(0).toString();
-			object = TERM_FACTORY.getVariable(columnName);
+			object = termFactory.getVariable(columnName);
 		}
 		if (datatype == null) {
 			return object;
 		} else {
-			return TERM_FACTORY.getImmutableFunctionalTerm(datatype, object);
+			return termFactory.getImmutableFunctionalTerm(datatype, object);
 		}
 	}
 
@@ -655,7 +662,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private MapItem createPredicateSubjectMap() {
 		// Create a default subject map using owl:Thing as the subject
-		return new MapItem(new PredicateItem(TERM_FACTORY.getClassPredicate("owl:Thing"), prefixManager));
+		return new MapItem(new PredicateItem(OWL.THING, CLASS, prefixManager));
 	}
 
 	private ImmutableFunctionalTerm getUriFunctionTerm(String text) {
@@ -668,13 +675,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				sb.append(token.toString());
 			} else if (token instanceof ColumnString) {
 				sb.append(PLACEHOLDER);
-				Variable column = TERM_FACTORY.getVariable(token.toString());
+				Variable column = termFactory.getVariable(token.toString());
 				terms.add(column);
 			}
 		}
-		ValueConstant uriTemplate = TERM_FACTORY.getConstantLiteral(sb.toString()); // complete URI template
+		ValueConstant uriTemplate = termFactory.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return TERM_FACTORY.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+		return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 	}
 
 	// Column placeholder pattern
@@ -801,7 +808,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn);
+			RDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory(), jdbcTypeMapper);
 			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
 			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
 			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {

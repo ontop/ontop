@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.cli;
 
+import com.github.rvesse.airline.Cli;
 import org.junit.Test;
+
+import static it.unibz.inf.ontop.cli.Ontop.getOntopCommandCLI;
 
 public class OntopR2RMLToOBDATest {
 
@@ -9,7 +12,7 @@ public class OntopR2RMLToOBDATest {
     @Test
     public void testOntopHelp (){
         String[] argv = {"help", "mapping", "to-obda"};
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     //@Ignore("too expensive to run")
@@ -19,7 +22,7 @@ public class OntopR2RMLToOBDATest {
                 "-i", "src/test/resources/books/exampleBooks.ttl",
                 "-o", "src/test/resources/output/converted-exampleBooks.obda"
         };
-        Ontop.main(argv);
+        runCommand(argv);
     }
 
     @Test
@@ -28,7 +31,14 @@ public class OntopR2RMLToOBDATest {
                 "-i", "src/test/resources/mapping.ttl",
                 "-o", "src/test/resources/output/mapping-booktutorial.obda"
         };
-        Ontop.main(argv);
+        runCommand(argv);
+    }
+
+    private void runCommand(String[] args) {
+        Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
+
+        OntopCommand command = ontopCommandCLI.parse(args);
+        command.run();
     }
 
 

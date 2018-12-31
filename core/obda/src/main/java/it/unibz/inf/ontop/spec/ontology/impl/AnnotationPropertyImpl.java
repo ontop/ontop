@@ -20,10 +20,8 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.AnnotationProperty;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents AnnotationPropertyExpression from the OWL 2 QL Specification
@@ -38,17 +36,17 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class AnnotationPropertyImpl implements AnnotationProperty {
 
-	private final Predicate predicate;
 	private final String name;
+	private IRI iri;
 
-	AnnotationPropertyImpl(String name) {
-		this.predicate = TERM_FACTORY.getAnnotationPropertyPredicate(name);
-		this.name = name;
+	AnnotationPropertyImpl(IRI iri) {
+		this.name = iri.getIRIString();
+		this.iri = iri;
 	}
 
 	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	@Override

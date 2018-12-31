@@ -21,20 +21,35 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-public class URITemplatePredicateImpl extends PredicateImpl implements URITemplatePredicate {
+import java.util.stream.IntStream;
+
+public class URITemplatePredicateImpl extends FunctionSymbolImpl implements URITemplatePredicate {
 
 	// The name of the function that creates URI's in Quest
 	private static final String URI_PREFIX = "URI";
-	private static final long serialVersionUID = 1L;
+	private final ObjectRDFType type;
 
-	public URITemplatePredicateImpl(int arity) {
-		// TODO: BAD CODE! Predicate shouldn't store the arity and the type.
-		super(URI_PREFIX  + arity, arity, null);
+	protected URITemplatePredicateImpl(int arity, String suffix, TypeFactory typeFactory) {
+		super(URI_PREFIX  + arity + suffix, IntStream.range(0, arity)
+				.boxed()
+				// TODO: require strings
+				.map(i -> typeFactory.getAbstractAtomicTermType())
+				.collect(ImmutableCollectors.toList()));
+		type = typeFactory.getIRITermType();
 	}
 	
 	@Override
 	public URITemplatePredicateImpl clone() {
 		return this;
+	}
+
+	@Override
+	public RDFTermType getReturnedType() {
+		return type;
 	}
 }

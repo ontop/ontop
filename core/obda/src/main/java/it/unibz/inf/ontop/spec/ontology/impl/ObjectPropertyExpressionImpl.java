@@ -20,11 +20,10 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import org.apache.commons.rdf.api.IRI;
 
 /**
  * Represents ObjectPropertyExpression from the OWL 2 QL Specification
@@ -43,57 +42,50 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 	private final boolean isInverse;
-	private final Predicate predicate;
+	private final IRI iri;
 	private final String string;
 	private final ObjectPropertyExpressionImpl inverseProperty;
 	
 	private final ObjectSomeValuesFromImpl domain;
 	
 	private final boolean isTop, isBottom;
-
-	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
-	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
 	
-	public static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(owlTopObjectPropertyIRI);
-	public static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(owlBottomObjectPropertyIRI);
+	static final ObjectPropertyExpression owlTopObjectProperty = new ObjectPropertyExpressionImpl(OWL.TOP_OBJECT_PROPERTY);
+	static final ObjectPropertyExpression owlBottomObjectProperty = new ObjectPropertyExpressionImpl(OWL.BOTTOM_OBJECT_PROPERTY);
 
-	/**
-	 * general constructor 
-	 * 
-	 * @param name
-	 */
-
-	ObjectPropertyExpressionImpl(String name) {
-		this.predicate = TERM_FACTORY.getObjectPropertyPredicate(name);
+	ObjectPropertyExpressionImpl(IRI iri) {
+		this.iri = iri;
 		this.isInverse = false;
-		this.string = name;
-		this.isTop = name.equals(owlTopObjectPropertyIRI);
-		this.isBottom = name.equals(owlBottomObjectPropertyIRI);
+		this.string = iri.getIRIString();
+		this.isTop = iri.equals(OWL.TOP_OBJECT_PROPERTY);
+		this.isBottom = iri.equals(OWL.BOTTOM_OBJECT_PROPERTY);
 		if (isTop || isBottom) 
 			this.inverseProperty = this;   // rule [R6] 
 		else
-			this.inverseProperty = new ObjectPropertyExpressionImpl(predicate, this);
+			this.inverseProperty = new ObjectPropertyExpressionImpl(iri, this);
 		
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
-	
+
+
+
 	/**
 	 * special constructor for creating the inverse of an object property
 	 *  (this constructor is never applied to the top and bottom properties)
-	 * 
-	 * @param p
+	 *
+	 * @param iri
 	 * @param inverseProperty
 	 */
 
-	private ObjectPropertyExpressionImpl(Predicate p, ObjectPropertyExpressionImpl inverseProperty) {
-		this.predicate = p;
+	private ObjectPropertyExpressionImpl(IRI iri, ObjectPropertyExpressionImpl inverseProperty) {
+		this.iri = iri;
 		this.isInverse = true; // always inverted
 		this.isTop = false; // cannot be the top property
 		this.isBottom = false; // cannot be the bottom property
 		this.inverseProperty = inverseProperty;
 		// always inverted
-		this.string = new StringBuilder().append(predicate.getName()).append("^-").toString();
-		this.domain = new ObjectSomeValuesFromImpl(this);		
+		this.string = new StringBuilder().append(this.iri.getIRIString()).append("^-").toString();
+		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
 
 	@Override
@@ -102,13 +94,13 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	}
 
 	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	@Override
 	public String getName() {
-		return predicate.getName();
+		return iri.getIRIString();
 	}
 	
 	@Override

@@ -20,11 +20,11 @@ package it.unibz.inf.ontop.owlapi.validation;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.ontology.*;
+import org.apache.commons.rdf.api.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +56,11 @@ public class QuestOWLEmptyEntitiesChecker {
 		this.conn = conn;
 	}
 
-	public Iterator<Predicate> iEmptyConcepts() {
+	public Iterator<IRI> iEmptyConcepts() {
 		return new EmptyEntitiesIterator(onto.classes().iterator(), conn);
 	}
 
-	public Iterator<Predicate> iEmptyRoles() {
+	public Iterator<IRI> iEmptyRoles() {
 		return new EmptyEntitiesIterator(onto.objectProperties().iterator(), onto.dataProperties().iterator(), conn);
 	}
 
@@ -90,7 +90,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * predicate in each data source.
 	 *
 	 */
-	private class EmptyEntitiesIterator implements Iterator<Predicate> {
+	private class EmptyEntitiesIterator implements Iterator<IRI> {
 
 
 		private static final String queryConcepts = "SELECT ?x WHERE {?x a <%s>.} LIMIT 1";
@@ -99,7 +99,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		private final OWLConnection questConn;
 
 		private boolean hasNext = false;
-		private Predicate nextConcept;
+		private IRI nextConcept;
 
 		private final Iterator<OClass> classIterator;
 		private final Iterator<ObjectPropertyExpression> objectRoleIterator;
@@ -160,20 +160,22 @@ public class QuestOWLEmptyEntitiesChecker {
 			this.dataRoleIterator = dataRoleIterator;
 		}
 
-		private String getPredicateQuery(Predicate p) {
-			return String.format(queryRoles, p.toString());
-		}
+		private String getPredicateQuery(IRI p) {
+			return String.format(queryRoles, p.getIRIString()); }
 
-		private String getClassQuery(Predicate p) {
-			return String.format(queryConcepts, p.toString());
-		}
+		private String getClassQuery(IRI p) {
+			return String.format(queryConcepts, p.getIRIString()); }
 
-		private String getQuery(Predicate p) {
-			if (p.getArity() == 1)
-				return getClassQuery(p);
-			else if (p.getArity() == 2)
-				return getPredicateQuery(p);
-			return "";
+		private String getQuery(int arity, IRI iri)
+		{
+			switch(arity) {
+				case 1:
+					return getClassQuery(iri);
+				case 2:
+					return getPredicateQuery(iri);
+				default:
+					return "";
+			}
 		}
 
 		@Override
@@ -181,8 +183,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			while (classIterator.hasNext()){
 				OClass next = classIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
-					Predicate entity = next.getPredicate();
-					if (nextEmptyEntity(entity)) {
+					if (nextEmptyEntity(next.getIRI(), 1)) {
 						nEmptyConcepts++;
 						return hasNext;
 					}
@@ -193,8 +194,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			while (objectRoleIterator.hasNext()){
 				ObjectPropertyExpression next = objectRoleIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
-					Predicate entity = next.getPredicate();
-					if (nextEmptyEntity(entity)) {
+					if (nextEmptyEntity(next.getIRI(), 2)) {
 						nEmptyRoles++;
 						return hasNext;
 					}
@@ -205,8 +205,7 @@ public class QuestOWLEmptyEntitiesChecker {
 			while (dataRoleIterator.hasNext()){
 				DataPropertyExpression next = dataRoleIterator.next();
 				if (!next.isTop() && !next.isBottom()) {
-					Predicate entity = next.getPredicate();
-					if (nextEmptyEntity(entity)) {
+					if (nextEmptyEntity(next.getIRI(), 2)) {
 						nEmptyRoles++;
 						return hasNext;
 					}
@@ -218,9 +217,9 @@ public class QuestOWLEmptyEntitiesChecker {
 			return hasNext;
 		}
 
-		private boolean nextEmptyEntity(Predicate entity) {
+		private boolean nextEmptyEntity(IRI entity, int arity) {
 
-			String query = getQuery(entity);
+			String query =getQuery(arity, entity);
 
 			//execute next query
 			try (OWLStatement stm = questConn.createStatement()){
@@ -243,7 +242,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 
 		@Override
-		public Predicate next() {
+		public IRI next() {
 			if (hasNext) {
 				return nextConcept;
 			}

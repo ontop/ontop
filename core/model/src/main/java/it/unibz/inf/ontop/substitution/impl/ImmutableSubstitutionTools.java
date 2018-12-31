@@ -1,40 +1,43 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.TermConstants;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
-
 /**
  * Tools for the new generation of (immutable) substitutions
  */
+
 public class ImmutableSubstitutionTools {
 
-    private static final ImmutableSubstitution<ImmutableTerm> EMPTY_SUBSTITUTION = new NeutralSubstitution();
+    private final SubstitutionFactory substitutionFactory;
+    private final ImmutabilityTools immutabilityTools;
 
-    static ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
-        ImmutableMap.Builder<Variable, ImmutableTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
-            ImmutableTerm immutableValue = ImmutabilityTools.convertIntoImmutableTerm(entry.getValue());
+    @Inject
+    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory,
+                                       ImmutabilityTools immutabilityTools) {
+        this.substitutionFactory = substitutionFactory;
+        this.immutabilityTools = immutabilityTools;
+    }
 
-            substitutionMapBuilder.put(entry.getKey(), immutableValue);
-
-        }
-        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
+    ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
+        ImmutableMap<Variable, ImmutableTerm> map = substitution.getMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> immutabilityTools.convertIntoImmutableTerm(e.getValue())));
+        return substitutionFactory.getSubstitution(map);
     }
 
 
@@ -47,7 +50,7 @@ public class ImmutableSubstitutionTools {
      *    t: target term
      *
      */
-    public static Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitution(ImmutableTerm sourceTerm,
+    public Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitution(ImmutableTerm sourceTerm,
                                                                                                    ImmutableTerm targetTerm) {
         /*
          * Variable
@@ -62,7 +65,7 @@ public class ImmutableSubstitutionTools {
                 return Optional.empty();
             }
 
-            ImmutableSubstitution<ImmutableTerm> substitution = new ImmutableSubstitutionImpl<>(
+            ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
                     ImmutableMap.of(sourceVariable, targetTerm));
             return Optional.of(substitution);
         }
@@ -82,14 +85,14 @@ public class ImmutableSubstitutionTools {
          * Constant
          */
         else if(sourceTerm.equals(targetTerm)) {
-            return Optional.of(EMPTY_SUBSTITUTION);
+            return Optional.of(substitutionFactory.getSubstitution());
         }
         else {
             return Optional.empty();
         }
     }
 
-    private static Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitutionOfFunctionalTerms(
+    private Optional<ImmutableSubstitution<ImmutableTerm>> computeUnidirectionalSubstitutionOfFunctionalTerms(
             ImmutableFunctionalTerm sourceFunctionalTerm, ImmutableFunctionalTerm targetFunctionalTerm) {
 
         /*
@@ -104,17 +107,17 @@ public class ImmutableSubstitutionTools {
         /*
          * Source is ground term
          */
-        if (isGroundTerm(sourceFunctionalTerm)) {
+        if (sourceFunctionalTerm.isGround()) {
             if (sourceFunctionalTerm.equals(targetFunctionalTerm)) {
-                return Optional.of(EMPTY_SUBSTITUTION);
+                return Optional.of(substitutionFactory.getSubstitution());
             }
             else {
                 return Optional.empty();
             }
         }
 
-        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getArguments();
-        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getArguments();
+        ImmutableList<? extends ImmutableTerm> sourceChildren = sourceFunctionalTerm.getTerms();
+        ImmutableList<? extends ImmutableTerm> targetChildren = targetFunctionalTerm.getTerms();
 
         /*
          * Arity equality
@@ -128,7 +131,7 @@ public class ImmutableSubstitutionTools {
          * Children
          */
         // Non-final
-        ImmutableSubstitution<ImmutableTerm> unifier = EMPTY_SUBSTITUTION;
+        ImmutableSubstitution<ImmutableTerm> unifier = substitutionFactory.getSubstitution();
         for(int i=0; i < sourceArity ; i++) {
 
             /*
@@ -155,22 +158,13 @@ public class ImmutableSubstitutionTools {
         return Optional.of(unifier);
     }
 
-    static ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
+    ImmutableSubstitution<VariableOrGroundTerm> convertIntoVariableOrGroundTermSubstitution(
             ImmutableSubstitution<ImmutableTerm> substitution) {
-        ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : substitution.getMap().entrySet()) {
-            VariableOrGroundTerm value = ImmutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
-
-            substitutionMapBuilder.put(entry.getKey(), value);
-        }
-        return new ImmutableSubstitutionImpl<>(substitutionMapBuilder.build());
-    }
-
-    public static ImmutableSubstitution<Constant> computeNullSubstitution(ImmutableSet<Variable> nullVariables) {
-        ImmutableMap<Variable, Constant> map = nullVariables.stream()
-                .map(v -> new AbstractMap.SimpleEntry<Variable, Constant>(v, TermConstants.NULL))
-                .collect(ImmutableCollectors.toMap());
-        return new ImmutableSubstitutionImpl<>(map);
+        ImmutableMap<Variable, VariableOrGroundTerm> map = substitution.getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue())));
+        return substitutionFactory.getSubstitution(map);
     }
 
     /**
@@ -179,8 +173,9 @@ public class ImmutableSubstitutionTools {
      * When applied to a MGU, it is expected to return another "equivalent" MGU.
      *
      */
-    public static ImmutableSubstitution<? extends ImmutableTerm> prioritizeRenaming(
-            ImmutableSubstitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> priorityVariables) {
+    public <T extends ImmutableTerm> ImmutableSubstitution<T> prioritizeRenaming(
+            ImmutableSubstitution<T> substitution, ImmutableSet<Variable> priorityVariables) {
+
         ImmutableMultimap<Variable, Variable> renamingMultimap = substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> priorityVariables.contains(e.getKey())
                         && (e.getValue() instanceof Variable)
@@ -196,8 +191,9 @@ public class ImmutableSubstitutionTools {
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().iterator().next()));
-        InjectiveVar2VarSubstitution renamingSubstitution = SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(renamingMap);
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(renamingMap);
 
-        return renamingSubstitution.composeWith(substitution);
+        // TODO: refactor
+        return (ImmutableSubstitution<T>) renamingSubstitution.composeWith(substitution);
     }
 }

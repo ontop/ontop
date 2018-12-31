@@ -77,9 +77,10 @@ public class OntopMappingOWLAPIConfigurationImpl extends OntopMappingConfigurati
     }
 
     Optional<Ontology> loadOntology() throws OntologyException {
+        OWLAPITranslatorOWL2QL translator = getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
         try {
             return loadInputOntology()
-                    .map(o -> OWLAPITranslatorOWL2QL.translateAndClassify(o));
+                    .map(o -> translator.translateAndClassify(o));
         }
         catch (OWLOntologyCreationException e) {
             throw new OntologyException(e.getMessage());

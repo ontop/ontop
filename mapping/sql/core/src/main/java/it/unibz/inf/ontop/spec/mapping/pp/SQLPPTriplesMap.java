@@ -21,13 +21,13 @@ package it.unibz.inf.ontop.spec.mapping.pp;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 
 
 public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 
-	ImmutableList<ImmutableFunctionalTerm> getTargetAtoms();
+	ImmutableList<TargetAtom> getTargetAtoms();
 
 	OBDASQLQuery getSourceQuery();
 
@@ -36,7 +36,7 @@ public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 	/**
 	 * PPMappingAssertion: a SQLPPTriplesMap with a single target atom.
 	 */
-	SQLPPTriplesMap extractPPMappingAssertion(ImmutableFunctionalTerm atom);
+	SQLPPTriplesMap extractPPMappingAssertion(TargetAtom atom);
 
-	SQLPPTriplesMap extractPPMappingAssertions(String newId, ImmutableList<ImmutableFunctionalTerm> atoms);
+	SQLPPTriplesMap extractPPMappingAssertions(String newId, ImmutableList<TargetAtom> atoms);
 }

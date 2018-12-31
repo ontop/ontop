@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.iq.node.OrderCondition;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 

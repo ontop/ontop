@@ -7,7 +7,10 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
+import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
+import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.OWLReasonerBase;
@@ -15,8 +18,6 @@ import org.semanticweb.owlapi.util.Version;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
-
-import static it.unibz.inf.ontop.owlapi.impl.QuestOWL.loadOntologies;
 
 /**
  * Wrapper around OntopOWLReasoner to use inside Protege
@@ -27,10 +28,12 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
     private final OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
     private final OntopConfigurationManager configurationManager;
     private OntopOWLConnection owlConnection;
+    private final OWLAPITranslatorOWL2QL owlapiTranslator;
 
 
     protected OntopProtegeReasoner(OWLOntology rootOntology, OntopProtegeOWLConfiguration configuration) throws IllegalConfigurationException {
         super(rootOntology, configuration, BufferingMode.BUFFERING);
+        this.owlapiTranslator = configuration.getOWLAPITranslator();
 
         reasoner = factory.createReasoner(rootOntology, configuration);
         this.configurationManager = configuration.getOntopConfigurationManager();
@@ -323,7 +326,11 @@ public class OntopProtegeReasoner extends OWLReasonerBase implements AutoCloseab
      * @throws Exception
      */
     public QuestOWLEmptyEntitiesChecker getEmptyEntitiesChecker() throws Exception {
-        return new QuestOWLEmptyEntitiesChecker(loadOntologies(getRootOntology()), owlConnection);
+        OWLOntology rootOntology = getRootOntology();
+        Ontology mergeOntology = owlapiTranslator.translateAndClassify(rootOntology);
+        ClassifiedTBox tBox = mergeOntology.tbox();
+
+        return new QuestOWLEmptyEntitiesChecker(tBox, owlConnection);
     }
 
     /**

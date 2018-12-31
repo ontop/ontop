@@ -23,16 +23,10 @@ package it.unibz.inf.ontop.protege.core;
 
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.spec.ontology.impl.ClassImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
-import it.unibz.inf.ontop.spec.ontology.impl.ObjectPropertyExpressionImpl;
-import org.semanticweb.owlapi.model.IRI;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.function.Function;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Implements MutableOntologyVocabulary
@@ -49,59 +43,52 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 public class MutableOntologyVocabularyImpl implements MutableOntologyVocabulary {
 
 	private static final class MutableOntologyVocabularyCategoryImpl implements MutableOntologyVocabularyCategory {
-		private final Map<String, Predicate> entities = new HashMap<>();
-		private final ImmutableSet<String> builtins;
-		private final Function<String, Predicate> ctor;
+		private final Set<IRI> entities;
+		private final ImmutableSet<IRI> builtins;
 
-		MutableOntologyVocabularyCategoryImpl(ImmutableSet<String> builtins, Function<String, Predicate> ctor) {
+		MutableOntologyVocabularyCategoryImpl(ImmutableSet<IRI> builtins) {
             this.builtins = builtins;
-            this.ctor = ctor;
-		    builtins.forEach(c -> entities.put(c, ctor.apply(c)));
+            entities = new HashSet<>(builtins);
 		}
 
 		@Override
-		public boolean contains(String iri) { return entities.containsKey(iri); }
+		public boolean contains(IRI iri) { return entities.contains(iri); }
 
 		@Override
 		public void declare(IRI iri) {
-		    String s = iri.toString();
-		    if (!entities.containsKey(s)) {
-		        Predicate p = ctor.apply(s);
-                entities.put(s, p);
-            }
+			entities.add(iri);
 		}
 
 		@Override
 		public void remove(IRI iri) {
-            String s = iri.toString();
-		    if (!builtins.contains(s))
-		        entities.remove(s);
+		    if (!builtins.contains(iri))
+		        entities.remove(iri);
 		}
 
 		@Override
-		public Iterator<Predicate> iterator() { return entities.values().iterator(); }
+		public Iterator<IRI> iterator() { return entities.iterator(); }
 	}
 
-	private final MutableOntologyVocabularyCategoryImpl classes = new MutableOntologyVocabularyCategoryImpl(
-			ImmutableSet.of(ClassImpl.owlThingIRI, ClassImpl.owlNothingIRI),
-            c -> TERM_FACTORY.getClassPredicate(c));
+	private final MutableOntologyVocabularyCategoryImpl classes;
 
-	private final MutableOntologyVocabularyCategoryImpl objectProperties = new MutableOntologyVocabularyCategoryImpl(
-			ImmutableSet.of(ObjectPropertyExpressionImpl.owlBottomObjectPropertyIRI,
-					ObjectPropertyExpressionImpl.owlTopObjectPropertyIRI),
-            c -> TERM_FACTORY.getObjectPropertyPredicate(c));
-
-	private final MutableOntologyVocabularyCategoryImpl dataProperties = new MutableOntologyVocabularyCategoryImpl(
-			ImmutableSet.of(DataPropertyExpressionImpl.owlBottomDataPropertyIRI,
-					DataPropertyExpressionImpl.owlTopDataPropertyIRI),
-            c -> TERM_FACTORY.getDataPropertyPredicate(c));
-
-	private final MutableOntologyVocabularyCategoryImpl annotationProperties = new MutableOntologyVocabularyCategoryImpl(
-			ImmutableSet.of(),
-            c -> TERM_FACTORY.getAnnotationPropertyPredicate(c));
+	private final MutableOntologyVocabularyCategoryImpl objectProperties;
+	private final MutableOntologyVocabularyCategoryImpl dataProperties;
+	private final MutableOntologyVocabularyCategoryImpl annotationProperties;
 
 	// package only
-	MutableOntologyVocabularyImpl() { }
+	MutableOntologyVocabularyImpl() {
+		classes = new MutableOntologyVocabularyCategoryImpl(
+				ImmutableSet.of(OWL.THING, OWL.NOTHING));
+
+		objectProperties = new MutableOntologyVocabularyCategoryImpl(
+				ImmutableSet.of(OWL.BOTTOM_OBJECT_PROPERTY, OWL.TOP_OBJECT_PROPERTY));
+
+		dataProperties = new MutableOntologyVocabularyCategoryImpl(
+				ImmutableSet.of(OWL.BOTTOM_DATA_PROPERTY, OWL.TOP_DATA_PROPERTY));
+
+		annotationProperties = new MutableOntologyVocabularyCategoryImpl(
+				ImmutableSet.of());
+	}
 
 	@Override
 	public MutableOntologyVocabularyCategory classes() {

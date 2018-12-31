@@ -1,16 +1,14 @@
 package it.unibz.inf.ontop.spec.dbschema.impl;
 
 
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
-import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -39,21 +37,27 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
      * Can be useful for eliminating self-joins
      */
     private final PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor;
+    private final JdbcTypeMapper jdbcTypeMapper;
+    private final TypeFactory typeFactory;
 
     @Inject
     private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings,
-                                        PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor) {
+                                        PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor,
+                                        JdbcTypeMapper jdbcTypeMapper, TypeFactory typeFactory) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
+        this.jdbcTypeMapper = jdbcTypeMapper;
+        this.typeFactory = typeFactory;
     }
 
     @Override
     public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection);
+            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory, jdbcTypeMapper);
             return extract(ppMapping, connection, metadata, constraintFile);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
         }
     }
@@ -94,7 +98,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
                 }
-
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);
                 }
@@ -107,7 +110,9 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
             return metadata;
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
-        }    }
+        }
+    }
 }

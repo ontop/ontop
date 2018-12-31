@@ -47,5 +47,7 @@ public interface IntermediateQueryBuilder {
 
     ImmutableList<QueryNode> getChildren(QueryNode node) throws IntermediateQueryBuilderException;
 
+    boolean contains(QueryNode node);
+
     IntermediateQueryFactory getFactory();
 }

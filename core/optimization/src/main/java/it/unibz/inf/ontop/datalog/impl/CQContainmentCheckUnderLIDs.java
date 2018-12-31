@@ -1,60 +1,54 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.CQContainmentCheck;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-
-public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
+public class CQContainmentCheckUnderLIDs {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CQContainmentCheckUnderLIDs.class);
 	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final LinearInclusionDependencies dependencies;
-	
-	/***
-	 * Constructs a CQC utility using the given query. If Sigma is not null and
-	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
-	 *
-	 */
-	public CQContainmentCheckUnderLIDs() {
-		dependencies = null;
-	}
+	private final ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies;
+	private final DatalogFactory datalogFactory;
+	private final UnifierUtilities unifierUtilities;
+	private final SubstitutionUtilities substitutionUtilities;
+	private final TermFactory termFactory;
 
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies) {
-		this.dependencies = dependencies;
+	public CQContainmentCheckUnderLIDs(ImmutableList<LinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
+                                       UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+                                       TermFactory termFactory) {
+	    // index dependencies
+		this.dependencies = dependencies.stream()
+				.collect(ImmutableCollectors.toMultimap(
+						d -> d.getHead().getFunctionSymbol(),
+						d -> d));
+		this.datalogFactory = datalogFactory;
+		this.unifierUtilities = unifierUtilities;
+		this.substitutionUtilities = substitutionUtilities;
+		this.termFactory = termFactory;
 	}
-	
-	
-	/**
+
+
+
+    /**
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
@@ -68,16 +62,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
-				rule = DATALOG_FACTORY.getFreshCQIECopy(rule);
+			for (LinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
+				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(d.getHead(), d.getBody()));
 				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
+				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					SubstitutionUtilities.applySubstitution(newFact, theta);
+					substitutionUtilities.applySubstitution(newFact, theta);
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -85,14 +79,14 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return derivedAtoms;
 	}
 	
-	public static final class IndexedCQ {
+	public final class IndexedCQ {
 		
 		private final Function head;
 		/***
 		 * An index of all the facts obtained by freezing this query.
 		 */
 		private final Map<Predicate, List<Function>> factMap;
-		
+
 		/***
 		 * Computes a query in which all terms have been replaced by
 		 * ValueConstants that have the no type and have the same 'name' as the
@@ -121,40 +115,23 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		}
 		
 		private Substitution computeHomomorphism(CQIE query) {
-			SubstitutionBuilder sb = new  SubstitutionBuilder();
+			SubstitutionBuilder sb = new  SubstitutionBuilder(termFactory);
 
 			// get the substitution for the head first 
 			// it will ensure that all answer variables are mapped either to constants or
 			//       to answer variables in the base (but not to the labelled nulls generated by the chase)
-			boolean headResult = HomomorphismUtilities.extendHomomorphism(sb, query.getHead(), head);
+			boolean headResult = extendHomomorphism(sb, query.getHead(), head);
 			if (!headResult)
 				return null;
 			
-			Substitution sub = HomomorphismUtilities.computeHomomorphism(sb, query.getBody(), factMap);
+			Substitution sub = computeSomeHomomorphism(sb, query.getBody(), factMap);
 			
 			return sub;
 		}	
 	}
 
 	
-	/***
-	 * True if the first query is contained in the second query
-	 *    (in other words, the first query is more specific, it has fewer answers)
-	 * 
-	 * @param q1
-	 * @param q2
-	 * @return true if the first query is contained in the second query
-	 */
-	@Override	
-	public boolean isContainedIn(CQIE q1, CQIE q2) {
 
-		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
-			return false;
-		
-		return (computeHomomorphsim(q1, q2) != null);
-	}
-	
-	@Override
 	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
 
         IndexedCQ indexedQ1 = indexedCQcache.get(q1);
@@ -187,7 +164,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		Set<Term> groundTerms = new HashSet<>();
 		for (Function atom : query.getBody())
 			// non-database atom
-			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
 				collectVariables(groundTerms, atom);
 			}
 			else {
@@ -201,7 +178,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		collectVariables(groundTerms, query.getHead());
 		
-		CQIE db = DATALOG_FACTORY.getCQIE(query.getHead(), databaseAtoms);
+		CQIE db = datalogFactory.getCQIE(query.getHead(), databaseAtoms);
 		
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
@@ -230,7 +207,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return false;
 		}
 
-		CQIE q0 = DATALOG_FACTORY.getCQIE(db.getHead(), atomsToLeave);
+		CQIE q0 = datalogFactory.getCQIE(db.getHead(), atomsToLeave);
 		// if db is homomorphically embeddable into q0
 		if (computeHomomorphsim(q0, db) != null) {
 			oneAtomQs++;
@@ -250,19 +227,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				terms.addAll(((Function)t).getTerms());
 		}		
 	}
-/*	
-	private static boolean containsConstants(Function atom) {
-		Deque<Term> terms = new LinkedList<>(atom.getTerms());
-		while (!terms.isEmpty()) {
-			Term t = terms.pollFirst();
-			if (t instanceof Constant)  
-				return true;
-			else if (!(t instanceof Variable))
-				terms.addAll(((Function)t).getTerms());
-		}		
-		return false;
-	}
-*/	
+
 	@Override
 	public String toString() {
 		if (dependencies != null)
@@ -270,4 +235,110 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		return "(empty)";
 	}
+
+	public ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies() { return dependencies; }
+
+
+
+
+	private static boolean extendHomomorphism(SubstitutionBuilder sb, Function from, Function to) {
+
+		if ((from.getArity() != to.getArity()) || !(from.getFunctionSymbol().equals(to.getFunctionSymbol())))
+			return false;
+
+		int arity = from.getArity();
+		for (int i = 0; i < arity; i++) {
+			Term fromTerm = from.getTerm(i);
+			Term toTerm = to.getTerm(i);
+			if (fromTerm instanceof Variable) {
+				boolean result = sb.extend((Variable)fromTerm, toTerm);
+				// if we cannot find a match, terminate the process and return false
+				if (!result)
+					return false;
+			}
+			else if (fromTerm instanceof Constant) {
+				// constants must match
+				if (!fromTerm.equals(toTerm))
+					return false;
+			}
+			else /*if (fromTerm instanceof Function)*/ {
+				// the to term must also be a function
+				if (!(toTerm instanceof Function))
+					return false;
+
+				boolean result = extendHomomorphism(sb, (Function)fromTerm, (Function)toTerm);
+				// if we cannot find a match, terminate the process and return false
+				if (!result)
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Extends a given substitution that maps each atom in {@code from} to match at least one atom in {@code to}
+	 *
+	 * @param sb
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	private static Substitution computeSomeHomomorphism(SubstitutionBuilder sb, List<Function> from, Map<Predicate, List<Function>> to) {
+
+		int fromSize = from.size();
+		if (fromSize == 0)
+			return sb.getSubstituition();
+
+		// stack of partial homomorphisms
+		Stack<SubstitutionBuilder> sbStack = new Stack<>();
+		sbStack.push(sb);
+		// set the capacity to reduce memory re-allocations
+		List<Stack<Function>> choicesMap = new ArrayList<>(fromSize);
+
+		int currentAtomIdx = 0;
+		while (currentAtomIdx >= 0) {
+			Function currentAtom = from.get(currentAtomIdx);
+
+			Stack<Function> choices;
+			if (currentAtomIdx >= choicesMap.size()) {
+				// we have never reached this atom (this is lazy initialization)
+				// initializing the stack
+				choices = new Stack<>();
+				// add all choices for the current predicate symbol
+				choices.addAll(to.get(currentAtom.getFunctionSymbol()));
+				choicesMap.add(currentAtomIdx, choices);
+			}
+			else
+				choices = choicesMap.get(currentAtomIdx);
+
+			boolean choiceMade = false;
+			while (!choices.isEmpty()) {
+				SubstitutionBuilder sb1 = sb.clone(); // clone!
+				choiceMade = extendHomomorphism(sb1, currentAtom, choices.pop());
+				if (choiceMade) {
+					// we reached the last atom
+					if (currentAtomIdx == fromSize - 1)
+						return sb1.getSubstituition();
+
+					// otherwise, save the partial homomorphism
+					sbStack.push(sb);
+					sb = sb1;
+					currentAtomIdx++;  // move to the next atom
+					break;
+				}
+			}
+			if (!choiceMade) {
+				// backtracking
+				// restore all choices for the current predicate symbol
+				choices.addAll(to.get(currentAtom.getFunctionSymbol()));
+				sb = sbStack.pop();   // restore the partial homomorphism
+				currentAtomIdx--;   // move to the previous atom
+			}
+		}
+
+		// checked all possible substitutions and have not found anything
+		return null;
+	}
+
 }

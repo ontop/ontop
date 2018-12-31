@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
@@ -22,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * Created by Roman Kontchakov on 25/01/2017.
  */
@@ -33,10 +32,12 @@ public class SelectQueryAttributeExtractor2 {
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
+    private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(DBMetadata metadata) {
+    public SelectQueryAttributeExtractor2(DBMetadata metadata, TermFactory termFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
+        this.termFactory = termFactory;
     }
 
     public RAExpressionAttributes parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -352,6 +353,6 @@ public class SelectQueryAttributeExtractor2 {
     }
 
     private Variable createVariable(QuotedID id) {
-        return TERM_FACTORY.getVariable(id.getName() + relationIndex);
+        return termFactory.getVariable(id.getName() + relationIndex);
     }
 }

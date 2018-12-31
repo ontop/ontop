@@ -22,47 +22,48 @@ package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLIndividual;
+import org.junit.*;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
 public class MarriageTest {
 
-	private Connection conn;
-
 	private static final String ONTOLOGY_FILE = "src/test/resources/marriage/marriage.ttl";
 	private static final String OBDA_FILE = "src/test/resources/marriage/marriage.obda";
     private static final String CREATE_DB_FILE = "src/test/resources/marriage/create-db.sql";
-    private static final String DROP_DB_FILE = "src/test/resources/marriage/drop-db.sql";
 	private static final String JDBC_URL = "jdbc:h2:mem:questjunitdb";
 	private static final String JDBC_USER = "sa";
 	private static final String JDBC_PASSWORD = "";
+	private static final Logger LOGGER = LoggerFactory.getLogger(MarriageTest.class);
+
+	private static Connection CONNECTION;
+	private static OntopOWLReasoner REASONER;
 
 
-    @Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void setUp() throws Exception {
 
-		conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+		CONNECTION = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 
-
-		Statement st = conn.createStatement();
+		Statement st = CONNECTION.createStatement();
 
 		FileReader reader = new FileReader(CREATE_DB_FILE);
 		BufferedReader in = new BufferedReader(reader);
@@ -75,34 +76,25 @@ public class MarriageTest {
 		in.close();
 
 		st.executeUpdate(bf.toString());
-		conn.commit();
+		CONNECTION.commit();
+
+		OntopOWLFactory owlFactory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(OBDA_FILE)
+				.ontologyFile(ONTOLOGY_FILE)
+				.jdbcUrl(JDBC_URL)
+				.jdbcUser(JDBC_USER)
+				.jdbcPassword(JDBC_PASSWORD)
+				.enableTestMode()
+				.build();
+
+		REASONER = owlFactory.createReasoner(config);
 	}
 
-	@After
-	public void tearDown() throws Exception {
-
-		  dropTables();
-			conn.close();
-
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader(DROP_DB_FILE);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+	@AfterClass
+	public static void tearDown() throws Exception {
+		REASONER.dispose();
+		CONNECTION.close();
 	}
 
 
@@ -123,8 +115,8 @@ public class MarriageTest {
                 "}";
 
         ImmutableSet<String> expectedValues = ImmutableSet.of(
-                "http://example.com/person/1",
-                "http://example.com/person/2"
+                "<http://example.com/person/1>",
+                "<http://example.com/person/2>"
         );
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -149,29 +141,201 @@ public class MarriageTest {
 
 		// All distinct values of x
 		ImmutableSet<String> expectedValues = ImmutableSet.of(
-				"http://example.com/person/1",
-				"http://example.com/person/2",
-				"http://example.com/person/3"
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
 		);
 		checkReturnedValues(queryBind, expectedValues);
 	}
 
+	@Test
+	public void testPersonConstruct() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}";
+
+		int count = runConstructQuery(query);
+		assertEquals(3, count);
+	}
+
+	@Test
+	public void testPersonConstructLimit() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"LIMIT 2";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void testPersonConstructOffset() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void testPersonConstructLimitOffset1() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 3\n" +
+				"LIMIT 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(0, count);
+	}
+
+	@Test
+	public void testPersonConstructLimitOffset2() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"OFFSET 2\n" +
+				"LIMIT 1";
+
+		int count = runConstructQuery(query);
+		assertEquals(1, count);
+	}
+
+	@Test
+	public void testPersonConstructOrderByLimit() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"CONSTRUCT {\n" +
+				" ?x a :Persona . \n" +
+				"}\n" +
+				"WHERE {\n" +
+				"  ?x a :Person .\n" +
+				"}\n" +
+				"ORDER BY ?x\n" +
+				"LIMIT 2";
+
+		int count = runConstructQuery(query);
+		assertEquals(2, count);
+	}
+
+	@Test
+	public void testOptionallyMarriedToMusician() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?s ?l2 \n" +
+				"WHERE {\n" +
+				"?x :firstName ?l1 .\n" +
+				   "OPTIONAL { \n" +
+				"    ?p :hasSpouse ?s .\n" +
+				"       OPTIONAL {\n" +
+				"        ?s :firstName ?l2 ;\n" +
+				"          a :Musician .\n" +
+				"       }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Test
+	public void testLJUnion() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?p ?x \n" +
+				"WHERE {\n" +
+				"?p a :Person .\n" +
+				"OPTIONAL { \n" +
+				"    { ?p :firstName ?x . }\n" +
+				"    UNION \n" +
+				"    { ?p :lastName ?x . }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of("Mary", "Bob", "John", "Smith", "Forester", "Doe");
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Ignore
+	@Test
+	public void testLJJoinUnion() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?p ?x \n" +
+				"WHERE {\n" +
+				"?p a :Person .\n" +
+				"OPTIONAL { \n" +
+				"    { ?p :firstName ?x . }\n" +
+				"    UNION \n" +
+				"    { ?p :lastName ?x . }\n" +
+				"    ?p a :Musician ." +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of("Mary", "Bob", "John", "Smith", "Forester", "Doe");
+		checkReturnedValues(query, expectedValues);
+	}
+
+	@Test
+	public void testEmptyClass1() throws Exception {
+		String query = "PREFIX : <http://example.org/marriage/voc#>\n" +
+				"\n" +
+				"SELECT ?x ?i ?e \n" +
+				"WHERE {\n" +
+				"?x :firstName ?l1 .\n" +
+				"OPTIONAL { \n" +
+				"    ?x :playsInstrument ?i .\n" +
+				"       OPTIONAL {\n" +
+				"         ?e a :EmptyElement .\n " +
+				"         ?r a :Musician \n" +
+				"       }\n" +
+				"  }\n" +
+				"}\n";
+
+		ImmutableSet<String> expectedValues = ImmutableSet.of(
+				"<http://example.com/person/1>",
+				"<http://example.com/person/2>",
+				"<http://example.com/person/3>"
+		);
+		checkReturnedValues(query, expectedValues);
+	}
+
     private void checkReturnedValues(String query, Set<String> expectedValues) throws Exception {
 
-		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.nativeOntopMappingFile(OBDA_FILE)
-				.ontologyFile(ONTOLOGY_FILE)
-				.jdbcUrl(JDBC_URL)
-				.jdbcUser(JDBC_USER)
-				.jdbcPassword(JDBC_PASSWORD)
-				.enableTestMode()
-				.build();
-		OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-
         // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
+        OWLConnection conn = REASONER.getConnection();
         OWLStatement st = conn.createStatement();
 
         Set<String> returnedValues = new HashSet<>();
@@ -180,17 +344,34 @@ public class MarriageTest {
 
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-                OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-                returnedValues.add(ind1.toStringID());
+
+				OWLObject value = bindingSet.getOWLObject("x");
+				String stringValue = (value instanceof OWLLiteral)
+						? ((OWLLiteral) value).getLiteral()
+						: (value == null) ? null : value.toString();
+
+                returnedValues.add(stringValue);
             }
         } finally {
             conn.close();
-            reasoner.dispose();
         }
         assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
                 returnedValues.equals(expectedValues));
-
     }
+
+    private int runConstructQuery(String constructQuery) throws Exception {
+		int count = 0;
+		try (OWLConnection conn = REASONER.getConnection();
+			 OWLStatement st = conn.createStatement()) {
+			GraphOWLResultSet rs = st.executeConstructQuery(constructQuery);
+			while (rs.hasNext()) {
+				OWLAxiom axiom = rs.next();
+				LOGGER.debug(axiom.toString());
+				count++;
+			}
+		}
+		return count;
+	}
 
 
 }

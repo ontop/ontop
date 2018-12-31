@@ -21,12 +21,10 @@ package it.unibz.inf.ontop.substitution.impl;
  */
 
 
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 
-import it.unibz.inf.ontop.model.term.TermConstants;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Collection;
@@ -59,6 +57,13 @@ public class SubstitutionUtilities {
 		private static final long serialVersionUID = 1587922941160561062L;
     }
 
+    private final TermFactory termFactory;
+
+    @Inject
+    public SubstitutionUtilities(TermFactory termFactory) {
+        this.termFactory = termFactory;
+    }
+
 
     /**
      * This method will return a new query, resulting from the application of
@@ -70,7 +75,7 @@ public class SubstitutionUtilities {
      * @param substitution
      * @return
      */
-    public static CQIE applySubstitution(CQIE q, Substitution substitution, boolean clone) {
+    public CQIE applySubstitution(CQIE q, Substitution substitution, boolean clone) {
 
         CQIE newq;
         if (clone)
@@ -86,7 +91,7 @@ public class SubstitutionUtilities {
         return newq;
     }
 
-    public static CQIE applySubstitution(CQIE q, Substitution substitution) {
+    public CQIE applySubstitution(CQIE q, Substitution substitution) {
         return applySubstitution(q, substitution, true);
     }
 
@@ -98,11 +103,11 @@ public class SubstitutionUtilities {
      * @param unifier
      */
 
-    public static void applySubstitution(Function atom, Substitution unifier) {
+    public void applySubstitution(Function atom, Substitution unifier) {
         applySubstitution(atom, unifier, 0);
     }
 
-    public static void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
+    public void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
 
         List<Term> terms = atom.getTerms();
 
@@ -130,13 +135,13 @@ public class SubstitutionUtilities {
      * @return substitution
      */
 
-    public static Substitution getNullifier(Collection<Variable> vars) {
+    public Substitution getNullifier(Collection<Variable> vars) {
         Map<Variable, Term> entries = new HashMap<>();
 
         for (Variable var : vars) {
-            entries.put(var, TermConstants.NULL);
+            entries.put(var, termFactory.getNullConstant());
         }
-        Substitution substitution = new SubstitutionImpl(entries);
+        Substitution substitution = new SubstitutionImpl(entries, termFactory);
         return substitution;
     }
 
@@ -149,7 +154,7 @@ public class SubstitutionUtilities {
      * Returns a new substitution function.
      *
      */
-    public static Substitution union(Substitution substitution1, Substitution substitution2)
+    public Substitution union(Substitution substitution1, Substitution substitution2)
             throws SubstitutionUnionException {
         Map<Variable, Term> substitutionMap = new HashMap<>();
         substitutionMap.putAll(substitution1.getMap());
@@ -174,7 +179,7 @@ public class SubstitutionUtilities {
             }
         }
 
-        Substitution newSubstitution = new SubstitutionImpl(substitutionMap);
+        Substitution newSubstitution = new SubstitutionImpl(substitutionMap, termFactory);
         return newSubstitution;
     }
 }

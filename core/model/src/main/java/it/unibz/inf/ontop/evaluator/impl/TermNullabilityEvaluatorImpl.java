@@ -3,22 +3,38 @@ package it.unibz.inf.ontop.evaluator.impl;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
-import static it.unibz.inf.ontop.model.term.TermConstants.NULL;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
 @Singleton
 public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
+    private final SubstitutionFactory substitutionFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final DatalogTools datalogTools;
+    private final ValueConstant valueNull;
+    private final ExpressionEvaluator defaultExpressionEvaluator;
+
     @Inject
-    private TermNullabilityEvaluatorImpl() {
+    private TermNullabilityEvaluatorImpl(SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                         TypeFactory typeFactory, DatalogTools datalogTools,
+                                         ExpressionEvaluator defaultExpressionEvaluator) {
+        this.substitutionFactory = substitutionFactory;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.datalogTools = datalogTools;
+        this.valueNull = termFactory.getNullConstant();
+        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     @Override
@@ -28,7 +44,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
             return isFunctionalTermNullable((ImmutableFunctionalTerm) term, nullableVariables);
         }
         else if (term instanceof Constant) {
-            return term.equals(NULL);
+            return term.equals(valueNull);
         }
         else if (term instanceof Variable) {
             return nullableVariables.contains(term);
@@ -40,11 +56,25 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
 
     @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
-        ImmutableExpression nullCaseExpression = SUBSTITUTION_FACTORY.getSubstitution(variable, NULL)
+        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
                 .applyToBooleanExpression(expression);
 
-        // TODO: inject the expression evaluator instead
-        EvaluationResult evaluationResult = new ExpressionEvaluator().evaluateExpression(nullCaseExpression);
+        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
+                .evaluateExpression(nullCaseExpression);
+        return evaluationResult.isEffectiveFalse();
+    }
+
+    @Override
+    public boolean isFilteringNullValues(ImmutableExpression expression, ImmutableSet<Variable> tightVariables) {
+        ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(
+                tightVariables.stream()
+                        .collect(ImmutableCollectors.toMap(
+                                v -> v,
+                                v -> valueNull)))
+                .applyToBooleanExpression(expression);
+
+        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
+                .evaluateExpression(nullCaseExpression);
         return evaluationResult.isEffectiveFalse();
     }
 
@@ -59,7 +89,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     }
 
     private boolean hasNullableArgument(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> nullableVariables) {
-        return functionalTerm.getArguments().stream()
+        return functionalTerm.getTerms().stream()
                 .anyMatch(t -> isNullable(t, nullableVariables));
     }
 

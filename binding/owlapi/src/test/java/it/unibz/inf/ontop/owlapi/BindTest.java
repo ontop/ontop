@@ -413,7 +413,7 @@ public class BindTest {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (STRLEN(CONCAT(?title, \" \")) AS ?v)\n"
-                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
+                + "   BIND (CONCAT(?title, \" \", str(?v)) AS ?w)\n"
                 + "}";
 
 
@@ -465,8 +465,8 @@ public class BindTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"goodSPARQL Tutorial\"^^xsd:string");
-        expectedValues.add("\"badThe Semantic Web\"^^xsd:string");
+        expectedValues.add("\"goodSPARQL Tutorial\"@en");
+        expectedValues.add("\"badThe Semantic Web\"@en");
         checkReturnedValues(queryBind, expectedValues);
 
 
@@ -495,6 +495,37 @@ public class BindTest {
             throw e.getCause();
         }
 
+    }
+
+    @Test
+    public void testBindLangTag() throws Exception {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?w\n" +
+                "WHERE {\n" +
+                "  ?y dc:title ?title .\n" +
+                "  BIND( lang(?title) AS ?w ) .\n" +
+                "}\n";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        checkReturnedValues(query, expectedValues);
+    }
+
+    @Test
+    public void testBindLangTag2() throws Exception {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?w\n" +
+                "WHERE {\n" +
+                "  ?y dc:title ?title .\n" +
+                "  BIND (str(?title) AS ?s)\n" +
+                "  BIND( lang(?s) AS ?w ) .\n" +
+                "}\n";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\"\"^^xsd:string");
+        checkReturnedValues(query, expectedValues);
     }
 
 

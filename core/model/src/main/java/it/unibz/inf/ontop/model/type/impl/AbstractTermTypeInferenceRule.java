@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.model.type.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.exception.AbstractTermTypeException;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.exception.IncompatibleTermException;
 import it.unibz.inf.ontop.model.type.TermTypeInferenceRule;
@@ -12,48 +12,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TYPE_FACTORY;
-
 /**
  * TODO: explain
  */
 public abstract class AbstractTermTypeInferenceRule implements TermTypeInferenceRule {
 
     @Override
-    public Optional<TermType> inferType(List<Term> terms, ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
+    public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes)
             throws IncompatibleTermException {
-
-        ImmutableList<Optional<TermType>> argumentTypes = ImmutableList.copyOf(
-                terms.stream()
-                        .map(TermTypeInferenceTools::inferType)
-                        .collect(Collectors.toList()));
-        return inferTypeFromArgumentTypes(argumentTypes, expectedBaseTypes);
-
-    }
-
-    @Override
-    public Optional<TermType> inferTypeFromArgumentTypes(ImmutableList<Optional<TermType>> argumentTypes,
-                                                  ImmutableList<Optional<Predicate.COL_TYPE>> expectedBaseTypes)
-            throws IncompatibleTermException {
-
-        /**
-         * TODO: restore inequality test between the arities
-         */
-        if (expectedBaseTypes.size() < argumentTypes.size()) {
-            throw new IllegalArgumentException("Arity mismatch between " + argumentTypes + " and " + expectedBaseTypes);
-        }
-
-        /**
-         * Checks the argument types
-         */
-        IntStream.range(0, argumentTypes.size())
-                .forEach(i -> argumentTypes.get(i)
-                        .ifPresent(t -> expectedBaseTypes.get(i).ifPresent(expectedBaseType -> {
-                            if (!t.isCompatibleWith(expectedBaseType)) {
-                                throw new IncompatibleTermException(TYPE_FACTORY.getTermType(expectedBaseType), t);
-                            }
-                        })));
-        doAdditionalChecks(argumentTypes);
 
         return postprocessInferredType(reduceInferredTypes(argumentTypes));
     }
@@ -63,13 +29,6 @@ public abstract class AbstractTermTypeInferenceRule implements TermTypeInference
      */
     protected Optional<TermType> postprocessInferredType(Optional<TermType> termType) {
         return termType;
-    }
-
-    /**
-     * Hook, does nothing by default
-     */
-    protected void doAdditionalChecks(ImmutableList<Optional<TermType>> argumentTypes)
-            throws IncompatibleTermException {
     }
 
     /**

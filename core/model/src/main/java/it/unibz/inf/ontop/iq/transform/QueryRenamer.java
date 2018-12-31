@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.iq.transform;
 
-import it.unibz.inf.ontop.iq.IntermediateQuery;
+import it.unibz.inf.ontop.iq.IQ;
 
-public interface QueryRenamer extends QueryTransformer {
+public interface QueryRenamer {
 
-    @Override
-    IntermediateQuery transform(IntermediateQuery originalQuery);
+    IQ transform(IQ originalQuery);
 }

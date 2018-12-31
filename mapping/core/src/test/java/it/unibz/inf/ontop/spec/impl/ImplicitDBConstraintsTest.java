@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -26,7 +27,7 @@ public class ImplicitDBConstraintsTest {
 	
 	@Before
 	public void setupMetadata(){
-		this.md = DBMetadataTestingTools.createDummyMetadata();
+		this.md = createDummyMetadata();
 		this.idfac = md.getQuotedIDFactory();
 
 		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));

@@ -20,17 +20,16 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
 import it.unibz.inf.ontop.spec.ontology.DataPropertyRangeExpression;
 import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /**
  * Represents DataPropertyExpression from the OWL 2 QL Specification
@@ -45,34 +44,30 @@ import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
-	private final Predicate predicate;
 	private final String name;
 	
 	private final boolean isTop, isBottom;
 	
 	private final Map<Datatype, DataSomeValuesFrom> domains = new HashMap<>();
 	private final DataPropertyRangeExpressionImpl range;
+	
+    public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(OWL.TOP_DATA_PROPERTY);
+    public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(OWL.BOTTOM_DATA_PROPERTY);
+	private final IRI iri;
 
-	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
-	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
-	
-    public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(owlTopDataPropertyIRI);
-    public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(owlBottomDataPropertyIRI);
-	
-	DataPropertyExpressionImpl(String name) {
-		this.predicate = TERM_FACTORY.getDataPropertyPredicate(name);
-		this.name = name;		
-		this.isTop = name.equals(owlTopDataPropertyIRI);
-		this.isBottom = name.equals(owlBottomDataPropertyIRI);
+	DataPropertyExpressionImpl(IRI iri) {
+		this.name = iri.getIRIString();
+		this.iri = iri;
+		this.isTop = iri.equals(OWL.TOP_DATA_PROPERTY);
+		this.isBottom = iri.equals(OWL.BOTTOM_DATA_PROPERTY);
 
 		this.domains.put(DatatypeImpl.rdfsLiteral, new DataSomeValuesFromImpl(this, DatatypeImpl.rdfsLiteral));
 		this.range = new DataPropertyRangeExpressionImpl(this);
 	}
 
-
 	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	public IRI getIRI() {
+		return iri;
 	}
 
 	@Override

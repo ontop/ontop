@@ -77,8 +77,10 @@ public class QuestImplicitDBConstraintsTest {
 
 	@After
 	public void tearDown() throws Exception {
-		conn.close();
-		reasoner.dispose();
+		if (conn != null)
+			conn.close();
+		if (reasoner != null)
+			reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
 			java.sql.Statement s = sqlConnection.createStatement();
 			try {

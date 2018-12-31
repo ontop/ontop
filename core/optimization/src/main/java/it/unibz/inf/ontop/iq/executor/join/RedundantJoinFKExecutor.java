@@ -1,23 +1,12 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.DataNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.VariableOccurrenceAnalyzer;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.iq.*;
@@ -29,7 +18,6 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -56,7 +44,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
             throws InvalidQueryOptimizationProposalException, EmptyQueryException {
 
         InnerJoinNode joinNode = proposal.getFocusNode();
-        ImmutableMultimap<DatabaseRelationDefinition, DataNode> dataNodeMap = extractDataNodeMap(query, joinNode);
+        ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap = extractDataNodeMap(query, joinNode);
 
         ImmutableSet<DataNode> nodesToRemove = findRedundantNodes(query, joinNode, dataNodeMap);
 
@@ -80,13 +68,13 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                                                                             InnerJoinNode joinNode,
                                                                             ImmutableSet<DataNode> nodesToRemove) {
 
-        /**
+        /*
          * First removes all the redundant nodes
          */
-        nodesToRemove.stream()
+        nodesToRemove
                 .forEach(treeComponent::removeSubTree);
 
-        /**
+        /*
          * Then replaces the join node if needed
          */
         switch (query.getChildren(joinNode).size()) {
@@ -98,7 +86,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 if (joinNode.getOptionalFilterCondition().isPresent()) {
                     FilterNode newFilterNode = iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get());
                     treeComponent.replaceNode(joinNode, newFilterNode);
-                    /**
+                    /*
                      * NB: the filter node is not declared as the replacing node but the child is.
                      * Why? Because a JOIN with a filtering condition could decomposed into two different nodes.
                      */
@@ -116,23 +104,17 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     /**
      * Predicates not having a DatabaseRelationDefinition are ignored
      */
-    private ImmutableMultimap<DatabaseRelationDefinition, DataNode> extractDataNodeMap(IntermediateQuery query,
-                                                                                       InnerJoinNode joinNode) {
-
-        DBMetadata dbMetadata = query.getDBMetadata();
-
+    private ImmutableMultimap<RelationDefinition, ExtensionalDataNode> extractDataNodeMap(IntermediateQuery query,
+                                                                                          InnerJoinNode joinNode) {
         return query.getChildren(joinNode).stream()
-                .filter(c -> c instanceof DataNode)
-                .map(c -> (DataNode) c)
-                .map(c -> getDatabaseRelationByName(dbMetadata, c.getProjectionAtom().getPredicate())
-                        .map(r -> new SimpleEntry<DatabaseRelationDefinition, DataNode>(r, c)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .filter(c -> c instanceof ExtensionalDataNode)
+                .map(c -> (ExtensionalDataNode) c)
+                .map(c -> Maps.immutableEntry(c.getProjectionAtom().getPredicate().getRelationDefinition(), c))
                 .collect(ImmutableCollectors.toMultimap());
     }
 
     private ImmutableSet<DataNode> findRedundantNodes(IntermediateQuery query, InnerJoinNode joinNode,
-                                                      ImmutableMultimap<DatabaseRelationDefinition, DataNode> dataNodeMap) {
+                                                      ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap) {
         return dataNodeMap.keySet().stream()
                 .flatMap(r -> r.getForeignKeys().stream()
                         .flatMap(c -> selectRedundantNodesForConstraint(r, c, query, joinNode, dataNodeMap)))
@@ -142,15 +124,15 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     /**
      * TODO: explain
      */
-    private Stream<DataNode> selectRedundantNodesForConstraint(DatabaseRelationDefinition sourceRelation,
+    private Stream<ExtensionalDataNode> selectRedundantNodesForConstraint(RelationDefinition sourceRelation,
                                                                ForeignKeyConstraint constraint,
                                                                IntermediateQuery query,
                                                                InnerJoinNode joinNode,
-                                                               ImmutableMultimap<DatabaseRelationDefinition, DataNode> dataNodeMap) {
+                                                               ImmutableMultimap<RelationDefinition, ExtensionalDataNode> dataNodeMap) {
         /**
          * "Target" data nodes === "referenced" data nodes
          */
-        ImmutableCollection<DataNode> targetDataNodes = dataNodeMap.get(constraint.getReferencedRelation());
+        ImmutableCollection<ExtensionalDataNode> targetDataNodes = dataNodeMap.get(constraint.getReferencedRelation());
 
         /**
          * No optimization possible
@@ -170,7 +152,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
      *
      * TODO: explain
      */
-    private boolean areMatching(DataNode sourceDataNode, DataNode targetDataNode, ForeignKeyConstraint constraint) {
+    private boolean areMatching(ExtensionalDataNode sourceDataNode, ExtensionalDataNode targetDataNode, ForeignKeyConstraint constraint) {
 
         ImmutableList<? extends VariableOrGroundTerm> sourceArguments = sourceDataNode.getProjectionAtom().getArguments();
         ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
@@ -183,7 +165,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     /**
      * TODO: explain
      */
-    private boolean areNonFKColumnsUnused(DataNode targetDataNode, IntermediateQuery query,
+    private boolean areNonFKColumnsUnused(ExtensionalDataNode targetDataNode, IntermediateQuery query,
                                           ForeignKeyConstraint constraint) {
 
         ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
@@ -223,19 +205,6 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
         return remainingTerms.stream()
                 .map(v -> (Variable) v)
-                .allMatch(v -> ! analyzer.isVariableUsedSomewhereElse(query, targetDataNode, v));
-    }
-
-    private Optional<DatabaseRelationDefinition> getDatabaseRelationByName(DBMetadata dbMetadata, AtomPredicate predicate) {
-
-        RelationID relationId = Relation2Predicate.createRelationFromPredicateName(dbMetadata.getQuotedIDFactory(),
-                predicate);
-
-        return Optional.ofNullable(dbMetadata.getRelation(relationId))
-                /**
-                 * Here we only consider DB relations
-                 */
-                .filter(r -> r instanceof DatabaseRelationDefinition)
-                .map(r -> (DatabaseRelationDefinition) r);
+                .noneMatch(v -> analyzer.isVariableUsedSomewhereElse(query, targetDataNode, v));
     }
 }

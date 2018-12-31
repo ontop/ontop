@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.iq.executor.join;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
@@ -15,23 +17,25 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
-
 /**
  * TODO: describe
  */
 public class JoinExtractionUtils {
 
-    /**
-     * TODO: explain
-     */
-    public static class UnsatisfiableExpressionException extends Exception  {
+    private final TermFactory termFactory;
+    private final ExpressionEvaluator defaultExpressionEvaluator;
+
+    @Inject
+    private JoinExtractionUtils(TermFactory termFactory,
+                                ExpressionEvaluator defaultExpressionEvaluator) {
+        this.termFactory = termFactory;
+        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     /**
      * TODO: explain
      */
-    public static Optional<ImmutableExpression> extractFoldAndOptimizeBooleanExpressions(
+    public Optional<ImmutableExpression> extractFoldAndOptimizeBooleanExpressions(
             ImmutableList<JoinOrFilterNode> filterAndJoinNodes)
             throws UnsatisfiableExpressionException {
 
@@ -40,7 +44,7 @@ public class JoinExtractionUtils {
 
         Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = new ExpressionEvaluator();
+            ExpressionEvaluator evaluator = defaultExpressionEvaluator.clone();
 
             ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(foldedExpression.get());
             if (evaluationResult.isEffectiveFalse()) {
@@ -90,7 +94,7 @@ public class JoinExtractionUtils {
         return joinAndFilterNodeBuilder.build();
     }
 
-    public static Optional<ImmutableExpression> foldBooleanExpressions(
+    public Optional<ImmutableExpression> foldBooleanExpressions(
         ImmutableList<ImmutableExpression> booleanExpressions) {
         switch (booleanExpressions.size()) {
             case 0:
@@ -101,10 +105,10 @@ public class JoinExtractionUtils {
                 Iterator<ImmutableExpression> it = booleanExpressions.iterator();
 
                 // Non-final
-                ImmutableExpression currentExpression = TERM_FACTORY.getImmutableExpression(ExpressionOperation.AND,
+                ImmutableExpression currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND,
                         it.next(), it.next());
                 while(it.hasNext()) {
-                    currentExpression = TERM_FACTORY.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
+                    currentExpression = termFactory.getImmutableExpression(ExpressionOperation.AND, currentExpression, it.next());
                 }
 
                 return Optional.of(currentExpression);
@@ -188,5 +192,11 @@ public class JoinExtractionUtils {
             }
         }
         return builder.build();
+    }
+
+    /**
+     * TODO: explain
+     */
+    public static class UnsatisfiableExpressionException extends Exception  {
     }
 }

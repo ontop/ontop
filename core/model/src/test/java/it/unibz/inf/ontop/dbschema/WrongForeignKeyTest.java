@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import java.sql.Types;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.createDummyMetadata;
+
 /**
  * Test that we correctly output exceptions in case we try to insert an incorrect foreign key (missing values)
  */
@@ -11,7 +13,7 @@ public class WrongForeignKeyTest {
     private static final DBMetadata METADATA;
 
     static{
-        BasicDBMetadata dbMetadata = DBMetadataTestingTools.createDummyMetadata();
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         /*

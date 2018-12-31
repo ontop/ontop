@@ -6,8 +6,13 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
@@ -23,14 +28,26 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final OntopMappingSettings settings;
+    private final Relation2Predicate relation2Predicate;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final TermTypeInferenceTools termTypeInferenceTools;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
                                         Mapping2DatalogConverter mapping2DatalogConverter,
-                                        OntopMappingSettings settings) {
+                                        OntopMappingSettings settings, Relation2Predicate relation2Predicate,
+                                        TermFactory termFactory, TypeFactory typeFactory,
+                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools) {
         this.datalog2MappingConverter = datalog2MappingConverter;
         this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.settings = settings;
+        this.relation2Predicate = relation2Predicate;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.termTypeInferenceTools = termTypeInferenceTools;
+        this.immutabilityTools = immutabilityTools;
     }
 
     /***
@@ -56,14 +73,14 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      */
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
-        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,  settings.isDefaultDatatypeInferred());
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,
+                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
 
         //CQIEs are mutable
         for(CQIE rule : ruleMap.keySet()){
             typeCompletion.insertDataTyping(rule);
         }
-        return datalog2MappingConverter.convertMappingRules(ruleMap, dbMetadata,
-                mapping.getExecutorRegistry(), mapping.getMetadata());
+        return datalog2MappingConverter.convertMappingRules(ruleMap, mapping.getMetadata());
     }
 }

@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.model.atom;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 /**
@@ -9,22 +10,22 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
  *
  * In the future, this class could be disassociated from the Function class.
  */
-public interface DataAtom extends ImmutableFunctionalTerm {
+public interface DataAtom<P extends AtomPredicate> {
 
-    AtomPredicate getPredicate();
+    P getPredicate();
+
+    int getArity();
 
     /**
      * Effective arity (number of sub-terms).
      */
     int getEffectiveArity();
 
-    @Override
     VariableOrGroundTerm getTerm(int index);
 
-    boolean hasSamePredicateAndArity(DataAtom otherAtom);
-
-    @Override
     ImmutableList<? extends VariableOrGroundTerm> getArguments();
+
+    ImmutableSet<Variable> getVariables();
 
     boolean containsGroundTerms();
 }

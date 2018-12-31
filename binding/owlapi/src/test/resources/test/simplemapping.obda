@@ -4,7 +4,7 @@ quest:		http://obda.org/quest#
 
 [MappingDeclaration] @collection [[
 mappingId	mapping1
-target	<{uri}> a :A ; :P <{uri}> ; :U {val} .
+target	<http://example.org/{uri}> a :A ; :P <http://example.org/{uri}> ; :U {val} .
 source	SELECT uri, val FROM TABLE1
 ]]
 

@@ -26,7 +26,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
 import java.sql.Types;
@@ -42,28 +41,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final SpecificationFactory specificationFactory;
+	private final DummyRDBMetadata defaultDummyMetadata;
 
-	private RDBMetadata md = RDBMetadataExtractionTools.createDummyMetadata();
+	private RDBMetadata md;
 	private PrefixManager pm;
+	private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
 
-    public SQLPPMapping2DatalogConverterTest() {
+	public SQLPPMapping2DatalogConverterTest() {
 		OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
 				.enableTestMode()
 				.build();
 
 		Injector injector = defaultConfiguration.getInjector();
 		specificationFactory = injector.getInstance(SpecificationFactory.class);
+		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
+		defaultDummyMetadata = injector.getInstance(DummyRDBMetadata.class);
     }
 	
 	public void setUp() {
-		md = RDBMetadataExtractionTools.createDummyMetadata();
+		md = defaultDummyMetadata.clone();
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
 		// Database schema
@@ -95,13 +98,12 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap());
-		ImmutableList<ImmutableFunctionalTerm> target = targetParser.parse(targetString).stream()
-				.map(TERM_FACTORY::getImmutableFunctionalTerm)
-				.collect(ImmutableCollectors.toList());
+		TargetQueryParser targetParser = new TurtleOBDASQLParser(pm.getPrefixMap(), TERM_FACTORY,
+				TARGET_ATOM_FACTORY, RDF_FACTORY);
+		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
-		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
-		Set<CQIE> dp = SQLPPMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
+		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
+		Set<CQIE> dp = ppMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

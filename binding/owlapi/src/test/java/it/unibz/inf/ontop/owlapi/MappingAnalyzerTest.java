@@ -30,11 +30,9 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidPredicateDeclarationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +121,7 @@ public class MappingAnalyzerTest extends TestCase {
 
 	}
 
-	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_1() throws IOException, InvalidMappingException {
 		try {
 			runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
 		} catch (Exception e) {
@@ -131,7 +129,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_2() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_2() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
 		} catch (Exception e) {
@@ -139,7 +137,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_3() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_3() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
 		} catch (Exception e) {
@@ -147,7 +145,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_4() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_4() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 		} catch (Exception e) {
@@ -155,7 +153,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_5() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_5() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 		} catch (Exception e) {
@@ -163,7 +161,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_6() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_6() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
 		} catch (Exception e) {
@@ -171,7 +169,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_7() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_7() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 		} catch (Exception e) {
@@ -179,7 +177,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_8() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_8() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 		} catch (Exception e) {
@@ -187,7 +185,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_9() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_9() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 		} catch (Exception e) {
@@ -195,7 +193,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_10() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_10() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 		} catch (Exception e) {
@@ -203,7 +201,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_11() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_11() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
 		} catch (Exception e) {
@@ -211,7 +209,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_12() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_12() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
 		} catch (Exception e) {
@@ -219,7 +217,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_13() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_13() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 		} catch (Exception e) {
@@ -227,7 +225,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_14() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testMapping_14() throws IOException, InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 		} catch (Exception e) {
@@ -235,7 +233,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_15() throws IOException, InvalidPredicateDeclarationException,
+	public void testMapping_15() throws IOException, 
             InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
@@ -244,7 +242,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_16() throws IOException, InvalidPredicateDeclarationException,
+	public void testMapping_16() throws IOException, 
             InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
@@ -253,7 +251,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_17() throws IOException, InvalidPredicateDeclarationException,
+	public void testMapping_17() throws IOException, 
             InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
@@ -262,7 +260,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_18() throws IOException, InvalidPredicateDeclarationException,
+	public void testMapping_18() throws IOException, 
             InvalidMappingException {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_18.obda");

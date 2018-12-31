@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR;
+
 public class DAGPerformanceTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(DAGPerformanceTest.class);
@@ -125,7 +127,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
+		ClassifiedTBox reasoner = OWLAPI_TRANSLATOR.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -212,7 +214,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
+		ClassifiedTBox reasoner = OWLAPI_TRANSLATOR.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();
@@ -300,7 +302,7 @@ public class DAGPerformanceTest extends TestCase {
 
 		log.debug("Translating into quest API and creating a DAG out of it");
 		long start = System.nanoTime();
-		ClassifiedTBox reasoner = OWLAPITranslatorOWL2QL.translateAndClassify(ont).tbox();
+		ClassifiedTBox reasoner = OWLAPI_TRANSLATOR.translateAndClassify(ont).tbox();
 		log.debug("{}s", ((System.nanoTime() - start)/1000000));
 
 //		long start = System.nanoTime();

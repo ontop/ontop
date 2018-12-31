@@ -21,11 +21,10 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
+import org.apache.commons.rdf.api.IRI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +66,8 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	// final String obdaFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 
-	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
-	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
+	private List<IRI> emptyConcepts = new ArrayList<>();
+	private List<IRI> emptyRoles = new ArrayList<>();
 
 	private OntopOWLReasoner reasoner;
 
@@ -145,7 +144,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	public void testEmptyConcepts() {
 
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<Predicate> iterator = empties.iEmptyConcepts();
+		Iterator<IRI> iterator = empties.iEmptyConcepts();
 		while (iterator.hasNext()){
 			emptyConcepts.add(iterator.next());
 		}
@@ -161,7 +160,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	@Test
 	public void testEmptyRoles() {
 		QuestOWLEmptyEntitiesChecker empties = new QuestOWLEmptyEntitiesChecker(onto, conn);
-		Iterator<Predicate> iterator = empties.iEmptyRoles();
+		Iterator<IRI> iterator = empties.iEmptyRoles();
 		while (iterator.hasNext()){
 			emptyRoles.add(iterator.next());
 		}

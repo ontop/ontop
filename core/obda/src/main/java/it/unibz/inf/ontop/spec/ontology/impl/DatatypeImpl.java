@@ -20,48 +20,48 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate.COL_TYPE;
-import it.unibz.inf.ontop.model.term.impl.DatatypePredicateImpl;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.ontology.Datatype;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.apache.commons.rdf.api.IRI;
+
+import javax.annotation.Nonnull;
 
 public class DatatypeImpl implements Datatype {
-	
-	private final Predicate predicate;
+
+	private final IRI iri;
 
 	public static final  Datatype rdfsLiteral; 
 	
 	static {
-	    rdfsLiteral = new DatatypeImpl(  new DatatypePredicateImpl(RDFS.LITERAL.stringValue(), COL_TYPE.LITERAL));
+	    rdfsLiteral = new DatatypeImpl(RDFS.LITERAL);
 	}
 	
-	DatatypeImpl(Predicate p) {
-		predicate = p;
+	DatatypeImpl(@Nonnull IRI iri) {
+		this.iri = iri;
 	}
-	
+
 	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	public IRI getIRI() {
+		return iri;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DatatypeImpl) {
 			DatatypeImpl type2 = (DatatypeImpl) obj;
-			return (predicate.equals(type2.getPredicate()));
+			return (iri.equals(type2.getIRI()));
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return iri.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return predicate.getName().toString();
+		return iri.getIRIString();
 	}
 	
 }

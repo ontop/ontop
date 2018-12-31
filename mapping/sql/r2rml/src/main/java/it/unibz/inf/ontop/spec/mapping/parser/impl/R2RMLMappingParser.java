@@ -6,6 +6,10 @@ import com.google.inject.Inject;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -30,12 +34,19 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
+    private final TermFactory termFactory;
+    private final TypeFactory typeFactory;
+    private final TargetAtomFactory targetAtomFactory;
 
 
     @Inject
-    private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory) {
+    private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
+                               TermFactory termFactory, TypeFactory typeFactory, TargetAtomFactory targetAtomFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
+        this.termFactory = termFactory;
+        this.typeFactory = typeFactory;
+        this.targetAtomFactory = targetAtomFactory;
     }
 
 
@@ -43,7 +54,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
     public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
 
         try {
-            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile);
+            R2RMLManager r2rmlManager = new R2RMLManager(mappingFile, termFactory, typeFactory, targetAtomFactory);
             return parse(r2rmlManager);
         } catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
@@ -60,7 +71,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
     @Override
     public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
-        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph);
+        R2RMLManager r2rmlManager = new R2RMLManager(mappingGraph, termFactory, typeFactory, targetAtomFactory);
         return parse(r2rmlManager);
     }
 
@@ -72,9 +83,10 @@ public class R2RMLMappingParser implements SQLMappingParser {
             UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
                     sourceMappings.stream()
                             .flatMap(ax -> ax.getTargetAtoms().stream())
-                            .flatMap(atom -> atom.getArguments().stream())
+                            .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
                             .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t));
+                            .map(t -> (ImmutableFunctionalTerm) t),
+                    termFactory);
 
             //TODO: try to extract prefixes from the R2RML mappings
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());

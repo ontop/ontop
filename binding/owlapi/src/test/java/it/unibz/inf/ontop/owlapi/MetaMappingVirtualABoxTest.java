@@ -145,7 +145,7 @@ public class MetaMappingVirtualABoxTest {
             OWLObject ind = bindingSet.getOWLObject("x");
 			//OWLIndividual ind2 = rs.getOWLIndividual("y");
 			//OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind.toString());
+			assertEquals("<http://example.org/uri1>", ind.toString());
 			//assertEquals("<uri1>", ind2.toString());
 			//assertEquals("\"value1\"", val.toString());
 
@@ -163,8 +163,8 @@ public class MetaMappingVirtualABoxTest {
             OWLObject ind1 = bindingSet.getOWLObject("x");
             OWLObject ind2 = bindingSet.getOWLObject("y");
 			//OWLLiteral val = rs2.getOWLLiteral("y");
-            assertEquals("<uri1>", ind1.toString());
-            assertEquals("<A>", ind2.toString());
+            assertEquals("<http://example.org/uri1>", ind1.toString());
+            assertEquals("<http://example.org/A>", ind2.toString());
             //assertEquals("\"A\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
         }
 	}

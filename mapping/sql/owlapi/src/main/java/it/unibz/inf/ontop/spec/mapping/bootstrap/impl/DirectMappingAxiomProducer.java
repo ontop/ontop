@@ -23,31 +23,32 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+
 
 public class DirectMappingAxiomProducer {
 
 	private final String baseIRI;
 
-	private final TermFactory df;
-	private final JdbcTypeMapper typeMapper;
+	private final TermFactory termFactory;
+	private final org.apache.commons.rdf.api.RDF rdfFactory;
+	private final TargetAtomFactory targetAtomFactory;
 
-	public DirectMappingAxiomProducer(String baseIRI, TermFactory dfac) {
-		this.df = dfac;
+	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
+									  org.apache.commons.rdf.api.RDF rdfFactory) {
+		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
-		/**
-		 * TODO: use Guice instead
-		 */
-		typeMapper = JdbcTypeMapper.getInstance();
+		this.targetAtomFactory = targetAtomFactory;
+		this.rdfFactory = rdfFactory;
 	}
 
 
@@ -55,8 +56,8 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, ImmutableList<ImmutableFunctionalTerm>> getRefAxioms(DatabaseRelationDefinition table) {
-		Map<String, ImmutableList<ImmutableFunctionalTerm>> refAxioms = new HashMap<>();
+	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table) {
+		Map<String, ImmutableList<TargetAtom>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys())
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
 		
@@ -121,21 +122,22 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<ImmutableFunctionalTerm> getCQ(DatabaseRelationDefinition table) {
+    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table) {
 
-		ImmutableList.Builder<ImmutableFunctionalTerm> atoms = ImmutableList.builder();
+		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
 		//Class Atom
 		ImmutableTerm sub = generateSubject(table, false);
-		atoms.add(df.getImmutableFunctionalTerm(df.getClassPredicate(getTableIRI(table.getID())), sub));
+		atoms.add(getAtom(getTableIRI(table.getID()), sub));
 
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
-			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
-			Variable objV = df.getVariable(att.getID().getName());
-			ImmutableTerm obj = df.getImmutableTypedTerm(objV, type);
+			// TODO: revisit this
+			RDFDatatype type = (RDFDatatype) att.getTermType();
+			Variable objV = termFactory.getVariable(att.getID().getName());
+			ImmutableTerm obj = termFactory.getImmutableTypedTerm(objV, type);
 			
-			atoms.add(df.getImmutableFunctionalTerm(df.getDataPropertyPredicate(getLiteralPropertyIRI(att)), sub, obj));
+			atoms.add(getAtom(getLiteralPropertyIRI(att), sub, obj));
 		}
 
 		return atoms.build();
@@ -147,12 +149,11 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	private ImmutableList<ImmutableFunctionalTerm> getRefCQ(ForeignKeyConstraint fk) {
+	private ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk) {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
 
-		ImmutableFunctionalTerm atom = df.getImmutableFunctionalTerm(
-				df.getObjectPropertyPredicate(getReferencePropertyIRI(fk)), sub, obj);
+		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
 	}
 
@@ -164,8 +165,8 @@ public class DirectMappingAxiomProducer {
      *
      * @return table IRI
      */
-	private String getTableIRI(RelationID tableId) {
-		return baseIRI + R2RMLIRISafeEncoder.encode(tableId.getTableName());
+	private IRI getTableIRI(RelationID tableId) {
+		return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(tableId.getTableName()));
 	}
 
     /**
@@ -180,9 +181,9 @@ public class DirectMappingAxiomProducer {
      *   - the hash character '#',
      *   - the percent-encoded form of the column name.
      */
-    private String getLiteralPropertyIRI(Attribute attr) {
-        return baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
-                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName());
+    private IRI getLiteralPropertyIRI(Attribute attr) {
+        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
+                + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
     }
 
     /*
@@ -197,13 +198,13 @@ public class DirectMappingAxiomProducer {
      *     - the percent-encoded form of the column name,
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
-    private String getReferencePropertyIRI(ForeignKeyConstraint fk) {
+    private IRI getReferencePropertyIRI(ForeignKeyConstraint fk) {
         List<String> attributes = new ArrayList<>(fk.getComponents().size());
  		for (Component component : fk.getComponents())
             attributes.add(R2RMLIRISafeEncoder.encode(component.getAttribute().getID().getName()));
         
-        return baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
-                + "#ref-" + Joiner.on(";").join(attributes);
+        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
+                + "#ref-" + Joiner.on(";").join(attributes));
     }
 
     /**
@@ -235,20 +236,36 @@ public class DirectMappingAxiomProducer {
 				attributes.add(R2RMLIRISafeEncoder.encode(att.getID().getName()) + "={}");
 			
 			String template = baseIRI + R2RMLIRISafeEncoder.encode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
-			terms.add(df.getConstantLiteral(template));
+			terms.add(termFactory.getConstantLiteral(template));
 			
 			for (Attribute att : pk.getAttributes())
-				terms.add(df.getVariable(varNamePrefix + att.getID().getName()));
+				terms.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getImmutableUriTemplate(ImmutableList.copyOf(terms));
+			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 		}
 		else {
 			List<ImmutableTerm> vars = new ArrayList<>(td.getAttributes().size());
 			for (Attribute att : td.getAttributes())
-				vars.add(df.getVariable(varNamePrefix + att.getID().getName()));
+				vars.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return df.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
+			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(vars));
 		}
+	}
+
+	private TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
+		return targetAtomFactory.getTripleTargetAtom(s,
+				convertIRIIntoGroundFunctionalTerm(iri),
+				o);
+	}
+
+	private TargetAtom getAtom(IRI iri, ImmutableTerm s) {
+    	return targetAtomFactory.getTripleTargetAtom(s,
+				convertIRIIntoGroundFunctionalTerm(RDF.TYPE),
+				convertIRIIntoGroundFunctionalTerm(iri));
+	}
+
+	private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
+    	return (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
 	}
 
 

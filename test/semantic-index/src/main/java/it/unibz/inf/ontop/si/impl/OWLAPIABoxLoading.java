@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.si.impl;
 
 
+import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.owlapi.utils.OWLAPIABoxIterator;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -33,15 +35,22 @@ public class OWLAPIABoxLoading {
     public static OntopSemanticIndexLoader loadOntologyIndividuals(OWLOntology owlOntology, Properties properties)
             throws SemanticIndexException {
 
-        Ontology ontology = OWLAPITranslatorOWL2QL.translateAndClassify(owlOntology);
-        SIRepository repo = new SIRepository(ontology.tbox());
+        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+        OWLAPITranslatorOWL2QL translatorOWL2QL = defaultConfiguration.getInjector().getInstance(OWLAPITranslatorOWL2QL.class);
+
+        Ontology ontology = translatorOWL2QL.translateAndClassify(owlOntology);
+
+        SIRepository repo = new SIRepository(ontology.tbox(), defaultConfiguration.getTermFactory(),
+                defaultConfiguration.getTypeFactory(),
+                defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class)
+                );
 
         try {
             Connection connection = repo.createConnection();
 
             // load the data
             Set<OWLOntology> ontologyClosure = owlOntology.getOWLOntologyManager().getImportsClosure(owlOntology);
-            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox());
+            OWLAPIABoxIterator aBoxIter = new OWLAPIABoxIterator(ontologyClosure, ontology.tbox(), translatorOWL2QL);
             int count = repo.insertData(connection, aBoxIter);
             LOG.debug("Inserted {} triples from the ontology.", count);
 

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -25,8 +26,6 @@ public interface QueryTreeComponent {
     ImmutableList<QueryNode> getNodesInBottomUpOrder() throws IllegalTreeException;
 
     ImmutableList<QueryNode> getNodesInTopDownOrder() throws IllegalTreeException;
-
-    ImmutableSet<EmptyNode> getEmptyNodes();
 
     ImmutableSet<TrueNode> getTrueNodes();
 
@@ -141,5 +140,7 @@ public interface QueryTreeComponent {
      * The version number of the query.
      * Used in fixed-point optimization.
      */
-    int getVersionNumber();
+    UUID getVersionNumber();
+
+    QueryNode replaceSubTreeByIQ(QueryNode subTreeRoot, IQTree replacingSubTree);
 }

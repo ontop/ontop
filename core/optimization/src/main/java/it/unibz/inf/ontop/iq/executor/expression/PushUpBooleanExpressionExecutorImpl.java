@@ -20,16 +20,18 @@ import java.util.Optional;
 public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpressionExecutor {
 
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory) {
+    private PushUpBooleanExpressionExecutorImpl(IntermediateQueryFactory iqFactory, ImmutabilityTools immutabilityTools) {
         this.iqFactory = iqFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
     public PushUpBooleanExpressionResults apply(PushUpBooleanExpressionProposal proposal, IntermediateQuery query,
                                                 QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
         ImmutableExpression expressionToPropagate = proposal.getPropagatedExpression();
 
         /**
@@ -74,7 +76,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
     private ImmutableExpression getCombinedExpression(ImmutableExpression expressionToPropagate, JoinOrFilterNode recipientNode) {
         Optional<ImmutableExpression> recipientNodeFormerExpression = recipientNode.getOptionalFilterCondition();
         if (recipientNodeFormerExpression.isPresent()) {
-            return ImmutabilityTools.foldBooleanExpressions(recipientNodeFormerExpression.get(), expressionToPropagate)
+            return immutabilityTools.foldBooleanExpressions(recipientNodeFormerExpression.get(), expressionToPropagate)
                     .orElseThrow(() -> new IllegalStateException("Folding two existing expressions should produce an expression"));
         }
         return expressionToPropagate;
@@ -93,8 +95,7 @@ public class PushUpBooleanExpressionExecutorImpl implements PushUpBooleanExpress
         }
         if (replacedNode instanceof ConstructionNode) {
             return Optional.of(iqFactory.createConstructionNode(allProjectedVariablesBuilder.build(),
-                    ((ConstructionNode) replacedNode).getSubstitution(),
-                    ((ConstructionNode) replacedNode).getOptionalModifiers()));
+                    ((ConstructionNode) replacedNode).getSubstitution()));
         }
         throw new IllegalStateException("Unsupported node type");
 

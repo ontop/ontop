@@ -21,20 +21,20 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  */
 
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.datalog.DatalogProgram;
-import it.unibz.inf.ontop.datalog.LinearInclusionDependencies;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+
 
 public interface QueryRewriter {
 
-	DatalogProgram rewrite(DatalogProgram input) throws OntopReformulationException;
+	IQ rewrite(IQ query) throws OntopReformulationException, EmptyQueryException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 
 	 * use to compute any reformulation.
 	 * 
 	 * @param ontology
-	 * @param sigma
 	 */
-	void setTBox(ClassifiedTBox ontology, LinearInclusionDependencies sigma);
+	void setTBox(ClassifiedTBox ontology);
 }

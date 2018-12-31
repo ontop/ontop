@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.panels;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.owlapi.validation.QuestOWLEmptyEntitiesChecker;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgr
 		try {
 		/* Create table list for empty concepts */
 
-			Iterator<Predicate> emptyC = check.iEmptyConcepts();
+			Iterator<IRI> emptyC = check.iEmptyConcepts();
 
 
 			final int rowConcepts = check.getEConceptsSize();
@@ -65,11 +66,11 @@ public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgr
 			DefaultTableModel modelConcept = (DefaultTableModel) tblConceptCount.getModel();
 
 			while (emptyC.hasNext() && !bCancel) {
-				modelConcept.addRow(new Object[]{emptyC.next().getName()});
+				modelConcept.addRow(new Object[]{emptyC.next().getIRIString()});
 			}
 
 		/* Create table list for empty roles */
-			Iterator<Predicate> emptyR = check.iEmptyRoles();
+			Iterator<IRI> emptyR = check.iEmptyRoles();
 
 			final int rowRoles = check.getERolesSize();
 
@@ -84,7 +85,7 @@ public class EmptiesCheckPanel extends javax.swing.JPanel   implements OBDAProgr
 			DefaultTableModel modelRole = (DefaultTableModel) tblRoleCount.getModel();
 
 			while (emptyR.hasNext() && !bCancel) {
-				modelRole.addRow(new Object[]{emptyR.next().getName()});
+				modelRole.addRow(new Object[]{emptyR.next().getIRIString()});
 			}
 
 

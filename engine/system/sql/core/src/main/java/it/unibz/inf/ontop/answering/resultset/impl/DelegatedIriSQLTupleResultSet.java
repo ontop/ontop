@@ -27,7 +27,10 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,10 +47,13 @@ public class DelegatedIriSQLTupleResultSet extends AbstractSQLTupleResultSet imp
     private final ImmutableMap<String, Integer> columnMap;
     protected final JDBC2ConstantConverter ontopConstantRetriever;
 
-    public DelegatedIriSQLTupleResultSet(ResultSet rs, ImmutableList<String> signature, DBMetadata dbMetadata, Optional<IRIDictionary> iriDictionary) {
+    public DelegatedIriSQLTupleResultSet(ResultSet rs, ImmutableList<String> signature, DBMetadata dbMetadata,
+                                         Optional<IRIDictionary> iriDictionary, TermFactory termFactory,
+                                         TypeFactory typeFactory, RDF rdfFactory) {
         super(rs, signature);
         this.columnMap = buildColumnMap();
-        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary);
+        this.ontopConstantRetriever = new JDBC2ConstantConverter(dbMetadata, iriDictionary, termFactory, typeFactory,
+                rdfFactory);
     }
 
     @Override

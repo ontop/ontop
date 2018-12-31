@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.term.functionsymbol.BuiltinPredicate;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.datalog.CQContainmentCheck;
+import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.EQNormalizer;
 import it.unibz.inf.ontop.substitution.Substitution;
 
@@ -16,9 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.DATALOG_FACTORY;
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})
@@ -33,9 +28,13 @@ public class TMappingRule {
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;	  
-	private final CQContainmentCheck cqc;   
+	private final CQContainmentCheckUnderLIDs cqc;
+	private final DatalogFactory datalogFactory;
+	private final TermFactory termFactory;
+	private final EQNormalizer eqNormalizer;
+	private final boolean isClass;
 
-	
+
 	/***
 	 * Given a mappings in {@link currentMapping}, this method will
 	 * return a new mappings in which no constants appear in the body of
@@ -55,13 +54,18 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc) {
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc, DatalogFactory datalogFactory,
+						TermFactory termFactory, EQNormalizer eqNormalizer, boolean isClass) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
-		
+		this.datalogFactory = datalogFactory;
+		this.termFactory = termFactory;
+		this.eqNormalizer = eqNormalizer;
+		this.isClass = isClass;
+
 		List<Function> filters = new ArrayList<>(body.size());
 		
 		for (Function atom : body) {
-			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
 				Function clone = (Function)atom.clone();
 				filters.add(clone);
 			}
@@ -76,7 +80,7 @@ public class TMappingRule {
 			this.filterAtoms = Collections.singletonList(filters);
 		
 		this.head = replaceConstants(head, filters);
-		this.stripped = DATALOG_FACTORY.getCQIE(this.head, databaseAtoms);
+		this.stripped = this.datalogFactory.getCQIE(this.head, databaseAtoms);
 		this.cqc = cqc;
 	}
 
@@ -96,9 +100,9 @@ public class TMappingRule {
 				Variable var = valueMap.get(c);
 				if (var == null) {
 					freshVarCount++;
-					var = TERM_FACTORY.getVariable("?FreshVar" + freshVarCount);
+					var = termFactory.getVariable("?FreshVar" + freshVarCount);
 					valueMap.put(c, var);
-					filters.add(TERM_FACTORY.getFunctionEQ(var, c));
+					filters.add(termFactory.getFunctionEQ(var, c));
 				}
 				atom.setTerm(i, var);
 			}
@@ -107,26 +111,36 @@ public class TMappingRule {
 		return atom;
 	}
 	
-	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms) {
+	TMappingRule(TMappingRule baseRule, List<List<Function>> filterAtoms, DatalogFactory datalogFactory,
+				 TermFactory termFactory, EQNormalizer eqNormalizer) {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
 		this.filterAtoms = filterAtoms;
-		
-		this.stripped = DATALOG_FACTORY.getCQIE(head, databaseAtoms);
+		this.datalogFactory = datalogFactory;
+		this.termFactory = termFactory;
+		this.eqNormalizer = eqNormalizer;
+		this.isClass = baseRule.isClass();
+
+		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule) {
+	TMappingRule(Function head, TMappingRule baseRule, DatalogFactory datalogFactory, TermFactory termFactory,
+				 EQNormalizer eqNormalizer, boolean isClass) {
 		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
+		this.datalogFactory = datalogFactory;
+		this.termFactory = termFactory;
+		this.eqNormalizer = eqNormalizer;
+		this.isClass = isClass;
 		for (List<Function> baseList: baseRule.filterAtoms)
 			filterAtoms.add(cloneList(baseList));
 		
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)head.clone();
 		
-		this.stripped = DATALOG_FACTORY.getCQIE(head, databaseAtoms);
+		this.stripped = this.datalogFactory.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
 	}
 	
@@ -165,7 +179,7 @@ public class TMappingRule {
 			while (iterOR.hasNext()) {
 				list = iterOR.next();
 				Function e = getMergedByAND(list);
-				mergedConditions = TERM_FACTORY.getFunctionOR(e, mergedConditions);
+				mergedConditions = termFactory.getFunctionOR(e, mergedConditions);
 			}
 			
 			combinedBody.add(mergedConditions);
@@ -173,8 +187,8 @@ public class TMappingRule {
 		else
 			combinedBody = databaseAtoms;
 		
-		CQIE cq = DATALOG_FACTORY.getCQIE(head, combinedBody);
-		EQNormalizer.enforceEqualities(cq);
+		CQIE cq = datalogFactory.getCQIE(head, combinedBody);
+		eqNormalizer.enforceEqualities(cq);
 		return cq;
 	}
 	
@@ -190,12 +204,12 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	private static Function getMergedByAND(List<Function> list) {
+	private Function getMergedByAND(List<Function> list) {
 		Iterator<Function> iterAND = list.iterator();
 		Function mergedConditions = iterAND.next();
 		while (iterAND.hasNext()) {
 			Function e = iterAND.next();
-			mergedConditions = TERM_FACTORY.getFunctionAND(e, mergedConditions);
+			mergedConditions = termFactory.getFunctionAND(e, mergedConditions);
 		}		
 		return mergedConditions;
 	}
@@ -236,5 +250,9 @@ public class TMappingRule {
 	@Override 
 	public String toString() {
 		return head + " <- " + databaseAtoms + " AND " + filterAtoms;
+	}
+
+	public boolean isClass() {
+		return isClass;
 	}
 }

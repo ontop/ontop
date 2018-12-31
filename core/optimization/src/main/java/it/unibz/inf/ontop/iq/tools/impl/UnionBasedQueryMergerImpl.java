@@ -5,57 +5,50 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ImmutableQueryModifiers;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.iq.optimizer.BindingLiftOptimizer;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.iq.optimizer.ConstructionNodeCleaner;
-import it.unibz.inf.ontop.iq.optimizer.FlattenUnionOptimizer;
-import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.utils.VariableGenerator;
-import it.unibz.inf.ontop.substitution.impl.NeutralSubstitution;
+import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.impl.QueryNodeRenamer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.FunctionalTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.SUBSTITUTION_FACTORY;
+import java.util.stream.Stream;
 
 @Singleton
 public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
     private final IntermediateQueryFactory iqFactory;
-    private final BindingLiftOptimizer bindingLifter;
-    private final ConstructionNodeCleaner constructionNodeCleaner;
-    private final FlattenUnionOptimizer unionFlattener;
+    private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
+    private final QueryTransformerFactory transformerFactory;
 
     @Inject
-    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, BindingLiftOptimizer bindingLifter,
-                                      ConstructionNodeCleaner constructionNodeCleaner,
-                                      FlattenUnionOptimizer unionFlattener) {
+    private UnionBasedQueryMergerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
+                                      CoreUtilsFactory coreUtilsFactory, QueryTransformerFactory transformerFactory) {
         this.iqFactory = iqFactory;
-        this.bindingLifter = bindingLifter;
-        this.constructionNodeCleaner = constructionNodeCleaner;
-        this.unionFlattener = unionFlattener;
+        this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.transformerFactory = transformerFactory;
     }
 
     @Override
-    public Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions) {
+    public Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions) {
         return mergeDefinitions(predicateDefinitions, Optional.empty());
     }
 
     @Override
-    public Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions,
+    public Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions,
                                                         ImmutableQueryModifiers topModifiers) {
         return mergeDefinitions(predicateDefinitions, Optional.of(topModifiers));
     }
@@ -65,38 +58,26 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
      *
      * TODO: refactor it so that the definitive intermediate query is directly constructed.
      */
-    private Optional<IntermediateQuery> mergeDefinitions(Collection<IntermediateQuery> predicateDefinitions,
-                                                         Optional<ImmutableQueryModifiers> optionalTopModifiers) {
+    private Optional<IQ> mergeDefinitions(Collection<IQ> predicateDefinitions,
+                                          Optional<ImmutableQueryModifiers> optionalTopModifiers) {
         if (predicateDefinitions.isEmpty())
             return Optional.empty();
 
-        IntermediateQuery firstDefinition = predicateDefinitions.iterator().next();
+        IQ firstDefinition = predicateDefinitions.iterator().next();
         if (predicateDefinitions.size() == 1) {
             return Optional.of(firstDefinition);
         }
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();
 
-        ConstructionNode rootNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                new NeutralSubstitution(), optionalTopModifiers);
+        VariableGenerator variableGenerator =  coreUtilsFactory.createVariableGenerator(firstDefinition.getTree().getKnownVariables());
 
-        IntermediateQueryBuilder queryBuilder = firstDefinition.newBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
-
-        UnionNode unionNode = iqFactory.createUnionNode(projectionAtom.getVariables());
-        queryBuilder.addChild(rootNode, unionNode);
-
-        // First definition can be added safely
-        appendFirstDefinition(queryBuilder, unionNode, firstDefinition);
-
-        VariableGenerator variableGenerator = new VariableGenerator(firstDefinition.getKnownVariables());
-
-        predicateDefinitions.stream()
+        Stream<IQTree> renamedDefinitions = predicateDefinitions.stream()
                 .skip(1)
-                .forEach(def -> {
+                .map(def -> {
                     // Updates the variable generator
-                    InjectiveVar2VarSubstitution disjointVariableSetRenaming = SUBSTITUTION_FACTORY.generateNotConflictingRenaming(
-                            variableGenerator, def.getKnownVariables());
+                    InjectiveVar2VarSubstitution disjointVariableSetRenaming = substitutionFactory.generateNotConflictingRenaming(
+                            variableGenerator, def.getTree().getKnownVariables());
 
                     ImmutableSet<Variable> freshVariables = ImmutableSet.copyOf(
                             disjointVariableSetRenaming.getImmutableMap().values());
@@ -107,73 +88,30 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                             .orElseThrow(() -> new IllegalStateException("Bug: unexpected incompatible atoms"));
 
                     InjectiveVar2VarSubstitution renamingSubstitution =
-                            /**
-                             * fresh variables are excluded from the domain of the renaming substitution
-                             *  since they are in use in the sub-query.
-                             *
-                             *  NB: this guarantees that the renaming substitution is injective
+                            /*
+                              fresh variables are excluded from the domain of the renaming substitution
+                               since they are in use in the sub-query.
+
+                               NB: this guarantees that the renaming substitution is injective
                              */
                             headSubstitution.composeWithAndPreserveInjectivity(disjointVariableSetRenaming, freshVariables)
-                                    .orElseThrow(()-> new IllegalStateException("Bug: the renaming substitution is not injective"));
+                                    .orElseThrow(() -> new IllegalStateException("Bug: the renaming substitution is not injective"));
 
-                    appendDefinition(queryBuilder, unionNode, def, renamingSubstitution);
+                    QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
+                    return queryRenamer.transform(def).getTree();
                 });
 
+        ImmutableList<IQTree> unionChildren = Stream.concat(Stream.of(firstDefinition.getTree()), renamedDefinitions)
+                .collect(ImmutableCollectors.toList());
 
-        return Optional.of(normalizeIQ(queryBuilder.build()));
-    }
+        IQTree unionTree = iqFactory.createNaryIQTree(iqFactory.createUnionNode(projectionAtom.getVariables()),
+                unionChildren);
 
-    /**
-     * Appends the first definition which is known to BE SAFE.
-     *
-     * Side-effect on the queryBuilder
-     *
-     */
-    private static void appendFirstDefinition(IntermediateQueryBuilder queryBuilder, UnionNode topUnionNode,
-                                              IntermediateQuery subQuery) {
+        IQTree tree = optionalTopModifiers
+                .map(m -> m.insertAbove(unionTree, iqFactory))
+                .orElse(unionTree);
 
-        // First add the root of the sub-query
-        queryBuilder.addChild(topUnionNode, subQuery.getRootNode());
-
-        subQuery.getNodesInTopDownOrder().stream()
-                .skip(1)
-                .forEach(node -> queryBuilder.addChild(
-                        subQuery.getParent(node).orElseThrow(()-> new IllegalStateException("Unknown parent")),
-                        node,
-                        subQuery.getOptionalPosition(node)));
-    }
-
-    /**
-     * Appends a definition under the union node after renaming it.
-     */
-    private void appendDefinition(IntermediateQueryBuilder queryBuilder, UnionNode unionNode,
-                                  IntermediateQuery definition, InjectiveVar2VarSubstitution renamingSubstitution) {
-        QueryNodeRenamer nodeRenamer = new QueryNodeRenamer(iqFactory, renamingSubstitution);
-        ImmutableList<QueryNode> originalNodesInTopDownOrder = definition.getNodesInTopDownOrder();
-
-        /**
-         * Renames all the nodes (new objects) and maps them to original nodes
-         */
-        ImmutableMap<QueryNode, QueryNode> renamedNodeMap = originalNodesInTopDownOrder.stream()
-                .map(n -> new AbstractMap.SimpleEntry<>(n, n.acceptNodeTransformer(nodeRenamer)))
-                .collect(ImmutableCollectors.toMap());
-
-        /**
-         * Adds the renamed root of the definition
-         */
-
-        queryBuilder.addChild(unionNode, renamedNodeMap.get(definition.getRootNode()));
-
-        /**
-         * Add the other renamed nodes
-         */
-        originalNodesInTopDownOrder.stream()
-                .skip(1)
-                .forEach(node -> queryBuilder.addChild(
-                        renamedNodeMap.get(definition.getParent(node)
-                                .orElseThrow(()-> new IllegalStateException("Unknown parent"))),
-                        renamedNodeMap.get(node),
-                        definition.getOptionalPosition(node)));
+        return Optional.of(iqFactory.createIQ(projectionAtom, tree));
     }
 
     /**
@@ -181,7 +119,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
      * When NO renaming is NEEDED returns an EMPTY SUBSTITUTION.
      *
      */
-    private static Optional<InjectiveVar2VarSubstitution> computeRenamingSubstitution(
+    private Optional<InjectiveVar2VarSubstitution> computeRenamingSubstitution(
             DistinctVariableOnlyDataAtom sourceProjectionAtom,
             DistinctVariableOnlyDataAtom targetProjectionAtom) {
 
@@ -199,21 +137,7 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
                     .filter(e -> !e.getKey().equals(e.getValue()))
                     .collect(ImmutableCollectors.toMap());
 
-            return Optional.of(SUBSTITUTION_FACTORY.getInjectiveVar2VarSubstitution(newMap));
-        }
-    }
-
-    /**
-     * Lift substitutions and query modifiers, and get rid of resulting idle construction nodes.
-     * Then flatten nested unions.
-     */
-    private IntermediateQuery normalizeIQ(IntermediateQuery query) {
-        try {
-            IntermediateQuery queryAfterBindingLift = bindingLifter.optimize(query);
-            IntermediateQuery queryAfterCNodeCleaning = constructionNodeCleaner.optimize(queryAfterBindingLift);
-            return unionFlattener.optimize(queryAfterCNodeCleaning);
-        }catch (EmptyQueryException e){
-            throw new IllegalStateException("The query should not be emptied by applying this normalization");
+            return Optional.of(substitutionFactory.getInjectiveVar2VarSubstitution(newMap));
         }
     }
 }

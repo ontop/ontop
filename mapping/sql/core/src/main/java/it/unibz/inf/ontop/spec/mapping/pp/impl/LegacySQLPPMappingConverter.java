@@ -10,18 +10,17 @@ import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.IriConstants;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
 
 
 /**
@@ -31,10 +30,18 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
     private final Datalog2QueryMappingConverter mappingConverter;
+    private final TermFactory termFactory;
+    private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
+    private final EQNormalizer eqNormalizer;
 
     @Inject
-    private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter) {
+    private LegacySQLPPMappingConverter(Datalog2QueryMappingConverter mappingConverter,
+                                        TermFactory termFactory, SQLPPMapping2DatalogConverter ppMapping2DatalogConverter,
+                                        EQNormalizer eqNormalizer) {
         this.mappingConverter = mappingConverter;
+        this.termFactory = termFactory;
+        this.ppMapping2DatalogConverter = ppMapping2DatalogConverter;
+        this.eqNormalizer = eqNormalizer;
     }
 
     @Override
@@ -42,7 +49,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
         ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = convertIntoDatalog(ppMapping, dbMetadata);
 
-        return mappingConverter.convertMappingRules(datalogMap, dbMetadata, executorRegistry, ppMapping.getMetadata());
+        return mappingConverter.convertMappingRules(datalogMap, ppMapping.getMetadata());
     }
 
     /**
@@ -54,7 +61,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         /*
          * May also add views in the DBMetadata!
          */
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = SQLPPMapping2DatalogConverter.convert(
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = ppMapping2DatalogConverter.convert(
                 ppMapping.getTripleMaps(), dbMetadata);
 
         LOGGER.debug("Original mapping size: {}", datalogMap.size());
@@ -81,12 +88,12 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     continue;
 
                 Function typedTerm = (Function) term;
-                if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(IriConstants.RDFS_LITERAL_URI)) {
+                if (typedTerm.getTerms().size() == 2 && typedTerm.getFunctionSymbol().getName().equals(RDF.LANGSTRING.getIRIString())) {
                     // changing the language, its always the second inner term (literal,lang)
                     Term originalLangTag = typedTerm.getTerm(1);
                     if (originalLangTag instanceof ValueConstant) {
                         ValueConstant originalLangConstant = (ValueConstant) originalLangTag;
-                        Term normalizedLangTag = TERM_FACTORY.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
+                        Term normalizedLangTag = termFactory.getConstantLiteral(originalLangConstant.getValue().toLowerCase(),
                                 originalLangConstant.getType());
                         typedTerm.setTerm(1, normalizedLangTag);
                     }
@@ -96,6 +103,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         // Normalizing equalities
         for (CQIE cq: unfoldingProgram)
-            EQNormalizer.enforceEqualities(cq);
+            eqNormalizer.enforceEqualities(cq);
     }
 }

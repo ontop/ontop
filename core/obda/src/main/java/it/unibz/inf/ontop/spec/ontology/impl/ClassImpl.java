@@ -20,42 +20,41 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.OClass;
-
-import static it.unibz.inf.ontop.model.OntopModelSingletons.TERM_FACTORY;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDF;
 
 public class ClassImpl implements OClass {
 
-	private static final long serialVersionUID = -4930755519806785384L;
-
-	private final Predicate predicate;
+	private final IRI iri;
 	private final String name;
 	private final boolean isNothing, isThing;
-
-	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
-	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
 	
-    public static final OClass owlThing = new ClassImpl(owlThingIRI); 
-    public static final OClass owlNothing = new ClassImpl(owlNothingIRI); 
+    public static final OClass owlThing = new ClassImpl(OWL.THING);
+    public static final OClass owlNothing = new ClassImpl(OWL.NOTHING);
 
-	ClassImpl(String name) {
-		this.predicate = TERM_FACTORY.getClassPredicate(name);
-		this.name = name;
-		this.isNothing = name.equals(owlNothingIRI);
-		this.isThing = name.equals(owlThingIRI);
+	ClassImpl(String name, RDF rdfFactory) {
+		this(rdfFactory.createIRI(name));
 	}
 
-	@Override
-	public Predicate getPredicate() {
-		return predicate;
+	ClassImpl(IRI iri) {
+		this.iri = iri;
+		this.name = iri.getIRIString();
+		this.isNothing = iri.equals(OWL.NOTHING);
+		this.isThing = iri.equals(OWL.THING);
 	}
 
 	@Override
 	public String getName() {
 		return name;
 	}
-	
+
+	@Override
+	public IRI getIRI() {
+		return iri;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)

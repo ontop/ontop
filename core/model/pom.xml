@@ -12,8 +12,12 @@
     <name>ontop-model</name>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-model</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-rdf4j</artifactId>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.antlr</groupId>-->
