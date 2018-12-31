@@ -73,4 +73,9 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

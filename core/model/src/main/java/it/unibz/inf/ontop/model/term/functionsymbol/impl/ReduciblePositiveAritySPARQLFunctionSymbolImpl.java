@@ -143,4 +143,13 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
     public String getOfficialName() {
         return officialName;
     }
+
+    /**
+     * Default value for SPARQL functions as they may produce NULL due
+     * to SPARQL errors
+     */
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return true;
+    }
 }

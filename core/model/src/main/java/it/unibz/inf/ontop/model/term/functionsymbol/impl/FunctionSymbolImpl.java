@@ -144,6 +144,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     private boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
                                                          VariableNullability variableNullability,
                                                          ImmutableList<? extends ImmutableTerm> otherTerms) {
+        if (mayReturnNullWithoutNullArguments())
+            return false;
         if (getArity() == 1)
             return true;
 
@@ -158,6 +160,13 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                                    NonNullConstant otherTerm, TermFactory termFactory) {
         return EvaluationResult.declareSameExpression();
     }
+
+    /**
+     * Returns false when a functional term with this symbol:
+     *   1. never produce NULLs
+     *   2. May produce NULLs but it is always due to a NULL argument
+     */
+    protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
      * When the function symbol is sometimes but not always injective, please override isInjective(...)

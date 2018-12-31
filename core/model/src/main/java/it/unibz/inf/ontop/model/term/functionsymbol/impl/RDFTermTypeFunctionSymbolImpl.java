@@ -76,4 +76,9 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     public TypeConstantDictionary getDictionary() {
         return dictionary;
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

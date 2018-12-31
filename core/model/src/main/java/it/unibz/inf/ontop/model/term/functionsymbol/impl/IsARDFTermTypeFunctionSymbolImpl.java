@@ -85,4 +85,9 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
         return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

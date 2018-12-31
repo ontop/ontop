@@ -47,6 +47,11 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
+
+    @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }

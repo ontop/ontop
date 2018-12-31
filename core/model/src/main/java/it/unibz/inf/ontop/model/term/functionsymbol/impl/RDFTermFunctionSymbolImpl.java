@@ -85,4 +85,9 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

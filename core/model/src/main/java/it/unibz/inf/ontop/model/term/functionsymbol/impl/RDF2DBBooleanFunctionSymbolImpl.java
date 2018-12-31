@@ -66,4 +66,9 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
         else
             return termFactory.getImmutableExpression(this, newTerms);
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

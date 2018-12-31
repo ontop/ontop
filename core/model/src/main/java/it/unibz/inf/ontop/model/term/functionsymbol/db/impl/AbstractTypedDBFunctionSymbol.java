@@ -27,4 +27,9 @@ public abstract class AbstractTypedDBFunctionSymbol extends FunctionSymbolImpl i
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(targetType));
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

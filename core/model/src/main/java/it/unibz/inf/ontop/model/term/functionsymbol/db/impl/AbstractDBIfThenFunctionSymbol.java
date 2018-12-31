@@ -161,4 +161,12 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     }
 
     protected abstract ImmutableTerm extractDefaultValue(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory);
+
+    /**
+     * Default, can be overridden
+     */
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return true;
+    }
 }

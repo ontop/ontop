@@ -188,4 +188,9 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
                 .map(i -> termFactory.getStrictEquality(subVariables.get(i), dictionary.convert(constants.get(i)))))
                 .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty stream"));
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }

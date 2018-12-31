@@ -113,6 +113,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return true;
     }
 
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {

@@ -19,4 +19,9 @@ public abstract class DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolI
     protected String inBrackets(String expression) {
         return "(" + expression + ")";
     }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
 }
