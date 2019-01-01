@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
-public class H2SQLDBFunctionSymbolFactory extends DefaultSQLDBFunctionSymbolFactory {
+public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
 
     private final DBBooleanFunctionSymbol containsFunctionSymbol;
