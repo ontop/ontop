@@ -792,7 +792,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * String functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#lower-case", LCASE)
                     .put("http://www.w3.org/2005/xpath-functions#string-length", STRLEN)
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
                     .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)

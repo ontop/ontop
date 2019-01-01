@@ -9,6 +9,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
 
     protected static final String UPPER_STR = "UPPER";
     protected static final String UCASE_STR = "UCASE";
+    protected static final String LOWER_STR = "LOWER";
+    protected static final String LCASE_STR = "LCASE";
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String AND_STR = "AND";
@@ -73,6 +75,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
                 false, abstractRootDBType);
         builder.put(UPPER_STR, 1, upperFunctionSymbol);
         builder.put(UCASE_STR, 1, upperFunctionSymbol);
+
+        DBFunctionSymbol lowerFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LOWER_STR, 1, dbStringType,
+                false, abstractRootDBType);
+        builder.put(LOWER_STR, 1, lowerFunctionSymbol);
+        builder.put(LCASE_STR, 1, lowerFunctionSymbol);
 
         DBFunctionSymbol replaceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REPLACE_STR, 3, dbStringType,
                 false, abstractRootDBType);
@@ -159,6 +166,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     @Override
     public DBFunctionSymbol getDBUpper() {
         return getRegularDBFunctionSymbol(UPPER_STR, 1);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBLower() {
+        return getRegularDBFunctionSymbol(LOWER_STR, 1);
     }
 
     @Override

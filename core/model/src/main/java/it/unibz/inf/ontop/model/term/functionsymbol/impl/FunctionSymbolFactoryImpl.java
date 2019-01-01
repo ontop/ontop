@@ -43,7 +43,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
-        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
+        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory);
         this.commonDenominatorMap = new HashMap<>();
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
@@ -53,12 +53,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+            TypeFactory typeFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
-                new UcaseSPARQLFunctionSymbolImpl(xsdString, dbFunctionSymbolFactory),
+                new UcaseSPARQLFunctionSymbolImpl(xsdString),
+                new LcaseSPARQLFunctionSymbolImpl(xsdString),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
         );

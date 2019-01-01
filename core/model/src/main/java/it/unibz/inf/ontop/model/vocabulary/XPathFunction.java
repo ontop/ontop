@@ -9,6 +9,7 @@ public class XPathFunction {
 
     public final static IRI CONCAT;
     public final static IRI UPPER_CASE;
+    public final static IRI LOWER_CASE;
     public final static IRI STARTS_WITH;
     public static final IRI ENDS_WITH;
 
@@ -16,6 +17,7 @@ public class XPathFunction {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
         CONCAT = factory.createIRI(PREFIX + "concat");
         UPPER_CASE = factory.createIRI(PREFIX + "upper-case");
+        LOWER_CASE = factory.createIRI(PREFIX + "lower-case");
         STARTS_WITH = factory.createIRI(PREFIX + "starts-with");
         ENDS_WITH = factory.createIRI(PREFIX + "ends-with");
 

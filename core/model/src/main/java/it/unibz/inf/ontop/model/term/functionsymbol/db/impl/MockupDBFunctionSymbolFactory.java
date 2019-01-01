@@ -111,6 +111,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBLower() {
+        return getRegularDBFunctionSymbol("LOWER", 1);
+    }
+
+    @Override
     public DBFunctionSymbol getDBReplace() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

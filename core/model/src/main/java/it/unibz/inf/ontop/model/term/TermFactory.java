@@ -427,6 +427,10 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBRight(ImmutableTerm stringTerm, ImmutableTerm lengthTerm);
 
+	ImmutableFunctionalTerm getDBUpper(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getDBLower(ImmutableTerm stringTerm);
+
 
 	TypeFactory getTypeFactory();
 
