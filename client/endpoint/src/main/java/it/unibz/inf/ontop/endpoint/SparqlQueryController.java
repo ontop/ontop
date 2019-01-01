@@ -3,7 +3,13 @@ package it.unibz.inf.ontop.endpoint;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.utils.VersionInfo;
-import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLBooleanJSONWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
@@ -23,8 +29,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -65,26 +77,7 @@ public class SparqlQueryController {
         map.put("ontop", "v" + VersionInfo.getVersionInfo().getVersion());
         map.put("HTTP endpoint", request.getRequestURL().toString() + "sparql");
         return map;
-
-//        String message = String.format("{\"ontop version\": \"%s\", \"HTTP endpoint\" : \"%s\"}",
-//                VersionInfo.getVersionInfo().getVersion(),
-//                "/sparql");
-
-//        String message = String.format("{\"ontop version\": \"%s\", \"HTTP endpoint\" : \"%s\"}", VersionInfo.getVersionInfo().getVersion(), "/sparql");
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set(CONTENT_TYPE, "application/json; charset=UTF-8");
-//        HttpStatus status = HttpStatus.OK;
-//        return new ResponseEntity<>(message, headers, status);
-
     }
-//    @RequestMapping(value = "/",
-//            method = {RequestMethod.GET}
-//    )
-//    @ResponseBody
-//    public String home() {
-//        return "Ontop: " + VersionInfo.getVersionInfo().getVersion();
-//    }
 
     @RequestMapping(value = "/sparql",
             method = {RequestMethod.GET}
@@ -224,7 +217,7 @@ public class SparqlQueryController {
         return new ResponseEntity<>(message, headers, status);
     }
 
-    @ExceptionHandler({RepositoryException.class})
+    @ExceptionHandler({RepositoryException.class, Exception.class})
     public ResponseEntity handleRepositoryException(Exception ex) {
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();

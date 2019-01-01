@@ -29,5 +29,3 @@ docker run --name=ontop-endpoint \
 docker start ontop-endpoint
 ```
 
-docker start ontop-endpoint bash
-
