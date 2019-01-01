@@ -33,6 +33,10 @@ public interface DBTypeFactory {
      */
     DBTermType getDBTermType(int typeCode, String typeName);
 
+    String getDBTrueLexicalValue();
+    String getDBFalseLexicalValue();
+    String getNullLexicalValue();
+
 
 
     /**

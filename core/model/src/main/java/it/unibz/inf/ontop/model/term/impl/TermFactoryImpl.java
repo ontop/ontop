@@ -32,10 +32,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -76,11 +73,12 @@ public class TermFactoryImpl implements TermFactory {
 		this.coreUtilsFactory = coreUtilsFactory;
 		this.rdfFactory = rdfFactory;
 
-		DBTermType dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
-		// TODO: let a DB-specific class have the control over DB constant creation
-		this.valueTrue = new DBConstantImpl("true", dbBooleanType);
-		this.valueFalse = new DBConstantImpl("false", dbBooleanType);
-		this.valueNull = new NullConstantImpl();
+		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
+		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
+		this.valueNull = new NullConstantImpl(dbTypeFactory.getNullLexicalValue());
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();

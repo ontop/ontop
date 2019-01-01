@@ -122,6 +122,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         switch (this) {
             case IS_TRUE:
+            case IS_NOT_NULL:
                 return true;
                 // TODO: allow additional ones
             default:

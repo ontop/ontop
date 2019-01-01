@@ -10,9 +10,10 @@ import java.util.stream.Stream;
 
 public class NullConstantImpl extends AbstractNonFunctionalTerm implements Constant {
 
-    private static final String NULL_STRING = "null";
+    private final String nullLexicalValue;
 
-    protected NullConstantImpl() {
+    protected NullConstantImpl(String nullLexicalValue) {
+        this.nullLexicalValue = nullLexicalValue;
     }
 
     @Override
@@ -22,7 +23,7 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
 
     @Override
     public String getValue() {
-        return NULL_STRING;
+        return nullLexicalValue;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
 
     @Override
     public String toString() {
-        return NULL_STRING;
+        return nullLexicalValue;
     }
 
     @Override
