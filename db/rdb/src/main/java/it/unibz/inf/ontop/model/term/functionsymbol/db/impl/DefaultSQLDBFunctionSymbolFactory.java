@@ -14,6 +14,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static final String AND_STR = "AND";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String LENGTH_STR = "LENGTH";
+    protected static final String RIGHT_STR = "RIGHT";
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
@@ -80,6 +81,10 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         DBFunctionSymbol subStringFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
                 false, abstractRootDBType);
         builder.put(SUBSTRING_STR, 3, subStringFunctionSymbol);
+
+        DBFunctionSymbol rightFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(RIGHT_STR, 2, dbStringType,
+                false, abstractRootDBType);
+        builder.put(RIGHT_STR, 2, rightFunctionSymbol);
 
         // TODO: check precise output type
         DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LENGTH_STR, 1, dbIntType,
@@ -164,6 +169,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     @Override
     public DBFunctionSymbol getDBSubString() {
         return getRegularDBFunctionSymbol(SUBSTRING_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRight() {
+        return getRegularDBFunctionSymbol(RIGHT_STR, 2);
     }
 
     @Override

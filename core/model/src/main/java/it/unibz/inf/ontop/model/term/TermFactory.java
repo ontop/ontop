@@ -385,6 +385,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
 
 	ImmutableExpression getDBStartsWithFunctionalTerm(ImmutableList<ImmutableTerm> terms);
+	ImmutableExpression getDBEndsWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);
+
 
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);
 
@@ -422,6 +424,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
 	ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
+
+	ImmutableFunctionalTerm getDBRight(ImmutableTerm stringTerm, ImmutableTerm lengthTerm);
+
 
 	TypeFactory getTypeFactory();
 

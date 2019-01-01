@@ -792,13 +792,10 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * String functions
                      */
-                    //.put("http://www.w3.org/2005/xpath-functions#upper-case", UCASE)
                     .put("http://www.w3.org/2005/xpath-functions#lower-case", LCASE)
                     .put("http://www.w3.org/2005/xpath-functions#string-length", STRLEN)
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
                     .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)
-                    //.put("http://www.w3.org/2005/xpath-functions#starts-with", STR_STARTS)
-                    .put("http://www.w3.org/2005/xpath-functions#ends-with", STR_ENDS)
                     .put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ENCODE_FOR_URI)
                     .put("http://www.w3.org/2005/xpath-functions#contains", CONTAINS)
                     .put("UUID", UUID)

@@ -671,7 +671,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStartsWith(), terms);
     }
 
-    @Override
+	@Override
+	public ImmutableExpression getDBEndsWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBEndsWith(), terms);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }
@@ -737,7 +742,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString(), stringTerm, from, to);
 	}
 
-    private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
+	@Override
+	public ImmutableFunctionalTerm getDBRight(ImmutableTerm stringTerm, ImmutableTerm lengthTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRight(), stringTerm, lengthTerm);
+	}
+
+	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);
 	}

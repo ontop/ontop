@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
@@ -21,6 +22,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final TypeFactory typeFactory;
     private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
+    private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
 
     /**
      * Lazy
@@ -84,6 +86,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.counter = new AtomicInteger();
         this.typeFactory = typeFactory;
         this.dbStartsWithFunctionSymbol = new DefaultDBStrStartsWithFunctionSymbol(
+                dbTypeFactory.getAbstractRootDBType(), dbStringType);
+        this.dbEndsWithFunctionSymbol = new DefaultDBStrEndsWithFunctionSymbol(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
     }
 
@@ -169,6 +173,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBBooleanFunctionSymbol getDBStartsWith() {
         return dbStartsWithFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBEndsWith() {
+        return dbEndsWithFunctionSymbol;
     }
 
     @Override

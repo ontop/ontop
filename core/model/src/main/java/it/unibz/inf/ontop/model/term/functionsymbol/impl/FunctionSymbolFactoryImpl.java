@@ -59,7 +59,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString, dbFunctionSymbolFactory),
-                new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
+                new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
+                new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

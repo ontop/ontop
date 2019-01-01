@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
@@ -63,6 +65,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBSubString();
 
+    DBFunctionSymbol getDBRight();
+
     DBFunctionSymbol getDBStrlen();
 
     DBFunctionSymbol getR2RMLIRISafeEncode();
@@ -80,4 +84,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBStrictEquality(int arity);
 
     DBBooleanFunctionSymbol getDBStartsWith();
+
+    DBBooleanFunctionSymbol getDBEndsWith();
+
 }

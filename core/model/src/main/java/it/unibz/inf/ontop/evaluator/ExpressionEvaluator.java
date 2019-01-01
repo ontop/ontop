@@ -294,7 +294,6 @@ public class ExpressionEvaluator {
 				case GT:
 				case LTE:
 				case LT:
-				case STR_ENDS:
 				case CONTAINS:
 				case SQL_LIKE:
 					return term;
