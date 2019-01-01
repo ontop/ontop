@@ -20,7 +20,7 @@ public class StartsWithSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQ
         return termFactory.getDBCastFunctionalTerm(
                 dbTypeFactory.getDBBooleanType(),
                 dbTypeFactory.getDBStringType(),
-                termFactory.getDBStartsWithFunctionalTerm(subLexicalTerms));
+                termFactory.getDBStartsWith(subLexicalTerms));
     }
 
     /**

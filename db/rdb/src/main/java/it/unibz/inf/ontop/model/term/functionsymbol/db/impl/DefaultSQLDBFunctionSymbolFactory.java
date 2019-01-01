@@ -207,4 +207,12 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBContains() {
+        throw new UnsupportedOperationException(
+                "Not supported in the Default SQL factory since no-one uses " +
+                        "the old official standard function.\n" +
+                        "Please specific it in your dialect factory");
+    }
+
 }
