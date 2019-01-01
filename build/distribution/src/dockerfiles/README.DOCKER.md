@@ -1,11 +1,13 @@
 # Build image
 ```
-docker build -t ghxiao/ontop-endpoint .  
+cd $ONTOP/build/distribution/ontop-dist
+docker build -t ghxiao/ontop-endpoint -f  ../src/dockerfiles/Dockerfile .  
 ```
 
-# Create a container
+# Create a container without a name
 ```
-docker run --name=ontop-endpoint --rm \
+docker run --rm \
+-v /Users/xiao/.m2/repository/com/h2database/h2/1.4.196:/opt/ontop/jdbc \
 -v /Users/xiao/Development/ontop-demo/university:/obda \
 -e ONTOLOGY_FILE=/obda/university-complete.ttl \
 -e MAPPING_FILE=/obda/university-complete.obda \
@@ -26,4 +28,6 @@ docker run --name=ontop-endpoint \
 ```
 docker start ontop-endpoint
 ```
+
+docker start ontop-endpoint bash
 

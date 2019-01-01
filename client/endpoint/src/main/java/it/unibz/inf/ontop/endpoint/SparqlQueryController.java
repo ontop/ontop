@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.endpoint;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.utils.VersionInfo;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLBooleanJSONWriter;
@@ -25,7 +26,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -54,6 +58,33 @@ public class SparqlQueryController {
         return repository;
     }
 
+    @RequestMapping(value = "/")
+    @ResponseBody
+    public Map<String, String> home(HttpServletRequest request) {
+        Map<String, String> map = new HashMap<>();
+        map.put("ontop", "v" + VersionInfo.getVersionInfo().getVersion());
+        map.put("HTTP endpoint", request.getRequestURL().toString() + "sparql");
+        return map;
+
+//        String message = String.format("{\"ontop version\": \"%s\", \"HTTP endpoint\" : \"%s\"}",
+//                VersionInfo.getVersionInfo().getVersion(),
+//                "/sparql");
+
+//        String message = String.format("{\"ontop version\": \"%s\", \"HTTP endpoint\" : \"%s\"}", VersionInfo.getVersionInfo().getVersion(), "/sparql");
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set(CONTENT_TYPE, "application/json; charset=UTF-8");
+//        HttpStatus status = HttpStatus.OK;
+//        return new ResponseEntity<>(message, headers, status);
+
+    }
+//    @RequestMapping(value = "/",
+//            method = {RequestMethod.GET}
+//    )
+//    @ResponseBody
+//    public String home() {
+//        return "Ontop: " + VersionInfo.getVersionInfo().getVersion();
+//    }
 
     @RequestMapping(value = "/sparql",
             method = {RequestMethod.GET}
