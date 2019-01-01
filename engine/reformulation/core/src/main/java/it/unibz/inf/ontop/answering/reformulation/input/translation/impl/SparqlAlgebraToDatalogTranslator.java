@@ -796,7 +796,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
                     .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)
                     .put("http://www.w3.org/2005/xpath-functions#encode-for-uri", ENCODE_FOR_URI)
-                    .put("http://www.w3.org/2005/xpath-functions#contains", CONTAINS)
                     .put("UUID", UUID)
                     .put("STRUUID", STRUUID)
                     /*

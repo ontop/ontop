@@ -662,21 +662,26 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
-    public ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
+    public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
     }
 
     @Override
-    public ImmutableExpression getDBStartsWithFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
+    public ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStartsWith(), terms);
     }
 
 	@Override
-	public ImmutableExpression getDBEndsWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {
+	public ImmutableExpression getDBEndsWith(ImmutableList<? extends ImmutableTerm> terms) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBEndsWith(), terms);
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getDBContains(ImmutableList<? extends ImmutableTerm> terms) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBContains(), terms);
+    }
+
+    @Override
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }

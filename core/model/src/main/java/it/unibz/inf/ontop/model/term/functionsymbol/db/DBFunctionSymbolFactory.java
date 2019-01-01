@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import org.mapdb.DB;
 
 /**
  * Factory for DBFunctionSymbols
@@ -88,4 +89,9 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBStartsWith();
 
     DBBooleanFunctionSymbol getDBEndsWith();
+
+    /**
+     * Arity 2, first argument is the string in which to search, second argument is subString
+     */
+    DBBooleanFunctionSymbol getDBContains();
 }

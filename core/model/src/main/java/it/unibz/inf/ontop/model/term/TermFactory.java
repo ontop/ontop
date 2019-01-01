@@ -382,10 +382,11 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
-	ImmutableFunctionalTerm getDBReplaceFunctionalTerm(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
+	ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
 
-	ImmutableExpression getDBStartsWithFunctionalTerm(ImmutableList<ImmutableTerm> terms);
-	ImmutableExpression getDBEndsWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms);
+	ImmutableExpression getDBEndsWith(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableExpression getDBContains(ImmutableList<? extends ImmutableTerm> terms);
 
 
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);

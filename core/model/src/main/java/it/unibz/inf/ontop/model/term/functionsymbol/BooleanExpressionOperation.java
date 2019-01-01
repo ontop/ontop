@@ -42,8 +42,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
 
-    CONTAINS("CONTAINS", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, COMPATIBLE_STRING_VALIDATOR),
-
     /* SPARQL built-in predicates */
 
     IS_NUMERIC("isNumeric", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),

@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
-public class EndsWithSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQLFunctionSymbolImpl {
+public class ContainsSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQLFunctionSymbolImpl {
 
-    protected EndsWithSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
-        super("SP_ENDS_WITH", XPathFunction.ENDS_WITH, xsdStringType, xsdBooleanType);
+    protected ContainsSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
+        super("SP_CONTAINS", XPathFunction.CONTAINS, xsdStringType, xsdBooleanType);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class EndsWithSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQLF
         return termFactory.getDBCastFunctionalTerm(
                 dbTypeFactory.getDBBooleanType(),
                 dbTypeFactory.getDBStringType(),
-                termFactory.getDBEndsWith(subLexicalTerms));
+                termFactory.getDBContains(subLexicalTerms));
     }
 
     /**
