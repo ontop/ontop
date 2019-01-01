@@ -15,7 +15,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String AND_STR = "AND";
     protected static final String SUBSTRING_STR = "SUBSTRING";
-    protected static final String LENGTH_STR = "LENGTH";
+    protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
     protected static final String RIGHT_STR = "RIGHT";
 
     private final DBTypeFactory dbTypeFactory;
@@ -94,9 +94,9 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
         builder.put(RIGHT_STR, 2, rightFunctionSymbol);
 
         // TODO: check precise output type
-        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LENGTH_STR, 1, dbIntType,
+        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CHAR_LENGTH_STR, 1, dbIntType,
                 false, abstractRootDBType);
-        builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+        builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
 
         return builder.build();
     }
@@ -189,8 +189,8 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolF
     }
 
     @Override
-    public DBFunctionSymbol getDBStrlen() {
-        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    public DBFunctionSymbol getDBCharLength() {
+        return getRegularDBFunctionSymbol(CHAR_LENGTH_STR, 1);
     }
 
     @Override

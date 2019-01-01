@@ -69,7 +69,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBRight();
 
-    DBFunctionSymbol getDBStrlen();
+    DBFunctionSymbol getDBCharLength();
 
     DBFunctionSymbol getR2RMLIRISafeEncode();
 

@@ -734,7 +734,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBStrlen(), stringTerm);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
     }
 
 	@Override
