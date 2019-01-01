@@ -61,6 +61,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBUpper();
 
+    DBFunctionSymbol getDBLower();
+
     DBFunctionSymbol getDBReplace();
 
     DBFunctionSymbol getDBSubString();
@@ -86,5 +88,4 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBStartsWith();
 
     DBBooleanFunctionSymbol getDBEndsWith();
-
 }

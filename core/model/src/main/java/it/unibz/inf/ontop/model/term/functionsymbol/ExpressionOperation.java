@@ -38,7 +38,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	/* SPARQL String functions */
 
 	STRLEN("STRLEN", TermTypeInferenceRules.PREDEFINED_INTEGER_RULE, XSD_STRING_DT, false),
-	LCASE("LCASE", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, false),
 	SUBSTR2("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT, false),
 	SUBSTR3("SUBSTR", TermTypeInferenceRules.FIRST_ARG_RULE, XSD_STRING_DT, XSD_INTEGER_DT, XSD_INTEGER_DT, false),
 	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR, false),

@@ -1243,10 +1243,6 @@ public class OneShotSQLGeneratorEngine {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.SHA512(literal); //TODO FIX
 		}
-		if (functionSymbol == ExpressionOperation.LCASE) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.strLcase(literal);
-		}
 		if (functionSymbol == ExpressionOperation.SUBSTR2) {
 			String string = getSQLString(function.getTerm(0), index, false);
 			String start = getSQLString(function.getTerm(1), index, false);

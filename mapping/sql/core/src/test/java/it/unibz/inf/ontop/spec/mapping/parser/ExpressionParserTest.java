@@ -1522,7 +1522,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(LCASE, v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
@@ -1548,7 +1548,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(LCASE, v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)

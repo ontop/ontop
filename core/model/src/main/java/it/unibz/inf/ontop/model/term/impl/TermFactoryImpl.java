@@ -747,7 +747,17 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRight(), stringTerm, lengthTerm);
 	}
 
-	private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
+    @Override
+    public ImmutableFunctionalTerm getDBUpper(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUpper(), stringTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBLower(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBLower(), stringTerm);
+	}
+
+    private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);
 	}

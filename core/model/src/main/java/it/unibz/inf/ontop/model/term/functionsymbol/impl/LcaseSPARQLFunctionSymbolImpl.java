@@ -6,10 +6,10 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
-public class UcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunctionSymbol {
+public class LcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunctionSymbol {
 
-    protected UcaseSPARQLFunctionSymbolImpl(RDFDatatype xsdStringDatatype) {
-        super("SP_UCASE", XPathFunction.UPPER_CASE, xsdStringDatatype);
+    protected LcaseSPARQLFunctionSymbolImpl(RDFDatatype xsdStringDatatype) {
+        super("SP_LCASE", XPathFunction.LOWER_CASE, xsdStringDatatype);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class UcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunc
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
-        return termFactory.getDBUpper(subLexicalTerms.get(0));
+        return termFactory.getDBLower(subLexicalTerms.get(0));
     }
 }

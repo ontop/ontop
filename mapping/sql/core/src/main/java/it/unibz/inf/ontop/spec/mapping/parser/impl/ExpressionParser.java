@@ -1157,8 +1157,6 @@ public class ExpressionParser {
             .put("REPLACE", this::get_REPLACE)
             .put("SUBSTR", this::get_SUBSTR)
             .put("SUBSTRING", this::get_SUBSTR)
-            .put("LCASE", this::get_LCASE)
-            .put("LOWER", this::get_LCASE)
             .put("LENGTH", this::get_STRLEN)
             .put("RAND", this::get_RAND)
             // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
@@ -1259,13 +1257,6 @@ public class ExpressionParser {
             case 0:
                 return termFactory.getFunction(ExpressionOperation.RAND);
         }
-        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-    }
-
-    private Function get_LCASE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        if (terms.size() == 1)
-            return termFactory.getFunction(ExpressionOperation.LCASE, terms.get(0));
-        // DB2 has 3
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
