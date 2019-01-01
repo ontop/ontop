@@ -1525,7 +1525,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void function_LCASE_2_Test() throws JSQLParserException {
         String sql = "SELECT LCASE(X, 'A') AS A FROM DUMMY";
 
@@ -1534,6 +1534,9 @@ public class ExpressionParserTest {
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        DBFunctionSymbol lowerFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LCASE", 2);
+        assertEquals(TERM_FACTORY.getFunction(lowerFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
@@ -1551,7 +1554,7 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void function_LOWER_2_Test() throws JSQLParserException {
         String sql = "SELECT LOWER(X, 'A') AS A FROM DUMMY";
 
@@ -1560,6 +1563,9 @@ public class ExpressionParserTest {
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        DBFunctionSymbol lowerFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LOWER", 2);
+        assertEquals(TERM_FACTORY.getFunction(lowerFunctionSymbol, v, TERM_FACTORY.getDBStringConstant("A")), translation);
     }
 
     @Test
