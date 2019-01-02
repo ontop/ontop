@@ -424,7 +424,9 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
-	ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
+	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);
+
+	ImmutableFunctionalTerm getDBSubString3(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);
 
 	ImmutableFunctionalTerm getDBRight(ImmutableTerm stringTerm, ImmutableTerm lengthTerm);
 

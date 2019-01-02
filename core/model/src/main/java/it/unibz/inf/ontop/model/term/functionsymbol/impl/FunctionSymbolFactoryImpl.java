@@ -56,13 +56,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
             TypeFactory typeFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
-                new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
+                new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
+                new SubStr2SPARQLFunctionSymbolImpl(xsdString, xsdInteger),
+                new SubStr3SPARQLFunctionSymbolImpl(xsdString, xsdInteger)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

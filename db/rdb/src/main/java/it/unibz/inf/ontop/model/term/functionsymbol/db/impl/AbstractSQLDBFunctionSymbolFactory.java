@@ -82,9 +82,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 false, abstractRootDBType);
         builder.put(REPLACE_STR, 3, replaceFunctionSymbol);
 
-        DBFunctionSymbol subStringFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
+        DBFunctionSymbol subString2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 2, dbStringType,
                 false, abstractRootDBType);
-        builder.put(SUBSTRING_STR, 3, subStringFunctionSymbol);
+        builder.put(SUBSTRING_STR, 2, subString2FunctionSymbol);
+
+        DBFunctionSymbol subString3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTRING_STR, 3, subString3FunctionSymbol);
 
         DBFunctionSymbol rightFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(RIGHT_STR, 2, dbStringType,
                 false, abstractRootDBType);
@@ -176,7 +180,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBFunctionSymbol getDBSubString() {
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTRING_STR, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTRING_STR, 3);
     }
 
