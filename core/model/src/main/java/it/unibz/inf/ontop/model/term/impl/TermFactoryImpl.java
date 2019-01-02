@@ -743,8 +743,13 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
-	public ImmutableFunctionalTerm getDBSubString(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString(), stringTerm, from, to);
+	public ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString2(), stringTerm, from);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSubString3(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString3(), stringTerm, from, to);
 	}
 
 	@Override

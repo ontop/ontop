@@ -16,6 +16,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String AND_STR = "AND";
+    protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
     protected static final String RIGHT_STR = "RIGHT";
@@ -82,9 +83,15 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 false, abstractRootDBType);
         builder.put(REPLACE_STR, 3, replaceFunctionSymbol);
 
-        DBFunctionSymbol subStringFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
+        DBFunctionSymbol subString2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 2, dbStringType,
                 false, abstractRootDBType);
-        builder.put(SUBSTRING_STR, 3, subStringFunctionSymbol);
+        builder.put(SUBSTRING_STR, 2, subString2FunctionSymbol);
+        builder.put(SUBSTR_STR, 2, subString2FunctionSymbol);
+
+        DBFunctionSymbol subString3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTRING_STR, 3, subString3FunctionSymbol);
+        builder.put(SUBSTR_STR, 3, subString3FunctionSymbol);
 
         DBFunctionSymbol rightFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(RIGHT_STR, 2, dbStringType,
                 false, abstractRootDBType);
@@ -176,7 +183,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBFunctionSymbol getDBSubString() {
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTRING_STR, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTRING_STR, 3);
     }
 

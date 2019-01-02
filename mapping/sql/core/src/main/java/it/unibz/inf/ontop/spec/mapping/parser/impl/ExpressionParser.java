@@ -1155,8 +1155,6 @@ public class ExpressionParser {
             FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
             .put("REGEXP_REPLACE", this::get_REGEXP_REPLACE)
             .put("REPLACE", this::get_REPLACE)
-            .put("SUBSTR", this::get_SUBSTR)
-            .put("SUBSTRING", this::get_SUBSTR)
             .put("LENGTH", this::get_STRLEN)
             .put("RAND", this::get_RAND)
             // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
@@ -1239,17 +1237,6 @@ public class ExpressionParser {
 
         }
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
-    }
-
-    private Function get_SUBSTR(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        switch (terms.size()) {
-            case 2:
-                return termFactory.getFunction(ExpressionOperation.SUBSTR2, terms.get(0), terms.get(1));
-            case 3:
-                return termFactory.getFunction(ExpressionOperation.SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
-        }
-        // DB2 has 4
-        throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
     private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {

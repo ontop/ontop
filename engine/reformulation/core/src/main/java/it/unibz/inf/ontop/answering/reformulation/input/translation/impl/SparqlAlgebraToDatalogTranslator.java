@@ -761,19 +761,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
                     return termFactory.getFunction(REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
 
-
-                    // SUBSTR (Sec 17.4.3.3)
-                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc)
-                    // string literal  SUBSTR(string literal source, xsd:integer startingLoc, xsd:integer length)
-                case "http://www.w3.org/2005/xpath-functions#substring":
-                    if (arity == 2)
-                        return termFactory.getFunction(SUBSTR2, terms.get(0), terms.get(1));
-                    else if (arity == 3)
-                        return termFactory.getFunction(SUBSTR3, terms.get(0), terms.get(1), terms.get(2));
-
-                    throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
-                            + terms.size() + ", only 2 or 3 supported) for SPARQL function SUBSTRING");
-
                 default:
                     throw new OntopUnsupportedInputQueryException("Function " + f.getURI() + " is not supported yet!");
             }

@@ -66,7 +66,9 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBReplace();
 
-    DBFunctionSymbol getDBSubString();
+    DBFunctionSymbol getDBSubString2();
+
+    DBFunctionSymbol getDBSubString3();
 
     DBFunctionSymbol getDBRight();
 
@@ -94,4 +96,5 @@ public interface DBFunctionSymbolFactory {
      * Arity 2, first argument is the string in which to search, second argument is subString
      */
     DBBooleanFunctionSymbol getDBContains();
+
 }

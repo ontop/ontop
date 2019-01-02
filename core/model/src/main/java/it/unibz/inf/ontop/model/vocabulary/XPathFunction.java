@@ -13,6 +13,7 @@ public class XPathFunction {
     public final static IRI STARTS_WITH;
     public static final IRI ENDS_WITH;
     public static final IRI CONTAINS;
+    public static final IRI SUBSTRING;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -22,6 +23,7 @@ public class XPathFunction {
         STARTS_WITH = factory.createIRI(PREFIX + "starts-with");
         ENDS_WITH = factory.createIRI(PREFIX + "ends-with");
         CONTAINS = factory.createIRI(PREFIX + "contains");
+        SUBSTRING = factory.createIRI(PREFIX + "substring");
 
     }
 }

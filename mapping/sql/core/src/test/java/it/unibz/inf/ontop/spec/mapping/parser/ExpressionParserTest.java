@@ -1444,7 +1444,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(SUBSTR2, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1460,7 +1460,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(SUBSTR3, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -1489,7 +1489,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(SUBSTR2, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1505,7 +1505,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(SUBSTR3, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
