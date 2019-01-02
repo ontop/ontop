@@ -6,12 +6,6 @@
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 
-	<!-- <moduleSets> <moduleSet> <includes> <include>inf.unibz.it.obda:quest-owlapi3</include>
-		</includes> <binaries> <outputDirectory>/</outputDirectory> <unpack>false</unpack>
-		<includeDependencies>true</includeDependencies> <dependencySets> <dependencySet>
-		<outputDirectory>/lib</outputDirectory> </dependencySet> </dependencySets>
-		</binaries> </moduleSet> </moduleSets> -->
-
 	<fileSets>
 		<fileSet>
 			<directory>${project.basedir}/../../licenses</directory>

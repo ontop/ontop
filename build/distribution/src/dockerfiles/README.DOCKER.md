@@ -1,7 +1,9 @@
 # Build image
 ```
-cd $ONTOP/build/distribution/ontop-dist
-docker build -t ghxiao/ontop-endpoint -f  ../src/dockerfiles/Dockerfile .  
+cd $ONTOP/build/distribution/ontop-cli
+unzip ontop-distr*.zip -d ontop
+cd ontop
+docker build -t ghxiao/ontop-endpoint -f  ../../src/dockerfiles/Dockerfile .  
 ```
 
 # Create a container without a name

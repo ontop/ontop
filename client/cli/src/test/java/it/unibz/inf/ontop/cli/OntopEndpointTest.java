@@ -1,17 +1,11 @@
 package it.unibz.inf.ontop.cli;
 
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
 
@@ -59,7 +53,7 @@ public class OntopEndpointTest {
         }
     }
 
-    @Test(expected = RepositoryException.class)
+    @Test(expected = QueryEvaluationException.class)
     public void testInvalidQuery() {
 
         String sparqlEndpoint = "http://localhost:" + PORT + "/sparql";

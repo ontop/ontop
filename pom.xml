@@ -151,6 +151,7 @@
         <jsqlparser.version>1.0</jsqlparser.version>
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <jackson.version>2.9.6</jackson.version>
+        <jena.version>3.9.0</jena.version>
     </properties>
 
     <build>
@@ -420,6 +421,7 @@
                 <artifactId>owlapi-apibinding</artifactId>
                 <version>${owlapi.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>net.sourceforge.owlapi</groupId>
                 <artifactId>owlapi-impl</artifactId>
@@ -569,7 +571,6 @@
                 <artifactId>rdf4j-queryrender</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
@@ -579,6 +580,12 @@
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-rio-rdfjson</artifactId>
                 <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.jsonld-java</groupId>
+                <artifactId>jsonld-java</artifactId>
+                <version>0.12.1</version>
             </dependency>
 
 
@@ -654,6 +661,34 @@
                 <groupId>eu.optique-project</groupId>
                 <artifactId>r2rml-api-jena-binding</artifactId>
                 <version>${r2rml-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-jena</artifactId>
+                <version>${commons-rdf.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.jena</groupId>
+                        <artifactId>jena-osgi</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.jena</groupId>
+                <artifactId>jena-arq</artifactId>
+                <version>${jena.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
