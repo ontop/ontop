@@ -29,14 +29,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
@@ -70,20 +64,20 @@ public class SparqlQueryController {
         return repository;
     }
 
-    @RequestMapping(value = "/")
-    @ResponseBody
-    public Map<String, String> home(HttpServletRequest request) {
-        Map<String, String> map = new HashMap<>();
-        map.put("ontop", "v" + VersionInfo.getVersionInfo().getVersion());
-        map.put("HTTP endpoint", request.getRequestURL().toString() + "sparql");
-        return map;
+    @GetMapping(value = "/")
+    public ModelAndView home(HttpServletRequest request) {
+        Map<String, String> model = new HashMap<>();
+        model.put("version", VersionInfo.getVersionInfo().getVersion());
+        model.put("endpointUrl", request.getRequestURL().toString() + "sparql");
+        model.put("yasguiUrl", request.getRequestURL().toString() + "yasgui");
+        return new ModelAndView("index", model);
     }
 
     @RequestMapping(value = "/sparql",
             method = {RequestMethod.GET}
     )
     @ResponseBody
-    public HttpEntity query_get(
+    public HttpEntity<String> query_get(
             @RequestHeader(ACCEPT) String accept,
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
@@ -91,12 +85,11 @@ public class SparqlQueryController {
         return execQuery(accept, query, defaultGraphUri, namedGraphUri);
     }
 
-
     @RequestMapping(value = "/sparql",
             method = RequestMethod.POST,
             consumes = APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseBody
-    public HttpEntity query_post_URL_encoded(
+    public HttpEntity<String> query_post_URL_encoded(
             @RequestHeader(ACCEPT) String accept,
             @RequestParam(value = "query") String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
@@ -108,7 +101,7 @@ public class SparqlQueryController {
             method = RequestMethod.POST,
             consumes = "application/sparql-query")
     @ResponseBody
-    public HttpEntity query_post_directly(
+    public HttpEntity<String> query_post_directly(
             @RequestHeader(ACCEPT) String accept,
             @RequestBody String query,
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
@@ -116,8 +109,8 @@ public class SparqlQueryController {
         return execQuery(accept, query, defaultGraphUri, namedGraphUri);
     }
 
-    private ResponseEntity execQuery(String accept,
-                                     String query, String[] defaultGraphUri, String[] namedGraphUri) {
+    private ResponseEntity<String> execQuery(String accept,
+                                             String query, String[] defaultGraphUri, String[] namedGraphUri) {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -209,7 +202,7 @@ public class SparqlQueryController {
 
 
     @ExceptionHandler({MalformedQueryException.class})
-    public ResponseEntity handleMalformedQueryException(Exception ex) {
+    public ResponseEntity<String> handleMalformedQueryException(Exception ex) {
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -218,7 +211,7 @@ public class SparqlQueryController {
     }
 
     @ExceptionHandler({RepositoryException.class, Exception.class})
-    public ResponseEntity handleRepositoryException(Exception ex) {
+    public ResponseEntity<String> handleRepositoryException(Exception ex) {
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
