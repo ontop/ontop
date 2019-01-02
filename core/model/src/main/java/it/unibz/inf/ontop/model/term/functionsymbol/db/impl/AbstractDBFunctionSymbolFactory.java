@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
@@ -24,9 +27,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
 
-    /**
-     * Lazy
-     */
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol containsFunctionSymbol;
+    // Lazy
     @Nullable
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
 
@@ -54,6 +58,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBBooleanFunctionSymbol> strictEqMap;
 
+    private final DBTermType rootDBType;
     private final DBTermType dbStringType;
 
     /**
@@ -89,6 +94,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.dbEndsWithFunctionSymbol = new DefaultDBStrEndsWithFunctionSymbol(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
+        this.rootDBType = dbTypeFactory.getAbstractRootDBType();
     }
 
     @Override
@@ -187,6 +193,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return r2rmlIRISafeEncodeFunctionSymbol;
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBContains() {
+        if (containsFunctionSymbol == null)
+            containsFunctionSymbol = createContainsFunctionSymbol();
+        return containsFunctionSymbol;
+    }
+    
+    protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
+        return new DBContainsFunctionSymbolImpl(rootDBType, dbStringType, this::serializeContains);
+    }
+
     /**
      * Can be overridden
      */
@@ -206,6 +223,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
 
     protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
+
+    protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter,
+                                     TermFactory termFactory);
+    
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {

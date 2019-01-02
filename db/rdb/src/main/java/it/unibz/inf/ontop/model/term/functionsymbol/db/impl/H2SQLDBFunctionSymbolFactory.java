@@ -1,28 +1,23 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.util.function.Function;
+
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
-
-
-    private final DBBooleanFunctionSymbol containsFunctionSymbol;
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDefaultNormalizationTable(typeFactory),
                 createH2RegularFunctionTable(typeFactory), typeFactory);
-
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        containsFunctionSymbol = new H2ContainsFunctionSymbolImpl(dbTypeFactory.getAbstractRootDBType(),
-                dbTypeFactory.getDBBooleanType());
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(
@@ -34,7 +29,11 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBContains() {
-        return containsFunctionSymbol;
+    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter,
+                                       TermFactory termFactory) {
+        return String.format("(POSITION(%s,%s) > 0)",
+                termConverter.apply(terms.get(1)),
+                termConverter.apply(terms.get(0)));
     }
 }

@@ -4,17 +4,21 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 
-import javax.annotation.Nonnull;
+import java.util.function.Function;
 
-public abstract class AbstractDBContainsFunctionSymbol extends DBBooleanFunctionSymbolImpl {
+public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
 
-    protected AbstractDBContainsFunctionSymbol(DBTermType abstractRootTermType, DBTermType dbBooleanTermType) {
+    private final DBFunctionSymbolSerializer serializer;
+
+    protected DBContainsFunctionSymbolImpl(DBTermType abstractRootTermType, DBTermType dbBooleanTermType,
+                                           DBFunctionSymbolSerializer serializer) {
         super("DB_CONTAINS",
                 ImmutableList.of(abstractRootTermType, abstractRootTermType),
                 dbBooleanTermType);
+        this.serializer = serializer;
     }
 
     @Override
@@ -38,5 +42,12 @@ public abstract class AbstractDBContainsFunctionSymbol extends DBBooleanFunction
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter,
+                                    TermFactory termFactory) {
+        return serializer.getNativeDBString(terms, termConverter, termFactory);
     }
 }

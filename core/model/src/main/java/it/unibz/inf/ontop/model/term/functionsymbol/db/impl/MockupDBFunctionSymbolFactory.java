@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -12,6 +15,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -101,6 +105,13 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected String serializeContains(ImmutableList<? extends ImmutableTerm> immutableTerms,
+                                       Function<ImmutableTerm, String> immutableTermStringFunction,
+                                       TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfElseNull() {
         return new MockupDBIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
@@ -147,11 +158,6 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBContains() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
 }
