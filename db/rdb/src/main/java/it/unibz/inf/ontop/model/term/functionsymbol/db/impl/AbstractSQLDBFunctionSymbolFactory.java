@@ -19,6 +19,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
+    protected static final String LENGTH_STR = "LENGTH";
     protected static final String RIGHT_STR = "RIGHT";
 
     private final DBTypeFactory dbTypeFactory;
@@ -101,6 +102,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CHAR_LENGTH_STR, 1, dbIntType,
                 false, abstractRootDBType);
         builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
+        //TODO: move away this synonym as it is non-standard
+        builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+
 
         return builder.build();
     }
