@@ -6,11 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @SpringBootApplication
 public class OntopEndpointApplication
@@ -28,16 +24,6 @@ public class OntopEndpointApplication
         return new EndpointConfig(owlFile, mappingFile, propertiesFile);
     }
 
-
-//    @Configuration
-//    public class CustomWebMvcConfigurerAdapter implements WebMvcConfigurer {
-//
-//        @Override
-//        public void addViewControllers(ViewControllerRegistry registry) {
-//            registry.addViewController("/yasgui").setViewName("redirect:/yasgui/");
-//            registry.addViewController("/yasgui/").setViewName("forward:/yasgui/index.html");
-//        }
-//    }
 
     @Component
     public class CustomizationPortBean implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {

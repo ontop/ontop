@@ -3,7 +3,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>YASGUI</title>
+    <title th:text="'Ontop SPARQL endpoint v' + ${version}"></title>
     <link href='./yasgui/yasgui.min.css' rel='stylesheet' type='text/css'/>
 
     <style>
@@ -12,11 +12,11 @@
             flex-grow: 1;
             justify-content: space-between;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 18px;
+            font-size: 20px;
             line-height: 1.42857;
             color: #333;
             background-color: #fff;
-            padding: 4px;
+            padding: 6px;
         }
 
         #title {
@@ -24,7 +24,8 @@
             order: 0;
         }
 
-        #endpointUrl {
+        #info {
+            font-size: 14px;
             order: 1;
         }
     </style>
@@ -32,10 +33,10 @@
 <body>
 <header>
     <div id="title">Ontop SPARQL endpoint</div>
-    <div id="endpointUrl">
-        <small>endpoint address: <span class="yasgui" th:text="${endpointUrl}"></span></small> |
-        <small><span th:text="'v'+${version}"></span></small>
-
+    <div id="info">
+        endpoint address: <span class="yasgui" style="text-decoration: underline;" th:text="${endpointUrl}"></span>
+        <small>|</small>
+        <span th:text="'v'+${version}"></span>
     </div>
 </header>
 
@@ -44,7 +45,7 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    var endpoint = /*[[${endpointUrl}]]*/ 'endpoint';
+    var endpointUrl = /*[[${endpointUrl}]]*/ 'endpoint';
     /*]]>*/
 </script>
 
@@ -53,7 +54,7 @@
         //Uncomment below to change the default endpoint
         //Note: If you've already opened the YASGUI page before, you should first clear your
         //local-storage cache before you will see the changes taking effect
-        yasqe: {sparql: {endpoint: endpoint}}
+        yasqe: {sparql: {endpoint: endpointUrl}}
     });
 </script>
 </body>
