@@ -14,6 +14,7 @@ public class XPathFunction {
     public static final IRI ENDS_WITH;
     public static final IRI CONTAINS;
     public static final IRI SUBSTRING;
+    public static final IRI STRING_LENGTH;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -24,6 +25,6 @@ public class XPathFunction {
         ENDS_WITH = factory.createIRI(PREFIX + "ends-with");
         CONTAINS = factory.createIRI(PREFIX + "contains");
         SUBSTRING = factory.createIRI(PREFIX + "substring");
-
+        STRING_LENGTH = factory.createIRI(PREFIX + "string-length");
     }
 }
