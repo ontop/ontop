@@ -3,13 +3,13 @@
 ########################################################################
 #
 #                       Ontop build script
-# 
+#
 #                      <xiao(a)inf.unibz.it>
 #
 #   Build Requirements
 #   - Java 8
 #   - Maven
-#   - git 
+#   - git
 #   - git-lfs
 #
 ########################################################################
@@ -37,8 +37,8 @@ JAVA_VER=$(${JAVA} -version 2>&1 | sed 's/version "\(.*\)\.\(.*\)\..*"/\2/; 1q')
 #    exit 1
 #fi
 
-echo '$ mvn -version'
-mvn -version || { echo "ERROR: maven is not installed!" ; exit 1 ; }
+echo '$ ./mvnw -version'
+./mvnw -version
 echo ""
 
 echo "$ git --version"
@@ -70,8 +70,8 @@ else
 fi
 
 # location for protege clean folder
-PROTEGE_COPY_FILENAME=Protege-5.2.0-platform-independent
-PROTEGE_MAIN_FOLDER_NAME=Protege-5.2.0
+PROTEGE_COPY_FILENAME=Protege-5.5.0-beta-7-platform-independent
+PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0-beta-7
 
 
 # location and name for jetty distribution (should be ZIP)
@@ -85,7 +85,7 @@ TOMCAT_FILENAME=apache-tomcat-8.5.9
 PROTEGE_DIST=ontop-protege
 ONTOP_JETTY_DIST=ontop-jetty
 ONTOP_TOMCAT_DIST=ontop-tomcat
-ONTOP_DIST=ontop-dist
+ONTOP_CLI=ontop-cli
 
 # jar name of the protege plugin
 PROTEGE_PLUGIN_NAME=it.unibz.inf.ontop.protege
@@ -214,15 +214,15 @@ cd ${BUILD_ROOT}/build/distribution
 #
 echo ""
 echo "========================================="
-echo " Building Ontop distribution package     "
+echo " Building Ontop CLI distribution package     "
 echo "-----------------------------------------"
 echo ""
 
 mvn assembly:assembly
-rm -fr ${ONTOP_DIST}
-mkdir -p ${ONTOP_DIST}
+rm -fr ${ONTOP_CLI}
+mkdir -p ${ONTOP_CLI}
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-${VERSION}.zip ${ONTOP_DIST}
+cp target/ontop-distribution-${VERSION}.zip ${ONTOP_CLI}
 
 echo ""
 echo "========================================="

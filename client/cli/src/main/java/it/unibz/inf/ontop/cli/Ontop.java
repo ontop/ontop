@@ -47,11 +47,11 @@ public class Ontop {
                         OntopMaterialize.class,
                         OntopBootstrap.class,
                         OntopValidate.class,
+                        OntopEndpoint.class,
                         /**
                          * hidden commands
                          */
                         OntopCompile.class
-                        // OntopServer.class
                 );
 
 

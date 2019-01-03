@@ -6,12 +6,6 @@
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 
-	<!-- <moduleSets> <moduleSet> <includes> <include>inf.unibz.it.obda:quest-owlapi3</include> 
-		</includes> <binaries> <outputDirectory>/</outputDirectory> <unpack>false</unpack> 
-		<includeDependencies>true</includeDependencies> <dependencySets> <dependencySet> 
-		<outputDirectory>/lib</outputDirectory> </dependencySet> </dependencySets> 
-		</binaries> </moduleSet> </moduleSets> -->
-
 	<fileSets>
 		<fileSet>
 			<directory>${project.basedir}/../../licenses</directory>
@@ -38,16 +32,6 @@
             </includes>
         </fileSet>
 
-    <!--
-        <fileSet>
-			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/
-			</directory>
-			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>*</include>
-			</includes>
-		</fileSet>
-	-->
 		<fileSet>
 			<directory>${project.basedir}/../../engine/owlapi/src/main/resources/
 			</directory>
@@ -56,16 +40,7 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
-	<!--
-		<fileSet>
-			<directory>${project.basedir}/../quest-sesame/src/main/resources/
-			</directory>
-			<outputDirectory>/</outputDirectory>
-			<includes>
-				<include>*</include>
-			</includes>
-    		</fileSet>
-    -->
+
 	</fileSets>
 
 	<dependencySets>
@@ -85,4 +60,4 @@
 
 	</dependencySets>
 
-</assembly> 
+</assembly>

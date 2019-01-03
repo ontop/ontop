@@ -17,9 +17,8 @@
     </organization>
 
     <properties>
-        <protege.version>5.2.0</protege.version>
+        <protege.version>5.5.0-beta-7</protege.version>
         <symbolic.name>it.unibz.inf.ontop.protege</symbolic.name>
-        <commons-rdf.version>0.3.0-incubating</commons-rdf.version>
     </properties>
 
     <dependencies>
@@ -68,13 +67,19 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>3.2</version>
+            <version>4.4</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.2</version>
         </dependency>
 
         <dependency>
@@ -322,11 +327,11 @@
             <artifactId>jena-arq</artifactId>
             <version>3.1.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.andrewoma.dexx</groupId>
-            <artifactId>collection</artifactId>
-            <version>0.6</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.github.andrewoma.dexx</groupId>-->
+            <!--<artifactId>collection</artifactId>-->
+            <!--<version>0.6</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
@@ -345,17 +350,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.7.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.7.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.7.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
@@ -365,7 +367,6 @@
         <dependency>
             <groupId>com.github.jsonld-java</groupId>
             <artifactId>jsonld-java</artifactId>
-            <version>0.9.0</version>
         </dependency>
         <!-- transtiive closure of commons-rdf-jena ends -->
 
@@ -420,11 +421,11 @@
         </dependency>
         <!-- antlr4 transitive dependencies end-->
 
-        <dependency>
-            <groupId>net.sf.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>2.0</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>net.sf.opencsv</groupId>-->
+            <!--<artifactId>opencsv</artifactId>-->
+            <!--<version>2.0</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>stringtemplate</artifactId>
@@ -619,7 +620,7 @@
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,*</Import-Package>
+                        <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,*</Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->

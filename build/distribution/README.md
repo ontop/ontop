@@ -11,7 +11,7 @@ By downloading these packages you are agreeing with them.
 
 ## Main downloads
 
-- `ontop-dist/`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
+- `ontop-cli/`: Libraries/scripts to use ontop with the OWLAPI or RDF4J and from the command line.
 
 - `ontop-protege/it.unibz.inf.ontop.protege-[version].jar`: plugin for Protege 5.x installation files (drop it in Protege’s plugins folder).
 
