@@ -580,6 +580,11 @@
                 <artifactId>rdf4j-rio-rdfjson</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-sail-memory</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.github.jsonld-java</groupId>
