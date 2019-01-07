@@ -35,6 +35,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.*;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
@@ -50,8 +51,8 @@ public class OntopRDF4JInMemoryTest {
     //
     //  I did not find an easy way to change this behavior, but simply converted the file format
     //   from RDF/XML format into turtle .
-    final static String owlFile = "src/test/resources/test/exampleBooks.ttl";
-	final static String owlAboxFile = "src/test/resources/test/exampleBooksAbox.ttl";
+    final static String owlFile = "/test/exampleBooks.ttl";
+	final static String owlAboxFile = "/test/exampleBooksAbox.ttl";
 
 	private static Repository repository;
 	private RepositoryConnection con;
@@ -71,13 +72,11 @@ public class OntopRDF4JInMemoryTest {
 		/*
 		 * Add RDF data to the repository
 		 */
-		File ontologyAboxFile = new File(owlAboxFile);
-		File ontologyFile = new File(owlFile);
 
 		SimpleDataset dataset = new SimpleDataset();
 		SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
-		dataset.addDefaultGraph(valueFactory.createIRI(ontologyAboxFile.toURI().toString()));
-		dataset.addDefaultGraph(valueFactory.createIRI(ontologyFile.toURI().toString()));
+		dataset.addDefaultGraph(valueFactory.createIRI(OntopRDF4JInMemoryTest.class.getResource(owlAboxFile).toString()));
+		dataset.addDefaultGraph(valueFactory.createIRI(OntopRDF4JInMemoryTest.class.getResource(owlFile).toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
 			repository = OntopRepository.defaultRepository(loader.getConfiguration());
