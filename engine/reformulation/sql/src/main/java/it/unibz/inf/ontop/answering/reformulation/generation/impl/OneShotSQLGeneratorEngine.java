@@ -1190,10 +1190,6 @@ public class OneShotSQLGeneratorEngine {
 			// TODO: handle flags
 			return sqladapter.strReplace(orig, out_str, in_str);
 		}
-		if (functionSymbol == ExpressionOperation.STRLEN) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.strLength(literal);
-		}
 		if (functionSymbol == ExpressionOperation.YEAR) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateYear(literal);

@@ -311,7 +311,7 @@ public class NormalizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(A)));
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ,
-                TERM_FACTORY.getImmutableFunctionalTerm(STRLEN, A), ONE));
+                TERM_FACTORY.getDBStrlen(A), ONE));
 
         UnaryIQTree subTree = IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode);
 
@@ -1675,6 +1675,6 @@ public class NormalizationTest {
 
     private static ImmutableExpression createExpression(Variable stringVariable) {
         return TERM_FACTORY.getImmutableExpression(EQ,
-                TERM_FACTORY.getImmutableFunctionalTerm(STRLEN, stringVariable), ONE);
+                TERM_FACTORY.getDBStrlen(stringVariable), ONE);
     }
 }

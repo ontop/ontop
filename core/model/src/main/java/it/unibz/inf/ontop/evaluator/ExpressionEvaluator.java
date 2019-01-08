@@ -228,7 +228,6 @@ public class ExpressionEvaluator {
 				case CEIL:
 				case FLOOR:
 				case RAND:
-				case STRLEN:
 				case STRBEFORE:
 				case STRAFTER:
 				case REPLACE:
