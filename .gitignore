@@ -22,6 +22,9 @@ bin
 *.iml
 .idea
 
+# Visual Studio Code
+.vscode
+
 # Protege generated files
 catalog-v*.xml
 
