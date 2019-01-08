@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,10 @@ import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.graph.Graph;
-import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.Lang;
+//import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.shared.PrefixMapping;
 
 import java.io.File;
@@ -170,8 +173,14 @@ public class SQLPPMappingToR2RMLConverter {
                                     , s1));
             jenaPrefixMapping.setNsPrefix("rr", "http://www.w3.org/ns/r2rml#");
 
+            RDFWriter.create()
+                    .lang(Lang.TTL)
+                    .format(RDFFormat.TURTLE_PRETTY)
+                    .source(graph)
+                    .output(os);
+
             // use Jena to output pretty turtle syntax
-            RDFDataMgr.write(os, graph, org.apache.jena.riot.RDFFormat.TURTLE_PRETTY);
+            //RDFDataMgr.write(os, graph, org.apache.jena.riot.RDFFormat.TURTLE_PRETTY);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();

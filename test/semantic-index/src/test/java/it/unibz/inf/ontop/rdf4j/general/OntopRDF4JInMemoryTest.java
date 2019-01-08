@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.rdf4j.general;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,6 +35,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.*;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
@@ -43,8 +44,15 @@ import static junit.framework.TestCase.assertTrue;
 
 public class OntopRDF4JInMemoryTest {
 
-	final static String owlFile = "src/test/resources/test/exampleBooks.owl";
-	final static String owlAboxFile = "src/test/resources/test/exampleBooksAbox.owl";
+	// REMARK: xiao(2019-01-04):
+	//  It seems that the newer version of RDF4J
+    // has disabled 'doctype-decl' and hence it cannot parse the old files anymore and throws the following exception.
+	// org.eclipse.rdf4j.rio.RDFParseException: DOCTYPE is disallowed when the feature "http://apache.org/xml/features/disallow-doctype-decl" set to true. [line 4, column 10]
+    //
+    //  I did not find an easy way to change this behavior, but simply converted the file format
+    //   from RDF/XML format into turtle .
+    final static String owlFile = "/test/exampleBooks.ttl";
+	final static String owlAboxFile = "/test/exampleBooksABox.ttl";
 
 	private static Repository repository;
 	private RepositoryConnection con;
@@ -64,13 +72,11 @@ public class OntopRDF4JInMemoryTest {
 		/*
 		 * Add RDF data to the repository
 		 */
-		File ontologyAboxFile = new File(owlAboxFile);
-		File ontologyFile = new File(owlFile);
 
 		SimpleDataset dataset = new SimpleDataset();
 		SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
-		dataset.addDefaultGraph(valueFactory.createIRI(ontologyAboxFile.toURI().toString()));
-		dataset.addDefaultGraph(valueFactory.createIRI(ontologyFile.toURI().toString()));
+		dataset.addDefaultGraph(valueFactory.createIRI(OntopRDF4JInMemoryTest.class.getResource(owlAboxFile).toString()));
+		dataset.addDefaultGraph(valueFactory.createIRI(OntopRDF4JInMemoryTest.class.getResource(owlFile).toString()));
 
 		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, p)) {
 			repository = OntopRepository.defaultRepository(loader.getConfiguration());
@@ -101,19 +107,19 @@ public class OntopRDF4JInMemoryTest {
 
 	@Test
 	public void runQuery() throws Exception {
-		
+
 		/*
 		 * Sample query: show all books with their title.
 		 */
-		String sparqlQuery = 
-				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" + 
+		String sparqlQuery =
+				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
 				"SELECT ?x ?y \n" +
 				"WHERE {?x a :Book; :title ?y}";
-			
+
 		try {
 			TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
 			TupleQueryResult result = tupleQuery.evaluate();
-	
+
 			/*
 			 * Print out the results to the standard output
 			 */
@@ -136,13 +142,13 @@ public class OntopRDF4JInMemoryTest {
 				System.out.println();
 			}
 			assertEquals(24, nresults);
-	
+
 			/*
 			 * Close result set to release resources
 			 */
 			result.close();
 		} finally {
-			
+
 			/*
 			 * Finally close the connection to release resources
 			 */
@@ -151,7 +157,7 @@ public class OntopRDF4JInMemoryTest {
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		try {
 			OntopRDF4JInMemoryTest example = new OntopRDF4JInMemoryTest();
