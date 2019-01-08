@@ -52,7 +52,7 @@ public class OntopRDF4JInMemoryTest {
     //  I did not find an easy way to change this behavior, but simply converted the file format
     //   from RDF/XML format into turtle .
     final static String owlFile = "/test/exampleBooks.ttl";
-	final static String owlAboxFile = "/test/exampleBooksAbox.ttl";
+	final static String owlAboxFile = "/test/exampleBooksABox.ttl";
 
 	private static Repository repository;
 	private RepositoryConnection con;
