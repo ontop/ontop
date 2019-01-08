@@ -950,7 +950,15 @@ public class ExpressionEvaluator {
 					}
 				} 
 				else if (!pred1.equals(pred2)) {
-					return termFactory.getBooleanConstant(!eq);
+					/*
+					 * TEMPORARY HOT FIX!
+					 */
+					if ((pred1.equals(SPARQL_LANG) || pred2.equals(SPARQL_LANG))
+							&& (isXsdString(pred1) || isXsdString(pred2))) {
+						return term;
+					}
+					else
+						return termFactory.getBooleanConstant(!eq);
 				} 
 				else {
 					return term;
