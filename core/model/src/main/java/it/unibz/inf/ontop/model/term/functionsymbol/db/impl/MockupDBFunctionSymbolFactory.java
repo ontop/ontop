@@ -25,6 +25,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     private static final String CONCAT_STR = "CONCAT";
     private static final String AND_STR = "AND";
+    private static final String CHAR_LENGTH_STR = "CHARLENGTH";
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
     private final DBTermType dbStringType;
@@ -148,7 +149,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBFunctionSymbol getDBCharLength() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return getRegularDBFunctionSymbol(CHAR_LENGTH_STR, 1);
     }
 
     @Override
