@@ -7,6 +7,7 @@
 |-----------|---------------|
 | [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
 | [develop](https://github.com/ontop/ontop/tree/develop) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
+| [version3](https://github.com/ontop/ontop/tree/version3) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=version3)](https://travis-ci.org/ontop/ontop)|
 
 
 Ontop
