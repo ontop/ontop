@@ -218,8 +218,6 @@ public class ExpressionEvaluator {
 					return evalStr(term);
 				case SPARQL_DATATYPE:
 					return evalDatatype(term);
-				case SPARQL_LANG:
-					return evalLang(term);
 				case UUID:
 				case STRUUID:
 				case MINUS:
@@ -450,46 +448,6 @@ public class ExpressionEvaluator {
 		// Variable
 		else {
 			return Optional.empty();
-		}
-	}
-
-	/*
-	 * Expression evaluator for lang() function
-	 */
-	private ImmutableTerm evalLang(ImmutableFunctionalTerm term) {
-		ImmutableTerm innerTerm = term.getTerm(0);
-
-		// Create a default return constant: blank language with literal type.
-		// TODO: avoid this constant wrapping thing
-		ImmutableFunctionalTerm emptyString = termFactory.getRDFLiteralFunctionalTerm(
-				termFactory.getRDFLiteralConstant("", XSD.STRING), XSD.STRING);
-
-        if (innerTerm instanceof Variable) {
-            return term;
-        }
-		/*
-		 * TODO: consider the case of constants
-		 */
-		if (!(innerTerm instanceof ImmutableFunctionalTerm)) {
-			return emptyString;
-		}
-		ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) innerTerm;
-
-		Optional<TermTypeInference> optionalTypeInference = function.inferType();
-		if (optionalTypeInference.isPresent()) {
-			return optionalTypeInference.get().getTermType()
-					.filter(t -> t instanceof RDFDatatype)
-					.map(t -> (RDFDatatype) t)
-					.flatMap(RDFDatatype::getLanguageTag)
-					.map(tag -> termFactory.getRDFLiteralFunctionalTerm(
-							termFactory.getRDFLiteralConstant(tag.getFullString(), XSD.STRING),
-							XSD.STRING))
-					// Not a langstring or non-fatal error
-					.orElse(null);
-		}
-		// Not determined yet
-		else {
-			return term;
 		}
 	}
 

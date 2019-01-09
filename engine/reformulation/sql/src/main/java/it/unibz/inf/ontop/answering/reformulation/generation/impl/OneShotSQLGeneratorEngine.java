@@ -1163,12 +1163,6 @@ public class OneShotSQLGeneratorEngine {
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
 		/*
-		 * TODO: make sure that SPARQL_LANG are eliminated earlier on
-		 */
-		if (functionSymbol == ExpressionOperation.SPARQL_LANG) {
-			throw new RuntimeException("SPARQL_LANG is not supported by the SQL generator");
-		}
-		/*
 		  TODO: replace by a switch
 		 */
 		if (functionSymbol == ExpressionOperation.QUEST_CAST) {
