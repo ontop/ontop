@@ -419,6 +419,8 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableList<? extends ImmutableTerm> terms);
 
+	ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
+
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
 	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);

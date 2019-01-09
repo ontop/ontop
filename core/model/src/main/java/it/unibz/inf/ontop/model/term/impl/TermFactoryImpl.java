@@ -732,7 +732,13 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStrictNEquality(terms.size()), terms);
 	}
 
-    @Override
+	@Override
+	public ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms) {
+		return getStrictNEquality(Stream.concat(Stream.of(term1, term2), Stream.of(otherTerms))
+				.collect(ImmutableCollectors.toList()));
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
     }
