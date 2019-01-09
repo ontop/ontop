@@ -17,8 +17,14 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     private final RDFDatatype xsdBooleanType;
 
     protected StringBooleanBinarySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull IRI functionIRI,
-                                                          RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
+                                                               RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
         super(functionSymbolName, functionIRI, ImmutableList.of(xsdStringType, xsdStringType));
+        this.xsdBooleanType = xsdBooleanType;
+    }
+
+    protected StringBooleanBinarySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull String officialName,
+                                                          RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
+        super(functionSymbolName, officialName, ImmutableList.of(xsdStringType, xsdStringType));
         this.xsdBooleanType = xsdBooleanType;
     }
 

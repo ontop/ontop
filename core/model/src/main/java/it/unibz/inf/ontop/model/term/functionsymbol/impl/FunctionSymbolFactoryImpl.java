@@ -28,6 +28,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
+    private final FunctionSymbol langTypeFunctionSymbol;
+    private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -40,7 +42,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 typeFactory.getMetaRDFTermType());
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 
-        this.dbBooleanType = typeFactory.getDBTypeFactory().getDBBooleanType();
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        DBTermType dbStringType = typeFactory.getDBTypeFactory().getDBStringType();
+
+        this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
         this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory);
@@ -49,7 +54,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.isAMap = new HashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
-                dbBooleanType, typeFactory.getDBTypeFactory().getDBStringType());
+                dbBooleanType, dbStringType);
+        this.langTypeFunctionSymbol = new LangTypeFunctionSymbolImpl(metaRDFType, dbStringType);
+        this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -57,6 +64,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+        RDFDatatype rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
@@ -66,7 +74,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new SubStr2SPARQLFunctionSymbolImpl(xsdString, xsdInteger),
                 new SubStr3SPARQLFunctionSymbolImpl(xsdString, xsdInteger),
-                new StrlenSPARQLFunctionSymbolImpl(xsdString, xsdInteger)
+                new StrlenSPARQLFunctionSymbolImpl(xsdString, xsdInteger),
+                new LangSPARQLFunctionSymbolImpl(rdfsLiteral, xsdString),
+                new LangMatchesSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -135,6 +145,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
             throw new IllegalArgumentException("Expected arity >= 2 for a common denominator");
         return commonDenominatorMap
                 .computeIfAbsent(arity, a -> new CommonDenominatorFunctionSymbolImpl(a, typeFactory.getMetaRDFTermType()));
+    }
+
+    @Override
+    public FunctionSymbol getLangTypeFunctionSymbol() {
+        return langTypeFunctionSymbol;
+    }
+
+    @Override
+    public BooleanFunctionSymbol getLexicalLangMatches() {
+        return lexicalLangMatchesFunctionSymbol;
     }
 
     protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {

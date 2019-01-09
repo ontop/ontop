@@ -8,11 +8,12 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -49,16 +50,19 @@ public class ExpressionEvaluatorTest {
     private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
     private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D));
 
-    private final ImmutableFunctionalTerm EXPR_LANG = TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.SPARQL_LANG, W );
-
 
     private final String languageTag =  "en-us";
     // TODO: avoid this language tag wrapping approach
     private final ImmutableFunctionalTerm wrappedLanguageTag = TERM_FACTORY.getRDFLiteralFunctionalTerm(
             TERM_FACTORY.getDBStringConstant(languageTag), XSD.STRING);
 
-    private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
-            LANGMATCHES, EXPR_LANG, wrappedLanguageTag);
+    private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getRDF2DBBooleanFunctionalTerm(
+            TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2).get(),
+                TERM_FACTORY.getImmutableFunctionalTerm(
+                        FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG, 1).get(),
+                        W),
+                wrappedLanguageTag));
 
 
     private IntermediateQuery getExpectedQuery() {

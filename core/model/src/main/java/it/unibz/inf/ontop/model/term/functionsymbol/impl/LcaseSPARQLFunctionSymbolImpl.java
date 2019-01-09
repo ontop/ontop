@@ -23,7 +23,7 @@ public class LcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunc
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
+    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         return termFactory.getDBLower(subLexicalTerms.get(0));
     }
 }

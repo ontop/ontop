@@ -72,6 +72,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
             ImmutableTerm lexicalTerm = computeLexicalTerm(newTerms.stream()
                             .map(t -> extractLexicalTerm(t, termFactory))
                             .collect(ImmutableCollectors.toList()),
+                        typeTerms,
                         termFactory);
 
             ImmutableTerm typeTerm = computeTypeTerm(typeTerms, termFactory, variableNullability);
@@ -129,7 +130,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
      * Compute the lexical term when there is no input type error
      */
     protected abstract ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                                        TermFactory termFactory);
+                                                        ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
 
     protected abstract ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability);

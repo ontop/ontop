@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -33,6 +34,7 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
@@ -652,7 +654,11 @@ public class SparqlAlgebraToDatalogTranslator {
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
-                    return termFactory.getFunction(SPARQL_LANG, term);
+                    return termFactory.getFunction(
+                            functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG, 1)
+                            .orElseThrow(() -> new MinorOntopInternalBugException(
+                                    "Internal bug: cannot retrieve the SPARQL lang function symbol")),
+                            term);
                 else
                     throw new RuntimeException("A variable or a value is expected in " + expr);
             }
@@ -699,20 +705,26 @@ public class SparqlAlgebraToDatalogTranslator {
                 ExpressionOperation p = NumericalOperations.get(((MathExpr)expr).getOperator());
                 return termFactory.getFunction(p, term1, term2);
             }
+            /*
+             * Restriction: the first argument must be LANG(...) and the second  a constant
+             * (for guaranteeing that the langMatches logic is not delegated to the native query)
+             */
             else if (expr instanceof LangMatches) {
-                if (term2 instanceof Function) {
-                    Function f = (Function) term2;
-                    if (f.isDataTypeFunction()) {
-                        Term functionTerm = f.getTerm(0);
-                        if (functionTerm instanceof RDFLiteralConstant) {
-                            RDFLiteralConstant c = (RDFLiteralConstant) functionTerm;
-                            term2 = termFactory.getFunction(f.getFunctionSymbol(),
-                                    termFactory.getRDFLiteralConstant(c.getValue().toLowerCase(),
-                                            c.getType()));
-                        }
-                    }
+                if ((!((term1 instanceof Function)
+                        && ((Function) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol))
+                        || (!((term2 instanceof Function)
+                        // TODO: support "real" constants (not wrapped into a functional term)
+                        && ((Function) term2).getFunctionSymbol() instanceof RDFTermFunctionSymbol)) ) {
+                    throw new OntopUnsupportedInputQueryException("The function langMatches is " +
+                            "only supported with lang(..) function for the first argument and a constant for the second");
                 }
-                return termFactory.getLANGMATCHESFunction(term1, term2);
+
+                SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("Cannot get " + SPARQL.LANG_MATCHES));
+
+                return termFactory.getExpression(
+                        functionSymbolFactory.getRDF2DBBooleanFunctionSymbol(),
+                        termFactory.getFunction(langMatchesFunctionSymbol, term1, term2));
             }
         }
 		else if (expr instanceof FunctionCall) {

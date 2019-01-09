@@ -23,16 +23,6 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
-        return getInputType().isPresent();
-    }
-
-    @Override
-    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return getInputType().isPresent();
-    }
-
-    @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         if (terms.size() != getArity())

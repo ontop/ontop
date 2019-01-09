@@ -65,7 +65,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	// NB: str() not defined for blank nodes!!!!
 	SPARQL_STR("str", TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDF_TERM_TYPE, false),
 	SPARQL_DATATYPE("datatype", TermTypeInferenceRules.PREDEFINED_IRI_RULE, RDFS_LITERAL_DT, false),
-	SPARQL_LANG("lang" , TermTypeInferenceRules.PREDEFINED_STRING_RULE, RDFS_LITERAL_DT, false),
 	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE, true),
 	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE, true),
 

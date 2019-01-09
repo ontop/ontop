@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.apache.commons.rdf.api.IRI;
 
@@ -18,6 +19,8 @@ public abstract class AbstractRDFDatatype extends RDFTermTypeImpl implements RDF
         String iriString = datatypeIRI.getIRIString();
         if (iriString.startsWith(XSD.PREFIX))
             return "xsd:" + iriString.substring(XSD.PREFIX.length());
+        else if (iriString.startsWith(RDFS.PREFIX))
+            return "rdfs:" + iriString.substring(RDFS.PREFIX.length());
         return iriString;
     }
 
