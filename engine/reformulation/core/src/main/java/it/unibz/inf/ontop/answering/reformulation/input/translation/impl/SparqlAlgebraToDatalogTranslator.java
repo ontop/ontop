@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
@@ -654,7 +655,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
                     return termFactory.getFunction(
-                            functionSymbolFactory.getSPARQLFunctionSymbol("lang", 1)
+                            functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG, 1)
                             .orElseThrow(() -> new MinorOntopInternalBugException(
                                     "Internal bug: cannot retrieve the SPARQL lang function symbol")),
                             term);
@@ -704,6 +705,10 @@ public class SparqlAlgebraToDatalogTranslator {
                 ExpressionOperation p = NumericalOperations.get(((MathExpr)expr).getOperator());
                 return termFactory.getFunction(p, term1, term2);
             }
+            /*
+             * TODO: restrict the first argument to be LANG(...) and the second to be a constant
+             * (for guaranteeing that the langMatches logic is not delegated to the native query)
+             */
             else if (expr instanceof LangMatches) {
                 if (term2 instanceof Function) {
                     Function f = (Function) term2;

@@ -772,6 +772,11 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getLangTypeFunctionSymbol(), rdfTypeTerm);
     }
 
+    @Override
+    public ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm) {
+		return getImmutableExpression(functionSymbolFactory.getLexicalLangMatches(), langTagTerm, langRangeTerm);
+    }
+
     private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
 		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
 				iriTypeConstant);

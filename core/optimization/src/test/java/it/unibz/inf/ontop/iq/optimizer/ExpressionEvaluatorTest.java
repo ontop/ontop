@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -54,12 +56,13 @@ public class ExpressionEvaluatorTest {
     private final ImmutableFunctionalTerm wrappedLanguageTag = TERM_FACTORY.getRDFLiteralFunctionalTerm(
             TERM_FACTORY.getDBStringConstant(languageTag), XSD.STRING);
 
-    private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getImmutableExpression(
-            LANGMATCHES,
+    private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getRDF2DBBooleanFunctionalTerm(
             TERM_FACTORY.getImmutableFunctionalTerm(
-                    FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol("lang", 1).get(),
-                    W),
-            wrappedLanguageTag);
+                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2).get(),
+                TERM_FACTORY.getImmutableFunctionalTerm(
+                        FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG, 1).get(),
+                        W),
+                wrappedLanguageTag));
 
 
     private IntermediateQuery getExpectedQuery() {

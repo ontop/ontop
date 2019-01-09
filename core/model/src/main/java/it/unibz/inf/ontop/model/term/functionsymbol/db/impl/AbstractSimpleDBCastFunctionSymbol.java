@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -70,5 +71,15 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     @Override
     public boolean isTemporary() {
         return false;
+    }
+
+    @Override
+    protected boolean isAlwaysInjective() {
+        return getInputType().isPresent();
+    }
+
+    @Override
+    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
+        return getInputType().isPresent();
     }
 }

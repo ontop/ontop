@@ -4,17 +4,20 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.Optional;
 
-public class LangSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public class LangSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl
+        implements LangSPARQLFunctionSymbol {
 
     private final RDFDatatype xsdStringDatatype;
 
     protected LangSPARQLFunctionSymbolImpl(RDFDatatype abstractRDFDatatype, RDFDatatype xsdStringDatatype) {
-        super("SP_LANG", "lang", ImmutableList.of(abstractRDFDatatype));
+        super("SP_LANG", SPARQL.LANG, ImmutableList.of(abstractRDFDatatype));
         this.xsdStringDatatype = xsdStringDatatype;
     }
 

@@ -439,6 +439,11 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getLangTypeFunctionalTerm(ImmutableTerm rdfTypeTerm);
 
+	/**
+	 * Do NOT confuse it with the langMatches SPARQL function
+	 */
+	ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm);
+
 	TypeFactory getTypeFactory();
 
     VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);

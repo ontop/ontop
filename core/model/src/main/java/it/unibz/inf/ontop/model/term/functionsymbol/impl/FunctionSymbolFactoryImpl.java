@@ -29,6 +29,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
     private final FunctionSymbol langTypeFunctionSymbol;
+    private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -55,6 +56,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
         this.langTypeFunctionSymbol = new LangTypeFunctionSymbolImpl(metaRDFType, dbStringType);
+        this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -73,7 +75,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new SubStr2SPARQLFunctionSymbolImpl(xsdString, xsdInteger),
                 new SubStr3SPARQLFunctionSymbolImpl(xsdString, xsdInteger),
                 new StrlenSPARQLFunctionSymbolImpl(xsdString, xsdInteger),
-                new LangSPARQLFunctionSymbolImpl(rdfsLiteral, xsdString)
+                new LangSPARQLFunctionSymbolImpl(rdfsLiteral, xsdString),
+                new LangMatchesSPARQLFunctionSymbolImpl(xsdString, xsdBoolean)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -147,6 +150,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getLangTypeFunctionSymbol() {
         return langTypeFunctionSymbol;
+    }
+
+    @Override
+    public BooleanFunctionSymbol getLexicalLangMatches() {
+        return lexicalLangMatchesFunctionSymbol;
     }
 
     protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {

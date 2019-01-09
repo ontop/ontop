@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.function.Function;
@@ -26,6 +23,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private static final String CONCAT_STR = "CONCAT";
     private static final String AND_STR = "AND";
     private static final String CHAR_LENGTH_STR = "CHARLENGTH";
+    private final TermType abstractRootType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
     private final DBTermType dbStringType;
@@ -33,6 +31,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDefaultNormalizationTable(typeFactory), createDefaultRegularFunctionTable(typeFactory), typeFactory);
+        abstractRootType = typeFactory.getAbstractAtomicTermType();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
         abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
@@ -87,7 +86,9 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return targetType.equals(dbBooleanType)
+                ? new MockupSimpleDBBooleanCastFunctionSymbol(inputType, targetType)
+                : new MockupSimpleDBCastFunctionSymbol(inputType, targetType);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBBooleanFunctionSymbol createDBStrictEquality(int arity) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
 
     @Override
