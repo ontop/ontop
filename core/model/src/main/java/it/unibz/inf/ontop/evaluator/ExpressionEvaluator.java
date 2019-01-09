@@ -280,8 +280,6 @@ public class ExpressionEvaluator {
 					return evalIsIri(term, variableNullability);
 				case IS_BLANK:
 					return evalIsBlank(term, variableNullability);
-				case LANGMATCHES:
-					return evalLangMatches(term, variableNullability);
 				case REGEX:
 					return evalRegex(term, variableNullability);
 				case GTE:
@@ -448,67 +446,6 @@ public class ExpressionEvaluator {
 		// Variable
 		else {
 			return Optional.empty();
-		}
-	}
-
-	/*
-	 * Expression evaluator for langMatches() function
-	 */
-	private ImmutableTerm evalLangMatches(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-		final String SELECT_ALL = "*";
-
-		/*
-		 * Evaluate the first term
-		 */
-		ImmutableTerm teval1 = eval(term.getTerm(0), variableNullability);
-		if (teval1 == null) {
-			return valueNull; // ROMAN (10 Jan 2017): not valueFalse
-		}
-		/*
-		 * Evaluate the second term
-		 */
-		ImmutableTerm innerTerm2 = term.getTerm(1);
-		if (innerTerm2 == null) {
-			return valueNull; // ROMAN (10 Jan 2017): not valueFalse
-		}
-
-		/*
-		 * Term checks
-		 */
-		if (teval1 instanceof Constant && innerTerm2 instanceof Constant) {
-			String lang1 = ((Constant) teval1).getValue();
-			String lang2 = ((Constant) innerTerm2).getValue();
-			if (lang2.equals(SELECT_ALL)) {
-				if (lang1.isEmpty())
-					return termFactory.getImmutableFunctionalTerm(IS_NULL, teval1);
-				else
-					return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, teval1);
-			}
-			else {
-				return termFactory.getDBBooleanConstant(lang1.equals(lang2));
-			}
-		}
-		else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
-			Variable var = (Variable) teval1;
-			Constant lang = (Constant) innerTerm2;
-			if (lang.getValue().equals(SELECT_ALL)) {
-				// The char * means to get all languages
-				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, var);
-			} else {
-				return termFactory.getImmutableFunctionalTerm(EQ, var, lang);
-			}
-		}
-		else if (teval1 instanceof ImmutableFunctionalTerm && innerTerm2 instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) teval1;
-			ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) innerTerm2;
-			if((f1.getFunctionSymbol() instanceof ExpressionOperation) || (f1.getFunctionSymbol() instanceof BooleanExpressionOperation)){
-				return term;
-			}
-			return evalLangMatches(termFactory.getImmutableFunctionalTerm(LANGMATCHES, f1.getTerm(0),
-					f2.getTerm(0)), variableNullability);
-		}
-		else {
-			return term;
 		}
 	}
 

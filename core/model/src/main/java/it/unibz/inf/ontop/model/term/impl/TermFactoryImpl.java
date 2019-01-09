@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -455,12 +456,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Expression getFunctionIsNotNull(Term term) {
 		return getExpression(BooleanExpressionOperation.IS_NOT_NULL, term);
-	}
-
-
-	@Override
-	public Expression getLANGMATCHESFunction(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.LANGMATCHES, term1, term2);
 	}
 
 	@Override

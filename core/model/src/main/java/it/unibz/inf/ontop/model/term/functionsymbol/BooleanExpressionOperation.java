@@ -48,7 +48,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     IS_LITERAL("isLiteral", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_IRI("isIRI", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_BLANK("isBlank", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
-    LANGMATCHES("LangMatches", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
     REGEX("regex", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
     // ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS

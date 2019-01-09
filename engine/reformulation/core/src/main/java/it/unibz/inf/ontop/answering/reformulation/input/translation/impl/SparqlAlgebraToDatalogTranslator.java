@@ -706,23 +706,25 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunction(p, term1, term2);
             }
             /*
-             * TODO: restrict the first argument to be LANG(...) and the second to be a constant
+             * Restriction: the first argument must be LANG(...) and the second  a constant
              * (for guaranteeing that the langMatches logic is not delegated to the native query)
              */
             else if (expr instanceof LangMatches) {
-                if (term2 instanceof Function) {
-                    Function f = (Function) term2;
-                    if (f.isDataTypeFunction()) {
-                        Term functionTerm = f.getTerm(0);
-                        if (functionTerm instanceof RDFLiteralConstant) {
-                            RDFLiteralConstant c = (RDFLiteralConstant) functionTerm;
-                            term2 = termFactory.getFunction(f.getFunctionSymbol(),
-                                    termFactory.getRDFLiteralConstant(c.getValue().toLowerCase(),
-                                            c.getType()));
-                        }
-                    }
+                if ((!((term1 instanceof Function)
+                        && ((Function) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol))
+                        || (!((term2 instanceof Function)
+                        // TODO: support "real" constants (not wrapped into a functional term)
+                        && ((Function) term2).getFunctionSymbol() instanceof RDFTermFunctionSymbol)) ) {
+                    throw new OntopUnsupportedInputQueryException("The function langMatches is " +
+                            "only supported with lang(..) function for the first argument and a constant for the second");
                 }
-                return termFactory.getLANGMATCHESFunction(term1, term2);
+
+                SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("Cannot get " + SPARQL.LANG_MATCHES));
+
+                return termFactory.getExpression(
+                        functionSymbolFactory.getRDF2DBBooleanFunctionSymbol(),
+                        termFactory.getFunction(langMatchesFunctionSymbol, term1, term2));
             }
         }
 		else if (expr instanceof FunctionCall) {

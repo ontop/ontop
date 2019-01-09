@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.ImmutableFunctionalTermImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -171,8 +170,6 @@ public interface TermFactory {
 	public Expression getFunctionIsNull(Term term);
 
 	public Expression getFunctionIsNotNull(Term term);
-
-	public Expression getLANGMATCHESFunction(Term term1, Term term2);
 	
 	// ROMAN (23 Dec 2015): LIKE comes only from mappings
 	public Expression getSQLFunctionLike(Term term1, Term term2);
