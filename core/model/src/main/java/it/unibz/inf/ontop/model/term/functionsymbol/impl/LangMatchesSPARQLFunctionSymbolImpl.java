@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -31,16 +30,16 @@ public class LangMatchesSPARQLFunctionSymbolImpl extends StringBooleanBinarySPAR
     }
 
     /**
-     * Both must be "simple" XSD.STRING (not langString).
+     * In theory, both should be "simple" XSD.STRING (not langString).
+     * However, for the moment, we tolerate
+     * TODO: enforce this restriction? This would require to create a novel function symbol IS_EXACTY_A .
      */
     @Override
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
-        RDFTermTypeConstant xsdStringTypeConstant = termFactory.getRDFTermTypeConstant(xsdStringType);
-
         return termFactory.getConjunction(
-                    termFactory.getStrictEquality(typeTerms.get(0), xsdStringTypeConstant),
-                    termFactory.getStrictEquality(typeTerms.get(1), xsdStringTypeConstant))
+                    termFactory.getIsAExpression(typeTerms.get(0), xsdStringType),
+                    termFactory.getIsAExpression(typeTerms.get(1), xsdStringType))
                 .evaluate(termFactory, variableNullability);
     }
 
