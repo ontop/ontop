@@ -37,4 +37,9 @@ public interface FunctionSymbolFactory {
     Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity);
 
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
+
+    /**
+     * Do NOT confuse it with the LANG SPARQL function
+     */
+    FunctionSymbol getLangTypeFunctionSymbol();
 }

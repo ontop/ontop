@@ -434,6 +434,10 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBLower(ImmutableTerm stringTerm);
 
+	/**
+	 * Do NOT confuse it with the LANG SPARQL function
+	 */
+	ImmutableFunctionalTerm getLangTypeFunctionalTerm(ImmutableTerm rdfTypeTerm);
 
 	TypeFactory getTypeFactory();
 
