@@ -58,6 +58,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, DBBooleanFunctionSymbol> strictEqMap;
 
+    /**
+     * For the strict NOT equalities
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> strictNEqMap;
+
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
 
@@ -85,6 +90,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
         this.caseMap = new HashMap<>();
         this.strictEqMap = new HashMap<>();
+        this.strictNEqMap = new HashMap<>();
         this.r2rmlIRISafeEncodeFunctionSymbol = null;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
@@ -177,6 +183,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBStrictNEquality(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of a strict equality must be >= 2");
+
+        return strictNEqMap
+                .computeIfAbsent(arity, a -> createDBStrictNEquality(arity));
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBStartsWith() {
         return dbStartsWithFunctionSymbol;
     }
@@ -221,6 +236,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBCase(int arity);
 
     protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
+
+    protected abstract DBBooleanFunctionSymbol createDBStrictNEquality(int arity);
 
     protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
 

@@ -137,9 +137,4 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     public boolean blocksNegation() {
         return false;
     }
-
-    @Override
-    public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement the switch of operators");
-    }
 }

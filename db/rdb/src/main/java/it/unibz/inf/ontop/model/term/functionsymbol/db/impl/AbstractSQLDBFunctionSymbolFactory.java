@@ -162,6 +162,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createDBStrictNEquality(int arity) {
+        return new DefaultDBStrictNEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
+    }
+
+    @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
     }

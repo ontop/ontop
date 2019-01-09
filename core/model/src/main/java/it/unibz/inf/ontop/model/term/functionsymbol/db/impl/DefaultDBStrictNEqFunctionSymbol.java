@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
  * TODO: should it make it a non-DB boolean function symbol?
  *  --> that is, downgrading to a non-strict equality?
  */
-public class DefaultDBStrictEqFunctionSymbol extends AbstractDBStrictEqNeqFunctionSymbol {
-    private static String OPERATOR = " = ";
-    private static String CONNECTOR = " AND ";
+public class DefaultDBStrictNEqFunctionSymbol extends AbstractDBStrictEqNeqFunctionSymbol {
+    private static String OPERATOR = " <> ";
+    private static String CONNECTOR = " OR ";
 
-    protected DefaultDBStrictEqFunctionSymbol(int arity, TermType rootTermType, DBTermType dbBooleanTermType) {
-        super("STRICT_EQ", arity, true, rootTermType, dbBooleanTermType);
+    protected DefaultDBStrictNEqFunctionSymbol(int arity, TermType rootTermType, DBTermType dbBooleanTermType) {
+        super("STRICT_NEQ", arity, false, rootTermType, dbBooleanTermType);
     }
 
     @Override
@@ -39,6 +39,6 @@ public class DefaultDBStrictEqFunctionSymbol extends AbstractDBStrictEqNeqFuncti
 
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        return termFactory.getStrictNEquality(subTerms);
+        return termFactory.getStrictEquality(subTerms);
     }
 }

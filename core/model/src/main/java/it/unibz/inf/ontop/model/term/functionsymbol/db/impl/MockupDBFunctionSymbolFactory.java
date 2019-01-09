@@ -102,6 +102,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createDBStrictNEquality(int arity) {
+        return new DefaultDBStrictNEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
+    }
+
+    @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
