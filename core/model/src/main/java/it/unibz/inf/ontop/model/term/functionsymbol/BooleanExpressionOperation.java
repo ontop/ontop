@@ -170,6 +170,9 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         if (newTerm instanceof Constant) {
             return termFactory.getDBBooleanConstant(!newTerm.isNull());
         }
+        else if ((newTerm instanceof Variable) && (!variableNullability.isPossiblyNullable((Variable)newTerm))) {
+            return termFactory.getDBBooleanConstant(true);
+        }
         return termFactory.getImmutableExpression(this, newTerm);
     }
 
