@@ -403,7 +403,7 @@ public interface TermFactory {
 	/**
 	 * terms must have at least two elements
 	 */
-	ImmutableExpression getStrictEquality(ImmutableList<ImmutableTerm> terms);
+	ImmutableExpression getStrictEquality(ImmutableList<? extends ImmutableTerm> terms);
 
 	ImmutableExpression getStrictEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
 
@@ -417,7 +417,7 @@ public interface TermFactory {
 	 * terms must have at least two elements
 	 * Logically equivalent to NOT(STRICT_EQx(...))
 	 */
-	ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms);
+	ImmutableExpression getStrictNEquality(ImmutableList<? extends ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 

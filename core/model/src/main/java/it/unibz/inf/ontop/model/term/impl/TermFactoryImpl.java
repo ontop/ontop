@@ -706,7 +706,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getStrictEquality(ImmutableList<ImmutableTerm> terms) {
+	public ImmutableExpression getStrictEquality(ImmutableList<? extends ImmutableTerm> terms) {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two values where expected in " + terms);
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStrictEquality(terms.size()), terms);
@@ -726,10 +726,10 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getStrictNEquality(ImmutableList<ImmutableTerm> terms) {
+	public ImmutableExpression getStrictNEquality(ImmutableList<? extends ImmutableTerm> terms) {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two values where expected in " + terms);
-		throw new RuntimeException("TODO: implement getStrictNEquality(...)");
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBStrictNEquality(terms.size()), terms);
 	}
 
     @Override
