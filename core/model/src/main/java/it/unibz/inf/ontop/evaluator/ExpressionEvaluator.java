@@ -214,8 +214,6 @@ public class ExpressionEvaluator {
 				case MULTIPLY:
 				case DIVIDE:
 					throw new RuntimeException("Refactor numeric operation evaluation");
-				case SPARQL_STR:
-					return evalStr(term);
 				case SPARQL_DATATYPE:
 					return evalDatatype(term);
 				case UUID:
@@ -382,29 +380,6 @@ public class ExpressionEvaluator {
 	private boolean isKnownToBeBlank(ImmutableFunctionalTerm functionalTerm) {
 		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				&& functionalTerm.getTerm(1).equals(bnodeConstant);
-	}
-
-	/*
-	 * Expression evaluator for str() function
-	 */
-	private ImmutableTerm evalStr(ImmutableFunctionalTerm topFunctionalTerm) {
-		ImmutableTerm innerTerm = topFunctionalTerm.getTerm(0);
-		if (innerTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalInnerTerm = (ImmutableFunctionalTerm) innerTerm;
-			FunctionSymbol functionSymbol = functionalInnerTerm.getFunctionSymbol();
-			if (functionSymbol instanceof RDFTermFunctionSymbol) {
-				ImmutableTerm lexicalTerm = functionalInnerTerm.getTerm(0);
-				ImmutableTerm typeTerm = functionalInnerTerm.getTerm(1);
-
-				return (typeTerm.equals(bnodeConstant))
-						// B-node are excluded
-						? valueNull
-						// Lexical term
-						: termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, XSD.STRING);
-			}
-			// TODO: reject if not applied to RDF term
-		}
-		return topFunctionalTerm;
 	}
 
 	/*
