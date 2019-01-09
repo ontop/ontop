@@ -643,7 +643,9 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunction(IS_IRI, term);
             }
             else if (expr instanceof Str) {
-                return termFactory.getFunction(SPARQL_STR, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1).get(),
+                        term);
             }
             else if (expr instanceof Datatype) {
                 return termFactory.getFunction(SPARQL_DATATYPE, term);

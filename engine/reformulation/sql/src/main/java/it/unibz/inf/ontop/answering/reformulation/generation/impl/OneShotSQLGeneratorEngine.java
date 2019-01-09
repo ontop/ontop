@@ -1173,10 +1173,6 @@ public class OneShotSQLGeneratorEngine {
 					: Types.LONGVARCHAR;
 			return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, sqlDatatype);
 		}
-		if (functionSymbol == ExpressionOperation.SPARQL_STR) {
-			String columnName = getSQLString(function.getTerm(0), index, false);
-			return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, Types.VARCHAR);
-		}
 		if (functionSymbol == ExpressionOperation.REPLACE) {
 			String orig = getSQLString(function.getTerm(0), index, false);
 			String out_str = getSQLString(function.getTerm(1), index, false);

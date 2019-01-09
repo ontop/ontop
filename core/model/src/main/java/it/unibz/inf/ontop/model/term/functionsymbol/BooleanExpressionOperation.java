@@ -159,6 +159,16 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         else if (this == IS_NOT_NULL) {
             return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
         }
+        else if (this == NOT) {
+            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+            if (newTerm instanceof Constant) {
+                return newTerm.isNull()
+                        ? newTerm
+                        : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(false)));
+            }
+            else
+                return termFactory.getImmutableExpression(NOT, newTerm);
+        }
         else
             return termFactory.getImmutableFunctionalTerm(this, terms);
     }
