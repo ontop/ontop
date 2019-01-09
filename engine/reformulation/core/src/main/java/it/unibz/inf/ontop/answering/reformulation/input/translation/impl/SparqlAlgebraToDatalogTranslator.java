@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -652,7 +653,11 @@ public class SparqlAlgebraToDatalogTranslator {
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
-                    return termFactory.getFunction(SPARQL_LANG, term);
+                    return termFactory.getFunction(
+                            functionSymbolFactory.getSPARQLFunctionSymbol("lang", 1)
+                            .orElseThrow(() -> new MinorOntopInternalBugException(
+                                    "Internal bug: cannot retrieve the SPARQL lang function symbol")),
+                            term);
                 else
                     throw new RuntimeException("A variable or a value is expected in " + expr);
             }
