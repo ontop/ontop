@@ -56,7 +56,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * For the strict equalities
      */
-    private final Map<Integer, DBBooleanFunctionSymbol> strictEqMap;
+    private final Map<Integer, DBStrictEqFunctionSymbol> strictEqMap;
 
     /**
      * For the strict NOT equalities
@@ -174,7 +174,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBStrictEquality(int arity) {
+    public DBStrictEqFunctionSymbol getDBStrictEquality(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of a strict equality must be >= 2");
 
@@ -235,7 +235,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
 
-    protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
+    protected abstract DBStrictEqFunctionSymbol createDBStrictEquality(int arity);
 
     protected abstract DBBooleanFunctionSymbol createDBStrictNEquality(int arity);
 

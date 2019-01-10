@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -19,8 +20,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 @Singleton
 public class ConditionSimplifierImpl implements ConditionSimplifier {
@@ -94,7 +93,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
-                .filter(e -> e.getFunctionSymbol().equals(EQ))
+                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                // TODO: consider the fact that equalities might be n-ary
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
                     return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm);
@@ -118,7 +118,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Equalities that must remain
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> nonLiftableVariables.contains(e.getKey()))
-                                .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()))
+                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
 
         ImmutableSubstitution<NonFunctionalTerm> ascendingSubstitution = substitutionFactory.getSubstitution(

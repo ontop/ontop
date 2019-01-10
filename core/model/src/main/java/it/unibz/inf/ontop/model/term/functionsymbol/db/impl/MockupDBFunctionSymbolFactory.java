@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -97,7 +94,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createDBStrictEquality(int arity) {
+    protected DBStrictEqFunctionSymbol createDBStrictEquality(int arity) {
         return new DefaultDBStrictEqFunctionSymbol(arity, abstractRootType, dbBooleanType);
     }
 

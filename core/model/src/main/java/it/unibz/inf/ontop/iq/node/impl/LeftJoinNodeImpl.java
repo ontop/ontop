@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -35,7 +36,6 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -474,7 +474,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
         ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
-                .filter(e -> e.getFunctionSymbol().equals(EQ))
+                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                // TODO: refactor it for dealing with n-ary EQs
                 .filter(e -> {
                     ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
                     return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm)

@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfElseNull
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -83,18 +82,15 @@ public class ExpressionEvaluator {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
-		private final ExpressionNormalizer normalizer;
 		private final TermFactory termFactory;
 
 		private EvaluationResult(ImmutableExpression expression, ExpressionNormalizer normalizer, TermFactory termFactory) {
 			optionalExpression = Optional.of(normalizer.normalize(expression));
-			this.normalizer = normalizer;
 			this.termFactory = termFactory;
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private EvaluationResult(boolean value, ExpressionNormalizer normalizer, TermFactory termFactory) {
-			this.normalizer = normalizer;
+		private EvaluationResult(boolean value, TermFactory termFactory) {
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
@@ -102,11 +98,9 @@ public class ExpressionEvaluator {
 
 		/**
 		 * Evaluated as valueNull
-		 * @param normalizer
 		 * @param termFactory
 		 */
-		private EvaluationResult(ExpressionNormalizer normalizer, TermFactory termFactory) {
-			this.normalizer = normalizer;
+		private EvaluationResult(TermFactory termFactory) {
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.empty();
@@ -170,12 +164,12 @@ public class ExpressionEvaluator {
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm == valueFalse) {
-				return new EvaluationResult(false, normalizer, termFactory);
+				return new EvaluationResult(false, termFactory);
 			}
 			else if (evaluatedTerm == valueNull)
-				return new EvaluationResult(normalizer, termFactory);
+				return new EvaluationResult(termFactory);
 			else {
-				return new EvaluationResult(true, normalizer, termFactory);
+				return new EvaluationResult(true, termFactory);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
@@ -587,9 +581,9 @@ public class ExpressionEvaluator {
 			} else if (functionSymbol == IS_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
 			} else if (functionSymbol == NEQ) {
-				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
+				return termFactory.getStrictNEquality(f.getTerm(0), f.getTerm(1));
 			} else if (functionSymbol == EQ) {
-				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
+				return termFactory.getStrictEquality(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
 			return teval;
