@@ -112,7 +112,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
         ImmutableSet<ImmutableTerm> remainingTerms = remainingTermBuilder.build();
         ImmutableSet<ImmutableExpression> otherExpressions = otherExpressionBuilder.build();
 
-        if (remainingTerms.isEmpty())
+        if (remainingTerms.size() < 2)
             return otherExpressions.isEmpty()
                     ? termFactory.getDBBooleanConstant(isEq)
                     : combineExpressions(otherExpressions.stream(), termFactory);
