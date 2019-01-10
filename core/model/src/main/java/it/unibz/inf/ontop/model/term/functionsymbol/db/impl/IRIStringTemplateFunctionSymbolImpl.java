@@ -22,13 +22,4 @@ public class IRIStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFun
 
         return new IRIStringTemplateFunctionSymbolImpl(iriTemplate, arity, typeFactory);
     }
-
-    /**
-     * TODO: try to reject or to decompose
-     */
-    @Override
-    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
-        return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory);
-    }
 }

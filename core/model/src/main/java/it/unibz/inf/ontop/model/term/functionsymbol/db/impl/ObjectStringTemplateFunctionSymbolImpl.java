@@ -181,4 +181,16 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 ? template.substring(0, index)
                 : template;
     }
+
+    /**
+     * TODO: try to decompose
+     */
+    @Override
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
+        if (!arePrefixesCompatible(otherTerm.getValue()))
+            return EvaluationResult.declareIsFalse();
+
+        return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory);
+    }
 }
