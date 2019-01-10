@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -142,5 +143,42 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                     : termFactory.getDBConcatFunctionalTerm(termsToConcatenate);
 
         return termConverter.apply(concatTerm);
+    }
+
+    @Override
+    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                  ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
+                                                                  VariableNullability variableNullability) {
+        FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
+        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
+            String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
+            /*
+             * TODO: go beyond prefix comparison
+             */
+            if (!arePrefixesCompatible(otherTemplate))
+                return EvaluationResult.declareIsFalse();
+        }
+
+        // May decompose in case of injectivity
+        return super.evaluateStrictEqWithFunctionalTerm(terms, otherTerm, termFactory, variableNullability);
+    }
+
+    protected boolean arePrefixesCompatible(String otherTemplate) {
+        String prefix = extractPrefix(template);
+        String otherPrefix = extractPrefix(otherTemplate);
+
+        int prefixLength = prefix.length();
+        int otherPrefixLength = otherPrefix.length();
+
+        int minLength = prefixLength < otherPrefixLength ? prefixLength : otherPrefixLength;
+
+        return prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength));
+    }
+
+    private static String extractPrefix(String template) {
+        int index = template.indexOf("{");
+        return index >= 0
+                ? template.substring(0, index)
+                : template;
     }
 }
