@@ -55,8 +55,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static jdk.nashorn.internal.objects.NativeRegExp.source;
-
 
 public class SQLPPMappingToR2RMLConverter {
 

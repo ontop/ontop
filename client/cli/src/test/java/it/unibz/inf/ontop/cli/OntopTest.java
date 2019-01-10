@@ -16,6 +16,10 @@ public class OntopTest {
         Ontop.main("help");
     }
 
+    @Test
+    public void testOntopHelpEndpoint(){
+        Ontop.main("help", "endpoint");
+    }
 
     @Test
     public void testOntopHelpMapping(){

@@ -8,12 +8,16 @@ import org.springframework.boot.SpringApplication;
 
 
 @Command(name = "endpoint",
-        description = "starts a SPARQL endpoint of Ontop")
+        description = "starts a SPARQL endpoint powered by Ontop")
 public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
-    @Option(type = OptionType.COMMAND, name = {"--port"}, title = "port of the SPARQL endpoint",
-            description = "Properties file")
+    @Option(type = OptionType.COMMAND, name = {"--port"}, title = "port",
+            description = "port of the SPARQL endpoint")
     private int port = 8080;
+
+    @Option(type = OptionType.COMMAND, name = {"--cors-allowed-origins"}, title = "origins",
+            description = "CORS allowed origins")
+    private String corsAllowedOrigins = ",";
 
     @Override
     public void run() {
@@ -21,7 +25,9 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
                 "--ontology=" + this.owlFile,
                 "--mapping=" + this.mappingFile,
                 "--properties=" + this.propertiesFile,
-                "--port=" + this.port};
+                "--port=" + this.port,
+                "--cors-allowed-origins=" + this.corsAllowedOrigins
+        };
 
         SpringApplication.run(OntopEndpointApplication.class, args);
     }
