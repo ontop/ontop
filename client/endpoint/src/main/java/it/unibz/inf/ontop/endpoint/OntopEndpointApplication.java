@@ -6,35 +6,28 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-public class OntopEndpointApplication
-{
+public class OntopEndpointApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(OntopEndpointApplication.class, args);
     }
 
+    @Bean
+    WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> portConfig(@Value("${port:8080}") int port) {
+        return server -> server.setPort(port);
+    }
 
     @Bean
-    EndpointConfig endpointConfig(@Value("${ontology}") String owlFile,
-                                  @Value("${mapping}") String mappingFile,
-                                  @Value("${properties}") String propertiesFile) {
-        return new EndpointConfig(owlFile, mappingFile, propertiesFile);
+    public WebMvcConfigurer corsConfigurer(@Value("${cors-allowed-origins:}") String[] allowedOrigins) {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/*").allowedOrigins(allowedOrigins);
+            }
+        };
     }
-
-
-    @Component
-    public class CustomizationPortBean implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
-
-        @Value("${port:8080}")
-        private int port;
-
-        @Override
-        public void customize(ConfigurableServletWebServerFactory server) {
-            server.setPort(this.port);
-        }
-    }
-
 }
