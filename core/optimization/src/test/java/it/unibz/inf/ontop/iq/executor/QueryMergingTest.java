@@ -59,6 +59,7 @@ public class QueryMergingTest {
     private static String URI_TEMPLATE_STR_2 = "http://example.org/ds2/{}";
     private static String URI_TEMPLATE_STR_3 = "http://example.org/ds3/{}/{}";
     private static Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static Constant ONE_STR = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
     private static Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static Constant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE, XSD.INTEGER);
@@ -71,7 +72,7 @@ public class QueryMergingTest {
 
     @Test
     public void testPruning1() throws EmptyQueryException {
-        GroundFunctionalTerm xValue = (GroundFunctionalTerm) generateURI1(ONE);
+        GroundFunctionalTerm xValue = (GroundFunctionalTerm) generateURI1(ONE_STR);
 
         IntermediateQuery mainQuery = createBasicSparqlQuery(ImmutableMap.of(X, xValue), xValue, Y);
 
@@ -107,7 +108,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE));
+        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE_STR));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
 

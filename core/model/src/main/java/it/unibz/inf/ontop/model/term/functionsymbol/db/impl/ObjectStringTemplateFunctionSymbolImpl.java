@@ -17,6 +17,8 @@ import it.unibz.inf.ontop.utils.URITemplates;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -25,6 +27,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private final String template;
     private final DBTermType lexicalType;
+    private final Pattern pattern;
 
     // Lazy
     @Nullable
@@ -35,6 +38,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
+        // TODO: forbid separators (e.g. /)
+        this.pattern = Pattern.compile(template.replace("{}", "(.+)"));
     }
 
     private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
@@ -71,7 +76,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
-                    .map(c -> encodeParameter(c, termFactory, variableNullability))
+                    .map(c -> encodeParameter(c, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability))
                     .collect(ImmutableCollectors.toList());
 
             return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
@@ -83,8 +88,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
-        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(false, variableNullability))
+    private String encodeParameter(DBConstant constant, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(isInConstructionNodeInOptimizationPhase, variableNullability))
                 .filter(t -> t instanceof DBConstant)
                 .map(t -> ((DBConstant) t).getValue())
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
@@ -109,6 +114,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
 
+    /**
+     * TODO: implement is seriously based on the pattern and if it is unary
+     */
     @Override
     protected boolean isAlwaysInjective() {
         return true;
@@ -182,15 +190,34 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 : template;
     }
 
-    /**
-     * TODO: try to decompose
-     */
     @Override
     protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
-        if (!arePrefixesCompatible(otherTerm.getValue()))
+                                                                   NonNullConstant otherTerm, TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        String otherValue = otherTerm.getValue();
+
+        if (isInjective(terms, variableNullability)) {
+            Matcher matcher = pattern.matcher(otherTerm.getValue());
+            if (matcher.find()) {
+                ImmutableList<DBConstant> subConstants = IntStream.range(0, getArity())
+                        .boxed()
+                        .map(i -> matcher.group(i + 1))
+                        .map(termFactory::getDBStringConstant)
+                        .collect(ImmutableCollectors.toList());
+                ImmutableExpression newExpression = termFactory.getConjunction(
+                        IntStream.range(0, getArity())
+                                .boxed()
+                                .map(i -> termFactory.getStrictEquality(terms.get(i), subConstants.get(i))))
+                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
+                return EvaluationResult.declareSimplifiedExpression(newExpression);
+            }
+            else
+                return EvaluationResult.declareIsFalse();
+        }
+        else if (!arePrefixesCompatible(otherValue))
             return EvaluationResult.declareIsFalse();
 
-        return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory);
+        return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }
 }

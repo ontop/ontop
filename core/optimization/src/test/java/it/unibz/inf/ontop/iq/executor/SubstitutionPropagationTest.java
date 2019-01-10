@@ -51,7 +51,9 @@ public class SubstitutionPropagationTest {
     private static final Variable M = TERM_FACTORY.getVariable("m");
     private static final Variable N = TERM_FACTORY.getVariable("n");
     private static final Constant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static final Constant ONE_STR = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
     private static final Constant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
+    private static final Constant TWO_STR = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBStringType());
 
     private static final String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
     private static final String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}/{}";
@@ -779,7 +781,7 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(ONE, TWO)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(ONE_STR, TWO_STR)));
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, IQ_FACTORY.createTrueNode());
 
@@ -787,7 +789,7 @@ public class SubstitutionPropagationTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, rightConstructionNode);
-        expectedQueryBuilder.addChild(rightConstructionNode, buildExtensionalDataNode(TABLE1_AR2, ONE, TWO));
+        expectedQueryBuilder.addChild(rightConstructionNode, buildExtensionalDataNode(TABLE1_AR2, ONE_STR, TWO_STR));
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }

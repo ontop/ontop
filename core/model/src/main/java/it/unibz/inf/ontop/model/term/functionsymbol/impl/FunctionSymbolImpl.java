@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
 
@@ -79,7 +77,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         else if ((otherTerm instanceof Constant) && otherTerm.isNull())
             return EvaluationResult.declareIsNull();
         else if (otherTerm instanceof NonNullConstant) {
-            return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory);
+            return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
         return EvaluationResult.declareSameExpression();
     }
@@ -157,7 +155,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * Default implementation, does nothing, can be overridden
      */
     protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory) {
+                                                                   NonNullConstant otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return EvaluationResult.declareSameExpression();
     }
 
