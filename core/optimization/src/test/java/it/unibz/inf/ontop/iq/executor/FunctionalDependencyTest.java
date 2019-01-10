@@ -20,7 +20,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static junit.framework.TestCase.assertTrue;
@@ -806,7 +805,7 @@ public class FunctionalDependencyTest {
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.addChild(distinctNode, topConstructionNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, B, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictNEquality(B, TWO));
         queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
@@ -836,7 +835,7 @@ public class FunctionalDependencyTest {
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.addChild(distinctNode, topConstructionNode);
 
-        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, F, TWO));
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictNEquality(F, TWO));
         queryBuilder.addChild(topConstructionNode, joinNode);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(

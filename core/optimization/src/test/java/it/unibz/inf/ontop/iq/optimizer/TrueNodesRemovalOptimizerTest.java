@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static org.junit.Assert.assertTrue;
@@ -82,7 +81,7 @@ public class TrueNodesRemovalOptimizerTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
         queryBuilder.init(projectionAtom, rootNode);
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(NEQ, A, B);
+        ImmutableExpression expression = TERM_FACTORY.getStrictNEquality(A, B);
         InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(expression);
         queryBuilder.addChild(rootNode, jn);
 

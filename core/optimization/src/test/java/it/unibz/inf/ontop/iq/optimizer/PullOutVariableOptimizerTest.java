@@ -18,7 +18,6 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static junit.framework.TestCase.assertTrue;
 
 public class PullOutVariableOptimizerTest {
@@ -42,20 +41,13 @@ public class PullOutVariableOptimizerTest {
     private final static Variable S = TERM_FACTORY.getVariable("S");
     private final static Variable T = TERM_FACTORY.getVariable("T");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, X0);
-    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            EQ, Y, Y1);
-    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, X2);
-    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
-            EQ, X0, X4);
-    private final static ImmutableExpression EXPRESSION8 = TERM_FACTORY.getImmutableExpression(
-            EQ, X0, X5);
-    private final static ImmutableExpression EXPRESSION_Z_Z0 = TERM_FACTORY.getImmutableExpression(
-            EQ, Z, Z0);
-    private final static ImmutableExpression EXPRESSION_Z_Z2 = TERM_FACTORY.getImmutableExpression(
-            EQ, Z, Z2);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(X, X0);
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictEquality(Y, Y1);
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getStrictEquality(X, X2);
+    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getStrictEquality(X0, X4);
+    private final static ImmutableExpression EXPRESSION8 = TERM_FACTORY.getStrictEquality(X0, X5);
+    private final static ImmutableExpression EXPRESSION_Z_Z0 = TERM_FACTORY.getStrictEquality(Z, Z0);
+    private final static ImmutableExpression EXPRESSION_Z_Z2 = TERM_FACTORY.getStrictEquality(Z, Z2);
 
     @Test
     public void testDataNode() throws EmptyQueryException {

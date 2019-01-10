@@ -33,16 +33,13 @@ public class PushUpBooleanExpressionOptimizerTest {
     private final static Variable Y = TERM_FACTORY.getVariable("Y");
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, Z);
-    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            NEQ, Y, Z);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(X, Z);
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(Y, Z);
     private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
             GTE, W, Z);
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
             LT, V, W);
-    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
-            NEQ, X, TERM_FACTORY.getDBStringConstant("a"));
+    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getStrictNEquality(X, TERM_FACTORY.getDBStringConstant("a"));
 
     @Test
     public void testPropagationFomInnerJoinProvider() throws EmptyQueryException {

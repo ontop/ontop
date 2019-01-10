@@ -260,10 +260,10 @@ public class ExpressionEvaluator {
 					return evalNot(term, variableNullability);
 				case EQ:
 					return termFactory.getStrictEquality(term.getTerm(0), term.getTerm(1))
-							.simplify(false, variableNullability);
+							.simplify(true, variableNullability);
 				case NEQ:
 					return termFactory.getStrictNEquality(term.getTerm(0), term.getTerm(1))
-							.simplify(false, variableNullability);
+							.simplify(true, variableNullability);
 				case IS_NULL:
 					return evalIsNullNotNull(term, true, variableNullability);
 				case IS_NOT_NULL:

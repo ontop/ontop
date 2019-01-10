@@ -236,7 +236,7 @@ public class ExpressionEvaluatorTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI2(C,D)));
 
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(NEQ, X, Y));
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictNEquality(X, Y));
 
         queryBuilder.init(projectionAtom, rootNode);
         queryBuilder.addChild(rootNode, joinNode1);
@@ -260,8 +260,8 @@ public class ExpressionEvaluatorTest {
                 ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(A,B), Y, generateURI2(C,D)));
 
-        ImmutableExpression subExpression1 = TERM_FACTORY.getImmutableExpression(NEQ, A, C);
-        ImmutableExpression subExpression2 = TERM_FACTORY.getImmutableExpression(NEQ, B, D);
+        ImmutableExpression subExpression1 = TERM_FACTORY.getStrictNEquality(A, C);
+        ImmutableExpression subExpression2 = TERM_FACTORY.getStrictNEquality(B, D);
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
@@ -398,7 +398,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
                 TERM_FACTORY.getIfElseNull(
-                    TERM_FACTORY.getImmutableExpression(EQ, TRUE, TRUE), Y));
+                    TERM_FACTORY.getStrictEquality(TRUE, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
@@ -411,7 +411,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
                 TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getImmutableExpression(EQ, X, TRUE), Y));
+                        TERM_FACTORY.getStrictEquality(X, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
@@ -424,7 +424,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
                 IS_NOT_NULL,
                 TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getImmutableExpression(EQ, TRUE, FALSE), Y));
+                        TERM_FACTORY.getStrictEquality(TRUE, FALSE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         assertFalse(result.getOptionalExpression().isPresent());

@@ -388,7 +388,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ1() throws EmptyQueryException {
         IntermediateQuery query = generateJoinLJInitialQuery(
-                Optional.of(TERM_FACTORY.getImmutableExpression(EQ, B, C)), B, false);
+                Optional.of(TERM_FACTORY.getStrictEquality(B, C)), B, false);
 
         optimizeUnsatisfiableQuery(query);
     }
@@ -587,8 +587,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B, true))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
-                EQ, B, B1));
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         queryBuilder.addChild(rootNode, lj1);
         queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B1)), RIGHT);
 
@@ -657,8 +656,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B, true))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
-                EQ, B, B1));
+        LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         queryBuilder.addChild(rootNode, lj1);
         queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, B1, C)), RIGHT);
 
