@@ -105,7 +105,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
     }
 
     @Override
