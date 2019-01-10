@@ -86,13 +86,18 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 		return Stream.of();
 	}
 
+	/**
+	 * Strict equality: require to have the same lexical value and the same datatype
+	 *
+	 * To be distinguished from https://www.w3.org/TR/sparql11-query/#func-RDFterm-equal
+	 *  (which returns NULL instead of FALSE for two different literals)
+	 */
 	@Override
 	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof RDFLiteralConstant) {
 			return equals(otherTerm)
 					? EvaluationResult.declareIsTrue()
-					// See https://www.w3.org/TR/sparql11-query/#func-RDFterm-equal
-					: EvaluationResult.declareIsNull();
+					: EvaluationResult.declareIsFalse();
 		}
 		else if (otherTerm instanceof Constant)
 			return ((Constant) otherTerm).isNull()

@@ -97,7 +97,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
                         break;
                     case IS_NULL:
                         throw new MinorOntopInternalBugException("Was not expected an equality to be evaluated " +
-                                "as NULL which the two arguments were supposed not to be nulls");
+                                "as NULL as both arguments were supposed to be non-nulls");
                     case IS_FALSE:
                         return termFactory.getDBBooleanConstant(!isEq);
                     case IS_TRUE:
