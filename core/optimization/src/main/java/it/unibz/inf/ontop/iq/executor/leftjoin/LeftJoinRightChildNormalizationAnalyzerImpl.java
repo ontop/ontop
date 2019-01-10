@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -17,14 +16,11 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 @Singleton
@@ -208,7 +204,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
         Stream<ImmutableExpression> expressions = IntStream.range(0, formerRightArguments.size())
                 .filter(i -> !formerRightArguments.get(i).equals(newRightArguments.get(i)))
                 .boxed()
-                .map(i -> termFactory.getImmutableExpression(EQ, newRightArguments.get(i), formerRightArguments.get(i)));
+                .map(i -> termFactory.getStrictEquality(newRightArguments.get(i), formerRightArguments.get(i)));
 
         return termFactory.getConjunction(expressions)
                 .orElseThrow(() -> new MinorOntopInternalBugException("A boolean expression was expected"));

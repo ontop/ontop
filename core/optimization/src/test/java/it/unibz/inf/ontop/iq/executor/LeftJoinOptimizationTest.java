@@ -275,7 +275,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
-    @Ignore("Need to support expression simplification in construction nodes")
     @Test
     public void testSelfLeftJoinNonUnification1() throws EmptyQueryException {
 
@@ -326,9 +325,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N,
-                        TERM_FACTORY.getIfElseNull(
-                                TERM_FACTORY.getStrictEquality(ONE, TWO),
-                                NF1)));
+                        TERM_FACTORY.getNullConstant()));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
