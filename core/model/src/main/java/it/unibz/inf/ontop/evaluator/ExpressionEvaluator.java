@@ -206,8 +206,6 @@ public class ExpressionEvaluator {
 				case MULTIPLY:
 				case DIVIDE:
 					throw new RuntimeException("Refactor numeric operation evaluation");
-				case SPARQL_DATATYPE:
-					return evalDatatype(term);
 				case UUID:
 				case STRUUID:
 				case MINUS:
@@ -374,31 +372,6 @@ public class ExpressionEvaluator {
 	private boolean isKnownToBeBlank(ImmutableFunctionalTerm functionalTerm) {
 		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				&& functionalTerm.getTerm(1).equals(bnodeConstant);
-	}
-
-	/*
-	 * Expression evaluator for datatype() function
-	 */
-	private ImmutableTerm evalDatatype(ImmutableFunctionalTerm functionalTerm) {
-		ImmutableTerm innerTerm = functionalTerm.getTerm(0);
-		if (innerTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm innerFunctionalTerm = (ImmutableFunctionalTerm) innerTerm;
-			Optional<TermTypeInference> optionalTypeInference = innerFunctionalTerm.inferType();
-
-			if (optionalTypeInference.isPresent()) {
-				return optionalTypeInference.get().getTermType()
-						.filter(t -> t instanceof RDFDatatype)
-						.map(t -> ((RDFDatatype) t).getIRI())
-						.map(i -> (ImmutableTerm) termFactory.getConstantIRI(i))
-						// Not a Datatype (or a non-fatal error)
-						.orElse(null);
-			}
-			else
-				// Not determined yet
-				return functionalTerm;
-		}
-		// No simplification
-		return functionalTerm;
 	}
 
 	/**
