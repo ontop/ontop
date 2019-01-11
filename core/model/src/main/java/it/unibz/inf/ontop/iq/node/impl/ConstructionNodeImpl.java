@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
 public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements ConstructionNode {
@@ -606,11 +605,11 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
         Stream<ImmutableExpression> thetaFRelatedExpressions = m.entries().stream()
                 .filter(e -> !thetaFBarEntries.contains(e))
-                .map(e -> createEquality(thetaFBar.apply(e.getKey()), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(thetaFBar.apply(e.getKey()), e.getValue()));
 
         Stream<ImmutableExpression> blockedExpressions = gamma.getImmutableMap().entrySet().stream()
                 .filter(e -> !newDeltaC.isDefining(e.getKey()))
-                .map(e -> createEquality(e.getKey(), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
         return termFactory.getConjunction(Stream.concat(thetaFRelatedExpressions, blockedExpressions));
     }
@@ -640,11 +639,11 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                         // tauF vs thetaBar
                         tauF.getImmutableMap().entrySet().stream()
                             .filter(e -> thetaBar.isDefining(e.getKey()))
-                            .map(e -> createEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
+                            .map(e -> termFactory.getStrictEquality(thetaBar.apply(e.getKey()), tauF.apply(e.getValue()))),
                         // tauF vs newDelta
                         tauF.getImmutableMap().entrySet().stream()
                                 .filter(e -> tauCPropagationResults.delta.isDefining(e.getKey()))
-                                .map(e -> createEquality(tauCPropagationResults.delta.apply(e.getKey()),
+                                .map(e -> termFactory.getStrictEquality(tauCPropagationResults.delta.apply(e.getKey()),
                                         tauF.apply(e.getValue()))));
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
@@ -696,10 +695,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                 Map.Entry::getKey,
                                e -> valueTransformationFct.apply(e.getValue())
                         )));
-    }
-
-    private ImmutableExpression createEquality(ImmutableTerm t1, ImmutableTerm t2) {
-        return termFactory.getImmutableExpression(EQ, t1, t2);
     }
 
     private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {

@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 
@@ -209,7 +208,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                           ImmutableSet<Variable> leftVariables) {
         return substitution.getImmutableMap().entrySet().stream()
                 .filter(e -> leftVariables.contains(e.getKey()) || leftVariables.contains(e.getValue()))
-                .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
     }
 
     /**

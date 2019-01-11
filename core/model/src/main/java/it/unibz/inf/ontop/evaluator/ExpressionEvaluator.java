@@ -33,15 +33,12 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfElseNull
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 
@@ -85,18 +82,15 @@ public class ExpressionEvaluator {
 		private final Optional<ImmutableExpression> optionalExpression;
 		private final Optional<Boolean> optionalBooleanValue;
 
-		private final ExpressionNormalizer normalizer;
 		private final TermFactory termFactory;
 
 		private EvaluationResult(ImmutableExpression expression, ExpressionNormalizer normalizer, TermFactory termFactory) {
 			optionalExpression = Optional.of(normalizer.normalize(expression));
-			this.normalizer = normalizer;
 			this.termFactory = termFactory;
 			optionalBooleanValue = Optional.empty();
 		}
 
-		private EvaluationResult(boolean value, ExpressionNormalizer normalizer, TermFactory termFactory) {
-			this.normalizer = normalizer;
+		private EvaluationResult(boolean value, TermFactory termFactory) {
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.of(value);
@@ -104,11 +98,9 @@ public class ExpressionEvaluator {
 
 		/**
 		 * Evaluated as valueNull
-		 * @param normalizer
 		 * @param termFactory
 		 */
-		private EvaluationResult(ExpressionNormalizer normalizer, TermFactory termFactory) {
-			this.normalizer = normalizer;
+		private EvaluationResult(TermFactory termFactory) {
 			this.termFactory = termFactory;
 			optionalExpression = Optional.empty();
 			optionalBooleanValue = Optional.empty();
@@ -172,12 +164,12 @@ public class ExpressionEvaluator {
 		}
 		else if (evaluatedTerm instanceof Constant) {
 			if (evaluatedTerm == valueFalse) {
-				return new EvaluationResult(false, normalizer, termFactory);
+				return new EvaluationResult(false, termFactory);
 			}
 			else if (evaluatedTerm == valueNull)
-				return new EvaluationResult(normalizer, termFactory);
+				return new EvaluationResult(termFactory);
 			else {
-				return new EvaluationResult(true, normalizer, termFactory);
+				return new EvaluationResult(true, termFactory);
 			}
 		}
 		else if (evaluatedTerm instanceof Variable) {
@@ -214,8 +206,6 @@ public class ExpressionEvaluator {
 				case MULTIPLY:
 				case DIVIDE:
 					throw new RuntimeException("Refactor numeric operation evaluation");
-				case SPARQL_DATATYPE:
-					return evalDatatype(term);
 				case UUID:
 				case STRUUID:
 				case MINUS:
@@ -261,9 +251,11 @@ public class ExpressionEvaluator {
 				case NOT:
 					return evalNot(term, variableNullability);
 				case EQ:
-					return evalEqNeq(term, true, variableNullability);
+					return termFactory.getStrictEquality(term.getTerm(0), term.getTerm(1))
+							.simplify(true, variableNullability);
 				case NEQ:
-					return evalEqNeq(term, false, variableNullability);
+					return termFactory.getStrictNEquality(term.getTerm(0), term.getTerm(1))
+							.simplify(true, variableNullability);
 				case IS_NULL:
 					return evalIsNullNotNull(term, true, variableNullability);
 				case IS_NOT_NULL:
@@ -380,31 +372,6 @@ public class ExpressionEvaluator {
 	private boolean isKnownToBeBlank(ImmutableFunctionalTerm functionalTerm) {
 		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				&& functionalTerm.getTerm(1).equals(bnodeConstant);
-	}
-
-	/*
-	 * Expression evaluator for datatype() function
-	 */
-	private ImmutableTerm evalDatatype(ImmutableFunctionalTerm functionalTerm) {
-		ImmutableTerm innerTerm = functionalTerm.getTerm(0);
-		if (innerTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm innerFunctionalTerm = (ImmutableFunctionalTerm) innerTerm;
-			Optional<TermTypeInference> optionalTypeInference = innerFunctionalTerm.inferType();
-
-			if (optionalTypeInference.isPresent()) {
-				return optionalTypeInference.get().getTermType()
-						.filter(t -> t instanceof RDFDatatype)
-						.map(t -> ((RDFDatatype) t).getIRI())
-						.map(i -> (ImmutableTerm) termFactory.getConstantIRI(i))
-						// Not a Datatype (or a non-fatal error)
-						.orElse(null);
-			}
-			else
-				// Not determined yet
-				return functionalTerm;
-		}
-		// No simplification
-		return functionalTerm;
 	}
 
 	/**
@@ -587,9 +554,9 @@ public class ExpressionEvaluator {
 			} else if (functionSymbol == IS_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
 			} else if (functionSymbol == NEQ) {
-				return termFactory.getImmutableFunctionalTerm(NEQ, f.getTerm(0), f.getTerm(1));
+				return termFactory.getStrictNEquality(f.getTerm(0), f.getTerm(1));
 			} else if (functionSymbol == EQ) {
-				return termFactory.getImmutableFunctionalTerm(EQ, f.getTerm(0), f.getTerm(1));
+				return termFactory.getStrictEquality(f.getTerm(0), f.getTerm(1));
 			}
 		} else if (teval instanceof Constant) {
 			return teval;
@@ -616,122 +583,6 @@ public class ExpressionEvaluator {
 		return initialSubTerm.equals(teval)
 				? term
 				: termFactory.getImmutableFunctionalTerm(NOT, teval);
-	}
-
-	private ImmutableTerm evalEqNeq(ImmutableFunctionalTerm term, boolean eq, VariableNullability variableNullability) {
-		/*
-		 * Evaluate the first term
-		 */
-
-		// Do not eval if term is DataTypeFunction, e.g. integer(10)
-		ImmutableTerm teval1;
-		if (term.getTerm(0) instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm t1 = (ImmutableFunctionalTerm) term.getTerm(0);
-			teval1 = eval(term.getTerm(0), variableNullability);
-			if (teval1 == null) {
-				return valueFalse;
-			}
-		}
-		// This follows the SQL semantics valueNull != valueNull
-		else if (term.getTerm(0).equals(valueNull)) {
-			return eq ? valueFalse : valueTrue;
-		}
-		else {
-			teval1 = eval(term.getTerm(0), variableNullability);
-		}
-
-		/*
-		 * Evaluate the second term
-		 */
-
-		ImmutableTerm teval2;
-		if (term.getTerm(1) instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm t2 = (ImmutableFunctionalTerm) term.getTerm(1);
-			teval2 = eval(term.getTerm(1), variableNullability);
-			if (teval2 == null) {
-				return valueFalse;
-			}
-		}
-		// This follows the SQL semantics valueNull != valueNull
-		else if (term.getTerm(1).equals(valueNull)) {
-			return eq ? valueFalse : valueTrue;
-		}
-		else {
-			teval2 = eval(term.getTerm(1), variableNullability);
-		}
-
-		/*
-		 * Normalizing the location of terms, functions first
-		 */
-		ImmutableTerm eval1 = teval1 instanceof ImmutableFunctionalTerm ? teval1 : teval2;
-		ImmutableTerm eval2 = teval1 instanceof ImmutableFunctionalTerm ? teval2 : teval1;
-
-		if (eval1 instanceof Variable || eval2 instanceof Variable) {
-			// no - op
-		}
-		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
-			if (eval1.equals(eval2))
-				return termFactory.getDBBooleanConstant(eq);
-			else
-				return termFactory.getDBBooleanConstant(!eq);
-
-		}
-		else if (eval1 instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) eval1;
-			FunctionSymbol functionSymbol1 = f1.getFunctionSymbol();
-
-			// TODO: see if we can get rid of it
-			if ((functionSymbol1 instanceof ExpressionOperation) || (functionSymbol1 instanceof BooleanExpressionOperation)) {
-				return term;
-			}
-
-			// TODO: implement it seriously
-			if (!functionSymbol1.isInjective(f1.getTerms(), variableNullability))
-				return term;
-
-
-			/*
-			 * Evaluate the second term
-			 */
-			if (eval2 instanceof ImmutableFunctionalTerm) {
-				ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) eval2;
-				FunctionSymbol pred2 = f2.getFunctionSymbol();
-//				if (pred2.getTermType(0) == COL_TYPE.UNSUPPORTED) {
-//					throw new RuntimeException("Unsupported type: " + pred2);
-//				}
-
-				// Unification assumption
-				if (functionSymbol1.equals(pred2)) {
-
-					BooleanFunctionSymbol comparisonSymbol = eq ? EQ : NEQ;
-
-					Stream<ImmutableExpression> expressions = IntStream.range(0, f1.getArity())
-							.boxed()
-							.map(i -> termFactory.getImmutableExpression(comparisonSymbol, f1.getTerm(i), f2.getTerm(i)));
-
-					Optional<ImmutableExpression> optionalExpression = eq
-							? termFactory.getConjunction(expressions)
-							: termFactory.getDisjunction(expressions);
-
-					return optionalExpression
-							.map(e -> eval(e, variableNullability))
-							.orElseGet(() -> termFactory.getDBBooleanConstant(eq));
-				}
-				else if (!functionSymbol1.equals(pred2)) {
-					return termFactory.getDBBooleanConstant(!eq);
-				}
-				else {
-					return term;
-				}
-			}
-		}
-
-		/* eval2 is not a function */
-		if (eq) {
-			return termFactory.getImmutableFunctionalTerm(EQ, teval1, teval2);
-		} else {
-			return termFactory.getImmutableFunctionalTerm(NEQ, teval1, teval2);
-		}
 	}
 
 	/**

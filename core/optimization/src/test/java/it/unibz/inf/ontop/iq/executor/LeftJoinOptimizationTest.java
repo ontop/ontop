@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 import static junit.framework.TestCase.assertTrue;
 
@@ -69,10 +68,8 @@ public class LeftJoinOptimizationTest {
     private final static Variable O1F1 = TERM_FACTORY.getVariable("o1f1");
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            EQ, M, N);
-    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            EQ, N, M);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictEquality(N, M);
 
     private static final DBMetadata DB_METADATA;
 
@@ -257,8 +254,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(
-                EQ, O, TWO));
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(O, TWO));
 
         queryBuilder.addChild(constructionNode, leftJoinNode);
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O1));
@@ -271,7 +267,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getImmutableExpression(EQ, OF0, TWO), OF0)));
+                        TERM_FACTORY.getStrictEquality(OF0, TWO), OF0)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
                 IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, OF0)));
@@ -279,7 +275,6 @@ public class LeftJoinOptimizationTest {
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
 
-    @Ignore("Need to support expression simplification in construction nodes")
     @Test
     public void testSelfLeftJoinNonUnification1() throws EmptyQueryException {
 
@@ -330,9 +325,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N,
-                        TERM_FACTORY.getIfElseNull(
-                                TERM_FACTORY.getImmutableExpression(EQ, ONE, TWO),
-                                NF1)));
+                        TERM_FACTORY.getNullConstant()));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
@@ -386,7 +379,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getImmutableExpression(EQ, F0, TWO), NF1)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
                 IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
@@ -414,7 +407,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull( 
-                        TERM_FACTORY.getImmutableExpression(EQ, F0, NF1), NF1)));
+                        TERM_FACTORY.getStrictEquality(F0, NF1), NF1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
                 IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
@@ -596,7 +589,7 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                     SUBSTITUTION_FACTORY.getSubstitution(O1, TERM_FACTORY.getIfElseNull(
-                            TERM_FACTORY.getImmutableExpression(EQ, F0, M1),
+                            TERM_FACTORY.getStrictEquality(F0, M1),
                             O1F1)));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
@@ -664,7 +657,7 @@ public class LeftJoinOptimizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_4_PREDICATE, M, M1, O, N1);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, O1, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(O1, TWO);
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(expression);
         ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, M, M1, O));
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
@@ -712,7 +705,7 @@ public class LeftJoinOptimizationTest {
 
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, F0, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(F0, TWO);
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N1,
                         TERM_FACTORY.getIfElseNull( expression, N1F1)));
@@ -787,7 +780,7 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
                         TERM_FACTORY.getIfElseNull(
-                            TERM_FACTORY.getImmutableExpression(EQ, N, N1),
+                            TERM_FACTORY.getStrictEquality(N, N1),
                             OF1)));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
@@ -934,8 +927,8 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ImmutableExpression zCondition = TERM_FACTORY.getConjunction(
-                TERM_FACTORY.getImmutableExpression(EQ, M, N),
-                TERM_FACTORY.getImmutableExpression(EQ, M, MF1),
+                TERM_FACTORY.getStrictEquality(M, N),
+                TERM_FACTORY.getStrictEquality(M, MF1),
                 o1IsNotNull);
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -994,9 +987,9 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
 
         ImmutableExpression zCondition = TERM_FACTORY.getConjunction(
-                TERM_FACTORY.getImmutableExpression(EQ, F0, N),
+                TERM_FACTORY.getStrictEquality(F0, N),
                 o1IsNotNull,
-                TERM_FACTORY.getImmutableExpression(EQ, M, N));
+                TERM_FACTORY.getStrictEquality(M, N));
 
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(

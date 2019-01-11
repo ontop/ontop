@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -16,6 +17,8 @@ import it.unibz.inf.ontop.utils.URITemplates;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -24,6 +27,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private final String template;
     private final DBTermType lexicalType;
+    private final Pattern pattern;
 
     // Lazy
     @Nullable
@@ -34,6 +38,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
+        // TODO: forbid separators (e.g. /)
+        this.pattern = Pattern.compile(template.replace("{}", "(.+)"));
     }
 
     private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
@@ -70,7 +76,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
-                    .map(c -> encodeParameter(c, termFactory, variableNullability))
+                    .map(c -> encodeParameter(c, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability))
                     .collect(ImmutableCollectors.toList());
 
             return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
@@ -82,8 +88,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
-        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(false, variableNullability))
+    private String encodeParameter(DBConstant constant, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(isInConstructionNodeInOptimizationPhase, variableNullability))
                 .filter(t -> t instanceof DBConstant)
                 .map(t -> ((DBConstant) t).getValue())
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +
@@ -108,6 +114,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
 
+    /**
+     * TODO: implement is seriously based on the pattern and if it is unary
+     */
     @Override
     protected boolean isAlwaysInjective() {
         return true;
@@ -142,5 +151,75 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                     : termFactory.getDBConcatFunctionalTerm(termsToConcatenate);
 
         return termConverter.apply(concatTerm);
+    }
+
+    @Override
+    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                  ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
+                                                                  VariableNullability variableNullability) {
+        FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
+        if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
+            String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
+            /*
+             * TODO: go beyond prefix comparison
+             */
+            if (!arePrefixesCompatible(otherTemplate))
+                return EvaluationResult.declareIsFalse();
+        }
+
+        // May decompose in case of injectivity
+        return super.evaluateStrictEqWithFunctionalTerm(terms, otherTerm, termFactory, variableNullability);
+    }
+
+    protected boolean arePrefixesCompatible(String otherTemplate) {
+        String prefix = extractPrefix(template);
+        String otherPrefix = extractPrefix(otherTemplate);
+
+        int prefixLength = prefix.length();
+        int otherPrefixLength = otherPrefix.length();
+
+        int minLength = prefixLength < otherPrefixLength ? prefixLength : otherPrefixLength;
+
+        return prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength));
+    }
+
+    private static String extractPrefix(String template) {
+        int index = template.indexOf("{");
+        return index >= 0
+                ? template.substring(0, index)
+                : template;
+    }
+
+    @Override
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        String otherValue = otherTerm.getValue();
+
+        if (isInjective(terms, variableNullability)) {
+            Matcher matcher = pattern.matcher(otherTerm.getValue());
+            if (matcher.find()) {
+                ImmutableList<DBConstant> subConstants = IntStream.range(0, getArity())
+                        .boxed()
+                        .map(i -> matcher.group(i + 1))
+                        .map(termFactory::getDBStringConstant)
+                        .collect(ImmutableCollectors.toList());
+                ImmutableExpression newExpression = termFactory.getConjunction(
+                        IntStream.range(0, getArity())
+                                .boxed()
+                                .map(i -> termFactory.getStrictEquality(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)), subConstants.get(i))))
+                        .orElseThrow(() -> new MinorOntopInternalBugException(
+                                "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
+
+                ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
+                return newEvaluation.getEvaluationResult(newExpression, true);
+            }
+            else
+                return EvaluationResult.declareIsFalse();
+        }
+        else if (!arePrefixesCompatible(otherValue))
+            return EvaluationResult.declareIsFalse();
+
+        return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }
 }

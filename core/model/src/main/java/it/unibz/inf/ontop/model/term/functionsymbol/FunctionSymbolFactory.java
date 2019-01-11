@@ -40,8 +40,24 @@ public interface FunctionSymbolFactory {
 
     /**
      * Do NOT confuse it with the LANG SPARQL function
+     *
+     * This function symbol takes a RDF type term as input.
+     * and returns
+     *   * NULL if it is not a literal
+     *   * "" if the literal type does not have a language tag
+     *   * the language tag if available
      */
-    FunctionSymbol getLangTypeFunctionSymbol();
+    FunctionSymbol getLangTagFunctionSymbol();
+
+    /**
+     * Do NOT confuse it with the LANG DATATYPE function
+     *
+     * This function symbol takes a RDF type term as input.
+     * and returns
+     *   * NULL if it is not a literal
+     *   * the string of the datatype IRI
+     */
+    FunctionSymbol getRDFDatatypeStringFunctionSymbol();
 
     /**
      * Do NOT confuse it with the langMatches SPARQL function

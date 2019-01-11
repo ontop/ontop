@@ -33,20 +33,13 @@ public class PushDownBooleanExpressionOptimizerTest {
     private final static Variable W = TERM_FACTORY.getVariable("W");
     private final static Variable A = TERM_FACTORY.getVariable("A");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, Z);
-    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            NEQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
-            LT, Z, W);
-    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
-            EQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getImmutableExpression(
-            NEQ, Z, W);
-    private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, W);
-    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getImmutableExpression(
-            EQ, X, Y);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(X, Z);
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(Y, Z);
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(LT, Z, W);
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getStrictEquality(Y, Z);
+    private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getStrictNEquality(Z, W);
+    private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getStrictEquality(X, W);
+    private final static ImmutableExpression EXPRESSION7 = TERM_FACTORY.getStrictEquality(X, Y);
 
     @Test
     public void testJoiningCondition1() throws EmptyQueryException {

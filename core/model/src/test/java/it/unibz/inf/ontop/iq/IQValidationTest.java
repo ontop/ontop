@@ -21,7 +21,6 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 public class IQValidationTest {
@@ -44,8 +43,7 @@ public class IQValidationTest {
     private final static Variable B = TERM_FACTORY.getVariable("b");
     private final static Variable C = TERM_FACTORY.getVariable("c");
 
-    private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getImmutableExpression(
-            EQ, X, Y);
+    private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getStrictEquality(X, Y);
 
     private static final DBMetadata DB_METADATA;
 

@@ -4,9 +4,8 @@ package it.unibz.inf.ontop.model.term.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.checkNonGroundTermConstraint;
 
 public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements NonGroundFunctionalTerm {
@@ -29,7 +28,7 @@ public class NonGroundExpressionImpl extends ImmutableExpressionImpl implements 
 
     @Override
     public boolean isVar2VarEquality() {
-        return getFunctionSymbol().equals(EQ) &&
+        return getFunctionSymbol() instanceof DBStrictEqFunctionSymbol &&
                 getTerms().size() == 2 &&
                 getTerms().stream().allMatch(t -> t instanceof Variable);
     }

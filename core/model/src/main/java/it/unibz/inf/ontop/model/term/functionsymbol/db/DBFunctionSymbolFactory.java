@@ -86,7 +86,11 @@ public interface DBFunctionSymbolFactory {
      */
     DBBooleanFunctionSymbol getDBAnd(int arity);
 
-    DBBooleanFunctionSymbol getDBStrictEquality(int arity);
+    FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
+
+    TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
+
+    DBStrictEqFunctionSymbol getDBStrictEquality(int arity);
 
     DBBooleanFunctionSymbol getDBStrictNEquality(int arity);
 

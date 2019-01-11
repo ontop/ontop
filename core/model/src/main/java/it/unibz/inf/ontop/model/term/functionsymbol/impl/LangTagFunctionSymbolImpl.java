@@ -16,12 +16,12 @@ import java.util.Optional;
  *   * "" if the literal type does not have a language tag
  *   * the language tag if available
  */
-public class LangTypeFunctionSymbolImpl extends FunctionSymbolImpl {
+public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final DBTermType dbStringType;
 
-    protected LangTypeFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbStringType) {
-        super("LANG_TYPE", ImmutableList.of(metaRDFTermType));
+    protected LangTagFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, DBTermType dbStringType) {
+        super("LANG_TAG", ImmutableList.of(metaRDFTermType));
         this.dbStringType = dbStringType;
     }
 

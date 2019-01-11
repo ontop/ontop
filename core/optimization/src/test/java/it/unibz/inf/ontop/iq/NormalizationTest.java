@@ -310,7 +310,7 @@ public class NormalizationTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(A)));
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ,
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(
                 TERM_FACTORY.getDBStrlen(A), ONE));
 
         UnaryIQTree subTree = IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode);
@@ -356,7 +356,7 @@ public class NormalizationTest {
     @Test
     public void testFilter2() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, A, B);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality( A, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -377,7 +377,7 @@ public class NormalizationTest {
     @Test
     public void testFilterUseless1() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, A, A);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(A, A);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -392,7 +392,7 @@ public class NormalizationTest {
     @Test
     public void testFilterSubstituable1() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, A, B);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(A, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -412,7 +412,7 @@ public class NormalizationTest {
     @Test
     public void testFilterUnsatisfiable1() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(EQ, ONE, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getStrictEquality(ONE, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -788,7 +788,7 @@ public class NormalizationTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ, A, C));
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(A, C));
 
         IQTree tree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, extensionalDataNode1, extensionalDataNode2));
@@ -832,7 +832,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(
-                TERM_FACTORY.getImmutableExpression(EQ,
+                TERM_FACTORY.getStrictEquality(
                         createNonInjectiveFunctionalTerm(A, B),
                         createNonInjectiveFunctionalTerm(C, D)));
 
@@ -883,7 +883,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(
-                TERM_FACTORY.getImmutableExpression(EQ, createNonInjectiveFunctionalTerm(C, D), X));
+                TERM_FACTORY.getStrictEquality(X, createNonInjectiveFunctionalTerm(C, D)));
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
@@ -1081,7 +1081,7 @@ public class NormalizationTest {
                         X, createNonInjectiveFunctionalTerm(A, B),
                         Y, createNonInjectiveFunctionalTerm(D, C)));
 
-        LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
+        LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(
                 createNonInjectiveFunctionalTerm(A, B), createNonInjectiveFunctionalTerm(C, D)));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode,
@@ -1132,7 +1132,7 @@ public class NormalizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         Y, createNonInjectiveFunctionalTerm(D, C)));
 
-        LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
+        LeftJoinNode newLeftJoinNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(
                 createNonInjectiveFunctionalTerm(A, B), createNonInjectiveFunctionalTerm(C, D)));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode,
@@ -1479,7 +1479,7 @@ public class NormalizationTest {
 
     @Test
     public void testJoinMerge2() {
-        testJoinSimpleMerge(Optional.of(TERM_FACTORY.getImmutableExpression(NEQ, B, C)));
+        testJoinSimpleMerge(Optional.of(TERM_FACTORY.getStrictNEquality(B, C)));
     }
 
     private void testJoinSimpleMerge(Optional<ImmutableExpression> leftExpression) {
@@ -1513,7 +1513,7 @@ public class NormalizationTest {
 
     @Test
     public void testJoinMerge4() {
-        testJoinSimpleMerge2(Optional.of(TERM_FACTORY.getImmutableExpression(NEQ, B, E)));
+        testJoinSimpleMerge2(Optional.of(TERM_FACTORY.getStrictNEquality(B, E)));
     }
 
     private void testJoinSimpleMerge2(Optional<ImmutableExpression> topExpression) {
@@ -1524,8 +1524,8 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
         ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, A, E);
 
-        ImmutableExpression leftExpression = TERM_FACTORY.getImmutableExpression(NEQ, B, C);
-        ImmutableExpression rightExpression = TERM_FACTORY.getImmutableExpression(NEQ, A, D);
+        ImmutableExpression leftExpression = TERM_FACTORY.getStrictNEquality( B, C);
+        ImmutableExpression rightExpression = TERM_FACTORY.getStrictNEquality( A, D);
 
         NaryIQTree tree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(topExpression),
                 ImmutableList.of(
@@ -1556,8 +1556,8 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
         ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, A, E);
 
-        ImmutableExpression leftExpression = TERM_FACTORY.getImmutableExpression(NEQ, B, C);
-        ImmutableExpression rightExpression = TERM_FACTORY.getImmutableExpression(NEQ, D, E);
+        ImmutableExpression leftExpression = TERM_FACTORY.getStrictNEquality( B, C);
+        ImmutableExpression rightExpression = TERM_FACTORY.getStrictNEquality( D, E);
 
         NaryIQTree tree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(
@@ -1674,7 +1674,6 @@ public class NormalizationTest {
     }
 
     private static ImmutableExpression createExpression(Variable stringVariable) {
-        return TERM_FACTORY.getImmutableExpression(EQ,
-                TERM_FACTORY.getDBStrlen(stringVariable), ONE);
+        return TERM_FACTORY.getStrictEquality(TERM_FACTORY.getDBStrlen(stringVariable), ONE);
     }
 }

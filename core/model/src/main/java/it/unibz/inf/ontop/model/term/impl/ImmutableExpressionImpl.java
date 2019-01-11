@@ -4,11 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 
 import javax.annotation.Nonnull;
@@ -133,6 +130,14 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         public ImmutableTerm getTerm() {
             return expression;
         }
+
+        @Override
+        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
+                                                    boolean wasExpressionAlreadyNew) {
+            return (wasExpressionAlreadyNew || (!originalExpression.equals(expression)))
+                    ? EvaluationResult.declareSimplifiedExpression(expression)
+                    : EvaluationResult.declareSameExpression();
+        }
     }
 
     protected static class ValueEvaluationImpl implements ImmutableExpression.Evaluation {
@@ -158,6 +163,20 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         @Override
         public ImmutableTerm getTerm() {
             return constant;
+        }
+
+        @Override
+        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
+                                                    boolean wasExpressionAlreadyNew) {
+            switch(value) {
+                case TRUE:
+                    return EvaluationResult.declareIsTrue();
+                case FALSE:
+                    return EvaluationResult.declareIsFalse();
+                // NULL
+                default:
+                    return EvaluationResult.declareIsNull();
+            }
         }
     }
 

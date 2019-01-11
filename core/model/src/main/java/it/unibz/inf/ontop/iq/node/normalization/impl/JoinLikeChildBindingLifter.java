@@ -21,8 +21,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
-
 @Singleton
 public class JoinLikeChildBindingLifter {
 
@@ -95,7 +93,7 @@ public class JoinLikeChildBindingLifter {
                         .map(ImmutableExpression::flattenAND)
                         .orElseGet(Stream::empty),
                 freshRenaming.getImmutableMap().entrySet().stream()
-                        .map(r -> termFactory.getImmutableExpression(EQ,
+                        .map(r -> termFactory.getStrictEquality(
                                 substitution.applyToVariable(r.getKey()),
                                 r.getValue())));
 

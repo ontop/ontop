@@ -46,6 +46,8 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
         Optional<BooleanValue> getValue();
         ImmutableTerm getTerm();
 
+        EvaluationResult getEvaluationResult(ImmutableExpression originalExpression, boolean wasExpressionAlreadyNew);
+
         enum BooleanValue {
             TRUE,
             FALSE,

@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 
 
 public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransformer {
@@ -178,8 +177,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
         private Stream<ImmutableExpression> extractEqualities(ImmutableList<InjectiveVar2VarSubstitution> substitutions) {
             return substitutions.stream()
                     .flatMap(s -> s.getImmutableMap().entrySet().stream())
-                    .map(e -> termFactory.getImmutableExpression(
-                            EQ,
+                    .map(e -> termFactory.getStrictEquality(
                             e.getKey(),
                             e.getValue()
                     ));
@@ -252,11 +250,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         private Optional<ImmutableExpression> getEquality(VariableOrGroundTerm t, Optional<Variable> replacement) {
             return replacement
-                    .map(variable -> termFactory.getImmutableExpression(
-                            EQ,
-                            t,
-                            variable
-                    ));
+                    .map(variable -> termFactory.getStrictEquality(t, variable));
         }
     }
 

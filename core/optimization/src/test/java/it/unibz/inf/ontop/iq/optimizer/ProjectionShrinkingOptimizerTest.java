@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -30,10 +29,8 @@ public class ProjectionShrinkingOptimizerTest {
     private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable B = TERM_FACTORY.getVariable("B");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            NEQ, Y, Z);
-    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getImmutableExpression(
-            NEQ, W, X);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictNEquality(Y, Z);
+    private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(W, X);
 
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {

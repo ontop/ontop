@@ -648,7 +648,9 @@ public class SparqlAlgebraToDatalogTranslator {
                         term);
             }
             else if (expr instanceof Datatype) {
-                return termFactory.getFunction(SPARQL_DATATYPE, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.DATATYPE, 1).get(),
+                        term);
             }
             else if (expr instanceof IsBNode) {
                 return termFactory.getFunction(IS_BLANK, term);

@@ -56,15 +56,26 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * For the strict equalities
      */
-    private final Map<Integer, DBBooleanFunctionSymbol> strictEqMap;
+    private final Map<Integer, DBStrictEqFunctionSymbol> strictEqMap;
 
     /**
      * For the strict NOT equalities
      */
     private final Map<Integer, DBBooleanFunctionSymbol> strictNEqMap;
 
+    /**
+     * For the FalseORNulls
+     */
+    private final Map<Integer, FalseOrNullFunctionSymbol> falseOrNullMap;
+
+    /**
+     * For the TrueORNulls
+     */
+    private final Map<Integer, TrueOrNullFunctionSymbol> trueOrNullMap;
+
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
+    private final DBTermType dbBooleanType;
 
     /**
      * Name (in the DB dialect), arity -> regular DBFunctionSymbol
@@ -85,12 +96,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.normalizationTable = normalizationTable;
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
+        this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
         this.caseMap = new HashMap<>();
         this.strictEqMap = new HashMap<>();
         this.strictNEqMap = new HashMap<>();
+        this.falseOrNullMap = new HashMap<>();
+        this.trueOrNullMap = new HashMap<>();
         this.r2rmlIRISafeEncodeFunctionSymbol = null;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
@@ -174,7 +188,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBStrictEquality(int arity) {
+    public DBStrictEqFunctionSymbol getDBStrictEquality(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of a strict equality must be >= 2");
 
@@ -209,6 +223,18 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity) {
+        return falseOrNullMap
+                .computeIfAbsent(arity, (this::createFalseOrNullFunctionSymbol));
+    }
+
+    @Override
+    public TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity) {
+        return trueOrNullMap
+                .computeIfAbsent(arity, (this::createTrueOrNullFunctionSymbol));
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBContains() {
         if (containsFunctionSymbol == null)
             containsFunctionSymbol = createContainsFunctionSymbol();
@@ -217,6 +243,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbStringType, this::serializeContains);
+    }
+
+    protected FalseOrNullFunctionSymbol createFalseOrNullFunctionSymbol(int arity) {
+        return new FalseOrNullFunctionSymbolImpl(arity, dbBooleanType);
+    }
+
+    protected TrueOrNullFunctionSymbol createTrueOrNullFunctionSymbol(int arity) {
+        return new TrueOrNullFunctionSymbolImpl(arity, dbBooleanType);
     }
 
     /**
@@ -235,7 +269,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
 
-    protected abstract DBBooleanFunctionSymbol createDBStrictEquality(int arity);
+    protected abstract DBStrictEqFunctionSymbol createDBStrictEquality(int arity);
 
     protected abstract DBBooleanFunctionSymbol createDBStrictNEquality(int arity);
 

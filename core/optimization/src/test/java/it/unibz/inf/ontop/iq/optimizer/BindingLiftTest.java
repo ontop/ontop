@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Assert;
@@ -21,7 +22,6 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.SPARQL_DATATYPE;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -1333,7 +1333,7 @@ public class BindingLiftTest {
 
     @Test
     public void testTrueNode() throws EmptyQueryException {
-        testTrueNode(TERM_FACTORY.getImmutableExpression(EQ,
+        testTrueNode(TERM_FACTORY.getStrictEquality(
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
     }
 
@@ -1395,7 +1395,7 @@ public class BindingLiftTest {
 
     @Test
     public void testJoinAndNotMatchingDatatypesDoubleRun() throws EmptyQueryException {
-        testJoinAndNotMatchingDatatypesDoubleRun(TERM_FACTORY.getImmutableExpression(EQ,
+        testJoinAndNotMatchingDatatypesDoubleRun(TERM_FACTORY.getStrictEquality(
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
     }
 
@@ -1469,7 +1469,7 @@ public class BindingLiftTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
         queryBuilder.init(projectionAtom, rootNode);
 
-        InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(EQ,
+        InnerJoinNode jn = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictEquality(
                 buildSparqlDatatype(X), buildSparqlDatatype(Y)));
         queryBuilder.addChild(rootNode, jn);
         ConstructionNode leftCn = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -1855,7 +1855,7 @@ public class BindingLiftTest {
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
         IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, A, B)),
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, B)),
                 leftJoinTree);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
@@ -1885,7 +1885,7 @@ public class BindingLiftTest {
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
         IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, B, C)),
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(B, C)),
                 leftJoinTree);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -1914,7 +1914,7 @@ public class BindingLiftTest {
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
         IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, B, ONE)),
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(B, ONE)),
                 leftJoinTree);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
@@ -1951,7 +1951,7 @@ public class BindingLiftTest {
         IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
-        ImmutableExpression filterCondition = TERM_FACTORY.getImmutableExpression(EQ, groundTerm, B);
+        ImmutableExpression filterCondition = TERM_FACTORY.getStrictEquality(groundTerm, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(filterCondition);
 
         IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(filterNode, leftJoinTree);
@@ -1988,7 +1988,7 @@ public class BindingLiftTest {
         IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
-        ImmutableExpression filterCondition = TERM_FACTORY.getImmutableExpression(EQ, functionalTerm, B);
+        ImmutableExpression filterCondition = TERM_FACTORY.getStrictEquality(functionalTerm, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(filterCondition);
 
         IQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(filterNode, leftJoinTree);
@@ -2060,7 +2060,7 @@ public class BindingLiftTest {
                 IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
 
         UnaryIQTree filterNodeTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, A, B)),
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, B)),
                 leftJoinTree);
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
@@ -2208,6 +2208,8 @@ public class BindingLiftTest {
     }
 
     private static ImmutableFunctionalTerm buildSparqlDatatype(ImmutableTerm argument){
-        return TERM_FACTORY.getImmutableFunctionalTerm(SPARQL_DATATYPE, argument);
+        return TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.DATATYPE, 1).get(),
+                argument);
     }
 }

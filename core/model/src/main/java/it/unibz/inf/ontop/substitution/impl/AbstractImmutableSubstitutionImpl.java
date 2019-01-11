@@ -427,7 +427,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
         List<ImmutableExpression> equalities = new ArrayList<>();
 
         for (Map.Entry<Variable, ? extends ImmutableTerm> entry : substitution.getImmutableMap().entrySet()) {
-            equalities.add(termFactory.getImmutableExpression(BooleanExpressionOperation.EQ, entry.getKey(), entry.getValue()));
+            equalities.add(termFactory.getStrictEquality(entry.getKey(), entry.getValue()));
         }
 
         switch(equalities.size()) {

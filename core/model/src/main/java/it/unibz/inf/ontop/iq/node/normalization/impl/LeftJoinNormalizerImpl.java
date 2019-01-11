@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
 @Singleton
@@ -657,7 +656,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             Stream<ImmutableExpression> equalitiesToInsert = selectedSubstitution.getImmutableMap().entrySet().stream()
                     .filter(e -> leftVariables.contains(e.getKey()))
-                    .map(e -> termFactory.getImmutableExpression(EQ, e.getKey(), e.getValue()));
+                    .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()));
 
             return termFactory.getConjunction(
                     Stream.concat(

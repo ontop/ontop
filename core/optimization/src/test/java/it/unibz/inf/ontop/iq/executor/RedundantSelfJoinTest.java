@@ -71,8 +71,7 @@ public class RedundantSelfJoinTest {
     private final static Variable O1 = TERM_FACTORY.getVariable("o1");
     private final static Variable O2 = TERM_FACTORY.getVariable("o2");
 
-    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getImmutableExpression(
-            EQ, M, N);
+    private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
 
     private static final DBMetadata METADATA;
 
@@ -741,8 +740,8 @@ public class RedundantSelfJoinTest {
         queryBuilder.init(projectionAtom, constructionNode);
 
         ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
-                TERM_FACTORY.getImmutableExpression(EQ, O, ONE),
-                TERM_FACTORY.getImmutableExpression(EQ, O, TWO));
+                TERM_FACTORY.getStrictEquality(O, ONE),
+                TERM_FACTORY.getStrictEquality(O, TWO));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         queryBuilder.addChild(constructionNode, joinNode);
@@ -789,8 +788,8 @@ public class RedundantSelfJoinTest {
         queryBuilder.init(projectionAtom, constructionNode);
 
         ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
-                TERM_FACTORY.getImmutableExpression(EQ, O, TWO),
-                TERM_FACTORY.getImmutableExpression(EQ, O, THREE));
+                TERM_FACTORY.getStrictEquality(O, TWO),
+                TERM_FACTORY.getStrictEquality(O, THREE));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         queryBuilder.addChild(constructionNode, joinNode);
@@ -815,8 +814,8 @@ public class RedundantSelfJoinTest {
         queryBuilder.init(projectionAtom, constructionNode);
 
         ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
-                TERM_FACTORY.getImmutableExpression(EQ, O, TWO),
-                TERM_FACTORY.getImmutableExpression(EQ, O, THREE));
+                TERM_FACTORY.getStrictEquality(O, TWO),
+                TERM_FACTORY.getStrictEquality(O, THREE));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
         queryBuilder.addChild(constructionNode, joinNode);
@@ -907,7 +906,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ, M, N));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
         expectedQueryBuilder.addChild(constructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
@@ -951,7 +950,7 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ, M, N));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
         expectedQueryBuilder.addChild(constructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
 
@@ -1001,7 +1000,7 @@ public class RedundantSelfJoinTest {
                                 )));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ, M, N));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, M));
 
         expectedQueryBuilder.addChild(newConstructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
@@ -1186,7 +1185,7 @@ public class RedundantSelfJoinTest {
                         )));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
-        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getImmutableExpression(EQ, N, O));
+        LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(N, O));
 
         expectedQueryBuilder.addChild(newConstructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);
@@ -1236,8 +1235,8 @@ public class RedundantSelfJoinTest {
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction(
-                TERM_FACTORY.getImmutableExpression(EQ, N, ONE),
-                TERM_FACTORY.getImmutableExpression(EQ, O, ONE)));
+                TERM_FACTORY.getStrictEquality(N, ONE),
+                TERM_FACTORY.getStrictEquality(O, ONE)));
 
         expectedQueryBuilder.addChild(newConstructionNode, newLJNode);
         expectedQueryBuilder.addChild(newLJNode, leftNode, LEFT);

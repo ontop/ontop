@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -301,12 +300,16 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
-		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
+		if (arguments.isEmpty())
+			throw new IllegalArgumentException("Arity must be >= 1");
+		return getImmutableExpression(dbFunctionSymbolFactory.getFalseOrNullFunctionSymbol(arguments.size()), arguments);
 	}
 
 	@Override
 	public ImmutableExpression getTrueOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
-		throw new RuntimeException("TODO: implement getTrueOrNullFunctionalTerm()");
+		if (arguments.isEmpty())
+			throw new IllegalArgumentException("Arity must be >= 1");
+		return getImmutableExpression(dbFunctionSymbolFactory.getTrueOrNullFunctionSymbol(arguments.size()), arguments);
 	}
 
 	@Override
@@ -400,6 +403,11 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm) {
 		return coreUtilsFactory.createDummyVariableNullability(functionalTerm);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFDatatypeStringFunctionSymbol(), rdfTypeTerm);
     }
 
     @Override
@@ -732,7 +740,13 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStrictNEquality(terms.size()), terms);
 	}
 
-    @Override
+	@Override
+	public ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms) {
+		return getStrictNEquality(Stream.concat(Stream.of(term1, term2), Stream.of(otherTerms))
+				.collect(ImmutableCollectors.toList()));
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
     }
@@ -764,7 +778,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getLangTypeFunctionalTerm(ImmutableTerm rdfTypeTerm) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getLangTypeFunctionSymbol(), rdfTypeTerm);
+		return getImmutableFunctionalTerm(functionSymbolFactory.getLangTagFunctionSymbol(), rdfTypeTerm);
     }
 
     @Override
