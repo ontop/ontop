@@ -6,4 +6,5 @@ public class SPARQL {
     public static final String LANG = "LANG";
     public static final String LANG_MATCHES = "langMatches";
     public static final String STR = "STR";
+    public static final String DATATYPE = "DATATYPE";
 }

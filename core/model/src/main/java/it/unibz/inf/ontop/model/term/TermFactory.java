@@ -446,4 +446,6 @@ public interface TermFactory {
 	TypeFactory getTypeFactory();
 
     VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);
+
+    ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
 }

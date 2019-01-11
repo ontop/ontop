@@ -29,6 +29,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
     private final FunctionSymbol langTypeFunctionSymbol;
+    private final FunctionSymbol rdfDatatypeFunctionSymbol;
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
@@ -55,7 +56,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
-        this.langTypeFunctionSymbol = new LangTypeFunctionSymbolImpl(metaRDFType, dbStringType);
+        this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
+        this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
     }
 
@@ -67,6 +69,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
+        ObjectRDFType iriType = typeFactory.getIRITermType();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
@@ -79,7 +82,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new StrlenSPARQLFunctionSymbolImpl(xsdString, xsdInteger),
                 new LangSPARQLFunctionSymbolImpl(rdfsLiteral, xsdString),
                 new LangMatchesSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
-                new StrSPARQLFunctionSymbolImpl(abstractRDFType, xsdString, bnodeType)
+                new StrSPARQLFunctionSymbolImpl(abstractRDFType, xsdString, bnodeType),
+                new DatatypeSPARQLFunctionSymbolImpl(rdfsLiteral, iriType)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -151,7 +155,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getLangTypeFunctionSymbol() {
+    public FunctionSymbol getRDFDatatypeStringFunctionSymbol() {
+        return rdfDatatypeFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getLangTagFunctionSymbol() {
         return langTypeFunctionSymbol;
     }
 

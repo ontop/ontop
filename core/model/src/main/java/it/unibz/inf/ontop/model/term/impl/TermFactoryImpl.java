@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -400,6 +399,11 @@ public class TermFactoryImpl implements TermFactory {
     @Override
     public VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm) {
 		return coreUtilsFactory.createDummyVariableNullability(functionalTerm);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFDatatypeStringFunctionSymbol(), rdfTypeTerm);
     }
 
     @Override
@@ -770,7 +774,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getLangTypeFunctionalTerm(ImmutableTerm rdfTypeTerm) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getLangTypeFunctionSymbol(), rdfTypeTerm);
+		return getImmutableFunctionalTerm(functionSymbolFactory.getLangTagFunctionSymbol(), rdfTypeTerm);
     }
 
     @Override
