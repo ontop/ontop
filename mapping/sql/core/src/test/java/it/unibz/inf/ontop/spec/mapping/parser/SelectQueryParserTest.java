@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -398,7 +397,7 @@ public class SelectQueryParserTest {
     // END SUB SELECT TESTS
 
     private Function eqOf(String var1, String var2) {
-        return TERM_FACTORY.getFunction(EQ,
+        return TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBStrictEquality(2),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 

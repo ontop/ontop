@@ -710,6 +710,9 @@ public class SparqlAlgebraToDatalogTranslator {
                     case NE:
                         p = dbFunctionSymbolFactory.getDBStrictNEquality(2);
                         break;
+                    case EQ:
+                        p = dbFunctionSymbolFactory.getDBStrictEquality(2);
+                        break;
                     default:
                         p = RelationalOperations.get(((Compare) expr).getOperator());
                 }
@@ -841,7 +844,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private static final ImmutableMap<Compare.CompareOp, BooleanExpressionOperation> RelationalOperations =
 			new ImmutableMap.Builder<Compare.CompareOp, BooleanExpressionOperation>()
-				.put(Compare.CompareOp.EQ, EQ)
 				.put(Compare.CompareOp.GE, GTE)
 				.put(Compare.CompareOp.GT, GT)
 				.put(Compare.CompareOp.LE, LTE)

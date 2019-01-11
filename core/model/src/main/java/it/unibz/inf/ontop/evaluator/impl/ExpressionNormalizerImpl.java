@@ -30,9 +30,9 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
             switch((BooleanExpressionOperation)functionSymbol) {
                 //case AND:
                 //case OR:
-                case EQ:
+                //case EQ:
                 //case NEQ:
-                    return normalizeCommutative(functionSymbol, expression.getTerms());
+                //    return normalizeCommutative(functionSymbol, expression.getTerms());
                 default:
                     return normalizeArguments(functionSymbol, expression.getTerms());
             }

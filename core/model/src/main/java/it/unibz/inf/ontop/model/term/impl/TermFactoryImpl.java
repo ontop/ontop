@@ -412,7 +412,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.EQ, firstTerm, secondTerm);
+		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
 
 	@Override

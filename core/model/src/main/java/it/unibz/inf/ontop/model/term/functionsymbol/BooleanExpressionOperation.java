@@ -28,7 +28,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     OR("OR", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
     NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 
-    EQ("EQ", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
     /*
      * BC: is it defined for IRIs?
      */
