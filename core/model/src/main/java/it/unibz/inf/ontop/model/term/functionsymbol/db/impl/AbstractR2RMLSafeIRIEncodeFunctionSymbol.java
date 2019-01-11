@@ -1,11 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import io.mikael.urlbuilder.util.Decoder;
 import io.mikael.urlbuilder.util.Encoder;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.nio.charset.Charset;
@@ -13,10 +12,13 @@ import java.nio.charset.Charset;
 public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractTypedDBFunctionSymbol {
 
     private final Encoder iriEncoder;
+    private final Decoder iriDecoder;
 
     protected AbstractR2RMLSafeIRIEncodeFunctionSymbol(DBTermType dbStringType) {
         super("R2RMLIRISafeEncode", ImmutableList.of(dbStringType), dbStringType);
-        this.iriEncoder = new Encoder(Charset.forName("utf-8"));
+        Charset charset = Charset.forName("utf-8");
+        this.iriEncoder = new Encoder(charset);
+        this.iriDecoder = new Decoder(charset);
     }
 
     @Override
@@ -35,5 +37,18 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
         // TODO: this implementation seems to ignore the ucschar range. Check if it is a problem
         // TODO: redundant with R2RMLIRISafeEncoder. Which one shall we choose?
         return termFactory.getDBStringConstant(iriEncoder.encodeQueryElement(constant.getValue()));
+    }
+
+    @Override
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        DBConstant decodedConstant = termFactory.getDBStringConstant(
+                iriDecoder.urlDecode(otherTerm.getValue(), true));
+
+        ImmutableExpression newExpression = termFactory.getStrictEquality(terms.get(0), decodedConstant);
+
+        return newExpression.evaluate(termFactory, variableNullability)
+                .getEvaluationResult(newExpression, true);
     }
 }

@@ -132,10 +132,11 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         }
 
         @Override
-        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression) {
-            return originalExpression.equals(expression)
-                    ? EvaluationResult.declareSameExpression()
-                    : EvaluationResult.declareSimplifiedExpression(expression);
+        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
+                                                    boolean wasExpressionAlreadyNew) {
+            return (wasExpressionAlreadyNew || (!originalExpression.equals(expression)))
+                    ? EvaluationResult.declareSimplifiedExpression(expression)
+                    : EvaluationResult.declareSameExpression();
         }
     }
 
@@ -165,7 +166,8 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         }
 
         @Override
-        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression) {
+        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
+                                                    boolean wasExpressionAlreadyNew) {
             switch(value) {
                 case TRUE:
                     return EvaluationResult.declareIsTrue();

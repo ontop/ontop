@@ -212,7 +212,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                 "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
 
                 ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
-                return newEvaluation.getEvaluationResult(newExpression);
+                return newEvaluation.getEvaluationResult(newExpression, true);
             }
             else
                 return EvaluationResult.declareIsFalse();
