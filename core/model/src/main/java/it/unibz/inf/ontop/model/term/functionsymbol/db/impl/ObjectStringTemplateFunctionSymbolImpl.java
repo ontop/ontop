@@ -207,10 +207,12 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 ImmutableExpression newExpression = termFactory.getConjunction(
                         IntStream.range(0, getArity())
                                 .boxed()
-                                .map(i -> termFactory.getStrictEquality(terms.get(i), subConstants.get(i))))
+                                .map(i -> termFactory.getStrictEquality(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)), subConstants.get(i))))
                         .orElseThrow(() -> new MinorOntopInternalBugException(
                                 "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
-                return EvaluationResult.declareSimplifiedExpression(newExpression);
+
+                ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
+                return newEvaluation.getEvaluationResult(newExpression);
             }
             else
                 return EvaluationResult.declareIsFalse();
