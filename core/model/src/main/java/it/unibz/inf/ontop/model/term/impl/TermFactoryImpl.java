@@ -300,12 +300,16 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
-		throw new RuntimeException("TODO: implement getFalseOrNullFunctionalTerm()");
+		if (arguments.isEmpty())
+			throw new IllegalArgumentException("Arity must be >= 1");
+		return getImmutableExpression(dbFunctionSymbolFactory.getFalseOrNullFunctionSymbol(arguments.size()), arguments);
 	}
 
 	@Override
 	public ImmutableExpression getTrueOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
-		throw new RuntimeException("TODO: implement getTrueOrNullFunctionalTerm()");
+		if (arguments.isEmpty())
+			throw new IllegalArgumentException("Arity must be >= 1");
+		return getImmutableExpression(dbFunctionSymbolFactory.getTrueOrNullFunctionSymbol(arguments.size()), arguments);
 	}
 
 	@Override
