@@ -31,7 +31,7 @@ public class ExpressionNormalizerImpl implements ExpressionNormalizer {
                 //case AND:
                 //case OR:
                 case EQ:
-                case NEQ:
+                //case NEQ:
                     return normalizeCommutative(functionSymbol, expression.getTerms());
                 default:
                     return normalizeArguments(functionSymbol, expression.getTerms());

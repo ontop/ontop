@@ -253,9 +253,6 @@ public class ExpressionEvaluator {
 				case EQ:
 					return termFactory.getStrictEquality(term.getTerm(0), term.getTerm(1))
 							.simplify(true, variableNullability);
-				case NEQ:
-					return termFactory.getStrictNEquality(term.getTerm(0), term.getTerm(1))
-							.simplify(true, variableNullability);
 				case IS_NULL:
 					return evalIsNullNotNull(term, true, variableNullability);
 				case IS_NOT_NULL:
@@ -553,8 +550,6 @@ public class ExpressionEvaluator {
 				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
 			} else if (functionSymbol == IS_NULL) {
 				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			} else if (functionSymbol == NEQ) {
-				return termFactory.getStrictNEquality(f.getTerm(0), f.getTerm(1));
 			} else if (functionSymbol == EQ) {
 				return termFactory.getStrictEquality(f.getTerm(0), f.getTerm(1));
 			}

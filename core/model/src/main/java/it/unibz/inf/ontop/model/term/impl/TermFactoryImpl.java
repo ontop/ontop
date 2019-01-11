@@ -436,11 +436,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.NEQ, firstTerm, secondTerm);
-	}
-
-	@Override
 	public Expression getFunctionNOT(Term term) {
 		return getExpression(BooleanExpressionOperation.NOT, term);
 	}

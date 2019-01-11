@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
@@ -33,6 +34,9 @@ import static org.junit.Assert.assertEquals;
  * Created by Roman Kontchakov on 02/12/2016.
  */
 public class ExpressionParserTest {
+
+
+    private static final DBBooleanFunctionSymbol NEQ = DB_FS_FACTORY.getDBStrictNEquality(2);
 
     private DBMetadata METADATA;
     private QuotedIDFactory IDFAC;
