@@ -157,8 +157,6 @@ public interface TermFactory {
 
 	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm);
-
 	public Expression getFunctionNOT(Term term);
 
 	public Expression getFunctionAND(Term term1, Term term2);

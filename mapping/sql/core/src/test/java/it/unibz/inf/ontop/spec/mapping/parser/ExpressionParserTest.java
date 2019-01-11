@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
@@ -33,6 +34,9 @@ import static org.junit.Assert.assertEquals;
  * Created by Roman Kontchakov on 02/12/2016.
  */
 public class ExpressionParserTest {
+
+
+    private static final DBBooleanFunctionSymbol NEQ = DB_FS_FACTORY.getDBStrictNEquality(2);
 
     private DBMetadata METADATA;
     private QuotedIDFactory IDFAC;
@@ -290,8 +294,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(
-                EQ,
+        assertEquals(TERM_FACTORY.getFunctionEQ(
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
@@ -416,8 +419,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
-                EQ,
+        assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunctionEQ(
                 v,
                 TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
@@ -543,10 +545,10 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(OR,
-                TERM_FACTORY.getFunction(EQ,
+                TERM_FACTORY.getFunctionEQ(
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
-                TERM_FACTORY.getFunction(EQ,
+                TERM_FACTORY.getFunctionEQ(
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -565,10 +567,10 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(OR,
-                        TERM_FACTORY.getFunction(EQ,
+                        TERM_FACTORY.getFunctionEQ(
                                 v,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
-                        TERM_FACTORY.getFunction(EQ,
+                        TERM_FACTORY.getFunctionEQ(
                                 v,
                                 TERM_FACTORY.getDBConstant("3", dbLongType)))), translation.get(0));
     }
@@ -590,16 +592,16 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getFunction(OR,
                 TERM_FACTORY.getFunctionAND(
-                        TERM_FACTORY.getFunction(EQ,
+                        TERM_FACTORY.getFunctionEQ(
                                 v1,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
-                        TERM_FACTORY.getFunction(EQ,
+                        TERM_FACTORY.getFunctionEQ(
                                 v2,
                                 TERM_FACTORY.getDBConstant("3", dbLongType))),
-                TERM_FACTORY.getFunction(EQ,
+                TERM_FACTORY.getFunctionEQ(
                         v1,
                         TERM_FACTORY.getDBConstant("2", dbLongType)),
-                TERM_FACTORY.getFunction(EQ,
+                TERM_FACTORY.getFunctionEQ(
                         v2,
                         TERM_FACTORY.getDBConstant("4", dbLongType))), translation.get(0));
     }
@@ -1239,8 +1241,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(
-                EQ,
+        assertEquals(TERM_FACTORY.getFunctionEQ(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(true)), translation.get(0));
     }
@@ -1258,8 +1259,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(
-                EQ,
+        assertEquals(TERM_FACTORY.getFunctionEQ(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(false)), translation.get(0));
     }

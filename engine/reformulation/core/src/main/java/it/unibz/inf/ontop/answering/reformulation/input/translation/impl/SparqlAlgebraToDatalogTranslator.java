@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -702,7 +703,19 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunction(REGEX, term1, term2, term3);
             }
             else if (expr instanceof Compare) {
-                BooleanExpressionOperation p = RelationalOperations.get(((Compare) expr).getOperator());
+                final BooleanFunctionSymbol p;
+                DBFunctionSymbolFactory dbFunctionSymbolFactory = functionSymbolFactory.getDBFunctionSymbolFactory();
+
+                switch (((Compare) expr).getOperator()) {
+                    case NE:
+                        p = dbFunctionSymbolFactory.getDBStrictNEquality(2);
+                        break;
+                    case EQ:
+                        p = dbFunctionSymbolFactory.getDBStrictEquality(2);
+                        break;
+                    default:
+                        p = RelationalOperations.get(((Compare) expr).getOperator());
+                }
                 return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
@@ -831,12 +844,10 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private static final ImmutableMap<Compare.CompareOp, BooleanExpressionOperation> RelationalOperations =
 			new ImmutableMap.Builder<Compare.CompareOp, BooleanExpressionOperation>()
-				.put(Compare.CompareOp.EQ, EQ)
 				.put(Compare.CompareOp.GE, GTE)
 				.put(Compare.CompareOp.GT, GT)
 				.put(Compare.CompareOp.LE, LTE)
 				.put(Compare.CompareOp.LT, LT)
-				.put(Compare.CompareOp.NE, NEQ)
 				.build();
 
 	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> NumericalOperations =

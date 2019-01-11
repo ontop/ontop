@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NEQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
 
 /**
@@ -67,7 +66,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
         Stream<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
                 .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
                 .map(Map.Entry::getKey)
-                .map(n -> termFactory.getImmutableExpression(NEQ, term, n));
+                .map(n -> termFactory.getStrictNEquality(term, n));
 
         return termFactory.getConjunction(Stream.concat(
                     Stream.of(termFactory.getImmutableExpression(IS_NOT_NULL, term)),

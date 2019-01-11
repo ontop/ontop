@@ -28,8 +28,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     OR("OR", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
     NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 
-    EQ("EQ", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
-    NEQ("NEQ", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE),
     /*
      * BC: is it defined for IRIs?
      */
@@ -219,8 +217,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     public boolean blocksNegation() {
         switch (this) {
             case OR:
-            case EQ:
-            case NEQ:
             case IS_NULL:
             case IS_NOT_NULL:
                 return false;
@@ -238,10 +234,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
             return termFactory.getImmutableExpression(IS_NULL, subTerms.get(0));
         } else if (this == IS_NULL) {
             return termFactory.getImmutableExpression(IS_NOT_NULL, subTerms.get(0));
-        } else if (this == NEQ) {
-            return termFactory.getImmutableExpression(EQ, subTerms.get(0), subTerms.get(1));
-        } else if (this == EQ) {
-            return termFactory.getImmutableExpression(NEQ, subTerms.get(0), subTerms.get(1));
         }
         else if (this == OR) {
             ImmutableList<ImmutableExpression> negatedArguments = subTerms.stream()

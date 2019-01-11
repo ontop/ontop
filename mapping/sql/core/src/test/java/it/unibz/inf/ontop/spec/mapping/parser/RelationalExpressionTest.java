@@ -17,7 +17,6 @@ import net.sf.jsqlparser.schema.Table;
 import org.junit.Before;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.EQ;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -105,7 +104,7 @@ public class RelationalExpressionTest {
                 RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3),
                 TERM_FACTORY);
 
-        eq = TERM_FACTORY.getFunction(EQ, ImmutableList.of(x, u));
+        eq = TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBStrictEquality(2), ImmutableList.of(x, u));
 
         onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table("P"), "A"));

@@ -186,7 +186,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(EqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.EQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBStrictEquality(2), t1, t2));
         }
 
         @Override
@@ -211,7 +211,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(NotEqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.NEQ, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBStrictNEquality(2), t1, t2));
         }
 
 

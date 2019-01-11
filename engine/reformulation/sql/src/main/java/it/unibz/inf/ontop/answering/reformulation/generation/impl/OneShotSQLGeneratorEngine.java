@@ -233,8 +233,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
 				.put(ExpressionOperation.ROUND, sqladapter.round())
 				.put(ExpressionOperation.RAND, sqladapter.rand())
-				.put(BooleanExpressionOperation.EQ, "%s = %s")
-				.put(BooleanExpressionOperation.NEQ, "%s <> %s")
 				.put(BooleanExpressionOperation.GT, "%s > %s")
 				.put(BooleanExpressionOperation.GTE, "%s >= %s")
 				.put(BooleanExpressionOperation.LT, "%s < %s")
