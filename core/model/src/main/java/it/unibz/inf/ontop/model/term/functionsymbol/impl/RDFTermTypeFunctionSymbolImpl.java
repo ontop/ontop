@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
@@ -80,5 +81,19 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     @Override
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
+    }
+
+    @Override
+    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                   NonNullConstant otherTerm, TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        if (!(otherTerm instanceof RDFTermTypeConstant))
+            throw new MinorOntopInternalBugException("Was expecting the constant to be a RDFTermTypeConstant: " + otherTerm);
+        RDFTermTypeConstant typeConstant = (RDFTermTypeConstant) otherTerm;
+
+        return Optional.ofNullable(conversionMap.inverse().get(typeConstant))
+                .map(c -> termFactory.getStrictEquality(terms.get(0), c))
+                .map(EvaluationResult::declareSimplifiedExpression)
+                .orElseGet(EvaluationResult::declareIsFalse);
     }
 }
