@@ -465,13 +465,6 @@ public class TermFactoryImpl implements TermFactory {
 	public Expression getSQLFunctionLike(Term term1, Term term2) {
 		return getExpression(BooleanExpressionOperation.SQL_LIKE, term1, term2);
 	}
-
-	@Override
-	public Function getFunctionCast(Term term1, Term term2) {
-		// TODO implement cast function
-		return getFunction(ExpressionOperation.QUEST_CAST, term1, term2);
-	}
-
 	
 	@Override
 	public BNode getConstantBNode(String name) {

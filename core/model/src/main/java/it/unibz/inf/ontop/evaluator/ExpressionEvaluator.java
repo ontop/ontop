@@ -230,7 +230,6 @@ public class ExpressionEvaluator {
 				case MINUTES:
 				case SECONDS:
 				case TZ:
-				case QUEST_CAST:
 				case AVG:
 				case SUM:
 				case MAX:

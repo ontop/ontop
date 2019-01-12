@@ -65,8 +65,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE, true),
 	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE, true),
 
-	QUEST_CAST("cast", TermTypeInferenceRules.SECOND_ARG_RULE, RDF_TERM_TYPE, RDF_TERM_TYPE, false), // TODO: refactor
-
 	/*
 	* Set functions (for aggregation)
 	* TODO: consider a non-atomic datatype

@@ -173,11 +173,6 @@ public interface TermFactory {
 	public Expression getSQLFunctionLike(Term term1, Term term2);
 
 
-	/*
-	 * Casting values cast(source-value AS destination-type)
-	 */
-	public Function getFunctionCast(Term term1, Term term2);
-
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification

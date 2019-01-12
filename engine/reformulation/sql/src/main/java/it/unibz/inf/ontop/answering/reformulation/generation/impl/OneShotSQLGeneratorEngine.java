@@ -1160,17 +1160,6 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
-		/*
-		  TODO: replace by a switch
-		 */
-		if (functionSymbol == ExpressionOperation.QUEST_CAST) {
-			String columnName = getSQLString(function.getTerm(0), index, false);
-			String datatype = ((Constant) function.getTerm(1)).getValue();
-			int sqlDatatype = datatype.equals(XMLSchema.STRING.stringValue())
-					? Types.VARCHAR
-					: Types.LONGVARCHAR;
-			return isStringColType(function, index) ? columnName : sqladapter.sqlCast(columnName, sqlDatatype);
-		}
 		if (functionSymbol == ExpressionOperation.REPLACE) {
 			String orig = getSQLString(function.getTerm(0), index, false);
 			String out_str = getSQLString(function.getTerm(1), index, false);
