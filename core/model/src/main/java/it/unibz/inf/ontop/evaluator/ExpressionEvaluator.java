@@ -255,14 +255,6 @@ public class ExpressionEvaluator {
 					return evalIsNullNotNull(term, false, variableNullability);
 				case IS_TRUE:
 					return evalIsTrue(term, variableNullability);
-				case IS_NUMERIC:
-					return evalIsRDFLiteralNumeric(term);
-				case IS_LITERAL:
-					return evalIsLiteral(term);
-				case IS_IRI:
-					return evalIsIri(term, variableNullability);
-				case IS_BLANK:
-					return evalIsBlank(term, variableNullability);
 				case REGEX:
 					return evalRegex(term, variableNullability);
 				case GTE:
@@ -290,97 +282,6 @@ public class ExpressionEvaluator {
 			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
 			// to exploit unification techniques for simplifying equalities
 			return term.simplify(true, variableNullability);
-		}
-	}
-
-	/*
-	 * Expression evaluator for isNumeric() function
-	 */
-
-	private ImmutableTerm evalIsRDFLiteralNumeric(ImmutableFunctionalTerm term) {
-		Optional<TermType> optionalTermType = getTermType(term.getTerm(0));
-		if (!optionalTermType.isPresent())
-			return term;
-
-		boolean isNumeric = optionalTermType
-				.map(t -> t.isA(typeFactory.getAbstractOntopNumericDatatype()))
-				.orElse(false);
-
-		return termFactory.getDBBooleanConstant(isNumeric);
-	}
-
-	/*
-	 * Expression evaluator for isLiteral() function
-	 */
-	private ImmutableTerm evalIsLiteral(ImmutableFunctionalTerm term) {
-		ImmutableTerm innerTerm = term.getTerm(0);
-		if (innerTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) innerTerm;
-			Optional<TermTypeInference> optionalTypeInference = functionalTerm.inferType();
-
-			if (optionalTypeInference.isPresent()) {
-				return optionalTypeInference.get()
-						.getTermType()
-						.map(t -> t.isA(typeFactory.getAbstractRDFSLiteral()))
-						.map(termFactory::getDBBooleanConstant)
-						// Non-fatal error
-						.orElse(null);
-			}
-			// Not determined yet
-			else
-				return term;
-		}
-		else {
-			return term;
-		}
-	}
-
-	/*
-	 * Expression evaluator for isBlank() function
-	 */
-	private ImmutableTerm evalIsBlank(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
-		if (teval instanceof ImmutableFunctionalTerm) {
-			return termFactory.getDBBooleanConstant(isKnownToBeBlank((ImmutableFunctionalTerm) teval));
-		}
-		return term;
-	}
-
-	/*
-	 * Expression evaluator for isIRI() and isURI() function
-	 */
-	private ImmutableTerm evalIsIri(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
-		if (teval instanceof ImmutableFunctionalTerm) {
-			return termFactory.getDBBooleanConstant(isKnownToBeIRI((ImmutableFunctionalTerm) teval));
-		}
-		return term;
-	}
-
-	private boolean isKnownToBeIRI(ImmutableFunctionalTerm functionalTerm) {
-		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
-				&& functionalTerm.getTerm(1).equals(iriConstant);
-	}
-
-	private boolean isKnownToBeBlank(ImmutableFunctionalTerm functionalTerm) {
-		return (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
-				&& functionalTerm.getTerm(1).equals(bnodeConstant);
-	}
-
-	/**
-	 * TODO: return an Optional<TermTypeInference> instead
-	 */
-	private Optional<TermType> getTermType(ImmutableTerm term) {
-		if (term instanceof ImmutableFunctionalTerm) {
-			return term.inferType()
-					.flatMap(TermTypeInference::getTermType);
-		}
-		else if (term instanceof Constant) {
-			return ((Constant) term).getOptionalType();
-		}
-		// Variable
-		else {
-			return Optional.empty();
 		}
 	}
 

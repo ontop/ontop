@@ -635,13 +635,19 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunctionNOT(term);
             }
             else if (expr instanceof IsNumeric) {
-                return termFactory.getFunction(IS_NUMERIC, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_NUMERIC, 1).get(),
+                        term);
             }
             else if (expr instanceof IsLiteral) {
-                return termFactory.getFunction(IS_LITERAL, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1).get(),
+                        term);
             }
             else if (expr instanceof IsURI) {
-                return termFactory.getFunction(IS_IRI, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_IRI, 1).get(),
+                        term);
             }
             else if (expr instanceof Str) {
                 return termFactory.getFunction(
@@ -654,7 +660,9 @@ public class SparqlAlgebraToDatalogTranslator {
                         term);
             }
             else if (expr instanceof IsBNode) {
-                return termFactory.getFunction(IS_BLANK, term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_BLANK, 1).get(),
+                        term);
             }
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
