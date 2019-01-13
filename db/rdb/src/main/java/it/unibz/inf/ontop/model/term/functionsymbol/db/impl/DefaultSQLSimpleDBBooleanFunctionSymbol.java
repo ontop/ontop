@@ -12,8 +12,8 @@ public class DefaultSQLSimpleDBBooleanFunctionSymbol extends AbstractSimpleTyped
 
 
     protected DefaultSQLSimpleDBBooleanFunctionSymbol(String nameInDialect, int arity, DBTermType dbBooleanType,
-                                                      boolean isInjective, DBTermType rootDBTermType) {
-        super(nameInDialect, arity, dbBooleanType, isInjective, rootDBTermType);
+                                                      DBTermType rootDBTermType) {
+        super(nameInDialect, arity, dbBooleanType, false, rootDBTermType);
     }
 
     @Override

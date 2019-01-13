@@ -117,13 +117,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
+    protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         // TODO: avoid if-then-else
         if (isAnd(nameInDialect))
             return createDBAnd(arity);
         else if (isConcat(nameInDialect))
             return createDBConcat(arity);
         return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createRegularBooleanFunctionSymbol(String nameInDialect, int arity) {
+        return new DefaultSQLSimpleDBBooleanFunctionSymbol(nameInDialect, arity, dbBooleanType, abstractRootDBType);
     }
 
     protected boolean isConcat(String nameInDialect) {

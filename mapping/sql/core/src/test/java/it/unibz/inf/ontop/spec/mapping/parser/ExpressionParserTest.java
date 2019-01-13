@@ -1297,7 +1297,10 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
     }
 
-    @Test(expected = InvalidSelectQueryRuntimeException.class)
+    /**
+     * Not recognized
+     */
+    @Test
     public void function_REGEXP_LIKE_4_Test() throws JSQLParserException {
         String sql = "SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')";
 
@@ -1306,6 +1309,8 @@ public class ExpressionParserTest {
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         ImmutableList<Function> translation = parser.parseBooleanExpression(getWhereExpression(sql));
+
+        System.out.println(translation);
     }
 
     @Test

@@ -40,11 +40,11 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         table.put(UUID_STR, 0, uiidFunctionSymbol);
 
         DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                false, abstractRootDBType);
+                abstractRootDBType);
         table.put(REGEXP_LIKE_STR, 2, regexpLike2);
 
         DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                false, abstractRootDBType);
+                abstractRootDBType);
         table.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
         return ImmutableTable.copyOf(table);
