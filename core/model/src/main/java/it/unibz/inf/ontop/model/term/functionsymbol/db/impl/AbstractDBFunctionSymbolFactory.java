@@ -78,9 +78,21 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBTermType dbBooleanType;
 
     /**
-     * Name (in the DB dialect), arity -> regular DBFunctionSymbol
+     * Name (in the DB dialect), arity -> predefined DBFunctionSymbol
      */
-    private final Table<String, Integer, DBFunctionSymbol> regularFunctionTable;
+    private final ImmutableTable<String, Integer, DBFunctionSymbol> predefinedFunctionTable;
+
+    /**
+     * Name (in the DB dialect), arity -> not predefined untyped DBFunctionSymbol
+     */
+    private final Table<String, Integer, DBFunctionSymbol> untypedFunctionTable;
+
+    /**
+     * Name (in the DB dialect), arity -> DBBooleanFunctionSymbol
+     *
+     * Only for boolean function symbols that are not predefined but created on-the-fly
+     */
+    private final Table<String, Integer, DBBooleanFunctionSymbol> notPredefinedBooleanFunctionTable;
 
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
@@ -99,7 +111,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
-        this.regularFunctionTable = HashBasedTable.create(defaultRegularFunctionTable);
+        this.predefinedFunctionTable = defaultRegularFunctionTable;
+        this.untypedFunctionTable = HashBasedTable.create();
+        this.notPredefinedBooleanFunctionTable = HashBasedTable.create();
         this.caseMap = new HashMap<>();
         this.strictEqMap = new HashMap<>();
         this.strictNEqMap = new HashMap<>();
@@ -168,12 +182,40 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity) {
         String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
 
-        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(regularFunctionTable.get(canonicalName, arity));
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedFunctionTable.get(canonicalName, arity))
+                .map(Optional::of)
+                .orElseGet(() -> Optional.ofNullable(untypedFunctionTable.get(canonicalName, arity)));
+
+        // NB: we don't look inside notPredefinedBooleanFunctionTable to avoid enforcing the boolean type
+
         if (optionalSymbol.isPresent())
             return optionalSymbol.get();
 
-        DBFunctionSymbol symbol = createRegularFunctionSymbol(canonicalName, arity);
-        regularFunctionTable.put(canonicalName, arity, symbol);
+        DBFunctionSymbol symbol = createRegularUntypedFunctionSymbol(canonicalName, arity);
+        untypedFunctionTable.put(canonicalName, arity, symbol);
+        return symbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity) {
+        String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
+
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedFunctionTable.get(canonicalName, arity))
+                .map(Optional::of)
+                .orElseGet(() -> Optional.ofNullable(notPredefinedBooleanFunctionTable.get(canonicalName, arity)));
+
+        // NB: we don't look inside untypedFunctionTable as they are not declared as boolean
+
+        if (optionalSymbol.isPresent()) {
+            DBFunctionSymbol functionSymbol = optionalSymbol.get();
+            if (functionSymbol instanceof DBBooleanFunctionSymbol)
+                return (DBBooleanFunctionSymbol) functionSymbol;
+            else
+                throw new IllegalArgumentException(nameInDialect + " is known not to be a boolean function symbol");
+        }
+
+        DBBooleanFunctionSymbol symbol = createRegularBooleanFunctionSymbol(canonicalName, arity);
+        notPredefinedBooleanFunctionTable.put(canonicalName, arity, symbol);
         return symbol;
     }
 
@@ -260,7 +302,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return nameInDialect.toUpperCase();
     }
 
-    protected abstract DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity);
+    protected abstract DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity);
+
+    protected abstract DBBooleanFunctionSymbol createRegularBooleanFunctionSymbol(String nameInDialect, int arity);
 
     protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType);
 

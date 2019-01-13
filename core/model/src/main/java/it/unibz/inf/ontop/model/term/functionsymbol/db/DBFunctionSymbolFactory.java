@@ -51,6 +51,8 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
 
+    DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity);
+
     /**
      * IF THEN, ELSE IF ..., ELSE
      *
@@ -106,4 +108,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBContains();
 
     DBFunctionSymbol getDBUUIDFunctionSymbol();
+
+    DBBooleanFunctionSymbol getDBRegexpMatches2();
+    DBBooleanFunctionSymbol getDBRegexpMatches3();
 }

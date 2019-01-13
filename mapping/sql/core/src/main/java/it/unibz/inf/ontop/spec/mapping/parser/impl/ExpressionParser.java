@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -237,7 +239,8 @@ public class ExpressionParser {
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, (t1, t2) ->  termFactory.getFunction(BooleanExpressionOperation.REGEX, t1, t2, flags));
+            process(expression, (t1, t2) ->  termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(),
+                    t1, t2, flags));
         }
 
         // POSIX Regular Expressions
@@ -268,7 +271,7 @@ public class ExpressionParser {
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->
-                    not.apply(termFactory.getFunction(BooleanExpressionOperation.REGEX, t1, t2, flags)));
+                    not.apply(termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags)));
         }
 
 
@@ -400,13 +403,11 @@ public class ExpressionParser {
                     .build()
                     : ImmutableList.of();
 
-            BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
-                    = BOOLEAN_FUNCTIONS.get(expression.getName().toUpperCase());
+            DBBooleanFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBBooleanFunctionSymbol(
+                    expression.getName(),
+                    terms.size());
 
-            if (function == null)
-                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-
-            result = ImmutableList.of(function.apply(terms, expression));
+            result = ImmutableList.of(termFactory.getExpression(functionSymbol, terms));
         }
 
 
@@ -1167,27 +1168,6 @@ public class ExpressionParser {
             .put("JSON_POPULATE_RECORDSET", this::reject)
             .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
-
-    private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
-            BOOLEAN_FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
-            .put("REGEXP_LIKE", this::get_REGEXP_LIKE)
-            .build();
-
-    private Function get_REGEXP_LIKE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        // Oracle only:
-        // a source string, a regex pattern (POSIX regular expression), an optional flags
-        switch (terms.size()) {
-            case 2:
-                return termFactory.getFunction(
-                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), termFactory.getDBStringConstant(""));
-            case 3:
-                // check the flag?
-                return termFactory.getFunction(
-                        BooleanExpressionOperation.REGEX, terms.get(0), terms.get(1), terms.get(2));
-        }
-        throw new InvalidSelectQueryRuntimeException("Wrong number of arguments for SQL function", expression);
-    }
-
 
     private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {

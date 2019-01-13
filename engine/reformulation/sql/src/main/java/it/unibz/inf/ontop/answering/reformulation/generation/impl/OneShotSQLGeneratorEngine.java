@@ -664,18 +664,6 @@ public class OneShotSQLGeneratorEngine {
 		else if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
 			return effectiveBooleanValue(atom.getTerm(0), index);
 		}
-		else if (functionSymbol == BooleanExpressionOperation.REGEX) {
-			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
-			if (atom.getArity() == 3) {
-				String options = atom.getTerm(2).toString();
-				caseinSensitive = options.contains("i");
-				multiLine = options.contains("m");
-				dotAllMode = options.contains("s");
-			}
-			String column = getSQLString(atom.getTerm(0), index, false);
-			String pattern = getSQLString(atom.getTerm(1), index, false);
-			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
-		}
 		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(atom.getTerms(),
 					// TODO: try to get rid of useBrackets
@@ -1137,18 +1125,6 @@ public class OneShotSQLGeneratorEngine {
 		}
 		if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
 			return effectiveBooleanValue(function.getTerm(0), index);
-		}
-		if (functionSymbol == BooleanExpressionOperation.REGEX) {
-			boolean caseinSensitive = false, multiLine = false, dotAllMode = false;
-			if (function.getArity() == 3) {
-				String options = function.getTerm(2).toString();
-				caseinSensitive = options.contains("i");
-				multiLine = options.contains("m");
-				dotAllMode = options.contains("s");
-			}
-			String column = getSQLString(function.getTerm(0), index, false);
-			String pattern = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
 		if (functionSymbol == ExpressionOperation.YEAR) {
 			String literal = getSQLString(function.getTerm(0), index, false);

@@ -53,7 +53,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBFunctionSymbol createRegularFunctionSymbol(String nameInDialect, int arity) {
+    protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:
                 return createDBAnd(arity);
@@ -66,6 +66,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
                                 .map(i -> abstractRootDBType)
                                 .collect(ImmutableCollectors.toList()));
         }
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createRegularBooleanFunctionSymbol(String nameInDialect, int arity) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     private DBFunctionSymbol createDBAnd(int arity) {
@@ -176,6 +181,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBFunctionSymbol getDBUUIDFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

@@ -7,6 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UUID_STR = "RANDOM_UUID";
+    private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -28,6 +30,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
@@ -35,6 +38,15 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         DBFunctionSymbol uiidFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UUID_STR, 0, dbStringType,
                 false, abstractRootDBType);
         table.put(UUID_STR, 0, uiidFunctionSymbol);
+
+        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
+
+        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
+
         return ImmutableTable.copyOf(table);
     }
 
@@ -50,5 +62,15 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     public DBFunctionSymbol getDBUUIDFunctionSymbol() {
         return getRegularDBFunctionSymbol(UUID_STR, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 }

@@ -6,29 +6,32 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
-import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
     private final RDFDatatype xsdStringType;
+    private final RDFDatatype xsdBooleanType;
 
-    protected ReplaceSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType) {
-        super("SP_REPLACE_" + arity, XPathFunction.REPLACE,
+    protected RegexSPARQLFunctionSymbolImpl(int arity, RDFDatatype xsdStringType, RDFDatatype xsdBooleanType) {
+        super("SP_REGEX_" + arity, SPARQL.REGEX,
                 IntStream.range(0, arity)
                         .boxed()
                         .map(i -> xsdStringType)
                         .collect(ImmutableCollectors.toList()));
         this.xsdStringType = xsdStringType;
+        this.xsdBooleanType = xsdBooleanType;
 
-        if (arity < 3 || arity > 4)
-            throw new IllegalArgumentException("The arity of REPLACE must be 3 or 4");
+        if (arity < 2 || arity > 3)
+            throw new IllegalArgumentException("The arity of REGEX must be 2 or 3");
     }
 
     /**
@@ -37,20 +40,18 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        return getArity() == 3
-                ? termFactory.getDBReplace(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2))
-                : termFactory.getDBRegexpReplace(subLexicalTerms.get(0), subLexicalTerms.get(1),
-                    subLexicalTerms.get(2), subLexicalTerms.get(3));
+        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
+
+        return termFactory.getDBCastFunctionalTerm(
+                dbTypeFactory.getDBBooleanType(),
+                dbTypeFactory.getDBStringType(),
+                termFactory.getDBRegexpMatches(subLexicalTerms));
     }
 
-    /**
-     * Not clear in the SPARQL specification. Return the type of the first argument or XSD.STRING?
-     * TODO: clarify
-     */
     @Override
     protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                             VariableNullability variableNullability) {
-        return typeTerms.get(0);
+        return termFactory.getRDFTermTypeConstant(xsdBooleanType);
     }
 
     @Override
@@ -60,10 +61,7 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return terms.get(0).inferType()
-                .filter(i -> i.getTermType()
-                        .map(t -> t.isA(xsdStringType))
-                        .orElse(false));
+        return Optional.of(TermTypeInference.declareTermType(xsdBooleanType));
     }
 
     @Override
