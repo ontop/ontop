@@ -1150,13 +1150,6 @@ public class OneShotSQLGeneratorEngine {
 			String pattern = getSQLString(function.getTerm(1), index, false);
 			return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
 		}
-		if (functionSymbol == ExpressionOperation.REPLACE) {
-			String orig = getSQLString(function.getTerm(0), index, false);
-			String out_str = getSQLString(function.getTerm(1), index, false);
-			String in_str = getSQLString(function.getTerm(2), index, false);
-			// TODO: handle flags
-			return sqladapter.strReplace(orig, out_str, in_str);
-		}
 		if (functionSymbol == ExpressionOperation.YEAR) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateYear(literal);

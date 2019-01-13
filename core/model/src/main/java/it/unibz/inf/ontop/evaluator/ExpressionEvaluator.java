@@ -214,7 +214,6 @@ public class ExpressionEvaluator {
 				case RAND:
 				case STRBEFORE:
 				case STRAFTER:
-				case REPLACE:
 				case MD5:
 				case SHA1:
 				case SHA512:

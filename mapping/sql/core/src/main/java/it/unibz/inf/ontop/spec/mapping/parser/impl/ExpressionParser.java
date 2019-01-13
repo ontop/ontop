@@ -1153,8 +1153,6 @@ public class ExpressionParser {
 
     private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
             FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
-            .put("REGEXP_REPLACE", this::get_REGEXP_REPLACE)
-            .put("REPLACE", this::get_REPLACE)
             .put("RAND", this::get_RAND)
             // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
             .put("CONVERT", this::reject)
@@ -1190,53 +1188,6 @@ public class ExpressionParser {
         throw new InvalidSelectQueryRuntimeException("Wrong number of arguments for SQL function", expression);
     }
 
-    private Function get_REGEXP_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        Term flags;
-        switch (terms.size()) {
-            case 3:
-                // either Oracle or PostgreSQL, without flags
-                flags = termFactory.getDBStringConstant(""); // the 4th argument is flags
-                break;
-            case 4:
-                if (((DBConstant)terms.get(3)).getType().equals(dbTypeFactory.getDBStringType())) {
-                    // PostgreSQL
-                    flags =  terms.get(3);
-                    // check that flags is either ig or g
-                }
-                else
-                    throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-                break;
-            case 6:
-                // Oracle
-                if (!terms.get(3).equals(termFactory.getDBConstant("1", dbTypeFactory.getDBLargeIntegerType()))
-                        || !terms.get(4).equals(termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType())))
-                    throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-
-                // check that the flags is a combination of imx
-                flags = terms.get(5);
-                break;
-            default:
-                throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
-        }
-
-        return termFactory.getFunction(
-                ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
-    }
-
-    private Function get_REPLACE(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
-        Term flags = termFactory.getDBStringConstant("");
-        switch (terms.size()) {
-            case 2:
-                return termFactory.getFunction(
-                        ExpressionOperation.REPLACE, terms.get(0), terms.get(1),
-                        termFactory.getDBStringConstant(""), flags);
-            case 3:
-                return termFactory.getFunction(
-                        ExpressionOperation.REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
-
-        }
-        throw new InvalidSelectQueryRuntimeException("Wrong number of arguments in SQL function", expression);
-    }
 
     private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {

@@ -659,12 +659,12 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace3(), text, from, to);
     }
 
 	@Override
 	public ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement, ImmutableTerm flags) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRegexpReplace(), arg, pattern, replacement, flags);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRegexpReplace4(), arg, pattern, replacement, flags);
 	}
 
 	@Override

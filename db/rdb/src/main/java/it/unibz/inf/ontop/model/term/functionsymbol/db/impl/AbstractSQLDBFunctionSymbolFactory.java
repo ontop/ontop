@@ -78,9 +78,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         builder.put(LOWER_STR, 1, lowerFunctionSymbol);
         builder.put(LCASE_STR, 1, lowerFunctionSymbol);
 
-        DBFunctionSymbol replaceFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REPLACE_STR, 3, dbStringType,
+
+        DBFunctionSymbol replace3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REPLACE_STR, 3, dbStringType,
                 false, abstractRootDBType);
-        builder.put(REPLACE_STR, 3, replaceFunctionSymbol);
+        builder.put(REPLACE_STR, 3, replace3FunctionSymbol);
+
+        DBFunctionSymbol regexpReplace3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REGEXP_REPLACE_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(REGEXP_REPLACE_STR, 3, regexpReplace3FunctionSymbol);
+
+        DBFunctionSymbol regexpReplace4FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(REGEXP_REPLACE_STR, 4, dbStringType,
+                false, abstractRootDBType);
+        builder.put(REGEXP_REPLACE_STR, 4, regexpReplace4FunctionSymbol);
 
         DBFunctionSymbol subString2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 2, dbStringType,
                 false, abstractRootDBType);
@@ -185,12 +194,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBFunctionSymbol getDBReplace() {
+    public DBFunctionSymbol getDBReplace3() {
         return getRegularDBFunctionSymbol(REPLACE_STR, 3);
     }
 
     @Override
-    public DBFunctionSymbol getDBRegexpReplace() {
+    public DBFunctionSymbol getDBRegexpReplace4() {
         return getRegularDBFunctionSymbol(REGEXP_REPLACE_STR, 4);
     }
 

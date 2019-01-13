@@ -1321,9 +1321,8 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 3), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
-                TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBStringConstant("")), translation);
     }
 
@@ -1339,12 +1338,15 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
+    /**
+     * Not recognized
+     */
     @Test
     public void function_REGEXP_REPLACE_6_Test() throws JSQLParserException {
         String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i')  AS A FROM DUMMY";
@@ -1356,14 +1358,12 @@ public class ExpressionParserTest {
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
-
-        assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
-                TERM_FACTORY.getDBStringConstant(""),
-                TERM_FACTORY.getDBStringConstant("i")), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    /**
+     * Not recognized
+     */
+    @Test
     public void function_REGEXP_REPLACE_6a_Test() throws JSQLParserException {
         String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 2, 0, 'i')  AS A FROM DUMMY";
 
@@ -1374,7 +1374,10 @@ public class ExpressionParserTest {
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    /**
+     * Not recognized
+     */
+    @Test
     public void function_REGEXP_REPLACE_7_Test() throws JSQLParserException {
         String sql = "SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i', '')  AS A FROM DUMMY";
 
@@ -1385,6 +1388,11 @@ public class ExpressionParserTest {
         Term translation = parser.parseTerm(getExpression(sql));
     }
 
+    /**
+     * Not recognized
+     *
+     * Does it makes sense in the first place? Which DB supports it?
+     */
     @Test
     public void function_REPLACE_Test() throws JSQLParserException {
         String sql = "SELECT REPLACE(X,'J') AS A FROM DUMMY";
@@ -1396,11 +1404,6 @@ public class ExpressionParserTest {
         Term translation = parser.parseTerm(getExpression(sql));
 
         System.out.println(translation);
-
-        assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
-                TERM_FACTORY.getDBStringConstant("J"),
-                TERM_FACTORY.getDBStringConstant(""),
-                TERM_FACTORY.getDBStringConstant("")), translation);
     }
 
     @Test
@@ -1415,13 +1418,12 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REPLACE, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBReplace3(), v,
                 TERM_FACTORY.getDBStringConstant("J"),
-                TERM_FACTORY.getDBStringConstant("BL"),
-                TERM_FACTORY.getDBStringConstant("")), translation);
+                TERM_FACTORY.getDBStringConstant("BL")), translation);
     }
 
-    @Test(expected = InvalidSelectQueryRuntimeException.class)
+    @Test
     public void function_REPLACE_4_Test() throws JSQLParserException {
         String sql = "SELECT REPLACE(X, 'J', 'BL', 'i')  AS A FROM DUMMY";
 
@@ -1430,6 +1432,8 @@ public class ExpressionParserTest {
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
+
+        System.out.println(translation);
     }
 
     @Test
