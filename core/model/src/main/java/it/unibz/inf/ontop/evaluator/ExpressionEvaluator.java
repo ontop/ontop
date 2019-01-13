@@ -206,8 +206,6 @@ public class ExpressionEvaluator {
 				case MULTIPLY:
 				case DIVIDE:
 					throw new RuntimeException("Refactor numeric operation evaluation");
-				case UUID:
-				case STRUUID:
 				case MINUS:
 				case ABS:
 				case ROUND:

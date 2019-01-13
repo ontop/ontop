@@ -12,4 +12,7 @@ public class SPARQL {
     public static final String IS_BLANK = "isBlank";
     public static final String IS_LITERAL = "isLiteral";
     public static final String IS_NUMERIC = "isNumeric";
+    public static final String STRUUID = "STRUUID";
+    public static final String UUID = "UUID";
+
 }

@@ -441,4 +441,6 @@ public interface TermFactory {
     VariableNullability createDummyVariableNullability(ImmutableFunctionalTerm functionalTerm);
 
     ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
+
+	ImmutableFunctionalTerm getDBUUID();
 }

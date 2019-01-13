@@ -244,17 +244,7 @@ public class OneShotSQLGeneratorEngine {
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
 				.put(BooleanExpressionOperation.SQL_LIKE, "%s LIKE %s")
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
-
-		try {
-			builder.put(ExpressionOperation.STRUUID, sqladapter.strUuid());
-		} catch (UnsupportedOperationException e) {
-			// ignore
-		}
-		try {
-			builder.put(ExpressionOperation.UUID, sqladapter.uuid());
-		} catch (UnsupportedOperationException e) {
-			// ignore
-		}
+		
 		return builder.build();
 	}
 

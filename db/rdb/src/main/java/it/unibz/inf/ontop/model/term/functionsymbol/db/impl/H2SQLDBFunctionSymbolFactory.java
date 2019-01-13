@@ -8,11 +8,15 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+
+    private static final String UUID_STR = "RANDOM_UUID";
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -22,9 +26,15 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(
             TypeFactory typeFactory) {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        DBTermType dbStringType = dbTypeFactory.getDBStringType();
+        DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
-        // ...
+        DBFunctionSymbol uiidFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UUID_STR, 0, dbStringType,
+                false, abstractRootDBType);
+        table.put(UUID_STR, 0, uiidFunctionSymbol);
         return ImmutableTable.copyOf(table);
     }
 
@@ -35,5 +45,10 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return String.format("(POSITION(%s,%s) > 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
+        return getRegularDBFunctionSymbol(UUID_STR, 0);
     }
 }

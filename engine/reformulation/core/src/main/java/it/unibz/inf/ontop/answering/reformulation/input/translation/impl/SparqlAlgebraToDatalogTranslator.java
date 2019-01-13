@@ -818,8 +818,6 @@ public class SparqlAlgebraToDatalogTranslator {
                      */
                     .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
                     .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)
-                    .put("UUID", UUID)
-                    .put("STRUUID", STRUUID)
                     /*
                      * Numerical functions
                      */

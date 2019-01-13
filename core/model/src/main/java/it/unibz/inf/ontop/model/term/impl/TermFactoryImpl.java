@@ -410,7 +410,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFDatatypeStringFunctionSymbol(), rdfTypeTerm);
     }
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getDBUUID() {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUUIDFunctionSymbol());
+	}
+
+	@Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

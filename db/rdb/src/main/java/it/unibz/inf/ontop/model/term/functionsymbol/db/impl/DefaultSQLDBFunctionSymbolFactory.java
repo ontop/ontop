@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.function.Function;
@@ -23,4 +24,11 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                         "Please specific it in your dialect factory");
     }
 
+    @Override
+    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
+        throw new UnsupportedOperationException(
+                "Not supported in the Default SQL factory since no-one uses " +
+                        "the old official standard function.\n" +
+                        "Please specific it in your dialect factory");
+    }
 }

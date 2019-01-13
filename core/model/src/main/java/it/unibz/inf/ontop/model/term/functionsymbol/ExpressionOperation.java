@@ -59,11 +59,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	SECONDS("SECONDS", TermTypeInferenceRules.PREDEFINED_DECIMAL_RULE, XSD_DATETIME_DT, false),
 	TZ("TZ", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_DATETIME_DT, false),
 
-	/* SPARQL built-in functions */
-
-	UUID("UUID", TermTypeInferenceRules.PREDEFINED_IRI_RULE, true),
-	STRUUID("STRUUID", TermTypeInferenceRules.PREDEFINED_STRING_RULE, true),
-
 	/*
 	* Set functions (for aggregation)
 	* TODO: consider a non-atomic datatype

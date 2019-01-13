@@ -102,4 +102,6 @@ public interface DBFunctionSymbolFactory {
      * Arity 2, first argument is the string in which to search, second argument is subString
      */
     DBBooleanFunctionSymbol getDBContains();
+
+    DBFunctionSymbol getDBUUIDFunctionSymbol();
 }

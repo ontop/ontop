@@ -169,4 +169,9 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
+    @Override
+    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
 }
