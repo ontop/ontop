@@ -177,6 +177,27 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return symbol;
     }
 
+    /**
+     * TODO: improve it
+     */
+    @Override
+    public DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity) {
+        String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
+
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(regularFunctionTable.get(canonicalName, arity));
+
+        if (optionalSymbol.isPresent()) {
+            DBFunctionSymbol functionSymbol = optionalSymbol.get();
+            if (functionSymbol instanceof DBBooleanFunctionSymbol)
+                return (DBBooleanFunctionSymbol) functionSymbol;
+            else
+                // TODO: refactor
+                throw new RuntimeException(nameInDialect + " is not known to be a boolean function symbol");
+        }
+        else
+            throw new RuntimeException("Unknown boolean function symbols are not yet supported.");
+    }
+
     @Override
     public DBFunctionSymbol getDBCase(int arity) {
         if ((arity < 3) || (arity % 2 == 0))

@@ -251,8 +251,6 @@ public class ExpressionEvaluator {
 					return evalIsNullNotNull(term, false, variableNullability);
 				case IS_TRUE:
 					return evalIsTrue(term, variableNullability);
-				case REGEX:
-					return evalRegex(term, variableNullability);
 				case GTE:
 				case GT:
 				case LTE:
@@ -280,47 +278,6 @@ public class ExpressionEvaluator {
 			return term.simplify(true, variableNullability);
 		}
 	}
-
-	private ImmutableTerm evalRegex(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-//
-		ImmutableTerm eval1 = term.getTerm(0);
-		eval1 = evalRegexSingleExpression(eval1, variableNullability);
-
-        ImmutableTerm eval2 = term.getTerm(1);
-		eval2 = evalRegexSingleExpression(eval2, variableNullability);
-
-        ImmutableTerm eval3 = term.getTerm(2);
-        eval3 = evalRegexSingleExpression(eval3, variableNullability);
-
-        if(eval1.equals(valueFalse)
-                || eval2.equals(valueFalse)
-                || eval3.equals(valueFalse))
-        {
-            return valueFalse;
-        }
-
-        return termFactory.getImmutableFunctionalTerm(term.getFunctionSymbol(), eval1, eval2, term.getTerm(2));
-
-	}
-
-	private ImmutableTerm evalRegexSingleExpression(ImmutableTerm expr, VariableNullability variableNullability){
-
-        if (expr instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm function1 = (ImmutableFunctionalTerm) expr;
-            FunctionSymbol functionSymbol1 = function1.getFunctionSymbol();
-            if((functionSymbol1 instanceof RDFTermFunctionSymbol)
-                    && (function1.getTerm(1).equals(iriConstant)
-						|| function1.getTerm(1).equals(bnodeConstant))) {
-                return valueFalse;
-            }
-			ImmutableTerm evaluatedExpression = eval(expr, variableNullability);
-			return expr.equals(evaluatedExpression)
-					? expr
-					: evalRegexSingleExpression(evaluatedExpression, variableNullability);
-        }
-        return expr;
-
-    }
 
 	/**
 	 * Temporary: allows to use eval() on the condition

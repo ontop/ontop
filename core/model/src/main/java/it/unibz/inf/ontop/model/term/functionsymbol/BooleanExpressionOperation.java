@@ -42,8 +42,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
     /* SPARQL built-in predicates */
 
-    REGEX("regex", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-
     // ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
     SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT);
 

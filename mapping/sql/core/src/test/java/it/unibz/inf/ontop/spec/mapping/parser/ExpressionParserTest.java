@@ -728,7 +728,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("")), translation.get(0));
@@ -747,7 +747,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
@@ -765,7 +765,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -784,7 +784,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant("i"))), translation.get(0));
@@ -803,7 +803,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
@@ -821,7 +821,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("")), translation.get(0));
@@ -840,7 +840,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant("i"))), translation.get(0));
@@ -858,7 +858,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -877,7 +877,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("")), translation.get(0));
@@ -895,7 +895,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -914,7 +914,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
@@ -933,7 +933,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(REGEX,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
                         TERM_FACTORY.getDBStringConstant("i"))), translation.get(0));
@@ -1276,9 +1276,8 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX, v,
-                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
-                TERM_FACTORY.getDBStringConstant("")), translation.get(0));
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(), v,
+                TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$")), translation.get(0));
     }
 
     @Test
@@ -1293,7 +1292,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(REGEX, v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
     }

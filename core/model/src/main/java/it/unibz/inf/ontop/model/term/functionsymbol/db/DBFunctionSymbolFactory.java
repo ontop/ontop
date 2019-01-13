@@ -51,6 +51,8 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
 
+    DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity);
+
     /**
      * IF THEN, ELSE IF ..., ELSE
      *
