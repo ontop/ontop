@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -1665,7 +1666,9 @@ public class NormalizationTest {
     }
 
     private ImmutableFunctionalTerm createInjectiveFunctionalTerm2(ImmutableTerm term) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(ENCODE_FOR_URI, term);
+        return TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(XPathFunction.ENCODE_FOR_URI.getIRIString(), 1).get(),
+                term);
     }
 
     private ImmutableFunctionalTerm createIfIsNotNullElseNull(Variable rightSpecificVariable, ImmutableTerm value) {

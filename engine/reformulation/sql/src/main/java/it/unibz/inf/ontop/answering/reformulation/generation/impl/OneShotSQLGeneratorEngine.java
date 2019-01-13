@@ -1195,10 +1195,6 @@ public class OneShotSQLGeneratorEngine {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateTZ(literal);
 		}
-		if (functionSymbol == ExpressionOperation.ENCODE_FOR_URI) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.iriSafeEncode(literal);
-		}
 		if (functionSymbol == ExpressionOperation.MD5) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.MD5(literal);
