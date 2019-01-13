@@ -662,7 +662,12 @@ public class TermFactoryImpl implements TermFactory {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
     }
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement, ImmutableTerm flags) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRegexpReplace(), arg, pattern, replacement, flags);
+	}
+
+	@Override
     public ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBStartsWith(), terms);
     }

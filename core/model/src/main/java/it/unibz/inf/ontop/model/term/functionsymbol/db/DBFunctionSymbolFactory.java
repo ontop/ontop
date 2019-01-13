@@ -66,6 +66,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBReplace();
 
+    DBFunctionSymbol getDBRegexpReplace();
+
     DBFunctionSymbol getDBSubString2();
 
     DBFunctionSymbol getDBSubString3();

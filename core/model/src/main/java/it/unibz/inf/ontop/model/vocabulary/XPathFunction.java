@@ -16,6 +16,7 @@ public class XPathFunction {
     public static final IRI SUBSTRING;
     public static final IRI STRING_LENGTH;
     public static final IRI ENCODE_FOR_URI;
+    public static final IRI REPLACE;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -28,5 +29,6 @@ public class XPathFunction {
         SUBSTRING = factory.createIRI(PREFIX + "substring");
         STRING_LENGTH = factory.createIRI(PREFIX + "string-length");
         ENCODE_FOR_URI = factory.createIRI(PREFIX + "encode-for-uri");
+        REPLACE = factory.createIRI(PREFIX + "replace");
     }
 }

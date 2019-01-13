@@ -374,6 +374,9 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
 
+	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement,
+											   ImmutableTerm flags);
+
 	ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms);
 	ImmutableExpression getDBEndsWith(ImmutableList<? extends ImmutableTerm> terms);
 	ImmutableExpression getDBContains(ImmutableList<? extends ImmutableTerm> terms);

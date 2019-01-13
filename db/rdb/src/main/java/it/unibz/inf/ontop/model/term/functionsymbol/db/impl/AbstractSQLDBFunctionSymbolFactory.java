@@ -12,6 +12,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String LCASE_STR = "LCASE";
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
+    protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
     protected static final String AND_STR = "AND";
     protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
@@ -186,6 +187,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getDBReplace() {
         return getRegularDBFunctionSymbol(REPLACE_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace() {
+        return getRegularDBFunctionSymbol(REGEXP_REPLACE_STR, 4);
     }
 
     @Override
