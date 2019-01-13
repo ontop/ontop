@@ -778,29 +778,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 return termFactory.getFunction(p, terms);
             }
-
-            // these are all special cases with **variable** number of arguments
-
-            switch (f.getURI()) {
-                // REPLACE (Sec 17.4.3.15)
-                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement )
-                //string literal  REPLACE (string literal arg, simple literal pattern, simple literal replacement,  simple literal flags)
-                case "http://www.w3.org/2005/xpath-functions#replace":
-                    // TODO: the fourth argument is flags (see http://www.w3.org/TR/xpath-functions/#flags)
-                    Term flags;
-                    if (arity == 3)
-                        flags = termFactory.getRDFLiteralConstant("", XSD.STRING);
-                    else if (arity == 4)
-                        flags = terms.get(3);
-                    else
-                        throw new OntopInvalidInputQueryException("Wrong number of arguments (found "
-                                + terms.size() + ", only 3 or 4 supported) for SPARQL function REPLACE");
-
-                    return termFactory.getFunction(REPLACE, terms.get(0), terms.get(1), terms.get(2), flags);
-
-                default:
-                    throw new OntopUnsupportedInputQueryException("Function " + f.getURI() + " is not supported yet!");
-            }
 		}
         // other subclasses
         // SubQueryValueOperator
