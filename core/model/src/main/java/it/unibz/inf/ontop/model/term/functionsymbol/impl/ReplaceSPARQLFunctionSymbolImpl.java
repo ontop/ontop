@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
@@ -79,11 +80,13 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
 
         RDFTermTypeConstant xsdStringConstant = termFactory.getRDFTermTypeConstant(xsdStringType);
 
-        return termFactory.getConjunction(
+        Stream<ImmutableExpression> conditionStream = Stream.concat(
+                Stream.of(termFactory.getIsAExpression(typeTerms.get(0), xsdStringType)),
                 typeTerms.stream()
                         .skip(1)
-                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)))
-                .get()
+                        .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)));
+
+        return termFactory.getConjunction(conditionStream).get()
                 .evaluate(termFactory, variableNullability);
     }
 }
