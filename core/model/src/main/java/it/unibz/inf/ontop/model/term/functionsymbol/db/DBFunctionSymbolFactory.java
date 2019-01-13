@@ -106,4 +106,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBContains();
 
     DBFunctionSymbol getDBUUIDFunctionSymbol();
+
+    DBBooleanFunctionSymbol getDBRegexpMatches2();
+    DBBooleanFunctionSymbol getDBRegexpMatches3();
 }

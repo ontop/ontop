@@ -380,6 +380,7 @@ public interface TermFactory {
 	ImmutableExpression getDBStartsWith(ImmutableList<ImmutableTerm> terms);
 	ImmutableExpression getDBEndsWith(ImmutableList<? extends ImmutableTerm> terms);
 	ImmutableExpression getDBContains(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableExpression getDBRegexpMatches(ImmutableList<ImmutableTerm> terms);
 
 
 	ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term);

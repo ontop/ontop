@@ -179,4 +179,14 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
 }

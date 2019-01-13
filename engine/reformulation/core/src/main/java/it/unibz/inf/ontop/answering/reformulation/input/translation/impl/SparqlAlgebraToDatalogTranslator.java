@@ -706,9 +706,14 @@ public class SparqlAlgebraToDatalogTranslator {
                 // xsd:boolean  REGEX (string literal text, simple literal pattern)
                 // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
                 Regex reg = (Regex) expr;
-                Term term3 = (reg.getFlagsArg() != null) ?
-                        getExpression(reg.getFlagsArg(), variables) : valueNull;
-                return termFactory.getFunction(REGEX, term1, term2, term3);
+                return (reg.getFlagsArg() != null)
+                        ? termFactory.getFunction(
+                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.REGEX, 3).get(),
+                                term1, term2,
+                                getExpression(reg.getFlagsArg(), variables))
+                        : termFactory.getFunction(
+                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.REGEX, 2).get(),
+                                term1, term2);
             }
             else if (expr instanceof Compare) {
                 final BooleanFunctionSymbol p;

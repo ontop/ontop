@@ -682,7 +682,20 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBContains(), terms);
     }
 
-    @Override
+	@Override
+	public ImmutableExpression getDBRegexpMatches(ImmutableList<ImmutableTerm> terms) {
+		int arity = terms.size();
+		if (arity < 2 || arity > 3)
+			throw new IllegalArgumentException("Arity must be 2 or 3");
+
+		BooleanFunctionSymbol functionSymbol = (arity == 2)
+				? dbFunctionSymbolFactory.getDBRegexpMatches2()
+				: dbFunctionSymbolFactory.getDBRegexpMatches3();
+
+		return getImmutableExpression(functionSymbol, terms);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getR2RMLIRISafeEncodeFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getR2RMLIRISafeEncode(), term);
     }
