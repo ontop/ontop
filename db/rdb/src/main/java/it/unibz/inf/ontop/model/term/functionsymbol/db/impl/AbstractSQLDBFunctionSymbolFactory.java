@@ -15,6 +15,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
     protected static final String AND_STR = "AND";
     protected static final String OR_STR = "OR";
+    protected static final String NOT_STR = "NOT";
     protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
@@ -158,6 +159,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected DBBooleanFunctionSymbol createDBOr(int arity) {
         return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
+        return new DefaultDBNotFunctionSymbol(NOT_STR, dbBooleanType);
     }
 
     protected DBFunctionSymbol createDBIfThenElse(DBTermType dbBooleanType, DBTermType abstractRootDBType) {

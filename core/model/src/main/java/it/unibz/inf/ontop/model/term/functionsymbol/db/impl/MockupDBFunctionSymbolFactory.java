@@ -21,6 +21,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private static final String AND_STR = "AND";
     private static final String OR_STR = "OR";
     private static final String CHAR_LENGTH_STR = "CHARLENGTH";
+    private static final String NOT_STR = "NOT";
     private final TermType abstractRootType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
@@ -82,6 +83,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     private DBFunctionSymbol createDBOr(int arity) {
         return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
+        return new DefaultDBNotFunctionSymbol(NOT_STR, dbBooleanType);
     }
 
     private DBFunctionSymbol createDBConcat(int arity) {
