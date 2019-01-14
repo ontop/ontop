@@ -26,6 +26,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
+    private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -129,6 +130,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbEndsWithFunctionSymbol = new DefaultDBStrEndsWithFunctionSymbol(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
+        this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
     }
 
     @Override
@@ -282,7 +284,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
             containsFunctionSymbol = createContainsFunctionSymbol();
         return containsFunctionSymbol;
     }
-    
+
+    @Override
+    public DBBooleanFunctionSymbol getDBLike() {
+        return dbLikeFunctionSymbol;
+    }
+
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbStringType, this::serializeContains);
     }

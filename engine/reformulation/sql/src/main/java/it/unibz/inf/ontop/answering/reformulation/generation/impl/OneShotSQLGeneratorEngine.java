@@ -242,7 +242,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(BooleanExpressionOperation.IS_NULL, "%s IS NULL")
 				.put(BooleanExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
-				.put(BooleanExpressionOperation.SQL_LIKE, "%s LIKE %s")
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
 		
 		return builder.build();

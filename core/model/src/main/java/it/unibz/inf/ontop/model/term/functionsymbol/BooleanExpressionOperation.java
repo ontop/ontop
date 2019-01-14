@@ -38,12 +38,7 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
     IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
-
-    /* SPARQL built-in predicates */
-
-    // ROMAN (23 Dec 2015) THIS COMES ONLY FROM MAPPINGS
-    SQL_LIKE("like", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT);
+    IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE);
 
     // unary operations
     BooleanExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,

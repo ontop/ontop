@@ -465,11 +465,6 @@ public class TermFactoryImpl implements TermFactory {
 	public Expression getFunctionIsNotNull(Term term) {
 		return getExpression(BooleanExpressionOperation.IS_NOT_NULL, term);
 	}
-
-	@Override
-	public Expression getSQLFunctionLike(Term term1, Term term2) {
-		return getExpression(BooleanExpressionOperation.SQL_LIKE, term1, term2);
-	}
 	
 	@Override
 	public BNode getConstantBNode(String name) {

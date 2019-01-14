@@ -223,7 +223,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(LikeExpression expression) {
-            process(expression, (t1, t2) -> termFactory.getSQLFunctionLike(t1, t2));
+            process(expression, (t1, t2) -> termFactory.getExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2));
         }
 
         @Override

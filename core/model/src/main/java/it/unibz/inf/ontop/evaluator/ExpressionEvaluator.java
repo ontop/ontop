@@ -255,7 +255,6 @@ public class ExpressionEvaluator {
 				case GT:
 				case LTE:
 				case LT:
-				case SQL_LIKE:
 					return term;
 				default:
 					throw new RuntimeException(

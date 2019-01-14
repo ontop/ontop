@@ -168,10 +168,6 @@ public interface TermFactory {
 	public Expression getFunctionIsNull(Term term);
 
 	public Expression getFunctionIsNotNull(Term term);
-	
-	// ROMAN (23 Dec 2015): LIKE comes only from mappings
-	public Expression getSQLFunctionLike(Term term1, Term term2);
-
 
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a

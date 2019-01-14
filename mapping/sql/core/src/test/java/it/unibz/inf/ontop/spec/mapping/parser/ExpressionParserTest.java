@@ -693,7 +693,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(SQL_LIKE,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLike(),
                 v,
                 TERM_FACTORY.getDBStringConstant("_A%")), translation.get(0));
     }
@@ -711,7 +711,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(SQL_LIKE,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBLike(),
                         v,
                         TERM_FACTORY.getDBStringConstant("_A%"))), translation.get(0));
     }
