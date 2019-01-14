@@ -28,7 +28,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
     private final DBFunctionSymbol ifElseNullFunctionSymbol;
-    private DBBooleanFunctionSymbol dbNotFunctionSymbol;
+    private final DBNotFunctionSymbol dbNotFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -284,7 +284,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBNot() {
+    public DBNotFunctionSymbol getDBNot() {
         return dbNotFunctionSymbol;
     }
 
@@ -368,7 +368,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBBooleanFunctionSymbol createDBStrictNEquality(int arity);
 
-    protected abstract DBBooleanFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType);
+    protected abstract DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType);
 
     protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
 

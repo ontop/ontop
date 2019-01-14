@@ -98,6 +98,8 @@ public interface TermFactory {
 	 */
 	Optional<ImmutableExpression> getDisjunction(Stream<ImmutableExpression> expressions);
 
+	ImmutableExpression getDBNot(ImmutableExpression expression);
+
 	/**
 	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
 	 *

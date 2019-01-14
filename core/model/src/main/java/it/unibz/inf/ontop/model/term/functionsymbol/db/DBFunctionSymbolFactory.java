@@ -87,14 +87,14 @@ public interface DBFunctionSymbolFactory {
     /**
      * arity must be >= 2
      */
-    DBBooleanFunctionSymbol getDBAnd(int arity);
+    DBAndFunctionSymbol getDBAnd(int arity);
 
     /**
      * arity must be >= 2
      */
-    DBBooleanFunctionSymbol getDBOr(int arity);
+    DBOrFunctionSymbol getDBOr(int arity);
 
-    DBBooleanFunctionSymbol getDBNot();
+    DBNotFunctionSymbol getDBNot();
 
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 

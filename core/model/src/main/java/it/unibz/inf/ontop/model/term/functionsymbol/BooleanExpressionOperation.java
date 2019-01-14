@@ -25,8 +25,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
-
     /*
      * BC: is it defined for IRIs?
      */
@@ -145,16 +143,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         else if (this == IS_NOT_NULL) {
             return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
         }
-        else if (this == NOT) {
-            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
-            if (newTerm instanceof Constant) {
-                return newTerm.isNull()
-                        ? newTerm
-                        : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(false)));
-            }
-            else
-                return termFactory.getImmutableExpression(NOT, newTerm);
-        }
         else
             return termFactory.getImmutableFunctionalTerm(this, terms);
     }
@@ -223,6 +211,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
             return termFactory.getImmutableExpression(IS_NOT_NULL, subTerms.get(0));
         }
         else
-            return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+            return termFactory.getDBNot(termFactory.getImmutableExpression(this, subTerms));
     }
 }

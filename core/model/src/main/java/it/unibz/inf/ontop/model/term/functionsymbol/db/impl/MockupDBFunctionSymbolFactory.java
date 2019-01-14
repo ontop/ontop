@@ -86,7 +86,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
+    protected DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
         return new DefaultDBNotFunctionSymbol(NOT_STR, dbBooleanType);
     }
 
@@ -198,17 +198,17 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBAnd(int arity) {
+    public DBAndFunctionSymbol getDBAnd(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+        return (DBAndFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBOr(int arity) {
+    public DBOrFunctionSymbol getDBOr(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of OR must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+        return (DBOrFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
     }
 
     @Override

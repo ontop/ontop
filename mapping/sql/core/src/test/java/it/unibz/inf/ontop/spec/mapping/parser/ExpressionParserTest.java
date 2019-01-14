@@ -37,6 +37,7 @@ public class ExpressionParserTest {
 
 
     private static final DBBooleanFunctionSymbol NEQ = DB_FS_FACTORY.getDBStrictNEquality(2);
+    private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
 
     private DBMetadata METADATA;
     private QuotedIDFactory IDFAC;

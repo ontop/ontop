@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -106,7 +107,7 @@ public class ExpressionParser {
 
         // cancel double negation
         private Function negation(Function arg) {
-            return (arg.getFunctionSymbol() == BooleanExpressionOperation.NOT)
+            return (arg.getFunctionSymbol() instanceof DBNotFunctionSymbol)
                     ? (Function) arg.getTerm(0)
                     : termFactory.getFunctionNOT(arg);
         }

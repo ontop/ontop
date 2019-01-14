@@ -9,8 +9,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
-
 public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     private final DBTermType dbBooleanTermType;
@@ -30,7 +28,7 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+        return termFactory.getDBNot(termFactory.getImmutableExpression(this, subTerms));
     }
 
     @Override

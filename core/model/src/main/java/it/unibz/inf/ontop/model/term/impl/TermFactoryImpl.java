@@ -290,7 +290,12 @@ public class TermFactoryImpl implements TermFactory {
 				.map(this::getDisjunction);
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getDBNot(ImmutableExpression expression) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNot(), expression);
+    }
+
+    @Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		if (arguments.isEmpty())
 			throw new IllegalArgumentException("Arity must be >= 1");
@@ -449,7 +454,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionNOT(Term term) {
-		return getExpression(BooleanExpressionOperation.NOT, term);
+		return getExpression(dbFunctionSymbolFactory.getDBNot(), term);
 	}
 
 	@Override

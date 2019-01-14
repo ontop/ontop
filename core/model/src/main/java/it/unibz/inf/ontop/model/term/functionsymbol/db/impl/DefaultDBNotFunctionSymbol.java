@@ -6,12 +6,13 @@ import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
 
-public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl {
+public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl implements DBNotFunctionSymbol {
 
     private final String prefix;
 

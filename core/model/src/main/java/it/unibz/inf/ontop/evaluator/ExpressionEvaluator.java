@@ -239,8 +239,7 @@ public class ExpressionEvaluator {
 		}
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
-				case NOT:
-					return evalNot(term, variableNullability);
+
 				case IS_NULL:
 					return evalIsNullNotNull(term, true, variableNullability);
 				case IS_NOT_NULL:
@@ -335,7 +334,7 @@ public class ExpressionEvaluator {
 						functionalTerm.getTerms().stream()
 								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
 				return eval(isnull
-						? termFactory.getImmutableFunctionalTerm(NOT, notNullExpression)
+						? termFactory.getDBNot(notNullExpression)
 						: notNullExpression,
 						variableNullability);
 			}
@@ -400,27 +399,6 @@ public class ExpressionEvaluator {
 			return teval;
 		}
 		return term;
-	}
-
-
-	private ImmutableTerm evalNot(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-		ImmutableTerm initialSubTerm = term.getTerm(0);
-		ImmutableTerm teval = eval(initialSubTerm, variableNullability);
-		if (teval instanceof ImmutableExpression) {
-			return ((ImmutableExpression) teval).negate(termFactory);
-		} else if (teval instanceof Constant) {
-			if (teval == valueFalse)
-				return valueTrue;
-			else if (teval == valueTrue)
-				return valueFalse;
-			else if (teval == valueNull)
-				return teval;
-			// ROMAN (10 Jan 2017): this needs to be revised
-			return teval;
-		}
-		return initialSubTerm.equals(teval)
-				? term
-				: termFactory.getImmutableFunctionalTerm(NOT, teval);
 	}
 
 	/**
