@@ -22,6 +22,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.LT;
 import static junit.framework.TestCase.assertTrue;
 
@@ -36,9 +37,19 @@ public class FlattenLiftTest {
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
 
     private final static Variable A = TERM_FACTORY.getVariable("A");
+    private final static Variable A1 = TERM_FACTORY.getVariable("A1");
+    private final static Variable A2 = TERM_FACTORY.getVariable("A2");
     private final static Variable B = TERM_FACTORY.getVariable("B");
+    private final static Variable B1 = TERM_FACTORY.getVariable("B1");
+    private final static Variable B2 = TERM_FACTORY.getVariable("B2");
     private final static Variable C = TERM_FACTORY.getVariable("C");
+    private final static Variable C1 = TERM_FACTORY.getVariable("C1");
+    private final static Variable C2 = TERM_FACTORY.getVariable("C2");
+    private final static Variable C3 = TERM_FACTORY.getVariable("C3");
+    private final static Variable C4 = TERM_FACTORY.getVariable("C4");
     private final static Variable D = TERM_FACTORY.getVariable("D");
+    private final static Variable D1 = TERM_FACTORY.getVariable("D1");
+    private final static Variable D2 = TERM_FACTORY.getVariable("D2");
     private final static Variable E = TERM_FACTORY.getVariable("E");
     private final static Variable F = TERM_FACTORY.getVariable("F");
     private final static Variable G = TERM_FACTORY.getVariable("G");
@@ -546,6 +557,71 @@ public class FlattenLiftTest {
     @Test
     public void testFlattenLeftJoinBlockingExpression3() throws EmptyQueryException {
         testFlattenLeftJoinBlockingExpression(TERM_FACTORY.getImmutableExpression(LT, Z, E));
+    }
+
+    @Test
+    public void testConsecutiveFlatten() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filter = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(EQ, A1, C3));
+        StrictFlattenNode flatten1 = IQ_FACTORY.createStrictFlattenNode(
+                A,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2),
+                ImmutableList.of(true, true)
+        );
+        StrictFlattenNode flatten2 = IQ_FACTORY.createStrictFlattenNode(
+                B,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2),
+                ImmutableList.of(true, true)
+        );
+        StrictFlattenNode flatten3 = IQ_FACTORY.createStrictFlattenNode(
+                C1,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4),
+                ImmutableList.of(true, true)
+        );
+        StrictFlattenNode flatten4 = IQ_FACTORY.createStrictFlattenNode(
+                D,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2),
+                ImmutableList.of(true, true)
+        );
+        StrictFlattenNode flatten5 = IQ_FACTORY.createStrictFlattenNode(
+                C,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2),
+                ImmutableList.of(true, true)
+        );
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C, D));
+        queryBuilder.addChild(rootNode, filter);
+        queryBuilder.addChild(filter, flatten1);
+        queryBuilder.addChild(flatten1, flatten2);
+        queryBuilder.addChild(flatten2, flatten3);
+        queryBuilder.addChild(flatten3, flatten4);
+        queryBuilder.addChild(flatten4, flatten5);
+        queryBuilder.addChild(flatten5, dataNode);
+
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.addChild(rootNode, flatten2);
+        expectedQueryBuilder.addChild(flatten2, flatten4);
+        expectedQueryBuilder.addChild(flatten4, filter);
+        expectedQueryBuilder.addChild(filter, flatten1);
+        expectedQueryBuilder.addChild(flatten1, flatten3);
+        expectedQueryBuilder.addChild(flatten3, flatten5);
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
     }
 
     private void testFlattenLeftJoinBlockingExpression(ImmutableExpression expression) throws EmptyQueryException {

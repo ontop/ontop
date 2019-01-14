@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 /**
  * Lifts flatten nodes.
  * <p>
- * Difficulty: sequence S of consecutive flatten nodes.
+ * Main difficulty: sequence S of consecutive flatten nodes.
  * <p>
- * Ex: filter(A1 = 2 && C3 =3)
+ * Ex: filter(A1 = C3)
  * flatten1 (A -> [A1,A2])
  * flatten2 (B -> [B1,B2])
  * flatten3 (C1 -> [C3,C4])
@@ -42,23 +42,42 @@ import java.util.stream.Collectors;
  * Solution:
  * - apply the optimization to the child tree first
  * - within S, lift only flatten nodes which can be lifted above the first non-flatten node (in this case, above the filter)
- * - consecutive liftable flatten nodes are lifted together (as a block)
  * <p>
- * Illustration:
- * - do not lift 5 over 4, as 5 is (transitively) not liftable over the filter
- * - then lift 4 over 3
- * - then do not lift 4 over 2, as both are liftable over the filter
- * - then lift 2 and 4 (together) over 1
- * - then lift 2 and 4 (together) over the filter
  * This yields:
  * <p>
  * flatten2 (B -> [B1,B2])
  * flatten4 (D -> [D1,D2])
- * filter(A1 = 2 & C3 =3)
+ * filter(A1 = C3)
  * flatten1 (A -> [A1,A2])
  * flatten3 (C1 -> [C3,C4])
  * flatten5 (C -> [C1,C2])
  * table(A,B,C,D)
+ * <p>
+ * <p>
+ * Another technical aspect is the potential split of boolean expressions.
+ * E.g. in the previous example, let the filter expression be (A1 = 2) && (C3 = 3)
+ * <p>
+ * Then if we split the expression into conjuncts, either flatten1 or (flatten3 and flatten5) can be lifted:
+ * E.g. (lifting flatten 1):
+ * <p>
+ * flatten2 (B -> [B1,B2])
+ * flatten4 (D -> [D1,D2])
+ * filter(A1 = 2)
+ * flatten1 (A -> [A1,A2])
+ * filter(C3 = 3)
+ * flatten3 (C1 -> [C3,C4])
+ * flatten5 (C -> [C1,C2])
+ * table(A,B,C,D)
+ * <p>
+ * The behavior for the different operators is the following:
+ * - inner join: (sequences of) flatten nodes are systematically lifted above the join
+ * Note that this may cause a cross product (TODO: optimize so as to avoid cross products?)
+ * Some conjuncts of the explicit join condition may be lifted above all flatten nodes, as a filter.
+ * Then a lift above the filter is performed, which may split the expression further.
+ * - left join: the explicit join condition is never lifted.
+ * - filter: the expression is split into conjuncts, as above.
+ * The expression split is done in a greedy way, looking for the first liftable flatten node (e.g. in the example above, flatten1 is lifted, rather than flatten 3 and flatten5).
+ * TODO: optimize by lifting as many flatten as possible?
  */
 public class FlattenLifterImpl implements FlattenLifter {
 
@@ -93,29 +112,39 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
         @Override
-        public IQTree transformFilter(IQTree tree, FilterNode fn, IQTree child) {
+        public IQTree transformFilter(IQTree tree, FilterNode filter, IQTree child) {
             child = child.acceptTransformer(this);
             FlattenLift lift = getFlattenLift(
-                    getBlockingVariables(fn.getFilterCondition()),
+                    getBlockingVariables(filter.getFilterCondition()),
                     child
             );
-            if (!lift.getLiftableNodes().isEmpty()) {
-                SplitExpression split = new SplitExpression(lift.getDefinedVariables(), fn.getOptionalFilterCondition());
-                // If some conjunct in the filter expression has no variable provided by the flatten node(s), perform the lift
-                Optional<ImmutableExpression> nonLiftedExpr = split.getNonLiftedExpression();
-                if (nonLiftedExpr.isPresent()) {
-                    ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.builder();
-                    // Part of the filter condition may be lifted together with the flatten node(s)
-                    split.getLiftedExpression().ifPresent(e -> builder.add(iqFactory.createFilterNode(e)));
-                    builder.addAll(lift.liftableNodes);
-                    builder.add(iqFactory.createFilterNode(nonLiftedExpr.get()));
-                    return buildUnaryTreeRec(
-                            builder.build().iterator(),
-                            lift.getSubtree()
-                    );
+            if (lift.getLiftableNodes().isEmpty())
+                return iqFactory.createUnaryIQTree(filter, child);
+
+            return buildUnaryTreeRec(
+                    interleave(Optional.of(filter.getFilterCondition()), lift).iterator(),
+                    lift.getSubtree()
+            );
+        }
+
+        private ImmutableList<UnaryOperatorNode> interleave(Optional<ImmutableExpression> expr, FlattenLift lift) {
+            Iterator<FlattenNode> fns = lift.getLiftableNodes().iterator();
+            ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.builder();
+            if (expr.isPresent()) {
+                SplitExpression split = new SplitExpression(ImmutableSet.of(), expr.get());
+                while (split.getNonLiftedExpression().isPresent() && fns.hasNext()) {
+                    FlattenNode fn = fns.next();
+                    split = new SplitExpression(lift.getDefinedVariables(fn), expr.get());
+                    if (split.getLiftedExpression().isPresent()) {
+                        builder.add(iqFactory.createFilterNode(split.getLiftedExpression().get()));
+                    }
+                    builder.add(fn);
                 }
             }
-            return iqFactory.createUnaryIQTree(fn, child);
+            while (fns.hasNext()) {
+                builder.add(fns.next());
+            }
+            return builder.build();
         }
 
         @Override
@@ -123,33 +152,25 @@ public class FlattenLifterImpl implements FlattenLifter {
             children = children.stream()
                     .map(c -> c.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
-
-            //ImmutableSet<Variable> blockingVars = getImplicitJoinVariables(children);
-            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(ImmutableSet.of(), children);
-            if (flattenLifts.stream()
+            ImmutableList<FlattenLift> lifts = getFlattenLifts(ImmutableSet.of(), children);
+            if (lifts.stream()
                     .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
-                SplitExpression split = splitExpression(flattenLifts.iterator(), join.getOptionalFilterCondition());
-                Optional<ImmutableExpression> expr = split.getNonLiftedExpression();
-                InnerJoinNode updatedJoin = expr.isPresent() ?
-                        iqFactory.createInnerJoinNode(expr.get()) :
-                        iqFactory.createInnerJoinNode();
-
-                ImmutableList<FlattenNode> liftedNodes = flattenLifts.stream()
+                ImmutableList<FlattenNode> liftedNodes = lifts.stream()
                         .flatMap(l -> l.getLiftableNodes().stream())
                         .collect(ImmutableCollectors.toList());
-
-                ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.builder();
-                // Part of the filter condition may be lifted together with the flatten node(s)
-                split.getLiftedExpression().ifPresent(e -> builder.add(iqFactory.createFilterNode(e)));
-                builder.addAll(liftedNodes);
+                IQTree subtree = iqFactory.createNaryIQTree(
+                        iqFactory.createInnerJoinNode(),
+                        lifts.stream()
+                                .map(l -> l.getSubtree())
+                                .collect(ImmutableCollectors.toList())
+                );
+                FlattenLift combinedLift = new FlattenLift(liftedNodes, subtree);
+                Optional<ImmutableExpression> joinCondition = join.getOptionalFilterCondition();
+                ImmutableList<UnaryOperatorNode> operators = interleave(joinCondition, combinedLift);
                 return buildUnaryTreeRec(
-                        builder.build().iterator(),
-                        iqFactory.createNaryIQTree(
-                                updatedJoin,
-                                flattenLifts.stream()
-                                        .map(l -> l.getSubtree())
-                                        .collect(ImmutableCollectors.toList())
-                        ));
+                        operators.iterator(),
+                        combinedLift.getSubtree()
+                );
             }
             return iqFactory.createNaryIQTree(join, children);
         }
@@ -190,25 +211,25 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .collect(ImmutableCollectors.toSet());
         }
 
-        private SplitExpression splitExpression(UnmodifiableIterator<FlattenLift> iterator, Optional<ImmutableExpression> expr) {
-            if (expr.isPresent()) {
-                if (iterator.hasNext()) {
-                    FlattenLift lift = iterator.next();
-                    SplitExpression recSplit = splitExpression(iterator, expr);
-                    SplitExpression split = new SplitExpression(lift.getDefinedVariables(), expr);
-                    // Merge the two splits: union of lifted conjuncts, and intersection of non lifted ones
-                    return new SplitExpression(
-                            ImmutableSet.copyOf(Sets.union(
-                                    recSplit.liftedConjuncts,
-                                    split.liftedConjuncts)),
-                            recSplit.nonLifedConjuncts.stream()
-                                    .filter(c -> split.nonLifedConjuncts.contains(c))
-                                    .collect(ImmutableCollectors.toSet())
-                    );
-                }
-            }
-            return new SplitExpression(ImmutableSet.of(), expr);
-        }
+//        private SplitExpression splitExpression(UnmodifiableIterator<FlattenLift> iterator, Optional<ImmutableExpression> expr) {
+//            if (expr.isPresent()) {
+//                if (iterator.hasNext()) {
+//                    FlattenLift lift = iterator.next();
+//                    SplitExpression recSplit = splitExpression(iterator, expr);
+//                    SplitExpression split = new SplitExpression(lift.getDefinedVariables(), expr);
+//                    // Merge the two splits: union of lifted conjuncts, and intersection of non lifted ones
+//                    return new SplitExpression(
+//                            ImmutableSet.copyOf(Sets.union(
+//                                    recSplit.liftedConjuncts,
+//                                    split.liftedConjuncts)),
+//                            recSplit.nonLiftedConjuncts.stream()
+//                                    .filter(c -> split.nonLiftedConjuncts.contains(c))
+//                                    .collect(ImmutableCollectors.toSet())
+//                    );
+//                }
+//            }
+//            return new SplitExpression(ImmutableSet.of(), expr);
+//        }
 
         private FlattenLift getFlattenLift(ImmutableSet<Variable> blockingVariables, IQTree child) {
             QueryNode n = child.getRootNode();
@@ -274,8 +295,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .collect(Collectors.toCollection(HashSet::new));
         }
 
-        private Iterable<? extends UnaryOperatorNode> applySubstitution (ImmutableList<FlattenNode> flattenNodes,
-                                                                         ImmutableSubstitution sub) {
+        private Iterable<? extends UnaryOperatorNode> applySubstitution(ImmutableList<FlattenNode> flattenNodes,
+                                                                        ImmutableSubstitution sub) {
             return flattenNodes.stream()
                     .map(n -> applySubstitution(sub, n))
                     .collect(ImmutableCollectors.toList());
@@ -344,7 +365,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child);
             if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains))
                 return false;
-            if(fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
+            if (fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
                 return false;
             return projectedVars.map(variables -> variables.contains(fn.getArrayVariable())).orElse(true);
         }
@@ -373,10 +394,19 @@ public class FlattenLifterImpl implements FlattenLifter {
              * Variables defined by some of the lifted flatten nodes (and not in the subtree)
              */
             ImmutableSet<Variable> getDefinedVariables() {
-                return (ImmutableSet<Variable>) liftableNodes.stream()
-                        .flatMap(n -> n.getDataAtom().getVariables().stream())
-                        .filter(v -> !subtree.getVariables().contains(v))
+                return liftableNodes.stream()
+                        .flatMap(n -> getDefinedVariables(n).stream())
                         .collect(ImmutableCollectors.toSet());
+            }
+
+            /**
+             * Variables defined by the flatten node (and not in the subtree)
+             */
+            ImmutableSet<Variable> getDefinedVariables(FlattenNode fn) {
+                return (ImmutableSet<Variable>)
+                        fn.getDataAtom().getVariables().stream()
+                                .filter(v -> !subtree.getVariables().contains(v))
+                                .collect(ImmutableCollectors.toSet());
             }
 
             IQTree getSubtree() {
@@ -385,50 +415,40 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
         private class SplitExpression {
-            private final ImmutableSet<ImmutableExpression> nonLifedConjuncts;
+            private final ImmutableSet<ImmutableExpression> nonLiftedConjuncts;
             private final ImmutableSet<ImmutableExpression> liftedConjuncts;
 
-            private SplitExpression(ImmutableSet<Variable> liftVars, Optional<ImmutableExpression> expr) {
-
-                if (expr.isPresent()) {
-                    ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitMap = splitExpression(liftVars, expr.get());
-                    nonLifedConjuncts = ImmutableSet.copyOf(splitMap.get(false));
-                    liftedConjuncts = ImmutableSet.copyOf(splitMap.get(true));
-                } else {
-                    nonLifedConjuncts = ImmutableSet.of();
-                    liftedConjuncts = ImmutableSet.of();
-                }
+            private SplitExpression(ImmutableSet<Variable> liftVars, ImmutableExpression expr) {
+                this(liftVars, expr.flattenAND());
             }
 
-            private SplitExpression(ImmutableSet<ImmutableExpression> liffedConjuncts,
-                                    ImmutableSet<ImmutableExpression> nonliftedConjuncts) {
-                this.liftedConjuncts = liffedConjuncts;
-                this.nonLifedConjuncts = nonliftedConjuncts;
+            private SplitExpression(ImmutableSet<Variable> liftVars, ImmutableSet<ImmutableExpression> conjuncts) {
+                ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitMap = splitConjuncts(liftVars, conjuncts);
+                nonLiftedConjuncts = ImmutableSet.copyOf(splitMap.get(false));
+                liftedConjuncts = ImmutableSet.copyOf(splitMap.get(true));
             }
+
+//            private SplitExpression(ImmutableSet<ImmutableExpression> liftedConjuncts,
+//                                    ImmutableSet<ImmutableExpression> nonliftedConjuncts) {
+//                this.liftedConjuncts = liftedConjuncts;
+//                this.nonLiftedConjuncts = nonliftedConjuncts;
+//            }
 
             /**
              * Partitions the conjuncts of the input expression:
              * - conjuncts containing no variable in vars
              * - conjuncts containing some variable in vars
              */
-            private ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitExpression(ImmutableSet<Variable> vars, ImmutableExpression expr) {
-                return expr.flattenAND().stream()
+            private ImmutableMap<Boolean, ImmutableList<ImmutableExpression>> splitConjuncts(ImmutableSet<Variable> vars, ImmutableSet<ImmutableExpression> conjuncts) {
+                return conjuncts.stream()
                         .collect(ImmutableCollectors.partitioningBy(e -> e.getVariableStream()
                                 .anyMatch(vars::contains)));
             }
 
-            public ImmutableSet<ImmutableExpression> getNonLifedConjuncts() {
-                return nonLifedConjuncts;
-            }
-
-            public ImmutableSet<ImmutableExpression> getLiftedConjuncts() {
-                return liftedConjuncts;
-            }
-
             public Optional<ImmutableExpression> getNonLiftedExpression() {
-                return nonLifedConjuncts.isEmpty() ?
+                return nonLiftedConjuncts.isEmpty() ?
                         Optional.empty() :
-                        immutabilityTools.foldBooleanExpressions(nonLifedConjuncts.stream());
+                        immutabilityTools.foldBooleanExpressions(nonLiftedConjuncts.stream());
             }
 
             public Optional<ImmutableExpression> getLiftedExpression() {
