@@ -6,9 +6,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
-import org.apache.commons.rdf.api.IRI;
-
-import javax.annotation.Nonnull;
 
 public class EncodeForUriAbstractUnaryStringSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunctionSymbol {
     private final RDFDatatype xsdStringDatatype;
@@ -26,7 +23,7 @@ public class EncodeForUriAbstractUnaryStringSPARQLFunctionSymbolImpl extends Abs
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                             VariableNullability variableNullability) {
         return termFactory.getRDFTermTypeConstant(xsdStringDatatype);
     }

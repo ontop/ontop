@@ -36,7 +36,7 @@ public abstract class AbstractIsASPARQLFunctionSymbol extends ReduciblePositiveA
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                             VariableNullability variableNullability) {
         return termFactory.getRDFTermTypeConstant(xsdBooleanType);
     }

@@ -796,11 +796,6 @@ public class SparqlAlgebraToDatalogTranslator {
     private static final ImmutableMap<String, FunctionSymbol> XPathFunctions =
             new ImmutableMap.Builder<String, FunctionSymbol>()
                     /*
-                     * String functions
-                     */
-                    .put("http://www.w3.org/2005/xpath-functions#substring-before", STRBEFORE)
-                    .put("http://www.w3.org/2005/xpath-functions#substring-after", STRAFTER)
-                    /*
                      * Numerical functions
                      */
                     .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ABS)

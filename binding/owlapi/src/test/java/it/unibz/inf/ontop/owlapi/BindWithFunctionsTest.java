@@ -502,7 +502,7 @@ public class BindWithFunctionsTest {
     
     
     @Test
-    public void testBindWithBefore() throws Exception {
+    public void testBindWithBefore1() throws Exception {
         
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -515,17 +515,39 @@ public class BindWithFunctionsTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Seman\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
+        checkReturnedValues(queryBind, expectedValues);
+
+    }
+
+    @Test
+    public void testBindWithBefore2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
         checkReturnedValues(queryBind, expectedValues);
 
     }
     
     
     @Test
-    public void testBindWithAfter() throws Exception {
+    public void testBindWithAfter1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -538,10 +560,31 @@ public class BindWithFunctionsTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\" Semantic Web\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testBindWithAfter2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
         checkReturnedValues(queryBind, expectedValues);
 
     }

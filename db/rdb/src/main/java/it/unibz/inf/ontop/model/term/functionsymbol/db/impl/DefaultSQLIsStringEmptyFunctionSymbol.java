@@ -7,21 +7,18 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-public class DefaultSQLIfElseNullFunctionSymbol extends AbstractDBIfElseNullFunctionSymbol {
+public class DefaultSQLIsStringEmptyFunctionSymbol extends AbstractDBIsStringEmptyFunctionSymbol {
 
-    private static final String TEMPLATE = "CASE WHEN %s THEN %s ELSE NULL END";
+    private static final String TEMPLATE = "(%s = 0)";
 
-    protected DefaultSQLIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super(dbBooleanType, rootDBTermType);
+
+    protected DefaultSQLIsStringEmptyFunctionSymbol(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
+        super(dbBooleanType, abstractRootDBType);
     }
 
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format(
-                TEMPLATE,
-                terms.stream()
-                        .map(termConverter::apply)
-                        .toArray());
+        return String.format(TEMPLATE, termConverter.apply(termFactory.getDBCharLength(terms.get(0))));
     }
 }

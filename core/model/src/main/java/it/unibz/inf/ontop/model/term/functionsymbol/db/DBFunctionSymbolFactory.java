@@ -59,6 +59,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIfElseNull();
 
+    DBFunctionSymbol getDBIfThenElse();
+
     DBFunctionSymbol getDBUpper();
 
     DBFunctionSymbol getDBLower();
@@ -99,6 +101,8 @@ public interface DBFunctionSymbolFactory {
 
     DBBooleanFunctionSymbol getDBEndsWith();
 
+    DBBooleanFunctionSymbol getDBIsStringEmpty();
+
     /**
      * Arity 2, first argument is the string in which to search, second argument is subString
      */
@@ -110,4 +114,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBRegexpMatches3();
 
     DBBooleanFunctionSymbol getDBLike();
+
+    DBFunctionSymbol getDBStrBefore();
+    DBFunctionSymbol getDBStrAfter();
 }

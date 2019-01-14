@@ -5,11 +5,13 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.function.Function;
+
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 
-public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
+public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
 
-    protected AbstractDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DefaultDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super("IF_ELSE_NULL", 2, dbBooleanType, rootDBTermType);
     }
 
@@ -21,6 +23,10 @@ public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThe
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm possibleValue = terms.get(1);
+
+        if (possibleValue.equals(termFactory.getNullConstant()))
+            return possibleValue;
+
         /*
          * Optimizes the special case IF_ELSE_NULL(IS_NOT_NULL(x),x) === x
          */
@@ -40,5 +46,15 @@ public abstract class AbstractDBIfElseNullFunctionSymbol extends AbstractDBIfThe
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return extractSubFunctionalTerms(arguments.subList(1, 2))
                 .allMatch(ImmutableFunctionalTerm::canBePostProcessed);
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter,
+                                    TermFactory termFactory) {
+        return termConverter.apply(
+                termFactory.getIfThenElse(
+                        (ImmutableExpression) terms.get(0),
+                        terms.get(1),
+                        termFactory.getNullConstant()));
     }
 }

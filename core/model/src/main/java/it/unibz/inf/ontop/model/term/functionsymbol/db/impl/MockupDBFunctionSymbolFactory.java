@@ -121,7 +121,19 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getDBIfElseNull() {
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIfThenElse() {
         return new MockupDBIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
@@ -177,6 +189,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsStringEmpty() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override

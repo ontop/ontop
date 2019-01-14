@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.DefaultDBAndFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
@@ -212,8 +212,6 @@ public class ExpressionEvaluator {
 				case CEIL:
 				case FLOOR:
 				case RAND:
-				case STRBEFORE:
-				case STRAFTER:
 				case MD5:
 				case SHA1:
 				case SHA512:
@@ -268,7 +266,7 @@ public class ExpressionEvaluator {
 			return evalNaryAnd(term.getTerms(), variableNullability);
 		}
 		// TODO: remove this temporary hack!
-		else if (functionSymbol instanceof AbstractDBIfElseNullFunctionSymbol) {
+		else if (functionSymbol instanceof DefaultDBIfElseNullFunctionSymbol) {
 			return evalIfElseNull(term.getTerms(), variableNullability);
 		}
 		else {

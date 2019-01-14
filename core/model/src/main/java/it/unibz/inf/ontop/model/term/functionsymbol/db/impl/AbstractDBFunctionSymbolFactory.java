@@ -27,6 +27,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
+    private final DBFunctionSymbol ifElseNullFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -34,6 +35,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Lazy
     @Nullable
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol strBeforeFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol strAfterFunctionSymbol;
 
 
     /**
@@ -121,6 +128,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.falseOrNullMap = new HashMap<>();
         this.trueOrNullMap = new HashMap<>();
         this.r2rmlIRISafeEncodeFunctionSymbol = null;
+        this.strBeforeFunctionSymbol = null;
+        this.strAfterFunctionSymbol = null;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
@@ -131,6 +140,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+        this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
     }
 
     @Override
@@ -232,6 +242,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getDBIfElseNull() {
+        return ifElseNullFunctionSymbol;
+    }
+
+    @Override
     public DBStrictEqFunctionSymbol getDBStrictEquality(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of a strict equality must be >= 2");
@@ -290,8 +305,30 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return dbLikeFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBStrBefore() {
+        if (strBeforeFunctionSymbol == null)
+            strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
+        return strBeforeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBStrAfter() {
+        if (strAfterFunctionSymbol == null)
+            strAfterFunctionSymbol = createStrAfterFunctionSymbol();
+        return strAfterFunctionSymbol;
+    }
+
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbStringType, this::serializeContains);
+    }
+
+    protected DBFunctionSymbol createStrBeforeFunctionSymbol() {
+        return new DBStrBeforeFunctionSymbolImpl(dbStringType, rootDBType, this::serializeStrBefore);
+    }
+
+    protected DBFunctionSymbol createStrAfterFunctionSymbol() {
+        return new DBStrAfterFunctionSymbolImpl(dbStringType, rootDBType, this::serializeStrAfter);
     }
 
     protected FalseOrNullFunctionSymbol createFalseOrNullFunctionSymbol(int arity) {
@@ -329,6 +366,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter,
                                      TermFactory termFactory);
+
+    protected abstract String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                                 Function<ImmutableTerm, String> termConverter,
+                                                 TermFactory termFactory);
+
+    protected abstract String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
+                                                 Function<ImmutableTerm, String> termConverter,
+                                                 TermFactory termFactory);
     
 
     @Override

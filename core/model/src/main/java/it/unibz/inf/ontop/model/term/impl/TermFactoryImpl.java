@@ -416,6 +416,21 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBStrBefore(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBStrBefore(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBStrAfter(), arg1, arg2);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
+	}
+
+	@Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
@@ -626,7 +641,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfElseNull(), condition, term);
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfThenElse(), condition, thenTerm, elseTerm);
+    }
+
+    @Override
 	public ImmutableFunctionalTerm getDBCase(
 			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm) {
 		ImmutableList<ImmutableTerm> terms = Stream.concat(
@@ -641,8 +661,10 @@ public class TermFactoryImpl implements TermFactory {
 			throw new IllegalArgumentException("whenPairs must be non-empty");
 		}
 
-		if ((arity == 3) && defaultTerm.equals(valueNull))
-			return getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1));
+		if (arity == 3)
+			return defaultTerm.equals(valueNull)
+					? getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1))
+					: getIfThenElse((ImmutableExpression) terms.get(0), terms.get(1), defaultTerm);
 
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity), terms);
 	}
@@ -737,6 +759,11 @@ public class TermFactoryImpl implements TermFactory {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two distinct values where expected in " + terms);
 		return getStrictNEquality(ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public ImmutableExpression getDBIsStringEmpty(ImmutableTerm stringTerm) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsStringEmpty(), stringTerm);
 	}
 
 	@Override

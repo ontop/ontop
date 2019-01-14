@@ -60,6 +60,27 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String before = termConverter.apply(terms.get(1));
+
+        return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+    }
+
+    @Override
+    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String after = termConverter.apply(terms.get(1));
+
+        // sign return 1 if positive number, 0 if 0, and -1 if negative number
+        // it will return everything after the value if it is present or it will return an empty string if it is not present
+        return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s), SIGN(CHARINDEX(%s,%s)) * LENGTH(%s))",
+                str, after, str, after, after, str, str);
+    }
+
+    @Override
     public DBFunctionSymbol getDBUUIDFunctionSymbol() {
         return getRegularDBFunctionSymbol(UUID_STR, 0);
     }

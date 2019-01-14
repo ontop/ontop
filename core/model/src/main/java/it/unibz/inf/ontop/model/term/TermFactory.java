@@ -353,6 +353,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
 
+	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
+
 	/**
 	 * IF THEN, ELSE IF ..., ELSE
 	 *
@@ -406,6 +408,8 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getStrictNEquality(ImmutableSet<ImmutableTerm> terms);
 
+	ImmutableExpression getDBIsStringEmpty(ImmutableTerm stringTerm);
+
 	/**
 	 * terms must have at least two elements
 	 * Logically equivalent to NOT(STRICT_EQx(...))
@@ -443,4 +447,9 @@ public interface TermFactory {
     ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
 
 	ImmutableFunctionalTerm getDBUUID();
+
+	ImmutableFunctionalTerm getDBStrBefore(ImmutableTerm arg1, ImmutableTerm arg2);
+	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
+
+	ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm);
 }
