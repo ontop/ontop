@@ -26,6 +26,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBTermType abstractRootDBType;
     private final TermType abstractRootType;
     private final DBFunctionSymbol ifThenElse;
+    private final DBBooleanFunctionSymbol isStringEmpty;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
@@ -36,6 +37,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
+        this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
     }
 
@@ -151,6 +153,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLIfThenElseFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
+    protected DBBooleanFunctionSymbol createIsStringEmpty(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
+        return new DefaultSQLIsStringEmptyFunctionSymbol(dbBooleanType, abstractRootDBType);
+    }
+
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), targetType);
@@ -240,6 +246,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsStringEmpty() {
+        return isStringEmpty;
     }
 
 }

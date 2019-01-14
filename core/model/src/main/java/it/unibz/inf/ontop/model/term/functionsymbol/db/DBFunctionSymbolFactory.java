@@ -101,6 +101,8 @@ public interface DBFunctionSymbolFactory {
 
     DBBooleanFunctionSymbol getDBEndsWith();
 
+    DBBooleanFunctionSymbol getDBIsStringEmpty();
+
     /**
      * Arity 2, first argument is the string in which to search, second argument is subString
      */

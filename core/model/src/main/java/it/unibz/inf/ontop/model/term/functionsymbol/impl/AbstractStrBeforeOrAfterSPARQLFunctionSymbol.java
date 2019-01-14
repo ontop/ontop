@@ -31,11 +31,28 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
                 && ((RDFTermTypeConstant) firstArgType).getRDFTermType().equals(xsdStringType))
             return firstArgType;
 
-        ImmutableExpression condition = termFactory.getDBContains(ImmutableList.of(subLexicalTerms.get(0),
-                subLexicalTerms.get(1)));
+        ImmutableTerm firstArg = subLexicalTerms.get(0);
+        ImmutableTerm secondArg = subLexicalTerms.get(1);
+
+        ImmutableExpression condition =
+                termFactory.getDisjunction(ImmutableList.of(
+                        termFactory.getDBContains(ImmutableList.of(firstArg, secondArg)),
+                        termFactory.getDBIsStringEmpty(secondArg)));
 
         return termFactory.getIfThenElse(condition, firstArgType, termFactory.getRDFTermTypeConstant(xsdStringType));
     }
+
+    @Override
+    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+        return termFactory.getIfThenElse(
+                termFactory.getDBIsStringEmpty(subLexicalTerms.get(1)),
+                termFactory.getDBStringConstant(""),
+                computeLexicalTermWhenSecondArgIsNotEmpty(subLexicalTerms, termFactory));
+    }
+
+    protected abstract ImmutableTerm computeLexicalTermWhenSecondArgIsNotEmpty(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                                                               TermFactory termFactory);
 
     @Override
     protected boolean isAlwaysInjective() {

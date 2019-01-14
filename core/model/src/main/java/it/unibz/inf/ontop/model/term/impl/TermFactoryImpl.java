@@ -426,6 +426,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
+	}
+
+	@Override
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
@@ -754,6 +759,11 @@ public class TermFactoryImpl implements TermFactory {
 		if (terms.size() < 2)
 			throw new IllegalArgumentException("At least two distinct values where expected in " + terms);
 		return getStrictNEquality(ImmutableList.copyOf(terms));
+	}
+
+	@Override
+	public ImmutableExpression getDBIsStringEmpty(ImmutableTerm stringTerm) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsStringEmpty(), stringTerm);
 	}
 
 	@Override
