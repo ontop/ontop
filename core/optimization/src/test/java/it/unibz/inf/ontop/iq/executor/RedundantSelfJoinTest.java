@@ -739,7 +739,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
 
-        ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
+        ImmutableExpression joiningCondition = TERM_FACTORY.getDisjunction(
                 TERM_FACTORY.getStrictEquality(O, ONE),
                 TERM_FACTORY.getStrictEquality(O, TWO));
 
@@ -787,7 +787,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
 
-        ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
+        ImmutableExpression joiningCondition = TERM_FACTORY.getDisjunction(
                 TERM_FACTORY.getStrictEquality(O, TWO),
                 TERM_FACTORY.getStrictEquality(O, THREE));
 
@@ -813,7 +813,7 @@ public class RedundantSelfJoinTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
 
-        ImmutableExpression joiningCondition = TERM_FACTORY.getImmutableExpression(OR,
+        ImmutableExpression joiningCondition = TERM_FACTORY.getDisjunction(
                 TERM_FACTORY.getStrictEquality(O, TWO),
                 TERM_FACTORY.getStrictEquality(O, THREE));
 

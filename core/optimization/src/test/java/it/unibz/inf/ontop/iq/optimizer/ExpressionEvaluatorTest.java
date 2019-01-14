@@ -264,7 +264,7 @@ public class ExpressionEvaluatorTest {
         ImmutableExpression subExpression2 = TERM_FACTORY.getStrictNEquality(B, D);
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
-                TERM_FACTORY.getImmutableExpression(OR, subExpression1, subExpression2));
+                TERM_FACTORY.getDisjunction(subExpression1, subExpression2));
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
@@ -365,7 +365,7 @@ public class ExpressionEvaluatorTest {
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
-                TERM_FACTORY.getImmutableExpression(OR,
+                TERM_FACTORY.getDisjunction(
                         TERM_FACTORY.getImmutableExpression(IS_NULL, X),
                         TERM_FACTORY.getImmutableExpression(IS_NULL, Y)));
     }

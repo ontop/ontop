@@ -237,7 +237,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(BooleanExpressionOperation.GTE, "%s >= %s")
 				.put(BooleanExpressionOperation.LT, "%s < %s")
 				.put(BooleanExpressionOperation.LTE, "%s <= %s")
-				.put(BooleanExpressionOperation.OR, "%s OR %s")
 				.put(BooleanExpressionOperation.NOT, "NOT %s")
 				.put(BooleanExpressionOperation.IS_NULL, "%s IS NULL")
 				.put(BooleanExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")

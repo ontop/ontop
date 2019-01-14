@@ -25,7 +25,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    OR("OR", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT, XSD_BOOLEAN_DT),
     NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
 
     /*
@@ -205,7 +204,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     @Override
     public boolean blocksNegation() {
         switch (this) {
-            case OR:
             case IS_NULL:
             case IS_NOT_NULL:
                 return false;
@@ -223,13 +221,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
             return termFactory.getImmutableExpression(IS_NULL, subTerms.get(0));
         } else if (this == IS_NULL) {
             return termFactory.getImmutableExpression(IS_NOT_NULL, subTerms.get(0));
-        }
-        else if (this == OR) {
-            ImmutableList<ImmutableExpression> negatedArguments = subTerms.stream()
-                    .map(t -> (ImmutableExpression) t)
-                    .map(t -> t.negate(termFactory))
-                    .collect(ImmutableCollectors.toList());
-            return termFactory.getConjunction(negatedArguments);
         }
         else
             return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));

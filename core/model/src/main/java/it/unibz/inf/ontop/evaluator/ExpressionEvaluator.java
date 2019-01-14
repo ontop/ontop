@@ -239,8 +239,6 @@ public class ExpressionEvaluator {
 		}
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
-				case OR:
-					return evalOr(term.getTerm(0), term.getTerm(1), variableNullability);
 				case NOT:
 					return evalNot(term, variableNullability);
 				case IS_NULL:
@@ -370,11 +368,11 @@ public class ExpressionEvaluator {
 					return terms.stream()
 							.reduce(null,
 									(e, t) -> e == null
-											? termFactory.getImmutableFunctionalTerm(IS_NULL, t)
-											: termFactory.getImmutableFunctionalTerm(OR, e, termFactory.getImmutableFunctionalTerm(IS_NULL, t)),
+											? termFactory.getImmutableExpression(IS_NULL, t)
+											: termFactory.getDisjunction((ImmutableExpression)e, termFactory.getImmutableExpression(IS_NULL, t)),
 									(e1, e2) -> e1 == null
 											? e2
-											: (e2 == null) ? e1 : termFactory.getImmutableFunctionalTerm(OR, e1, e2));
+											: (e2 == null) ? e1 : termFactory.getDisjunction((ImmutableExpression) e1, (ImmutableExpression) e2));
 			}
 		}
 		else {
@@ -435,22 +433,6 @@ public class ExpressionEvaluator {
 						.map(t -> t == null ? (ImmutableTerm) termFactory.getNullEvaluation() : t)
 						.collect(ImmutableCollectors.toList()),
 				termFactory);
-	}
-
-	private ImmutableTerm evalOr(ImmutableTerm t1, ImmutableTerm t2, VariableNullability variableNullability) {
-		ImmutableTerm e1 = eval(t1, variableNullability);
-		ImmutableTerm e2 = eval(t2, variableNullability);
-
-		if (e1 == valueTrue || e2 == valueTrue)
-			return valueTrue;
-
-		if (e1 == valueFalse)
-			return e2;
-
-		if (e2 == valueFalse)
-			return e1;
-
-		return termFactory.getImmutableFunctionalTerm(OR, e1, e2);
 	}
 
 	@Override
