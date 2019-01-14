@@ -34,12 +34,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
 	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE, false),
 
-
-	/* SPARQL String functions */
-
-	STRBEFORE("STRBEFORE", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR, false),
-	STRAFTER("STRAFTER", TermTypeInferenceRules.FIRST_ARG_RULE, COMPATIBLE_STRING_VALIDATOR, false),
-
 	/* Hash functions */
 
 	MD5("MD5", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),

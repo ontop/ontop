@@ -1169,16 +1169,6 @@ public class OneShotSQLGeneratorEngine {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.SHA512(literal); //TODO FIX
 		}
-		if (functionSymbol == ExpressionOperation.STRBEFORE) {
-			String string = getSQLString(function.getTerm(0), index, false);
-			String before = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.strBefore(string, before);
-		}
-		if (functionSymbol == ExpressionOperation.STRAFTER) {
-			String string = getSQLString(function.getTerm(0), index, false);
-			String after = getSQLString(function.getTerm(1), index, false);
-			return sqladapter.strAfter(string, after);
-		}
 		if (functionSymbol == ExpressionOperation.COUNT) {
 			if (function.getTerm(0).toString().equals("*")) {
 				return "COUNT(*)";

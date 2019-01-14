@@ -212,8 +212,6 @@ public class ExpressionEvaluator {
 				case CEIL:
 				case FLOOR:
 				case RAND:
-				case STRBEFORE:
-				case STRAFTER:
 				case MD5:
 				case SHA1:
 				case SHA512:

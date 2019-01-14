@@ -69,13 +69,14 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                         break;
                 }
             }
-            ImmutableTerm lexicalTerm = computeLexicalTerm(newTerms.stream()
-                            .map(t -> extractLexicalTerm(t, termFactory))
-                            .collect(ImmutableCollectors.toList()),
-                        typeTerms,
-                        termFactory);
 
-            ImmutableTerm typeTerm = computeTypeTerm(typeTerms, termFactory, variableNullability);
+            ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
+                    .map(t -> extractLexicalTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, typeTerms, termFactory);
+
+            ImmutableTerm typeTerm = computeTypeTerm(subLexicalTerms, typeTerms, termFactory, variableNullability);
 
             Optional<ImmutableExpression> condition = inputTypeErrorEvaluation.getExpression();
 
@@ -132,7 +133,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
     protected abstract ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                         ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
 
-    protected abstract ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+    protected abstract ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
+                                                     ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability);
 
     @Override

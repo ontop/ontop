@@ -34,7 +34,7 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
+    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getRDFTermTypeConstant(xsdBooleanType);
     }
 
