@@ -14,6 +14,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
     protected static final String AND_STR = "AND";
+    protected static final String OR_STR = "OR";
     protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
@@ -123,6 +124,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         // TODO: avoid if-then-else
         if (isAnd(nameInDialect))
             return createDBAnd(arity);
+        else if (isOr(nameInDialect))
+            return createDBOr(arity);
         else if (isConcat(nameInDialect))
             return createDBConcat(arity);
         return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
@@ -141,12 +144,20 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return nameInDialect.equals(AND_STR);
     }
 
+    protected boolean isOr(String nameInDialect) {
+        return nameInDialect.equals(OR_STR);
+    }
+
     protected DBConcatFunctionSymbol createDBConcat(int arity) {
         return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
     }
 
     protected DBBooleanFunctionSymbol createDBAnd(int arity) {
         return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
+    }
+
+    protected DBBooleanFunctionSymbol createDBOr(int arity) {
+        return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
     }
 
     protected DBFunctionSymbol createDBIfThenElse(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
@@ -246,6 +257,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBOr(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of OR must be >= 2");
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
     }
 
     @Override
