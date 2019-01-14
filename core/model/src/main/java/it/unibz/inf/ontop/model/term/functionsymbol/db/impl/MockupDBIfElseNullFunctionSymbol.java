@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-public class MockupDBIfElseNullFunctionSymbol extends AbstractDBIfElseNullFunctionSymbol {
+public class MockupDBIfElseNullFunctionSymbol extends AbstractDBIfThenElseFunctionSymbol {
     protected MockupDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super(dbBooleanType, rootDBTermType);
     }

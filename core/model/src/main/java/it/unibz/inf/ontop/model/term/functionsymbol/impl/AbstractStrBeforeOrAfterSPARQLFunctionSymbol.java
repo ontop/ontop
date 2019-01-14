@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -13,7 +12,6 @@ import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
@@ -36,8 +34,7 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
         ImmutableExpression condition = termFactory.getDBContains(ImmutableList.of(subLexicalTerms.get(0),
                 subLexicalTerms.get(1)));
 
-        return termFactory.getDBCase(Stream.of(Maps.immutableEntry(condition, firstArgType)),
-                termFactory.getRDFTermTypeConstant(xsdStringType));
+        return termFactory.getIfThenElse(condition, firstArgType, termFactory.getRDFTermTypeConstant(xsdStringType));
     }
 
     @Override

@@ -27,6 +27,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
+    private final DBFunctionSymbol ifElseNullFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -139,6 +140,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+        this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
     }
 
     @Override
@@ -237,6 +239,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return caseMap
                 .computeIfAbsent(arity, a -> createDBCase(arity));
 
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIfElseNull() {
+        return ifElseNullFunctionSymbol;
     }
 
     @Override

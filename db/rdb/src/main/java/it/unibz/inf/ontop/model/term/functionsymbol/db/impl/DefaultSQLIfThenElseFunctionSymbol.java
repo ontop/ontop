@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-public class DefaultSQLIfElseNullFunctionSymbol extends AbstractDBIfElseNullFunctionSymbol {
+public class DefaultSQLIfThenElseFunctionSymbol extends AbstractDBIfThenElseFunctionSymbol {
 
-    private static final String TEMPLATE = "CASE WHEN %s THEN %s ELSE NULL END";
+    private static final String TEMPLATE = "CASE WHEN %s THEN %s ELSE %s END";
 
-    protected DefaultSQLIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DefaultSQLIfThenElseFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super(dbBooleanType, rootDBTermType);
     }
 

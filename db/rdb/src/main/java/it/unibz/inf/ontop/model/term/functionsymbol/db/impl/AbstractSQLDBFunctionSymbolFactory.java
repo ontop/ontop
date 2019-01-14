@@ -25,7 +25,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
     private final TermType abstractRootType;
-    private final DBFunctionSymbol ifElseNull;
+    private final DBFunctionSymbol ifThenElse;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
@@ -35,7 +35,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-        this.ifElseNull = createDBIfElseNull(dbBooleanType, abstractRootDBType);
+        this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
     }
 
@@ -147,8 +147,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
     }
 
-    protected DBFunctionSymbol createDBIfElseNull(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
-        return new DefaultSQLIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
+    protected DBFunctionSymbol createDBIfThenElse(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
+        return new DefaultSQLIfThenElseFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
     @Override
@@ -184,8 +184,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBFunctionSymbol getDBIfElseNull() {
-        return ifElseNull;
+    public DBFunctionSymbol getDBIfThenElse() {
+        return ifThenElse;
     }
 
     @Override

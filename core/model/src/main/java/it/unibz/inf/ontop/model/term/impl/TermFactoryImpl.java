@@ -636,7 +636,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfElseNull(), condition, term);
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfThenElse(), condition, thenTerm, elseTerm);
+    }
+
+    @Override
 	public ImmutableFunctionalTerm getDBCase(
 			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm) {
 		ImmutableList<ImmutableTerm> terms = Stream.concat(
@@ -651,8 +656,10 @@ public class TermFactoryImpl implements TermFactory {
 			throw new IllegalArgumentException("whenPairs must be non-empty");
 		}
 
-		if ((arity == 3) && defaultTerm.equals(valueNull))
-			return getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1));
+		if (arity == 3)
+			return defaultTerm.equals(valueNull)
+					? getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1))
+					: getIfThenElse((ImmutableExpression) terms.get(0), terms.get(1), defaultTerm);
 
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity), terms);
 	}
