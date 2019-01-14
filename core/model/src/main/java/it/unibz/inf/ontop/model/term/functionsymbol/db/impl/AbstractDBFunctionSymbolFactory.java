@@ -320,7 +320,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
-        return new DBContainsFunctionSymbolImpl(rootDBType, dbStringType, this::serializeContains);
+        return new DBContainsFunctionSymbolImpl(rootDBType, dbBooleanType, this::serializeContains);
     }
 
     protected DBFunctionSymbol createStrBeforeFunctionSymbol() {
