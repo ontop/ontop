@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term;
 
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 
@@ -23,13 +22,6 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
      * Flattens OR expressions.
      */
     Stream<ImmutableExpression> flattenOR();
-
-    /**
-     * Generalization of flattening (AND, OR, etc.).
-     *
-     * It is the responsibility of the caller to make sure such a flattening makes sense.
-     */
-    ImmutableSet<ImmutableExpression> flatten(BooleanFunctionSymbol operator);
 
     Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability);
 

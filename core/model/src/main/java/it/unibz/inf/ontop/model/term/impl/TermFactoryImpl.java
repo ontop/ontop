@@ -41,8 +41,6 @@ import org.apache.commons.rdf.api.RDF;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
-
 @Singleton
 public class TermFactoryImpl implements TermFactory {
 
@@ -268,22 +266,16 @@ public class TermFactoryImpl implements TermFactory {
 				throw new IllegalArgumentException("disjunctionOfExpressions must be non-empty");
 			case 1:
 				return disjunctionOfExpressions.get(0);
-			case 2:
-				return getImmutableExpression(OR, disjunctionOfExpressions);
 			default:
-				// Non-final
-				ImmutableExpression cumulativeExpression = getImmutableExpression(
-						OR,
-						disjunctionOfExpressions.get(0),
-						disjunctionOfExpressions.get(1));
-				for (int i = 2; i < size; i++) {
-					cumulativeExpression = getImmutableExpression(
-							OR,
-							cumulativeExpression,
-							disjunctionOfExpressions.get(i));
-				}
-				return cumulativeExpression;
+				return getImmutableExpression(dbFunctionSymbolFactory.getDBOr(size), disjunctionOfExpressions);
 		}
+	}
+
+	@Override
+	public ImmutableExpression getDisjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions) {
+		return getDisjunction(
+				Stream.concat(Stream.of(expression), Stream.of(otherExpressions))
+						.collect(ImmutableCollectors.toList()));
 	}
 
 	@Override
@@ -467,7 +459,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
-		return getExpression(OR,term1, term2);
+		return getExpression(dbFunctionSymbolFactory.getDBOr(2), term1, term2);
 	}
 
 

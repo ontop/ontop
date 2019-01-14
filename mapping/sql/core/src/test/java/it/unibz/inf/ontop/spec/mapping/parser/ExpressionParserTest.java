@@ -544,7 +544,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(OR,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getFunctionEQ(
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
@@ -566,7 +566,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(OR,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getFunctionEQ(
                                 v,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
@@ -590,7 +590,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(OR,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getFunctionAND(
                         TERM_FACTORY.getFunctionEQ(
                                 v1,
@@ -672,7 +672,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(//FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(OR,
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getFunction(LT,
                                 v,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
@@ -972,7 +972,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(OR,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getFunction(LT,
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),

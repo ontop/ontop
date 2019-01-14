@@ -89,6 +89,8 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getDisjunction(ImmutableList<ImmutableExpression> nonEmptyExpressionList);
 
+	ImmutableExpression getDisjunction(ImmutableExpression expression, ImmutableExpression... otherExpressions);
+
 	/**
 	 * May be empty.
 	 *

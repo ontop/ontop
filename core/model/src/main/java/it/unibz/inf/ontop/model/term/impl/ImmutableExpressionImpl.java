@@ -7,13 +7,13 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBAndFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBOrFunctionSymbol;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.OR;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
     protected ImmutableExpressionImpl(TermFactory termFactory, BooleanFunctionSymbol functor, ImmutableTerm... terms) {
@@ -50,34 +50,12 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
 
     @Override
     public Stream<ImmutableExpression> flattenOR() {
-        return flatten(OR).stream();
-    }
-
-    @Override
-    public ImmutableSet<ImmutableExpression> flatten(BooleanFunctionSymbol operator) {
-
-        /**
-         * Only flattens OR expressions.
-         */
-        if (getFunctionSymbol().equals(operator)) {
-            ImmutableSet.Builder<ImmutableExpression> setBuilder = ImmutableSet.builder();
-            for (ImmutableTerm subTerm : getTerms()) {
-                /**
-                 * Recursive call
-                 */
-                if (subTerm instanceof ImmutableExpression) {
-                    setBuilder.addAll(((ImmutableExpression) subTerm).flatten(operator));
-                }
-                else {
-                    throw new IllegalStateException("An AND-expression must be only composed of " +
-                            "ImmutableBooleanExpression(s), not of a " + subTerm);
-                }
-            }
-            return setBuilder.build();
+        if (getFunctionSymbol() instanceof DBOrFunctionSymbol) {
+            return getTerms().stream()
+                    .map(t -> (ImmutableExpression) t)
+                    .distinct();
         }
-        else {
-            return ImmutableSet.of(this);
-        }
+        return Stream.of(this);
     }
 
     @Override

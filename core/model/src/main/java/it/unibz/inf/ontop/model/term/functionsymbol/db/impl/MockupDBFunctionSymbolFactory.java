@@ -19,6 +19,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     private static final String CONCAT_STR = "CONCAT";
     private static final String AND_STR = "AND";
+    private static final String OR_STR = "OR";
     private static final String CHAR_LENGTH_STR = "CHARLENGTH";
     private final TermType abstractRootType;
     private final DBTermType dbBooleanType;
@@ -57,6 +58,8 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         switch (nameInDialect) {
             case AND_STR:
                 return createDBAnd(arity);
+            case OR_STR:
+                return createDBOr(arity);
             case CONCAT_STR:
                 return createDBConcat(arity);
             default:
@@ -75,6 +78,10 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     private DBFunctionSymbol createDBAnd(int arity) {
         return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
+    }
+
+    private DBFunctionSymbol createDBOr(int arity) {
+        return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
     }
 
     private DBFunctionSymbol createDBConcat(int arity) {
@@ -189,6 +196,13 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBOr(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of OR must be >= 2");
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
     }
 
     @Override
