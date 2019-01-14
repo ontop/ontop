@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -58,6 +59,9 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
                     ? newTerm
                     : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(false)));
 
-        return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        if (newTerm instanceof ImmutableExpression)
+            return ((ImmutableExpression) newTerm).negate(termFactory);
+        else
+            throw new MinorOntopInternalBugException("NOT was expecting an expression as parameter");
     }
 }
