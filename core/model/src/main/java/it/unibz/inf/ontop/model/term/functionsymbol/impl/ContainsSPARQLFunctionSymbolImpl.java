@@ -14,13 +14,9 @@ public class ContainsSPARQLFunctionSymbolImpl extends StringBooleanBinarySPARQLF
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-
-        return termFactory.getDBCastFunctionalTerm(
-                dbTypeFactory.getDBBooleanType(),
-                dbTypeFactory.getDBStringType(),
-                termFactory.getDBContains(subLexicalTerms));
+    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                                 ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+        return termFactory.getDBContains(subLexicalTerms);
     }
 
     /**

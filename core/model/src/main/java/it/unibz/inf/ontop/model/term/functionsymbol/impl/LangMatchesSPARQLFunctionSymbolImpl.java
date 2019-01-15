@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
@@ -19,14 +18,9 @@ public class LangMatchesSPARQLFunctionSymbolImpl extends StringBooleanBinarySPAR
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
-        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-
-        return termFactory.getDBCastFunctionalTerm(
-                dbTypeFactory.getDBBooleanType(),
-                dbTypeFactory.getDBStringType(),
-                termFactory.getLexicalLangMatches(subLexicalTerms.get(0), subLexicalTerms.get(1)));
+    protected ImmutableTerm computeDBBooleanTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                                 ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+        return termFactory.getLexicalLangMatches(subLexicalTerms.get(0), subLexicalTerms.get(1));
     }
 
     /**

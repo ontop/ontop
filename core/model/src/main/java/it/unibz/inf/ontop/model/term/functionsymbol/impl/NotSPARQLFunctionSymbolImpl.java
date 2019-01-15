@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -26,16 +27,18 @@ public class NotSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+
         ImmutableExpression notTerm = termFactory.getDBNot(
                 (ImmutableExpression) termFactory.getDBCastFunctionalTerm(
                         dbTypeFactory.getDBStringType(),
-                        dbTypeFactory.getDBBooleanType(),
+                        dbBooleanType,
                         subLexicalTerms.get(0)));
 
-        return termFactory.getDBCastFunctionalTerm(
-                dbTypeFactory.getDBBooleanType(),
-                dbTypeFactory.getDBStringType(),
-                notTerm);
+        return termFactory.getConversion2RDFLexicalFunctionalTerm(
+                dbBooleanType,
+                notTerm,
+                xsdBooleanType);
     }
 
     @Override
