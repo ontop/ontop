@@ -342,8 +342,7 @@ public interface TermFactory {
 	/**
 	 * May "normalize"
 	 */
-	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term,
-													 RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
 
 	/**
 	 * May "denormalize"

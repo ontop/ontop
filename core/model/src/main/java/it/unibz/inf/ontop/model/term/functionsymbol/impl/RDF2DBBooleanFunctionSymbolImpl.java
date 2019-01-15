@@ -11,12 +11,14 @@ import java.util.Optional;
 
 public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
+    private final RDFDatatype xsdBooleanType;
     private final DBTermType dbBooleanTermType;
     private final DBTermType dbStringTermType;
 
     protected RDF2DBBooleanFunctionSymbolImpl(RDFDatatype xsdBooleanType, DBTermType dbBooleanTermType,
                                               DBTermType dbStringTermType) {
         super("RDF_2_DB_BOOL", ImmutableList.of(xsdBooleanType), dbBooleanTermType);
+        this.xsdBooleanType = xsdBooleanType;
         this.dbBooleanTermType = dbBooleanTermType;
         this.dbStringTermType = dbStringTermType;
     }
@@ -43,7 +45,8 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+                                                     boolean isInConstructionNodeInOptimizationPhase,
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof Constant) {
             Constant newConstant = (Constant) newTerm;
@@ -58,7 +61,7 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
                 && (((ImmutableFunctionalTerm) newTerm).getFunctionSymbol()) instanceof RDFTermFunctionSymbol) {
             // TODO: shall we check the RDF datatype?
             ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) newTerm).getTerm(0);
-            return termFactory.getDBCastFunctionalTerm(dbStringTermType, dbBooleanTermType, lexicalTerm)
+            return termFactory.getConversionFromRDFLexical2DB(dbBooleanTermType, lexicalTerm, xsdBooleanType)
                     .simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
         }
         else
