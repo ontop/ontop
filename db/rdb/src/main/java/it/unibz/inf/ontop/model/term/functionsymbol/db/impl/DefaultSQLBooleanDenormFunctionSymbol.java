@@ -10,9 +10,9 @@ import java.util.function.Function;
 /**
  * SQL-specific
  */
-public class DefaultSQLBooleanNormFunctionSymbol extends AbstractBooleanNormFunctionSymbol {
+public class DefaultSQLBooleanDenormFunctionSymbol extends AbstractBooleanDenormFunctionSymbol {
 
-    protected DefaultSQLBooleanNormFunctionSymbol(DBTermType booleanType, DBTermType stringType) {
+    protected DefaultSQLBooleanDenormFunctionSymbol(DBTermType booleanType, DBTermType stringType) {
         super(booleanType, stringType);
     }
 

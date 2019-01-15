@@ -42,7 +42,7 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getConversion2RDFLexicalFunctionalTerm(
+        return termFactory.getConversion2RDFLexical(
                 dbTypeFactory.getDBBooleanType(),
                 termFactory.getDBRegexpMatches(subLexicalTerms),
                 xsdBooleanType);

@@ -340,9 +340,16 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
 
 	/**
-	 * TODO: explain
+	 * May "normalize"
 	 */
-	ImmutableFunctionalTerm getConversion2RDFLexicalFunctionalTerm(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term,
+													 RDFTermType rdfTermType);
+
+	/**
+	 * May "denormalize"
+	 */
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
+														   RDFTermType rdfType);
 
 	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term

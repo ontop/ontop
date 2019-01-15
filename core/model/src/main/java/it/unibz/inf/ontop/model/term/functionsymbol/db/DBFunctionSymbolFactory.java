@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
@@ -42,6 +43,12 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType);
+
+    /**
+     * From a possibly "normalized" DB string to another DB type
+     */
+    DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType, RDFTermType rdfType);
+
 
     /**
      * Not for special DB function symbols such as casts.
@@ -124,4 +131,5 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBStrBefore();
     DBFunctionSymbol getDBStrAfter();
+
 }

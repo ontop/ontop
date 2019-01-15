@@ -31,9 +31,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBBooleanFunctionSymbol isStringEmpty;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
+                                                 ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
-        super(normalizationTable, regularFunctionTable, typeFactory);
+        super(normalizationTable, deNormalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -59,6 +60,26 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
                 new DefaultSQLBooleanNormFunctionSymbol(booleanType, stringType));
+
+        return builder.build();
+    }
+
+    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
+            TypeFactory typeFactory) {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+        DBTermType stringType = dbTypeFactory.getDBStringType();
+        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
+                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
+        // Boolean
+        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
+                new DefaultSQLBooleanDenormFunctionSymbol(booleanType, stringType));
 
         return builder.build();
     }

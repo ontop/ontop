@@ -52,6 +52,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      *  For conversion function symbols that implies a NORMALIZATION as RDF lexical term
      */
     private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
+
+    /**
+     *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
+     */
+    private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
+
+
     /**
      *  For conversion function symbols that are SIMPLE CASTs from a determined type (no normalization)
      */
@@ -110,11 +117,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
     protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
+                                              ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                               ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
+        this.deNormalizationTable = deNormalizationTable;
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -393,5 +402,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .flatMap(t -> Optional.ofNullable(normalizationTable.get(inputType, t)))
                 // Fallback to simple cast
                 .orElseGet(() -> getDBCastFunctionSymbol(inputType, dbStringType));
+    }
+
+    @Override
+    public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType,
+                                                                                       RDFTermType rdfTermType) {
+        return Optional.of(rdfTermType)
+                .filter(t -> t instanceof RDFDatatype)
+                .map(t -> (RDFDatatype) t)
+                .flatMap(t -> Optional.ofNullable(deNormalizationTable.get(targetDBType, t)))
+                // Fallback to simple cast
+                .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
 }

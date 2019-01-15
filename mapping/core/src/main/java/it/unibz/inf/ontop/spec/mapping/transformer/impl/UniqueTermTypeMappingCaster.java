@@ -167,7 +167,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .map(i ->
                         i.equals(dBStringType)
                                 ? uncastLexicalTerm
-                                : termFactory.getConversion2RDFLexicalFunctionalTerm(i, uncastLexicalTerm, rdfType))
+                                : termFactory.getConversion2RDFLexical(i, uncastLexicalTerm, rdfType))
                 .orElseGet(() -> termFactory.getDBCastFunctionalTerm(dBStringType, uncastLexicalTerm));
     }
 

@@ -38,7 +38,7 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        return termFactory.getConversion2RDFLexicalFunctionalTerm(
+        return termFactory.getConversion2RDFLexical(
                 dbTypeFactory.getDBBooleanType(),
                 computeDBBooleanTerm(subLexicalTerms, typeTerms, termFactory),
                 xsdBooleanType);

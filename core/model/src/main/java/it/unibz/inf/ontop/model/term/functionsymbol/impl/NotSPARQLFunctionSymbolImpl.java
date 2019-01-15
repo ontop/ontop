@@ -30,12 +30,12 @@ public class NotSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 
         ImmutableExpression notTerm = termFactory.getDBNot(
-                (ImmutableExpression) termFactory.getDBCastFunctionalTerm(
-                        dbTypeFactory.getDBStringType(),
+                (ImmutableExpression) termFactory.getConversionFromRDFLexical2DB(
                         dbBooleanType,
-                        subLexicalTerms.get(0)));
+                        subLexicalTerms.get(0),
+                        xsdBooleanType));
 
-        return termFactory.getConversion2RDFLexicalFunctionalTerm(
+        return termFactory.getConversion2RDFLexical(
                 dbBooleanType,
                 notTerm,
                 xsdBooleanType);
