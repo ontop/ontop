@@ -492,6 +492,26 @@ public class BindWithFunctionsTest {
     }
 
     @Test
+    public void testNotFilter() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(?title AS ?w)\n"
+                + "   FILTER(!CONTAINS(?title,\"Semantic\"))\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
     public void testBindWithUcase() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
