@@ -19,6 +19,7 @@ public class XPathFunction {
     public static final IRI REPLACE;
     public static final IRI SUBSTRING_BEFORE;
     public static final IRI SUBSTRING_AFTER;
+    public static final IRI NOT;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -34,5 +35,6 @@ public class XPathFunction {
         REPLACE = factory.createIRI(PREFIX + "replace");
         SUBSTRING_BEFORE = factory.createIRI(PREFIX + "substring-before");
         SUBSTRING_AFTER = factory.createIRI(PREFIX + "substring-after");
+        NOT = factory.createIRI(PREFIX + "not");
     }
 }

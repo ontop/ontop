@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
@@ -632,7 +633,9 @@ public class SparqlAlgebraToDatalogTranslator {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
 
             if (expr instanceof Not) {
-                return termFactory.getFunctionNOT(term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1).get(),
+                        term);
             }
             else if (expr instanceof IsNumeric) {
                 return termFactory.getFunction(
