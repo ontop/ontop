@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -59,6 +56,13 @@ public abstract class AbstractBooleanDenormFunctionSymbol
      */
     protected String deNormalizeValue(String value) {
         return value.toUpperCase();
+    }
+
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory) {
+        if (subTerm.getFunctionSymbol() instanceof AbstractBooleanNormFunctionSymbol) {
+            return subTerm.getTerm(0);
+        }
+        return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 
     @Override
