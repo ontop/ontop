@@ -151,7 +151,12 @@ public interface TermFactory {
 	 * Boolean function terms
 	 */
 
-	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
+	// TODO: distinguish the strict and non-strict equalities
+	default Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getFunctionStrictEQ(firstTerm, secondTerm);
+	}
+
+	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
 
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 
