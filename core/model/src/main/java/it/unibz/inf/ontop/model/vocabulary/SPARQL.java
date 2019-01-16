@@ -17,5 +17,5 @@ public class SPARQL {
     public static final String REGEX = "REGEX";
     public static final String LOGICAL_AND = "&&";
     public static final String LOGICAL_OR = "||";
-
+    public static final String BOUND = "BOUND";
 }

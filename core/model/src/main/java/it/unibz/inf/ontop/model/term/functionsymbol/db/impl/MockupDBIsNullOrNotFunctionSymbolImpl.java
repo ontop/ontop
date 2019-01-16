@@ -10,8 +10,8 @@ import java.util.function.Function;
 
 public class MockupDBIsNullOrNotFunctionSymbolImpl extends AbstractDBIsNullOrNotFunctionSymbol {
 
-    protected MockupDBIsNullOrNotFunctionSymbolImpl(boolean isNull, DBTermType dbBooleanTermType, TermType rootTermType) {
-        super(isNull, dbBooleanTermType, rootTermType);
+    protected MockupDBIsNullOrNotFunctionSymbolImpl(boolean isNull, DBTermType dbBooleanTermType, DBTermType rootDBTermType) {
+        super(isNull, dbBooleanTermType, rootDBTermType);
     }
 
     @Override

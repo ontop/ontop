@@ -13,8 +13,8 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
 
     private final boolean isNull;
 
-    protected AbstractDBIsNullOrNotFunctionSymbol(boolean isNull, DBTermType dbBooleanTermType, TermType rootTermType) {
-        super(isNull ? IS_NULL_NAME : IS_NOT_NULL_NAME, ImmutableList.of(rootTermType), dbBooleanTermType);
+    protected AbstractDBIsNullOrNotFunctionSymbol(boolean isNull, DBTermType dbBooleanTermType, DBTermType rootDBTermType) {
+        super(isNull ? IS_NULL_NAME : IS_NOT_NULL_NAME, ImmutableList.of(rootDBTermType), dbBooleanTermType);
         this.isNull = isNull;
     }
 

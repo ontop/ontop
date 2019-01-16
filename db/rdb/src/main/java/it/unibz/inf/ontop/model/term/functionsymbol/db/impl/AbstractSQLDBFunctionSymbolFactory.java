@@ -44,8 +44,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
         this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
-        this.isNull = createDBIsNull(dbBooleanType, abstractRootType);
-        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootType);
+        this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
+        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -199,12 +199,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLIsStringEmptyFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsNull(DBTermType dbBooleanType, TermType abstractAtomicTermType) {
-        return new DefaultSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, abstractAtomicTermType);
+    protected DBBooleanFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, rootDBTermType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, TermType abstractAtomicTermType) {
-        return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, abstractAtomicTermType);
+    protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
     }
 
     @Override
