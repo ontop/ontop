@@ -19,7 +19,7 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
 
     protected AbstractBinaryBooleanOperatorSPARQLFunctionSymbol(@Nonnull String functionSymbolName, @Nonnull String officialName,
                                                                 RDFDatatype xsdBooleanType) {
-        super(functionSymbolName, officialName, ImmutableList.of(xsdBooleanType));
+        super(functionSymbolName, officialName, ImmutableList.of(xsdBooleanType, xsdBooleanType));
         this.xsdBooleanType = xsdBooleanType;
     }
 
