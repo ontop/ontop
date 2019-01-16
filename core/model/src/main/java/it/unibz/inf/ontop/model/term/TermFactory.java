@@ -174,10 +174,6 @@ public interface TermFactory {
 
 	public Expression getFunctionIsTrue(Term term);
 
-	public Expression getFunctionIsNull(Term term);
-
-	public Expression getFunctionIsNotNull(Term term);
-
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification

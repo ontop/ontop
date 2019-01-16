@@ -476,17 +476,6 @@ public class TermFactoryImpl implements TermFactory {
 	public Expression getFunctionOR(Term term1, Term term2) {
 		return getExpression(dbFunctionSymbolFactory.getDBOr(2), term1, term2);
 	}
-
-
-	@Override
-	public Expression getFunctionIsNull(Term term) {
-		return getExpression(BooleanExpressionOperation.IS_NULL, term);
-	}
-
-	@Override
-	public Expression getFunctionIsNotNull(Term term) {
-		return getExpression(BooleanExpressionOperation.IS_NOT_NULL, term);
-	}
 	
 	@Override
 	public BNode getConstantBNode(String name) {

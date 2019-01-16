@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 
 public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
@@ -42,7 +40,7 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
         return nullableGroups.stream()
                 .map(g -> g.stream().findFirst())
                 .map(Optional::get)
-                .map(v -> termFactory.getImmutableExpression(IS_NOT_NULL, v))
+                .map(termFactory::getDBIsNotNull)
                 .reduce(null, (a, b) -> (a == null) ? b : termFactory.getConjunction(a, b));
     }
 

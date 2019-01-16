@@ -87,15 +87,15 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     private boolean isExpressionNullable(ImmutableExpression expression, ImmutableSet<Variable> nullableVariables) {
         BooleanFunctionSymbol functionSymbol = expression.getFunctionSymbol();
 
-        if (functionSymbol instanceof BooleanExpressionOperation) {
-            switch((BooleanExpressionOperation) functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    return false;
-                default:
-                    break;
-            }
-        }
+//        if (functionSymbol instanceof BooleanExpressionOperation) {
+//            switch((BooleanExpressionOperation) functionSymbol) {
+//                case IS_NOT_NULL:
+//                case IS_NULL:
+//                    return false;
+//                default:
+//                    break;
+//            }
+//        }
         // TODO: support COALESCE and IF-THEN-ELSE (they will need to use isFilteringNullValue)
 
         return hasNullableArgument(expression, nullableVariables);

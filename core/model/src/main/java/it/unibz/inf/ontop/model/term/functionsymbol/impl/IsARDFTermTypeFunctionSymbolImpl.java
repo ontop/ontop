@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 /**
  * TODO: find a better name!
  */
@@ -68,7 +66,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                 .map(n -> termFactory.getStrictNEquality(term, n));
 
         return termFactory.getConjunction(Stream.concat(
-                    Stream.of(termFactory.getImmutableExpression(IS_NOT_NULL, term)),
+                    Stream.of(termFactory.getDBIsNotNull(term)),
                     excludedMagicNumbers))
                 .get()
                 .simplify(false, variableNullability);

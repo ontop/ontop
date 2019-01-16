@@ -396,8 +396,7 @@ public class EmptyNodeRemovalTest {
     @Test(expected = EmptyQueryException.class)
     public void testJoinLJ2() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL, C)), B, false);
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNotNull(C)), B, false);
 
         optimizeUnsatisfiableQuery(query);
     }
@@ -405,8 +404,7 @@ public class EmptyNodeRemovalTest {
     @Test
     public void testJoinLJ3() throws EmptyQueryException {
 
-        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getImmutableExpression(
-                IS_NULL, C)), B, false);
+        IntermediateQuery query = generateJoinLJInitialQuery(Optional.of(TERM_FACTORY.getDBIsNull(C)), B, false);
 
         /*
          * Expected query
@@ -488,8 +486,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B, false))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL, C));
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C));
         queryBuilder.addChild(rootNode, filterNode);
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -512,8 +509,7 @@ public class EmptyNodeRemovalTest {
                         Y, generateURI1(B, true))));
         queryBuilder.init(PROJECTION_ATOM, rootNode);
 
-        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getImmutableExpression(
-                IS_NULL, C));
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNull(C));
         queryBuilder.addChild(rootNode, filterNode);
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
@@ -550,8 +546,7 @@ public class EmptyNodeRemovalTest {
 
         queryBuilder.addChild(lj1, DATA_NODE_2, LEFT);
 
-        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL, C));
+        InnerJoinNode join = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBIsNotNull(C));
         queryBuilder.addChild(lj1, join, RIGHT);
 
         queryBuilder.addChild(join, DATA_NODE_1);
@@ -813,7 +808,7 @@ public class EmptyNodeRemovalTest {
 //
 //        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
-//                        Y, TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, B))),
+//                        Y, TERM_FACTORY.getDBIsNotNull(B))),
 //                Optional.empty());
 //        queryBuilder.init(PROJECTION_ATOM, rootNode);
 //
@@ -832,7 +827,7 @@ public class EmptyNodeRemovalTest {
 //        IntermediateQueryBuilder expectedQueryBuilder = new DefaultIntermediateQueryBuilder(METADATA);
 //        ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(PROJECTION_ATOM.getVariables(),
 //                SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A),
-//                        Y, TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, OBDAVocabulary.NULL))),
+//                        Y, TERM_FACTORY.getDBIsNotNull(OBDAVocabulary.NULL))),
 //                Optional.empty());
 //        expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
 //
@@ -847,7 +842,7 @@ public class EmptyNodeRemovalTest {
     private static ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument,
                                                         boolean isNullable) {
         if (isNullable) {
-            ImmutableExpression condition = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, argument);
+            ImmutableExpression condition = TERM_FACTORY.getDBIsNotNull(argument);
             return TERM_FACTORY.getRDFFunctionalTerm(
                     TERM_FACTORY.getIfElseNull(condition, argument),
                     TERM_FACTORY.getIfElseNull(condition, TERM_FACTORY.getRDFTermTypeConstant(

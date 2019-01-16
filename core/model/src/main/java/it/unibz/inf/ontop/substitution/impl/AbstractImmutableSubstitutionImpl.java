@@ -407,17 +407,18 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
     /**
      * TODO: move it elsewhere
+     * TODO: refactor!!!
      */
     private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof BooleanExpressionOperation) {
-            switch((BooleanExpressionOperation)functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    // TODO: add COALESCE, EXISTS, NOT EXISTS
-                    return true;
-            }
-        }
+//        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+//        if (functionSymbol instanceof BooleanExpressionOperation) {
+//            switch((BooleanExpressionOperation)functionSymbol) {
+//                case IS_NOT_NULL:
+//                case IS_NULL:
+//                    // TODO: add COALESCE, EXISTS, NOT EXISTS
+//                    return true;
+//            }
+//        }
         return false;
     }
 

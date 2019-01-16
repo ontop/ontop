@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
 
     protected DefaultDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
@@ -32,7 +30,8 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
          */
         if (possibleValue instanceof Variable) {
             ImmutableExpression expression = (ImmutableExpression) terms.get(0);
-            if ((expression.getFunctionSymbol() == IS_NOT_NULL) && expression.getTerm(0).equals(possibleValue))
+            // TODO: make it more efficient?
+            if (expression.equals(termFactory.getDBIsNotNull(possibleValue)))
                 return possibleValue;
         }
         return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);

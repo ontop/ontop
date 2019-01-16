@@ -282,42 +282,42 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIsNotNullUri1() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI1(X));
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(generateURI1(X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNotNull(X));
     }
 
     @Test
     public void testIsNotNullUri2() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, generateURI2(X, Y));
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(generateURI2(X, Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
                 TERM_FACTORY.getConjunction(
-                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X),
-                        TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y)));
+                        TERM_FACTORY.getDBIsNotNull(X),
+                        TERM_FACTORY.getDBIsNotNull(Y)));
     }
 
     @Test
     public void testIsNotNullUri3() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNotNull(X));
     }
 
     @Ignore("TODO: optimize this case")
     @Test
     public void testIsNotNullUri4() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
@@ -328,8 +328,8 @@ public class ExpressionEvaluatorTest {
     @Ignore("TODO: support this tricky case")
     @Test
     public void testIsNotNullUriTrickyCase() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL,
-                generateURI1(TERM_FACTORY.getImmutableExpression(IS_NULL, X)));
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
+                generateURI1(TERM_FACTORY.getDBIsNull(X)));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
 
@@ -339,7 +339,7 @@ public class ExpressionEvaluatorTest {
         if (optionalExpression.isPresent()) {
             ImmutableExpression optimizedExpression = optionalExpression.get();
             assertNotEquals("Invalid optimization for " + initialExpression,
-                    optimizedExpression, TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X));
+                    optimizedExpression, TERM_FACTORY.getDBIsNotNull(X));
             fail("The expression " + initialExpression + " should be evaluated as true");
         }
         else {
@@ -350,41 +350,41 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIsNullUri1() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI1(X));
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(generateURI1(X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNull(X));
     }
 
     @Test
     public void testIsNullUri2() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL, generateURI2(X, Y));
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(generateURI2(X, Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone().evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
         assertEquals(optionalExpression.get(),
                 TERM_FACTORY.getDisjunction(
-                        TERM_FACTORY.getImmutableExpression(IS_NULL, X),
-                        TERM_FACTORY.getImmutableExpression(IS_NULL, Y)));
+                        TERM_FACTORY.getDBIsNull(X),
+                        TERM_FACTORY.getDBIsNull(Y)));
     }
 
     @Test
     public void testIsNullUri3() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(
                 generateURI2(TERM_FACTORY.getDBStringConstant("toto"), X));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(optionalExpression.get(), TERM_FACTORY.getImmutableExpression(IS_NULL, X));
+        assertEquals(optionalExpression.get(), TERM_FACTORY.getDBIsNull(X));
     }
 
     @Ignore("TODO: optimize this case")
     @Test
     public void testIsNullUri4() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(IS_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNull(
                 generateURI1(TERM_FACTORY.getDBStringConstant("toto")));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
@@ -395,21 +395,19 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIfElseNull1() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 TERM_FACTORY.getIfElseNull(
                     TERM_FACTORY.getStrictEquality(TRUE, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
                 .evaluateExpression(initialExpression);
         Optional<ImmutableExpression> optionalExpression = result.getOptionalExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, Y), optionalExpression.get());
+        assertEquals(TERM_FACTORY.getDBIsNotNull(Y), optionalExpression.get());
     }
 
     @Test
     public void testIfElseNull2() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(X, TRUE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()
@@ -421,8 +419,7 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIfElseNull3() {
-        ImmutableExpression initialExpression = TERM_FACTORY.getImmutableExpression(
-                IS_NOT_NULL,
+        ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
                 TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(TRUE, FALSE), Y));
         ExpressionEvaluator.EvaluationResult result = DEFAULT_EXPRESSION_EVALUATOR.clone()

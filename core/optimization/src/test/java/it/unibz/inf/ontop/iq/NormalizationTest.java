@@ -1592,7 +1592,7 @@ public class NormalizationTest {
         ConstructionNode rightConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, NULL));
 
-        ImmutableExpression topExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, X);
+        ImmutableExpression topExpression = TERM_FACTORY.getDBIsNotNull(X);
 
         NaryIQTree unionTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createUnionNode(leftConstruction.getVariables()),
                 ImmutableList.of(
@@ -1604,7 +1604,7 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ImmutableExpression newExpression = TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, B);
+        ImmutableExpression newExpression = TERM_FACTORY.getDBIsNotNull(B);
 
         ConstructionNode newConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X, D),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(B)));
@@ -1673,7 +1673,7 @@ public class NormalizationTest {
 
     private ImmutableFunctionalTerm createIfIsNotNullElseNull(Variable rightSpecificVariable, ImmutableTerm value) {
         return TERM_FACTORY.getIfElseNull(
-                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable), value);
+                TERM_FACTORY.getDBIsNotNull(rightSpecificVariable), value);
     }
 
     private static ImmutableExpression createExpression(Variable stringVariable) {

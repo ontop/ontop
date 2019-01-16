@@ -184,7 +184,9 @@ public class ExpressionParser {
         @Override
         public void visit(IsNullExpression expression) {
             Term term = termVisitor.getTerm(expression.getLeftExpression());
-            result = notOperation(expression.isNot()).apply(termFactory.getFunctionIsNull(term));
+            result = notOperation(expression.isNot()).apply(termFactory.getFunction(
+                    dbFunctionSymbolFactory.getDBIsNull(),
+                    term));
         }
 
         @Override
