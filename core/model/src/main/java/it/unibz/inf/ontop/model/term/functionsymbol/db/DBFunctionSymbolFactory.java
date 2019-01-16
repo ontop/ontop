@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -103,6 +104,9 @@ public interface DBFunctionSymbolFactory {
 
     DBNotFunctionSymbol getDBNot();
 
+    DBBooleanFunctionSymbol getDBIsNull();
+    DBBooleanFunctionSymbol getDBIsNotNull();
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
@@ -131,5 +135,4 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBStrBefore();
     DBFunctionSymbol getDBStrAfter();
-
 }

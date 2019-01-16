@@ -29,6 +29,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final TermType abstractRootType;
     private final DBFunctionSymbol ifThenElse;
     private final DBBooleanFunctionSymbol isStringEmpty;
+    private final DBBooleanFunctionSymbol isNull;
+    private final DBBooleanFunctionSymbol isNotNull;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
                                                  ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
@@ -42,6 +44,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
         this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
+        this.isNull = createDBIsNull(dbBooleanType, abstractRootType);
+        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootType);
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -195,6 +199,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLIsStringEmptyFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
+    protected DBBooleanFunctionSymbol createDBIsNull(DBTermType dbBooleanType, TermType abstractAtomicTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, abstractAtomicTermType);
+    }
+
+    protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, TermType abstractAtomicTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, abstractAtomicTermType);
+    }
+
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), targetType);
@@ -291,6 +303,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         if (arity < 2)
             throw new IllegalArgumentException("Arity of OR must be >= 2");
         return (DBOrFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNull() {
+        return isNull;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNotNull() {
+        return isNotNull;
     }
 
     @Override

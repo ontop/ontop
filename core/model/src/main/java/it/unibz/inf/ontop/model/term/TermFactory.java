@@ -467,4 +467,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm);
+
+	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
+	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
 }

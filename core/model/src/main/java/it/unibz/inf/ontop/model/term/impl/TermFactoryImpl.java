@@ -427,7 +427,17 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
 	}
 
+    @Override
+    public ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNull(), immutableTerm);
+    }
+
 	@Override
+	public ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNotNull(), immutableTerm);
+	}
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

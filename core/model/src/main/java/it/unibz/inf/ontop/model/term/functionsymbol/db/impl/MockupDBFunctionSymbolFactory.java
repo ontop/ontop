@@ -218,6 +218,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBIsNull() {
+        return new MockupDBIsNullOrNotFunctionSymbolImpl(true, dbBooleanType, abstractRootType);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNotNull() {
+        return new MockupDBIsNullOrNotFunctionSymbolImpl(false, dbBooleanType, abstractRootType);
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBIsStringEmpty() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
