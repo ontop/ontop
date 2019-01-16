@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -98,6 +99,11 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 					? EvaluationResult.declareIsNull()
 					: EvaluationResult.declareSameExpression();
 		}
+	}
+
+	@Override
+	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
+		return nullableVariables.contains(this);
 	}
 
 	@Override

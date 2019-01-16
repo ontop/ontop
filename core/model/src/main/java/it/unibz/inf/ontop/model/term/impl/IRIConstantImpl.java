@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
@@ -99,6 +100,11 @@ public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRICon
 		}
 		else
 			return otherTerm.evaluateStrictEq(this, variableNullability);
+	}
+
+	@Override
+	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
+		return false;
 	}
 
 	@Deprecated

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -146,4 +147,12 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         return functionSymbol.canBePostProcessed(terms);
     }
 
+    @Override
+    public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
+        ImmutableSet<Integer> nullableIndexes = IntStream.range(0, getArity())
+                .filter(i -> getTerm(i).isNullable(nullableVariables))
+                .boxed()
+                .collect(ImmutableCollectors.toSet());
+        return functionSymbol.isNullable(nullableIndexes);
+    }
 }

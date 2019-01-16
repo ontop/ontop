@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -80,6 +81,14 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
         return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * By default, to be overridden by function symbols that supports tolerate NULL values
+     */
+    @Override
+    public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
+        return mayReturnNullWithoutNullArguments() || (!nullableIndexes.isEmpty());
     }
 
     /**

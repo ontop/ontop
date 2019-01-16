@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -70,6 +71,11 @@ public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConst
         }
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);
+    }
+
+    @Override
+    public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
+        return false;
     }
 
     @Override

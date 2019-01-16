@@ -373,7 +373,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
             ImmutableSet<Variable> nullableVariables = substitutionValue.getVariableStream()
                     .filter(v -> isChildVariableNullable(query, v))
                     .collect(ImmutableCollectors.toSet());
-            return nullabilityEvaluator.isNullable(substitutionValue, nullableVariables);
+            return substitutionValue.isNullable(nullableVariables);
 
         }
         else if (substitutionValue instanceof Constant) {

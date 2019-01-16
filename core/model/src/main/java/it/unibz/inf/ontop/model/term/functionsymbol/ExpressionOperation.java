@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -157,6 +158,11 @@ public enum ExpressionOperation implements FunctionSymbol {
 	@Override
 	public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
 		return false;
+	}
+
+	@Override
+	public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
+		return !nullableIndexes.isEmpty();
 	}
 
 	@Override

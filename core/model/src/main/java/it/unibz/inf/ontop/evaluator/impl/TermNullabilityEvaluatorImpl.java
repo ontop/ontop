@@ -29,23 +29,6 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
     }
 
     @Override
-    public boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableVariables) {
-
-        if (term instanceof ImmutableFunctionalTerm) {
-            return isFunctionalTermNullable((ImmutableFunctionalTerm) term, nullableVariables);
-        }
-        else if (term instanceof Constant) {
-            return term.equals(valueNull);
-        }
-        else if (term instanceof Variable) {
-            return nullableVariables.contains(term);
-        }
-        else {
-            throw new IllegalStateException("Unexpected immutable term");
-        }
-    }
-
-    @Override
     public boolean isFilteringNullValue(ImmutableExpression expression, Variable variable) {
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
                 .applyToBooleanExpression(expression);
@@ -67,37 +50,5 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
                 .evaluateExpression(nullCaseExpression);
         return evaluationResult.isEffectiveFalse();
-    }
-
-    private boolean isFunctionalTermNullable(ImmutableFunctionalTerm functionalTerm,
-                                             ImmutableSet<Variable> nullableVariables) {
-        if (functionalTerm instanceof ImmutableExpression) {
-            return isExpressionNullable((ImmutableExpression)functionalTerm, nullableVariables);
-        }
-        else {
-            return hasNullableArgument(functionalTerm, nullableVariables);
-        }
-    }
-
-    private boolean hasNullableArgument(ImmutableFunctionalTerm functionalTerm, ImmutableSet<Variable> nullableVariables) {
-        return functionalTerm.getTerms().stream()
-                .anyMatch(t -> isNullable(t, nullableVariables));
-    }
-
-    private boolean isExpressionNullable(ImmutableExpression expression, ImmutableSet<Variable> nullableVariables) {
-        BooleanFunctionSymbol functionSymbol = expression.getFunctionSymbol();
-
-//        if (functionSymbol instanceof BooleanExpressionOperation) {
-//            switch((BooleanExpressionOperation) functionSymbol) {
-//                case IS_NOT_NULL:
-//                case IS_NULL:
-//                    return false;
-//                default:
-//                    break;
-//            }
-//        }
-        // TODO: support COALESCE and IF-THEN-ELSE (they will need to use isFilteringNullValue)
-
-        return hasNullableArgument(expression, nullableVariables);
     }
 }

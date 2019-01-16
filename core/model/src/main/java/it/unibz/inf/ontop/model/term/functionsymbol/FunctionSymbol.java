@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -42,6 +43,8 @@ public interface FunctionSymbol extends Predicate {
      *
      */
     boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
+
+    boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 
 
     interface FunctionalTermNullability {
