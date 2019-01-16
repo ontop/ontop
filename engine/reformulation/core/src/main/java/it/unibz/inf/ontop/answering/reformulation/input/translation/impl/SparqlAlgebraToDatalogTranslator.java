@@ -694,10 +694,14 @@ public class SparqlAlgebraToDatalogTranslator {
             Term term2 = getExpression(bexpr.getRightArg(), variables);
 
             if (expr instanceof And) {
-                return termFactory.getFunctionAND(term1, term2);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2).get(),
+                        term1, term2);
             }
             else if (expr instanceof Or) {
-                return termFactory.getFunctionOR(term1, term2);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2).get(),
+                        term1, term2);
             }
             else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)

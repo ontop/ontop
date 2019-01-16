@@ -98,7 +98,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new RegexSPARQLFunctionSymbolImpl(3, xsdString, xsdBoolean),
                 new StrBeforeSPARQLFunctionSymbolImpl(xsdString),
                 new StrAfterSPARQLFunctionSymbolImpl(xsdString),
-                new NotSPARQLFunctionSymbolImpl(xsdBoolean)
+                new NotSPARQLFunctionSymbolImpl(xsdBoolean),
+                new LogicalOrSPARQLFunctionSymbolImpl(xsdBoolean),
+                new LogicalAndSPARQLFunctionSymbolImpl(xsdBoolean)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
