@@ -34,10 +34,7 @@ public class BoundSPARQLFunctionSymbolImpl extends AbstractUnaryBooleanSPARQLFun
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory,
                                                                     VariableNullability variableNullability) {
-        // TODO: find a more elegant way to return a positive evaluation
-        DBConstant trueValue = termFactory.getDBBooleanConstant(true);
-        return termFactory.getStrictEquality(trueValue, trueValue)
-                .evaluate(termFactory, variableNullability);
+        return termFactory.getPositiveEvaluation();
     }
 
     @Override
