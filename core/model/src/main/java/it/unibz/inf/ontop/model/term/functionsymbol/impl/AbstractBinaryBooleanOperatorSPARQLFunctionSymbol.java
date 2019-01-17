@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -13,7 +11,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends SPARQLFunctionSymbolImpl {
 
     private final RDFDatatype xsdBooleanType;
 
@@ -23,9 +21,39 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
         this.xsdBooleanType = xsdBooleanType;
     }
 
+
+    /**
+     * Type of the input is not checked as it cannot be a source of SPARQL errors.
+     *   --> such a type error would correspond to an internal bug.
+     *
+     *  Effective Boolean Values (EBVs) are expected to be ALREADY wrapped into a specialized function.
+     *
+     */
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+    protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                           boolean isInConstructionNodeInOptimizationPhase,
+                                                           TermFactory termFactory, VariableNullability variableNullability) {
+        if (newTerms.stream()
+                .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {
+
+            ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
+                    .map(t -> extractLexicalTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, termFactory);
+
+            // The type term only depends on the presence of a non-null lexical term
+            ImmutableTerm typeTerm = termFactory.getIfElseNull(
+                    termFactory.getDBIsNotNull(lexicalTerm),
+                    termFactory.getRDFTermTypeConstant(xsdBooleanType));
+
+            return termFactory.getRDFFunctionalTerm(lexicalTerm, typeTerm);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, newTerms);
+    }
+
+    private ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, TermFactory termFactory) {
         DBTermType dbBooleanType = termFactory.getTypeFactory().getDBTypeFactory().getDBBooleanType();
 
         ImmutableList<ImmutableExpression> booleanSubTerms = subLexicalTerms.stream()
@@ -42,12 +70,6 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
     protected abstract ImmutableTerm computeExpression(ImmutableList<ImmutableExpression> subExpressions,
                                                        TermFactory termFactory);
 
-    @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
-                                            ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                            VariableNullability variableNullability) {
-        return termFactory.getRDFTermTypeConstant(xsdBooleanType);
-    }
 
     @Override
     protected boolean isAlwaysInjective() {
