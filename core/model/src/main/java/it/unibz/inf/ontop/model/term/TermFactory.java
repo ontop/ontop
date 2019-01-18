@@ -285,11 +285,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * Returns RDF(NULL, NULL)
-	 */
-	ImmutableFunctionalTerm getNullRDFFunctionalTerm();
-
-	/**
 	 * TODO: use a more precise type for the argument
 	 */
 	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
