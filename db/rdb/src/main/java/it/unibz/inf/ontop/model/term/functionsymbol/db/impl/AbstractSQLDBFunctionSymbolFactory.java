@@ -15,6 +15,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
     protected static final String AND_STR = "AND";
     protected static final String OR_STR = "OR";
+    protected static final String NOT_STR = "NOT";
     protected static final String SUBSTR_STR = "SUBSTR";
     protected static final String SUBSTRING_STR = "SUBSTRING";
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
@@ -28,11 +29,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final TermType abstractRootType;
     private final DBFunctionSymbol ifThenElse;
     private final DBBooleanFunctionSymbol isStringEmpty;
+    private final DBBooleanFunctionSymbol isNull;
+    private final DBBooleanFunctionSymbol isNotNull;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
+                                                 ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
-        super(normalizationTable, regularFunctionTable, typeFactory);
+        super(normalizationTable, deNormalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -40,6 +44,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
         this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
+        this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
+        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -58,6 +64,26 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
                 new DefaultSQLBooleanNormFunctionSymbol(booleanType, stringType));
+
+        return builder.build();
+    }
+
+    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
+            TypeFactory typeFactory) {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+        DBTermType stringType = dbTypeFactory.getDBStringType();
+        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
+                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
+        // Boolean
+        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
+                new DefaultSQLBooleanDenormFunctionSymbol(booleanType, stringType));
 
         return builder.build();
     }
@@ -160,12 +186,25 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
     }
 
+    @Override
+    protected DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
+        return new DefaultDBNotFunctionSymbol(NOT_STR, dbBooleanType);
+    }
+
     protected DBFunctionSymbol createDBIfThenElse(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
         return new DefaultSQLIfThenElseFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
     protected DBBooleanFunctionSymbol createIsStringEmpty(DBTermType dbBooleanType, DBTermType abstractRootDBType) {
         return new DefaultSQLIsStringEmptyFunctionSymbol(dbBooleanType, abstractRootDBType);
+    }
+
+    protected DBBooleanFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, rootDBTermType);
+    }
+
+    protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
     }
 
     @Override
@@ -253,17 +292,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBAnd(int arity) {
+    public DBAndFunctionSymbol getDBAnd(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+        return (DBAndFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBOr(int arity) {
+    public DBOrFunctionSymbol getDBOr(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of OR must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+        return (DBOrFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNull() {
+        return isNull;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNotNull() {
+        return isNotNull;
     }
 
     @Override

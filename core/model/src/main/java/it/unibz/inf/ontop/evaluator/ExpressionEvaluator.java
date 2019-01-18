@@ -239,12 +239,6 @@ public class ExpressionEvaluator {
 		}
 		else if (functionSymbol instanceof BooleanExpressionOperation) {
 			switch((BooleanExpressionOperation) functionSymbol){
-				case NOT:
-					return evalNot(term, variableNullability);
-				case IS_NULL:
-					return evalIsNullNotNull(term, true, variableNullability);
-				case IS_NOT_NULL:
-					return evalIsNullNotNull(term, false, variableNullability);
 				case IS_TRUE:
 					return evalIsTrue(term, variableNullability);
 				case GTE:
@@ -293,134 +287,12 @@ public class ExpressionEvaluator {
 					"to be a ImmutableExpression, not " + newCondition);
 	}
 
-	private ImmutableTerm evalIsNullNotNull(ImmutableFunctionalTerm term, boolean isnull, VariableNullability variableNullability) {
-		ImmutableTerm innerTerm = term.getTerms().get(0);
-		if (innerTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalInnerTerm = (ImmutableFunctionalTerm) innerTerm;
-			FunctionSymbol functionSymbol = functionalInnerTerm.getFunctionSymbol();
-			if (functionSymbol instanceof RDFTermType) {
-
-				ImmutableFunctionalTerm isNotNullInnerInnerTerm = termFactory.getImmutableFunctionalTerm(
-						isnull ? IS_NULL : IS_NOT_NULL,
-						((ImmutableFunctionalTerm) innerTerm).getTerm(0));
-				return evalIsNullNotNull(isNotNullInnerInnerTerm , isnull, variableNullability);
-			}
-		}
-		ImmutableTerm result = eval(innerTerm, variableNullability);
-		if (result == valueNull) {
-			return termFactory.getDBBooleanConstant(isnull);
-		}
-		else if (result instanceof Constant) {
-			return termFactory.getDBBooleanConstant(!isnull);
-		}
-
-		if (result instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) result;
-			FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-			/*
-			 * Special optimization for URI templates
-			 */
-			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-				return simplifyIsNullorNotNullUriTemplate(functionalTerm, isnull, variableNullability);
-			}
-			/*
-			 * All the functions that accepts null
-			 * TODO: add COALESCE
-			 */
-			else if (functionSymbol != IS_NULL
-					&& functionSymbol != IS_NOT_NULL
-					// TODO: use something else!
-					&& (!(functionSymbol instanceof AbstractDBIfThenFunctionSymbol))) {
-				ImmutableExpression notNullExpression = termFactory.getConjunction(
-						functionalTerm.getTerms().stream()
-								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))).get();
-				return eval(isnull
-						? termFactory.getImmutableFunctionalTerm(NOT, notNullExpression)
-						: notNullExpression,
-						variableNullability);
-			}
-		}
-
-		// TODO improve evaluation of is (not) null
-		/*
-		 * This can be improved by evaluating some of the function, e.g,. URI
-		 * and Bnodes never return null
-		 */
-		if (isnull) {
-			return termFactory.getImmutableFunctionalTerm(IS_NULL, result);
-		} else {
-			return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, result);
-		}
-	}
-
-	/**
-	 * TODO: make it stronger (in case someone uses complex sub-terms such as IS_NULL(x) inside the URI template...)
-	 */
-	private ImmutableTerm simplifyIsNullorNotNullUriTemplate(ImmutableFunctionalTerm uriTemplate, boolean isNull, VariableNullability variableNullability) {
-		ImmutableList<? extends ImmutableTerm> terms = uriTemplate.getTerms();
-		if (isNull) {
-			switch (terms.size()) {
-				case 0:
-					return termFactory.getImmutableFunctionalTerm(IS_NULL, uriTemplate);
-				case 1:
-					return termFactory.getImmutableFunctionalTerm(IS_NULL, terms.get(0));
-				default:
-					return terms.stream()
-							.reduce(null,
-									(e, t) -> e == null
-											? termFactory.getImmutableExpression(IS_NULL, t)
-											: termFactory.getDisjunction((ImmutableExpression)e, termFactory.getImmutableExpression(IS_NULL, t)),
-									(e1, e2) -> e1 == null
-											? e2
-											: (e2 == null) ? e1 : termFactory.getDisjunction((ImmutableExpression) e1, (ImmutableExpression) e2));
-			}
-		}
-		else {
-			if (terms.isEmpty())
-				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, uriTemplate);
-			else
-				return eval(termFactory.getConjunction(
-						terms.stream()
-								.map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
-				).get(), variableNullability);
-		}
-	}
-
 	private ImmutableTerm evalIsTrue(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
 		ImmutableTerm teval = eval(term.getTerm(0), variableNullability);
-		if (teval instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm f = (ImmutableFunctionalTerm) teval;
-			FunctionSymbol functionSymbol = f.getFunctionSymbol();
-			if (functionSymbol == IS_NOT_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NOT_NULL, f.getTerm(0));
-			} else if (functionSymbol == IS_NULL) {
-				return termFactory.getImmutableFunctionalTerm(IS_NULL, f.getTerm(0));
-			}
-		} else if (teval instanceof Constant) {
+		if (teval instanceof Constant) {
 			return teval;
 		}
 		return term;
-	}
-
-
-	private ImmutableTerm evalNot(ImmutableFunctionalTerm term, VariableNullability variableNullability) {
-		ImmutableTerm initialSubTerm = term.getTerm(0);
-		ImmutableTerm teval = eval(initialSubTerm, variableNullability);
-		if (teval instanceof ImmutableExpression) {
-			return ((ImmutableExpression) teval).negate(termFactory);
-		} else if (teval instanceof Constant) {
-			if (teval == valueFalse)
-				return valueTrue;
-			else if (teval == valueTrue)
-				return valueFalse;
-			else if (teval == valueNull)
-				return teval;
-			// ROMAN (10 Jan 2017): this needs to be revised
-			return teval;
-		}
-		return initialSubTerm.equals(teval)
-				? term
-				: termFactory.getImmutableFunctionalTerm(NOT, teval);
 	}
 
 	/**

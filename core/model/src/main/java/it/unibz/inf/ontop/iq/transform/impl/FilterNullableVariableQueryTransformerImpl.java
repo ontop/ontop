@@ -28,8 +28,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 @Singleton
 public class FilterNullableVariableQueryTransformerImpl implements FilterNullableVariableQueryTransformer {
 
@@ -76,7 +74,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         Stream<ImmutableExpression> filteringExpressionStream = nullableProjectedVariables.stream()
                 .map(v -> Optional.ofNullable(topSubstitution.get(v))
                         .orElse(v))
-                .map(t -> termFactory.getImmutableExpression(IS_NOT_NULL, t))
+                .map(termFactory::getDBIsNotNull)
                 .distinct();
 
         ImmutableExpression nonOptimizedExpression = termFactory.getConjunction(filteringExpressionStream)

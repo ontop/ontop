@@ -105,8 +105,8 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
      */
     ImmutableSubstitution<T> reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 
-    ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
+    ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
 
-    ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase);
+    ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase);
 
 }

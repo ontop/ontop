@@ -44,6 +44,12 @@ public interface DBFunctionSymbolFactory {
     DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType);
 
     /**
+     * From a possibly "normalized" DB string to another DB type
+     */
+    DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType, RDFTermType rdfType);
+
+
+    /**
      * Not for special DB function symbols such as casts.
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
@@ -87,12 +93,17 @@ public interface DBFunctionSymbolFactory {
     /**
      * arity must be >= 2
      */
-    DBBooleanFunctionSymbol getDBAnd(int arity);
+    DBAndFunctionSymbol getDBAnd(int arity);
 
     /**
      * arity must be >= 2
      */
-    DBBooleanFunctionSymbol getDBOr(int arity);
+    DBOrFunctionSymbol getDBOr(int arity);
+
+    DBNotFunctionSymbol getDBNot();
+
+    DBBooleanFunctionSymbol getDBIsNull();
+    DBBooleanFunctionSymbol getDBIsNotNull();
 
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 

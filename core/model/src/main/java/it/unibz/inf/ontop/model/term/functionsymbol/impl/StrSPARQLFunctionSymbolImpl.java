@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
-
 
 public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
@@ -47,7 +45,7 @@ public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm typeTerm = typeTerms.get(0);
 
-        return termFactory.getImmutableExpression(NOT, termFactory.getIsAExpression(typeTerm, bnodeType))
+        return termFactory.getDBNot(termFactory.getIsAExpression(typeTerm, bnodeType))
                 .evaluate(termFactory, variableNullability);
     }
 

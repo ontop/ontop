@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
+public abstract class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     private final DBTermType booleanType;
 
@@ -58,9 +58,4 @@ public class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionF
         return value.toLowerCase();
     }
 
-    @Override
-    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
-                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
-    }
 }

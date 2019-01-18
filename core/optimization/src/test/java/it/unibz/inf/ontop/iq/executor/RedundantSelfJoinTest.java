@@ -995,7 +995,7 @@ public class RedundantSelfJoinTest {
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
                         TERM_FACTORY.getIfElseNull(
-                                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
+                                TERM_FACTORY.getDBIsNotNull(F0),
                                 M
                                 )));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
@@ -1180,7 +1180,7 @@ public class RedundantSelfJoinTest {
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M,
                         TERM_FACTORY.getIfElseNull(
-                                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F0),
+                                TERM_FACTORY.getDBIsNotNull(F0),
                                 O
                         )));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);

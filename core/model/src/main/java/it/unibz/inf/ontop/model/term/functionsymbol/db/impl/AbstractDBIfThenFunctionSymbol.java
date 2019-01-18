@@ -169,4 +169,9 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     protected boolean mayReturnNullWithoutNullArguments() {
         return true;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
+    }
 }

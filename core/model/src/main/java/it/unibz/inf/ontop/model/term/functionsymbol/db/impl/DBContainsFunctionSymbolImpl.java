@@ -50,4 +50,9 @@ public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
                                     TermFactory termFactory) {
         return serializer.getNativeDBString(terms, termConverter, termFactory);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

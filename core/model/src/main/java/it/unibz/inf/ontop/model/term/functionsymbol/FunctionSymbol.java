@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -29,6 +30,9 @@ public interface FunctionSymbol extends Predicate {
     EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                       TermFactory termFactory, VariableNullability variableNullability);
 
+    EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                       VariableNullability variableNullability);
+
     /**
      * 1. When a functional term simplifies itself in a BOTTOM-UP manner:
      *     Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments
@@ -42,6 +46,8 @@ public interface FunctionSymbol extends Predicate {
      *
      */
     boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
+
+    boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 
 
     interface FunctionalTermNullability {

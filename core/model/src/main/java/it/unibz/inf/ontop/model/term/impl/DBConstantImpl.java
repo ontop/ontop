@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Stream;
 
-public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConstant {
+public class DBConstantImpl extends AbstractNonNullConstant implements DBConstant {
     private final String value;
     private final DBTermType termType;
 

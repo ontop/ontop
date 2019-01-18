@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
@@ -7,7 +8,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.stream.Stream;
 
-public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implements RDFTermTypeConstant {
+public class RDFTermTypeConstantImpl extends AbstractNonNullConstant implements RDFTermTypeConstant {
 
     private final RDFTermType rdfTermType;
     private final MetaRDFTermType metaType;

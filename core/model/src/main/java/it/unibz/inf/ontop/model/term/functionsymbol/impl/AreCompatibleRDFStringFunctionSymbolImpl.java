@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
-
 /**
  * TODO: find a better name
  */
@@ -24,7 +22,7 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
 
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+        return termFactory.getDBNot(termFactory.getImmutableExpression(this, subTerms));
     }
 
     @Override
@@ -76,6 +74,11 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
 
     @Override
     protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
+
+    @Override
+    protected boolean tolerateNulls() {
         return false;
     }
 }

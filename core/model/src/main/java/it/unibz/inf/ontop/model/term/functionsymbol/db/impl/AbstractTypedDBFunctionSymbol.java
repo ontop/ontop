@@ -32,4 +32,9 @@ public abstract class AbstractTypedDBFunctionSymbol extends FunctionSymbolImpl i
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

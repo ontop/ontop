@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * Provides a storage to put the URI constant.
  */
-public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRIConstant {
+public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConstant {
 
 	private final int identifier;
 	private final IRI iri;

@@ -21,26 +21,18 @@ import java.util.stream.IntStream;
  *
  * Arity >= 1
  */
-public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements SPARQLFunctionSymbol {
-
-    @Nullable
-    private final IRI functionIRI;
-    private final String officialName;
+public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
 
     protected ReduciblePositiveAritySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull IRI functionIRI,
                                                              @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-        super(functionSymbolName, expectedBaseTypes);
-        this.functionIRI = functionIRI;
-        this.officialName = functionIRI.getIRIString();
+        super(functionSymbolName, functionIRI, expectedBaseTypes);
         if (expectedBaseTypes.isEmpty())
             throw new IllegalArgumentException("The arity must be >= 1");
     }
 
     protected ReduciblePositiveAritySPARQLFunctionSymbolImpl(@Nonnull String functionSymbolName, @Nonnull String officialName,
                                                              @Nonnull ImmutableList<TermType> expectedBaseTypes) {
-        super(functionSymbolName, expectedBaseTypes);
-        this.functionIRI = null;
-        this.officialName = officialName;
+        super(functionSymbolName, officialName, expectedBaseTypes);
         if (expectedBaseTypes.isEmpty())
             throw new IllegalArgumentException("The arity must be >= 1");
     }
@@ -49,13 +41,19 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                            boolean isInConstructionNodeInOptimizationPhase,
                                                            TermFactory termFactory, VariableNullability variableNullability) {
+        if ((!tolerateNulls()
+                && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull())))
+            return termFactory.getNullConstant();
+
         if (newTerms.stream()
-                .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof RDFConstant))) {
+                .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {
             ImmutableList<ImmutableTerm> typeTerms = newTerms.stream()
                     .map(t -> extractRDFTermTypeTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(typeTerms, termFactory, variableNullability);
+            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(typeTerms,
+                    termFactory, variableNullability);
+
             if (inputTypeErrorEvaluation.getValue().isPresent()) {
                 switch (inputTypeErrorEvaluation.getValue().get()) {
                     case FALSE:
@@ -92,13 +90,21 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private boolean isRDFFunctionalTerm(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
+    /**
+     * By default, does not tolerate receiving NULLs (SPARQL errors) as input
+     */
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
     }
 
-    /**
+    /***
+     * MUST detect ALL the cases where the SPARQL function would produce an error (that is a NULL)
+     * ---> the resulting condition must determine if the output of the SPARQL function is NULL (evaluates to FALSE or NULL)
+     *      or not (evaluates to TRUE).
+     *
      * Default implementation, can be overridden
+     *
      */
     protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
@@ -111,22 +117,6 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                  .evaluate(termFactory, variableNullability);
     }
 
-    private ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        if (isRDFFunctionalTerm(rdfTerm))
-            return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
-        else if (rdfTerm instanceof RDFConstant)
-            return termFactory.getRDFTermTypeConstant(((RDFConstant) rdfTerm).getType());
-        throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant");
-    }
-
-    private ImmutableTerm extractLexicalTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        if (isRDFFunctionalTerm(rdfTerm))
-            return ((ImmutableFunctionalTerm)rdfTerm).getTerm(0);
-        else if (rdfTerm instanceof RDFConstant)
-            return termFactory.getDBStringConstant(((RDFConstant) rdfTerm).getValue());
-        throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant");
-    }
-
     /**
      * Compute the lexical term when there is no input type error
      */
@@ -137,22 +127,4 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends Fun
                                                      ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability);
 
-    @Override
-    public Optional<IRI> getIRI() {
-        return Optional.ofNullable(functionIRI);
-    }
-
-    @Override
-    public String getOfficialName() {
-        return officialName;
-    }
-
-    /**
-     * Default value for SPARQL functions as they may produce NULL due
-     * to SPARQL errors
-     */
-    @Override
-    protected boolean mayReturnNullWithoutNullArguments() {
-        return true;
-    }
 }

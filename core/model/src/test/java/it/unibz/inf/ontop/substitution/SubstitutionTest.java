@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
 import static org.junit.Assert.assertEquals;
 
 public class SubstitutionTest {
@@ -140,7 +139,7 @@ public class SubstitutionTest {
 
         ImmutableSubstitution<ImmutableTerm> initialSubstitution = SUBSTITUTION_FACTORY.getSubstitution(
                 ImmutableMap.of(
-                        X, TERM_FACTORY.getImmutableFunctionalTerm(IS_NOT_NULL, Y),
+                        X, TERM_FACTORY.getDBIsNotNull(Y),
                         Y, ONE
                 ));
 

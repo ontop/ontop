@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Collection;
 
 /**
  * TODO: find a better name
@@ -34,4 +37,10 @@ public interface VariableNullability {
 
     VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                ImmutableSet<Variable> projectedVariables);
+
+    default ImmutableSet<Variable> getNullableVariables() {
+        return getNullableGroups().stream()
+                .flatMap(Collection::stream)
+                .collect(ImmutableCollectors.toSet());
+    }
 }

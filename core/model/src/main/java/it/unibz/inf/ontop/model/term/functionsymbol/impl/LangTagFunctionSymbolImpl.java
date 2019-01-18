@@ -64,4 +64,9 @@ public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
         return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
 
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
+
 }

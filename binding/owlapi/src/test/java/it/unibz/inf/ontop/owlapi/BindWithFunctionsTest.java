@@ -432,8 +432,9 @@ public class BindWithFunctionsTest {
 
         checkReturnedValues(queryBind, expectedValues);
     }
+
     @Test
-    public void testContains() throws Exception {
+    public void testContainsFilter() throws Exception {
         
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -448,10 +449,108 @@ public class BindWithFunctionsTest {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(queryBind, expectedValues);
+    }
 
-    }    
-    
-  
+    @Test
+    public void testContainsBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testNotBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(!(CONTAINS(?title,\"Semantic\")) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testNotFilter() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(?title AS ?w)\n"
+                + "   FILTER(!CONTAINS(?title,\"Semantic\"))\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testAndBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testOrBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     @Test
     public void testBindWithUcase() throws Exception {
 

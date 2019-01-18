@@ -25,8 +25,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 @Singleton
 public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
@@ -551,7 +549,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return value;
 
             return termFactory.getIfElseNull(
-                    termFactory.getImmutableExpression(IS_NOT_NULL, rightProvenanceVariable),
+                    termFactory.getDBIsNotNull(rightProvenanceVariable),
                     value);
         }
 

@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
@@ -30,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNode {
+public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode {
 
 	private static final long serialVersionUID = 214867118996974157L;
 

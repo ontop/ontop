@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
@@ -626,13 +627,18 @@ public class SparqlAlgebraToDatalogTranslator {
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? termFactory.getFunctionIsNotNull(var) : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
+            return variables.contains(var)
+                    ? termFactory.getFunction(
+                            functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.BOUND, 1).get(), var)
+                    : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
         }
         else if (expr instanceof UnaryValueOperator) {
             Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
 
             if (expr instanceof Not) {
-                return termFactory.getFunctionNOT(term);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1).get(),
+                        term);
             }
             else if (expr instanceof IsNumeric) {
                 return termFactory.getFunction(
@@ -691,15 +697,19 @@ public class SparqlAlgebraToDatalogTranslator {
             Term term2 = getExpression(bexpr.getRightArg(), variables);
 
             if (expr instanceof And) {
-                return termFactory.getFunctionAND(term1, term2);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2).get(),
+                        term1, term2);
             }
             else if (expr instanceof Or) {
-                return termFactory.getFunctionOR(term1, term2);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2).get(),
+                        term1, term2);
             }
             else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)
-                // ROMAN (28 June 2016): strictly speaking it's not equality
-                return termFactory.getFunctionEQ(term1, term2);
+                // Corresponds to the STRICT equality (same lexical value, same type)
+                return termFactory.getFunctionStrictEQ(term1, term2);
             }
             else if (expr instanceof Regex) {
                 // REGEX (Sec 17.4.3.14)

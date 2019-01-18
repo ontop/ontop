@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -28,7 +29,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
-public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements RDFLiteralConstant {
+public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements RDFLiteralConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 

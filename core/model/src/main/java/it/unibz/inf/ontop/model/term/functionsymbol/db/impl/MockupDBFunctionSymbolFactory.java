@@ -21,6 +21,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private static final String AND_STR = "AND";
     private static final String OR_STR = "OR";
     private static final String CHAR_LENGTH_STR = "CHARLENGTH";
+    private static final String NOT_STR = "NOT";
     private final TermType abstractRootType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
@@ -28,7 +29,9 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory), createDefaultRegularFunctionTable(typeFactory), typeFactory);
+        super(createDefaultNormalizationTable(typeFactory),
+                createDefaultDenormalizationTable(typeFactory),
+                createDefaultRegularFunctionTable(typeFactory), typeFactory);
         abstractRootType = typeFactory.getAbstractAtomicTermType();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -38,8 +41,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
             TypeFactory typeFactory) {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        return builder.build();
+    }
 
+    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
+            TypeFactory typeFactory) {
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
         return builder.build();
     }
@@ -82,6 +89,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     private DBFunctionSymbol createDBOr(int arity) {
         return new DefaultDBOrFunctionSymbol(OR_STR, arity, dbBooleanType);
+    }
+
+    @Override
+    protected DBNotFunctionSymbol createDBNotFunctionSymbol(DBTermType dbBooleanType) {
+        return new DefaultDBNotFunctionSymbol(NOT_STR, dbBooleanType);
     }
 
     private DBFunctionSymbol createDBConcat(int arity) {
@@ -192,17 +204,27 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBAnd(int arity) {
+    public DBAndFunctionSymbol getDBAnd(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
+        return (DBAndFunctionSymbol) getRegularDBFunctionSymbol(AND_STR, arity);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBOr(int arity) {
+    public DBOrFunctionSymbol getDBOr(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of OR must be >= 2");
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+        return (DBOrFunctionSymbol) getRegularDBFunctionSymbol(OR_STR, arity);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNull() {
+        return new MockupDBIsNullOrNotFunctionSymbolImpl(true, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBIsNotNull() {
+        return new MockupDBIsNullOrNotFunctionSymbolImpl(false, dbBooleanType, abstractRootDBType);
     }
 
     @Override

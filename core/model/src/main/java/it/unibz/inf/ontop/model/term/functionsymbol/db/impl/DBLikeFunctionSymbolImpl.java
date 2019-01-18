@@ -48,4 +48,9 @@ public class DBLikeFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

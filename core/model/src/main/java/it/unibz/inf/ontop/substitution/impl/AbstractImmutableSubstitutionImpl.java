@@ -4,7 +4,6 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
@@ -28,13 +27,11 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     final AtomFactory atomFactory;
     final TermFactory termFactory;
     final SubstitutionFactory substitutionFactory;
-    private final Constant nullValue;
 
     protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.nullValue = termFactory.getNullConstant();
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -347,78 +344,24 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase,
-                                                                VariableNullability variableNullability) {
-        return normalizeValues(isInConstructionNodeInOptimizationPhase, Optional.of(variableNullability));
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase,
+                                                               VariableNullability variableNullability) {
+        return simplifyValues(isInConstructionNodeInOptimizationPhase, Optional.of(variableNullability));
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase) {
-        return normalizeValues(isInConstructionNodeInOptimizationPhase, Optional.empty());
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase) {
+        return simplifyValues(isInConstructionNodeInOptimizationPhase, Optional.empty());
     }
 
-    public ImmutableSubstitution<ImmutableTerm> normalizeValues(boolean isInConstructionNodeInOptimizationPhase,
-                                                                Optional<VariableNullability> variableNullability) {
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase,
+                                                               Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
-                .map(e -> Maps.immutableEntry(e.getKey(), (ImmutableTerm) e.getValue()))
-                .map(e -> applyNullNormalization(e, isInConstructionNodeInOptimizationPhase, variableNullability))
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    /**
-     * Most functional terms do not accept NULL as arguments. If this happens, they become NULL.
-     * TODO: just use the simplify method()
-     */
-    private Map.Entry<Variable, ImmutableTerm> applyNullNormalization(
-            Map.Entry<Variable, ImmutableTerm> substitutionEntry, boolean isInConstructionNodeInOptimizationPhase,
-            Optional<VariableNullability> variableNullability) {
-        ImmutableTerm value = substitutionEntry.getValue();
-        if (value instanceof ImmutableFunctionalTerm) {
-            ImmutableTerm normalizedTerm = normalizeFunctionalTerm((ImmutableFunctionalTerm) value);
-            ImmutableTerm newValue = variableNullability
-                    .map(n -> normalizedTerm.simplify(isInConstructionNodeInOptimizationPhase, n))
-                    .orElseGet(() -> normalizedTerm.simplify(isInConstructionNodeInOptimizationPhase));
-            return newValue.equals(value)
-                    ? substitutionEntry
-                    : new AbstractMap.SimpleEntry<>(substitutionEntry.getKey(), newValue);
-        }
-        return substitutionEntry;
-    }
-
-    private ImmutableTerm normalizeFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isSupportingNullArguments(functionalTerm)) {
-            return functionalTerm;
-        }
-
-        ImmutableList<ImmutableTerm> newArguments = functionalTerm.getTerms().stream()
-                .map(arg -> (arg instanceof ImmutableFunctionalTerm)
-                        ? normalizeFunctionalTerm((ImmutableFunctionalTerm) arg)
-                        : arg)
-                .collect(ImmutableCollectors.toList());
-        // Does not simplify RDF(NULL,NULL)
-        if ((!(functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol))
-                && newArguments.stream()
-                .anyMatch(arg -> arg.equals(nullValue))) {
-            return nullValue;
-        }
-
-        return termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newArguments);
-    }
-
-    /**
-     * TODO: move it elsewhere
-     */
-    private static boolean isSupportingNullArguments(ImmutableFunctionalTerm functionalTerm) {
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-        if (functionSymbol instanceof BooleanExpressionOperation) {
-            switch((BooleanExpressionOperation)functionSymbol) {
-                case IS_NOT_NULL:
-                case IS_NULL:
-                    // TODO: add COALESCE, EXISTS, NOT EXISTS
-                    return true;
-            }
-        }
-        return false;
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> variableNullability
+                                .map(n -> e.getValue().simplify(isInConstructionNodeInOptimizationPhase, n))
+                                .orElseGet(() -> e.getValue().simplify(isInConstructionNodeInOptimizationPhase)))));
     }
 
     protected Optional<ImmutableExpression> convertIntoBooleanExpression(

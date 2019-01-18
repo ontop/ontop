@@ -55,6 +55,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
@@ -237,9 +238,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(BooleanExpressionOperation.GTE, "%s >= %s")
 				.put(BooleanExpressionOperation.LT, "%s < %s")
 				.put(BooleanExpressionOperation.LTE, "%s <= %s")
-				.put(BooleanExpressionOperation.NOT, "NOT %s")
-				.put(BooleanExpressionOperation.IS_NULL, "%s IS NULL")
-				.put(BooleanExpressionOperation.IS_NOT_NULL, "%s IS NOT NULL")
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
 		
@@ -644,7 +642,8 @@ public class OneShotSQLGeneratorEngine {
 				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 				ImmutableTerm term = atom.getTerm(0);
 				final String arg;
-				if (functionSymbol == BooleanExpressionOperation.NOT) {
+				// TODO: avoid this test!
+				if (functionSymbol instanceof DBNotFunctionSymbol) {
 					arg = getSQLString(term, index, false);
 				}
 				else {

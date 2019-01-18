@@ -1076,7 +1076,7 @@ public class BindingLiftTest {
         ConstructionNode expectedNodeOnLeft =IQ_FACTORY.createConstructionNode(expectedUnionNode.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         E, TERM_FACTORY.getIfElseNull(
-                                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, F),
+                                TERM_FACTORY.getDBIsNotNull(F),
                                 A),
                         F0, generateIRIString(URI_TEMPLATE_STR_1, A))));
 
@@ -2188,7 +2188,7 @@ public class BindingLiftTest {
     private static ImmutableFunctionalTerm generateIfIsNotNullElseNull(Variable rightSpecificVariable,
                                                                        ImmutableTerm conditionalValue) {
         return TERM_FACTORY.getIfElseNull(
-                TERM_FACTORY.getImmutableExpression(IS_NOT_NULL, rightSpecificVariable),
+                TERM_FACTORY.getDBIsNotNull(rightSpecificVariable),
                 conditionalValue);
     }
 

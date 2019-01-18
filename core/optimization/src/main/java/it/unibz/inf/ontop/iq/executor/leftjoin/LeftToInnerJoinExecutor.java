@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -33,8 +34,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-
 
 /**
  * Tries to transform the left join into a inner join node
@@ -50,17 +49,20 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private LeftToInnerJoinExecutor(LeftJoinRightChildNormalizationAnalyzer normalizer,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory, SubstitutionFactory substitutionFactory,
+                                    DBFunctionSymbolFactory dbFunctionSymbolFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
         this.normalizer = normalizer;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
@@ -246,7 +248,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         // Special case: ljCondition = IS_NOT_NULL(x) and x is a specific right variable
         // --> x will not be affected by the condition
         ImmutableSet<Variable> rightVariablesToUpdate = Optional.of(ljCondition)
-                .filter(c -> c.getFunctionSymbol().equals(IS_NOT_NULL))
+                .filter(c -> c.getFunctionSymbol().equals(dbFunctionSymbolFactory.getDBIsNotNull()))
                 .map(c -> c.getTerms().get(0))
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable) v)

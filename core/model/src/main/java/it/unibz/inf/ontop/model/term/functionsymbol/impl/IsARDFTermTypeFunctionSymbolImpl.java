@@ -12,9 +12,6 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_NOT_NULL;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.NOT;
-
 /**
  * TODO: find a better name!
  */
@@ -69,7 +66,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                 .map(n -> termFactory.getStrictNEquality(term, n));
 
         return termFactory.getConjunction(Stream.concat(
-                    Stream.of(termFactory.getImmutableExpression(IS_NOT_NULL, term)),
+                    Stream.of(termFactory.getDBIsNotNull(term)),
                     excludedMagicNumbers))
                 .get()
                 .simplify(false, variableNullability);
@@ -82,11 +79,16 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
 
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+        return termFactory.getDBNot(termFactory.getImmutableExpression(this, subTerms));
     }
 
     @Override
     protected boolean mayReturnNullWithoutNullArguments() {
+        return false;
+    }
+
+    @Override
+    protected boolean tolerateNulls() {
         return false;
     }
 }

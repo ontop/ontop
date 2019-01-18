@@ -44,4 +44,9 @@ public abstract class AbstractDBIsStringEmptyFunctionSymbol extends DBBooleanFun
 
         return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

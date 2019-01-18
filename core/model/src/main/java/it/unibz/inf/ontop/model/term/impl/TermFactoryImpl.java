@@ -290,7 +290,12 @@ public class TermFactoryImpl implements TermFactory {
 				.map(this::getDisjunction);
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getDBNot(ImmutableExpression expression) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNot(), expression);
+    }
+
+    @Override
 	public ImmutableExpression getFalseOrNullFunctionalTerm(ImmutableList<ImmutableExpression> arguments) {
 		if (arguments.isEmpty())
 			throw new IllegalArgumentException("Arity must be >= 1");
@@ -422,8 +427,18 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
 	}
 
+    @Override
+    public ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm) {
+        return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNull(), immutableTerm);
+    }
+
 	@Override
-	public Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
+	public ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBIsNotNull(), immutableTerm);
+	}
+
+    @Override
+	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
 
@@ -449,7 +464,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public Expression getFunctionNOT(Term term) {
-		return getExpression(BooleanExpressionOperation.NOT, term);
+		return getExpression(dbFunctionSymbolFactory.getDBNot(), term);
 	}
 
 	@Override
@@ -460,17 +475,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Expression getFunctionOR(Term term1, Term term2) {
 		return getExpression(dbFunctionSymbolFactory.getDBOr(2), term1, term2);
-	}
-
-
-	@Override
-	public Expression getFunctionIsNull(Term term) {
-		return getExpression(BooleanExpressionOperation.IS_NULL, term);
-	}
-
-	@Override
-	public Expression getFunctionIsNotNull(Term term) {
-		return getExpression(BooleanExpressionOperation.IS_NOT_NULL, term);
 	}
 	
 	@Override
@@ -612,8 +616,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getConversion2RDFLexicalFunctionalTerm(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType) {
+	public ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getConversion2RDFLexicalFunctionSymbol(inputType, rdfTermType), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm, RDFTermType rdfType) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getConversionFromRDFLexical2DBFunctionSymbol(targetDBType, rdfType),
+				dbTerm);
 	}
 
 	@Override

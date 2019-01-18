@@ -22,7 +22,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory),
+        super(createDefaultNormalizationTable(typeFactory),createDefaultDenormalizationTable(typeFactory),
                 createH2RegularFunctionTable(typeFactory), typeFactory);
     }
 

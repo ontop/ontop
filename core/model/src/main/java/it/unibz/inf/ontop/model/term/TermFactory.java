@@ -98,6 +98,8 @@ public interface TermFactory {
 	 */
 	Optional<ImmutableExpression> getDisjunction(Stream<ImmutableExpression> expressions);
 
+	ImmutableExpression getDBNot(ImmutableExpression expression);
+
 	/**
 	 * When filled with constants, evaluates to FALSE if one argument is FALSE or to NULL otherwise.
 	 *
@@ -149,7 +151,12 @@ public interface TermFactory {
 	 * Boolean function terms
 	 */
 
-	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
+	// TODO: distinguish the strict and non-strict equalities
+	default Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getFunctionStrictEQ(firstTerm, secondTerm);
+	}
+
+	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
 
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 
@@ -166,10 +173,6 @@ public interface TermFactory {
 	public Expression getFunctionOR(Term term1, Term term2);
 
 	public Expression getFunctionIsTrue(Term term);
-
-	public Expression getFunctionIsNull(Term term);
-
-	public Expression getFunctionIsNotNull(Term term);
 
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
@@ -338,9 +341,15 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
 
 	/**
-	 * TODO: explain
+	 * May "normalize"
 	 */
-	ImmutableFunctionalTerm getConversion2RDFLexicalFunctionalTerm(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+
+	/**
+	 * May "denormalize"
+	 */
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
+														   RDFTermType rdfType);
 
 	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
@@ -454,4 +463,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
 
 	ImmutableFunctionalTerm getDBCharLength(ImmutableTerm stringTerm);
+
+	ImmutableExpression getDBIsNull(ImmutableTerm immutableTerm);
+	ImmutableExpression getDBIsNotNull(ImmutableTerm immutableTerm);
 }

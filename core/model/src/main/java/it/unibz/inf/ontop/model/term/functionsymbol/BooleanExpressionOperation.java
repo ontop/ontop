@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.FatalTypingException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -25,8 +26,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    NOT("NOT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, XSD_BOOLEAN_DT),
-
     /*
      * BC: is it defined for IRIs?
      */
@@ -35,8 +34,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     LTE("LTE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
     LT("LT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
 
-    IS_NULL("IS_NULL", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDF_TERM_TYPE),
-    IS_NOT_NULL("IS_NOT_NULL", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE),
     IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE);
 
     // unary operations
@@ -52,20 +49,6 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         this.name = name;
         this.termTypeInferenceRule = termTypeInferenceRule;
         this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2));
-    }
-    // ternary operations
-    BooleanExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-                        @Nonnull TermType arg1, @Nonnull TermType arg2, @Nonnull TermType arg3) {
-        this.name = name;
-        this.termTypeInferenceRule = termTypeInferenceRule;
-        this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2, arg3));
-    }
-
-    BooleanExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-                        @Nonnull ArgumentValidator argumentValidator) {
-        this.name = name;
-        this.termTypeInferenceRule = termTypeInferenceRule;
-        this.argumentValidator = argumentValidator;
     }
 
     private final String name;
@@ -96,6 +79,11 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return EvaluationResult.declareSameExpression();
     }
 
+    @Override
+    public EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
+        return EvaluationResult.declareSameExpression();
+    }
+
     /**
      * TODO: let some of them be post-processed
      * @param arguments
@@ -104,12 +92,16 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         switch (this) {
             case IS_TRUE:
-            case IS_NOT_NULL:
                 return true;
                 // TODO: allow additional ones
             default:
                 return false;
         }
+    }
+
+    @Override
+    public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
+        return !nullableIndexes.isEmpty();
     }
 
     @Override
@@ -142,34 +134,8 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
             else
                 return termFactory.getImmutableExpression(IS_TRUE, newTerm);
         }
-        else if (this == IS_NOT_NULL) {
-            return simplifyIsNotNull(terms.get(0), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
-        }
-        else if (this == NOT) {
-            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
-            if (newTerm instanceof Constant) {
-                return newTerm.isNull()
-                        ? newTerm
-                        : termFactory.getDBBooleanConstant(newTerm.equals(termFactory.getDBBooleanConstant(false)));
-            }
-            else
-                return termFactory.getImmutableExpression(NOT, newTerm);
-        }
         else
             return termFactory.getImmutableFunctionalTerm(this, terms);
-    }
-
-    private ImmutableTerm simplifyIsNotNull(ImmutableTerm subTerm,
-                                            boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory,
-                                            VariableNullability variableNullability) {
-        ImmutableTerm newTerm = subTerm.simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
-        if (newTerm instanceof Constant) {
-            return termFactory.getDBBooleanConstant(!newTerm.isNull());
-        }
-        else if ((newTerm instanceof Variable) && (!variableNullability.isPossiblyNullable((Variable)newTerm))) {
-            return termFactory.getDBBooleanConstant(true);
-        }
-        return termFactory.getImmutableExpression(this, newTerm);
     }
 
     private Optional<TermTypeInference> inferTypeFromArgumentTypes(ImmutableList<Optional<TermTypeInference>> argumentTypes) {
@@ -203,26 +169,11 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
     @Override
     public boolean blocksNegation() {
-        switch (this) {
-            case IS_NULL:
-            case IS_NOT_NULL:
-                return false;
-            default:
-                return true;
-        }
+        return true;
     }
 
-    /**
-     * NB: in theory, further operators could be consider for simplification
-     */
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
-        if (this == IS_NOT_NULL) {
-            return termFactory.getImmutableExpression(IS_NULL, subTerms.get(0));
-        } else if (this == IS_NULL) {
-            return termFactory.getImmutableExpression(IS_NOT_NULL, subTerms.get(0));
-        }
-        else
-            return termFactory.getImmutableExpression(NOT, termFactory.getImmutableExpression(this, subTerms));
+        throw new UnsupportedOperationException();
     }
 }
