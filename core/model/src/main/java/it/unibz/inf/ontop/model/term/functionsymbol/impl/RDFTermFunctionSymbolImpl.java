@@ -52,10 +52,9 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
-        if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
+        if (newTerms.stream()
                 .allMatch(t -> t instanceof Constant)) {
 
             DBConstant lexicalConstant = Optional.of(newTerms.get(0))

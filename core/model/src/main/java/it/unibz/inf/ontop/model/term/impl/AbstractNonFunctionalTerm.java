@@ -7,12 +7,12 @@ import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 public abstract class AbstractNonFunctionalTerm implements NonFunctionalTerm {
 
     @Override
-    public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability) {
+    public ImmutableTerm simplify(VariableNullability variableNullability) {
         return this;
     }
 
     @Override
-    public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase) {
+    public ImmutableTerm simplify() {
         return this;
     }
 }

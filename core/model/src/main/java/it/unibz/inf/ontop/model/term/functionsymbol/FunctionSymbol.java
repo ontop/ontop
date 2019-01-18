@@ -22,7 +22,7 @@ public interface FunctionSymbol extends Predicate {
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);
 
-    ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
+    ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
                            TermFactory termFactory, VariableNullability variableNullability);
 
     TermType getExpectedBaseType(int index);

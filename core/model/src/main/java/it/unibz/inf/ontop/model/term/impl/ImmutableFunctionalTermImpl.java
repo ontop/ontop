@@ -132,13 +132,13 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability) {
-        return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+    public ImmutableTerm simplify(VariableNullability variableNullability) {
+        return functionSymbol.simplify(getTerms(), termFactory, variableNullability);
     }
 
     @Override
-    public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase) {
-        return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory,
+    public ImmutableTerm simplify() {
+        return functionSymbol.simplify(getTerms(), termFactory,
                 termFactory.createDummyVariableNullability(this));
     }
 

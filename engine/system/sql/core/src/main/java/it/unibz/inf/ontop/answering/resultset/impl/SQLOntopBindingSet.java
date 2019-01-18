@@ -46,7 +46,7 @@ public class SQLOntopBindingSet extends AbstractOntopBindingSet implements Ontop
     }
 
     private static Optional<RDFConstant> evaluate(ImmutableTerm term) {
-        ImmutableTerm simplifiedTerm = term.simplify(false);
+        ImmutableTerm simplifiedTerm = term.simplify();
         if (simplifiedTerm instanceof Constant){
             if (simplifiedTerm instanceof RDFConstant) {
                 return Optional.of((RDFConstant) simplifiedTerm);

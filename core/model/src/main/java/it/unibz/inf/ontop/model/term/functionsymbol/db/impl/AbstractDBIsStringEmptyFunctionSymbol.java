@@ -36,13 +36,12 @@ public abstract class AbstractDBIsStringEmptyFunctionSymbol extends DBBooleanFun
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof DBConstant)
             return termFactory.getDBBooleanConstant(((DBConstant) newTerm).getValue().isEmpty());
 
-        return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     @Override

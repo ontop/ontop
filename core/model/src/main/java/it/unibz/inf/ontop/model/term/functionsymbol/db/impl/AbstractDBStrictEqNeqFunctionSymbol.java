@@ -38,7 +38,6 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
         if (newTerms.size() < 2)
@@ -59,7 +58,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
                         : termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getStrictNEquality(nonNullTerms)));
 
                 // Indirectly recursive
-                return newExpression.simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                return newExpression.simplify(variableNullability);
             }
         }
         else if (nonNullTerms.size() == 1) {

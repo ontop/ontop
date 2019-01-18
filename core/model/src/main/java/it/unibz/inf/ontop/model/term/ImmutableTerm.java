@@ -33,12 +33,12 @@ public interface ImmutableTerm {
 
     EvaluationResult evaluateIsNotNull(VariableNullability variableNullability);
 
-    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
+    ImmutableTerm simplify(VariableNullability variableNullability);
 
     /**
      * When no variableNullability is available
      */
-    ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase);
+    ImmutableTerm simplify();
 
     boolean isNullable(ImmutableSet<Variable> nullableVariables);
 }

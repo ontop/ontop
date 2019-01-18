@@ -23,18 +23,18 @@ public abstract class AbstractDBIfThenElseFunctionSymbol extends AbstractDBIfThe
     }
 
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase,
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
                                   TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm defaultValue = extractDefaultValue(terms, termFactory);
 
         if (defaultValue.equals(termFactory.getNullConstant()))
             return termFactory.getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1))
-                    .simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                    .simplify(variableNullability);
 
         if (terms.get(1).equals(defaultValue))
             return defaultValue;
 
-        return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.simplify(terms, termFactory, variableNullability);
     }
 
     /**

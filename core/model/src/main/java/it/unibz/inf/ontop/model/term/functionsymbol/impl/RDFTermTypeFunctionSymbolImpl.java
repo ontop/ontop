@@ -53,7 +53,6 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm term = newTerms.get(0);
         if (term instanceof DBConstant) {

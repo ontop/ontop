@@ -47,7 +47,6 @@ public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof RDFTermTypeConstant) {
@@ -61,7 +60,7 @@ public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
                     .orElseGet(termFactory::getNullConstant);
         }
         // TODO: simplify in the presence of magic numbers
-        return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     @Override

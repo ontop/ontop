@@ -264,7 +264,7 @@ public class ExpressionEvaluator {
 		else {
 			// isInConstructionNodeInOptimizationPhase is CURRENTLY set to true
 			// to exploit unification techniques for simplifying equalities
-			return term.simplify(true, variableNullability);
+			return term.simplify(variableNullability);
 		}
 	}
 
@@ -281,7 +281,7 @@ public class ExpressionEvaluator {
 			return valueNull;
 		else if (newCondition instanceof ImmutableExpression)
 			return termFactory.getIfElseNull((ImmutableExpression) newCondition, terms.get(1))
-					.simplify(false, variableNullability);
+					.simplify(variableNullability);
 		else
 			throw new MinorOntopInternalBugException("The new condition was expected " +
 					"to be a ImmutableExpression, not " + newCondition);

@@ -25,7 +25,7 @@ public class LangSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFu
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         return termFactory.getLangTypeFunctionalTerm(typeTerms.get(0))
-                .simplify(false);
+                .simplify();
     }
 
     @Override

@@ -45,7 +45,6 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof Constant) {
@@ -62,7 +61,7 @@ public class RDF2DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
             // TODO: shall we check the RDF datatype?
             ImmutableTerm lexicalTerm = ((ImmutableFunctionalTerm) newTerm).getTerm(0);
             return termFactory.getConversionFromRDFLexical2DB(dbBooleanTermType, lexicalTerm, xsdBooleanType)
-                    .simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                    .simplify(variableNullability);
         }
         else
             return termFactory.getImmutableExpression(this, newTerms);

@@ -41,18 +41,18 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+                                  TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
+                        ? t.simplify(variableNullability)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
         if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
             return termFactory.getNullConstant();
 
-        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     /**
@@ -226,7 +226,6 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      *
      */
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }

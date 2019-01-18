@@ -47,7 +47,6 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
      */
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }

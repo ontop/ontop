@@ -84,7 +84,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+                                  TermFactory termFactory, VariableNullability variableNullability) {
         int arity = getArity();
 
         List<Map.Entry<ImmutableExpression, ImmutableTerm>> newWhenPairs = new ArrayList<>();
@@ -104,7 +104,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
             if (evaluation.getValue().isPresent()) {
                 switch (evaluation.getValue().get()) {
                     case TRUE:
-                        ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                        ImmutableTerm possibleValue = terms.get(i+1).simplify(variableNullability);
                         if (newWhenPairs.isEmpty())
                             return possibleValue;
                         else
@@ -117,13 +117,13 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
                 ImmutableExpression newExpression = evaluation.getExpression()
                         .orElseThrow(() -> new MinorOntopInternalBugException("The evaluation was expected " +
                                 "to return an expression because no value was returned"));
-                ImmutableTerm possibleValue = terms.get(i+1).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                ImmutableTerm possibleValue = terms.get(i+1).simplify(variableNullability);
                 newWhenPairs.add(Maps.immutableEntry(newExpression, possibleValue));
             }
         }
 
         ImmutableTerm defaultValue = extractDefaultValue(terms, termFactory)
-                .simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+                .simplify(variableNullability);
 
         if (newWhenPairs.isEmpty())
             return defaultValue;
@@ -133,7 +133,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
         // Make sure the size was reduced so as to avoid an infinite loop
         // For instance, new opportunities may appear when reduced to a IF_ELSE_NULL
         return (newWhenPairs.size() < terms.size() % 2)
-                ? newTerm.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
+                ? newTerm.simplify(variableNullability)
                 : newTerm;
     }
 

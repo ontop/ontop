@@ -60,7 +60,7 @@ public class UUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements 
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory,
+                                                     TermFactory termFactory,
                                                      VariableNullability variableNullability) {
         ImmutableFunctionalTerm lexicalTerm =
                 termFactory.getDBConcatFunctionalTerm(

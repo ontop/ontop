@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
-
-import javax.annotation.Nonnull;
 
 public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
 
@@ -41,7 +38,6 @@ public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolI
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         if (newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
             return termFactory.getNullConstant();
@@ -53,7 +49,7 @@ public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolI
 
         // TODO: simplify in the presence of magic numbers
 
-        return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     /**

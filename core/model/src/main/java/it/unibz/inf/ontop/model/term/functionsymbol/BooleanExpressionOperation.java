@@ -119,10 +119,9 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
      */
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase,
                                   TermFactory termFactory, VariableNullability variableNullability) {
         if (this == IS_TRUE) {
-            ImmutableTerm newTerm = terms.get(0).simplify(isInConstructionNodeInOptimizationPhase, variableNullability);
+            ImmutableTerm newTerm = terms.get(0).simplify(variableNullability);
             if (newTerm instanceof Constant) {
                 /*
                  * TODO: Is ok to say that IS TRUE can return NULL?

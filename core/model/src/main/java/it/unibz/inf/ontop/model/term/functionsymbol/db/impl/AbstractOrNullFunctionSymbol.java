@@ -55,7 +55,6 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         DBConstant possibleBooleanConstant = termFactory.getDBBooleanConstant(possibleBoolean);
         if (newTerms.stream()

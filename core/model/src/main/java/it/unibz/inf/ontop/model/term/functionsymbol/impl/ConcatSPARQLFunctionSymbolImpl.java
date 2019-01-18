@@ -45,8 +45,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
         return termFactory.getDBCase(
                 Stream.of(Maps.immutableEntry(condition, typeTerms.get(0))),
                 termFactory.getRDFTermTypeConstant(xsdStringType))
-                // NB: isInConstructionNodeInOptimizationPhase is irrelevant here
-                .simplify(false, variableNullability);
+                .simplify(variableNullability);
     }
 
     @Override

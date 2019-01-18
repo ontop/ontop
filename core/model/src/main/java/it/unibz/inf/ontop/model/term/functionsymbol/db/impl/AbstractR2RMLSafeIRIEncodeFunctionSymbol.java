@@ -23,13 +23,12 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof DBConstant)
             return encodeConstant((DBConstant) newTerm, termFactory);
 
-        return super.buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     private DBConstant encodeConstant(DBConstant constant, TermFactory termFactory) {
