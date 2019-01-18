@@ -55,10 +55,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
-        // Null argument --> null
-        if ((!isInConstructionNodeInOptimizationPhase) && isOneArgumentNull(newTerms))
-            return termFactory.getNullConstant();
-
         if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
                 .allMatch(t -> t instanceof Constant)) {
 
