@@ -43,6 +43,11 @@ public class DefaultDBStrEndsWithFunctionSymbol extends DBBooleanFunctionSymbolI
     }
 
     @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
+
+    @Override
     protected boolean isAlwaysInjective() {
         return false;
     }

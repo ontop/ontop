@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
@@ -80,6 +81,27 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         else if (otherTerm instanceof NonNullConstant) {
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
+        return EvaluationResult.declareSameExpression();
+    }
+
+    /**
+     * Default implementation, can be overridden
+     */
+    @Override
+    public EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                              VariableNullability variableNullability) {
+        if ((!mayReturnNullWithoutNullArguments()) && (!tolerateNulls())) {
+            ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
+            Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
+                    .filter(t -> (t.isNullable(nullableVariables)))
+                    .map(termFactory::getDBIsNotNull));
+
+            return optionalExpression
+                    .map(e -> e.evaluate(termFactory, variableNullability)
+                            .getEvaluationResult(e, true))
+                    .orElseGet(EvaluationResult::declareIsTrue);
+        }
+        // By default, does not optimize (to be overridden for optimizing)
         return EvaluationResult.declareSameExpression();
     }
 
@@ -167,6 +189,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                                                                    NonNullConstant otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return EvaluationResult.declareSameExpression();
     }
+
+    /**
+     * Returns true if is not guarantee to return NULL when one argument is NULL
+     */
+    protected abstract boolean tolerateNulls();
 
     /**
      * Returns false when a functional term with this symbol:

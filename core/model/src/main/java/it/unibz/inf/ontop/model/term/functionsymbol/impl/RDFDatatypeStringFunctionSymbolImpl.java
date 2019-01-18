@@ -29,6 +29,11 @@ public class RDFDatatypeStringFunctionSymbolImpl extends FunctionSymbolImpl {
     }
 
     @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
+
+    @Override
     protected boolean isAlwaysInjective() {
         return false;
     }

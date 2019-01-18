@@ -96,4 +96,9 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
                 .map(EvaluationResult::declareSimplifiedExpression)
                 .orElseGet(EvaluationResult::declareIsFalse);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

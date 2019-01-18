@@ -64,4 +64,9 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
         else
             throw new MinorOntopInternalBugException("NOT was expecting an expression as parameter");
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

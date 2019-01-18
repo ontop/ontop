@@ -74,4 +74,14 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
                 ? termFactory.getNullConstant()
                 : termFactory.getImmutableExpression(this, remainingExpressions);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
+    }
+
+    @Override
+    protected boolean mayReturnNullWithoutNullArguments() {
+        return true;
+    }
 }

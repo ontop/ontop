@@ -18,4 +18,9 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                         .collect(ImmutableCollectors.toList()),
                 dbBooleanTermType);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
+    }
 }

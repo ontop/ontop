@@ -1604,15 +1604,13 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ImmutableExpression newExpression = TERM_FACTORY.getDBIsNotNull(B);
-
         ConstructionNode newConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X, D),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(B)));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(newConstruction,
                         IQ_FACTORY.createNaryIQTree(
-                                IQ_FACTORY.createInnerJoinNode(newExpression),
+                                IQ_FACTORY.createInnerJoinNode(),
                                 ImmutableList.of(extensionalDataNode1, extensionalDataNode3))));
 
         normalizeAndCompare(initialIQ, expectedIQ);

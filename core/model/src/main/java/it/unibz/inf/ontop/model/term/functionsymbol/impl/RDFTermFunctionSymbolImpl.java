@@ -90,4 +90,9 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

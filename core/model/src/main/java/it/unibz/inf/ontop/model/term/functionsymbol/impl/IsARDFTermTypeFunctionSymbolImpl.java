@@ -86,4 +86,9 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

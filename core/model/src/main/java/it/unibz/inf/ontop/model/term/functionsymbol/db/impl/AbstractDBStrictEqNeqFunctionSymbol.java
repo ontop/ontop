@@ -137,4 +137,9 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     public boolean blocksNegation() {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

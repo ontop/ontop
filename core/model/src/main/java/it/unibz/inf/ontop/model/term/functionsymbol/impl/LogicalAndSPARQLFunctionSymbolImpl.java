@@ -24,5 +24,4 @@ public class LogicalAndSPARQLFunctionSymbolImpl extends AbstractBinaryBooleanOpe
                                                     TermFactory termFactory) {
         return termFactory.getConjunction(subExpressions);
     }
-
 }

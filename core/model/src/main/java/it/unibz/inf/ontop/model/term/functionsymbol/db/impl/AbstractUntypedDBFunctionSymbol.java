@@ -63,4 +63,9 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
                 .collect(Collectors.joining(","));
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

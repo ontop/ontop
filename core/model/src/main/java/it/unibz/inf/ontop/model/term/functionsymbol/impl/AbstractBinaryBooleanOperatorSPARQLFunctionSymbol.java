@@ -85,4 +85,9 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
+    }
 }

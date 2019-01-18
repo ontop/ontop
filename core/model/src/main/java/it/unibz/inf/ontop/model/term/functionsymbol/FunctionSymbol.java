@@ -30,6 +30,9 @@ public interface FunctionSymbol extends Predicate {
     EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                       TermFactory termFactory, VariableNullability variableNullability);
 
+    EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                       VariableNullability variableNullability);
+
     /**
      * 1. When a functional term simplifies itself in a BOTTOM-UP manner:
      *     Returns true if is guaranteed to "simplify itself" as a Constant when receiving Constants as arguments

@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * Provides a storage to put the URI constant.
  */
-public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRIConstant {
+public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConstant {
 
 	private final int identifier;
 	private final IRI iri;
@@ -100,11 +100,6 @@ public class IRIConstantImpl extends AbstractNonFunctionalTerm implements IRICon
 		}
 		else
 			return otherTerm.evaluateStrictEq(this, variableNullability);
-	}
-
-	@Override
-	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-		return false;
 	}
 
 	@Deprecated

@@ -76,4 +76,9 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

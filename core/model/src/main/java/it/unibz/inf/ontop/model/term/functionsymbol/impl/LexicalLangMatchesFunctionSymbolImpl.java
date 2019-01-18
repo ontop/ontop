@@ -65,4 +65,9 @@ public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolI
 
         return langTag.toLowerCase().startsWith(langRange.toLowerCase());
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

@@ -127,6 +127,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
+    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
+        return functionSymbol.evaluateIsNotNull(getTerms(), termFactory, variableNullability);
+    }
+
+    @Override
     public ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability) {
         return functionSymbol.simplify(getTerms(), isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
     }

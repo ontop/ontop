@@ -79,6 +79,11 @@ public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
         return EvaluationResult.declareSameExpression();
     }
 
+    @Override
+    public EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
+        return EvaluationResult.declareSameExpression();
+    }
+
     /**
      * TODO: let some of them be post-processed
      * @param arguments

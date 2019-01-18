@@ -101,7 +101,14 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 		}
 	}
 
-	@Override
+    @Override
+    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
+		return variableNullability.isPossiblyNullable(this)
+				? EvaluationResult.declareSameExpression()
+				: EvaluationResult.declareIsTrue();
+    }
+
+    @Override
 	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
 		return nullableVariables.contains(this);
 	}

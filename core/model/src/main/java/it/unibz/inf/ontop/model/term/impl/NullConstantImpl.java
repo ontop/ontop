@@ -58,6 +58,11 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
     }
 
     @Override
+    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
+        return EvaluationResult.declareIsFalse();
+    }
+
+    @Override
     public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
         return true;
     }

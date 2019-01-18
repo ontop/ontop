@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -47,23 +48,33 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
                                                      boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
-        if (newTerm instanceof Constant) {
-            return termFactory.getDBBooleanConstant(isNull == newTerm.isNull());
-        }
-        else if (newTerm instanceof Variable) {
-            return variableNullability.isPossiblyNullable((Variable) newTerm)
-                    ? termFactory.getImmutableExpression(this, newTerm)
-                    : termFactory.getDBBooleanConstant(!isNull);
-        }
-        else {
-            ImmutableFunctionalTerm newFunctionalTerm = (ImmutableFunctionalTerm) newTerm;
-            // TODO: try to optimize
-            return termFactory.getImmutableExpression(this, newFunctionalTerm);
+
+        EvaluationResult evaluationResult = newTerm.evaluateIsNotNull(variableNullability);
+        switch (evaluationResult.getStatus()) {
+            case SAME_EXPRESSION:
+                return termFactory.getImmutableExpression(this, newTerm);
+            case SIMPLIFIED_EXPRESSION:
+                return evaluationResult.getSimplifiedExpression()
+                        .map(e -> isNull ? e.negate(termFactory) : e)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("A simplified expression was expected"));
+            case IS_NULL:
+                return termFactory.getNullConstant();
+            case IS_FALSE:
+                return termFactory.getDBBooleanConstant(isNull);
+            case IS_TRUE:
+                return termFactory.getDBBooleanConstant(!isNull);
+            default:
+                throw new MinorOntopInternalBugException("Unexpected status");
         }
     }
 
     @Override
     public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
         return false;
+    }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
     }
 }

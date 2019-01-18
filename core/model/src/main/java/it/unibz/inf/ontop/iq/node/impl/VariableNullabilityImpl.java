@@ -87,7 +87,7 @@ public class VariableNullabilityImpl implements VariableNullability {
         return getNullableVariables().contains(variable);
     }
 
-    private ImmutableSet<Variable> getNullableVariables() {
+    public ImmutableSet<Variable> getNullableVariables() {
         if (nullableVariables == null)
             nullableVariables = nullableGroups.stream()
                     .flatMap(Collection::stream)

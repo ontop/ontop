@@ -93,6 +93,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
     /**
      * By default, does not tolerate receiving NULLs (SPARQL errors) as input
      */
+    @Override
     protected boolean tolerateNulls() {
         return false;
     }

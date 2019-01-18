@@ -61,4 +61,9 @@ public class StrUUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implemen
         ImmutableFunctionalTerm lexicalTerm = termFactory.getDBUUID();
         return termFactory.getRDFFunctionalTerm(lexicalTerm, termFactory.getRDFTermTypeConstant(xsdStringType));
     }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
 }

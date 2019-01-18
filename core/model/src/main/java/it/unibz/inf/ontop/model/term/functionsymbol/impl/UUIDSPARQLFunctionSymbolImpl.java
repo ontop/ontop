@@ -29,6 +29,11 @@ public class UUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements 
     }
 
     @Override
+    protected boolean tolerateNulls() {
+        return false;
+    }
+
+    @Override
     protected boolean isAlwaysInjective() {
         return false;
     }

@@ -31,6 +31,8 @@ public interface ImmutableTerm {
 
     EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability);
 
+    EvaluationResult evaluateIsNotNull(VariableNullability variableNullability);
+
     ImmutableTerm simplify(boolean isInConstructionNodeInOptimizationPhase, VariableNullability variableNullability);
 
     /**

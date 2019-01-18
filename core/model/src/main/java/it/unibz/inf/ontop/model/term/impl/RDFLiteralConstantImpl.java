@@ -29,7 +29,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
 
-public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements RDFLiteralConstant {
+public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements RDFLiteralConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 
@@ -106,11 +106,6 @@ public class RDFLiteralConstantImpl extends AbstractNonFunctionalTerm implements
 				: EvaluationResult.declareIsFalse();
 		else
 			return otherTerm.evaluateStrictEq(this, variableNullability);
-	}
-
-	@Override
-	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-		return false;
 	}
 
 	@Override

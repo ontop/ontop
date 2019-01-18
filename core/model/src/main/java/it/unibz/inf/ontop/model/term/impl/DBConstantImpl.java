@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Stream;
 
-public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConstant {
+public class DBConstantImpl extends AbstractNonNullConstant implements DBConstant {
     private final String value;
     private final DBTermType termType;
 
@@ -71,11 +71,6 @@ public class DBConstantImpl extends AbstractNonFunctionalTerm implements DBConst
         }
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);
-    }
-
-    @Override
-    public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-        return false;
     }
 
     @Override

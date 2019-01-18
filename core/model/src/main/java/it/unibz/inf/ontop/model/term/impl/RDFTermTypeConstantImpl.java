@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.stream.Stream;
 
-public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implements RDFTermTypeConstant {
+public class RDFTermTypeConstantImpl extends AbstractNonNullConstant implements RDFTermTypeConstant {
 
     private final RDFTermType rdfTermType;
     private final MetaRDFTermType metaType;
@@ -79,10 +79,5 @@ public class RDFTermTypeConstantImpl extends AbstractNonFunctionalTerm implement
         }
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);
-    }
-
-    @Override
-    public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-        return false;
     }
 }

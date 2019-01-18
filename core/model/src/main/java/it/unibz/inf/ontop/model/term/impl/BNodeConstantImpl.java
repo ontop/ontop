@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNode {
+public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode {
 
 	private static final long serialVersionUID = 214867118996974157L;
 
@@ -98,11 +98,6 @@ public class BNodeConstantImpl extends AbstractNonFunctionalTerm implements BNod
 		}
 		else
 			return otherTerm.evaluateStrictEq(this, variableNullability);
-	}
-
-	@Override
-	public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-		return false;
 	}
 
 	@Override
