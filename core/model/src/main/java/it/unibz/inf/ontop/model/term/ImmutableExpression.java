@@ -25,8 +25,7 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
 
     Evaluation evaluate(VariableNullability variableNullability);
 
-    IncrementalEvaluation evaluate(VariableNullability variableNullability,
-                                   boolean wasExpressionAlreadyNew);
+    IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew);
 
     boolean isVar2VarEquality();
 

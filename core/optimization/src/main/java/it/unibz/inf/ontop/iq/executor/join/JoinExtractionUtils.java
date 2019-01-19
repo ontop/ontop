@@ -7,9 +7,9 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -23,14 +23,11 @@ import java.util.Queue;
 public class JoinExtractionUtils {
 
     private final TermFactory termFactory;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-    private JoinExtractionUtils(TermFactory termFactory,
-                                ExpressionEvaluator defaultExpressionEvaluator, CoreUtilsFactory coreUtilsFactory) {
+    private JoinExtractionUtils(TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
         this.termFactory = termFactory;
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
@@ -46,18 +43,16 @@ public class JoinExtractionUtils {
 
         Optional<ImmutableExpression> foldedExpression = foldBooleanExpressions(booleanExpressions);
         if (foldedExpression.isPresent()) {
-            ExpressionEvaluator evaluator = defaultExpressionEvaluator.clone();
-
             ImmutableExpression expression = foldedExpression.get();
 
-            ExpressionEvaluator.EvaluationResult evaluationResult = evaluator.evaluateExpression(
-                    expression, coreUtilsFactory.createDummyVariableNullability(expression));
+            IncrementalEvaluation evaluationResult = expression.evaluate(
+                    coreUtilsFactory.createDummyVariableNullability(expression), true);
 
             if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
             }
             else {
-                return evaluationResult.getOptionalExpression();
+                return evaluationResult.getNewExpression();
             }
         }
         else {

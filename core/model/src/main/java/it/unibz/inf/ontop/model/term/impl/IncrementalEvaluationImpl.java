@@ -35,7 +35,7 @@ public class IncrementalEvaluationImpl implements IncrementalEvaluation {
     }
 
     @Override
-    public Optional<ImmutableExpression> getSimplifiedExpression() {
+    public Optional<ImmutableExpression> getNewExpression() {
         return Optional.ofNullable(simplifiedExpression);
     }
 

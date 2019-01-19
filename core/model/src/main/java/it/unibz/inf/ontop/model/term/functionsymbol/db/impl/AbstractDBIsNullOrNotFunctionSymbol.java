@@ -52,7 +52,7 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
             case SAME_EXPRESSION:
                 return termFactory.getImmutableExpression(this, newTerm);
             case SIMPLIFIED_EXPRESSION:
-                return incrementalEvaluation.getSimplifiedExpression()
+                return incrementalEvaluation.getNewExpression()
                         .map(e -> isNull ? e.negate(termFactory) : e)
                         .orElseThrow(() -> new MinorOntopInternalBugException("A simplified expression was expected"));
             case IS_NULL:

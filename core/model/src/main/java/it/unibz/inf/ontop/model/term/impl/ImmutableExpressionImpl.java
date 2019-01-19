@@ -76,9 +76,9 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean wasExpressionAlreadyNew) {
+    public IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew) {
         return evaluate(variableNullability)
-                .getEvaluationResult(this, wasExpressionAlreadyNew);
+                .getEvaluationResult(this, isExpressionNew);
     }
 
 

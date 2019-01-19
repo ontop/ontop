@@ -91,7 +91,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
                     case SAME_EXPRESSION:
                         break;
                     case SIMPLIFIED_EXPRESSION:
-                        otherExpressionBuilder.add(evaluation.getSimplifiedExpression().get());
+                        otherExpressionBuilder.add(evaluation.getNewExpression().get());
                         keepTerm = false;
                         break;
                     case IS_NULL:

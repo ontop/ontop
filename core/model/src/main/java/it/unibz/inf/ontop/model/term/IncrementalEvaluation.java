@@ -23,7 +23,7 @@ public interface IncrementalEvaluation {
     /**
      * Only when getStatus() == SIMPLIFIED_EXPRESSION
      */
-    Optional<ImmutableExpression> getSimplifiedExpression();
+    Optional<ImmutableExpression> getNewExpression();
 
     Status getStatus();
 
