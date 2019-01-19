@@ -93,10 +93,10 @@ public class TMappingRule {
 		
 		for (int i = 0; i < atom.getTerms().size(); i++) {
 			Term term = atom.getTerm(i);
-			if (term instanceof DBConstant) {
-				// Found a DB constant, replacing with a fresh variable
+			if ((term instanceof Constant) && (!(term instanceof RDFConstant))) {
+				// Found a non-RDF constant, replacing with a fresh variable
 				// and adding the new equality atom
-				DBConstant c = (DBConstant)term;
+				Constant c = (Constant)term;
 				Variable var = valueMap.get(c);
 				if (var == null) {
 					freshVarCount++;
