@@ -28,6 +28,7 @@ import com.google.common.collect.Multimap;
 import eu.optique.r2rml.api.binding.jena.JenaR2RMLMappingManager;
 import eu.optique.r2rml.api.model.TriplesMap;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -60,18 +61,20 @@ public class SQLPPMappingToR2RMLConverter {
     private List<SQLPPTriplesMap> ppMappingAxioms;
     private PrefixManager prefixmng;
     private final RDF rdfFactory;
+    private final TermFactory termFactory;
 
-    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, RDF rdfFactory) {
+    public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, RDF rdfFactory, TermFactory termFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
         this.prefixmng = ppMapping.getMetadata().getPrefixManager();
         this.rdfFactory = rdfFactory;
+        this.termFactory = termFactory;
     }
 
     /**
      * TODO: remove the splitting logic, not needed anymore.
      */
     public Collection<TriplesMap> getTripleMaps() {
-        OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory);
+        OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory, termFactory);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
                 .flatMap(a -> transformer.getTriplesMaps(a, prefixmng))
                 .collect(Collectors.toList());

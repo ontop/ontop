@@ -36,16 +36,18 @@ import java.util.stream.Stream;
 public class OBDAMappingTransformer {
 
 	private final RDF rdfFactory;
-    private String baseIRIString;
+	private final TermFactory termFactory;
+	private String baseIRIString;
 	private final eu.optique.r2rml.api.MappingFactory mappingFactory;
 
-	OBDAMappingTransformer(RDF rdfFactory) {
-        this("urn:", rdfFactory);
+	OBDAMappingTransformer(RDF rdfFactory, TermFactory termFactory) {
+        this("urn:", rdfFactory, termFactory);
 	}
 
-    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory) {
+    OBDAMappingTransformer(String baseIRIString, RDF rdfFactory, TermFactory termFactory) {
         this.baseIRIString = baseIRIString;
 		this.rdfFactory = rdfFactory;
+		this.termFactory = termFactory;
 		this.mappingFactory = RDF4JR2RMLMappingManager.getInstance().getMappingFactory();
 	}
 
@@ -174,13 +176,12 @@ public class OBDAMappingTransformer {
 												 java.util.function.Function<Literal, T> literalFct,
 												 PrefixManager prefixManager) {
 
-		// All RDF terms in our internal representation of a mapping assertion are expected to be built
 		ImmutableFunctionalTerm rdfFunctionalTerm = Optional.of(substitutedTerm)
-				.filter(t -> t instanceof ImmutableFunctionalTerm)
-				.map(t -> (ImmutableFunctionalTerm) t)
+				.filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
+				.map(t -> convertIntoRDFFunctionalTerm((NonVariableTerm) t))
 				.filter(t -> t.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
 				.orElseThrow(() -> new R2RMLSerializationException(
-						"Was expecting a RDFTerm functional term, not " + substitutedTerm));
+						"Was expecting a RDFTerm functional or constant term, not " + substitutedTerm));
 
 		ImmutableTerm lexicalTerm = uncast(rdfFunctionalTerm.getTerm(0));
 
@@ -204,6 +205,17 @@ public class OBDAMappingTransformer {
 						+ substitutedTerm);
 		else
 			throw new MinorOntopInternalBugException("An RDF termType must be either an object type or a datatype");
+	}
+
+	private ImmutableFunctionalTerm convertIntoRDFFunctionalTerm(NonVariableTerm term) {
+		if (term instanceof  RDFConstant) {
+			RDFConstant constant = (RDFConstant) term;
+			return termFactory.getRDFFunctionalTerm(
+					termFactory.getDBStringConstant(constant.getValue()),
+					termFactory.getRDFTermTypeConstant(constant.getType()));
+		}
+		else
+			return (ImmutableFunctionalTerm) term;
 	}
 
 	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType, boolean acceptBNode,
