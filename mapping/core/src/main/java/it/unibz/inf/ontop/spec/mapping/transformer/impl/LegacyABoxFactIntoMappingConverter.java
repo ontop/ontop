@@ -65,9 +65,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 ontology.getClassAssertions(),
                 ontology.getObjectPropertyAssertions(),
                 ontology.getDataPropertyAssertions(),
-                annotationAssertions,
-                uriTemplateMatcher
-        );
+                annotationAssertions);
 
         return datalog2QueryMappingConverter.convertMappingRules(
                 rules,
@@ -84,8 +82,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
                                                   Iterable<ObjectPropertyAssertion> pas,
                                                   Iterable<DataPropertyAssertion> das,
-                                                  Iterable<AnnotationAssertion> aas,
-                                                  UriTemplateMatcher uriTemplateMatcher) {
+                                                  Iterable<AnnotationAssertion> aas) {
 
         List<CQIE> mutableMapping = new ArrayList<>();
 
@@ -94,9 +91,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             // no blank nodes are supported here
             IRIConstant c = (IRIConstant) ca.getIndividual();
             IRI classIRI = ca.getConcept().getIRI();
-            Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableTerm(
-                            uriTemplateMatcher.generateIRITerm(c.getIRI())), classIRI);
+            Function head = atomFactory.getMutableTripleHeadAtom(c, classIRI);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -111,9 +106,9 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRIConstant o = (IRIConstant) pa.getObject();
             IRI propertyIRI = pa.getProperty().getIRI();
             Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateIRITerm(s.getIRI())),
+                    s,
                     propertyIRI,
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateIRITerm(o.getIRI())));
+                    o);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -130,13 +125,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             IRI propertyIRI = da.getProperty().getIRI();
 
 
-            Function head = o.getType().getLanguageTag()
-                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
-                            propertyIRI,
-                            termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
-                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
-                            propertyIRI,
-                            termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
+            Function head = atomFactory.getMutableTripleHeadAtom(s, propertyIRI, o);
             CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
 
             mutableMapping.add(rule);
@@ -157,22 +146,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
                 RDFLiteralConstant o = (RDFLiteralConstant) aa.getValue();
 
-                head = o.getType().getLanguageTag()
-                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
-                                    s.getIRI()),
-                                    propertyIRI,
-                                    termFactory.getRDFLiteralMutableFunctionalTerm(termFactory.getDBStringConstant(o.getValue()), lang.getFullString())))
-                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getIRIMutableFunctionalTerm(
-                                s.getIRI()),
-                                propertyIRI,
-                                termFactory.getRDFLiteralMutableFunctionalTerm(o, o.getType())));
+                head = atomFactory.getMutableTripleHeadAtom(s, propertyIRI, o);
             } else {
 
                 IRIConstant o = (IRIConstant) aa.getValue();
-                head = atomFactory.getMutableTripleHeadAtom(
-                        termFactory.getIRIMutableFunctionalTerm(s.getIRI()),
-                        propertyIRI,
-                        termFactory.getIRIMutableFunctionalTerm(o.getIRI()));
+                head = atomFactory.getMutableTripleHeadAtom(s, propertyIRI, o);
 
 
             }
