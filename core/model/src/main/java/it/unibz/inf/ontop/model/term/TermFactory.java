@@ -306,16 +306,6 @@ public interface TermFactory {
 												 ImmutableList<DBConstant> arguments);
 
 	/**
-	 * Temporary
-	 */
-	Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments);
-	Function getIRIMutableFunctionalTerm(IRI iri);
-
-	Function getNullRDFMutableFunctionalTerm();
-
-
-
-	/**
 	 * NB: a fresh Bnode template is created
 	 */
 	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable);

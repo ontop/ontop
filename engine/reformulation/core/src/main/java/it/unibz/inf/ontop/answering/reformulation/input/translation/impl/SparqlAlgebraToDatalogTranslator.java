@@ -209,7 +209,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (nullVariables.isEmpty())
                 return atoms;
 
-            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, termFactory.getNullRDFMutableFunctionalTerm())));
+            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, termFactory.getNullConstant())));
         }
 
         /**
@@ -485,13 +485,13 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p.equals(RDF.TYPE)) {
                 Term oTerm;
 					// term rdf:type variable .
-                Term pTerm = termFactory.getIRIMutableFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+                Term pTerm = termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
                 if (o == null) {
                     oTerm = getTermForVariable(triple.getObjectVar(), variables);
 
 				}
 				else if (o instanceof IRI) {
-                    oTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(o.stringValue()));
+                    oTerm = termFactory.getConstantIRI(rdfFactory.createIRI(o.stringValue()));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
@@ -500,7 +500,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-                Term pTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(p.stringValue()));
+                Term pTerm = termFactory.getConstantIRI(rdfFactory.createIRI(p.stringValue()));
                 atom = atomFactory.getMutableTripleAtom(sTerm, pTerm, oTerm);
 			}
 		}
@@ -588,8 +588,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 return immutabilityTools.convertToMutableFunction(termFactory.getRDFFunctionalTerm(id));
         }
         else {
-            return immutabilityTools.convertToMutableTerm(
-                    uriTemplateMatcher.generateIRITerm(rdfFactory.createIRI(uri)));
+            return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
         }
     }
 

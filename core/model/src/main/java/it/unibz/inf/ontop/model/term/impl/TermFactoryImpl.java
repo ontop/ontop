@@ -555,24 +555,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments) {
-		FunctionSymbol templateFunctionSymbol = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
-		Function lexicalTerm = getFunction(templateFunctionSymbol, arguments);
-		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalTerm);
-	}
-
-	@Override
-	public Function getIRIMutableFunctionalTerm(IRI iri) {
-		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
-		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
-	}
-
-	@Override
-	public Function getNullRDFMutableFunctionalTerm() {
-		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), valueNull, valueNull);
-	}
-
-	@Override
 	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable) {
 		return getRDFFunctionalTerm(variable, bnodeTypeConstant);
 	}
