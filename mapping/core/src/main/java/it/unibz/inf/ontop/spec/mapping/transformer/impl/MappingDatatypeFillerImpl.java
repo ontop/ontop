@@ -71,10 +71,10 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)
             throws UnknownDatatypeException {
         Variable objectVariable = extractObjectVariable(mappingAssertion);
-        ImmutableSet<ImmutableFunctionalTerm> objectDefinitions = extractDefinitions(objectVariable, mappingAssertion);
+        ImmutableSet<ImmutableTerm> objectDefinitions = extractDefinitions(objectVariable, mappingAssertion);
 
         ImmutableSet<Optional<TermTypeInference>> typeInferences = objectDefinitions.stream()
-                .map(ImmutableFunctionalTerm::inferType)
+                .map(ImmutableTerm::inferType)
                 .collect(ImmutableCollectors.toSet());
 
         if (typeInferences.size() > 1) {
@@ -98,18 +98,19 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
             return fillMissingDatatype(objectVariable, mappingAssertion, provenance);
     }
 
-    private ImmutableSet<ImmutableFunctionalTerm> extractDefinitions(Variable objectVariable, IQ mappingAssertion) {
+    private ImmutableSet<ImmutableTerm> extractDefinitions(Variable objectVariable, IQ mappingAssertion) {
 
-        ImmutableSet<? extends ImmutableTerm> objectDefinitions = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
+        ImmutableSet<ImmutableTerm> objectDefinitions = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
                 .map(s -> s.get(objectVariable))
                 .collect(ImmutableCollectors.toSet());
 
-        if (objectDefinitions.stream()
-                .allMatch(t -> t instanceof ImmutableFunctionalTerm))
-            return (ImmutableSet<ImmutableFunctionalTerm>) objectDefinitions;
-        else
-            throw new MinorOntopInternalBugException("The object was expected to be defined by functional terms only\n"
+        if (!objectDefinitions.stream()
+                .allMatch(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant)))
+            throw new MinorOntopInternalBugException("The object was expected to be defined by functional terms " +
+                    "or RDF constant only\n"
                     + mappingAssertion);
+
+        return objectDefinitions;
     }
 
     Variable extractObjectVariable(IQ mappingAssertion) {
@@ -135,10 +136,13 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
                         "The mapping assertion was expecting to start with a construction node\n" + mappingAssertion));
 
         ImmutableTerm objectLexicalTerm = Optional.ofNullable(topSubstitution.get(objectVariable))
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .map(t -> ((ImmutableFunctionalTerm) t).getTerm(0))
+                .filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))
+                .map(t -> (t instanceof ImmutableFunctionalTerm)
+                        ? ((ImmutableFunctionalTerm) t).getTerm(0)
+                        : termFactory.getRDFTermTypeConstant(((RDFConstant) t).getType()))
                 .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "The root construction node is not defining the object variable with a functional term\n" + mappingAssertion));
+                        "The root construction node is not defining the object variable with a functional term " +
+                                "or a RDF constant\n" + mappingAssertion));
 
         IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
 
