@@ -140,10 +140,6 @@ public class ExpressionEvaluator {
 		}
 	}
 
-	public EvaluationResult evaluateExpression(ImmutableExpression expression) {
-		return evaluateExpression(expression, coreUtilsFactory.createDummyVariableNullability(expression));
-	}
-
 	public EvaluationResult evaluateExpression(ImmutableExpression expression, VariableNullability variableNullability) {
 		ImmutableTerm evaluatedTerm = eval(expression, variableNullability);
 

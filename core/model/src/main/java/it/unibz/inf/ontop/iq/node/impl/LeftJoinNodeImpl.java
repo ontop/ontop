@@ -442,12 +442,13 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableConditionException {
 
+        ImmutableExpression expression = descendingSubstitution.applyToBooleanExpression(initialExpression);
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
         ExpressionEvaluator.EvaluationResult results =
-                createExpressionEvaluator().evaluateExpression(
-                        descendingSubstitution.applyToBooleanExpression(initialExpression));
+                createExpressionEvaluator().evaluateExpression(expression,
+                        coreUtilsFactory.createDummyVariableNullability(expression));
 
         if (results.isEffectiveFalse())
             throw new UnsatisfiableConditionException();

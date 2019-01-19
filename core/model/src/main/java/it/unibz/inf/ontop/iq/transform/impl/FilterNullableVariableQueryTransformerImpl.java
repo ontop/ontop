@@ -6,10 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.NotFilterableNullVariableException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -21,6 +18,7 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
@@ -35,16 +33,19 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
     private final ExpressionEvaluator defaultExpressionEvaluator;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private FilterNullableVariableQueryTransformerImpl(IntermediateQueryFactory iqFactory,
                                                        ExpressionEvaluator defaultExpressionEvaluator,
                                                        TermFactory termFactory,
-                                                       SubstitutionFactory substitutionFactory) {
+                                                       SubstitutionFactory substitutionFactory,
+                                                       CoreUtilsFactory coreUtilsFactory) {
         this.iqFactory = iqFactory;
         this.defaultExpressionEvaluator = defaultExpressionEvaluator;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -81,7 +82,8 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
                 .orElseThrow(() -> new IllegalArgumentException("Is nullableProjectedVariables empty? After folding" +
                         "there should be one expression"));
         EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
-                .evaluateExpression(nonOptimizedExpression);
+                .evaluateExpression(nonOptimizedExpression,
+                        coreUtilsFactory.createDummyVariableNullability(nonOptimizedExpression));
 
         Optional<ImmutableExpression> optionalExpression = evaluationResult.getOptionalExpression();
         if (optionalExpression.isPresent())
