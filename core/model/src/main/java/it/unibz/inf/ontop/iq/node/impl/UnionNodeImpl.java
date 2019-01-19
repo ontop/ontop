@@ -26,6 +26,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -355,29 +356,64 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
             return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareNormalizedForOptimization());
 
+        ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
+                .map(c -> (ConstructionNode) c.getRootNode())
+                .map(ConstructionNode::getSubstitution)
+                .map(this::tmpNormalizeNullAndRDFConstantsInSubstitution)
+                .collect(ImmutableCollectors.toList());
+
         ImmutableSubstitution<ImmutableTerm> mergedSubstitution = mergeChildSubstitutions(
-                    projectedVariables,
-                    liftedChildren.stream()
-                            .map(c -> (ConstructionNode) c.getRootNode())
-                            .map(ConstructionNode::getSubstitution)
-                            .collect(ImmutableCollectors.toList()),
-                    variableGenerator);
+                    projectedVariables, tmpNormalizedChildSubstitutions, variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
             return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareNormalizedForOptimization());
         }
-        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, mergedSubstitution);
+        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
+                // Cleans up the temporary "normalization"
+                mergedSubstitution.simplifyValues());
 
         ImmutableSet<Variable> unionVariables = newRootNode.getChildVariables();
         UnionNode newUnionNode = iqFactory.createUnionNode(unionVariables);
 
         NaryIQTree unionIQ = iqFactory.createNaryIQTree(newUnionNode,
-                liftedChildren.stream()
-                        .map(c -> (UnaryIQTree) c)
-                        .map(c -> updateChild(c, mergedSubstitution, unionVariables))
+                IntStream.range(0, liftedChildren.size())
+                        .boxed()
+                        .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
+                                tmpNormalizedChildSubstitutions.get(i), unionVariables))
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ);
+    }
+
+    private ImmutableSubstitution<ImmutableTerm> tmpNormalizeNullAndRDFConstantsInSubstitution(
+            ImmutableSubstitution<ImmutableTerm> substitution) {
+        return substitutionFactory.getSubstitution(
+                substitution.getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> normalizeNullAndRDFConstants(e.getValue())
+                )));
+    }
+
+    /**
+     * RDF constants are transformed into RDF ground terms
+     * Trick: NULL --> RDF(NULL,NULL)
+     *
+     * This "normalization" is temporary --> it will be "cleaned" but simplify the terms afterwards
+     *
+     */
+    private ImmutableTerm normalizeNullAndRDFConstants(ImmutableTerm definition) {
+        if (definition instanceof RDFConstant) {
+            RDFConstant constant = (RDFConstant) definition;
+            return termFactory.getRDFFunctionalTerm(
+                    termFactory.getDBStringConstant(constant.getValue()),
+                    termFactory.getRDFTermTypeConstant(constant.getType()));
+        }
+        else if ((definition instanceof Constant) && definition.isNull())
+            return termFactory.getRDFFunctionalTerm(
+                    termFactory.getNullConstant(), termFactory.getNullConstant());
+        else
+            return definition;
     }
 
     private ImmutableSubstitution<ImmutableTerm> mergeChildSubstitutions(
@@ -404,7 +440,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return Optional.empty();
 
         return childSubstitutions.stream()
-                .map(s -> Optional.of(s.get(variable)))
+                .map(s -> s.get(variable))
+                .map(this::normalizeNullAndRDFConstants)
+                .map(Optional::of)
                 .reduce((od1, od2) -> od1
                         .flatMap(d1 -> od2
                                 .flatMap(d2 -> combineDefinitions(d1, d2, variableGenerator, true))))
@@ -489,11 +527,12 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * TODO: find a better name
      */
     private IQTree updateChild(UnaryIQTree liftedChildTree, ImmutableSubstitution<ImmutableTerm> mergedSubstitution,
+                               ImmutableSubstitution<ImmutableTerm> tmpNormalizedSubstitution,
                                ImmutableSet<Variable> projectedVariables) {
         ConstructionNode constructionNode = (ConstructionNode) liftedChildTree.getRootNode();
 
         ConstructionNodeTools.NewSubstitutionPair substitutionPair = constructionTools.traverseConstructionNode(
-                mergedSubstitution, constructionNode.getSubstitution(),
+                mergedSubstitution, tmpNormalizedSubstitution,
                 constructionNode.getVariables(), projectedVariables);
 
         // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
@@ -507,7 +546,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .applyDescendingSubstitution(descendingSubstitution, Optional.empty());
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
-                    substitutionPair.bindings);
+                    // Cleans up the temporary "normalization", in particular non-lifted RDF(NULL,NULL)
+                    substitutionPair.bindings.simplifyValues());
 
         return substitutionPair.bindings.isEmpty()
                 ? newChild
