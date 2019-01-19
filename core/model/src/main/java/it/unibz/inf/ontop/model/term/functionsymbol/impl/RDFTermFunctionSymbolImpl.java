@@ -92,8 +92,8 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                             TermFactory termFactory, VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                                  TermFactory termFactory, VariableNullability variableNullability) {
         if (otherTerm instanceof RDFConstant) {
             RDFConstant otherConstant = (RDFConstant) otherTerm;
 
@@ -101,8 +101,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                     termFactory.getStrictEquality(terms.get(0), termFactory.getDBStringConstant(otherConstant.getValue())),
                     termFactory.getStrictEquality(terms.get(1), termFactory.getRDFTermTypeConstant(otherConstant.getType())));
 
-            return conjunction.evaluate(termFactory, variableNullability)
-                    .getEvaluationResult(conjunction, true);
+            return conjunction.evaluate(variableNullability, true);
         }
         return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
     }

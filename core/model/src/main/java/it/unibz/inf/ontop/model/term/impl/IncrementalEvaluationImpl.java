@@ -1,32 +1,32 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import it.unibz.inf.ontop.model.term.EvaluationResult;
+import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class EvaluationResultImpl implements EvaluationResult {
+public class IncrementalEvaluationImpl implements IncrementalEvaluation {
 
-    private static final EvaluationResult SAME_EXPRESSION_RESULT, IS_NULL_RESULT, IS_TRUE_RESULT, IS_FALSE_RESULT;
+    private static final IncrementalEvaluation SAME_EXPRESSION_RESULT, IS_NULL_RESULT, IS_TRUE_RESULT, IS_FALSE_RESULT;
 
     static {
-        SAME_EXPRESSION_RESULT = new EvaluationResultImpl(Status.SAME_EXPRESSION);
-        IS_NULL_RESULT = new EvaluationResultImpl(Status.IS_NULL);
-        IS_FALSE_RESULT = new EvaluationResultImpl(Status.IS_FALSE);
-        IS_TRUE_RESULT = new EvaluationResultImpl(Status.IS_TRUE);
+        SAME_EXPRESSION_RESULT = new IncrementalEvaluationImpl(Status.SAME_EXPRESSION);
+        IS_NULL_RESULT = new IncrementalEvaluationImpl(Status.IS_NULL);
+        IS_FALSE_RESULT = new IncrementalEvaluationImpl(Status.IS_FALSE);
+        IS_TRUE_RESULT = new IncrementalEvaluationImpl(Status.IS_TRUE);
     }
 
     @Nullable
     private final ImmutableExpression simplifiedExpression;
     private final Status status;
 
-    private EvaluationResultImpl(ImmutableExpression expression) {
+    private IncrementalEvaluationImpl(ImmutableExpression expression) {
         this.simplifiedExpression = expression;
         this.status = Status.SIMPLIFIED_EXPRESSION;
     }
 
-    private EvaluationResultImpl(Status status) {
+    private IncrementalEvaluationImpl(Status status) {
         if (status == Status.SIMPLIFIED_EXPRESSION) {
             throw new IllegalArgumentException("Use a different construction for SIMPLIFIED EXPRESSION");
         }
@@ -44,24 +44,24 @@ public class EvaluationResultImpl implements EvaluationResult {
         return status;
     }
 
-    public static EvaluationResult declareSimplifiedExpression(
+    public static IncrementalEvaluation declareSimplifiedExpression(
             ImmutableExpression simplifiedExpression) {
-        return new EvaluationResultImpl(simplifiedExpression);
+        return new IncrementalEvaluationImpl(simplifiedExpression);
     }
 
-    public static EvaluationResult declareSameExpression() {
+    public static IncrementalEvaluation declareSameExpression() {
         return SAME_EXPRESSION_RESULT;
     }
 
-    public static EvaluationResult declareIsNull() {
+    public static IncrementalEvaluation declareIsNull() {
         return IS_NULL_RESULT;
     }
 
-    public static EvaluationResult declareIsFalse() {
+    public static IncrementalEvaluation declareIsFalse() {
         return IS_FALSE_RESULT;
     }
 
-    public static EvaluationResult declareIsTrue() {
+    public static IncrementalEvaluation declareIsTrue() {
         return IS_TRUE_RESULT;
     }
 }

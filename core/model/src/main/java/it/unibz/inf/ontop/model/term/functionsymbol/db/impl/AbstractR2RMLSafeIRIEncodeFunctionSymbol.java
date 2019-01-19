@@ -39,15 +39,14 @@ public abstract class AbstractR2RMLSafeIRIEncodeFunctionSymbol extends AbstractT
     }
 
     @Override
-    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory,
-                                                                   VariableNullability variableNullability) {
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
         DBConstant decodedConstant = termFactory.getDBStringConstant(
                 iriDecoder.urlDecode(otherTerm.getValue(), true));
 
         ImmutableExpression newExpression = termFactory.getStrictEquality(terms.get(0), decodedConstant);
 
-        return newExpression.evaluate(termFactory, variableNullability)
-                .getEvaluationResult(newExpression, true);
+        return newExpression.evaluate(variableNullability, true);
     }
 }

@@ -34,7 +34,7 @@ public class LangMatchesSPARQLFunctionSymbolImpl extends StringBooleanBinarySPAR
         return termFactory.getConjunction(
                     termFactory.getIsAExpression(typeTerms.get(0), xsdStringType),
                     termFactory.getIsAExpression(typeTerms.get(1), xsdStringType))
-                .evaluate(termFactory, variableNullability);
+                .evaluate(variableNullability);
     }
 
     /**

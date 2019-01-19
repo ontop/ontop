@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -63,8 +62,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      *
      */
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                             TermFactory termFactory, VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                                  TermFactory termFactory, VariableNullability variableNullability) {
         boolean differentTypeDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
@@ -74,25 +73,25 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 .orElse(false);
 
         if (differentTypeDetected)
-            return EvaluationResult.declareIsFalse();
+            return IncrementalEvaluation.declareIsFalse();
 
         if ((otherTerm instanceof ImmutableFunctionalTerm))
             return evaluateStrictEqWithFunctionalTerm(terms, (ImmutableFunctionalTerm) otherTerm, termFactory,
                     variableNullability);
         else if ((otherTerm instanceof Constant) && otherTerm.isNull())
-            return EvaluationResult.declareIsNull();
+            return IncrementalEvaluation.declareIsNull();
         else if (otherTerm instanceof NonNullConstant) {
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
-        return EvaluationResult.declareSameExpression();
+        return IncrementalEvaluation.declareSameExpression();
     }
 
     /**
      * Default implementation, can be overridden
      */
     @Override
-    public EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
-                                              VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
         if ((!mayReturnNullWithoutNullArguments()) && (!tolerateNulls())) {
             ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
             Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
@@ -100,12 +99,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                     .map(termFactory::getDBIsNotNull));
 
             return optionalExpression
-                    .map(e -> e.evaluate(termFactory, variableNullability)
-                            .getEvaluationResult(e, true))
-                    .orElseGet(EvaluationResult::declareIsTrue);
+                    .map(e -> e.evaluate(variableNullability, true))
+                    .orElseGet(IncrementalEvaluation::declareIsTrue);
         }
         // By default, does not optimize (to be overridden for optimizing)
-        return EvaluationResult.declareSameExpression();
+        return IncrementalEvaluation.declareSameExpression();
     }
 
     /**
@@ -120,23 +118,23 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * Default implementation, can be overridden
      *
      */
-    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
-                                                                  ImmutableFunctionalTerm otherTerm,
-                                                                  TermFactory termFactory,
-                                                                  VariableNullability variableNullability) {
+    protected IncrementalEvaluation evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                       ImmutableFunctionalTerm otherTerm,
+                                                                       TermFactory termFactory,
+                                                                       VariableNullability variableNullability) {
         /*
          * In case of injectivity
          */
         if (otherTerm.getFunctionSymbol().equals(this)
                 && isInjective(terms, variableNullability)) {
             if (getArity() == 0)
-                return EvaluationResult.declareIsTrue();
+                return IncrementalEvaluation.declareIsTrue();
 
             if (!canBeSafelyDecomposedIntoConjunction(terms, variableNullability, otherTerm.getTerms()))
                 /*
                  * TODO: support this special case? Could potentially be wrapped into an IF-ELSE-NULL
                  */
-                return EvaluationResult.declareSameExpression();
+                return IncrementalEvaluation.declareSameExpression();
 
             ImmutableExpression newExpression = termFactory.getConjunction(
                     IntStream.range(0, getArity())
@@ -144,26 +142,10 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                             .map(i -> termFactory.getStrictEquality(terms.get(i), otherTerm.getTerm(i)))
                             .collect(ImmutableCollectors.toList()));
 
-            ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
-            return newEvaluation.getExpression()
-                    .map(EvaluationResult::declareSimplifiedExpression)
-                    .orElseGet(() -> newEvaluation.getValue()
-                            .map(v -> {
-                                switch (v) {
-                                    case TRUE:
-                                        return EvaluationResult.declareIsTrue();
-                                    case FALSE:
-                                        return EvaluationResult.declareIsFalse();
-                                    //case NULL:
-                                    default:
-                                        return EvaluationResult.declareIsNull();
-                                }
-                            })
-                            .orElseThrow(() -> new MinorOntopInternalBugException(
-                                    "An evaluation either is expected to return an expression or a value")));
+            return newExpression.evaluate(variableNullability, true);
         }
         else
-            return EvaluationResult.declareSameExpression();
+            return IncrementalEvaluation.declareSameExpression();
     }
 
     /**
@@ -188,10 +170,10 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     /**
      * Default implementation, does nothing, can be overridden
      */
-    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory,
-                                                                   VariableNullability variableNullability) {
-        return EvaluationResult.declareSameExpression();
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
+        return IncrementalEvaluation.declareSameExpression();
     }
 
     /**

@@ -110,7 +110,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                 .collect(ImmutableCollectors.toList());
 
          return termFactory.getConjunction(typeTestExpressions)
-                 .evaluate(termFactory, variableNullability);
+                 .evaluate(variableNullability);
     }
 
     /**

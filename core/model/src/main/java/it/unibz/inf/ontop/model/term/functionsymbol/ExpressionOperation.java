@@ -147,15 +147,15 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it?
 	 */
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-											 TermFactory termFactory, VariableNullability variableNullability) {
-		return EvaluationResult.declareSameExpression();
+	public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+												  TermFactory termFactory, VariableNullability variableNullability) {
+		return IncrementalEvaluation.declareSameExpression();
 	}
 
 	@Override
-	public EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
-											  VariableNullability variableNullability) {
-		return EvaluationResult.declareSameExpression();
+	public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+												   VariableNullability variableNullability) {
+		return IncrementalEvaluation.declareSameExpression();
 	}
 
 	/**

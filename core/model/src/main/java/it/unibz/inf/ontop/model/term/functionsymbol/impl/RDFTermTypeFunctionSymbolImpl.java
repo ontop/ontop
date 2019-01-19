@@ -83,17 +83,17 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory,
-                                                                   VariableNullability variableNullability) {
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
         if (!(otherTerm instanceof RDFTermTypeConstant))
             throw new MinorOntopInternalBugException("Was expecting the constant to be a RDFTermTypeConstant: " + otherTerm);
         RDFTermTypeConstant typeConstant = (RDFTermTypeConstant) otherTerm;
 
         return Optional.ofNullable(conversionMap.inverse().get(typeConstant))
                 .map(c -> termFactory.getStrictEquality(terms.get(0), c))
-                .map(EvaluationResult::declareSimplifiedExpression)
-                .orElseGet(EvaluationResult::declareIsFalse);
+                .map(IncrementalEvaluation::declareSimplifiedExpression)
+                .orElseGet(IncrementalEvaluation::declareIsFalse);
     }
 
     @Override

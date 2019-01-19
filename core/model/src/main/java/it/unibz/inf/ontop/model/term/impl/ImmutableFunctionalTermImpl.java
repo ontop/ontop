@@ -122,12 +122,12 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         return functionSymbol.evaluateStrictEq(getTerms(), otherTerm, termFactory, variableNullability);
     }
 
     @Override
-    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability) {
         return functionSymbol.evaluateIsNotNull(getTerms(), termFactory, variableNullability);
     }
 

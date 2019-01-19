@@ -13,13 +13,18 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImpl implements ImmutableExpression {
+
+    private final TermFactory termFactory;
+
     protected ImmutableExpressionImpl(TermFactory termFactory, BooleanFunctionSymbol functor, ImmutableTerm... terms) {
         super(functor, termFactory, terms);
+        this.termFactory = termFactory;
     }
 
     protected ImmutableExpressionImpl(BooleanFunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms,
                                       TermFactory termFactory) {
         super(functor, terms, termFactory);
+        this.termFactory = termFactory;
     }
 
     @Override
@@ -56,7 +61,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability) {
+    public Evaluation evaluate(VariableNullability variableNullability) {
         ImmutableTerm newTerm = simplify(variableNullability);
         if (newTerm instanceof ImmutableExpression)
             return termFactory.getEvaluation((ImmutableExpression) newTerm);
@@ -69,6 +74,13 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
 
         throw new IncorrectExpressionSimplificationBugException(this, newTerm);
     }
+
+    @Override
+    public IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean wasExpressionAlreadyNew) {
+        return evaluate(variableNullability)
+                .getEvaluationResult(this, wasExpressionAlreadyNew);
+    }
+
 
     @Override
     public ImmutableExpression negate(TermFactory termFactory) {
@@ -106,11 +118,11 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         }
 
         @Override
-        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
-                                                    boolean wasExpressionAlreadyNew) {
+        public IncrementalEvaluation getEvaluationResult(ImmutableExpression originalExpression,
+                                                         boolean wasExpressionAlreadyNew) {
             return (wasExpressionAlreadyNew || (!originalExpression.equals(expression)))
-                    ? EvaluationResult.declareSimplifiedExpression(expression)
-                    : EvaluationResult.declareSameExpression();
+                    ? IncrementalEvaluation.declareSimplifiedExpression(expression)
+                    : IncrementalEvaluation.declareSameExpression();
         }
     }
 
@@ -140,16 +152,16 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         }
 
         @Override
-        public EvaluationResult getEvaluationResult(ImmutableExpression originalExpression,
-                                                    boolean wasExpressionAlreadyNew) {
+        public IncrementalEvaluation getEvaluationResult(ImmutableExpression originalExpression,
+                                                         boolean wasExpressionAlreadyNew) {
             switch(value) {
                 case TRUE:
-                    return EvaluationResult.declareIsTrue();
+                    return IncrementalEvaluation.declareIsTrue();
                 case FALSE:
-                    return EvaluationResult.declareIsFalse();
+                    return IncrementalEvaluation.declareIsFalse();
                 // NULL
                 default:
-                    return EvaluationResult.declareIsNull();
+                    return IncrementalEvaluation.declareIsNull();
             }
         }
     }

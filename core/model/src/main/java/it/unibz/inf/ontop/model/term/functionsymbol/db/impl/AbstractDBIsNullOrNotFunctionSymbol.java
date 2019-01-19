@@ -47,12 +47,12 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
 
-        EvaluationResult evaluationResult = newTerm.evaluateIsNotNull(variableNullability);
-        switch (evaluationResult.getStatus()) {
+        IncrementalEvaluation incrementalEvaluation = newTerm.evaluateIsNotNull(variableNullability);
+        switch (incrementalEvaluation.getStatus()) {
             case SAME_EXPRESSION:
                 return termFactory.getImmutableExpression(this, newTerm);
             case SIMPLIFIED_EXPRESSION:
-                return evaluationResult.getSimplifiedExpression()
+                return incrementalEvaluation.getSimplifiedExpression()
                         .map(e -> isNull ? e.negate(termFactory) : e)
                         .orElseThrow(() -> new MinorOntopInternalBugException("A simplified expression was expected"));
             case IS_NULL:

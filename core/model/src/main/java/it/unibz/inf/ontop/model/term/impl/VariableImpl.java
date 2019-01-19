@@ -83,11 +83,11 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	}
 
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof Variable) {
 			return equals(otherTerm)
-					? EvaluationResult.declareIsTrue()
-					: EvaluationResult.declareSameExpression();
+					? IncrementalEvaluation.declareIsTrue()
+					: IncrementalEvaluation.declareSameExpression();
 		}
 		else if (otherTerm instanceof ImmutableFunctionalTerm) {
 			// Functional terms are in charge of evaluating other terms
@@ -96,16 +96,16 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 		// Constant
 		else  {
 			return ((Constant) otherTerm).isNull()
-					? EvaluationResult.declareIsNull()
-					: EvaluationResult.declareSameExpression();
+					? IncrementalEvaluation.declareIsNull()
+					: IncrementalEvaluation.declareSameExpression();
 		}
 	}
 
     @Override
-    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability) {
 		return variableNullability.isPossiblyNullable(this)
-				? EvaluationResult.declareSameExpression()
-				: EvaluationResult.declareIsTrue();
+				? IncrementalEvaluation.declareSameExpression()
+				: IncrementalEvaluation.declareIsTrue();
     }
 
     @Override

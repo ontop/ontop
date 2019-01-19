@@ -154,9 +154,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    protected EvaluationResult evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
-                                                                  ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
-                                                                  VariableNullability variableNullability) {
+    protected IncrementalEvaluation evaluateStrictEqWithFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms,
+                                                                       ImmutableFunctionalTerm otherTerm, TermFactory termFactory,
+                                                                       VariableNullability variableNullability) {
         FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
         if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
             String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
@@ -164,7 +164,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
              * TODO: go beyond prefix comparison
              */
             if (!arePrefixesCompatible(otherTemplate))
-                return EvaluationResult.declareIsFalse();
+                return IncrementalEvaluation.declareIsFalse();
         }
 
         // May decompose in case of injectivity
@@ -191,9 +191,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
     @Override
-    protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory,
-                                                                   VariableNullability variableNullability) {
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
         String otherValue = otherTerm.getValue();
 
         if (isInjective(terms, variableNullability)) {
@@ -211,14 +211,13 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                         .orElseThrow(() -> new MinorOntopInternalBugException(
                                 "An ObjectStringTemplateFunctionSymbolImpl is expected to have a non-null arity"));
 
-                ImmutableExpression.Evaluation newEvaluation = newExpression.evaluate(termFactory, variableNullability);
-                return newEvaluation.getEvaluationResult(newExpression, true);
+                return newExpression.evaluate(variableNullability, true);
             }
             else
-                return EvaluationResult.declareIsFalse();
+                return IncrementalEvaluation.declareIsFalse();
         }
         else if (!arePrefixesCompatible(otherValue))
-            return EvaluationResult.declareIsFalse();
+            return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }
