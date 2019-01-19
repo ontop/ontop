@@ -69,27 +69,22 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        // For efficiency purposes, we keep the term functional to make decomposition easier
-        if ((!isInConstructionNodeInOptimizationPhase) && newTerms.stream()
+        if (newTerms.stream()
             .allMatch(t -> t instanceof DBConstant)) {
             ImmutableList<String> values = newTerms.stream()
                     .map(t -> (DBConstant) t)
-                    .map(c -> encodeParameter(c, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability))
+                    .map(c -> encodeParameter(c, termFactory, variableNullability))
                     .collect(ImmutableCollectors.toList());
 
             return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
-        }
-        else if (isOneArgumentNull(newTerms)) {
-            return termFactory.getNullConstant();
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private String encodeParameter(DBConstant constant, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
-        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(isInConstructionNodeInOptimizationPhase, variableNullability))
+    private String encodeParameter(DBConstant constant, TermFactory termFactory, VariableNullability variableNullability) {
+        return Optional.of(termFactory.getR2RMLIRISafeEncodeFunctionalTerm(constant).simplify(variableNullability))
                 .filter(t -> t instanceof DBConstant)
                 .map(t -> ((DBConstant) t).getValue())
                 .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting " +

@@ -37,6 +37,7 @@ import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -232,8 +233,8 @@ public class R2RMLManager {
 				
 				ImmutableTerm joinSubject2 = r2rmlParser.getSubjectAtom(parentTriple);
 				
-			List<ImmutableFunctionalTerm> joinPredicates = r2rmlParser.getBodyURIPredicates(pobm);
-			for (ImmutableFunctionalTerm pred : joinPredicates) {
+			List<NonVariableTerm> joinPredicates = r2rmlParser.getBodyURIPredicates(pobm);
+			for (NonVariableTerm pred : joinPredicates) {
 				//TODO:joinPredicates
 				bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(joinSubject1, pred, joinSubject2));   // objectAtom
 			}
@@ -272,9 +273,9 @@ public class R2RMLManager {
 		ImmutableTerm subjectAtom = r2rmlParser.getSubjectAtom(tm);
 		
 		//get any class predicates, construct atom Class(subject), add to body
-		List<ImmutableFunctionalTerm> classPredicates = r2rmlParser.getClassPredicates();
-		for (ImmutableFunctionalTerm classPred : classPredicates) {
-			ImmutableTerm predFunction = termFactory.getIRIFunctionalTerm(RDF.TYPE);
+		List<NonVariableTerm> classPredicates = r2rmlParser.getClassPredicates();
+		for (NonVariableTerm classPred : classPredicates) {
+			ImmutableTerm predFunction = termFactory.getConstantIRI(RDF.TYPE);
 			bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(subjectAtom, predFunction, classPred));   // objectAtom
 		}		
 
@@ -282,7 +283,7 @@ public class R2RMLManager {
 			//for each predicate object map
 
 			//predicates that contain a variable are separately treated
-			List<ImmutableFunctionalTerm> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
+			List<NonVariableTerm> bodyURIPredicates = r2rmlParser.getBodyURIPredicates(pom);
 			
 			//get object atom
 			ImmutableTerm objectAtom = r2rmlParser.getObjectAtom(pom);
@@ -294,7 +295,7 @@ public class R2RMLManager {
 
 			
 			//treat predicates
-			for (ImmutableFunctionalTerm predFunction : bodyURIPredicates) {
+			for (NonVariableTerm predFunction : bodyURIPredicates) {
 
 				bodyBuilder.add(targetAtomFactory.getTripleTargetAtom(subjectAtom, predFunction, objectAtom));   // objectAtom
 			}

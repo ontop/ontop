@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.JdbcTypeMapper;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
@@ -229,7 +228,7 @@ public class OBDAModel {
                                         .map(e -> e.getKey().equals(predicateVariable)
                                                 ? Maps.immutableEntry(predicateVariable,
                                                 // We build a ground term for the IRI
-                                                (ImmutableTerm) termFactory.getIRIMutableFunctionalTerm(newIRI))
+                                                (ImmutableTerm) termFactory.getConstantIRI(newIRI))
                                                 : e)
                                         .collect(ImmutableCollectors.toMap()));
 

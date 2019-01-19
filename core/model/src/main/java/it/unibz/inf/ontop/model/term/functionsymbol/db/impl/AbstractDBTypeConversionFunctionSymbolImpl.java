@@ -18,12 +18,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        // Null
-        if (isOneArgumentNull(newTerms))
-            return termFactory.getNullConstant();
-
         ImmutableTerm subTerm = newTerms.get(0);
 
         // Non null

@@ -31,7 +31,6 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
      */
     @Override
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                           boolean isInConstructionNodeInOptimizationPhase,
                                                            TermFactory termFactory, VariableNullability variableNullability) {
         if (newTerms.stream()
                 .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {

@@ -520,17 +520,6 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
 	}
 
-    @Override
-    public ImmutableFunctionalTerm getNullRDFFunctionalTerm() {
-		return getRDFFunctionalTerm(valueNull, valueNull);
-    }
-
-    @Override
-    public GroundFunctionalTerm getIRIFunctionalTerm(IRI iri) {
-		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
-		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
-    }
-
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString) {
 		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;
@@ -563,24 +552,6 @@ public class TermFactoryImpl implements TermFactory {
 														ImmutableList<DBConstant> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(templateSymbol, arguments);
 		return getRDFFunctionalTerm(lexicalTerm, iriTypeConstant);
-	}
-
-	@Override
-	public Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments) {
-		FunctionSymbol templateFunctionSymbol = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(iriTemplate);
-		Function lexicalTerm = getFunction(templateFunctionSymbol, arguments);
-		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalTerm);
-	}
-
-	@Override
-	public Function getIRIMutableFunctionalTerm(IRI iri) {
-		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
-		return getIRIMutableFunctionalTermFromLexicalTerm(lexicalConstant);
-	}
-
-	@Override
-	public Function getNullRDFMutableFunctionalTerm() {
-		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), valueNull, valueNull);
 	}
 
 	@Override

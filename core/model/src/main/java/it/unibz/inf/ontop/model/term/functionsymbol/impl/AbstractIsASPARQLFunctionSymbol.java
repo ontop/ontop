@@ -32,7 +32,7 @@ public abstract class AbstractIsASPARQLFunctionSymbol extends ReduciblePositiveA
 
         return termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBBooleanType(), dbTypeFactory.getDBStringType(),
                 expression)
-                .simplify(false);
+                .simplify();
     }
 
     @Override

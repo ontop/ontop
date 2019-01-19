@@ -260,14 +260,14 @@ public class DirectMappingAxiomProducer {
 
 	private TargetAtom getAtom(IRI iri, ImmutableTerm s, ImmutableTerm o) {
 		return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getIRIFunctionalTerm(iri),
+				termFactory.getConstantIRI(iri),
 				o);
 	}
 
 	private TargetAtom getAtom(IRI iri, ImmutableTerm s) {
     	return targetAtomFactory.getTripleTargetAtom(s,
-				termFactory.getIRIFunctionalTerm(RDF.TYPE),
-				termFactory.getIRIFunctionalTerm(iri));
+				termFactory.getConstantIRI(RDF.TYPE),
+				termFactory.getConstantIRI(iri));
 	}
 
 

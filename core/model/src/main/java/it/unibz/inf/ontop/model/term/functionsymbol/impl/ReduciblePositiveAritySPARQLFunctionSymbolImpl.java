@@ -4,15 +4,12 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -39,7 +36,6 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
 
     @Override
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                           boolean isInConstructionNodeInOptimizationPhase,
                                                            TermFactory termFactory, VariableNullability variableNullability) {
         if ((!tolerateNulls()
                 && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull())))

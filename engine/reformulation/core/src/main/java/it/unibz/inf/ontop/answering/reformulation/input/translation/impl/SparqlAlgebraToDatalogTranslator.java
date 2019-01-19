@@ -209,7 +209,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (nullVariables.isEmpty())
                 return atoms;
 
-            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, termFactory.getNullRDFMutableFunctionalTerm())));
+            return getAtomsExtended(nullVariables.stream().map(v -> termFactory.getFunctionEQ(v, termFactory.getNullConstant())));
         }
 
         /**
@@ -485,13 +485,13 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p.equals(RDF.TYPE)) {
                 Term oTerm;
 					// term rdf:type variable .
-                Term pTerm = termFactory.getIRIMutableFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+                Term pTerm = termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
                 if (o == null) {
                     oTerm = getTermForVariable(triple.getObjectVar(), variables);
 
 				}
 				else if (o instanceof IRI) {
-                    oTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(o.stringValue()));
+                    oTerm = termFactory.getConstantIRI(rdfFactory.createIRI(o.stringValue()));
 				}
 				else
 					throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
@@ -500,7 +500,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				// term uri term . (where uri is either an object or a datatype property)
 				Term oTerm = (o == null) ? getTermForVariable(triple.getObjectVar(), variables) : getTermForLiteralOrIri(o);
-                Term pTerm = termFactory.getIRIMutableFunctionalTerm(rdfFactory.createIRI(p.stringValue()));
+                Term pTerm = termFactory.getConstantIRI(rdfFactory.createIRI(p.stringValue()));
                 atom = atomFactory.getMutableTripleAtom(sTerm, pTerm, oTerm);
 			}
 		}
@@ -550,7 +550,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
                 return immutabilityTools.convertToMutableTerm(
-                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(typeURI.stringValue())));
+                        termFactory.getConstantIRI(rdfFactory.createIRI(typeURI.stringValue())));
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
@@ -583,14 +583,12 @@ public class SparqlAlgebraToDatalogTranslator {
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
-                return immutabilityTools.convertToMutableFunction(
-                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(uri)));
+                return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
             else
                 return immutabilityTools.convertToMutableFunction(termFactory.getRDFFunctionalTerm(id));
         }
         else {
-            return immutabilityTools.convertToMutableFunction(
-                    uriTemplateMatcher.generateIRIFunctionalTerm(rdfFactory.createIRI(uri)));
+            return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
         }
     }
 

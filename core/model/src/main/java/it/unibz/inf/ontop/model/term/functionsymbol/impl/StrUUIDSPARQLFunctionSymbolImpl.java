@@ -7,12 +7,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import org.apache.commons.rdf.api.IRI;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public class StrUUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements SPARQLFunctionSymbol {
@@ -56,7 +54,7 @@ public class StrUUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implemen
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory,
+                                                     TermFactory termFactory,
                                                      VariableNullability variableNullability) {
         ImmutableFunctionalTerm lexicalTerm = termFactory.getDBUUID();
         return termFactory.getRDFFunctionalTerm(lexicalTerm, termFactory.getRDFTermTypeConstant(xsdStringType));

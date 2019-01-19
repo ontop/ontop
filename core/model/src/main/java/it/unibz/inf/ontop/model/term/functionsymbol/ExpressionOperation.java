@@ -186,10 +186,10 @@ public enum ExpressionOperation implements FunctionSymbol {
 	 * TODO: implement it seriously after getting rid of this enum
 	 */
 	@Override
-	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+	public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
 		ImmutableList<ImmutableTerm> newTerms = terms.stream()
 				.map(t -> (t instanceof ImmutableFunctionalTerm)
-						? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
+						? t.simplify(variableNullability)
 						: t)
 				.collect(ImmutableCollectors.toList());
 		return termFactory.getImmutableFunctionalTerm(this, newTerms);

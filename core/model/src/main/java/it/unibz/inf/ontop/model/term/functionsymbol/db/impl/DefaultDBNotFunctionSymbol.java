@@ -50,7 +50,6 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableTerm newTerm = newTerms.get(0);

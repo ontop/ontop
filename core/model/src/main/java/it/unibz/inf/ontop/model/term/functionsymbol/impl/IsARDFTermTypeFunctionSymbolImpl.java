@@ -37,7 +37,6 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm subTerm = newTerms.get(0);
 
@@ -69,7 +68,7 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                     Stream.of(termFactory.getDBIsNotNull(term)),
                     excludedMagicNumbers))
                 .get()
-                .simplify(false, variableNullability);
+                .simplify(variableNullability);
     }
 
     @Override

@@ -27,7 +27,6 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<TermType> termTypes = newTerms.stream()
                 .filter(t -> t instanceof RDFTermTypeConstant)

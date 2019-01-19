@@ -57,8 +57,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
 
     @Override
     public Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability) {
-        // NB: isInConstructionNodeInOptimizationPhase is irrelevant for expressions
-        ImmutableTerm newTerm = simplify(false, variableNullability);
+        ImmutableTerm newTerm = simplify(variableNullability);
         if (newTerm instanceof ImmutableExpression)
             return termFactory.getEvaluation((ImmutableExpression) newTerm);
         else if (newTerm.equals(termFactory.getDBBooleanConstant(true)))

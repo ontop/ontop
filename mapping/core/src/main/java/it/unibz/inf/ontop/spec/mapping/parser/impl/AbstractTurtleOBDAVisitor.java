@@ -81,7 +81,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
             FormatString token = tokens.get(0);
             if (token instanceof FixedString) {
                 IRI iri = rdfFactory.createIRI(token.toString());
-                toReturn = termFactory.getIRIFunctionalTerm(iri);
+                toReturn = termFactory.getConstantIRI(iri);
             } else if (token instanceof ColumnString) {
                 // the IRI string is coming from the DB (no escaping needed)
                 Variable column = termFactory.getVariable(token.toString());
@@ -309,7 +309,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (rc != null) {
             return visitResource(rc);
         }
-        return termFactory.getIRIFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+        return termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
     }
 
     @Override

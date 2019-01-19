@@ -206,10 +206,7 @@ public class MetaMappingExpander {
 
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
 
-
-						// In a mapping assertion, we create ground terms instead of constants for IRIs
-						// (so as to guarantee that RDF functions can ALWAYS be lifted after unfolding)
-						GroundFunctionalTerm predicateTerm = termFactory.getIRIFunctionalTerm(
+						IRIConstant predicateTerm = termFactory.getConstantIRI(
 								rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
 
 						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);

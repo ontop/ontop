@@ -344,24 +344,22 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase,
-                                                               VariableNullability variableNullability) {
-        return simplifyValues(isInConstructionNodeInOptimizationPhase, Optional.of(variableNullability));
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(VariableNullability variableNullability) {
+        return simplifyValues(Optional.of(variableNullability));
     }
 
     @Override
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase) {
-        return simplifyValues(isInConstructionNodeInOptimizationPhase, Optional.empty());
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues() {
+        return simplifyValues(Optional.empty());
     }
 
-    public ImmutableSubstitution<ImmutableTerm> simplifyValues(boolean isInConstructionNodeInOptimizationPhase,
-                                                               Optional<VariableNullability> variableNullability) {
+    public ImmutableSubstitution<ImmutableTerm> simplifyValues(Optional<VariableNullability> variableNullability) {
         return substitutionFactory.getSubstitution(getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> variableNullability
-                                .map(n -> e.getValue().simplify(isInConstructionNodeInOptimizationPhase, n))
-                                .orElseGet(() -> e.getValue().simplify(isInConstructionNodeInOptimizationPhase)))));
+                                .map(n -> e.getValue().simplify(n))
+                                .orElseGet(() -> e.getValue().simplify()))));
     }
 
     protected Optional<ImmutableExpression> convertIntoBooleanExpression(

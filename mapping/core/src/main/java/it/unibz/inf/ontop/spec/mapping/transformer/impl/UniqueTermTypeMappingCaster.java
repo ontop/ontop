@@ -83,17 +83,17 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
         if (!projectedVariables.stream()
                 .map(topSubstitution::apply)
-                .allMatch(t -> (t instanceof ImmutableFunctionalTerm) &&
-                        ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))) {
+                .allMatch(t -> ((t instanceof ImmutableFunctionalTerm) &&
+                        ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))
+                        || (t instanceof RDFConstant))) {
             throw new MinorOntopInternalBugException(
-                    "The root construction node is not defining all the variables with a RDF functional term\n"
+                    "The root construction node is not defining all the variables with a RDF functional or constant term\n"
                             + mappingAssertion);
         }
         IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
-                (ImmutableMap<Variable, ImmutableFunctionalTerm>)(ImmutableMap<Variable, ?>)topSubstitution.getImmutableMap(),
-                childTree);
+                topSubstitution.getImmutableMap(), childTree);
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
@@ -105,7 +105,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
      * TODO: explain why all the transformation is done in the top construction node substitution
      */
     private ImmutableSubstitution<ImmutableTerm> transformTopSubstitution(
-            ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap,
+            ImmutableMap<Variable, ImmutableTerm> substitutionMap,
             IQTree childTree) {
 
         return substitutionFactory.getSubstitution(
@@ -116,17 +116,25 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                         )));
     }
 
-    private ImmutableFunctionalTerm transformDefinition(ImmutableFunctionalTerm rdfTermDefinition, IQTree childTree) {
-        ImmutableTerm uncastLexicalTerm = uncast(rdfTermDefinition.getTerm(0));
-        ImmutableTerm rdfTypeTerm = rdfTermDefinition.getTerm(1);
+    private ImmutableTerm transformDefinition(ImmutableTerm rdfTerm, IQTree childTree) {
+        if (rdfTerm instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm rdfTermDefinition = (ImmutableFunctionalTerm) rdfTerm;
+            ImmutableTerm uncastLexicalTerm = uncast(rdfTermDefinition.getTerm(0));
+            ImmutableTerm rdfTypeTerm = rdfTermDefinition.getTerm(1);
 
-        Optional<DBTermType> dbType = extractInputDBType(uncastLexicalTerm, childTree);
-        RDFTermType rdfType = extractRDFTermType(rdfTypeTerm);
+            Optional<DBTermType> dbType = extractInputDBType(uncastLexicalTerm, childTree);
+            RDFTermType rdfType = extractRDFTermType(rdfTypeTerm);
 
-        ImmutableTerm newLexicalTerm = transformNestedTemporaryCasts(
-                transformTopOfLexicalTerm(uncastLexicalTerm, dbType, rdfType), childTree);
+            ImmutableTerm newLexicalTerm = transformNestedTemporaryCasts(
+                    transformTopOfLexicalTerm(uncastLexicalTerm, dbType, rdfType), childTree);
 
-        return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm);
+            return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm);
+        }
+        else if (rdfTerm instanceof RDFConstant) {
+            return rdfTerm;
+        }
+        else
+            throw new IllegalArgumentException("Was expecting an ImmutableFunctionalTerm or a Constant");
     }
 
     /**

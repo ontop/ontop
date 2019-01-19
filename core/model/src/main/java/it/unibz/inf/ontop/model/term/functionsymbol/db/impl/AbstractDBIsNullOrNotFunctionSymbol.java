@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 
 public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunctionSymbolImpl {
 
@@ -45,7 +44,6 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
 
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newTerm = newTerms.get(0);
 

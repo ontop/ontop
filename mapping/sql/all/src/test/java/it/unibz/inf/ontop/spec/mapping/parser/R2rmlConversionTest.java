@@ -44,7 +44,8 @@ public class R2rmlConversionTest {
        }
 
 
-       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping, config.getRdfFactory());
+       SQLPPMappingToR2RMLConverter converter = new SQLPPMappingToR2RMLConverter(ppMapping,
+               config.getRdfFactory(), config.getTermFactory());
        return converter.getTripleMaps();
 
 

@@ -778,7 +778,7 @@ public class RDBMSSIRepositoryManager {
 					continue;
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
-				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getIRIFunctionalTerm(ope.getIRI()),
+				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
@@ -818,7 +818,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getIRIFunctionalTerm(dpe.getIRI()) ,
+						termFactory.getConstantIRI(dpe.getIRI()) ,
 						view.getId().getType1(), view.getId().getType2());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
@@ -852,7 +852,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getIRIFunctionalTerm(classNode.getIRI()), view.getId().getType1());
+						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
@@ -904,7 +904,7 @@ public class RDBMSSIRepositoryManager {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
 
-		ImmutableTerm predTerm = termFactory.getIRIFunctionalTerm(RDF.TYPE);
+		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
 
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm, predTerm ,classTerm);
 		return ImmutableList.of(targetAtom);

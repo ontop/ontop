@@ -285,16 +285,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * Returns RDF(NULL, NULL)
-	 */
-	ImmutableFunctionalTerm getNullRDFFunctionalTerm();
-
-	/**
-	 * TODO: use a more precise type for the argument
-	 */
-	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
-
-	/**
 	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);
@@ -314,16 +304,6 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<DBConstant> arguments);
-
-	/**
-	 * Temporary
-	 */
-	Function getIRIMutableFunctionalTerm(String iriTemplate, Term... arguments);
-	Function getIRIMutableFunctionalTerm(IRI iri);
-
-	Function getNullRDFMutableFunctionalTerm();
-
-
 
 	/**
 	 * NB: a fresh Bnode template is created

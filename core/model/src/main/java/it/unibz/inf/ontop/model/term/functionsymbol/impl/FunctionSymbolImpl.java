@@ -41,15 +41,18 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms,
-                                  boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+                                  TermFactory termFactory, VariableNullability variableNullability) {
 
         ImmutableList<ImmutableTerm> newTerms = terms.stream()
                 .map(t -> (t instanceof ImmutableFunctionalTerm)
-                        ? t.simplify(isInConstructionNodeInOptimizationPhase, variableNullability)
+                        ? t.simplify(variableNullability)
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        return buildTermAfterEvaluation(newTerms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
+            return termFactory.getNullConstant();
+
+        return buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     /**
@@ -186,12 +189,13 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * Default implementation, does nothing, can be overridden
      */
     protected EvaluationResult evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
-                                                                   NonNullConstant otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
+                                                                   NonNullConstant otherTerm, TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
         return EvaluationResult.declareSameExpression();
     }
 
     /**
-     * Returns true if is not guarantee to return NULL when one argument is NULL
+     * Returns true if is not guaranteed to return NULL when one argument is NULL
      */
     protected abstract boolean tolerateNulls();
 
@@ -218,19 +222,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     /**
      * By default, just build a new functional term.
      *
-     * To be extended for reacting to null values and so on.
+     * NB: If the function symbol does not tolerate NULL values, no need to handle them here.
      *
      */
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
-    }
-
-    protected boolean isOneArgumentNull(ImmutableList<ImmutableTerm> subTerms) {
-        return subTerms.stream()
-                .filter(t -> t instanceof Constant)
-                .anyMatch(t -> ((Constant) t).isNull());
     }
 
     protected ImmutableList<TermType> getExpectedBaseTypes() {

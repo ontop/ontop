@@ -19,7 +19,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, boolean isInConstructionNodeInOptimizationPhase, TermFactory termFactory, VariableNullability variableNullability) {
+    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm possibleValue = terms.get(1);
 
         if (possibleValue.equals(termFactory.getNullConstant()))
@@ -34,7 +34,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
             if (expression.equals(termFactory.getDBIsNotNull(possibleValue)))
                 return possibleValue;
         }
-        return super.simplify(terms, isInConstructionNodeInOptimizationPhase, termFactory, variableNullability);
+        return super.simplify(terms, termFactory, variableNullability);
     }
 
     /**

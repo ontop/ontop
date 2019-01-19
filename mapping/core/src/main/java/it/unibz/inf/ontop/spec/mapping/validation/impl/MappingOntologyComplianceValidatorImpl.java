@@ -116,13 +116,16 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                         "Not defined in the root node (expected for a mapping assertion)");
             return optionalType;
         }
+        else if (constructionTerm instanceof RDFConstant) {
+            return Optional.of(((RDFConstant) constructionTerm).getType());
+        }
         else {
             /*
-             * TODO: consider variables and constants (NB: could be relevant for SPARQL->SPARQL
+             * TODO: consider variables (NB: could be relevant for SPARQL->SPARQL
               * but not much for SPARQL->SQL where RDF terms have to built)
              */
             throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                    "Was expecting a functional term (constants and variables are not yet supported). \n"
+                    "Was expecting a functional or constant term (variables are not yet supported). \n"
                             + "Term definition: " + constructionTerm);
         }
     }

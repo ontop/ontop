@@ -39,7 +39,6 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
      */
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         return computeNewDisjunction(newTerms, termFactory);
     }

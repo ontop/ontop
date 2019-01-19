@@ -48,7 +48,6 @@ public class CommonDenominatorFunctionSymbolImpl extends FunctionSymbolImpl {
      */
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
-                                                     boolean isInConstructionNodeInOptimizationPhase,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         /*
          * Constant terms are first reduced
