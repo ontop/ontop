@@ -40,24 +40,16 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        return computeNewConjunction(newTerms, termFactory);
-    }
-
-    /**
-     * Temporarily public
-     * TODO: hide it again
-     */
-    public static ImmutableTerm computeNewConjunction(ImmutableList<ImmutableTerm> evaluatedTerms, TermFactory termFactory) {
         DBConstant falseValue = termFactory.getDBBooleanConstant(false);
-        if (evaluatedTerms.stream()
+        if (newTerms.stream()
                 .anyMatch(falseValue::equals))
             return falseValue;
 
-        Optional<ImmutableTerm> optionalNull = evaluatedTerms.stream()
-                .filter(t -> (t instanceof Constant) && ((Constant) t).isNull())
+        Optional<ImmutableTerm> optionalNull = newTerms.stream()
+                .filter(t -> (t instanceof Constant) && t.isNull())
                 .findFirst();
 
-        ImmutableList<ImmutableExpression> others = evaluatedTerms.stream()
+        ImmutableList<ImmutableExpression> others = newTerms.stream()
                 // We don't care about TRUE
                 .filter(t -> (t instanceof ImmutableExpression))
                 .map(t -> (ImmutableExpression) t)
