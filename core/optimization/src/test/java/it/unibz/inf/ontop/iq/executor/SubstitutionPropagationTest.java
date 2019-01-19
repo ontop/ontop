@@ -781,7 +781,8 @@ public class SubstitutionPropagationTest {
         initialQueryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X, generateURI2(ONE_STR, TWO_STR)));
+                SUBSTITUTION_FACTORY.getSubstitution(X, TERM_FACTORY.getConstantIRI(
+                        RDF_FACTORY.createIRI("http://example.org/ds2/1/2"))));
         initialQueryBuilder.addChild(joinNode, rightConstructionNode);
         initialQueryBuilder.addChild(rightConstructionNode, IQ_FACTORY.createTrueNode());
 
