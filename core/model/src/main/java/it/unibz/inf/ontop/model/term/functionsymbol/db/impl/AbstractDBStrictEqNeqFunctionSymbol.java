@@ -85,13 +85,13 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
 
             for (int j=i+1; (j < size) && keepTerm; j++) {
                 ImmutableTerm otherTerm = nonNullTerms.get(j);
-                EvaluationResult evaluation = term.evaluateStrictEq(otherTerm, variableNullability);
+                IncrementalEvaluation evaluation = term.evaluateStrictEq(otherTerm, variableNullability);
 
                 switch(evaluation.getStatus()) {
                     case SAME_EXPRESSION:
                         break;
                     case SIMPLIFIED_EXPRESSION:
-                        otherExpressionBuilder.add(evaluation.getSimplifiedExpression().get());
+                        otherExpressionBuilder.add(evaluation.getNewExpression().get());
                         keepTerm = false;
                         break;
                     case IS_NULL:

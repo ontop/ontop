@@ -53,13 +53,13 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
-        return EvaluationResult.declareIsNull();
+    public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+        return IncrementalEvaluation.declareIsNull();
     }
 
     @Override
-    public EvaluationResult evaluateIsNotNull(VariableNullability variableNullability) {
-        return EvaluationResult.declareIsFalse();
+    public IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability) {
+        return IncrementalEvaluation.declareIsFalse();
     }
 
     @Override

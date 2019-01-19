@@ -6,21 +6,14 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.NotFilterableNullVariableException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator.EvaluationResult;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.FilterNullableVariableQueryTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.LinkedList;
@@ -32,19 +25,19 @@ import java.util.stream.Stream;
 public class FilterNullableVariableQueryTransformerImpl implements FilterNullableVariableQueryTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private FilterNullableVariableQueryTransformerImpl(IntermediateQueryFactory iqFactory,
-                                                       ExpressionEvaluator defaultExpressionEvaluator,
                                                        TermFactory termFactory,
-                                                       SubstitutionFactory substitutionFactory) {
+                                                       SubstitutionFactory substitutionFactory,
+                                                       CoreUtilsFactory coreUtilsFactory) {
         this.iqFactory = iqFactory;
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -80,16 +73,21 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         ImmutableExpression nonOptimizedExpression = termFactory.getConjunction(filteringExpressionStream)
                 .orElseThrow(() -> new IllegalArgumentException("Is nullableProjectedVariables empty? After folding" +
                         "there should be one expression"));
-        EvaluationResult evaluationResult = defaultExpressionEvaluator.clone()
-                .evaluateExpression(nonOptimizedExpression);
+        IncrementalEvaluation evaluationResult = nonOptimizedExpression.evaluate(
+                coreUtilsFactory.createDummyVariableNullability(nonOptimizedExpression), false);
 
-        Optional<ImmutableExpression> optionalExpression = evaluationResult.getOptionalExpression();
-        if (optionalExpression.isPresent())
-            return optionalExpression.get();
-        else if (evaluationResult.isEffectiveFalse())
-            throw new NotFilterableNullVariableException(query, nonOptimizedExpression);
-        else
-            throw new UnexpectedTrueExpressionException(nonOptimizedExpression);
+        switch (evaluationResult.getStatus()) {
+            case SAME_EXPRESSION:
+                return nonOptimizedExpression;
+            case SIMPLIFIED_EXPRESSION:
+                return evaluationResult.getNewExpression().get();
+            case IS_NULL:
+            case IS_FALSE:
+                throw new NotFilterableNullVariableException(query, nonOptimizedExpression);
+            case IS_TRUE:
+            default:
+                throw new UnexpectedTrueExpressionException(nonOptimizedExpression);
+        }
     }
 
     private IntermediateQuery constructQuery(IntermediateQuery query, QueryNode rootNode,

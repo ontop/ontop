@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -28,18 +27,15 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     private final TermFactory termFactory;
     private final ImmutableUnificationTools unificationTools;
     private final ImmutableSubstitutionTools substitutionTools;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
 
     @Inject
     private ConditionSimplifierImpl(SubstitutionFactory substitutionFactory,
                                     TermFactory termFactory, ImmutableUnificationTools unificationTools,
-                                    ImmutableSubstitutionTools substitutionTools,
-                                    ExpressionEvaluator defaultExpressionEvaluator) {
+                                    ImmutableSubstitutionTools substitutionTools) {
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
 
@@ -55,17 +51,17 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                        VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
-        Optional<ExpressionEvaluator.EvaluationResult> optionalEvaluationResults =
+        Optional<IncrementalEvaluation> optionalEvaluationResults =
                 nonOptimizedExpression
-                        .map(expression -> evaluateExpression(expression, variableNullability));
+                        .map(expression -> expression.evaluate(variableNullability, true));
 
         if (optionalEvaluationResults.isPresent()) {
-            ExpressionEvaluator.EvaluationResult results = optionalEvaluationResults.get();
+            IncrementalEvaluation results = optionalEvaluationResults.get();
 
             if (results.isEffectiveFalse())
                 throw new UnsatisfiableConditionException();
 
-            Optional<ImmutableExpression> optionalExpression = results.getOptionalExpression();
+            Optional<ImmutableExpression> optionalExpression = results.getNewExpression();
             if (optionalExpression.isPresent())
                 // May throw an exception if unification is rejected
                 return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables);
@@ -74,10 +70,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         }
         else
             return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
-    }
-
-    private ExpressionEvaluator.EvaluationResult evaluateExpression(ImmutableExpression expression, VariableNullability variableNullability) {
-        return (defaultExpressionEvaluator.clone()).evaluateExpression(expression, variableNullability);
     }
 
     /**
@@ -164,12 +156,12 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                     substitutedConstraint.flattenAND())))
                     .orElse(substitutedConstraint);
 
-            ExpressionEvaluator.EvaluationResult evaluationResults = evaluateExpression(combinedExpression, childVariableNullability);
+            IncrementalEvaluation evaluationResults = combinedExpression.evaluate(childVariableNullability, true);
 
             if (evaluationResults.isEffectiveFalse())
                 throw new UnsatisfiableConditionException();
 
-            return evaluationResults.getOptionalExpression();
+            return evaluationResults.getNewExpression();
         }
         else
             return conditionSimplificationResults.getOptionalExpression();

@@ -4,8 +4,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
-import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -44,7 +42,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
 
-    private final TermNullabilityEvaluator nullabilityEvaluator;
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSubstitution<ImmutableTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
@@ -58,24 +55,21 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final TermFactory termFactory;
     private final Constant nullValue;
-    private final ExpressionEvaluator expressionEvaluator;
     private final AscendingSubstitutionNormalizer substitutionNormalizer;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                  @Assisted ImmutableSubstitution<ImmutableTerm> substitution,
-                                 TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ExpressionEvaluator expressionEvaluator, OntopModelSettings settings,
+                                 OntopModelSettings settings,
                                  AscendingSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionTools = substitutionTools;
@@ -83,7 +77,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         this.termFactory = termFactory;
         this.nullValue = termFactory.getNullConstant();
         this.iqFactory = iqFactory;
-        this.expressionEvaluator = expressionEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionNormalizer = substitutionNormalizer;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
@@ -128,23 +121,19 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
      */
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
-                                 TermNullabilityEvaluator nullabilityEvaluator,
                                  ImmutableUnificationTools unificationTools,
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 ExpressionEvaluator expressionEvaluator,
                                  AscendingSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
-        this.nullabilityEvaluator = nullabilityEvaluator;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
         this.substitution = substitutionFactory.getSubstitution();
         this.termFactory = termFactory;
         this.iqFactory = iqFactory;
-        this.expressionEvaluator = expressionEvaluator;
         this.constructionNodeTools = constructionNodeTools;
         this.substitutionFactory = substitutionFactory;
         this.nullValue = termFactory.getNullConstant();
@@ -660,17 +649,17 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                                                  VariableNullability childVariableNullability)
             throws EmptyTreeException {
 
-        Optional<ExpressionEvaluator.EvaluationResult> descendingConstraintResults = initialConstraint
+        Optional<IncrementalEvaluation> descendingConstraintResults = initialConstraint
                 .map(theta::applyToBooleanExpression)
-                .map(exp -> expressionEvaluator.clone().evaluateExpression(exp, childVariableNullability));
+                .map(exp -> exp.evaluate(childVariableNullability, true));
 
         if (descendingConstraintResults
-                .filter(ExpressionEvaluator.EvaluationResult::isEffectiveFalse)
+                .filter(IncrementalEvaluation::isEffectiveFalse)
                 .isPresent())
             throw new EmptyTreeException();
 
         return descendingConstraintResults
-                .flatMap(ExpressionEvaluator.EvaluationResult::getOptionalExpression);
+                .flatMap(IncrementalEvaluation::getNewExpression);
     }
 
     /**

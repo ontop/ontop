@@ -87,6 +87,6 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
                         .map(t -> termFactory.getStrictEquality(t, xsdStringConstant)));
 
         return termFactory.getConjunction(conditionStream).get()
-                .evaluate(termFactory, variableNullability);
+                .evaluate(variableNullability);
     }
 }

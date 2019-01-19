@@ -27,11 +27,11 @@ public interface FunctionSymbol extends Predicate {
 
     TermType getExpectedBaseType(int index);
 
-    EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
-                                      TermFactory termFactory, VariableNullability variableNullability);
+    IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                           TermFactory termFactory, VariableNullability variableNullability);
 
-    EvaluationResult evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
-                                       VariableNullability variableNullability);
+    IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                            VariableNullability variableNullability);
 
     /**
      * 1. When a functional term simplifies itself in a BOTTOM-UP manner:

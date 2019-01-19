@@ -46,7 +46,7 @@ public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
         ImmutableTerm typeTerm = typeTerms.get(0);
 
         return termFactory.getDBNot(termFactory.getIsAExpression(typeTerm, bnodeType))
-                .evaluate(termFactory, variableNullability);
+                .evaluate(variableNullability);
     }
 
     @Override

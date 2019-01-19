@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -51,12 +50,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private LeftJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalJoinCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator,
                              IntermediateQueryFactory iqFactory,
                              ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                              ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 substitutionFactory, unificationTools, substitutionTools);
         this.conditionSimplifier = conditionSimplifier;
         this.ljNormalizer = ljNormalizer;
@@ -68,12 +66,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     private LeftJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                              TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator,
                              IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                              ImmutableSubstitutionTools substitutionTools, ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
-                defaultExpressionEvaluator, substitutionFactory, unificationTools, substitutionTools);
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, substitutionFactory, unificationTools, substitutionTools);
         this.conditionSimplifier = conditionSimplifier;
         this.ljNormalizer = ljNormalizer;
         this.variableNullabilityTools = variableNullabilityTools;
@@ -83,11 +79,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @AssistedInject
     private LeftJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, SubstitutionFactory substitutionFactory,
                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                             ExpressionEvaluator defaultExpressionEvaluator,
                              IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
                              ImmutableSubstitutionTools substitutionTools, ConditionSimplifier conditionSimplifier, LeftJoinNormalizer ljNormalizer,
                              JoinOrFilterVariableNullabilityTools variableNullabilityTools, CoreUtilsFactory coreUtilsFactory) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools, defaultExpressionEvaluator,
+        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
                 substitutionFactory, unificationTools, substitutionTools);
         this.conditionSimplifier = conditionSimplifier;
         this.ljNormalizer = ljNormalizer;
@@ -103,7 +98,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode clone() {
         return new LeftJoinNodeImpl(getOptionalFilterCondition(), getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), iqFactory,
+                termFactory, typeFactory, datalogTools, iqFactory,
                 unificationTools, substitutionTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
     }
 
@@ -115,7 +110,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public LeftJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
         return new LeftJoinNodeImpl(newOptionalFilterCondition, getNullabilityEvaluator(), substitutionFactory,
-                termFactory, typeFactory, datalogTools, createExpressionEvaluator(), iqFactory,
+                termFactory, typeFactory, datalogTools, iqFactory,
                 unificationTools, substitutionTools, conditionSimplifier, ljNormalizer, variableNullabilityTools, coreUtilsFactory);
     }
 
@@ -442,17 +437,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
             throws UnsatisfiableConditionException {
 
+        ImmutableExpression expression = descendingSubstitution.applyToBooleanExpression(initialExpression);
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
-        ExpressionEvaluator.EvaluationResult results =
-                createExpressionEvaluator().evaluateExpression(
-                        descendingSubstitution.applyToBooleanExpression(initialExpression));
+        IncrementalEvaluation results = expression.evaluate(
+                coreUtilsFactory.createDummyVariableNullability(expression), true);
 
         if (results.isEffectiveFalse())
             throw new UnsatisfiableConditionException();
 
-        return results.getOptionalExpression()
+        return results.getNewExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
                         new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getNonFunctionalTermFragment()));

@@ -8,10 +8,8 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -31,14 +29,13 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected final SubstitutionFactory substitutionFactory;
     protected final ImmutableUnificationTools unificationTools;
     protected final ImmutableSubstitutionTools substitutionTools;
-    private final ExpressionEvaluator defaultExpressionEvaluator;
+
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
                                    IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogTools datalogTools,
                                    SubstitutionFactory substitutionFactory,
-                                   ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
-                                   ExpressionEvaluator defaultExpressionEvaluator) {
+                                   ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(substitutionFactory, iqFactory);
         this.optionalFilterCondition = optionalFilterCondition;
         this.nullabilityEvaluator = nullabilityEvaluator;
@@ -48,7 +45,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;
-        this.defaultExpressionEvaluator = defaultExpressionEvaluator;
     }
 
     @Override
@@ -72,11 +68,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         else {
             return ImmutableSet.of();
         }
-    }
-
-
-    protected ExpressionEvaluator createExpressionEvaluator() {
-        return defaultExpressionEvaluator.clone();
     }
 
     protected boolean isFilteringNullValue(Variable variable) {

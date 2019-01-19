@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.evaluator.ExpressionEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -51,7 +50,6 @@ public class OptimizationTestingTools {
     public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
-    public static final ExpressionEvaluator DEFAULT_EXPRESSION_EVALUATOR;
     public static final IQConverter IQ_CONVERTER;
     public static final DBConstant TRUE, FALSE;
     public static final Constant NULL;
@@ -121,7 +119,6 @@ public class OptimizationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
-        DEFAULT_EXPRESSION_EVALUATOR = injector.getInstance(ExpressionEvaluator.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER = injector.getInstance(PushDownBooleanExpressionOptimizer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
@@ -69,13 +68,13 @@ public class RDFTermTypeConstantImpl extends AbstractNonNullConstant implements 
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         if (otherTerm instanceof Constant) {
             if (((Constant) otherTerm).isNull())
-                return EvaluationResult.declareIsNull();
+                return IncrementalEvaluation.declareIsNull();
             return equals(otherTerm)
-                    ? EvaluationResult.declareIsTrue()
-                    : EvaluationResult.declareIsFalse();
+                    ? IncrementalEvaluation.declareIsTrue()
+                    : IncrementalEvaluation.declareIsFalse();
         }
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);

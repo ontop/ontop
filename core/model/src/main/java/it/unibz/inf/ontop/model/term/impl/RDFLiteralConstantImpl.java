@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.model.term.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -94,16 +93,16 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	 *  (which returns NULL instead of FALSE for two different literals)
 	 */
 	@Override
-	public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+	public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
 		if (otherTerm instanceof RDFLiteralConstant) {
 			return equals(otherTerm)
-					? EvaluationResult.declareIsTrue()
-					: EvaluationResult.declareIsFalse();
+					? IncrementalEvaluation.declareIsTrue()
+					: IncrementalEvaluation.declareIsFalse();
 		}
 		else if (otherTerm instanceof Constant)
 			return ((Constant) otherTerm).isNull()
-				? EvaluationResult.declareIsNull()
-				: EvaluationResult.declareIsFalse();
+				? IncrementalEvaluation.declareIsNull()
+				: IncrementalEvaluation.declareIsFalse();
 		else
 			return otherTerm.evaluateStrictEq(this, variableNullability);
 	}

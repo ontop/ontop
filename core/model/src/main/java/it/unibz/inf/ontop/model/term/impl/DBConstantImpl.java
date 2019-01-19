@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -61,13 +60,13 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
     }
 
     @Override
-    public EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
+    public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         if (otherTerm instanceof Constant) {
             return ((Constant) otherTerm).isNull()
-                    ? EvaluationResult.declareIsNull()
+                    ? IncrementalEvaluation.declareIsNull()
                     : equals(otherTerm)
-                        ? EvaluationResult.declareIsTrue()
-                        : EvaluationResult.declareIsFalse();
+                        ? IncrementalEvaluation.declareIsTrue()
+                        : IncrementalEvaluation.declareIsFalse();
         }
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);

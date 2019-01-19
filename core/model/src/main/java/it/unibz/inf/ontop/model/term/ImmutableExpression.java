@@ -23,7 +23,9 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
      */
     Stream<ImmutableExpression> flattenOR();
 
-    Evaluation evaluate(TermFactory termFactory, VariableNullability variableNullability);
+    Evaluation evaluate(VariableNullability variableNullability);
+
+    IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew);
 
     boolean isVar2VarEquality();
 
@@ -38,7 +40,8 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
         Optional<BooleanValue> getValue();
         ImmutableTerm getTerm();
 
-        EvaluationResult getEvaluationResult(ImmutableExpression originalExpression, boolean wasExpressionAlreadyNew);
+        IncrementalEvaluation getEvaluationResult(ImmutableExpression originalExpression,
+                                                  boolean wasExpressionAlreadyNew);
 
         enum BooleanValue {
             TRUE,

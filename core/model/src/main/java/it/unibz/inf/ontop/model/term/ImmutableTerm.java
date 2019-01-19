@@ -29,9 +29,9 @@ public interface ImmutableTerm {
      */
     Optional<TermTypeInference> inferType();
 
-    EvaluationResult evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability);
+    IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability);
 
-    EvaluationResult evaluateIsNotNull(VariableNullability variableNullability);
+    IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability);
 
     ImmutableTerm simplify(VariableNullability variableNullability);
 
