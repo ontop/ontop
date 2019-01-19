@@ -90,4 +90,20 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     protected boolean tolerateNulls() {
         return false;
     }
+
+    @Override
+    public EvaluationResult evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                             TermFactory termFactory, VariableNullability variableNullability) {
+        if (otherTerm instanceof RDFConstant) {
+            RDFConstant otherConstant = (RDFConstant) otherTerm;
+
+            ImmutableExpression conjunction = termFactory.getConjunction(
+                    termFactory.getStrictEquality(terms.get(0), termFactory.getDBStringConstant(otherConstant.getValue())),
+                    termFactory.getStrictEquality(terms.get(1), termFactory.getRDFTermTypeConstant(otherConstant.getType())));
+
+            return conjunction.evaluate(termFactory, variableNullability)
+                    .getEvaluationResult(conjunction, true);
+        }
+        return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
+    }
 }
