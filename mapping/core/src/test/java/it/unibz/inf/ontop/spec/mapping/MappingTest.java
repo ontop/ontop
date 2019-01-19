@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -220,13 +221,8 @@ public class MappingTest {
         return TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(argument));
     }
 
-    /**
-     *
-     * Currently, we are wrapping IRI constants into an IRI function
-     * TODO: stop this practise
-     */
-    private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
-        return TERM_FACTORY.getIRIFunctionalTerm(iri);
+    private IRIConstant getConstantIRI(IRI iri) {
+        return TERM_FACTORY.getConstantIRI(iri);
     }
 
     private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {

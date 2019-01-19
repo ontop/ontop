@@ -1945,7 +1945,7 @@ public class BindingLiftTest {
         ExtensionalDataNode dataNode2 = buildExtensionalDataNode(TABLE2_AR1, B);
 
         // TODO: use another function (a UDF for instance)
-        GroundFunctionalTerm groundTerm = (GroundFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(
+        GroundFunctionalTerm groundTerm = (GroundFunctionalTerm) TERM_FACTORY.getConstantIRI(
                 RDF_FACTORY.createIRI("http://my-uri/constant"));
 
         IQTree leftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(

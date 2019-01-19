@@ -550,7 +550,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
                 return immutabilityTools.convertToMutableTerm(
-                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(typeURI.stringValue())));
+                        termFactory.getConstantIRI(rdfFactory.createIRI(typeURI.stringValue())));
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
@@ -583,14 +583,13 @@ public class SparqlAlgebraToDatalogTranslator {
         if (uriRef != null) {  // if in the Semantic Index mode
             int id = uriRef.getId(uri);
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
-                return immutabilityTools.convertToMutableFunction(
-                        termFactory.getIRIFunctionalTerm(rdfFactory.createIRI(uri)));
+                return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
             else
                 return immutabilityTools.convertToMutableFunction(termFactory.getRDFFunctionalTerm(id));
         }
         else {
-            return immutabilityTools.convertToMutableFunction(
-                    uriTemplateMatcher.generateIRIFunctionalTerm(rdfFactory.createIRI(uri)));
+            return immutabilityTools.convertToMutableTerm(
+                    uriTemplateMatcher.generateIRITerm(rdfFactory.createIRI(uri)));
         }
     }
 

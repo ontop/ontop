@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -41,7 +40,7 @@ import java.util.*;
 
 public class R2RMLParser {
 
-	List<ImmutableFunctionalTerm> classPredicates;
+	List<NonVariableTerm> classPredicates;
 	List<Resource> joinPredObjNodes;
 
 
@@ -91,9 +90,9 @@ public class R2RMLParser {
      * They can be retrieved only once, after retrieving everything is cleared.
 	 * @return
 	 */
-	public List<ImmutableFunctionalTerm> getClassPredicates() {
-		List<ImmutableFunctionalTerm> classes = new ArrayList<>();
-		for (ImmutableFunctionalTerm p : classPredicates)
+	public List<NonVariableTerm> getClassPredicates() {
+		List<NonVariableTerm> classes = new ArrayList<>();
+		for (NonVariableTerm p : classPredicates)
 			classes.add(p);
 		classPredicates.clear();
 		return classes;
@@ -183,7 +182,7 @@ public class R2RMLParser {
 		// process class declaration
 		List<IRI> classes = sMap.getClasses();
 		for (IRI o : classes) {
-            classPredicates.add(termFactory.getIRIFunctionalTerm(o));
+            classPredicates.add(termFactory.getConstantIRI(o));
 		}
 
 		if (subjectAtom == null)
@@ -200,15 +199,15 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<ImmutableFunctionalTerm> getBodyURIPredicates(PredicateObjectMap pom) {
-		List<ImmutableFunctionalTerm> predicateAtoms = new ArrayList<>();
+	public List<NonVariableTerm> getBodyURIPredicates(PredicateObjectMap pom) {
+		List<NonVariableTerm> predicateAtoms = new ArrayList<>();
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 
 			RDFTerm pmConstant = pm.getConstant();
 			if (pmConstant != null) {
-				ImmutableFunctionalTerm bodyPredicate = termFactory.getIRIFunctionalTerm(
+				IRIConstant bodyPredicate = termFactory.getConstantIRI(
 						rdfFactory.createIRI(pmConstant.toString()));
 				predicateAtoms.add(bodyPredicate);
 			}
@@ -216,14 +215,14 @@ public class R2RMLParser {
 			Template t = pm.getTemplate();
 			if (t != null) {
 				// create uri("...",var)
-				ImmutableFunctionalTerm predicateAtom = getURIFunction(t.toString());
+				NonVariableTerm predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
 
 			// process column declaration
 			String c = pm.getColumn();
 			if (c != null) {
-				ImmutableFunctionalTerm predicateAtom = getURIFunction(c);
+				NonVariableTerm predicateAtom = getURIFunction(c);
 				predicateAtoms.add(predicateAtom);
 			}
 		}
@@ -315,7 +314,7 @@ public class R2RMLParser {
 						return termFactory.getRDFLiteralConstant(lexicalString, RDFS.LITERAL);
 					}
                 } else if (constantObj instanceof IRI){
-                    return termFactory.getIRIFunctionalTerm((IRI) constantObj);
+                    return termFactory.getConstantIRI((IRI) constantObj);
                 }
 			}
 		}
@@ -419,7 +418,7 @@ public class R2RMLParser {
 	 *            - the atom as string
 	 * @return the contructed Function atom
 	 */
-	private ImmutableFunctionalTerm getTermTypeAtom(String string, Object type, String joinCond) {
+	private NonVariableTerm getTermTypeAtom(String string, Object type, String joinCond) {
 
 		if (type.equals(R2RMLVocabulary.iri)) {
 
@@ -436,15 +435,15 @@ public class R2RMLParser {
 		return null;
 	}
 
-	private ImmutableFunctionalTerm getURIFunction(String string, String joinCond) {
+	private NonVariableTerm getURIFunction(String string, String joinCond) {
 		return getTypedFunction(string, 1, joinCond);
 	}
 
-	private ImmutableFunctionalTerm getURIFunction(String string) {
+	private NonVariableTerm getURIFunction(String string) {
 		return getTypedFunction(string, 1);
 	}
 
-	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type) {
+	public NonVariableTerm getTypedFunction(String parsedString, int type) {
 		return getTypedFunction(parsedString, type, "");
 	}
 	
@@ -474,7 +473,7 @@ public class R2RMLParser {
 	 *            - CHILD_ or PARENT_ prefix for variables
 	 * @return the constructed Function atom
 	 */
-	public ImmutableFunctionalTerm getTypedFunction(String parsedString, int type,
+	public NonVariableTerm getTypedFunction(String parsedString, int type,
 			String joinCond) {
 
 		List<ImmutableTerm> terms = new ArrayList<>();
@@ -540,7 +539,7 @@ public class R2RMLParser {
 		// constant uri
 		case 0:
 			IRI iri = rdfFactory.createIRI(string);
-			return termFactory.getIRIFunctionalTerm(iri);
+			return termFactory.getConstantIRI(iri);
 			// URI or IRI
 		case 1:
 			return termFactory.getIRIFunctionalTerm(string, ImmutableList.copyOf(terms));

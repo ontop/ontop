@@ -7,10 +7,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -57,13 +54,13 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
 
     @Override
     public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI classIRI) {
-        return getTripleTargetAtom(subjectTerm, createGroundFunctionalTerm(RDF.TYPE),
-                createGroundFunctionalTerm(classIRI));
+        return getTripleTargetAtom(subjectTerm, createIRIConstant(RDF.TYPE),
+                createIRIConstant(classIRI));
     }
 
     @Override
     public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI propertyIRI, ImmutableTerm objectTerm) {
-        return getTripleTargetAtom(subjectTerm, createGroundFunctionalTerm(propertyIRI), objectTerm);
+        return getTripleTargetAtom(subjectTerm, createIRIConstant(propertyIRI), objectTerm);
     }
 
     @Override
@@ -71,7 +68,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
         return new TargetAtomImpl(projectionAtom, substitution);
     }
 
-    private ImmutableFunctionalTerm createGroundFunctionalTerm(IRI iri) {
-        return termFactory.getIRIFunctionalTerm(iri);
+    private IRIConstant createIRIConstant(IRI iri) {
+        return termFactory.getConstantIRI(iri);
     }
 }

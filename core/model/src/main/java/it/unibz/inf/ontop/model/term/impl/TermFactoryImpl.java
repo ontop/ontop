@@ -520,12 +520,6 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
 	}
 
-    @Override
-    public GroundFunctionalTerm getIRIFunctionalTerm(IRI iri) {
-		DBConstant lexicalConstant = getDBStringConstant(iri.getIRIString());
-		return (GroundFunctionalTerm) getRDFFunctionalTerm(lexicalConstant, iriTypeConstant);
-    }
-
 	@Override
 	public ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString) {
 		ImmutableTerm lexicalTerm = temporaryCastToString ? getPartiallyDefinedToStringCast(variable) : variable;

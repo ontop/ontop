@@ -285,11 +285,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
 	/**
-	 * TODO: use a more precise type for the argument
-	 */
-	GroundFunctionalTerm getIRIFunctionalTerm(IRI iri);
-
-	/**
 	 * temporaryCastToString == true must only be used when dealing with PRE-PROCESSED mapping
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(Variable variable, boolean temporaryCastToString);

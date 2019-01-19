@@ -92,7 +92,7 @@ public class AtomFactoryImpl implements AtomFactory {
     public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
         return getMutableTripleAtom(
                 subject,
-                convertIRIIntoFunction(propertyIRI),
+                convertIRIIntoConstant(propertyIRI),
                 object);
     }
 
@@ -100,16 +100,12 @@ public class AtomFactoryImpl implements AtomFactory {
     public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
         return getMutableTripleAtom(
                 subject,
-                convertIRIIntoFunction(RDF.TYPE),
-                convertIRIIntoFunction(classIRI));
+                convertIRIIntoConstant(RDF.TYPE),
+                convertIRIIntoConstant(classIRI));
     }
 
-    private Function convertIRIIntoFunction(IRI iri) {
-        return (Function) immutabilityTools.convertToMutableTerm(termFactory.getIRIFunctionalTerm(iri));
-    }
-
-    private GroundFunctionalTerm convertIRIIntoGroundFunctionalTerm(IRI iri) {
-        return termFactory.getIRIFunctionalTerm(iri);
+    private IRIConstant convertIRIIntoConstant(IRI iri) {
+        return termFactory.getConstantIRI(iri);
     }
 
     @Override
@@ -127,13 +123,13 @@ public class AtomFactoryImpl implements AtomFactory {
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
                                                             VariableOrGroundTerm object) {
         // TODO: in the future, constants will be for IRIs in intensional data atoms
-        return getIntensionalTripleAtom(subject, convertIRIIntoGroundFunctionalTerm(propertyIRI), object);
+        return getIntensionalTripleAtom(subject, convertIRIIntoConstant(propertyIRI), object);
     }
 
     @Override
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
         // TODO: in the future, constants will be for IRIs in intensional data atoms
-        return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoGroundFunctionalTerm(classIRI));
+        return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoConstant(classIRI));
     }
 
     @Override

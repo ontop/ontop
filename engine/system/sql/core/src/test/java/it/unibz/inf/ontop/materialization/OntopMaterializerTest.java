@@ -121,13 +121,13 @@ public class OntopMaterializerTest {
 
 		xsdStringDt = typeFactory.getXsdStringDatatype();
 
-		type = termFactory.getIRIFunctionalTerm(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
-		person = termFactory.getIRIFunctionalTerm(personIRI);
-		fn = termFactory.getIRIFunctionalTerm(fnIRI);
-		ln = termFactory.getIRIFunctionalTerm(lnIRI);
-		age =termFactory.getIRIFunctionalTerm(ageIRI);
-		hasschool = termFactory.getIRIFunctionalTerm(hasschoolIRI);
-		school = termFactory.getIRIFunctionalTerm(schoolIRI);
+		type = termFactory.getConstantIRI(it.unibz.inf.ontop.model.vocabulary.RDF.TYPE);
+		person = termFactory.getConstantIRI(personIRI);
+		fn = termFactory.getConstantIRI(fnIRI);
+		ln = termFactory.getConstantIRI(lnIRI);
+		age =termFactory.getConstantIRI(ageIRI);
+		hasschool = termFactory.getConstantIRI(hasschoolIRI);
+		school = termFactory.getConstantIRI(schoolIRI);
     }
 
 	private static OntopStandaloneSQLConfiguration.Builder<? extends OntopStandaloneSQLConfiguration.Builder> createAndInitConfiguration() {

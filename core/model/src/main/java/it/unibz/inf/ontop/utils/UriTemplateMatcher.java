@@ -126,20 +126,20 @@ public class UriTemplateMatcher {
      * have a corresponding function, and the parameters for this function. The
      * parameters are the values for the groups of the pattern.
      */
-    public ImmutableFunctionalTerm generateIRIFunctionalTerm(IRI iri) {
+    public NonVariableTerm generateIRITerm(IRI iri) {
         Optional<Pattern> longestMatchingPattern = uriTemplateMatcher.keySet().stream()
                 .filter(p -> p.matcher(iri.getIRIString()).matches())
                 .max(Comparator.comparingInt(c -> c.pattern().length()));
 
         return longestMatchingPattern
-                .map(p -> generateIRIFunctionalTerm(iri, p))
-                .orElseGet(() -> termFactory.getIRIFunctionalTerm(iri));
+                .map(p -> generateIRITerm(iri, p))
+                .orElseGet(() -> termFactory.getConstantIRI(iri));
     }
 
-    private ImmutableFunctionalTerm generateIRIFunctionalTerm(IRI iri, Pattern pattern) {
+    private NonVariableTerm generateIRITerm(IRI iri, Pattern pattern) {
         NonConstantTerm matchingTerm = uriTemplateMatcher.get(pattern);
         if (matchingTerm instanceof Variable)
-            return termFactory.getIRIFunctionalTerm(iri);
+            return termFactory.getConstantIRI(iri);
 
         // TODO: refactor
         IRIStringTemplateFunctionSymbol matchingFunctionSymbol =
