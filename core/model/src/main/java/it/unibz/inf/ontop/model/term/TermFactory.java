@@ -332,6 +332,24 @@ public interface TermFactory {
 														   RDFTermType rdfType);
 
 	/**
+	 * Reconverts a dbTerm that has been converted into the NATURAL DB type of an RDF type.
+	 *
+	 * The key point here is that RDF type may NOT YET be KNOWN.
+	 *
+	 * TODO: find a better name
+	 *
+	 */
+	ImmutableFunctionalTerm getReconversion2RDFLexical(ImmutableTerm dbTerm, ImmutableTerm rdfTypeTerm);
+
+	/**
+	 * Converts a lexical term to the NATURAL DB type of an RDF type.
+	 *
+	 * The key point here is that RDF type may NOT YET be KNOWN.
+	 *
+	 */
+	ImmutableFunctionalTerm getConversionFromRDFLexical2NaturalDB(ImmutableTerm dbTerm, ImmutableTerm rdfTypeTerm);
+
+	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
 	 *   (either the full lexical value or a fragment involved in a template)
 	 * in a PRE-PROCESSED mapping assertion.

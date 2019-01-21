@@ -28,7 +28,7 @@ public abstract class AbstractUnaryBooleanSPARQLFunctionSymbol extends Reducible
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
         ImmutableExpression expression = computeExpression(subLexicalTerms, termFactory);

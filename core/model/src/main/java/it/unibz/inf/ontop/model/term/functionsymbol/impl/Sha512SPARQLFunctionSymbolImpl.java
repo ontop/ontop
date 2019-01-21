@@ -14,7 +14,7 @@ public class Sha512SPARQLFunctionSymbolImpl extends AbstractHashSPARQLFunctionSy
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getDBSha512(subLexicalTerms.get(0));
     }
 }

@@ -3,14 +3,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
-import org.apache.commons.rdf.api.IRI;
-
-import javax.annotation.Nonnull;
 
 public class DivideSPARQLFunctionSymbolImpl extends AbstractNumericBinarySPARQLFunctionSymbol {
 
@@ -22,8 +19,8 @@ public class DivideSPARQLFunctionSymbolImpl extends AbstractNumericBinarySPARQLF
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+    protected ImmutableTerm computeNumericTerm(ImmutableFunctionalTerm numericTerm1, ImmutableFunctionalTerm numericTerm2,
+                                               TermFactory termFactory) {
         throw new RuntimeException("TODO: implement it");
     }
 

@@ -18,7 +18,7 @@ public class EncodeForUriAbstractUnaryStringSPARQLFunctionSymbolImpl extends Abs
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms,
-                                               TermFactory termFactory) {
+                                               TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getR2RMLIRISafeEncodeFunctionalTerm(subLexicalTerms.get(0));
     }
 

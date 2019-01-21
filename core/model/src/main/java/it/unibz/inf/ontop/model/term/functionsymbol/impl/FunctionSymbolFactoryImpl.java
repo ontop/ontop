@@ -198,6 +198,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return lexicalLangMatchesFunctionSymbol;
     }
 
+    @Override
+    public FunctionSymbol getReconversion2RDFLexicalFunctionSymbol() {
+        throw new RuntimeException("TODO: implement it");
+    }
+
+    @Override
+    public FunctionSymbol getConversionFromRDFLexical2NaturalDBFunctionSymbol() {
+        throw new RuntimeException("TODO: implement it");
+    }
+
     protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {
         return getSPARQLFunctionSymbol(officialName, arity)
                 .orElseThrow(() -> new MinorOntopInternalBugException(

@@ -70,4 +70,8 @@ public interface FunctionSymbolFactory {
      * Not a DBFunctionSymbol as it is not delegated to the DB (too complex logic)
      */
     BooleanFunctionSymbol getLexicalLangMatches();
+
+    FunctionSymbol getReconversion2RDFLexicalFunctionSymbol();
+
+    FunctionSymbol getConversionFromRDFLexical2NaturalDBFunctionSymbol();
 }

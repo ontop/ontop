@@ -626,6 +626,20 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getReconversion2RDFLexical(ImmutableTerm dbTerm, ImmutableTerm rdfTypeTerm) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getReconversion2RDFLexicalFunctionSymbol(),
+				dbTerm, rdfTypeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getConversionFromRDFLexical2NaturalDB(ImmutableTerm dbTerm, ImmutableTerm rdfTypeTerm) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getConversionFromRDFLexical2NaturalDBFunctionSymbol(),
+				dbTerm, rdfTypeTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getPartiallyDefinedToStringCast(Variable variable) {
 		return getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getTemporaryConversionToDBStringFunctionSymbol(),
