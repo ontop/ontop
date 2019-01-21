@@ -8,7 +8,7 @@ import org.apache.commons.rdf.api.IRI;
 public class AbstractNumericRDFDatatype extends SimpleRDFDatatype implements NumericRDFDatatype {
 
     private AbstractNumericRDFDatatype(IRI datatypeIRI, TermTypeAncestry parentAncestry) {
-        super(datatypeIRI, parentAncestry, true);
+        super(datatypeIRI, parentAncestry);
     }
 
     static NumericRDFDatatype createAbstractNumericTermType(IRI datatypeIRI, TermTypeAncestry parentAncestry) {
