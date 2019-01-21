@@ -35,13 +35,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 	FLOOR("floor", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false),
 	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE, false),
 
-	/* Hash functions */
-
-	MD5("MD5", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
-	SHA1("SHA1", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
-	SHA512("SHA521", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
-	SHA256("SHA256", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_STRING_DT, false),
-
 	/* SPARQL Functions on Dates and Times */
 
 	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE, true),

@@ -99,7 +99,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("HASH('SHA256', STRINGTOUTF8(%s), 1000)", termConverter.apply(terms.get(0)));
+        return String.format("HASH('SHA256', STRINGTOUTF8(%s), 1)", termConverter.apply(terms.get(0)));
     }
 
     @Override
