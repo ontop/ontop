@@ -822,13 +822,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", SECONDS)
                     .put("NOW", NOW)
                     .put("TZ", TZ)
-                    /*
-                     * Hash functions
-                     */
-                    .put("MD5", MD5)
-                    .put("SHA1", SHA1)
-                    .put("SHA256", SHA256)
-                    .put("SHA512", SHA512)
                     .build();
 
 

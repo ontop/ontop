@@ -438,6 +438,26 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableFunctionalTerm getDBMd5(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMd5(), stringTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha1(), stringTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha256(), stringTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSha512(), stringTerm);
+	}
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

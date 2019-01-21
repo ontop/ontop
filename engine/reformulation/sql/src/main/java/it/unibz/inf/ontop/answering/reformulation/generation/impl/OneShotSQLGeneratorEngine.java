@@ -62,7 +62,6 @@ import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
@@ -1150,22 +1149,6 @@ public class OneShotSQLGeneratorEngine {
 		if (functionSymbol == ExpressionOperation.TZ) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateTZ(literal);
-		}
-		if (functionSymbol == ExpressionOperation.MD5) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.MD5(literal);
-		}
-		if (functionSymbol == ExpressionOperation.SHA1) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.SHA1(literal);
-		}
-		if (functionSymbol == ExpressionOperation.SHA256) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.SHA256(literal);
-		}
-		if (functionSymbol == ExpressionOperation.SHA512) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.SHA512(literal); //TODO FIX
 		}
 		if (functionSymbol == ExpressionOperation.COUNT) {
 			if (function.getTerm(0).toString().equals("*")) {

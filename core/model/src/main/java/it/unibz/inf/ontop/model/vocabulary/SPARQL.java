@@ -18,4 +18,8 @@ public class SPARQL {
     public static final String LOGICAL_AND = "&&";
     public static final String LOGICAL_OR = "||";
     public static final String BOUND = "BOUND";
+    public static final String MD5 = "MD5";
+    public static final String SHA1 = "SHA1";
+    public static final String SHA256 = "SHA256";
+    public static final String SHA512 = "SHA512";
 }
