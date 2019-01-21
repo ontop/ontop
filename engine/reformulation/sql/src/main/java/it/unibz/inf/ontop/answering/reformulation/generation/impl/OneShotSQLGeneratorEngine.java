@@ -1150,24 +1150,6 @@ public class OneShotSQLGeneratorEngine {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateTZ(literal);
 		}
-		if (functionSymbol == ExpressionOperation.COUNT) {
-			if (function.getTerm(0).toString().equals("*")) {
-				return "COUNT(*)";
-			}
-			String columnName = getSQLString(function.getTerm(0), index, false);
-			//havingCond = true;
-			return "COUNT(" + columnName + ")";
-		}
-		if (functionSymbol == ExpressionOperation.AVG) {
-			String columnName = getSQLString(function.getTerm(0), index, false);
-			//havingCond = true;
-			return "AVG(" + columnName + ")";
-		}
-		if (functionSymbol == ExpressionOperation.SUM) {
-			String columnName = getSQLString(function.getTerm(0), index, false);
-			//havingCond = true;
-			return "SUM(" + columnName + ")";
-		}
 
 		/*
 		 * New approach
