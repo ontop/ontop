@@ -458,6 +458,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1, ImmutableTerm rdfTypeTerm2) {
+        return getImmutableFunctionalTerm(
+        		functionSymbolFactory.getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol(),
+				rdfTypeTerm1, rdfTypeTerm2);
+    }
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

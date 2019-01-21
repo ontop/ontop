@@ -39,6 +39,11 @@ public interface FunctionSymbolFactory {
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 
     /**
+     * Binary
+     */
+    FunctionSymbol getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol();
+
+    /**
      * Do NOT confuse it with the LANG SPARQL function
      *
      * This function symbol takes a RDF type term as input.

@@ -31,6 +31,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol langTypeFunctionSymbol;
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
+    private final FunctionSymbol commonNumericTypeFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -59,6 +60,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
+        this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -174,6 +176,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
             throw new IllegalArgumentException("Expected arity >= 2 for a common denominator");
         return commonDenominatorMap
                 .computeIfAbsent(arity, a -> new CommonDenominatorFunctionSymbolImpl(a, typeFactory.getMetaRDFTermType()));
+    }
+
+    @Override
+    public FunctionSymbol getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol() {
+        return commonNumericTypeFunctionSymbol;
     }
 
     @Override

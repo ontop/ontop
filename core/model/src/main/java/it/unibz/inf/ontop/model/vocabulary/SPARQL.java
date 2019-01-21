@@ -22,4 +22,8 @@ public class SPARQL {
     public static final String SHA1 = "SHA1";
     public static final String SHA256 = "SHA256";
     public static final String SHA512 = "SHA512";
+    public static final String NUMERIC_MULTIPLY = "*";
+    public static final String NUMERIC_DIVIDE = "/";
+    public static final String NUMERIC_ADD = "+";
+    public static final String NUMERIC_SUBSTRACT = "-";
 }

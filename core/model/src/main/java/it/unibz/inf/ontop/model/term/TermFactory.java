@@ -451,4 +451,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1,
+																		ImmutableTerm rdfTypeTerm2);
 }

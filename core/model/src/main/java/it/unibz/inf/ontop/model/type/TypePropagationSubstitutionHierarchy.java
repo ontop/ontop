@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.model.type;
 
-import java.util.Optional;
-
 /**
  * Hierarchy used for type propagation and type substitution between CONCRETE numeric RDF datatypes
  *
