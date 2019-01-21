@@ -71,7 +71,7 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getLexicalLangMatches();
 
-    FunctionSymbol getReconversion2RDFLexicalFunctionSymbol();
+    FunctionSymbol getFromClosestDBType2RDFLexicalFunctionSymbol();
 
-    FunctionSymbol getConversionFromRDFLexical2NaturalDBFunctionSymbol();
+    FunctionSymbol getConversionFromRDFLexical2ClosestDBTypeFunctionSymbol();
 }
