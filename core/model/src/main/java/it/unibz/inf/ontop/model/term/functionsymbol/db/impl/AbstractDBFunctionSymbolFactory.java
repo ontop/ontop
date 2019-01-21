@@ -42,6 +42,18 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Lazy
     @Nullable
     private DBFunctionSymbol strAfterFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol md5FunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol sha1FunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol sha256FunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol sha512FunctionSymbol;
 
 
     /**
@@ -116,6 +128,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
 
+
     protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
                                               ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                               ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
@@ -140,6 +153,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.r2rmlIRISafeEncodeFunctionSymbol = null;
         this.strBeforeFunctionSymbol = null;
         this.strAfterFunctionSymbol = null;
+        this.md5FunctionSymbol = null;
+        this.sha1FunctionSymbol = null;
+        this.sha256FunctionSymbol = null;
+        this.sha512FunctionSymbol = null;
         this.iriTemplateMap = new HashMap<>();
         this.bnodeTemplateMap = new HashMap<>();
         this.counter = new AtomicInteger();
@@ -335,6 +352,34 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return strAfterFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBMd5() {
+        if (md5FunctionSymbol == null)
+            md5FunctionSymbol = createMD5FunctionSymbol();
+        return md5FunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSha1() {
+        if (sha1FunctionSymbol == null)
+            sha1FunctionSymbol = createSHA1FunctionSymbol();
+        return sha1FunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSha256() {
+        if (sha256FunctionSymbol == null)
+            sha256FunctionSymbol = createSHA256FunctionSymbol();
+        return sha256FunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSha512() {
+        if (sha512FunctionSymbol == null)
+            sha512FunctionSymbol = createSHA512FunctionSymbol();
+        return sha512FunctionSymbol;
+    }
+
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbBooleanType, this::serializeContains);
     }
@@ -353,6 +398,22 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected TrueOrNullFunctionSymbol createTrueOrNullFunctionSymbol(int arity) {
         return new TrueOrNullFunctionSymbolImpl(arity, dbBooleanType);
+    }
+
+    protected DBFunctionSymbol createMD5FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_MD5", rootDBType, dbStringType, this::serializeMD5);
+    }
+
+    protected DBFunctionSymbol createSHA1FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_SHA1", rootDBType, dbStringType, this::serializeSHA1);
+    }
+
+    protected DBFunctionSymbol createSHA256FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_SHA256", rootDBType, dbStringType, this::serializeSHA256);
+    }
+
+    protected DBFunctionSymbol createSHA512FunctionSymbol() {
+        return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
 
     /**
@@ -392,7 +453,22 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
                                                  Function<ImmutableTerm, String> termConverter,
                                                  TermFactory termFactory);
-    
+
+    protected abstract String serializeMD5(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter,
+                                           TermFactory termFactory);
+
+    protected abstract String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter,
+                                           TermFactory termFactory);
+
+    protected abstract String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
