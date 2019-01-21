@@ -48,5 +48,19 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
             FALSE,
             NULL
         }
+
+        default boolean isEffectiveFalse() {
+            return getValue()
+                    .filter(v -> {
+                        switch (v) {
+                            case FALSE:
+                            case NULL:
+                                return true;
+                            default:
+                                return false;
+                        }
+                    })
+                    .isPresent();
+        }
     }
 }

@@ -45,14 +45,14 @@ public class JoinExtractionUtils {
         if (foldedExpression.isPresent()) {
             ImmutableExpression expression = foldedExpression.get();
 
-            IncrementalEvaluation evaluationResult = expression.evaluate(
-                    coreUtilsFactory.createDummyVariableNullability(expression), true);
+            ImmutableExpression.Evaluation evaluationResult = expression.evaluate(
+                    coreUtilsFactory.createDummyVariableNullability(expression));
 
             if (evaluationResult.isEffectiveFalse()) {
                 throw new UnsatisfiableExpressionException();
             }
             else {
-                return evaluationResult.getNewExpression();
+                return evaluationResult.getExpression();
             }
         }
         else {

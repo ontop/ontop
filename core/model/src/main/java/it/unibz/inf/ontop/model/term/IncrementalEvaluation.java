@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.term.impl.IncrementalEvaluationImpl;
 import java.util.Optional;
 
 /**
- * TODO: explain
+ * TODO: find a better name
  *
  * 3-value logic
  *
@@ -26,16 +26,6 @@ public interface IncrementalEvaluation {
     Optional<ImmutableExpression> getNewExpression();
 
     Status getStatus();
-
-    default boolean isEffectiveFalse() {
-        switch (getStatus()) {
-            case IS_FALSE:
-            case IS_NULL:
-                return true;
-            default:
-                return false;
-        }
-    }
 
     static IncrementalEvaluation declareSimplifiedExpression(ImmutableExpression simplifiedExpression) {
         return IncrementalEvaluationImpl.declareSimplifiedExpression(simplifiedExpression);

@@ -649,17 +649,17 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
                                                                  VariableNullability childVariableNullability)
             throws EmptyTreeException {
 
-        Optional<IncrementalEvaluation> descendingConstraintResults = initialConstraint
+        Optional<ImmutableExpression.Evaluation> descendingConstraintResults = initialConstraint
                 .map(theta::applyToBooleanExpression)
-                .map(exp -> exp.evaluate(childVariableNullability, true));
+                .map(exp -> exp.evaluate(childVariableNullability));
 
         if (descendingConstraintResults
-                .filter(IncrementalEvaluation::isEffectiveFalse)
+                .filter(ImmutableExpression.Evaluation::isEffectiveFalse)
                 .isPresent())
             throw new EmptyTreeException();
 
         return descendingConstraintResults
-                .flatMap(IncrementalEvaluation::getNewExpression);
+                .flatMap(ImmutableExpression.Evaluation::getExpression);
     }
 
     /**
