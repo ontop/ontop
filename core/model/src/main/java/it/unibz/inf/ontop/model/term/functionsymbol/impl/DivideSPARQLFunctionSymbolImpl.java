@@ -9,19 +9,13 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
-public class DivideSPARQLFunctionSymbolImpl extends AbstractNumericBinarySPARQLFunctionSymbol {
+public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionSymbolImpl {
 
     private final RDFDatatype xsdDecimalType;
 
     protected DivideSPARQLFunctionSymbolImpl(RDFDatatype abstractNumericType, RDFDatatype xsdDecimalType) {
         super("SP_DIVIDE", SPARQL.NUMERIC_DIVIDE, abstractNumericType);
         this.xsdDecimalType = xsdDecimalType;
-    }
-
-    @Override
-    protected ImmutableTerm computeNumericTerm(ImmutableFunctionalTerm numericTerm1, ImmutableFunctionalTerm numericTerm2,
-                                               TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement it");
     }
 
     /**

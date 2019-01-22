@@ -22,6 +22,10 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private static final String OR_STR = "OR";
     private static final String CHAR_LENGTH_STR = "CHARLENGTH";
     private static final String NOT_STR = "NOT";
+    private static final String MULTIPLY_STR = "*";
+    protected static final String DIVIDE_STR = "/";
+    protected static final String ADD_STR = "+";
+    protected static final String SUBSTRACT_STR = "-";
     private final TermType abstractRootType;
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
@@ -130,6 +134,26 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createMultiplyFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(MULTIPLY_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDivideFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(DIVIDE_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createAddFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(ADD_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createSubstractFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(SUBSTRACT_STR, dbNumericType);
     }
 
     @Override

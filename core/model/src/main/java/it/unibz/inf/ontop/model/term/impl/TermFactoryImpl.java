@@ -464,7 +464,30 @@ public class TermFactoryImpl implements TermFactory {
 				rdfTypeTerm1, rdfTypeTerm2);
     }
 
-    @Override
+	@Override
+	public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
+		return dbFunctionSymbolFactory;
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
+																		 ImmutableTerm lexicalTerm1,
+																		 ImmutableTerm lexicalTerm2,
+																		 ImmutableTerm rdfTypeTerm) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getBinaryNumericLexicalFunctionSymbol(dbNumericOperationName),
+				lexicalTerm1, lexicalTerm2, rdfTypeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName,  DBTermType dbNumericType,
+																	ImmutableTerm dbTerm1, ImmutableTerm dbTerm2) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBBinaryNumericFunctionSymbol(dbNumericOperationName, dbNumericType),
+				dbTerm1, dbTerm2);
+	}
+
+	@Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

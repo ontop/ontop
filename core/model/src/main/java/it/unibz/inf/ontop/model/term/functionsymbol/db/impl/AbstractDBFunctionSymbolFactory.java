@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -76,6 +77,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
 
+    private final Table<String, DBTermType, DBFunctionSymbol> binaryNumericTable;
+
     /**
      * For the CASE functions
      */
@@ -137,6 +140,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
+        this.binaryNumericTable = HashBasedTable.create();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -380,6 +384,37 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return sha512FunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBBinaryNumericFunctionSymbol(String dbNumericOperationName, DBTermType dbNumericType) {
+        DBFunctionSymbol existingFunctionSymbol = binaryNumericTable.get(dbNumericOperationName, dbNumericType);
+        if (existingFunctionSymbol != null) {
+            return existingFunctionSymbol;
+        }
+
+        DBFunctionSymbol newFunctionSymbol = createDBBinaryNumericFunctionSymbol(dbNumericOperationName, dbNumericType);
+        binaryNumericTable.put(dbNumericOperationName, dbNumericType, newFunctionSymbol);
+        return newFunctionSymbol;
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected DBFunctionSymbol createDBBinaryNumericFunctionSymbol(String dbNumericOperationName, DBTermType dbNumericType)
+        throws UnsupportedOperationException {
+        switch (dbNumericOperationName) {
+            case SPARQL.NUMERIC_MULTIPLY:
+                return createMultiplyFunctionSymbol(dbNumericType);
+            case SPARQL.NUMERIC_DIVIDE:
+                return createDivideFunctionSymbol(dbNumericType);
+            case SPARQL.NUMERIC_ADD:
+                return createAddFunctionSymbol(dbNumericType);
+            case SPARQL.NUMERIC_SUBSTRACT:
+                return createSubstractFunctionSymbol(dbNumericType);
+            default:
+                throw new UnsupportedOperationException("The numeric operator " + dbNumericOperationName + " is not supported");
+        }
+    }
+
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbBooleanType, this::serializeContains);
     }
@@ -415,6 +450,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
+
+    protected abstract DBFunctionSymbol createMultiplyFunctionSymbol(DBTermType dbNumericType);
+    protected abstract DBFunctionSymbol createDivideFunctionSymbol(DBTermType dbNumericType);
+    protected abstract DBFunctionSymbol createAddFunctionSymbol(DBTermType dbNumericType) ;
+    protected abstract DBFunctionSymbol createSubstractFunctionSymbol(DBTermType dbNumericType);
 
     /**
      * Can be overridden

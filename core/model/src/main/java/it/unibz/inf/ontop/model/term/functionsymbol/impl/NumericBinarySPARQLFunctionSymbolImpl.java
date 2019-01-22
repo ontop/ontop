@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -10,10 +9,11 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
-public abstract class AbstractNumericBinarySPARQLFunctionSymbol extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
-    protected AbstractNumericBinarySPARQLFunctionSymbol(String functionSymbolName, String officialName,
-                                                        RDFDatatype abstractNumericType) {
+public class NumericBinarySPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+
+    protected NumericBinarySPARQLFunctionSymbolImpl(String functionSymbolName, String officialName,
+                                                    RDFDatatype abstractNumericType) {
         super(functionSymbolName, officialName, ImmutableList.of(abstractNumericType, abstractNumericType));
     }
 
@@ -28,18 +28,11 @@ public abstract class AbstractNumericBinarySPARQLFunctionSymbol extends Reducibl
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
                                                ImmutableTerm returnedRDFTypeTerm) {
-
-        ImmutableTerm numericTerm = computeNumericTerm(
-                termFactory.getConversionFromRDFLexical2NaturalDB(subLexicalTerms.get(0), returnedRDFTypeTerm),
-                termFactory.getConversionFromRDFLexical2NaturalDB(subLexicalTerms.get(1), returnedRDFTypeTerm),
-                termFactory);
-
-        return termFactory.getReconversion2RDFLexical(numericTerm, returnedRDFTypeTerm);
+        return termFactory.getBinaryNumericLexicalFunctionalTerm(getOfficialName(),
+                subLexicalTerms.get(0),
+                subLexicalTerms.get(1),
+                returnedRDFTypeTerm);
     }
-
-    protected abstract ImmutableTerm computeNumericTerm(ImmutableFunctionalTerm numericTerm1,
-                                                        ImmutableFunctionalTerm numericTerm2,
-                                                        TermFactory termFactory);
 
     @Override
     protected boolean isAlwaysInjective() {

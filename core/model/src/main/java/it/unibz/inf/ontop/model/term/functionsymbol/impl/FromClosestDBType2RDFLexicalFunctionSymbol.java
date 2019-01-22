@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
 
+@Deprecated
 public class FromClosestDBType2RDFLexicalFunctionSymbol extends FunctionSymbolImpl implements FunctionSymbol {
 
     private final DBTermType dbStringType;

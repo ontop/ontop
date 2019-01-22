@@ -21,6 +21,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
     protected static final String LENGTH_STR = "LENGTH";
     protected static final String RIGHT_STR = "RIGHT";
+    protected static final String MULTIPLY_STR = "*";
+    protected static final String DIVIDE_STR = "/";
+    protected static final String ADD_STR = "+";
+    protected static final String SUBSTRACT_STR = "-";
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
@@ -237,6 +241,26 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createMultiplyFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(MULTIPLY_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDivideFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(DIVIDE_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createAddFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(ADD_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createSubstractFunctionSymbol(DBTermType dbNumericType) {
+        return new DefaultDBBinaryNumericFunctionSymbol(SUBSTRACT_STR, dbNumericType);
     }
 
     @Override
