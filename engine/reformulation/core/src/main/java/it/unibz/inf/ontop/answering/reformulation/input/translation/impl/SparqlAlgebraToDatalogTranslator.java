@@ -740,8 +740,9 @@ public class SparqlAlgebraToDatalogTranslator {
                 return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
-                ExpressionOperation p = NumericalOperations.get(((MathExpr)expr).getOperator());
-                return termFactory.getFunction(p, term1, term2);
+                SPARQLFunctionSymbol f = functionSymbolFactory.getSPARQLFunctionSymbol(
+                        NumericalOperations.get(((MathExpr)expr).getOperator()), 2).get();
+                return termFactory.getFunction(f, term1, term2);
             }
             /*
              * Restriction: the first argument must be LANG(...) and the second  a constant
@@ -833,12 +834,12 @@ public class SparqlAlgebraToDatalogTranslator {
 				.put(Compare.CompareOp.LT, LT)
 				.build();
 
-	private static final ImmutableMap<MathExpr.MathOp, ExpressionOperation> NumericalOperations =
-			new ImmutableMap.Builder<MathExpr.MathOp, ExpressionOperation>()
-			.put(MathExpr.MathOp.PLUS, ADD)
-			.put(MathExpr.MathOp.MINUS, SUBTRACT)
-			.put(MathExpr.MathOp.MULTIPLY, MULTIPLY)
-			.put(MathExpr.MathOp.DIVIDE, DIVIDE)
+	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
+			new ImmutableMap.Builder<MathExpr.MathOp, String>()
+			.put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
+			.put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBSTRACT)
+			.put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
+			.put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
 			.build();
 
 
