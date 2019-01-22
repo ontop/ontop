@@ -74,9 +74,5 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getLexicalLangMatches();
 
-    FunctionSymbol getFromClosestDBType2RDFLexicalFunctionSymbol();
-
-    FunctionSymbol getConversionFromRDFLexical2ClosestDBTypeFunctionSymbol();
-
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
 }

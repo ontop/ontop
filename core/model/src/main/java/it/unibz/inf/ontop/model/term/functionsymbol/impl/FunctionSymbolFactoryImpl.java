@@ -33,8 +33,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
     private final FunctionSymbol commonNumericTypeFunctionSymbol;
-    private final FunctionSymbol fromClosestDBTypeFunctionSymbol;
-    private final FunctionSymbol toClosestDBTypeFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -67,8 +65,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
         this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
-        this.fromClosestDBTypeFunctionSymbol = new FromClosestDBType2RDFLexicalFunctionSymbol(rootDBType, dbStringType, metaRDFType);
-        this.toClosestDBTypeFunctionSymbol = new FromRDFLexicalToClosestDBTypeFunctionSymbol(dbStringType, metaRDFType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -209,16 +205,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalLangMatches() {
         return lexicalLangMatchesFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getFromClosestDBType2RDFLexicalFunctionSymbol() {
-        return fromClosestDBTypeFunctionSymbol;
-    }
-
-    @Override
-    public FunctionSymbol getConversionFromRDFLexical2ClosestDBTypeFunctionSymbol() {
-        return toClosestDBTypeFunctionSymbol;
     }
 
     @Override
