@@ -17,7 +17,7 @@ public class DefaultDBBinaryNumericFunctionSymbol extends FunctionSymbolImpl imp
     private final DBTermType dbNumericType;
 
     protected DefaultDBBinaryNumericFunctionSymbol(String operatorString, DBTermType dbNumericType) {
-        super(operatorString + dbNumericType.toString(), ImmutableList.of(dbNumericType, dbNumericType));
+        super(dbNumericType.toString() + operatorString, ImmutableList.of(dbNumericType, dbNumericType));
         this.template = "(%s " + operatorString + " %s)";
         this.dbNumericType = dbNumericType;
     }
