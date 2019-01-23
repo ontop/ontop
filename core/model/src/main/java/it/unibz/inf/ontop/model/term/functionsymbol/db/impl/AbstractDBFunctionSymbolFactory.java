@@ -77,7 +77,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
 
-    private final Table<String, DBTermType, DBFunctionSymbol> binaryNumericTable;
+    private final Table<String, DBTermType, DBMathBinaryOperator> binaryMathTable;
 
     /**
      * For the CASE functions
@@ -140,7 +140,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
-        this.binaryNumericTable = HashBasedTable.create();
+        this.binaryMathTable = HashBasedTable.create();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -385,33 +385,33 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBBinaryNumericFunctionSymbol(String dbNumericOperationName, DBTermType dbNumericType) {
-        DBFunctionSymbol existingFunctionSymbol = binaryNumericTable.get(dbNumericOperationName, dbNumericType);
-        if (existingFunctionSymbol != null) {
-            return existingFunctionSymbol;
+    public DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType) {
+        DBMathBinaryOperator existingOperator = binaryMathTable.get(dbMathOperatorName, dbNumericType);
+        if (existingOperator != null) {
+            return existingOperator;
         }
 
-        DBFunctionSymbol newFunctionSymbol = createDBBinaryNumericFunctionSymbol(dbNumericOperationName, dbNumericType);
-        binaryNumericTable.put(dbNumericOperationName, dbNumericType, newFunctionSymbol);
-        return newFunctionSymbol;
+        DBMathBinaryOperator newOperator = createDBBinaryMathOperator(dbMathOperatorName, dbNumericType);
+        binaryMathTable.put(dbMathOperatorName, dbNumericType, newOperator);
+        return newOperator;
     }
 
     /**
      * Can be overridden
      */
-    protected DBFunctionSymbol createDBBinaryNumericFunctionSymbol(String dbNumericOperationName, DBTermType dbNumericType)
+    protected DBMathBinaryOperator createDBBinaryMathOperator(String dbNumericOperationName, DBTermType dbNumericType)
         throws UnsupportedOperationException {
         switch (dbNumericOperationName) {
             case SPARQL.NUMERIC_MULTIPLY:
-                return createMultiplyFunctionSymbol(dbNumericType);
+                return createMultiplyOperator(dbNumericType);
             case SPARQL.NUMERIC_DIVIDE:
-                return createDivideFunctionSymbol(dbNumericType);
+                return createDivideOperator(dbNumericType);
             case SPARQL.NUMERIC_ADD:
-                return createAddFunctionSymbol(dbNumericType);
+                return createAddOperator(dbNumericType);
             case SPARQL.NUMERIC_SUBSTRACT:
-                return createSubstractFunctionSymbol(dbNumericType);
+                return createSubstractOperator(dbNumericType);
             default:
-                throw new UnsupportedOperationException("The numeric operator " + dbNumericOperationName + " is not supported");
+                throw new UnsupportedOperationException("The math operator " + dbNumericOperationName + " is not supported");
         }
     }
 
@@ -451,10 +451,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
 
-    protected abstract DBFunctionSymbol createMultiplyFunctionSymbol(DBTermType dbNumericType);
-    protected abstract DBFunctionSymbol createDivideFunctionSymbol(DBTermType dbNumericType);
-    protected abstract DBFunctionSymbol createAddFunctionSymbol(DBTermType dbNumericType) ;
-    protected abstract DBFunctionSymbol createSubstractFunctionSymbol(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
+    protected abstract DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType);
 
     /**
      * Can be overridden

@@ -244,22 +244,22 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createMultiplyFunctionSymbol(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
         return new DefaultDBBinaryNumericFunctionSymbol(MULTIPLY_STR, dbNumericType);
     }
 
     @Override
-    protected DBFunctionSymbol createDivideFunctionSymbol(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType) {
         return new DefaultDBBinaryNumericFunctionSymbol(DIVIDE_STR, dbNumericType);
     }
 
     @Override
-    protected DBFunctionSymbol createAddFunctionSymbol(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) {
         return new DefaultDBBinaryNumericFunctionSymbol(ADD_STR, dbNumericType);
     }
 
     @Override
-    protected DBFunctionSymbol createSubstractFunctionSymbol(DBTermType dbNumericType) {
+    protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
         return new DefaultDBBinaryNumericFunctionSymbol(SUBSTRACT_STR, dbNumericType);
     }
 

@@ -483,7 +483,7 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName,  DBTermType dbNumericType,
 																	ImmutableTerm dbTerm1, ImmutableTerm dbTerm2) {
 		return getImmutableFunctionalTerm(
-				dbFunctionSymbolFactory.getDBBinaryNumericFunctionSymbol(dbNumericOperationName, dbNumericType),
+				dbFunctionSymbolFactory.getDBMathBinaryOperator(dbNumericOperationName, dbNumericType),
 				dbTerm1, dbTerm2);
 	}
 

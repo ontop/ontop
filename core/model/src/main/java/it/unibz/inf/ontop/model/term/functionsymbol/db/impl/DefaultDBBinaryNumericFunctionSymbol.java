@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -11,7 +12,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class DefaultDBBinaryNumericFunctionSymbol extends FunctionSymbolImpl implements DBFunctionSymbol {
+public class DefaultDBBinaryNumericFunctionSymbol extends FunctionSymbolImpl implements DBMathBinaryOperator {
 
     private final String template;
     private final DBTermType dbNumericType;

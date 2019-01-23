@@ -139,5 +139,5 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSha256();
     DBFunctionSymbol getDBSha512();
 
-    DBFunctionSymbol getDBBinaryNumericFunctionSymbol(String dbNumericOperationName, DBTermType dbNumericType);
+    DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType);
 }
