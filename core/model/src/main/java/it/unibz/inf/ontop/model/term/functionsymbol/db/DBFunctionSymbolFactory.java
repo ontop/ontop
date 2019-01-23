@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
@@ -139,4 +138,11 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSha1();
     DBFunctionSymbol getDBSha256();
     DBFunctionSymbol getDBSha512();
+
+    DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType);
+
+    /**
+     * Please use getDBMathBinaryOperator(...) if you know the type
+     */
+    DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName);
 }

@@ -44,7 +44,7 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getIfThenElse(
                 termFactory.getDBIsStringEmpty(subLexicalTerms.get(1)),
                 termFactory.getDBStringConstant(""),

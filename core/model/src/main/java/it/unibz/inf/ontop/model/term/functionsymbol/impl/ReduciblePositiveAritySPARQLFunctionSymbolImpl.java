@@ -68,9 +68,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                     .map(t -> extractLexicalTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, typeTerms, termFactory);
-
             ImmutableTerm typeTerm = computeTypeTerm(subLexicalTerms, typeTerms, termFactory, variableNullability);
+            ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, typeTerms, termFactory, typeTerm);
 
             Optional<ImmutableExpression> condition = inputTypeErrorEvaluation.getExpression();
 
@@ -117,7 +116,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
      * Compute the lexical term when there is no input type error
      */
     protected abstract ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                                        ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory);
+                                                        ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+                                                        ImmutableTerm returnedTypeTerm);
 
     protected abstract ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
                                                      ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,

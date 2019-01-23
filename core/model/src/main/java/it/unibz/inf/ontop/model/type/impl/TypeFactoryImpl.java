@@ -17,7 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static it.unibz.inf.ontop.model.type.impl.AbstractNumericRDFDatatype.createAbstractNumericTermType;
 import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createConcreteNumericTermType;
 import static it.unibz.inf.ontop.model.type.impl.ConcreteNumericRDFDatatypeImpl.createTopConcreteNumericTermType;
-import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleRDFDatatype;
+import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleAbstractRDFDatatype;
+import static it.unibz.inf.ontop.model.type.impl.SimpleRDFDatatype.createSimpleConcreteRDFDatatype;
 
 @Singleton
 public class TypeFactoryImpl implements TypeFactory {
@@ -56,85 +57,131 @@ public class TypeFactoryImpl implements TypeFactory {
 		iriTermType = new IRITermType(objectRDFType.getAncestry());
 		blankNodeTermType = new BlankNodeTermType(objectRDFType.getAncestry());
 
-		rdfsLiteralDatatype = createSimpleRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry(), true);
+		rdfsLiteralDatatype = createSimpleAbstractRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry());
 		registerDatatype(rdfsLiteralDatatype);
 
 		numericDatatype = createAbstractNumericTermType(OntopInternal.NUMERIC, rdfsLiteralDatatype.getAncestry());
 		registerDatatype(numericDatatype);
 
-		xsdDoubleDatatype = createTopConcreteNumericTermType(XSD.DOUBLE, numericDatatype);
+		xsdDoubleDatatype = createTopConcreteNumericTermType(XSD.DOUBLE, numericDatatype,
+				// TODO: check
+				DBTypeFactory::getDBDoubleType);
 		registerDatatype(xsdDoubleDatatype);
 
 		// Type promotion: an xsd:float can be promoted into a xsd:double
 		xsdFloatDatatype = createConcreteNumericTermType(XSD.FLOAT, numericDatatype.getAncestry(),
-				xsdDoubleDatatype.getPromotionSubstitutionHierarchy(),true);
+				xsdDoubleDatatype.getPromotionSubstitutionHierarchy(),true,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBDoubleType);
 		registerDatatype(xsdFloatDatatype);
 
 		owlRealDatatype = createAbstractNumericTermType(OWL.REAL, numericDatatype.getAncestry());
 		registerDatatype(owlRealDatatype);
 		// Type promotion: an owl:rational can be promoted into a xsd:float
 		owlRationalDatatype = createConcreteNumericTermType(OWL.RATIONAL, owlRealDatatype.getAncestry(),
-				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true);
+				xsdFloatDatatype.getPromotionSubstitutionHierarchy(), true,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBDecimalType
+				);
 		registerDatatype(owlRationalDatatype);
-		xsdDecimalDatatype = createConcreteNumericTermType(XSD.DECIMAL, owlRationalDatatype, true);
+		xsdDecimalDatatype = createConcreteNumericTermType(XSD.DECIMAL, owlRationalDatatype, true,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBDecimalType);
 		registerDatatype(xsdDecimalDatatype);
-		xsdIntegerDatatype = createConcreteNumericTermType(XSD.INTEGER, xsdDecimalDatatype, true);
+		xsdIntegerDatatype = createConcreteNumericTermType(XSD.INTEGER, xsdDecimalDatatype, true,
+				// TODO: check
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdIntegerDatatype);
 
 		xsdNonPositiveIntegerDatatype = createConcreteNumericTermType(XSD.NON_POSITIVE_INTEGER,
-				xsdIntegerDatatype, false);
+				xsdIntegerDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdNonPositiveIntegerDatatype);
 		xsdNegativeIntegerDatatype = createConcreteNumericTermType(XSD.NEGATIVE_INTEGER,
-				xsdNonPositiveIntegerDatatype, false);
+				xsdNonPositiveIntegerDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdNegativeIntegerDatatype);
 
-		xsdLongDatatype = createConcreteNumericTermType(XSD.LONG, xsdIntegerDatatype,false);
+		xsdLongDatatype = createConcreteNumericTermType(XSD.LONG, xsdIntegerDatatype,false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdLongDatatype);
-		xsdIntDatatype = createConcreteNumericTermType(XSD.INT, xsdLongDatatype,false);
+		xsdIntDatatype = createConcreteNumericTermType(XSD.INT, xsdLongDatatype,false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdIntDatatype);
-		xsdShortDatatype = createConcreteNumericTermType(XSD.SHORT, xsdIntDatatype, false);
+		xsdShortDatatype = createConcreteNumericTermType(XSD.SHORT, xsdIntDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdShortDatatype);
-		xsdByteDatatype = createConcreteNumericTermType(XSD.BYTE, xsdShortDatatype, false);
+		xsdByteDatatype = createConcreteNumericTermType(XSD.BYTE, xsdShortDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdByteDatatype);
 
 		xsdNonNegativeIntegerDatatype = createConcreteNumericTermType(XSD.NON_NEGATIVE_INTEGER,
-				xsdIntegerDatatype,false);
+				xsdIntegerDatatype,false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdNonNegativeIntegerDatatype);
 
-		xsdUnsignedLongDatatype = createConcreteNumericTermType(XSD.UNSIGNED_LONG, xsdIntegerDatatype, false);
+		xsdUnsignedLongDatatype = createConcreteNumericTermType(XSD.UNSIGNED_LONG, xsdIntegerDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdUnsignedLongDatatype);
-		xsdUnsignedIntDatatype = createConcreteNumericTermType(XSD.UNSIGNED_INT, xsdUnsignedLongDatatype,false);
+		xsdUnsignedIntDatatype = createConcreteNumericTermType(XSD.UNSIGNED_INT, xsdUnsignedLongDatatype,false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdUnsignedIntDatatype);
 
-		xsdUnsignedShortDatatype = createConcreteNumericTermType(XSD.UNSIGNED_SHORT, xsdUnsignedIntDatatype, false);
+		xsdUnsignedShortDatatype = createConcreteNumericTermType(XSD.UNSIGNED_SHORT, xsdUnsignedIntDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdUnsignedShortDatatype);
-		xsdUnsignedByteDatatype = createConcreteNumericTermType(XSD.UNSIGNED_BYTE, xsdUnsignedShortDatatype, false);
+		xsdUnsignedByteDatatype = createConcreteNumericTermType(XSD.UNSIGNED_BYTE, xsdUnsignedShortDatatype, false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdUnsignedByteDatatype);
 
 		xsdPositiveIntegerDatatype = createConcreteNumericTermType(XSD.POSITIVE_INTEGER,
-				xsdNonNegativeIntegerDatatype,false);
+				xsdNonNegativeIntegerDatatype,false,
+				// TODO: is there a better type?
+				DBTypeFactory::getDBLargeIntegerType);
 		registerDatatype(xsdPositiveIntegerDatatype);
 
-		xsdBooleanDatatype = createSimpleRDFDatatype(XSD.BOOLEAN, rdfsLiteralDatatype.getAncestry());
+		xsdBooleanDatatype = createSimpleConcreteRDFDatatype(XSD.BOOLEAN, rdfsLiteralDatatype.getAncestry(),
+				DBTypeFactory::getDBBooleanType);
 		registerDatatype(xsdBooleanDatatype);
 
-		xsdStringDatatype = createSimpleRDFDatatype(XSD.STRING, rdfsLiteralDatatype.getAncestry());
+		xsdStringDatatype = createSimpleConcreteRDFDatatype(XSD.STRING, rdfsLiteralDatatype.getAncestry(),
+				DBTypeFactory::getDBStringType);
 		registerDatatype(xsdStringDatatype);
 
 		defaultUnsupportedDatatype = UnsupportedRDFDatatype.createUnsupportedDatatype(rdfsLiteralDatatype.getAncestry());
 
-		xsdTimeDatatype = createSimpleRDFDatatype(XSD.TIME, rdfsLiteralDatatype.getAncestry());
+		xsdTimeDatatype = createSimpleConcreteRDFDatatype(XSD.TIME, rdfsLiteralDatatype.getAncestry(),
+				DBTypeFactory::getDBTimeType);
 		registerDatatype(xsdTimeDatatype);
-		xsdDateDatatype = createSimpleRDFDatatype(XSD.DATE, rdfsLiteralDatatype.getAncestry());
+		xsdDateDatatype = createSimpleConcreteRDFDatatype(XSD.DATE, rdfsLiteralDatatype.getAncestry(),
+				DBTypeFactory::getDBDateType);
 		registerDatatype(xsdDateDatatype);
-		xsdDatetimeDatatype = createSimpleRDFDatatype(XSD.DATETIME, rdfsLiteralDatatype.getAncestry());
+		xsdDatetimeDatatype = createSimpleConcreteRDFDatatype(XSD.DATETIME, rdfsLiteralDatatype.getAncestry(),
+				// TODO: check
+				DBTypeFactory::getDBDateTimestampType);
 		registerDatatype(xsdDatetimeDatatype);
-		xsdDatetimeStampDatatype = createSimpleRDFDatatype(XSD.DATETIMESTAMP, xsdDatetimeDatatype.getAncestry());
+		xsdDatetimeStampDatatype = createSimpleConcreteRDFDatatype(XSD.DATETIMESTAMP, xsdDatetimeDatatype.getAncestry(),
+				DBTypeFactory::getDBDateTimestampType);
 		registerDatatype(xsdDatetimeStampDatatype);
-		xsdGYearDatatype = createSimpleRDFDatatype(XSD.GYEAR, rdfsLiteralDatatype.getAncestry());
+		xsdGYearDatatype = createSimpleConcreteRDFDatatype(XSD.GYEAR, rdfsLiteralDatatype.getAncestry(),
+				// TODO: check
+				DBTypeFactory::getDBStringType);
 		registerDatatype(xsdGYearDatatype);
 
-		xsdBase64Datatype = createSimpleRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(), false);
+		xsdBase64Datatype = createSimpleConcreteRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(),
+				// TODO: is there a better type
+				DBTypeFactory::getDBStringType);
 		registerDatatype(xsdBase64Datatype);
 
 		dbTypeFactory = dbTypeFactoryFactory.createDBFactory(rootTermType, this);
@@ -155,7 +202,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		return datatypeCache.computeIfAbsent(
 				iri,
 				// Non-predefined datatypes cannot be declared as the child of a concrete datatype
-				i -> createSimpleRDFDatatype(i, rdfsLiteralDatatype.getAncestry()));
+				i -> createSimpleConcreteRDFDatatype(i, rdfsLiteralDatatype.getAncestry(), DBTypeFactory::getDBStringType));
 	}
 
 	@Override

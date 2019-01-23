@@ -22,7 +22,7 @@ public class DatatypeSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPAR
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getRDFDatatypeStringFunctionalTerm(typeTerms.get(0));
     }
 

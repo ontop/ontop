@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -331,6 +333,7 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
 														   RDFTermType rdfType);
 
+
 	/**
 	 * Used when building (a fragment of) the lexical part of an RDF term
 	 *   (either the full lexical value or a fragment involved in a template)
@@ -451,4 +454,21 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSha1(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha256(ImmutableTerm stringTerm);
 	ImmutableFunctionalTerm getDBSha512(ImmutableTerm stringTerm);
+
+	ImmutableFunctionalTerm getCommonPropagatedOrSubstitutedNumericType(ImmutableTerm rdfTypeTerm1,
+																		ImmutableTerm rdfTypeTerm2);
+
+	DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+	/**
+	 * TODO: find a better name
+	 *
+	 */
+	ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
+																  ImmutableTerm lexicalTerm1,
+																  ImmutableTerm lexicalTerm2,
+																  ImmutableTerm rdfTypeTerm);
+
+	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
+															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 }

@@ -14,7 +14,7 @@ public class Md5SPARQLFunctionSymbolImpl extends AbstractHashSPARQLFunctionSymbo
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getDBMd5(subLexicalTerms.get(0));
     }
 }

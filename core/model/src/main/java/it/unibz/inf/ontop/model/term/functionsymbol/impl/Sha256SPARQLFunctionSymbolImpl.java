@@ -14,7 +14,7 @@ public class Sha256SPARQLFunctionSymbolImpl extends AbstractHashSPARQLFunctionSy
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getDBSha256(subLexicalTerms.get(0));
     }
 }

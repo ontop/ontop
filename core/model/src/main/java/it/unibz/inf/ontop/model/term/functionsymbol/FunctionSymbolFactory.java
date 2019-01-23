@@ -3,10 +3,13 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface FunctionSymbolFactory {
 
@@ -39,6 +42,11 @@ public interface FunctionSymbolFactory {
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 
     /**
+     * Binary
+     */
+    FunctionSymbol getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol();
+
+    /**
      * Do NOT confuse it with the LANG SPARQL function
      *
      * This function symbol takes a RDF type term as input.
@@ -65,4 +73,6 @@ public interface FunctionSymbolFactory {
      * Not a DBFunctionSymbol as it is not delegated to the DB (too complex logic)
      */
     BooleanFunctionSymbol getLexicalLangMatches();
+
+    FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
 }

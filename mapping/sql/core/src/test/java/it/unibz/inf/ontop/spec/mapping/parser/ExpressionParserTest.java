@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
@@ -149,7 +150,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                ADD,
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_ADD),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
@@ -167,7 +168,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                SUBTRACT,
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_SUBSTRACT),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
@@ -185,7 +186,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                MULTIPLY,
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -203,7 +204,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                DIVIDE,
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_DIVIDE),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }

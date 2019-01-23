@@ -15,7 +15,7 @@ public class SubStr3SPARQLFunctionSymbolImpl extends AbstractSubStrSPARQLFunctio
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
+    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return termFactory.getDBSubString3(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2));
     }
 }

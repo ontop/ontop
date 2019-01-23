@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
 import java.util.HashMap;
@@ -31,9 +32,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol langTypeFunctionSymbol;
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
+    private final FunctionSymbol commonNumericTypeFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
+    private final DBTermType rootDBType;
+    private final DBTermType dbStringType;
 
     @Inject
     private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
@@ -44,7 +48,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbStringType = typeFactory.getDBTypeFactory().getDBStringType();
+        this.dbStringType = dbTypeFactory.getDBStringType();
+        this.rootDBType = dbTypeFactory.getAbstractRootDBType();
 
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
@@ -59,12 +64,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
+        this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
             TypeFactory typeFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
         RDFDatatype rdfsLiteral = typeFactory.getAbstractRDFSLiteral();
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
@@ -105,7 +112,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Md5SPARQLFunctionSymbolImpl(xsdString),
                 new Sha1SPARQLFunctionSymbolImpl(xsdString),
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
-                new Sha512SPARQLFunctionSymbolImpl(xsdString)
+                new Sha512SPARQLFunctionSymbolImpl(xsdString),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
+                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBSTRACT, abstractNumericType),
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -177,6 +188,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
+    public FunctionSymbol getCommonPropagatedOrSubstitutedNumericTypeFunctionSymbol() {
+        return commonNumericTypeFunctionSymbol;
+    }
+
+    @Override
     public FunctionSymbol getRDFDatatypeStringFunctionSymbol() {
         return rdfDatatypeFunctionSymbol;
     }
@@ -189,6 +205,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalLangMatches() {
         return lexicalLangMatchesFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
+        return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
     }
 
     protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {

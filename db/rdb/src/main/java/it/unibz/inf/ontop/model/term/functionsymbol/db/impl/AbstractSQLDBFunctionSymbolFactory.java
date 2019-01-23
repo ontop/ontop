@@ -21,6 +21,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CHAR_LENGTH_STR = "CHAR_LENGTH";
     protected static final String LENGTH_STR = "LENGTH";
     protected static final String RIGHT_STR = "RIGHT";
+    protected static final String MULTIPLY_STR = "*";
+    protected static final String DIVIDE_STR = "/";
+    protected static final String ADD_STR = "+";
+    protected static final String SUBSTRACT_STR = "-";
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
@@ -237,6 +241,46 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
+        return new DefaultTypedDBMathBinaryOperator(MULTIPLY_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType) {
+        return new DefaultTypedDBMathBinaryOperator(DIVIDE_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) {
+        return new DefaultTypedDBMathBinaryOperator(ADD_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
+        return new DefaultTypedDBMathBinaryOperator(SUBSTRACT_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedMultiplyOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(MULTIPLY_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedDivideOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(DIVIDE_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedAddOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(ADD_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedSubstractOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(SUBSTRACT_STR, abstractRootDBType);
     }
 
     @Override

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -76,6 +77,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
 
+    private final Table<String, DBTermType, DBMathBinaryOperator> binaryMathTable;
+    private final Map<String, DBMathBinaryOperator> untypedBinaryMathMap;
+
     /**
      * For the CASE functions
      */
@@ -137,6 +141,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
+        this.binaryMathTable = HashBasedTable.create();
+        this.untypedBinaryMathMap = new HashMap<>();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -380,6 +386,64 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return sha512FunctionSymbol;
     }
 
+    @Override
+    public DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType) {
+        DBMathBinaryOperator existingOperator = binaryMathTable.get(dbMathOperatorName, dbNumericType);
+        if (existingOperator != null) {
+            return existingOperator;
+        }
+
+        DBMathBinaryOperator newOperator = createDBBinaryMathOperator(dbMathOperatorName, dbNumericType);
+        binaryMathTable.put(dbMathOperatorName, dbNumericType, newOperator);
+        return newOperator;
+    }
+
+    @Override
+    public DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName) {
+        DBMathBinaryOperator existingOperator = untypedBinaryMathMap.get(dbMathOperatorName);
+        if (existingOperator != null) {
+            return existingOperator;
+        }
+
+        DBMathBinaryOperator newOperator = createUntypedDBBinaryMathOperator(dbMathOperatorName);
+        untypedBinaryMathMap.put(dbMathOperatorName, newOperator);
+        return newOperator;
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected DBMathBinaryOperator createDBBinaryMathOperator(String dbMathOperatorName, DBTermType dbNumericType)
+        throws UnsupportedOperationException {
+        switch (dbMathOperatorName) {
+            case SPARQL.NUMERIC_MULTIPLY:
+                return createMultiplyOperator(dbNumericType);
+            case SPARQL.NUMERIC_DIVIDE:
+                return createDivideOperator(dbNumericType);
+            case SPARQL.NUMERIC_ADD:
+                return createAddOperator(dbNumericType);
+            case SPARQL.NUMERIC_SUBSTRACT:
+                return createSubstractOperator(dbNumericType);
+            default:
+                throw new UnsupportedOperationException("The math operator " + dbMathOperatorName + " is not supported");
+        }
+    }
+
+    protected DBMathBinaryOperator createUntypedDBBinaryMathOperator(String dbMathOperatorName) throws UnsupportedOperationException {
+        switch (dbMathOperatorName) {
+            case SPARQL.NUMERIC_MULTIPLY:
+                return createUntypedMultiplyOperator();
+            case SPARQL.NUMERIC_DIVIDE:
+                return createUntypedDivideOperator();
+            case SPARQL.NUMERIC_ADD:
+                return createUntypedAddOperator();
+            case SPARQL.NUMERIC_SUBSTRACT:
+                return createUntypedSubstractOperator();
+            default:
+                throw new UnsupportedOperationException("The untyped math operator " + dbMathOperatorName + " is not supported");
+        }
+    }
+
     protected DBBooleanFunctionSymbol createContainsFunctionSymbol() {
         return new DBContainsFunctionSymbolImpl(rootDBType, dbBooleanType, this::serializeContains);
     }
@@ -415,6 +479,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
+
+    protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
+    protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
+    protected abstract DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType);
+
+    protected abstract DBMathBinaryOperator createUntypedMultiplyOperator();
+    protected abstract DBMathBinaryOperator createUntypedDivideOperator();
+    protected abstract DBMathBinaryOperator createUntypedAddOperator();
+    protected abstract DBMathBinaryOperator createUntypedSubstractOperator();
 
     /**
      * Can be overridden
