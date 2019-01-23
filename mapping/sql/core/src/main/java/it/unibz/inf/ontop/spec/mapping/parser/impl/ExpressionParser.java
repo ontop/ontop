@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -796,22 +797,26 @@ public class ExpressionParser {
 
         @Override
         public void visit(Addition expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.ADD, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_ADD), t1, t2));
         }
 
         @Override
         public void visit(Subtraction expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.SUBTRACT, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_SUBSTRACT), t1, t2));
         }
 
         @Override
         public void visit(Multiplication expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.MULTIPLY, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY), t1, t2));
         }
 
         @Override
         public void visit(Division expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(ExpressionOperation.DIVIDE, t1, t2));
+            process(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_DIVIDE), t1, t2));
         }
 
         @Override

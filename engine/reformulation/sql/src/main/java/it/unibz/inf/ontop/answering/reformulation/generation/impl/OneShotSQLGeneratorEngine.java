@@ -224,10 +224,6 @@ public class OneShotSQLGeneratorEngine {
 
 	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
 		ImmutableMap.Builder<FunctionSymbol, String> builder = new ImmutableMap.Builder<FunctionSymbol, String>()
-				.put(ExpressionOperation.ADD, "%s + %s")
-				.put(ExpressionOperation.SUBTRACT, "%s - %s")
-				.put(ExpressionOperation.MULTIPLY, "%s * %s")
-				.put(ExpressionOperation.DIVIDE, "(1.0 * %s) / %s")
 				.put(ExpressionOperation.ABS, "ABS(%s)")
 				.put(ExpressionOperation.CEIL, sqladapter.ceil())
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
