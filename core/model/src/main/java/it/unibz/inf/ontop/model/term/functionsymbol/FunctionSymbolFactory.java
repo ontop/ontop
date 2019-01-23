@@ -25,6 +25,8 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol();
 
+    BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol();
+
     /**
      * Used for wrapping SPARQL boolean functional terms to make them becoming ImmutableExpressions
      *

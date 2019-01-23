@@ -493,6 +493,31 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictNumericEquality(), dbNumericTerm1, dbNumericTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBNonStrictBooleanEquality(ImmutableTerm dbBooleanTerm1, ImmutableTerm dbBooleanTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictBooleanEquality(), dbBooleanTerm1, dbBooleanTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictStringEquality(), dbStringTerm1, dbStringTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDatetimeEquality(), dbDatetimeTerm1, dbDatetimeTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDefaultDBNonStrictEquality(ImmutableTerm term1, ImmutableTerm term2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDefaultDBNonStrictEquality(), term1, term2);
+	}
+
+	@Override
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm) {
 		return getExpression(BooleanExpressionOperation.GTE, firstTerm, secondTerm);
 	}

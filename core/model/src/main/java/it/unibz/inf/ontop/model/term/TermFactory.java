@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -159,6 +158,16 @@ public interface TermFactory {
 	}
 
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
+
+	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
+	ImmutableExpression getDBNonStrictBooleanEquality(ImmutableTerm dbBooleanTerm1, ImmutableTerm dbBooleanTerm2);
+	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
+	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
+
+	/**
+	 * Cannot be simplified --> has to be evaluated by the DB engine
+	 */
+	ImmutableExpression getDefaultDBNonStrictEquality(ImmutableTerm term1, ImmutableTerm term2);
 
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 
@@ -471,4 +480,5 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
+
 }

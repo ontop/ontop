@@ -23,6 +23,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
     private final BooleanFunctionSymbol areCompatibleRDFStringFunctionSymbol;
+    private final BooleanFunctionSymbol lexicalNonStrictEqualityFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
@@ -61,6 +62,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
+        this.lexicalNonStrictEqualityFunctionSymbol = new LexicalNonStrictEqualityFunctionSymbolImpl(metaRDFType,
+                typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
+                dbStringType, dbBooleanType);
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
@@ -149,6 +153,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol() {
         return areCompatibleRDFStringFunctionSymbol;
     }
+
+    @Override
+    public BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol() {
+        return lexicalNonStrictEqualityFunctionSymbol;
+    }
+
 
     @Override
     public BooleanFunctionSymbol getRDF2DBBooleanFunctionSymbol() {
