@@ -17,15 +17,19 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Lifts flatten nodes.
  * <p>
- * Main difficulty: sequence S of consecutive flatten nodes.
+ * Main difficulty: sequence of consecutive flatten nodes.
+ * Consider the (sub)tree S, composed of a potentially blocking operator (e.g. filter),
+ * and a sequence of flatten, e.g.:
  * <p>
  * Ex: filter(A1 = C3)
  * flatten1 (A -> [A1,A2])
@@ -40,13 +44,14 @@ import java.util.stream.Collectors;
  * - flatten5 cannot be lifted over flatten3.
  * <p>
  * Solution:
- * - apply the optimization to the child tree first
- * - within S, lift only flatten nodes which can be lifted above the first non-flatten node (in this case, above the filter)
+ * - apply the optimization to the child tree first (in this example, it consists of the data node only).
+ * - within S, lift each flatten node one after the other, as high as possible, starting with the 1st flatten (from root to leaf).
+ * Note that the order of flatten operators may change as a result.
  * <p>
  * This yields:
  * <p>
- * flatten2 (B -> [B1,B2])
  * flatten4 (D -> [D1,D2])
+ * flatten2 (B -> [B1,B2])
  * filter(A1 = C3)
  * flatten1 (A -> [A1,A2])
  * flatten3 (C1 -> [C3,C4])
@@ -54,14 +59,38 @@ import java.util.stream.Collectors;
  * table(A,B,C,D)
  * <p>
  * <p>
- * Another technical aspect is the potential split of boolean expressions.
+ * This is complicate by the potential split of boolean expressions.
  * E.g. in the previous example, let the filter expression be (A1 = 2) && (C3 = 3)
  * <p>
- * Then if we split the expression into conjuncts, either flatten1 or (flatten3 and flatten5) can be lifted:
- * E.g. (lifting flatten 1):
+ * Then some conjuncts of the expression may be lifted together with a flatten.
+ * This is performed only if at least one conjunct is not lifted.
  * <p>
+ * E.g. lifting flatten 1 first, we get:
+ * <p>
+ * filter(A1 = 2)
+ * flatten1 (A -> [A1,A2])
+ * filter(C3 = 3)
  * flatten2 (B -> [B1,B2])
  * flatten4 (D -> [D1,D2])
+ * flatten3 (C1 -> [C3,C4])
+ * flatten5 (C -> [C1,C2])
+ * table(A,B,C,D)
+ * <p>
+ * Then lifting flatten 2:
+ * <p>
+ * flatten2 (B -> [B1,B2])
+ * filter(A1 = 2)
+ * flatten1 (A -> [A1,A2])
+ * filter(C3 = 3)
+ * flatten4 (D -> [D1,D2])
+ * flatten3 (C1 -> [C3,C4])
+ * flatten5 (C -> [C1,C2])
+ * table(A,B,C,D)
+ * <p>
+ * Then flatten 4:
+ * <p>
+ * flatten4 (D -> [D1,D2])
+ * flatten2 (B -> [B1,B2])
  * filter(A1 = 2)
  * flatten1 (A -> [A1,A2])
  * filter(C3 = 3)
@@ -70,14 +99,12 @@ import java.util.stream.Collectors;
  * table(A,B,C,D)
  * <p>
  * The behavior for the different operators is the following:
- * - inner join: (sequences of) flatten nodes are systematically lifted above the join
- * Note that this may cause a cross product (TODO: optimize so as to avoid cross products?)
- * Some conjuncts of the explicit join condition may be lifted above all flatten nodes, as a filter.
- * Then a lift above the filter is performed, which may split the expression further.
+ * - inner join:
+ * . the the explicit join condition is isolated as a filter,
+ * . flatten nodes are systematically lifted above the join (and below the filter)
+ * . the procedure for a lift above the filter is applied
+ * . the (possibly) resulting filter-join sequence is replaced by a join with explicit join condition.
  * - left join: the explicit join condition is never lifted.
- * - filter: the expression is split into conjuncts, as above.
- * The expression split is done in a greedy way, looking for the first liftable flatten node (e.g. in the example above, flatten1 is lifted, rather than flatten 3 and flatten5).
- * TODO: optimize by lifting as many flatten as possible?
  */
 public class FlattenLifterImpl implements FlattenLifter {
 
@@ -114,18 +141,156 @@ public class FlattenLifterImpl implements FlattenLifter {
         @Override
         public IQTree transformFilter(IQTree tree, FilterNode filter, IQTree child) {
             child = child.acceptTransformer(this);
-            FlattenLift lift = getFlattenLift(
-                    getBlockingVariables(filter.getFilterCondition()),
+            ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(child)
+                    .collect(ImmutableCollectors.toList());
+
+            child = discardRootNodes(child, flattens.iterator());
+
+            ImmutableList<UnaryOperatorNode> seq = liftRec(
+                    concat(
+                            flattens.reverse().stream(),
+                            Stream.of(filter)
+                    ),
+                    flattens.size(),
+                    child.getVariables()
+            );
+            return buildUnaryTreeRec(
+                    seq.reverse().iterator(),
                     child
             );
-            if (lift.getLiftableNodes().isEmpty())
-                return iqFactory.createUnaryIQTree(filter, child);
-
-            return buildUnaryTreeRec(
-                    interleave(Optional.of(filter.getFilterCondition()), lift).iterator(),
-                    lift.getSubtree()
-            );
         }
+
+        private IQTree discardRootNodes(IQTree tree, UnmodifiableIterator<FlattenNode> it) {
+            if (it.hasNext()) {
+                FlattenNode node = it.next();
+                if (tree.getRootNode().equals(node)) {
+                    return discardRootNodes(
+                            ((UnaryIQTree) tree).getChild(),
+                            it
+                    );
+                }
+                throw new FlattenLifterException("Node " + node + " is expected top be the root of " + tree);
+            }
+            return tree;
+        }
+
+        private Stream<FlattenNode> getConsecutiveFlatten(IQTree tree) {
+            QueryNode n = tree.getRootNode();
+            if (n instanceof FlattenNode) {
+                return Stream.concat(
+                        Stream.of((FlattenNode) n),
+                        getConsecutiveFlatten(((UnaryIQTree) tree).getChild())
+                );
+            }
+            return Stream.of();
+        }
+
+        private ImmutableList<UnaryOperatorNode> liftRec(ImmutableList<UnaryOperatorNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars) {
+            if (parentIndex == 0) {
+                return seq;
+            }
+            seq = liftAboveParentRec(seq, parentIndex, subtreeVars);
+            return liftRec(seq, parentIndex - 1, subtreeVars);
+        }
+
+        private ImmutableList<UnaryOperatorNode> liftAboveParentRec(ImmutableList<UnaryOperatorNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars) {
+            if (parentIndex == seq.size()) {
+                return seq;
+            }
+            if (!(seq.get(parentIndex - 1) instanceof FlattenNode)) {
+                throw new FlattenLifterException("A Flatten Node is expected");
+            }
+            FlattenNode flatten = (FlattenNode) seq.get(parentIndex - 1);
+            UnaryOperatorNode parent = seq.get(parentIndex);
+            ImmutableList<UnaryOperatorNode> init = seq.subList(0, parentIndex - 1);
+            ImmutableList<UnaryOperatorNode> tail = seq.subList(parentIndex + 1, seq.size());
+            // Variables defined by the flatten node (and not in its subtree)
+            ImmutableSet<Variable> definedVars = getDefinedVariables(flatten, seq, parentIndex - 1, subTreeVars);
+            if (parent instanceof FlattenNode) {
+                if(definedVars.contains(((FlattenNode) parent).getArrayVariable())){
+                    return seq;
+                }
+                return liftAboveParentRec(
+                        concat(
+                                init.stream(),
+                                Stream.of(
+                                        parent,
+                                        flatten
+                                ),
+                                tail.stream()),
+                        parentIndex + 1,
+                        subTreeVars
+                );
+            }
+            if (parent instanceof FilterNode) {
+                SplitExpression split = new SplitExpression(
+                        definedVars,
+                        ((FilterNode) parent).getFilterCondition());
+                Optional<ImmutableExpression> nonLiftedExpr = split.getNonLiftedExpression();
+                if (nonLiftedExpr.isPresent()) {
+                    Optional<ImmutableExpression> liftedExpr = split.getLiftedExpression();
+                    if (liftedExpr.isPresent()) {
+                        return liftAboveParentRec(
+                                concat(
+                                        init.stream(),
+                                        Stream.of(
+                                                iqFactory.createFilterNode(nonLiftedExpr.get()),
+                                                flatten,
+                                                iqFactory.createFilterNode(liftedExpr.get())
+                                        ),
+                                        tail.stream()
+                                ), parentIndex + 1,
+                                subTreeVars
+                        );
+                    }
+                    return liftAboveParentRec(
+                            concat(
+                                    init.stream(),
+                                    Stream.of(
+                                            parent,
+                                            flatten
+                                    ),
+                                    tail.stream()
+                            ),
+                            parentIndex + 1,
+                            subTreeVars
+                    );
+                }
+                return seq;
+            }
+            throw new FlattenLifterException("A Filter or Flatten Node is expected");
+        }
+
+        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<UnaryOperatorNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
+
+            ImmutableSet<Variable> subsequenceVars = (ImmutableSet<Variable>) seq.subList(0, index).stream()
+                    .filter(n -> n instanceof FlattenNode)
+                    .flatMap(n -> ((FlattenNode) n).getDataAtom().getVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            return (ImmutableSet<Variable>)
+                    flatten.getDataAtom().getVariables().stream()
+                            .filter(v -> !subtreeVars.contains(v))
+                            .filter(v -> !subsequenceVars.contains(v))
+                            .collect(ImmutableCollectors.toSet());
+        }
+
+//        private ImmutableList<UnaryOperatorNode> concat(Stream<? extends UnaryOperatorNode> s, UnaryOperatorNode... nodes, Stream<? extends UnaryOperatorNode> s2) {
+//            return concat((Stream<UnaryOperatorNode>) s, Stream.of(nodes));
+//        }
+
+        private ImmutableList<UnaryOperatorNode> concat(Stream<? extends UnaryOperatorNode>... streams) {
+            return Arrays.stream(streams)
+                    .flatMap(s -> s)
+                    .collect(ImmutableCollectors.toList());
+        }
+//        private ImmutableList<UnaryOperatorNode> concat(Stream<UnaryOperatorNode> s1, Stream<? extends UnaryOperatorNode> s2) {
+//            return Stream.concat(
+//                    s1,
+//                    s2
+//            ).collect(ImmutableCollectors.toList());
+//        }
+
 
         private ImmutableList<UnaryOperatorNode> interleave(Optional<ImmutableExpression> expr, FlattenLift lift) {
             Iterator<FlattenNode> fns = lift.getLiftableNodes().iterator();
@@ -462,6 +627,12 @@ public class FlattenLifterImpl implements FlattenLifter {
             FlattenLiftException(String message) {
                 super(message);
             }
+        }
+    }
+
+    private static class FlattenLifterException extends OntopInternalBugException {
+        FlattenLifterException(String message) {
+            super(message);
         }
     }
 

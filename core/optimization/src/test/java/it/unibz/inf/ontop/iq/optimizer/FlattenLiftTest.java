@@ -33,8 +33,10 @@ public class FlattenLiftTest {
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
     private static final RelationPredicate TABLE3_PREDICATE;
+    private static final RelationPredicate TABLE4_PREDICATE;
 //    private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
+    private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
 
     private final static Variable A = TERM_FACTORY.getVariable("A");
     private final static Variable A1 = TERM_FACTORY.getVariable("A1");
@@ -79,11 +81,20 @@ public class FlattenLiftTest {
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
         Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
+
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
+        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table4Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
+        table4Def.addAttribute(idFactory.createAttributeID("arr3"), Types.ARRAY, null, true);
+        table4Def.addAttribute(idFactory.createAttributeID("arr4"), Types.ARRAY, null, true);
+        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
+        TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;
@@ -562,7 +573,7 @@ public class FlattenLiftTest {
     @Test
     public void testConsecutiveFlatten() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
-        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS2_PREDICATE, X, Y);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS4_PREDICATE, A2, B1, C4, D1);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, rootNode);
 
@@ -571,35 +582,35 @@ public class FlattenLiftTest {
                 A,
                 0,
                 ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2),
-                ImmutableList.of(true, true)
+                ImmutableList.of(false, true)
         );
         StrictFlattenNode flatten2 = IQ_FACTORY.createStrictFlattenNode(
                 B,
                 0,
                 ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2),
-                ImmutableList.of(true, true)
+                ImmutableList.of(false, true)
         );
         StrictFlattenNode flatten3 = IQ_FACTORY.createStrictFlattenNode(
                 C1,
                 0,
                 ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4),
-                ImmutableList.of(true, true)
+                ImmutableList.of(false, true)
         );
         StrictFlattenNode flatten4 = IQ_FACTORY.createStrictFlattenNode(
                 D,
                 0,
                 ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2),
-                ImmutableList.of(true, true)
+                ImmutableList.of(false, true)
         );
         StrictFlattenNode flatten5 = IQ_FACTORY.createStrictFlattenNode(
                 C,
                 0,
                 ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2),
-                ImmutableList.of(true, true)
+                ImmutableList.of(false, true)
         );
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C, D));
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
         queryBuilder.addChild(rootNode, filter);
         queryBuilder.addChild(filter, flatten1);
         queryBuilder.addChild(flatten1, flatten2);
@@ -619,6 +630,8 @@ public class FlattenLiftTest {
         expectedQueryBuilder.addChild(filter, flatten1);
         expectedQueryBuilder.addChild(flatten1, flatten3);
         expectedQueryBuilder.addChild(flatten3, flatten5);
+        expectedQueryBuilder.addChild(flatten5, dataNode);
+
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
         optimizeAndCompare(query, expectedQuery);
