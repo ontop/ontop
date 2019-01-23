@@ -140,4 +140,9 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSha512();
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType);
+
+    /**
+     * Please use getDBMathBinaryOperator(...) if you know the type
+     */
+    DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName);
 }

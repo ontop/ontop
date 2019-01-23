@@ -138,22 +138,42 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
-        return new DefaultDBBinaryNumericFunctionSymbol(MULTIPLY_STR, dbNumericType);
+        return new DefaultTypedDBMathBinaryOperator(MULTIPLY_STR, dbNumericType);
     }
 
     @Override
     protected DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType) {
-        return new DefaultDBBinaryNumericFunctionSymbol(DIVIDE_STR, dbNumericType);
+        return new DefaultTypedDBMathBinaryOperator(DIVIDE_STR, dbNumericType);
     }
 
     @Override
     protected DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) {
-        return new DefaultDBBinaryNumericFunctionSymbol(ADD_STR, dbNumericType);
+        return new DefaultTypedDBMathBinaryOperator(ADD_STR, dbNumericType);
     }
 
     @Override
     protected DBMathBinaryOperator createSubstractOperator(DBTermType dbNumericType) {
-        return new DefaultDBBinaryNumericFunctionSymbol(SUBSTRACT_STR, dbNumericType);
+        return new DefaultTypedDBMathBinaryOperator(SUBSTRACT_STR, dbNumericType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedMultiplyOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(MULTIPLY_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedDivideOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(DIVIDE_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedAddOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(ADD_STR, abstractRootDBType);
+    }
+
+    @Override
+    protected DBMathBinaryOperator createUntypedSubstractOperator() {
+        return new DefaultUntypedDBMathBinaryOperator(SUBSTRACT_STR, abstractRootDBType);
     }
 
     @Override

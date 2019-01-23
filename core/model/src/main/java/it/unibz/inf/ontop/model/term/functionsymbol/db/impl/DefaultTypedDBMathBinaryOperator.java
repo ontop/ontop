@@ -12,12 +12,12 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class DefaultDBBinaryNumericFunctionSymbol extends FunctionSymbolImpl implements DBMathBinaryOperator {
+public class DefaultTypedDBMathBinaryOperator extends FunctionSymbolImpl implements DBMathBinaryOperator {
 
     private final String template;
     private final DBTermType dbNumericType;
 
-    protected DefaultDBBinaryNumericFunctionSymbol(String operatorString, DBTermType dbNumericType) {
+    protected DefaultTypedDBMathBinaryOperator(String operatorString, DBTermType dbNumericType) {
         super(dbNumericType.toString() + operatorString, ImmutableList.of(dbNumericType, dbNumericType));
         this.template = "(%s " + operatorString + " %s)";
         this.dbNumericType = dbNumericType;
