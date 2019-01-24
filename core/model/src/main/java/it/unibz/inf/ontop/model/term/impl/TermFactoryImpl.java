@@ -500,9 +500,10 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2) {
+	public ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+														   ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalNonStrictEqualityFunctionSymbol(),
-				lexicalTerm1, lexicalTerm2);
+				lexicalTerm1, typeTerm1, lexicalTerm2, typeTerm2);
 	}
 
 	@Override

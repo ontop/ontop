@@ -159,7 +159,8 @@ public interface TermFactory {
 
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
 
-	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2);
+	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
 
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);

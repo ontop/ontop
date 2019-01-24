@@ -83,6 +83,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ObjectRDFType iriType = typeFactory.getIRITermType();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
 
+        DBTermType dbBoolean = typeFactory.getDBTypeFactory().getDBBooleanType();
+
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
@@ -120,8 +122,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBSTRACT, abstractNumericType),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal)
-                );
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean));
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
