@@ -29,7 +29,7 @@ public class LangMatchesSPARQLFunctionSymbolImpl extends StringBooleanBinarySPAR
      * TODO: enforce this restriction? This would require to create a novel function symbol IS_EXACTY_A .
      */
     @Override
-    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getConjunction(
                     termFactory.getIsAExpression(typeTerms.get(0), xsdStringType),

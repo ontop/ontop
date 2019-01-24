@@ -724,15 +724,21 @@ public class SparqlAlgebraToDatalogTranslator {
                                 term1, term2);
             }
             else if (expr instanceof Compare) {
-                final BooleanFunctionSymbol p;
-                DBFunctionSymbolFactory dbFunctionSymbolFactory = functionSymbolFactory.getDBFunctionSymbolFactory();
+                // TODO: make it a SPARQLFunctionSymbol
+                final FunctionSymbol p;
 
+                /*
+                 * TODO: update the Relational operations map and add EQ inside it.
+                 */
                 switch (((Compare) expr).getOperator()) {
                     case NE:
-                        p = dbFunctionSymbolFactory.getDBStrictNEquality(2);
-                        break;
+                        return termFactory.getFunction(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
+                                termFactory.getFunction(
+                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2),
+                                        term1, term2));
                     case EQ:
-                        p = dbFunctionSymbolFactory.getDBStrictEquality(2);
+                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
                         break;
                     default:
                         p = RelationalOperations.get(((Compare) expr).getOperator());

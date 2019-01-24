@@ -284,6 +284,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createNonStrictNumericEquality() {
+        return new DefaultDBNonStrictNumericEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictStringEquality() {
+        return new DefaultDBNonStrictStringEqOperator(abstractRootDBType, dbBooleanType);
+
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictDatetimeEquality() {
+        return new DefaultDBNonStrictDatetimeEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictDefaultEquality() {
+        return new DefaultDBNonStrictDefaultEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return ifThenElse;
     }

@@ -296,6 +296,27 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createNonStrictNumericEquality() {
+        return new DefaultDBNonStrictNumericEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictStringEquality() {
+        return new DefaultDBNonStrictStringEqOperator(abstractRootDBType, dbBooleanType);
+
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictDatetimeEquality() {
+        return new DefaultDBNonStrictDatetimeEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNonStrictDefaultEquality() {
+        return new DefaultDBNonStrictDefaultEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBIsStringEmpty() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

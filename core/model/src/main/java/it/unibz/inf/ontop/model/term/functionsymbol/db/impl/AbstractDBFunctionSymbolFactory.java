@@ -56,6 +56,19 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Nullable
     private DBFunctionSymbol sha512FunctionSymbol;
 
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol nonStrictNumericEqOperator;
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol nonStrictStringEqOperator;
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol nonStrictDatetimeEqOperator;
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
+
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -299,6 +312,34 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBNonStrictNumericEquality() {
+        if (nonStrictNumericEqOperator == null)
+            nonStrictNumericEqOperator = createNonStrictNumericEquality();
+        return nonStrictNumericEqOperator;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBNonStrictStringEquality() {
+        if (nonStrictStringEqOperator == null)
+            nonStrictStringEqOperator = createNonStrictStringEquality();
+        return nonStrictStringEqOperator;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBNonStrictDatetimeEquality() {
+        if (nonStrictDatetimeEqOperator == null)
+            nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
+        return nonStrictDatetimeEqOperator;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBNonStrictDefaultEquality() {
+        if (nonStrictDefaultEqOperator == null)
+            nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
+        return nonStrictDefaultEqOperator;
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBStartsWith() {
         return dbStartsWithFunctionSymbol;
     }
@@ -489,6 +530,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBMathBinaryOperator createUntypedDivideOperator();
     protected abstract DBMathBinaryOperator createUntypedAddOperator();
     protected abstract DBMathBinaryOperator createUntypedSubstractOperator();
+
+    protected abstract DBBooleanFunctionSymbol createNonStrictNumericEquality();
+    protected abstract DBBooleanFunctionSymbol createNonStrictStringEquality();
+    protected abstract DBBooleanFunctionSymbol createNonStrictDatetimeEquality();
+    protected abstract DBBooleanFunctionSymbol createNonStrictDefaultEquality();
 
     /**
      * Can be overridden

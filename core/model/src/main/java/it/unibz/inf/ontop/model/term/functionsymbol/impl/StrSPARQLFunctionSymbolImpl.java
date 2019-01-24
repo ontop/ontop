@@ -41,7 +41,7 @@ public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
      * Excludes blank nodes
      */
     @Override
-    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm typeTerm = typeTerms.get(0);
 

@@ -26,4 +26,5 @@ public class SPARQL {
     public static final String NUMERIC_DIVIDE = "/";
     public static final String NUMERIC_ADD = "+";
     public static final String NUMERIC_SUBSTRACT = "-";
+    public static final String EQ = "=";
 }

@@ -25,6 +25,8 @@ public interface FunctionSymbolFactory {
      */
     BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol();
 
+    BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol();
+
     /**
      * Used for wrapping SPARQL boolean functional terms to make them becoming ImmutableExpressions
      *
@@ -38,6 +40,12 @@ public interface FunctionSymbolFactory {
     // SPARQL functions
 
     Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity);
+
+    default SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {
+        return getSPARQLFunctionSymbol(officialName, arity)
+                .orElseThrow(() -> new IllegalArgumentException("The SPARQL function " + officialName
+                        + " is not available for the arity " + arity));
+    }
 
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 
@@ -75,4 +83,5 @@ public interface FunctionSymbolFactory {
     BooleanFunctionSymbol getLexicalLangMatches();
 
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
+
 }

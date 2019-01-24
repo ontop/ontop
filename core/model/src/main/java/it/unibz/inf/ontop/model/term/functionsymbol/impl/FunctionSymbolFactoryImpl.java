@@ -23,6 +23,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final TypeFactory typeFactory;
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
     private final BooleanFunctionSymbol areCompatibleRDFStringFunctionSymbol;
+    private final BooleanFunctionSymbol lexicalNonStrictEqualityFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
@@ -61,6 +62,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
+        this.lexicalNonStrictEqualityFunctionSymbol = new LexicalNonStrictEqualityFunctionSymbolImpl(metaRDFType,
+                typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
+                dbStringType, dbBooleanType);
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
@@ -78,6 +82,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
         ObjectRDFType iriType = typeFactory.getIRITermType();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+
+        DBTermType dbBoolean = typeFactory.getDBTypeFactory().getDBBooleanType();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
@@ -116,8 +122,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBSTRACT, abstractNumericType),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal)
-                );
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean));
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -149,6 +155,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol() {
         return areCompatibleRDFStringFunctionSymbol;
     }
+
+    @Override
+    public BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol() {
+        return lexicalNonStrictEqualityFunctionSymbol;
+    }
+
 
     @Override
     public BooleanFunctionSymbol getRDF2DBBooleanFunctionSymbol() {
@@ -210,11 +222,5 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
         return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
-    }
-
-    protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {
-        return getSPARQLFunctionSymbol(officialName, arity)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        String.format("Not able to get the SPARQL function %s with arity %d", officialName, arity)));
     }
 }

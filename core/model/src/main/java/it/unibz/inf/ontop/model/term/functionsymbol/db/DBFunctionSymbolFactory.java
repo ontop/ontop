@@ -113,6 +113,11 @@ public interface DBFunctionSymbolFactory {
 
     DBBooleanFunctionSymbol getDBStrictNEquality(int arity);
 
+    DBBooleanFunctionSymbol getDBNonStrictNumericEquality();
+    DBBooleanFunctionSymbol getDBNonStrictStringEquality();
+    DBBooleanFunctionSymbol getDBNonStrictDatetimeEquality();
+    DBBooleanFunctionSymbol getDBNonStrictDefaultEquality();
+
     DBBooleanFunctionSymbol getDBStartsWith();
 
     DBBooleanFunctionSymbol getDBEndsWith();
