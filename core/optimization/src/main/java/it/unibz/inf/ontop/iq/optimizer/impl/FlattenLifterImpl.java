@@ -100,11 +100,18 @@ import java.util.stream.Stream;
  * <p>
  * The behavior for the different operators is the following:
  * - inner join:
- * . the the explicit join condition is isolated as a filter,
- * . flatten nodes are systematically lifted above the join (and below the filter)
- * . the procedure for a lift above the filter is applied
- * . the (possibly) resulting filter-join sequence is replaced by a join with explicit join condition.
- * - left join: the explicit join condition is never lifted.
+ *  . the the explicit join condition is isolated as a filter,
+ *  . flatten nodes are systematically lifted above the join (and below the filter)
+ *  . the procedure for a lift above the filter is applied
+ *  . the (possibly) resulting filter-join sequence is replaced by a join with explicit join condition.
+ * - left join:
+ *  . the explicit join condition is never lifted.
+ *  . flatten nodes from the right-hand-side are not lifted
+ *  . flatten nodes from the left-hand-side are lifted if they do not define a variable used in the left join condition
+ * - construction node:
+ *  . flatten nodes are lifted if they do not define a variable used ion the substitution range.
+ *  . the substitution is applied to the lifted flatten nodes' array variables (could happen in theory in the construction node renames the array variable)
+ *  . the construction node's projected variables are updated accordingly
  */
 public class FlattenLifterImpl implements FlattenLifter {
 
@@ -144,9 +151,9 @@ public class FlattenLifterImpl implements FlattenLifter {
             ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(child)
                     .collect(ImmutableCollectors.toList());
 
-            child = discardRootNodes(child, flattens.iterator());
+            child = discardRootFlattenNodes(child, flattens.iterator());
 
-            ImmutableList<UnaryOperatorNode> seq = liftRec(
+            ImmutableList<QueryNode> seq = liftRec(
                     concat(
                             flattens.reverse().stream(),
                             Stream.of(filter)
@@ -160,11 +167,118 @@ public class FlattenLifterImpl implements FlattenLifter {
             );
         }
 
-        private IQTree discardRootNodes(IQTree tree, UnmodifiableIterator<FlattenNode> it) {
+        @Override
+        public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
+            child = child.acceptTransformer(this);
+            ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(child)
+                    .collect(ImmutableCollectors.toList());
+
+            child = discardRootFlattenNodes(child, flattens.iterator());
+            ImmutableList<QueryNode> seq = liftRec(
+                    concat(
+                            flattens.reverse().stream(),
+                            Stream.of(cn)
+                    ),
+                    flattens.size(),
+                    child.getVariables()
+            );
+            return buildUnaryTreeRec(
+                    seq.reverse().iterator(),
+                    child
+            );
+        }
+
+
+        @Override
+        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
+            ImmutableList<IQTree> children = ImmutableList.of(
+                    leftChild.acceptTransformer(this),
+                    rightChild.acceptTransformer(this)
+            );
+
+            ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(leftChild)
+                    .collect(ImmutableCollectors.toList());
+
+            leftChild = discardRootFlattenNodes(leftChild, flattens.iterator());
+            ImmutableList<QueryNode> seq = liftRec(
+                    concat(
+                            flattens.reverse().stream(),
+                            Stream.of(lj)
+                    ),
+                    flattens.size(),
+                    leftChild.getVariables()
+            );
+
+            ImmutableSet.Builder<Variable> blockingVars = ImmutableSet.builder();
+            blockingVars.addAll(getImplicitJoinVariables(children));
+            lj.getOptionalFilterCondition()
+                    .ifPresent(e -> blockingVars.addAll(e.getVariables()));
+
+            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars.build(), children);
+            if (flattenLifts.stream()
+                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
+                return buildUnaryTreeRec(
+                        flattenLifts.stream()
+                                .flatMap(l -> l.getLiftableNodes().stream()).iterator(),
+                        iqFactory.createBinaryNonCommutativeIQTree(
+                                lj,
+                                flattenLifts.get(0).getSubtree(),
+                                flattenLifts.get(1).getSubtree()
+                        ));
+            }
+            return iqFactory.createBinaryNonCommutativeIQTree(lj, children.get(0), children.get(1));
+        }
+        @Override
+        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> children) {
+            children = children.stream()
+                    .map(c -> c.acceptTransformer(this))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<FlattenNode> flattens = children.stream()
+                    .flatMap(t -> getConsecutiveFlatten(t))
+                    .collect(ImmutableCollectors.toList());
+
+            UnmodifiableIterator<FlattenNode> it = flattens.iterator();
+
+            children = children.stream()
+                    .map(t -> discardRootFlattenNodes(t, it))
+                    .collect(ImmutableCollectors.toList());
+
+            if (join.getOptionalFilterCondition().isPresent()) {
+                FilterNode filter = iqFactory.createFilterNode(join.getOptionalFilterCondition().get());
+                ImmutableList<QueryNode> seq = liftRec(
+                        concat(
+                                flattens.reverse().stream(),
+                                Stream.of(filter)
+                        ),
+                        flattens.size(),
+                        children.stream()
+                                .flatMap(t -> t.getVariables().stream())
+                                .collect(ImmutableCollectors.toSet())
+                );
+                // avoid a consecutive join+filter
+                InnerJoinNode updatedJoin;
+                if (seq.get(0) instanceof FilterNode) {
+                    updatedJoin = iqFactory.createInnerJoinNode((((FilterNode) seq.get(0)).getFilterCondition()));
+                    seq = seq.subList(1, seq.size());
+                } else {
+                    updatedJoin = iqFactory.createInnerJoinNode();
+                }
+                return buildUnaryTreeRec(
+                        seq.reverse().iterator(),
+                        iqFactory.createNaryIQTree(
+                                updatedJoin,
+                                children
+                        )
+                );
+            }
+        }
+
+        private IQTree discardRootFlattenNodes(IQTree tree, UnmodifiableIterator<FlattenNode> it) {
             if (it.hasNext()) {
                 FlattenNode node = it.next();
                 if (tree.getRootNode().equals(node)) {
-                    return discardRootNodes(
+                    return discardRootFlattenNodes(
                             ((UnaryIQTree) tree).getChild(),
                             it
                     );
@@ -185,7 +299,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             return Stream.of();
         }
 
-        private ImmutableList<UnaryOperatorNode> liftRec(ImmutableList<UnaryOperatorNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars) {
+        private ImmutableList<QueryNode> liftRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars) {
             if (parentIndex == 0) {
                 return seq;
             }
@@ -193,7 +307,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             return liftRec(seq, parentIndex - 1, subtreeVars);
         }
 
-        private ImmutableList<UnaryOperatorNode> liftAboveParentRec(ImmutableList<UnaryOperatorNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars) {
+        private ImmutableList<QueryNode> liftAboveParentRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars) {
             if (parentIndex == seq.size()) {
                 return seq;
             }
@@ -201,67 +315,124 @@ public class FlattenLifterImpl implements FlattenLifter {
                 throw new FlattenLifterException("A Flatten Node is expected");
             }
             FlattenNode flatten = (FlattenNode) seq.get(parentIndex - 1);
-            UnaryOperatorNode parent = seq.get(parentIndex);
-            ImmutableList<UnaryOperatorNode> init = seq.subList(0, parentIndex - 1);
-            ImmutableList<UnaryOperatorNode> tail = seq.subList(parentIndex + 1, seq.size());
+            QueryNode parent = seq.get(parentIndex);
+            ImmutableList<QueryNode> init = seq.subList(0, parentIndex - 1);
+            ImmutableList<QueryNode> tail = seq.subList(parentIndex + 1, seq.size());
             // Variables defined by the flatten node (and not in its subtree)
             ImmutableSet<Variable> definedVars = getDefinedVariables(flatten, seq, parentIndex - 1, subTreeVars);
-            if (parent instanceof FlattenNode) {
-                if(definedVars.contains(((FlattenNode) parent).getArrayVariable())){
-                    return seq;
-                }
-                return liftAboveParentRec(
-                        concat(
-                                init.stream(),
-                                Stream.of(
-                                        parent,
-                                        flatten
-                                ),
-                                tail.stream()),
-                        parentIndex + 1,
-                        subTreeVars
-                );
-            }
-            if (parent instanceof FilterNode) {
-                SplitExpression split = new SplitExpression(
-                        definedVars,
-                        ((FilterNode) parent).getFilterCondition());
-                Optional<ImmutableExpression> nonLiftedExpr = split.getNonLiftedExpression();
-                if (nonLiftedExpr.isPresent()) {
-                    Optional<ImmutableExpression> liftedExpr = split.getLiftedExpression();
-                    if (liftedExpr.isPresent()) {
-                        return liftAboveParentRec(
-                                concat(
-                                        init.stream(),
-                                        Stream.of(
-                                                iqFactory.createFilterNode(nonLiftedExpr.get()),
-                                                flatten,
-                                                iqFactory.createFilterNode(liftedExpr.get())
-                                        ),
-                                        tail.stream()
-                                ), parentIndex + 1,
-                                subTreeVars
-                        );
-                    }
-                    return liftAboveParentRec(
-                            concat(
-                                    init.stream(),
-                                    Stream.of(
-                                            parent,
-                                            flatten
-                                    ),
-                                    tail.stream()
-                            ),
-                            parentIndex + 1,
-                            subTreeVars
-                    );
-                }
-                return seq;
-            }
-            throw new FlattenLifterException("A Filter or Flatten Node is expected");
+            Stream<QueryNode> lift = getChildParentLift(flatten, parent, definedVars);
+            return liftAboveParentRec(
+                    concat(
+                            init.stream(),
+                            lift,
+                            tail.stream()),
+                    parentIndex + 1,
+                    subTreeVars
+            );
         }
 
-        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<UnaryOperatorNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
+//            if (parent instanceof FlattenNode) {
+//                if(definedVars.contains(((FlattenNode) parent).getArrayVariable())){
+//                    return seq;
+//                }
+//                return liftAboveParentRec(
+//                        concat(
+//                                init.stream(),
+//                                Stream.of(
+//                                        parent,
+//                                        flatten
+//                                ),
+//                                tail.stream()),
+//                        parentIndex + 1,
+//                        subTreeVars
+//                );
+//            }
+//            if (parent instanceof FilterNode) {
+//                SplitExpression split = new SplitExpression(
+//                        definedVars,
+//                        ((FilterNode) parent).getFilterCondition());
+//                Optional<ImmutableExpression> nonLiftedExpr = split.getNonLiftedExpression();
+//                if (nonLiftedExpr.isPresent()) {
+//                    Optional<ImmutableExpression> liftedExpr = split.getLiftedExpression();
+//                    if (liftedExpr.isPresent()) {
+//                        return liftAboveParentRec(
+//                                concat(
+//                                        init.stream(),
+//                                        Stream.of(
+//                                                iqFactory.createFilterNode(nonLiftedExpr.get()),
+//                                                flatten,
+//                                                iqFactory.createFilterNode(liftedExpr.get())
+//                                        ),
+//                                        tail.stream()
+//                                ), parentIndex + 1,
+//                                subTreeVars
+//                        );
+//                    }
+//                    return liftAboveParentRec(
+//                            concat(
+//                                    init.stream(),
+//                                    Stream.of(
+//                                            parent,
+//                                            flatten
+//                                    ),
+//                                    tail.stream()
+//                            ),
+//                            parentIndex + 1,
+//                            subTreeVars
+//                    );
+//                }
+//                return seq;
+//            }
+//            throw new FlattenLifterException("A Filter, Flatten or Construction Node is expected");
+//        }
+
+        private Stream<QueryNode> getChildParentLift(FlattenNode liftedNode, QueryNode parent, ImmutableSet<Variable> definedVars) {
+            if (parent instanceof FlattenNode) {
+                return getLift(liftedNode, (FlattenNode) parent, definedVars);
+            }
+            if (parent instanceof FilterNode) {
+                return getLift(liftedNode, (FilterNode) parent, definedVars);
+            }
+            if (parent instanceof ConstructionNode) {
+                return getLift(liftedNode, (ConstructionNode) parent, definedVars);
+            }
+            throw new FlattenLifterException("A Filter, Flatten or Construction Node is expected");
+        }
+
+        private Stream<QueryNode> getLift(FlattenNode liftedNode, FlattenNode parent, ImmutableSet<Variable> definedVars) {
+            if(definedVars.contains(parent.getArrayVariable())){
+                return Stream.of(liftedNode, parent);
+            }
+            return Stream.of(parent, liftedNode);
+        }
+
+        private Stream<QueryNode> getLift(FlattenNode liftedNode, FilterNode parent, ImmutableSet<Variable> definedVars) {
+            SplitExpression split = new SplitExpression(
+                    definedVars,
+                    parent.getFilterCondition());
+            Optional<ImmutableExpression> nonLiftedExpr = split.getNonLiftedExpression();
+            if (nonLiftedExpr.isPresent()) {
+                Optional<ImmutableExpression> liftedExpr = split.getLiftedExpression();
+                if (liftedExpr.isPresent()) {
+                    return Stream.of(
+                            iqFactory.createFilterNode(nonLiftedExpr.get()),
+                            liftedNode,
+                            iqFactory.createFilterNode(liftedExpr.get())
+                    );
+                }
+                return Stream.of(
+                        parent,
+                        liftedNode
+                );
+            }
+            return Stream.of(
+                    liftedNode,
+                    parent
+            );
+        }
+
+
+        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<QueryNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
 
             ImmutableSet<Variable> subsequenceVars = (ImmutableSet<Variable>) seq.subList(0, index).stream()
                     .filter(n -> n instanceof FlattenNode)
@@ -279,7 +450,7 @@ public class FlattenLifterImpl implements FlattenLifter {
 //            return concat((Stream<UnaryOperatorNode>) s, Stream.of(nodes));
 //        }
 
-        private ImmutableList<UnaryOperatorNode> concat(Stream<? extends UnaryOperatorNode>... streams) {
+        private ImmutableList<QueryNode> concat(Stream<? extends QueryNode>... streams) {
             return Arrays.stream(streams)
                     .flatMap(s -> s)
                     .collect(ImmutableCollectors.toList());
@@ -312,33 +483,33 @@ public class FlattenLifterImpl implements FlattenLifter {
             return builder.build();
         }
 
-        @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> children) {
-            children = children.stream()
-                    .map(c -> c.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
-            ImmutableList<FlattenLift> lifts = getFlattenLifts(ImmutableSet.of(), children);
-            if (lifts.stream()
-                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
-                ImmutableList<FlattenNode> liftedNodes = lifts.stream()
-                        .flatMap(l -> l.getLiftableNodes().stream())
-                        .collect(ImmutableCollectors.toList());
-                IQTree subtree = iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
-                        lifts.stream()
-                                .map(l -> l.getSubtree())
-                                .collect(ImmutableCollectors.toList())
-                );
-                FlattenLift combinedLift = new FlattenLift(liftedNodes, subtree);
-                Optional<ImmutableExpression> joinCondition = join.getOptionalFilterCondition();
-                ImmutableList<UnaryOperatorNode> operators = interleave(joinCondition, combinedLift);
-                return buildUnaryTreeRec(
-                        operators.iterator(),
-                        combinedLift.getSubtree()
-                );
-            }
-            return iqFactory.createNaryIQTree(join, children);
-        }
+//        @Override
+//        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> children) {
+//            children = children.stream()
+//                    .map(c -> c.acceptTransformer(this))
+//                    .collect(ImmutableCollectors.toList());
+//            ImmutableList<FlattenLift> lifts = getFlattenLifts(ImmutableSet.of(), children);
+//            if (lifts.stream()
+//                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
+//                ImmutableList<FlattenNode> liftedNodes = lifts.stream()
+//                        .flatMap(l -> l.getLiftableNodes().stream())
+//                        .collect(ImmutableCollectors.toList());
+//                IQTree subtree = iqFactory.createNaryIQTree(
+//                        iqFactory.createInnerJoinNode(),
+//                        lifts.stream()
+//                                .map(l -> l.getSubtree())
+//                                .collect(ImmutableCollectors.toList())
+//                );
+//                FlattenLift combinedLift = new FlattenLift(liftedNodes, subtree);
+//                Optional<ImmutableExpression> joinCondition = join.getOptionalFilterCondition();
+//                ImmutableList<UnaryOperatorNode> operators = interleave(joinCondition, combinedLift);
+//                return buildUnaryTreeRec(
+//                        operators.iterator(),
+//                        combinedLift.getSubtree()
+//                );
+//            }
+//            return iqFactory.createNaryIQTree(join, children);
+//        }
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
@@ -429,43 +600,65 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
 
-        @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
-            child = child.acceptTransformer(this);
-            QueryNode childNode = child.getRootNode();
-            if (childNode instanceof FlattenNode) {
-                ImmutableSubstitution sub = cn.getSubstitution();
-                FlattenLift lift = liftFlattenSequence(
-                        (FlattenNode) childNode,
-                        getVarsInSubstitutionRange(sub),
-                        cn.getVariables(),
-                        Optional.of(cn.getVariables()),
-                        ((UnaryIQTree) child).getChild()
-                );
-                if (!lift.getLiftableNodes().isEmpty()) {
-                    return buildUnaryTreeRec(
-                            ImmutableList.<UnaryOperatorNode>builder()
-                                    .addAll(applySubstitution(lift.getLiftableNodes(), sub))
-                                    .add(cn).build().iterator(),
-                            lift.getSubtree()
-                    );
-                }
+//        @Override
+//        public IQTree transformConstruction(IQTree tree, ConstructionNode cn, IQTree child) {
+//            child = child.acceptTransformer(this);
+//            QueryNode childNode = child.getRootNode();
+//            if (childNode instanceof FlattenNode) {
+//                ImmutableSubstitution sub = cn.getSubstitution();
+//                FlattenLift lift = liftFlattenSequence(
+//                        (FlattenNode) childNode,
+//                        getVarsInSubstitutionRange(sub),
+//                        cn.getVariables(),
+//                        Optional.of(cn.getVariables()),
+//                        ((UnaryIQTree) child).getChild()
+//                );
+//                if (!lift.getLiftableNodes().isEmpty()) {
+//                    return buildUnaryTreeRec(
+//                            ImmutableList.<UnaryOperatorNode>builder()
+//                                    .addAll(applySubstitution(lift.getLiftableNodes(), sub))
+//                                    .add(cn).build().iterator(),
+//                            lift.getSubtree()
+//                    );
+//                }
+//            }
+//            return iqFactory.createUnaryIQTree(cn, child);
+//        }
+
+        private Stream<QueryNode> getLift(FlattenNode liftedNode, ConstructionNode parent, ImmutableSet<Variable> definedVars) {
+            ImmutableSet<Variable> varsInSubRange = getVarsInSubstitutionRange(parent);
+            ImmutableSet<Variable> arrayDefinedVars = (ImmutableSet<Variable>) liftedNode.getDataAtom().getVariables().stream()
+                    .filter(v -> !definedVars.contains(v))
+                    .collect(ImmutableCollectors.toSet());
+            if(arrayDefinedVars.stream()
+                    .anyMatch(v -> varsInSubRange.contains(v))){
+                return Stream.of(liftedNode, parent);
             }
-            return iqFactory.createUnaryIQTree(cn, child);
+            // among variables projected by the cn, delete the ones defined in the fn's array, and add the fn's array variable
+            ImmutableSet<Variable> projectedVars =
+                    Stream.concat(
+                            parent.getVariables().stream()
+                                    .filter(v -> arrayDefinedVars.contains(v)),
+                            Stream.of(liftedNode.getArrayVariable())
+                    ).collect(ImmutableCollectors.toSet());
+
+            // apply the substitution to the flatten node's array variable (if applicable, which is unlikely)
+            ConstructionNode updatedCn = iqFactory.createConstructionNode(projectedVars, parent.getSubstitution());
+            FlattenNode updatedFlatten = applySubstitution(parent.getSubstitution(), liftedNode);
+            return Stream.of(updatedCn, updatedFlatten);
+        }
+        private ImmutableSet<Variable> getVarsInSubstitutionRange(ConstructionNode cn) {
+            return cn.getSubstitution().getImmutableMap().values().stream()
+                    .flatMap(t -> t.getVariableStream())
+                    .collect(ImmutableCollectors.toSet());
         }
 
-        private HashSet<Variable> getVarsInSubstitutionRange(ImmutableSubstitution sub) {
-            return (HashSet<Variable>) sub.getImmutableMap().values().stream()
-                    .flatMap(t -> ((ImmutableTerm) t).getVariableStream())
-                    .collect(Collectors.toCollection(HashSet::new));
-        }
-
-        private Iterable<? extends UnaryOperatorNode> applySubstitution(ImmutableList<FlattenNode> flattenNodes,
-                                                                        ImmutableSubstitution sub) {
-            return flattenNodes.stream()
-                    .map(n -> applySubstitution(sub, n))
-                    .collect(ImmutableCollectors.toList());
-        }
+//        private Iterable<? extends UnaryOperatorNode> applySubstitution(ImmutableList<FlattenNode> flattenNodes,
+//                                                                        ImmutableSubstitution sub) {
+//            return flattenNodes.stream()
+//                    .map(n -> applySubstitution(sub, n))
+//                    .collect(ImmutableCollectors.toList());
+//        }
 
         /**
          * @param blockingVars:            if the flatten node's data atom uses one of these var, then the node cannot be lifted
@@ -497,12 +690,16 @@ public class FlattenLifterImpl implements FlattenLifter {
                     ));
         }
 
-        private IQTree buildUnaryTreeRec(Iterator<? extends UnaryOperatorNode> it, IQTree subtree) {
+        private IQTree buildUnaryTreeRec(Iterator<? extends QueryNode> it, IQTree subtree) {
             if (it.hasNext()) {
-                return iqFactory.createUnaryIQTree(
-                        it.next(),
-                        buildUnaryTreeRec(it, subtree)
-                );
+                QueryNode n = it.next();
+                if (n instanceof UnaryOperatorNode) {
+                    return iqFactory.createUnaryIQTree(
+                            (UnaryOperatorNode) it.next(),
+                            buildUnaryTreeRec(it, subtree)
+                    );
+                }
+                throw new FlattenLiftException(n + "is not a unary node");
             }
             return subtree;
         }
@@ -527,7 +724,7 @@ public class FlattenLifterImpl implements FlattenLifter {
         }
 
         private boolean isLiftable(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, Optional<ImmutableSet<Variable>> projectedVars, IQTree child) {
-            ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child);
+            ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child.getVariables());
             if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains))
                 return false;
             if (fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
@@ -535,7 +732,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             return projectedVars.map(variables -> variables.contains(fn.getArrayVariable())).orElse(true);
         }
 
-        private ImmutableSet<Variable> getDataAtomExclusiveVars(FlattenNode fn, IQTree child) {
+        private ImmutableSet<Variable> getDataAtomExclusiveVars(FlattenNode fn, ImmutableSet<Variable> childVars) {
             ImmutableSet<Variable> childVars = child.getVariables();
             return (ImmutableSet<Variable>) fn.getDataAtom().getVariables().stream()
                     .filter(v -> !childVars.contains(v))
