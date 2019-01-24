@@ -39,7 +39,8 @@ public class DivideSPARQLFunctionSymbolImpl extends NumericBinarySPARQLFunctionS
 
         ImmutableExpression denominatorZeroEquality = termFactory.getRDF2DBBooleanFunctionalTerm(
                 termFactory.getSPARQLNonStrictEquality(
-                        subLexicalTerms.get(1),
+                        // Denominator
+                        termFactory.getRDFFunctionalTerm(subLexicalTerms.get(1), typeTerms.get(1)),
                         termFactory.getRDFLiteralConstant("0.0", xsdDecimalType)));
 
         // Division by zero case
