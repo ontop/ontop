@@ -37,6 +37,9 @@ public abstract class AbstractDBNonStrictEqOperator extends DBBooleanFunctionSym
         return false;
     }
 
+    /**
+     * TODO: stop blocking
+     */
     @Override
     public boolean blocksNegation() {
         return true;

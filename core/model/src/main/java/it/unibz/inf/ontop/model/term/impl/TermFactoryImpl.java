@@ -521,9 +521,43 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDatetimeEquality(), dbDatetimeTerm1, dbDatetimeTerm2);
 	}
 
-	@Override
+    @Override
 	public ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm term1, ImmutableTerm term2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDefaultEquality(), term1, term2);
+	}
+
+	@Override
+	public ImmutableExpression getDBNumericInequality(InequalityLabel inequalityLabel, ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNumericInequality(inequalityLabel),
+				dbNumericTerm1, dbNumericTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBBooleanInequality(InequalityLabel inequalityLabel, ImmutableTerm dbBooleanTerm1,
+													  ImmutableTerm dbBooleanTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanInequality(inequalityLabel),
+				dbBooleanTerm1, dbBooleanTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBStringInequality(InequalityLabel inequalityLabel, ImmutableTerm dbStringTerm1,
+													 ImmutableTerm dbStringTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBStringInequality(inequalityLabel),
+				dbStringTerm1, dbStringTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBDatetimeInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDatetimeTerm1,
+													   ImmutableTerm dbDatetimeTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBDatetimeInequality(inequalityLabel),
+				dbDatetimeTerm1, dbDatetimeTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
+													  ImmutableTerm dbTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBDefaultInequality(inequalityLabel),
+				dbTerm1, dbTerm2);
 	}
 
 	@Override

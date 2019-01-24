@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableTable;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
@@ -302,6 +303,31 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBBooleanFunctionSymbol createNonStrictDefaultEquality() {
         return new DefaultDBNonStrictDefaultEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createNumericInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBNumericInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createBooleanInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBBooleanInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createStringInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBStringInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDatetimeInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBDatetimeInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDefaultInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBDefaultInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
     }
 
     @Override
