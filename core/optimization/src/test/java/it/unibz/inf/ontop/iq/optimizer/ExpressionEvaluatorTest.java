@@ -55,9 +55,9 @@ public class ExpressionEvaluatorTest {
 
     private final ImmutableExpression EXPR_LANGMATCHES = TERM_FACTORY.getRDF2DBBooleanFunctionalTerm(
             TERM_FACTORY.getImmutableFunctionalTerm(
-                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2).get(),
+                FUNCTION_SYMBOL_FACTORY.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2),
                 TERM_FACTORY.getImmutableFunctionalTerm(
-                        FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.LANG, 1).get(),
+                        FUNCTION_SYMBOL_FACTORY.getRequiredSPARQLFunctionSymbol(SPARQL.LANG, 1),
                         W),
                 wrappedLanguageTag));
 

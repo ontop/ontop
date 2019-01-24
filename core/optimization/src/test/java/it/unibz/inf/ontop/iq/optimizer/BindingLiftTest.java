@@ -2227,7 +2227,7 @@ public class BindingLiftTest {
 
     private static ImmutableFunctionalTerm buildSparqlDatatype(ImmutableTerm argument){
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(SPARQL.DATATYPE, 1).get(),
+                FUNCTION_SYMBOL_FACTORY.getRequiredSPARQLFunctionSymbol(SPARQL.DATATYPE, 1),
                 argument);
     }
 }

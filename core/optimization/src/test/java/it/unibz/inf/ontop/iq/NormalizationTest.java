@@ -1665,7 +1665,7 @@ public class NormalizationTest {
 
     private ImmutableFunctionalTerm createInjectiveFunctionalTerm2(ImmutableTerm term) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(XPathFunction.ENCODE_FOR_URI.getIRIString(), 1).get(),
+                FUNCTION_SYMBOL_FACTORY.getRequiredSPARQLFunctionSymbol(XPathFunction.ENCODE_FOR_URI.getIRIString(), 1),
                 term);
     }
 
