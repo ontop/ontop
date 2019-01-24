@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -166,7 +163,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                             Stream.of(filter)
                     ),
                     flattens.size(),
-                    child.getVariables()
+                    child.getVariables(),
+                    ImmutableSet.of()
             );
             return buildUnaryTreeRec(
                     seq.reverse().iterator(),
@@ -190,7 +188,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                             Stream.of(cn)
                     ),
                     flattens.size(),
-                    child.getVariables()
+                    child.getVariables(),
+                    ImmutableSet.of()
             );
             return buildUnaryTreeRec(
                     seq.reverse().iterator(),
@@ -200,10 +199,11 @@ public class FlattenLifterImpl implements FlattenLifter {
 
         @Override
         public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
-            ImmutableList<IQTree> children = ImmutableList.of(
-                    leftChild.acceptTransformer(this),
-                    rightChild.acceptTransformer(this)
-            );
+
+            leftChild = leftChild.acceptTransformer(this);
+            rightChild = rightChild.acceptTransformer(this);
+
+            ImmutableSet<Variable> implicitJoinVariables = getImplicitJoinVariables(ImmutableList.of(leftChild, rightChild));
 
             ImmutableList<FlattenNode> flattens = getConsecutiveFlatten(leftChild)
                     .collect(ImmutableCollectors.toList());
@@ -215,7 +215,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                             Stream.of(lj)
                     ),
                     flattens.size(),
-                    leftChild.getVariables()
+                    leftChild.getVariables(),
+                    implicitJoinVariables
             );
 
             SplitLJLift lift = splitLJLift(seq);
@@ -260,7 +261,8 @@ public class FlattenLifterImpl implements FlattenLifter {
                         flattens.size(),
                         children.stream()
                                 .flatMap(t -> t.getVariables().stream())
-                                .collect(ImmutableCollectors.toSet())
+                                .collect(ImmutableCollectors.toSet()),
+                        ImmutableSet.of()
                 );
                 // avoid a consecutive join+filter
                 InnerJoinNode updatedJoin;
@@ -312,15 +314,15 @@ public class FlattenLifterImpl implements FlattenLifter {
             return Stream.of();
         }
 
-        private ImmutableList<QueryNode> liftRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars) {
+        private ImmutableList<QueryNode> liftRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subtreeVars, ImmutableSet blockingVars) {
             if (parentIndex == 0) {
                 return seq;
             }
-            seq = liftAboveParentRec(seq, parentIndex, subtreeVars);
-            return liftRec(seq, parentIndex - 1, subtreeVars);
+            seq = liftAboveParentRec(seq, parentIndex, subtreeVars, blockingVars);
+            return liftRec(seq, parentIndex - 1, subtreeVars, blockingVars);
         }
 
-        private ImmutableList<QueryNode> liftAboveParentRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars) {
+        private ImmutableList<QueryNode> liftAboveParentRec(ImmutableList<QueryNode> seq, int parentIndex, ImmutableSet<Variable> subTreeVars, ImmutableSet<Variable> blockingVars) {
             if (parentIndex == seq.size()) {
                 return seq;
             }
@@ -331,7 +333,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             QueryNode parent = seq.get(parentIndex);
             // Variables defined by the flatten node (and not in its subtree)
             ImmutableSet<Variable> definedVars = getDefinedVariables(flatten, seq, parentIndex - 1, subTreeVars);
-            ImmutableList<QueryNode> lift = getChildParentLift(flatten, parent, definedVars);
+            ImmutableList<QueryNode> lift = getChildParentLift(flatten, parent, definedVars, blockingVars);
             if (lift.isEmpty()) {
                 return seq;
             }
@@ -343,11 +345,12 @@ public class FlattenLifterImpl implements FlattenLifter {
                             lift.stream(),
                             tail.stream()),
                     parentIndex + 1,
-                    subTreeVars
+                    subTreeVars,
+                    blockingVars
             );
         }
 
-        private ImmutableList<QueryNode> getChildParentLift(FlattenNode liftedNode, QueryNode parent, ImmutableSet<Variable> definedVars) {
+        private ImmutableList<QueryNode> getChildParentLift(FlattenNode liftedNode, QueryNode parent, ImmutableSet<Variable> definedVars, ImmutableSet<Variable> blockingVars) {
             if (parent instanceof FlattenNode) {
                 return getLift(liftedNode, (FlattenNode) parent, definedVars);
             }
@@ -358,12 +361,16 @@ public class FlattenLifterImpl implements FlattenLifter {
                 return getLift(liftedNode, (ConstructionNode) parent, definedVars);
             }
             if (parent instanceof LeftJoinNode) {
-                return getLift(liftedNode, (LeftJoinNode) parent, definedVars);
+                return getLift(liftedNode, (LeftJoinNode) parent, definedVars, blockingVars);
             }
             throw new FlattenLifterException("A Filter, Flatten Left Join or Construction Node is expected");
         }
 
-        private ImmutableList<QueryNode> getLift(FlattenNode liftedNode, LeftJoinNode parent, ImmutableSet<Variable> definedVars) {
+        private ImmutableList<QueryNode> getLift(FlattenNode liftedNode, LeftJoinNode parent, ImmutableSet<Variable> definedVars, ImmutableSet<Variable> blockingVars) {
+            if(definedVars.stream()
+                    .anyMatch(v -> blockingVars.contains(v))){
+                return ImmutableList.of();
+            }
             if (parent.getOptionalFilterCondition().isPresent()) {
                 ImmutableSet<Variable> joinConditionVars = parent.getOptionalFilterCondition().get().getVariables();
                 if (definedVars.stream()
@@ -403,26 +410,6 @@ public class FlattenLifterImpl implements FlattenLifter {
             return ImmutableList.of();
         }
 
-        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<QueryNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
-
-            ImmutableSet<Variable> subsequenceVars = (ImmutableSet<Variable>) seq.subList(0, index).stream()
-                    .filter(n -> n instanceof FlattenNode)
-                    .flatMap(n -> ((FlattenNode) n).getDataAtom().getVariables().stream())
-                    .collect(ImmutableCollectors.toSet());
-
-            return (ImmutableSet<Variable>)
-                    flatten.getDataAtom().getVariables().stream()
-                            .filter(v -> !subtreeVars.contains(v))
-                            .filter(v -> !subsequenceVars.contains(v))
-                            .collect(ImmutableCollectors.toSet());
-        }
-
-        private ImmutableList<QueryNode> concat(Stream<? extends QueryNode>... streams) {
-            return Arrays.stream(streams)
-                    .flatMap(s -> s)
-                    .collect(ImmutableCollectors.toList());
-        }
-
         private ImmutableList<QueryNode> getLift(FlattenNode liftedNode, ConstructionNode parent, ImmutableSet<Variable> definedVars) {
             ImmutableSet<Variable> varsInSubRange = getVarsInSubstitutionRange(parent);
             ImmutableSet<Variable> arrayDefinedVars = (ImmutableSet<Variable>) liftedNode.getDataAtom().getVariables().stream()
@@ -446,6 +433,36 @@ public class FlattenLifterImpl implements FlattenLifter {
             return ImmutableList.of(updatedCn, updatedFlatten);
         }
 
+
+
+        private ImmutableSet<Variable> getDefinedVariables(FlattenNode flatten, ImmutableList<QueryNode> seq, int index, ImmutableSet<Variable> subtreeVars) {
+
+            ImmutableSet<Variable> subsequenceVars = (ImmutableSet<Variable>) seq.subList(0, index).stream()
+                    .filter(n -> n instanceof FlattenNode)
+                    .flatMap(n -> ((FlattenNode) n).getDataAtom().getVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            return (ImmutableSet<Variable>)
+                    flatten.getDataAtom().getVariables().stream()
+                            .filter(v -> !subtreeVars.contains(v))
+                            .filter(v -> !subsequenceVars.contains(v))
+                            .collect(ImmutableCollectors.toSet());
+        }
+
+        private ImmutableList<QueryNode> concat(Stream<? extends QueryNode>... streams) {
+            return Arrays.stream(streams)
+                    .flatMap(s -> s)
+                    .collect(ImmutableCollectors.toList());
+        }
+
+        private ImmutableSet<Variable> getImplicitJoinVariables(ImmutableList<IQTree> children) {
+            return children.stream()
+                    .flatMap(t -> t.getVariables().stream())
+                    .collect(ImmutableCollectors.toMultiset()).entrySet().stream()
+                    .filter(e -> e.getCount() > 1)
+                    .map(Multiset.Entry::getElement)
+                    .collect(ImmutableCollectors.toSet());
+        }
 
         private ImmutableSet<Variable> getVarsInSubstitutionRange(ConstructionNode cn) {
             return cn.getSubstitution().getImmutableMap().values().stream()
