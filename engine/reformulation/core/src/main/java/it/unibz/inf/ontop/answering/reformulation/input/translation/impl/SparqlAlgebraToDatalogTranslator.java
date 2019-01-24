@@ -725,9 +725,6 @@ public class SparqlAlgebraToDatalogTranslator {
                 // TODO: make it a SPARQLFunctionSymbol
                 final FunctionSymbol p;
 
-                /*
-                 * TODO: update the Relational operations map and add EQ inside it.
-                 */
                 switch (((Compare) expr).getOperator()) {
                     case NE:
                         return termFactory.getFunction(
@@ -738,8 +735,26 @@ public class SparqlAlgebraToDatalogTranslator {
                     case EQ:
                         p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
                         break;
+                    case LT:
+                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2);
+                        break;
+                    case LE:
+                        return termFactory.getFunction(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
+                                termFactory.getFunction(
+                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2),
+                                        term1, term2));
+                    case GE:
+                        return termFactory.getFunction(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
+                                termFactory.getFunction(
+                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2),
+                                        term1, term2));
+                    case GT:
+                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2);
+                        break;
                     default:
-                        p = RelationalOperations.get(((Compare) expr).getOperator());
+                        throw new OntopUnsupportedInputQueryException("Unsupported operator: " + expr);
                 }
                 return termFactory.getFunction(p, term1, term2);
             }
@@ -827,15 +842,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("NOW", NOW)
                     .put("TZ", TZ)
                     .build();
-
-
-	private static final ImmutableMap<Compare.CompareOp, BooleanExpressionOperation> RelationalOperations =
-			new ImmutableMap.Builder<Compare.CompareOp, BooleanExpressionOperation>()
-				.put(Compare.CompareOp.GE, GTE)
-				.put(Compare.CompareOp.GT, GT)
-				.put(Compare.CompareOp.LE, LTE)
-				.put(Compare.CompareOp.LT, LT)
-				.build();
 
 	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, String>()
