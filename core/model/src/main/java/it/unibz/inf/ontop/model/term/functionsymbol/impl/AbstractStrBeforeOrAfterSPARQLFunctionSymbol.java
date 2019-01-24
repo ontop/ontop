@@ -73,7 +73,7 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
     }
 
     @Override
-    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getAreCompatibleRDFStringExpression(typeTerms.get(0), typeTerms.get(1))
                 .evaluate(variableNullability);

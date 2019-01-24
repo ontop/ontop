@@ -221,10 +221,4 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
         return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
     }
-
-    protected SPARQLFunctionSymbol getRequiredSPARQLFunctionSymbol(String officialName, int arity) {
-        return getSPARQLFunctionSymbol(officialName, arity)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        String.format("Not able to get the SPARQL function %s with arity %d", officialName, arity)));
-    }
 }

@@ -159,6 +159,8 @@ public interface TermFactory {
 
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
 
+	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2);
+
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
@@ -482,4 +484,8 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
+	/**
+	 * Using the SPARQL "=" operator
+	 */
+	ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2);
 }

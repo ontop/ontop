@@ -48,7 +48,7 @@ public abstract class AbstractHashSPARQLFunctionSymbol extends ReduciblePositive
      * According to the SPARQL specification, does not accept lang strings
      */
     @Override
-    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory,
                                                                     VariableNullability variableNullability) {
         return termFactory.getStrictEquality(typeTerms.get(0), termFactory.getRDFTermTypeConstant(xsdStringType))

@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -488,8 +489,20 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2),
+				rdfTerm1, rdfTerm2);
+	}
+
+	@Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
+	}
+
+	@Override
+	public ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2) {
+		return getImmutableExpression(functionSymbolFactory.getLexicalNonStrictEqualityFunctionSymbol(),
+				lexicalTerm1, lexicalTerm2);
 	}
 
 	@Override

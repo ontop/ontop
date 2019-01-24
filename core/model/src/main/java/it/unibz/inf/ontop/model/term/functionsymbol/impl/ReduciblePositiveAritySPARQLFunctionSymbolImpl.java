@@ -47,7 +47,11 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                     .map(t -> extractRDFTermTypeTerm(t, termFactory))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(typeTerms,
+            ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
+                    .map(t -> extractLexicalTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableExpression.Evaluation inputTypeErrorEvaluation = evaluateInputTypeError(subLexicalTerms, typeTerms,
                     termFactory, variableNullability);
 
             if (inputTypeErrorEvaluation.getValue().isPresent()) {
@@ -63,10 +67,6 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                         break;
                 }
             }
-
-            ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
-                    .map(t -> extractLexicalTerm(t, termFactory))
-                    .collect(ImmutableCollectors.toList());
 
             ImmutableTerm typeTerm = computeTypeTerm(subLexicalTerms, typeTerms, termFactory, variableNullability);
             ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerms, typeTerms, termFactory, typeTerm);
@@ -101,7 +101,7 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
      * Default implementation, can be overridden
      *
      */
-    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> typeTerms,
+    protected ImmutableExpression.Evaluation evaluateInputTypeError(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms,
                                                                     TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableList<ImmutableExpression> typeTestExpressions = IntStream.range(0, typeTerms.size())
                 .boxed()
