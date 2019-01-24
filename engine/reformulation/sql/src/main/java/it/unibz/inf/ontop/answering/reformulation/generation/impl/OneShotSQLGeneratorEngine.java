@@ -229,10 +229,6 @@ public class OneShotSQLGeneratorEngine {
 				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
 				.put(ExpressionOperation.ROUND, sqladapter.round())
 				.put(ExpressionOperation.RAND, sqladapter.rand())
-				.put(BooleanExpressionOperation.GT, "%s > %s")
-				.put(BooleanExpressionOperation.GTE, "%s >= %s")
-				.put(BooleanExpressionOperation.LT, "%s < %s")
-				.put(BooleanExpressionOperation.LTE, "%s <= %s")
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
 		

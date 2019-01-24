@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
@@ -29,6 +28,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
+    private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
     private final FunctionSymbol langTypeFunctionSymbol;
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
@@ -59,6 +59,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonDenominatorMap = new HashMap<>();
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
+        this.lexicalInequalityFunctionSymbolMap = new HashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
@@ -123,7 +124,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
                 new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBSTRACT, abstractNumericType),
                 new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
-                new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean));
+                new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
+                new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
+                new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean)
+                );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -159,6 +163,18 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol() {
         return lexicalNonStrictEqualityFunctionSymbol;
+    }
+
+    @Override
+    public BooleanFunctionSymbol getLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel) {
+        return lexicalInequalityFunctionSymbolMap
+                .computeIfAbsent(inequalityLabel, this::createLexicalInequalityFunctionSymbol);
+    }
+
+    protected BooleanFunctionSymbol createLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel) {
+        return new LexicalInequalityFunctionSymbolImpl(inequalityLabel, metaRDFType,
+                typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
+                dbStringType, dbBooleanType);
     }
 
 

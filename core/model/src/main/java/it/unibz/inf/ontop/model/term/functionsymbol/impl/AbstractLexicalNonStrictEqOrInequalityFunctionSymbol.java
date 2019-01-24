@@ -64,8 +64,7 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                     termType1.getClosestDBType(dbTypeFactory), newTerms.get(2), termType2);
 
             if ((termType1 instanceof ConcreteNumericRDFDatatype) && (termType2 instanceof ConcreteNumericRDFDatatype))
-                return termFactory.getDBNonStrictNumericEquality(dbTerm1, dbTerm2)
-                        .simplify(variableNullability);
+                return computeNumericEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
 
             else if (termType1.equals(termType2)) {
                 if (termType1.equals(xsdBooleanType))
@@ -94,6 +93,9 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
         throw new UnsupportedOperationException();
     }
+
+    protected abstract ImmutableTerm computeNumericEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                                        TermFactory termFactory, VariableNullability variableNullability);
 
     protected abstract ImmutableTerm computeBooleanEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
                                                                         TermFactory termFactory, VariableNullability variableNullability);

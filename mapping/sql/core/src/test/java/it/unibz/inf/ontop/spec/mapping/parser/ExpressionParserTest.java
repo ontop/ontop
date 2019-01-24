@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
@@ -352,7 +353,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                GT,
+                DB_FS_FACTORY.getDBDefaultInequality(GT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
     }
@@ -370,7 +371,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                GTE,
+                DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
     }
@@ -388,7 +389,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                LT,
+                DB_FS_FACTORY.getDBDefaultInequality(LT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
     }
@@ -406,7 +407,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                LTE,
+                DB_FS_FACTORY.getDBDefaultInequality(LTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
     }
@@ -477,7 +478,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
-                GT,
+                DB_FS_FACTORY.getDBDefaultInequality(GT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -495,7 +496,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
-                GTE,
+                DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -513,7 +514,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
-                LT,
+                DB_FS_FACTORY.getDBDefaultInequality(LT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -531,7 +532,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT, TERM_FACTORY.getFunction(
-                LTE,
+                DB_FS_FACTORY.getDBDefaultInequality(LTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -655,10 +656,12 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(ImmutableList.of(// FACTORY.getFunction(AND,
-                TERM_FACTORY.getFunction(GTE,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
-                TERM_FACTORY.getFunction(LTE,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(LTE),
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation);
     }
@@ -677,10 +680,12 @@ public class ExpressionParserTest {
 
         assertEquals(//FACTORY.getFunction(NOT,
                 TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
-                        TERM_FACTORY.getFunction(LT,
+                        TERM_FACTORY.getFunction(
+                                DB_FS_FACTORY.getDBDefaultInequality(LT),
                                 v,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
-                        TERM_FACTORY.getFunction(GT,
+                        TERM_FACTORY.getFunction(
+                                DB_FS_FACTORY.getDBDefaultInequality(GT),
                                 v,
                                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -956,10 +961,12 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(ImmutableList.of( //FACTORY.getFunction(AND,
-                TERM_FACTORY.getFunction(GTE,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
                         TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())),
-                TERM_FACTORY.getFunction(LTE,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(LTE),
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation);
     }
@@ -977,10 +984,12 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBOr(2),
-                TERM_FACTORY.getFunction(LT,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(LT),
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
-                TERM_FACTORY.getFunction(GT,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(GT),
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -997,7 +1006,8 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(GTE,
+        assertEquals(TERM_FACTORY.getFunction(
+                DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation.get(0));
     }
@@ -1015,7 +1025,8 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(GTE,
+                TERM_FACTORY.getFunction(
+                        DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType))), translation.get(0));
     }

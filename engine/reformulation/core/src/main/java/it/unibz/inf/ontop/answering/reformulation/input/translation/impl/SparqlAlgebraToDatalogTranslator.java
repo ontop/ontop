@@ -627,7 +627,7 @@ public class SparqlAlgebraToDatalogTranslator {
             Variable var = termFactory.getVariable(v.getName());
             return variables.contains(var)
                     ? termFactory.getFunction(
-                            functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.BOUND, 1).get(), var)
+                            functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.BOUND, 1), var)
                     : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
         }
         else if (expr instanceof UnaryValueOperator) {
@@ -635,46 +635,44 @@ public class SparqlAlgebraToDatalogTranslator {
 
             if (expr instanceof Not) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
                         term);
             }
             else if (expr instanceof IsNumeric) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_NUMERIC, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_NUMERIC, 1),
                         term);
             }
             else if (expr instanceof IsLiteral) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1),
                         term);
             }
             else if (expr instanceof IsURI) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_IRI, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_IRI, 1),
                         term);
             }
             else if (expr instanceof Str) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.STR, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.STR, 1),
                         term);
             }
             else if (expr instanceof Datatype) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.DATATYPE, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.DATATYPE, 1),
                         term);
             }
             else if (expr instanceof IsBNode) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.IS_BLANK, 1).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_BLANK, 1),
                         term);
             }
             else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
                     return termFactory.getFunction(
-                            functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG, 1)
-                            .orElseThrow(() -> new MinorOntopInternalBugException(
-                                    "Internal bug: cannot retrieve the SPARQL lang function symbol")),
+                            functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG, 1),
                             term);
                 else
                     throw new RuntimeException("A variable or a value is expected in " + expr);
@@ -696,12 +694,12 @@ public class SparqlAlgebraToDatalogTranslator {
 
             if (expr instanceof And) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2),
                         term1, term2);
             }
             else if (expr instanceof Or) {
                 return termFactory.getFunction(
-                        functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2).get(),
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2),
                         term1, term2);
             }
             else if (expr instanceof SameTerm) {
@@ -716,20 +714,17 @@ public class SparqlAlgebraToDatalogTranslator {
                 Regex reg = (Regex) expr;
                 return (reg.getFlagsArg() != null)
                         ? termFactory.getFunction(
-                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.REGEX, 3).get(),
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 3),
                                 term1, term2,
                                 getExpression(reg.getFlagsArg(), variables))
                         : termFactory.getFunction(
-                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.REGEX, 2).get(),
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
                                 term1, term2);
             }
             else if (expr instanceof Compare) {
                 // TODO: make it a SPARQLFunctionSymbol
                 final FunctionSymbol p;
 
-                /*
-                 * TODO: update the Relational operations map and add EQ inside it.
-                 */
                 switch (((Compare) expr).getOperator()) {
                     case NE:
                         return termFactory.getFunction(
@@ -740,14 +735,32 @@ public class SparqlAlgebraToDatalogTranslator {
                     case EQ:
                         p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2);
                         break;
+                    case LT:
+                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2);
+                        break;
+                    case LE:
+                        return termFactory.getFunction(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
+                                termFactory.getFunction(
+                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2),
+                                        term1, term2));
+                    case GE:
+                        return termFactory.getFunction(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
+                                termFactory.getFunction(
+                                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2),
+                                        term1, term2));
+                    case GT:
+                        p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2);
+                        break;
                     default:
-                        p = RelationalOperations.get(((Compare) expr).getOperator());
+                        throw new OntopUnsupportedInputQueryException("Unsupported operator: " + expr);
                 }
                 return termFactory.getFunction(p, term1, term2);
             }
             else if (expr instanceof MathExpr) {
-                SPARQLFunctionSymbol f = functionSymbolFactory.getSPARQLFunctionSymbol(
-                        NumericalOperations.get(((MathExpr)expr).getOperator()), 2).get();
+                SPARQLFunctionSymbol f = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                        NumericalOperations.get(((MathExpr)expr).getOperator()), 2);
                 return termFactory.getFunction(f, term1, term2);
             }
             /*
@@ -764,8 +777,7 @@ public class SparqlAlgebraToDatalogTranslator {
                             "only supported with lang(..) function for the first argument and a constant for the second");
                 }
 
-                SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2)
-                        .orElseThrow(() -> new MinorOntopInternalBugException("Cannot get " + SPARQL.LANG_MATCHES));
+                SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2);
 
                 return termFactory.getExpression(
                         functionSymbolFactory.getRDF2DBBooleanFunctionSymbol(),
@@ -830,15 +842,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     .put("NOW", NOW)
                     .put("TZ", TZ)
                     .build();
-
-
-	private static final ImmutableMap<Compare.CompareOp, BooleanExpressionOperation> RelationalOperations =
-			new ImmutableMap.Builder<Compare.CompareOp, BooleanExpressionOperation>()
-				.put(Compare.CompareOp.GE, GTE)
-				.put(Compare.CompareOp.GT, GT)
-				.put(Compare.CompareOp.LE, LTE)
-				.put(Compare.CompareOp.LT, LT)
-				.build();
 
 	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, String>()

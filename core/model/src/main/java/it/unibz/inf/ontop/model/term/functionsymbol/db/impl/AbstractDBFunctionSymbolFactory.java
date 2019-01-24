@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -118,6 +119,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Map<Integer, TrueOrNullFunctionSymbol> trueOrNullMap;
 
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> numericInequalityMap;
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> booleanInequalityMap;
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> datetimeInequalityMap;
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> defaultInequalityMap;
+
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
@@ -188,6 +195,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
         this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
         this.dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
+
+        this.numericInequalityMap = new HashMap<>();
+        this.booleanInequalityMap = new HashMap<>();
+        this.stringInequalityMap = new HashMap<>();
+        this.datetimeInequalityMap = new HashMap<>();
+        this.defaultInequalityMap = new HashMap<>();
     }
 
     @Override
@@ -337,6 +350,36 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         if (nonStrictDefaultEqOperator == null)
             nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
         return nonStrictDefaultEqOperator;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBNumericInequality(InequalityLabel inequalityLabel) {
+        return numericInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createNumericInequality);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBBooleanInequality(InequalityLabel inequalityLabel) {
+        return booleanInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createBooleanInequality);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBStringInequality(InequalityLabel inequalityLabel) {
+        return stringInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createStringInequality);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBDatetimeInequality(InequalityLabel inequalityLabel) {
+        return datetimeInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createDatetimeInequality);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBDefaultInequality(InequalityLabel inequalityLabel) {
+        return defaultInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createDefaultInequality);
     }
 
     @Override
@@ -535,6 +578,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createNonStrictStringEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictDatetimeEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictDefaultEquality();
+
+    protected abstract DBBooleanFunctionSymbol createNumericInequality(InequalityLabel inequalityLabel);
+    protected abstract DBBooleanFunctionSymbol createBooleanInequality(InequalityLabel inequalityLabel);
+    protected abstract DBBooleanFunctionSymbol createStringInequality(InequalityLabel inequalityLabel);
+    protected abstract DBBooleanFunctionSymbol createDatetimeInequality(InequalityLabel inequalityLabel);
+    protected abstract DBBooleanFunctionSymbol createDefaultInequality(InequalityLabel inequalityLabel);
 
     /**
      * Can be overridden

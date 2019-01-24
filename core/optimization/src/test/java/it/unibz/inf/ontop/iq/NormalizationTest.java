@@ -17,6 +17,8 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertEquals;
 
 public class NormalizationTest {
@@ -437,7 +439,7 @@ public class NormalizationTest {
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, xDefinition));
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, X, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, X, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode,
@@ -445,7 +447,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(LT, xDefinition, TWO));
+                TERM_FACTORY.getDBDefaultInequality(LT, xDefinition, TWO));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createUnaryIQTree(newFilterNode, extensionalDataNode));
@@ -468,7 +470,7 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, X, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, X, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode,
@@ -477,7 +479,7 @@ public class NormalizationTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
-                TERM_FACTORY.getImmutableExpression(LT, xDefinition, TWO));
+                TERM_FACTORY.getDBDefaultInequality(LT, xDefinition, TWO));
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
@@ -495,7 +497,7 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode,
@@ -518,7 +520,7 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode,
@@ -540,10 +542,10 @@ public class NormalizationTest {
 
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         FilterNode secondFilterNode = IQ_FACTORY.createFilterNode(expression2);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(topFilterNode,
@@ -567,10 +569,10 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         FilterNode secondFilterNode = IQ_FACTORY.createFilterNode(expression2);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(topFilterNode,
@@ -596,10 +598,10 @@ public class NormalizationTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         FilterNode secondFilterNode = IQ_FACTORY.createFilterNode(expression2);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(topFilterNode,
@@ -627,10 +629,10 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         FilterNode secondFilterNode = IQ_FACTORY.createFilterNode(expression2);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(topFilterNode,
@@ -657,7 +659,7 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -682,10 +684,10 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression2);
 
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(topFilterNode,
@@ -709,10 +711,10 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression2);
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -739,10 +741,10 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
 
-        ImmutableExpression expression1 = TERM_FACTORY.getImmutableExpression(LT, A, TWO);
+        ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
 
-        ImmutableExpression expression2 = TERM_FACTORY.getImmutableExpression(GT, B, ONE);
+        ImmutableExpression expression2 = TERM_FACTORY.getDBDefaultInequality(GT, B, ONE);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(expression2);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -1623,7 +1625,7 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(INT_TABLE1_AR2, A, B);
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(INT_TABLE2_AR2, A, B);
 
-        ImmutableExpression expression = TERM_FACTORY.getImmutableExpression(LT, A, B);
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, A, B);
 
         NaryIQTree tree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(
@@ -1665,7 +1667,7 @@ public class NormalizationTest {
 
     private ImmutableFunctionalTerm createInjectiveFunctionalTerm2(ImmutableTerm term) {
         return TERM_FACTORY.getImmutableFunctionalTerm(
-                FUNCTION_SYMBOL_FACTORY.getSPARQLFunctionSymbol(XPathFunction.ENCODE_FOR_URI.getIRIString(), 1).get(),
+                FUNCTION_SYMBOL_FACTORY.getRequiredSPARQLFunctionSymbol(XPathFunction.ENCODE_FOR_URI.getIRIString(), 1),
                 term);
     }
 

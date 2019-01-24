@@ -162,6 +162,10 @@ public interface TermFactory {
 	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
 													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
 
+	ImmutableExpression getLexicalInequality(InequalityLabel inequalityLabel,
+											 ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+											 ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
+
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
@@ -173,13 +177,16 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
-	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionGT(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
+	ImmutableExpression getDBNumericInequality(InequalityLabel inequalityLabel, ImmutableTerm dbNumericTerm1,
+											   ImmutableTerm dbNumericTerm2);
+	ImmutableExpression getDBBooleanInequality(InequalityLabel inequalityLabel, ImmutableTerm dbBooleanTerm1,
+											   ImmutableTerm dbBooleanTerm2);
+	ImmutableExpression getDBStringInequality(InequalityLabel inequalityLabel, ImmutableTerm dbStringTerm1,
+											  ImmutableTerm dbStringTerm2);
+	ImmutableExpression getDBDatetimeInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDatetimeTerm1,
+												ImmutableTerm dbDatetimeTerm2);
+	ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
+											   ImmutableTerm dbTerm2);
 
 	public Expression getFunctionNOT(Term term);
 

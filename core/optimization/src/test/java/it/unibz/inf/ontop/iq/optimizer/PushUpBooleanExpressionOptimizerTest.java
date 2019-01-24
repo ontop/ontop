@@ -20,6 +20,8 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GTE;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertTrue;
 
 public class PushUpBooleanExpressionOptimizerTest {
@@ -35,9 +37,9 @@ public class PushUpBooleanExpressionOptimizerTest {
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(X, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(Y, Z);
-    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getDBDefaultInequality(
             GTE, W, Z);
-    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getImmutableExpression(
+    private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getDBDefaultInequality(
             LT, V, W);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getStrictNEquality(X, TERM_FACTORY.getDBStringConstant("a"));
 
