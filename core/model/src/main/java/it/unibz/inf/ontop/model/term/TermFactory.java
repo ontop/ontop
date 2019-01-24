@@ -160,14 +160,15 @@ public interface TermFactory {
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
 
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
-	ImmutableExpression getDBNonStrictBooleanEquality(ImmutableTerm dbBooleanTerm1, ImmutableTerm dbBooleanTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
 
 	/**
 	 * Cannot be simplified --> has to be evaluated by the DB engine
+	 *
+	 * Only suitable for DB terms
 	 */
-	ImmutableExpression getDefaultDBNonStrictEquality(ImmutableTerm term1, ImmutableTerm term2);
+	ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
 	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
 

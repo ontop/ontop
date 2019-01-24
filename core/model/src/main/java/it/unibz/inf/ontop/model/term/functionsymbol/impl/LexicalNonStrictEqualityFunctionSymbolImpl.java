@@ -22,7 +22,7 @@ public class LexicalNonStrictEqualityFunctionSymbolImpl extends AbstractLexicalN
     @Override
     protected ImmutableTerm computeBooleanEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
                                                                TermFactory termFactory, VariableNullability variableNullability) {
-        return termFactory.getDBNonStrictBooleanEquality(dbTerm1, dbTerm2)
+        return termFactory.getStrictEquality(dbTerm1, dbTerm2)
                 .simplify(variableNullability);
     }
 

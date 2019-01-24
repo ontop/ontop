@@ -498,11 +498,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getDBNonStrictBooleanEquality(ImmutableTerm dbBooleanTerm1, ImmutableTerm dbBooleanTerm2) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictBooleanEquality(), dbBooleanTerm1, dbBooleanTerm2);
-	}
-
-	@Override
 	public ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictStringEquality(), dbStringTerm1, dbStringTerm2);
 	}
@@ -513,8 +508,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableExpression getDefaultDBNonStrictEquality(ImmutableTerm term1, ImmutableTerm term2) {
-		return getImmutableExpression(dbFunctionSymbolFactory.getDefaultDBNonStrictEquality(), term1, term2);
+	public ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm term1, ImmutableTerm term2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDefaultEquality(), term1, term2);
 	}
 
 	@Override
