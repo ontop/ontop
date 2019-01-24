@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -11,17 +14,14 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.FlattenLifter;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -209,25 +209,19 @@ public class FlattenLifterImpl implements FlattenLifter {
                     leftChild.getVariables()
             );
 
-            ImmutableSet.Builder<Variable> blockingVars = ImmutableSet.builder();
-            blockingVars.addAll(getImplicitJoinVariables(children));
-            lj.getOptionalFilterCondition()
-                    .ifPresent(e -> blockingVars.addAll(e.getVariables()));
-
-            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars.build(), children);
-            if (flattenLifts.stream()
-                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
-                return buildUnaryTreeRec(
-                        flattenLifts.stream()
-                                .flatMap(l -> l.getLiftableNodes().stream()).iterator(),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                lj,
-                                flattenLifts.get(0).getSubtree(),
-                                flattenLifts.get(1).getSubtree()
-                        ));
-            }
-            return iqFactory.createBinaryNonCommutativeIQTree(lj, children.get(0), children.get(1));
+            SplitLJLift lift = splitLJLift(seq);
+            return buildUnaryTreeRec(
+                    lift.getLiftedNodes().reverse().iterator(),
+                    iqFactory.createBinaryNonCommutativeIQTree(
+                            lj,
+                            buildUnaryTreeRec(
+                                    lift.getNonLiftedNodes().iterator(),
+                                    leftChild
+                            ),
+                            rightChild
+                    ));
         }
+
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> children) {
             children = children.stream()
@@ -272,6 +266,13 @@ public class FlattenLifterImpl implements FlattenLifter {
                         )
                 );
             }
+            return buildUnaryTreeRec(
+                    flattens.iterator(),
+                    iqFactory.createNaryIQTree(
+                            join,
+                            children
+                    )
+            );
         }
 
         private IQTree discardRootFlattenNodes(IQTree tree, UnmodifiableIterator<FlattenNode> it) {
@@ -463,25 +464,25 @@ public class FlattenLifterImpl implements FlattenLifter {
 //        }
 
 
-        private ImmutableList<UnaryOperatorNode> interleave(Optional<ImmutableExpression> expr, FlattenLift lift) {
-            Iterator<FlattenNode> fns = lift.getLiftableNodes().iterator();
-            ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.builder();
-            if (expr.isPresent()) {
-                SplitExpression split = new SplitExpression(ImmutableSet.of(), expr.get());
-                while (split.getNonLiftedExpression().isPresent() && fns.hasNext()) {
-                    FlattenNode fn = fns.next();
-                    split = new SplitExpression(lift.getDefinedVariables(fn), expr.get());
-                    if (split.getLiftedExpression().isPresent()) {
-                        builder.add(iqFactory.createFilterNode(split.getLiftedExpression().get()));
-                    }
-                    builder.add(fn);
-                }
-            }
-            while (fns.hasNext()) {
-                builder.add(fns.next());
-            }
-            return builder.build();
-        }
+//        private ImmutableList<UnaryOperatorNode> interleave(Optional<ImmutableExpression> expr, FlattenLift lift) {
+//            Iterator<FlattenNode> fns = lift.getLiftableNodes().iterator();
+//            ImmutableList.Builder<UnaryOperatorNode> builder = ImmutableList.builder();
+//            if (expr.isPresent()) {
+//                SplitExpression split = new SplitExpression(ImmutableSet.of(), expr.get());
+//                while (split.getNonLiftedExpression().isPresent() && fns.hasNext()) {
+//                    FlattenNode fn = fns.next();
+//                    split = new SplitExpression(lift.getDefinedVariables(fn), expr.get());
+//                    if (split.getLiftedExpression().isPresent()) {
+//                        builder.add(iqFactory.createFilterNode(split.getLiftedExpression().get()));
+//                    }
+//                    builder.add(fn);
+//                }
+//            }
+//            while (fns.hasNext()) {
+//                builder.add(fns.next());
+//            }
+//            return builder.build();
+//        }
 
 //        @Override
 //        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode join, ImmutableList<IQTree> children) {
@@ -511,41 +512,41 @@ public class FlattenLifterImpl implements FlattenLifter {
 //            return iqFactory.createNaryIQTree(join, children);
 //        }
 
-        @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
-            ImmutableList<IQTree> children = ImmutableList.of(
-                    leftChild.acceptTransformer(this),
-                    rightChild.acceptTransformer(this)
-            );
+//        @Override
+//        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode lj, IQTree leftChild, IQTree rightChild) {
+//            ImmutableList<IQTree> children = ImmutableList.of(
+//                    leftChild.acceptTransformer(this),
+//                    rightChild.acceptTransformer(this)
+//            );
+//
+//            ImmutableSet.Builder<Variable> blockingVars = ImmutableSet.builder();
+//            blockingVars.addAll(getImplicitJoinVariables(children));
+//            lj.getOptionalFilterCondition()
+//                    .ifPresent(e -> blockingVars.addAll(e.getVariables()));
+//
+//            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars.build(), children);
+//            if (flattenLifts.stream()
+//                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
+//                return buildUnaryTreeRec(
+//                        flattenLifts.stream()
+//                                .flatMap(l -> l.getLiftableNodes().stream()).iterator(),
+//                        iqFactory.createBinaryNonCommutativeIQTree(
+//                                lj,
+//                                flattenLifts.get(0).getSubtree(),
+//                                flattenLifts.get(1).getSubtree()
+//                        ));
+//            }
+//            return iqFactory.createBinaryNonCommutativeIQTree(lj, children.get(0), children.get(1));
+//        }
 
-            ImmutableSet.Builder<Variable> blockingVars = ImmutableSet.builder();
-            blockingVars.addAll(getImplicitJoinVariables(children));
-            lj.getOptionalFilterCondition()
-                    .ifPresent(e -> blockingVars.addAll(e.getVariables()));
-
-            ImmutableList<FlattenLift> flattenLifts = getFlattenLifts(blockingVars.build(), children);
-            if (flattenLifts.stream()
-                    .anyMatch(l -> !l.getLiftableNodes().isEmpty())) {
-                return buildUnaryTreeRec(
-                        flattenLifts.stream()
-                                .flatMap(l -> l.getLiftableNodes().stream()).iterator(),
-                        iqFactory.createBinaryNonCommutativeIQTree(
-                                lj,
-                                flattenLifts.get(0).getSubtree(),
-                                flattenLifts.get(1).getSubtree()
-                        ));
-            }
-            return iqFactory.createBinaryNonCommutativeIQTree(lj, children.get(0), children.get(1));
-        }
-
-        private ImmutableSet<Variable> getImplicitJoinVariables(ImmutableList<IQTree> children) {
-            return children.stream()
-                    .flatMap(t -> t.getVariables().stream())
-                    .collect(ImmutableCollectors.toMultiset()).entrySet().stream()
-                    .filter(e -> e.getCount() > 1)
-                    .map(Multiset.Entry::getElement)
-                    .collect(ImmutableCollectors.toSet());
-        }
+//        private ImmutableSet<Variable> getImplicitJoinVariables(ImmutableList<IQTree> children) {
+//            return children.stream()
+//                    .flatMap(t -> t.getVariables().stream())
+//                    .collect(ImmutableCollectors.toMultiset()).entrySet().stream()
+//                    .filter(e -> e.getCount() > 1)
+//                    .map(Multiset.Entry::getElement)
+//                    .collect(ImmutableCollectors.toSet());
+//        }
 
 //        private SplitExpression splitExpression(UnmodifiableIterator<FlattenLift> iterator, Optional<ImmutableExpression> expr) {
 //            if (expr.isPresent()) {
@@ -567,37 +568,37 @@ public class FlattenLifterImpl implements FlattenLifter {
 //            return new SplitExpression(ImmutableSet.of(), expr);
 //        }
 
-        private FlattenLift getFlattenLift(ImmutableSet<Variable> blockingVariables, IQTree child) {
-            QueryNode n = child.getRootNode();
-            if (n instanceof FlattenNode) {
-                return liftFlattenSequence(
-                        (FlattenNode) n,
-                        new HashSet<>(),
-                        blockingVariables,
-                        Optional.empty(),
-                        ((UnaryIQTree) child).getChild()
-                );
-            }
-            return new FlattenLift(ImmutableList.of(), child);
-        }
+//        private FlattenLift getFlattenLift(ImmutableSet<Variable> blockingVariables, IQTree child) {
+//            QueryNode n = child.getRootNode();
+//            if (n instanceof FlattenNode) {
+//                return liftFlattenSequence(
+//                        (FlattenNode) n,
+//                        new HashSet<>(),
+//                        blockingVariables,
+//                        Optional.empty(),
+//                        ((UnaryIQTree) child).getChild()
+//                );
+//            }
+//            return new FlattenLift(ImmutableList.of(), child);
+//        }
 
-        private ImmutableList<FlattenLift> getFlattenLifts(ImmutableSet<Variable> blockingVars, ImmutableList<IQTree> children) {
-            return children.stream()
-                    .map(t -> getFlattenLift(blockingVars, t))
-                    .collect(ImmutableCollectors.toList());
-        }
+//        private ImmutableList<FlattenLift> getFlattenLifts(ImmutableSet<Variable> blockingVars, ImmutableList<IQTree> children) {
+//            return children.stream()
+//                    .map(t -> getFlattenLift(blockingVars, t))
+//                    .collect(ImmutableCollectors.toList());
+//        }
 
-        /**
-         * Returns variables appearing in all conjuncts of the expression
-         */
-        private ImmutableSet<Variable> getBlockingVariables(ImmutableExpression expr) {
-            ImmutableSet<ImmutableExpression> conjuncts = expr.flattenAND();
-            ImmutableSet<Variable> firstConjunctVars = conjuncts.iterator().next().getVariables();
-            return conjuncts.stream()
-                    .flatMap(c -> c.getVariableStream())
-                    .filter(v -> firstConjunctVars.contains(v))
-                    .collect(ImmutableCollectors.toSet());
-        }
+//        /**
+//         * Returns variables appearing in all conjuncts of the expression
+//         */
+//        private ImmutableSet<Variable> getBlockingVariables(ImmutableExpression expr) {
+//            ImmutableSet<ImmutableExpression> conjuncts = expr.flattenAND();
+//            ImmutableSet<Variable> firstConjunctVars = conjuncts.iterator().next().getVariables();
+//            return conjuncts.stream()
+//                    .flatMap(c -> c.getVariableStream())
+//                    .filter(v -> firstConjunctVars.contains(v))
+//                    .collect(ImmutableCollectors.toSet());
+//        }
 
 
 //        @Override
@@ -660,35 +661,35 @@ public class FlattenLifterImpl implements FlattenLifter {
 //                    .collect(ImmutableCollectors.toList());
 //        }
 
-        /**
-         * @param blockingVars:            if the flatten node's data atom uses one of these var, then the node cannot be lifted
-         * @param blockingIfExclusiveVars: if the flatten node's data atom uses one of these var, and the subtree does not project it, then the node cannot be lifted
-         * @param projectedVars:           if present, and if the flatten node's array variable is NOT one of these, then the node cannot be lifted
-         */
-        private FlattenLift liftFlattenSequence(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars,
-                                                Optional<ImmutableSet<Variable>> projectedVars,
-                                                IQTree child) {
-            FlattenLift childLift;
-            if (child.getRootNode() instanceof FlattenNode) {
-                blockingVars.add(fn.getArrayVariable());
-                childLift = liftFlattenSequence((FlattenNode) child.getRootNode(), blockingVars, blockingIfExclusiveVars, projectedVars, ((UnaryIQTree) child).getChild());
-            } else {
-                childLift = new FlattenLift(ImmutableList.of(), child);
-            }
-
-            if (isLiftable(fn, blockingVars, blockingIfExclusiveVars, projectedVars, child)) {
-                return new FlattenLift(
-                        ImmutableList.<FlattenNode>builder().add(fn).addAll(childLift.getLiftableNodes()).build(),
-                        childLift.getSubtree()
-                );
-            }
-            return new FlattenLift(
-                    childLift.getLiftableNodes(),
-                    iqFactory.createUnaryIQTree(
-                            fn,
-                            childLift.getSubtree()
-                    ));
-        }
+//        /**
+//         * @param blockingVars:            if the flatten node's data atom uses one of these var, then the node cannot be lifted
+//         * @param blockingIfExclusiveVars: if the flatten node's data atom uses one of these var, and the subtree does not project it, then the node cannot be lifted
+//         * @param projectedVars:           if present, and if the flatten node's array variable is NOT one of these, then the node cannot be lifted
+//         */
+//        private FlattenLift liftFlattenSequence(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars,
+//                                                Optional<ImmutableSet<Variable>> projectedVars,
+//                                                IQTree child) {
+//            FlattenLift childLift;
+//            if (child.getRootNode() instanceof FlattenNode) {
+//                blockingVars.add(fn.getArrayVariable());
+//                childLift = liftFlattenSequence((FlattenNode) child.getRootNode(), blockingVars, blockingIfExclusiveVars, projectedVars, ((UnaryIQTree) child).getChild());
+//            } else {
+//                childLift = new FlattenLift(ImmutableList.of(), child);
+//            }
+//
+//            if (isLiftable(fn, blockingVars, blockingIfExclusiveVars, projectedVars, child)) {
+//                return new FlattenLift(
+//                        ImmutableList.<FlattenNode>builder().add(fn).addAll(childLift.getLiftableNodes()).build(),
+//                        childLift.getSubtree()
+//                );
+//            }
+//            return new FlattenLift(
+//                    childLift.getLiftableNodes(),
+//                    iqFactory.createUnaryIQTree(
+//                            fn,
+//                            childLift.getSubtree()
+//                    ));
+//        }
 
         private IQTree buildUnaryTreeRec(Iterator<? extends QueryNode> it, IQTree subtree) {
             if (it.hasNext()) {
@@ -723,58 +724,86 @@ public class FlattenLifterImpl implements FlattenLifter {
             );
         }
 
-        private boolean isLiftable(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, Optional<ImmutableSet<Variable>> projectedVars, IQTree child) {
-            ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child.getVariables());
-            if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains))
-                return false;
-            if (fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
-                return false;
-            return projectedVars.map(variables -> variables.contains(fn.getArrayVariable())).orElse(true);
+//        private boolean isLiftable(FlattenNode fn, HashSet<Variable> blockingVars, ImmutableSet<Variable> blockingIfExclusiveVars, Optional<ImmutableSet<Variable>> projectedVars, IQTree child) {
+//            ImmutableSet<Variable> dataAtomExlcusiveVars = getDataAtomExclusiveVars(fn, child.getVariables());
+//            if (dataAtomExlcusiveVars.stream().anyMatch(blockingIfExclusiveVars::contains))
+//                return false;
+//            if (fn.getDataAtom().getVariables().stream().anyMatch(blockingVars::contains))
+//                return false;
+//            return projectedVars.map(variables -> variables.contains(fn.getArrayVariable())).orElse(true);
+//        }
+//
+//        private ImmutableSet<Variable> getDataAtomExclusiveVars(FlattenNode fn, ImmutableSet<Variable> childVars) {
+//            ImmutableSet<Variable> childVars = child.getVariables();
+//            return (ImmutableSet<Variable>) fn.getDataAtom().getVariables().stream()
+//                    .filter(v -> !childVars.contains(v))
+//                    .collect(ImmutableCollectors.toSet());
+//        }
+
+//        private class FlattenLift {
+//            private final ImmutableList<FlattenNode> liftableNodes;
+//            private final IQTree subtree;
+//
+//            private FlattenLift(ImmutableList<FlattenNode> liftableNodes, IQTree subtree) {
+//                this.liftableNodes = liftableNodes;
+//                this.subtree = subtree;
+//            }
+//
+//            ImmutableList<FlattenNode> getLiftableNodes() {
+//                return liftableNodes;
+//            }
+//
+//            /**
+//             * Variables defined by some of the lifted flatten nodes (and not in the subtree)
+//             */
+//            ImmutableSet<Variable> getDefinedVariables() {
+//                return liftableNodes.stream()
+//                        .flatMap(n -> getDefinedVariables(n).stream())
+//                        .collect(ImmutableCollectors.toSet());
+//            }
+//
+//            /**
+//             * Variables defined by the flatten node (and not in the subtree)
+//             */
+//            ImmutableSet<Variable> getDefinedVariables(FlattenNode fn) {
+//                return (ImmutableSet<Variable>)
+//                        fn.getDataAtom().getVariables().stream()
+//                                .filter(v -> !subtree.getVariables().contains(v))
+//                                .collect(ImmutableCollectors.toSet());
+//            }
+//
+//            IQTree getSubtree() {
+//                return subtree;
+//            }
+//        }
+
+
+        private SplitLJLift splitLJLift(ImmutableList<QueryNode> seq) {
+            ImmutableList.Builder<FlattenNode> liftedNodes = ImmutableList.builder();
+            ImmutableList.Builder<FlattenNode> nonLiftedNodes = ImmutableList.builder();
+            LeftJoinNode lj = null;
+            boolean lifted = false;
+            UnmodifiableIterator<QueryNode> it = seq.iterator();
+            while (it.hasNext() && !lifted){
+                QueryNode n = it.next();
+                if(n instanceof FlattenNode) {
+                    liftedNodes.add((FlattenNode) n);
+                } else if(n instanceof LeftJoinNode) {
+                    lj = (LeftJoinNode)n;
+                    lifted = true;
+                }
+                else throw new FlattenLiftException("A Flatten of Left Join node is expected");
+            }
+            while (it.hasNext()){
+                QueryNode n = it.next();
+                if(n instanceof FlattenNode) {
+                    nonLiftedNodes.add((FlattenNode) n);
+                }
+                else throw new FlattenLiftException("A Flatten node is expected");
+            }
+            return new SplitLJLift(liftedNodes.build(), nonLiftedNodes.build(), lj);
         }
 
-        private ImmutableSet<Variable> getDataAtomExclusiveVars(FlattenNode fn, ImmutableSet<Variable> childVars) {
-            ImmutableSet<Variable> childVars = child.getVariables();
-            return (ImmutableSet<Variable>) fn.getDataAtom().getVariables().stream()
-                    .filter(v -> !childVars.contains(v))
-                    .collect(ImmutableCollectors.toSet());
-        }
-
-        private class FlattenLift {
-            private final ImmutableList<FlattenNode> liftableNodes;
-            private final IQTree subtree;
-
-            private FlattenLift(ImmutableList<FlattenNode> liftableNodes, IQTree subtree) {
-                this.liftableNodes = liftableNodes;
-                this.subtree = subtree;
-            }
-
-            ImmutableList<FlattenNode> getLiftableNodes() {
-                return liftableNodes;
-            }
-
-            /**
-             * Variables defined by some of the lifted flatten nodes (and not in the subtree)
-             */
-            ImmutableSet<Variable> getDefinedVariables() {
-                return liftableNodes.stream()
-                        .flatMap(n -> getDefinedVariables(n).stream())
-                        .collect(ImmutableCollectors.toSet());
-            }
-
-            /**
-             * Variables defined by the flatten node (and not in the subtree)
-             */
-            ImmutableSet<Variable> getDefinedVariables(FlattenNode fn) {
-                return (ImmutableSet<Variable>)
-                        fn.getDataAtom().getVariables().stream()
-                                .filter(v -> !subtree.getVariables().contains(v))
-                                .collect(ImmutableCollectors.toSet());
-            }
-
-            IQTree getSubtree() {
-                return subtree;
-            }
-        }
 
         private class SplitExpression {
             private final ImmutableSet<ImmutableExpression> nonLiftedConjuncts;
@@ -807,13 +836,13 @@ public class FlattenLifterImpl implements FlattenLifter {
                                 .anyMatch(vars::contains)));
             }
 
-            public Optional<ImmutableExpression> getNonLiftedExpression() {
+            Optional<ImmutableExpression> getNonLiftedExpression() {
                 return nonLiftedConjuncts.isEmpty() ?
                         Optional.empty() :
                         immutabilityTools.foldBooleanExpressions(nonLiftedConjuncts.stream());
             }
 
-            public Optional<ImmutableExpression> getLiftedExpression() {
+            Optional<ImmutableExpression> getLiftedExpression() {
                 return liftedConjuncts.isEmpty() ?
                         Optional.empty() :
                         immutabilityTools.foldBooleanExpressions(liftedConjuncts.stream());
@@ -823,6 +852,31 @@ public class FlattenLifterImpl implements FlattenLifter {
         private class FlattenLiftException extends OntopInternalBugException {
             FlattenLiftException(String message) {
                 super(message);
+            }
+        }
+
+        private class SplitLJLift {
+
+            private final ImmutableList<FlattenNode> liftedNodes;
+            private final ImmutableList<FlattenNode> nonLiftedNodes;
+            private final LeftJoinNode lj;
+
+            private SplitLJLift(ImmutableList<FlattenNode> liftedNodes, ImmutableList<FlattenNode> nonLiftedNodes, LeftJoinNode lj) {
+                this.liftedNodes = liftedNodes;
+                this.nonLiftedNodes = nonLiftedNodes;
+                this.lj = lj;
+            }
+
+            ImmutableList<FlattenNode> getLiftedNodes() {
+                return liftedNodes;
+            }
+
+            ImmutableList<FlattenNode> getNonLiftedNodes() {
+                return nonLiftedNodes;
+            }
+
+            public LeftJoinNode getLj() {
+                return lj;
             }
         }
     }
