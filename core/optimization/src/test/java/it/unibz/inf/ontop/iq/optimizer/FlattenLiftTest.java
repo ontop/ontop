@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
@@ -22,6 +23,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.LT;
 import static junit.framework.TestCase.assertTrue;
@@ -60,6 +62,7 @@ public class FlattenLiftTest {
     private final static Variable Z = TERM_FACTORY.getVariable("Z");
 
     private static final Constant ONE = TERM_FACTORY.getConstantLiteral("1");
+    private static final Constant TWO = TERM_FACTORY.getConstantLiteral("2");
 
     static {
         BasicDBMetadata dbMetadata = createDummyMetadata();
@@ -361,10 +364,10 @@ public class FlattenLiftTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, leftFlattenNode);
-        expectedQueryBuilder.addChild(leftFlattenNode, rightFlattenNode);
+        expectedQueryBuilder.addChild(rootNode, rightFlattenNode );
+        expectedQueryBuilder.addChild(rightFlattenNode, leftFlattenNode);
 
-        expectedQueryBuilder.addChild(rightFlattenNode, joinNode);
+        expectedQueryBuilder.addChild(leftFlattenNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, leftDataNode);
         expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
@@ -571,7 +574,7 @@ public class FlattenLiftTest {
     }
 
     @Test
-    public void testConsecutiveFlatten() throws EmptyQueryException {
+    public void testConsecutiveFlatten1() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS4_PREDICATE, A2, B1, C4, D1);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -624,11 +627,90 @@ public class FlattenLiftTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, rootNode);
-        expectedQueryBuilder.addChild(rootNode, flatten2);
-        expectedQueryBuilder.addChild(flatten2, flatten4);
-        expectedQueryBuilder.addChild(flatten4, filter);
-        expectedQueryBuilder.addChild(filter, flatten1);
-        expectedQueryBuilder.addChild(flatten1, flatten3);
+        expectedQueryBuilder.addChild(rootNode, flatten4);
+        expectedQueryBuilder.addChild(flatten4, flatten2);
+        expectedQueryBuilder.addChild(flatten2, filter);
+        expectedQueryBuilder.addChild(filter, flatten3);
+        expectedQueryBuilder.addChild(flatten3, flatten5);
+        expectedQueryBuilder.addChild(flatten5, flatten1);
+        expectedQueryBuilder.addChild(flatten1, dataNode);
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+
+    @Test
+    public void testConsecutiveFlatten2() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+
+        ImmutableExpression exp1 = TERM_FACTORY.getImmutableExpression(EQ, A1, ONE);
+        ImmutableExpression exp2 = TERM_FACTORY.getImmutableExpression(EQ, C3, TWO);
+        ImmutableExpression exp3 = TERM_FACTORY.getImmutableExpression(AND, exp1, exp2);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS4_PREDICATE, A2, B1, C4, D1);
+
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        FilterNode filter3 = IQ_FACTORY.createFilterNode(exp3);
+        StrictFlattenNode flatten1 = IQ_FACTORY.createStrictFlattenNode(
+                A,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2),
+                ImmutableList.of(false, true)
+        );
+        StrictFlattenNode flatten2 = IQ_FACTORY.createStrictFlattenNode(
+                B,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2),
+                ImmutableList.of(false, true)
+        );
+        StrictFlattenNode flatten3 = IQ_FACTORY.createStrictFlattenNode(
+                C1,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4),
+                ImmutableList.of(false, true)
+        );
+        StrictFlattenNode flatten4 = IQ_FACTORY.createStrictFlattenNode(
+                D,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2),
+                ImmutableList.of(false, true)
+        );
+        StrictFlattenNode flatten5 = IQ_FACTORY.createStrictFlattenNode(
+                C,
+                0,
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2),
+                ImmutableList.of(false, true)
+        );
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
+        queryBuilder.addChild(rootNode, filter3);
+        queryBuilder.addChild(filter3, flatten1);
+        queryBuilder.addChild(flatten1, flatten2);
+        queryBuilder.addChild(flatten2, flatten3);
+        queryBuilder.addChild(flatten3, flatten4);
+        queryBuilder.addChild(flatten4, flatten5);
+        queryBuilder.addChild(flatten5, dataNode);
+
+
+        IntermediateQuery query = queryBuilder.build();
+
+
+        FilterNode filter1 = IQ_FACTORY.createFilterNode(exp1);
+        FilterNode filter2 = IQ_FACTORY.createFilterNode(exp2);
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.addChild(rootNode, flatten4);
+        expectedQueryBuilder.addChild(flatten4, flatten2);
+        expectedQueryBuilder.addChild(flatten2, filter1);
+        expectedQueryBuilder.addChild(filter1, flatten1);
+        expectedQueryBuilder.addChild(flatten1, filter2);
+        expectedQueryBuilder.addChild(filter2, flatten3);
         expectedQueryBuilder.addChild(flatten3, flatten5);
         expectedQueryBuilder.addChild(flatten5, dataNode);
 
