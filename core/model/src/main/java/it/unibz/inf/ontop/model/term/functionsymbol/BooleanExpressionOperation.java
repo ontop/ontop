@@ -26,14 +26,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.RDF_TERM
  */
 public enum BooleanExpressionOperation implements BooleanFunctionSymbol {
 
-    /*
-     * BC: is it defined for IRIs?
-     */
-    GTE("GTE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    GT("GT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    LTE("LTE", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-    LT("LT", TermTypeInferenceRules.PREDEFINED_XSD_BOOLEAN_RULE, RDFS_LITERAL_DT, RDFS_LITERAL_DT),
-
     IS_TRUE("IS_TRUE", TermTypeInferenceRules.PREDEFINED_DB_BOOLEAN_RULE, RDF_TERM_TYPE);
 
     // unary operations

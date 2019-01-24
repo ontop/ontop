@@ -188,14 +188,6 @@ public interface TermFactory {
 	ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
 											   ImmutableTerm dbTerm2);
 
-	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionGT(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
-
 	public Expression getFunctionNOT(Term term);
 
 	public Expression getFunctionAND(Term term1, Term term2);

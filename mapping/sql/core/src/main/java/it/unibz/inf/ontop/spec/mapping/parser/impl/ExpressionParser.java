@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -38,6 +39,8 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
 
 /**
@@ -197,22 +200,26 @@ public class ExpressionParser {
 
         @Override
         public void visit(GreaterThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.GT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getDBDefaultInequality(GT), t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.GTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getDBDefaultInequality(GTE), t1, t2));
         }
 
         @Override
         public void visit(MinorThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.LT, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getDBDefaultInequality(LT), t1, t2));
         }
 
         @Override
         public void visit(MinorThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(BooleanExpressionOperation.LTE, t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getFunction(
+                    dbFunctionSymbolFactory.getDBDefaultInequality(LTE), t1, t2));
         }
 
         @Override
@@ -291,14 +298,14 @@ public class ExpressionParser {
             Term t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
 
             if (expression.isNot()) {
-                Function atom1 = termFactory.getFunction(BooleanExpressionOperation.LT, t1, t2);
-                Function atom2 = termFactory.getFunction(BooleanExpressionOperation.GT, t3, t4);
+                Function atom1 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(LT), t1, t2);
+                Function atom2 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(GT), t3, t4);
 
                 result = ImmutableList.of(termFactory.getFunctionOR(atom1, atom2));
             }
             else {
-                Function atom1 = termFactory.getFunction(BooleanExpressionOperation.GTE, t1, t2);
-                Function atom2 = termFactory.getFunction(BooleanExpressionOperation.LTE, t3, t4);
+                Function atom1 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(GTE), t1, t2);
+                Function atom2 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(LTE), t3, t4);
 
                 result = ImmutableList.of(atom1, atom2);
             }

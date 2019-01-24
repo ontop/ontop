@@ -569,26 +569,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Expression getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.GTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.GT, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.LTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getExpression(BooleanExpressionOperation.LT, firstTerm, secondTerm);
-	}
-
-	@Override
 	public Expression getFunctionNOT(Term term) {
 		return getExpression(dbFunctionSymbolFactory.getDBNot(), term);
 	}

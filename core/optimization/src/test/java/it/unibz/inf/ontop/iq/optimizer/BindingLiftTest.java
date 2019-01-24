@@ -22,6 +22,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GT;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -52,7 +53,7 @@ public class BindingLiftTest {
     private ExtensionalDataNode DATA_NODE_8 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR1, A));
     private ExtensionalDataNode DATA_NODE_9 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, B));
 
-    private final ImmutableExpression EXPRESSIONGT = TERM_FACTORY.getImmutableExpression(
+    private final ImmutableExpression EXPRESSIONGT = TERM_FACTORY.getDBDefaultInequality(
             GT, Z, Y);
 
     public BindingLiftTest() {
@@ -141,7 +142,7 @@ public class BindingLiftTest {
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 
         //construct expected innerjoin
-        ImmutableExpression expectedEspressionGT = TERM_FACTORY.getImmutableExpression(GT, generateInt(A), generateInt(D));
+        ImmutableExpression expectedEspressionGT = TERM_FACTORY.getDBDefaultInequality(GT, generateInt(A), generateInt(D));
         InnerJoinNode expectedJoinNode = IQ_FACTORY.createInnerJoinNode(expectedEspressionGT);
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 

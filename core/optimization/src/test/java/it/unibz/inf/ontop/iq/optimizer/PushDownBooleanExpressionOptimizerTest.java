@@ -16,6 +16,7 @@ import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertTrue;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -35,7 +36,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(X, Z);
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictNEquality(Y, Z);
-    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getImmutableExpression(LT, Z, W);
+    private final static ImmutableExpression EXPRESSION3 = TERM_FACTORY.getDBDefaultInequality(LT, Z, W);
     private final static ImmutableExpression EXPRESSION4 = TERM_FACTORY.getStrictEquality(Y, Z);
     private final static ImmutableExpression EXPRESSION5 = TERM_FACTORY.getStrictNEquality(Z, W);
     private final static ImmutableExpression EXPRESSION6 = TERM_FACTORY.getStrictEquality(X, W);
