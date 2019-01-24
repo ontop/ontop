@@ -507,6 +507,14 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableExpression getLexicalInequality(InequalityLabel inequalityLabel, ImmutableTerm lexicalTerm1,
+													ImmutableTerm typeTerm1, ImmutableTerm lexicalTerm2,
+													ImmutableTerm typeTerm2) {
+		return getImmutableExpression(functionSymbolFactory.getLexicalInequalityFunctionSymbol(inequalityLabel),
+				lexicalTerm1, typeTerm1, lexicalTerm2, typeTerm2);
+	}
+
+	@Override
 	public ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictNumericEquality(), dbNumericTerm1, dbNumericTerm2);
 	}

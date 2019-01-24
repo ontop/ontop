@@ -162,6 +162,10 @@ public interface TermFactory {
 	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
 													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
 
+	ImmutableExpression getLexicalInequality(InequalityLabel inequalityLabel,
+											 ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
+											 ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
+
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
