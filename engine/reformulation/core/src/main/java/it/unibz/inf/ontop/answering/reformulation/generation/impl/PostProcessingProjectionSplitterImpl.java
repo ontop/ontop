@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.IS_TRUE;
-
 public class PostProcessingProjectionSplitterImpl implements PostProcessingProjectionSplitter {
 
     private final IntermediateQueryFactory iqFactory;
@@ -132,7 +130,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
                 // Wraps variables replacing an expression into an IS_TRUE functional term
                 ImmutableTerm newTerm = ((!definedVariable.isPresent())
                         && (functionalTerm instanceof ImmutableExpression))
-                        ? termFactory.getImmutableExpression(IS_TRUE, variable)
+                        ? termFactory.getIsTrue(variable)
                         : variable;
 
                 return new DefinitionDecomposition(newTerm,

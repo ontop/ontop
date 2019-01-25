@@ -197,6 +197,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 : Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
     }
 
+    @Override
+    public SPARQLFunctionSymbol getRDFEffectiveBooleanValueFunctionSymbol() {
+        throw new RuntimeException("TODO: implement getRDFEffectiveBooleanValueFunctionSymbol()");
+    }
+
     /**
      * For smoother integration, return Optional.empty() for arity < 2
      */

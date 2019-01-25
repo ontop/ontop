@@ -649,9 +649,6 @@ public class OneShotSQLGeneratorEngine {
 				return String.format(inBrackets(expressionFormat), left, right);
 			}
 		}
-		else if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
-			return effectiveBooleanValue(atom.getTerm(0), index);
-		}
 		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(atom.getTerms(),
 					// TODO: try to get rid of useBrackets
@@ -885,28 +882,6 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	/**
-	 * TODO: remove
-	 */
-	private String effectiveBooleanValue(ImmutableTerm term, AliasIndex index) {
-
-		String column = getSQLString(term, index, false);
-		// find data type of term and evaluate accordingly
-		switch (getDataType(term)) {
-			case Types.INTEGER:
-			case Types.BIGINT:
-			case Types.DOUBLE:
-			case Types.FLOAT:
-				return String.format("%s != 0", column);
-			case Types.VARCHAR:
-				return String.format("LENGTH(%s) > 0", column);
-			case Types.BOOLEAN:
-				return column;
-			default:
-				return "1";
-		}
-	}
-
 	// return the SQL data type
     // TODO: get rid of it
     @Deprecated
@@ -1110,9 +1085,6 @@ public class OneShotSQLGeneratorEngine {
 				default:
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
-		}
-		if (functionSymbol == BooleanExpressionOperation.IS_TRUE) {
-			return effectiveBooleanValue(function.getTerm(0), index);
 		}
 		if (functionSymbol == ExpressionOperation.YEAR) {
 			String literal = getSQLString(function.getTerm(0), index, false);

@@ -48,6 +48,14 @@ public interface FunctionSymbolFactory {
                         + " is not available for the arity " + arity));
     }
 
+    /**
+     * Special function capturing the EBV logic
+     * https://www.w3.org/TR/sparql11-query/#ebv
+     *
+     * Returns an XSD.BOOLEAN
+     */
+    FunctionSymbol getRDFEffectiveBooleanValueFunctionSymbol();
+
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 
     /**
@@ -84,5 +92,4 @@ public interface FunctionSymbolFactory {
     BooleanFunctionSymbol getLexicalLangMatches();
 
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
-
 }

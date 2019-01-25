@@ -194,8 +194,6 @@ public interface TermFactory {
 
 	public Expression getFunctionOR(Term term1, Term term2);
 
-	public Expression getFunctionIsTrue(Term term);
-
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification
@@ -499,6 +497,13 @@ public interface TermFactory {
 
 	/**
 	 * Using the SPARQL "=" operator
+	 *
+	 * Returns an XSD.BOOLEAN
 	 */
 	ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2);
+
+	/**
+	 * Returns an XSD.BOOLEAN
+	 */
+	ImmutableFunctionalTerm getRDFEffectiveBooleanValue(ImmutableTerm rdfTerm);
 }

@@ -495,6 +495,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getRDFEffectiveBooleanValue(ImmutableTerm rdfTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFEffectiveBooleanValueFunctionSymbol(), rdfTerm);
+	}
+
+	@Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
@@ -586,11 +591,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name, typeFactory);
-	}
-
-	@Override
-	public Expression getFunctionIsTrue(Term term) {
-		return getExpression(BooleanExpressionOperation.IS_TRUE, term);
 	}
 
 	@Override
