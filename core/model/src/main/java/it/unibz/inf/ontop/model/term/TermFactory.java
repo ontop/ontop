@@ -227,6 +227,8 @@ public interface TermFactory {
 
 	DBConstant getDBIntegerConstant(int value);
 
+	DBConstant getDoubleNaN();
+
 	/**
 	 * TODO: explain
 	 */
@@ -344,12 +346,15 @@ public interface TermFactory {
 	 * May "normalize"
 	 */
 	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(ImmutableTerm term, RDFTermType rdfTermType);
 
 	/**
 	 * May "denormalize"
 	 */
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
 														   RDFTermType rdfType);
+
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType);
 
 
 	/**
@@ -505,5 +510,7 @@ public interface TermFactory {
 	/**
 	 * Returns an XSD.BOOLEAN
 	 */
-	ImmutableFunctionalTerm getRDFEffectiveBooleanValue(ImmutableTerm rdfTerm);
+	ImmutableFunctionalTerm getSPARQLEffectiveBooleanValue(ImmutableTerm rdfTerm);
+
+	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
 }

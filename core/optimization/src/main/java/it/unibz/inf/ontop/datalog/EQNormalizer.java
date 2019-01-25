@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 
 import java.util.List;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-
 @Singleton
 public class EQNormalizer {
 

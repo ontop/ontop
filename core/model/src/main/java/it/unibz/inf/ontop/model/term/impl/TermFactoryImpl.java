@@ -52,6 +52,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final DBConstant valueTrue;
 	private final DBConstant valueFalse;
 	private final Constant valueNull;
+	private final DBConstant doubleNaN;
 	// TODO: make it be a DBConstant
 	private final RDFLiteralConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
@@ -78,6 +79,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
 		this.valueNull = new NullConstantImpl(dbTypeFactory.getNullLexicalValue());
+		this.doubleNaN = new DBConstantImpl(dbTypeFactory.getDBNaNLexicalValue(), dbTypeFactory.getDBDoubleType());
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
@@ -495,8 +497,13 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getRDFEffectiveBooleanValue(ImmutableTerm rdfTerm) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFEffectiveBooleanValueFunctionSymbol(), rdfTerm);
+	public ImmutableFunctionalTerm getSPARQLEffectiveBooleanValue(ImmutableTerm rdfTerm) {
+		return getImmutableFunctionalTerm(functionSymbolFactory.getSPARQLEffectiveBooleanValueFunctionSymbol(), rdfTerm);
+	}
+
+	@Override
+	public ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm) {
+		return getImmutableExpression(functionSymbolFactory.getLexicalEBVFunctionSymbol(), lexicalTerm, rdfDatatypeTerm);
 	}
 
 	@Override
@@ -609,6 +616,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public DBConstant getDoubleNaN() {
+		return doubleNaN;
+	}
+
+	@Override
 	public RDFLiteralConstant getProvenanceSpecialConstant() {
 		return provenanceConstant;
 	}
@@ -698,10 +710,24 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getConversion2RDFLexical(ImmutableTerm dbTerm, RDFTermType rdfType) {
+		return getConversion2RDFLexical(
+				rdfType.getClosestDBType(typeFactory.getDBTypeFactory()),
+				dbTerm, rdfType);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm, RDFTermType rdfType) {
 		return getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getConversionFromRDFLexical2DBFunctionSymbol(targetDBType, rdfType),
 				dbTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType) {
+		return getConversionFromRDFLexical2DB(
+				rdfType.getClosestDBType(typeFactory.getDBTypeFactory()),
+				dbTerm, rdfType);
 	}
 
 	@Override

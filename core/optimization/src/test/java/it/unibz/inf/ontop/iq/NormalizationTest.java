@@ -15,8 +15,6 @@ import java.util.Optional;
 import static it.unibz.inf.ontop.DependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.GT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
 import static junit.framework.TestCase.assertEquals;

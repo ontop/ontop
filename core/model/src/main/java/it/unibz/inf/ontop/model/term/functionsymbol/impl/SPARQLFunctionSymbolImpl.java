@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public abstract class SPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements SPARQLFunctionSymbol {
+public abstract class SPARQLFunctionSymbolImpl extends SPARQLLikeFunctionSymbolImpl implements SPARQLFunctionSymbol {
 
     @Nullable
     private final IRI functionIRI;
@@ -39,39 +39,5 @@ public abstract class SPARQLFunctionSymbolImpl extends FunctionSymbolImpl implem
     @Override
     public String getOfficialName() {
         return officialName;
-    }
-
-    /**
-     * Default value for SPARQL functions as they may produce NULL due
-     * to SPARQL errors
-     */
-    @Override
-    protected boolean mayReturnNullWithoutNullArguments() {
-        return true;
-    }
-
-    protected boolean isRDFFunctionalTerm(ImmutableTerm term) {
-        return (term instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
-    }
-
-    protected ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        if (isRDFFunctionalTerm(rdfTerm))
-            return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
-        else if (rdfTerm instanceof RDFConstant)
-            return termFactory.getRDFTermTypeConstant(((RDFConstant) rdfTerm).getType());
-        else if ((rdfTerm instanceof Constant) && rdfTerm.isNull())
-            return termFactory.getNullConstant();
-        throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant or NULL");
-    }
-
-    protected ImmutableTerm extractLexicalTerm(ImmutableTerm rdfTerm, TermFactory termFactory) {
-        if (isRDFFunctionalTerm(rdfTerm))
-            return ((ImmutableFunctionalTerm)rdfTerm).getTerm(0);
-        else if (rdfTerm instanceof RDFConstant)
-            return termFactory.getDBStringConstant(((RDFConstant) rdfTerm).getValue());
-        else if ((rdfTerm instanceof Constant) && rdfTerm.isNull())
-            return termFactory.getNullConstant();
-        throw new IllegalArgumentException("Was expecting a isRDFFunctionalTerm or an RDFConstant or NULL");
     }
 }

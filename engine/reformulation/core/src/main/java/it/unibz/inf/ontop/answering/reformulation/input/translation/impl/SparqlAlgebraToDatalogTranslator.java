@@ -448,7 +448,7 @@ public class SparqlAlgebraToDatalogTranslator {
                         .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
                         .isPresent()
                 ? term
-                : termFactory.getRDFEffectiveBooleanValue(term);
+                : termFactory.getSPARQLEffectiveBooleanValue(term);
 
         ImmutableExpression expression = termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm);
 
