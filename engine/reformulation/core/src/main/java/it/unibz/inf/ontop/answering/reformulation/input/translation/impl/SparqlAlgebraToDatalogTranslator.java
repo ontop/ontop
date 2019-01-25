@@ -23,14 +23,12 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -61,7 +59,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.BooleanExpressionOperation.*;
 import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 
 
@@ -440,24 +437,22 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return
      */
 
-    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
+    private Expression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
-        Term term = getExpression(expr, variables);
-        // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
-        if (term instanceof Function) {
-            Function f = (Function) term;
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) immutabilityTools.convertIntoImmutableTerm(f);
-            if ((functionalTerm.getFunctionSymbol() instanceof SPARQLFunctionSymbol)
-                    && functionalTerm.inferType()
+
+        ImmutableTerm term = immutabilityTools.convertIntoImmutableTerm(getExpression(expr, variables));
+
+        ImmutableTerm xsdBooleanTerm = term.inferType()
                         .flatMap(TermTypeInference::getTermType)
                         .filter(t -> t instanceof RDFDatatype)
                         .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
-                        .isPresent())
-                return immutabilityTools.convertToMutableFunction(termFactory.getRDF2DBBooleanFunctionalTerm(functionalTerm));
-            // TODO: deal with other functional terms
-            return f;
-        }
-        return termFactory.getFunctionIsTrue(term);
+                        .isPresent()
+                ? term
+                : termFactory.getSPARQLEffectiveBooleanValue(term);
+
+        ImmutableExpression expression = termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm);
+
+        return immutabilityTools.convertToMutableBooleanExpression(expression);
     }
 
 	private TranslationResult translateTriplePattern(StatementPattern triple) throws OntopUnsupportedInputQueryException {
@@ -779,9 +774,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2);
 
-                return termFactory.getExpression(
-                        functionSymbolFactory.getRDF2DBBooleanFunctionSymbol(),
-                        termFactory.getFunction(langMatchesFunctionSymbol, term1, term2));
+                return termFactory.getFunction(langMatchesFunctionSymbol, term1, term2);
             }
         }
 		else if (expr instanceof FunctionCall) {

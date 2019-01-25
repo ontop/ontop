@@ -348,6 +348,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBBooleanFunctionSymbol getIsTrue() {
+        return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
+    }
+
+    @Override
     public DBFunctionSymbol getDBUUIDFunctionSymbol() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }

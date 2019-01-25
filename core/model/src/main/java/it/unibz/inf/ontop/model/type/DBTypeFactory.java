@@ -36,6 +36,7 @@ public interface DBTypeFactory {
     String getDBTrueLexicalValue();
     String getDBFalseLexicalValue();
     String getNullLexicalValue();
+    String getDBNaNLexicalValue();
 
 
 

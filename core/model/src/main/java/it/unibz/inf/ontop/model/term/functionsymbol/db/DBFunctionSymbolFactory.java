@@ -133,6 +133,8 @@ public interface DBFunctionSymbolFactory {
 
     DBBooleanFunctionSymbol getDBIsStringEmpty();
 
+    DBBooleanFunctionSymbol getIsTrue();
+
     /**
      * Arity 2, first argument is the string in which to search, second argument is subString
      */

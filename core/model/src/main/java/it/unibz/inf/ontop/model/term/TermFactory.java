@@ -194,8 +194,6 @@ public interface TermFactory {
 
 	public Expression getFunctionOR(Term term1, Term term2);
 
-	public Expression getFunctionIsTrue(Term term);
-
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
 	 * usual URI construction following the generic URI syntax specification
@@ -228,6 +226,8 @@ public interface TermFactory {
 	Constant getNullConstant();
 
 	DBConstant getDBIntegerConstant(int value);
+
+	DBConstant getDoubleNaN();
 
 	/**
 	 * TODO: explain
@@ -346,12 +346,15 @@ public interface TermFactory {
 	 * May "normalize"
 	 */
 	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
+	ImmutableFunctionalTerm getConversion2RDFLexical(ImmutableTerm term, RDFTermType rdfTermType);
 
 	/**
 	 * May "denormalize"
 	 */
 	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(DBTermType targetDBType, ImmutableTerm dbTerm,
 														   RDFTermType rdfType);
+
+	ImmutableFunctionalTerm getConversionFromRDFLexical2DB(ImmutableTerm dbTerm, RDFTermType rdfType);
 
 
 	/**
@@ -432,6 +435,11 @@ public interface TermFactory {
 
 	ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
 
+	/**
+	 * Wraps a DB boolean constant/variable into an ImmutableExpression
+	 */
+	ImmutableExpression getIsTrue(NonFunctionalTerm dbBooleanTerm);
+
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
 	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);
@@ -494,6 +502,15 @@ public interface TermFactory {
 
 	/**
 	 * Using the SPARQL "=" operator
+	 *
+	 * Returns an XSD.BOOLEAN
 	 */
 	ImmutableFunctionalTerm getSPARQLNonStrictEquality(ImmutableTerm rdfTerm1, ImmutableTerm rdfTerm2);
+
+	/**
+	 * Returns an XSD.BOOLEAN
+	 */
+	ImmutableFunctionalTerm getSPARQLEffectiveBooleanValue(ImmutableTerm rdfTerm);
+
+	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
 }

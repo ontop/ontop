@@ -3,13 +3,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
 import java.util.Optional;
-import java.util.function.Function;
+
 
 public interface FunctionSymbolFactory {
 
@@ -27,6 +25,8 @@ public interface FunctionSymbolFactory {
 
     BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol();
     BooleanFunctionSymbol getLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel);
+
+    BooleanFunctionSymbol getLexicalEBVFunctionSymbol();
 
     /**
      * Used for wrapping SPARQL boolean functional terms to make them becoming ImmutableExpressions
@@ -47,6 +47,14 @@ public interface FunctionSymbolFactory {
                 .orElseThrow(() -> new IllegalArgumentException("The SPARQL function " + officialName
                         + " is not available for the arity " + arity));
     }
+
+    /**
+     * Special function capturing the EBV logic
+     * https://www.w3.org/TR/sparql11-query/#ebv
+     *
+     * Returns an XSD.BOOLEAN
+     */
+    FunctionSymbol getSPARQLEffectiveBooleanValueFunctionSymbol();
 
     FunctionSymbol getCommonDenominatorFunctionSymbol(int arity);
 
@@ -84,5 +92,4 @@ public interface FunctionSymbolFactory {
     BooleanFunctionSymbol getLexicalLangMatches();
 
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
-
 }

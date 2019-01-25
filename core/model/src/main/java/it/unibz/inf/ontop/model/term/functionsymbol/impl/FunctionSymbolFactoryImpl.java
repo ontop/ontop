@@ -23,6 +23,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
     private final BooleanFunctionSymbol areCompatibleRDFStringFunctionSymbol;
     private final BooleanFunctionSymbol lexicalNonStrictEqualityFunctionSymbol;
+    private final BooleanFunctionSymbol lexicalEBVFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
@@ -34,6 +35,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
     private final BooleanFunctionSymbol lexicalLangMatchesFunctionSymbol;
     private final FunctionSymbol commonNumericTypeFunctionSymbol;
+    private final FunctionSymbol EBVSPARQLLikeFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -70,6 +72,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
         this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
+        this.EBVSPARQLLikeFunctionSymbol = new EBVSPARQLLikeFunctionSymbolImpl(typeFactory.getAbstractRDFSLiteral(), typeFactory.getXsdBooleanDatatype());
+        this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -171,6 +175,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 .computeIfAbsent(inequalityLabel, this::createLexicalInequalityFunctionSymbol);
     }
 
+    @Override
+    public BooleanFunctionSymbol getLexicalEBVFunctionSymbol() {
+        return lexicalEBVFunctionSymbol;
+    }
+
     protected BooleanFunctionSymbol createLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel) {
         return new LexicalInequalityFunctionSymbolImpl(inequalityLabel, metaRDFType,
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
@@ -195,6 +204,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return officialName.equals(XPathFunction.CONCAT.getIRIString())
                 ? getSPARQLConcatFunctionSymbol(arity)
                 : Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
+    }
+
+    @Override
+    public FunctionSymbol getSPARQLEffectiveBooleanValueFunctionSymbol() {
+        return EBVSPARQLLikeFunctionSymbol;
     }
 
     /**

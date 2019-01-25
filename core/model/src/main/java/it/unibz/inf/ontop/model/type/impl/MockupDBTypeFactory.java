@@ -84,4 +84,9 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     public String getNullLexicalValue() {
         return "NULL";
     }
+
+    @Override
+    public String getDBNaNLexicalValue() {
+        return "NaN";
+    }
 }

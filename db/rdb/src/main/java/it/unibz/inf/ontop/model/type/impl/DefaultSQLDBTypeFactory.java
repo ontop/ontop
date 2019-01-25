@@ -166,6 +166,11 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         return "NULL";
     }
 
+    @Override
+    public String getDBNaNLexicalValue() {
+        return "NaN";
+    }
+
     /**
      * Can be overridden
      */
