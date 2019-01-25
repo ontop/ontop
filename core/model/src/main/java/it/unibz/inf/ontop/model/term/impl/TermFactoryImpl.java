@@ -859,7 +859,12 @@ public class TermFactoryImpl implements TermFactory {
 				.collect(ImmutableCollectors.toList()));
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getIsTrue(NonFunctionalTerm dbBooleanTerm) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getIsTrue(), dbBooleanTerm);
+    }
+
+    @Override
     public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
     }

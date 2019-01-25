@@ -36,6 +36,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBBooleanFunctionSymbol isStringEmpty;
     private final DBBooleanFunctionSymbol isNull;
     private final DBBooleanFunctionSymbol isNotNull;
+    private final DBBooleanFunctionSymbol isTrue;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
                                                  ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
@@ -51,6 +52,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
         this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
         this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
+        this.isTrue = createDBIsTrue(dbBooleanType);
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
@@ -210,6 +212,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
+    }
+
+    protected DBBooleanFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
     }
 
     @Override
@@ -409,6 +415,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBBooleanFunctionSymbol getDBIsStringEmpty() {
         return isStringEmpty;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getIsTrue() {
+        return isTrue;
     }
 
 }

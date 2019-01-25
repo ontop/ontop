@@ -432,6 +432,11 @@ public interface TermFactory {
 
 	ImmutableExpression getStrictNEquality(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... otherTerms);
 
+	/**
+	 * Wraps a DB boolean constant/variable into an ImmutableExpression
+	 */
+	ImmutableExpression getIsTrue(NonFunctionalTerm dbBooleanTerm);
+
 	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
 
 	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);
