@@ -774,9 +774,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
                 SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2);
 
-                return termFactory.getExpression(
-                        functionSymbolFactory.getRDF2DBBooleanFunctionSymbol(),
-                        termFactory.getFunction(langMatchesFunctionSymbol, term1, term2));
+                return termFactory.getFunction(langMatchesFunctionSymbol, term1, term2);
             }
         }
 		else if (expr instanceof FunctionCall) {
