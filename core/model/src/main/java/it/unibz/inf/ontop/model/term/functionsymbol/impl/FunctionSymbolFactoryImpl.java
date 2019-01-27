@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
@@ -252,5 +254,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
         return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
+    }
+
+    @Override
+    public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<RDFTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+        return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
     }
 }
