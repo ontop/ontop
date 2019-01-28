@@ -258,22 +258,22 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleTypedDBFunctionSymbol(ABS_STR, 1, dbTermType, false, abstractRootDBType);
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false);
     }
 
     @Override
     protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleTypedDBFunctionSymbol(CEIL_STR, 1, dbTermType, false, abstractRootDBType);
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false);
     }
 
     @Override
     protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleTypedDBFunctionSymbol(FLOOR_STR, 1, dbTermType, false, abstractRootDBType);
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false);
     }
 
     @Override
     protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
-        return new DefaultSQLSimpleTypedDBFunctionSymbol(ROUND_STR, 1, dbTermType, false, abstractRootDBType);
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
     }
 
     @Override
